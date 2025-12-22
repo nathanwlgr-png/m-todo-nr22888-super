@@ -11,7 +11,8 @@ import {
   History, 
   Sparkles,
   TrendingUp,
-  ThermometerSun
+  ThermometerSun,
+  MapPin
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 
@@ -89,10 +90,10 @@ export default function Home() {
             </Button>
           </Link>
           
-          <Link to={createPageUrl('Clients?filter=history')}>
+          <Link to={createPageUrl('ClientsByCity')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <History className="w-4 h-4 mr-2" />
-              Histórico
+              <MapPin className="w-4 h-4 mr-2" />
+              Por Cidade
             </Button>
           </Link>
         </div>
