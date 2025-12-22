@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from 'lucide-react';
 
 const pipelineStages = [
-  { key: 'diagnosticar_necessidades', label: 'Diagnóstico', color: 'bg-blue-500' },
-  { key: 'apresentar_equipamento', label: 'Apresentação', color: 'bg-indigo-500' },
-  { key: 'demonstracao_tecnica', label: 'Demonstração Técnica', color: 'bg-purple-500' },
-  { key: 'negociar_proposta', label: 'Negociação', color: 'bg-orange-500' },
-  { key: 'fechar_venda', label: 'Fechamento', color: 'bg-green-500' }
+  { key: 'diagnosticar_necessidades', label: 'Diagnóstico', color: 'bg-blue-500', score: 30 },
+  { key: 'apresentar_equipamento', label: 'Apresentação', color: 'bg-indigo-500', score: 50 },
+  { key: 'demonstracao_tecnica', label: 'Demonstração Técnica', color: 'bg-purple-500', score: 65 },
+  { key: 'negociar_proposta', label: 'Negociação', color: 'bg-orange-500', score: 80 },
+  { key: 'fechar_venda', label: 'Fechamento', color: 'bg-green-500', score: 95 }
 ];
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -39,10 +39,12 @@ export default function PipelineVisual({ client, onStageClick }) {
 
   return (
     <Card className="p-4">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="w-5 h-5 text-indigo-600" />
         <h3 className="font-semibold text-slate-800">Pipeline de Vendas</h3>
       </div>
+
+      <p className="text-xs text-indigo-600 mb-3">👆 Clique em qualquer etapa para pular/atualizar</p>
 
       <div className="space-y-2">
         {pipelineStages.map((stage, index) => {
@@ -53,7 +55,8 @@ export default function PipelineVisual({ client, onStageClick }) {
           return (
             <button
               key={stage.key}
-              onClick={() => onStageClick?.(stage.key)}
+              onClick={() => handleStageClick(stage.key, stage.score)}
+              disabled={updateStageMutation.isPending}
               className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
                 isActive
                   ? 'border-indigo-500 bg-indigo-50 shadow-md'
@@ -97,7 +100,7 @@ export default function PipelineVisual({ client, onStageClick }) {
 
       <div className="mt-4 p-3 bg-slate-50 rounded-lg">
         <p className="text-xs text-slate-600">
-          💡 <strong>Dica:</strong> Clique em uma etapa para avançar o cliente no pipeline
+          💡 <strong>Pule livremente:</strong> Não precisa seguir a ordem. Clique na etapa atual do cliente.
         </p>
       </div>
     </Card>
