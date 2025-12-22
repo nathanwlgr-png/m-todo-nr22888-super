@@ -228,11 +228,23 @@ export default function PreVisitChecklist() {
                     {client?.client_type?.replace(/_/g, ' ') || '-'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-slate-500">Decisor:</span>
-                  <span className="font-medium text-slate-800 capitalize">
-                    {client?.decision_role?.replace(/_/g, ' ') || '-'}
-                  </span>
+                <div className="space-y-1">
+                  <span className="text-slate-500 text-sm">Decisor:</span>
+                  <Select
+                    value={client?.decision_role || ''}
+                    onValueChange={(value) => updateMutation.mutate({ decision_role: value })}
+                  >
+                    <SelectTrigger className="h-9 text-sm bg-white">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="proprietario">Proprietário</SelectItem>
+                      <SelectItem value="veterinario_responsavel">Veterinário Responsável</SelectItem>
+                      <SelectItem value="gestor_laboratorio">Gestor de Laboratório</SelectItem>
+                      <SelectItem value="coordenador_tecnico">Coordenador Técnico</SelectItem>
+                      <SelectItem value="socio">Sócio</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 {client?.clinic_name && (
                   <div className="flex items-center gap-2 text-sm">
