@@ -23,6 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   MessageSquare, 
@@ -35,13 +41,21 @@ import {
   Sparkles,
   Trash2,
   Edit2,
-  Save
+  Save,
+  FileText,
+  Upload,
+  Download,
+  Calendar,
+  CheckSquare,
+  Plus
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
 import ScheduleVisitButton from '@/components/ScheduleVisitButton';
 import ClientEquipmentManager from '@/components/ClientEquipmentManager';
 import FunnelPersuasionTriggers from '@/components/FunnelPersuasionTriggers';
+import ClientTimeline from '@/components/ClientTimeline';
+import QuickActionDialog from '@/components/QuickActionDialog';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -75,6 +89,12 @@ export default function ClientProfile() {
   const [editData, setEditData] = React.useState({});
   const [aiSummary, setAiSummary] = React.useState(null);
   const [loadingSummary, setLoadingSummary] = React.useState(false);
+  const [quickActionOpen, setQuickActionOpen] = React.useState(false);
+  const [quickActionType, setQuickActionType] = React.useState('task');
+  const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
+  const [uploadData, setUploadData] = React.useState({ title: '', type: 'proposta', notes: '' });
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef(null);
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -129,6 +149,102 @@ export default function ClientProfile() {
   const handleSaveEdit = () => {
     updateMutation.mutate(editData);
   };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.ClientDocument.create({
+        client_id: clientId,
+        client_name: client.first_name,
+        title: uploadData.title || file.name,
+        type: uploadData.type,
+        file_url,
+        notes: uploadData.notes
+      });
+      queryClient.invalidateQueries(['client-documents']);
+      setUploadDialogOpen(false);
+      setUploadData({ title: '', type: 'proposta', notes: '' });
+    } catch (error) {
+      alert('Erro ao fazer upload');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const openQuickAction = (type) => {
+    setQuickActionType(type);
+    setQuickActionOpen(true);
+  };
+
+  // Montar timeline de eventos
+  const timelineEvents = React.useMemo(() => {
+    if (!client) return [];
+    
+    const events = [];
+
+    // Visitas
+    visits.forEach(visit => {
+      events.push({
+        type: 'visit',
+        title: `Visita: ${visit.visit_type}`,
+        date: visit.scheduled_date,
+        description: visit.result_notes || visit.notes,
+        badge: visit.status,
+        metadata: { duração: `${visit.duration_minutes}min` }
+      });
+    });
+
+    // Follow-ups
+    followupLogs.forEach(log => {
+      events.push({
+        type: log.channel === 'email' ? 'email' : 'followup',
+        title: log.sequence_name,
+        date: log.sent_date,
+        description: log.message_content?.substring(0, 100),
+        badge: log.status
+      });
+    });
+
+    // Vendas
+    sales.forEach(sale => {
+      events.push({
+        type: 'sale',
+        title: `Venda: ${sale.equipment_name}`,
+        date: sale.sale_date,
+        description: `R$ ${sale.sale_value.toLocaleString('pt-BR')}`,
+        badge: sale.status
+      });
+    });
+
+    // Tarefas concluídas
+    clientTasks.filter(t => t.status === 'concluida').forEach(task => {
+      events.push({
+        type: 'task',
+        title: task.title,
+        date: task.updated_date || task.created_date,
+        description: task.description,
+        badge: 'concluída'
+      });
+    });
+
+    // Documentos
+    documents.forEach(doc => {
+      events.push({
+        type: 'document',
+        title: `Documento: ${doc.title}`,
+        date: doc.created_date,
+        description: doc.notes,
+        badge: doc.type
+      });
+    });
+
+    // Ordenar por data decrescente
+    return events.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [client, visits, followupLogs, sales, clientTasks, documents]);
 
   const generateAISummary = async () => {
     setLoadingSummary(true);
@@ -244,6 +360,26 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => openQuickAction('task')}
+            variant="outline"
+            className="h-12 border-2 border-indigo-200 hover:bg-indigo-50"
+          >
+            <CheckSquare className="w-4 h-4 mr-2" />
+            Nova Tarefa
+          </Button>
+          <Button
+            onClick={() => openQuickAction('visit')}
+            variant="outline"
+            className="h-12 border-2 border-purple-200 hover:bg-purple-50"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Agendar Visita
+          </Button>
+        </div>
+
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="p-4 bg-white shadow-lg border-none">
@@ -324,6 +460,112 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Equipment Manager */}
         <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+
+        {/* Tabs: Tarefas, Documentos, Timeline */}
+        <Tabs defaultValue="tasks" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="tasks">
+              Tarefas ({clientTasks.filter(t => t.status === 'pendente').length})
+            </TabsTrigger>
+            <TabsTrigger value="documents">
+              Documentos ({documents.length})
+            </TabsTrigger>
+            <TabsTrigger value="timeline">
+              Timeline
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tarefas Ativas */}
+          <TabsContent value="tasks" className="space-y-2 mt-4">
+            {clientTasks.filter(t => t.status === 'pendente').length === 0 ? (
+              <Card className="p-6 text-center">
+                <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">Nenhuma tarefa ativa</p>
+              </Card>
+            ) : (
+              clientTasks.filter(t => t.status === 'pendente').map(task => (
+                <Card key={task.id} className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{task.title}</p>
+                      {task.description && (
+                        <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className={
+                          task.priority === 'alta' ? 'bg-red-100 text-red-700' :
+                          task.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-blue-100 text-blue-700'
+                        }>
+                          {task.priority}
+                        </Badge>
+                        <span className="text-xs text-slate-500">
+                          Vence: {format(new Date(task.due_date), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          {/* Documentos */}
+          <TabsContent value="documents" className="space-y-2 mt-4">
+            <Button
+              onClick={() => setUploadDialogOpen(true)}
+              variant="outline"
+              className="w-full h-12 border-2 border-dashed border-indigo-300 hover:bg-indigo-50"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Fazer Upload
+            </Button>
+
+            {documents.length === 0 ? (
+              <Card className="p-6 text-center">
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">Nenhum documento</p>
+              </Card>
+            ) : (
+              documents.map(doc => (
+                <Card key={doc.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{doc.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">{doc.type}</Badge>
+                        <span className="text-xs text-slate-500">
+                          {format(new Date(doc.created_date), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
+                      {doc.notes && (
+                        <p className="text-xs text-slate-600 mt-2">{doc.notes}</p>
+                      )}
+                    </div>
+                    {doc.file_url && (
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 hover:bg-slate-100 rounded-lg"
+                      >
+                        <Download className="w-4 h-4 text-indigo-600" />
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          {/* Timeline */}
+          <TabsContent value="timeline" className="mt-4">
+            <ClientTimeline events={timelineEvents} />
+          </TabsContent>
+        </Tabs>
 
         {/* Funnel Persuasion Triggers */}
         <div>
@@ -574,8 +816,83 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               )}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+          </DialogContent>
+          </Dialog>
+
+          {/* Upload Document Dialog */}
+          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+          <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload de Documento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Título *</Label>
+              <Input
+                value={uploadData.title}
+                onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+                placeholder="Ex: Proposta Comercial"
+              />
+            </div>
+
+            <div>
+              <Label>Tipo *</Label>
+              <Select value={uploadData.type} onValueChange={(v) => setUploadData({ ...uploadData, type: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="proposta">Proposta</SelectItem>
+                  <SelectItem value="contrato">Contrato</SelectItem>
+                  <SelectItem value="relatorio">Relatório</SelectItem>
+                  <SelectItem value="apresentacao">Apresentação</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Notas</Label>
+              <Textarea
+                value={uploadData.notes}
+                onChange={(e) => setUploadData({ ...uploadData, notes: e.target.value })}
+                placeholder="Observações sobre o documento..."
+                rows={3}
+              />
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Selecionar Arquivo
+                </>
+              )}
+            </Button>
+          </div>
+          </DialogContent>
+          </Dialog>
+
+          {/* Quick Action Dialog */}
+          <QuickActionDialog
+          client={client}
+          open={quickActionOpen}
+          onOpenChange={setQuickActionOpen}
+          actionType={quickActionType}
+          />
+          </div>
+          );
+          }
