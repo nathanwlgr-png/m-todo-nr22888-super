@@ -48,12 +48,20 @@ export default function ClientCard({ client }) {
               </div>
               <div>
                 <h3 className="font-semibold text-slate-800">{client.first_name}</h3>
-                <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <Building2 className="w-3 h-3" />
-                  <span>{clientTypeLabels[client.client_type] || client.client_type}</span>
-                  {client.phone && (
-                    <MessageCircle className="w-3 h-3 text-green-500 ml-1" />
-                  )}
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    {client.razao_social && <span>{client.razao_social}</span>}
+                    {client.razao_social && client.clinic_name && <span>•</span>}
+                    {client.clinic_name && <span>{client.clinic_name}</span>}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    {client.cnpj && <span>CNPJ: {client.cnpj}</span>}
+                    {client.cnpj && client.city && <span>•</span>}
+                    {client.city && <span>{client.city}</span>}
+                    {client.phone && (
+                      <MessageCircle className="w-3 h-3 text-green-500 ml-1" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
