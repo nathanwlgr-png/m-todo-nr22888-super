@@ -39,7 +39,7 @@ export default function QuickActionDialog({ client, open, onOpenChange, actionTy
     onSuccess: () => {
       queryClient.invalidateQueries(['client-tasks']);
       queryClient.invalidateQueries(['tasks']);
-      toast.success('Tarefa criada!');
+      toast.success('✓ Tarefa criada e salva!');
       onOpenChange(false);
       resetForm();
     }
@@ -50,7 +50,7 @@ export default function QuickActionDialog({ client, open, onOpenChange, actionTy
     onSuccess: () => {
       queryClient.invalidateQueries(['client-visits']);
       queryClient.invalidateQueries(['visits']);
-      toast.success('Visita agendada!');
+      toast.success('✓ Visita agendada e salva!');
       onOpenChange(false);
       resetForm();
     }

@@ -43,6 +43,7 @@ export default function AddInteractionDialog({ client, trigger }) {
     mutationFn: (data) => base44.entities.Interaction.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['interactions']);
+      alert('✓ Interação registrada e salva com sucesso!');
       setOpen(false);
       setFormData({
         type: 'call',
