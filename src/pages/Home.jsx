@@ -27,6 +27,7 @@ import AutoTaskGenerator from '@/components/AutoTaskGenerator';
 import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
 import QuickTips from '@/components/onboarding/QuickTips';
 import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
+import SalesOverview from '@/components/SalesOverview';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -93,6 +94,11 @@ export default function Home() {
 
       {/* Quick Stats */}
       <div className="px-6 -mt-10">
+        {/* Sales Overview */}
+        <div className="mb-6">
+          <SalesOverview />
+        </div>
+
         <div className="grid grid-cols-2 gap-3 dashboard-metrics">
           <Card className="p-4 bg-white shadow-lg border-none">
             <div className="flex items-center gap-3">

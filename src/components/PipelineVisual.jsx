@@ -11,7 +11,30 @@ const pipelineStages = [
   { key: 'fechar_venda', label: 'Fechamento', color: 'bg-green-500' }
 ];
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+
 export default function PipelineVisual({ client, onStageClick }) {
+  const queryClient = useQueryClient();
+
+  const updateStageMutation = useMutation({
+    mutationFn: ({ stage, score }) => base44.entities.Client.update(client.id, {
+      visit_objective: stage,
+      purchase_score: score,
+      last_visit_date: new Date().toISOString().split('T')[0]
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['client', client.id]);
+      queryClient.invalidateQueries(['clients']);
+      toast.success('Etapa atualizada!');
+    }
+  });
+
+  const handleStageClick = (stage, score) => {
+    updateStageMutation.mutate({ stage, score });
+    if (onStageClick) onStageClick(stage);
+  };
   const currentStageIndex = pipelineStages.findIndex(s => s.key === client.visit_objective);
 
   return (

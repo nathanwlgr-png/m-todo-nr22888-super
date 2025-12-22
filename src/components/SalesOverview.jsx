@@ -1,0 +1,151 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Package, TrendingUp, DollarSign } from 'lucide-react';
+
+export default function SalesOverview() {
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list()
+  });
+
+  const { data: sales = [] } = useQuery({
+    queryKey: ['sales'],
+    queryFn: () => base44.entities.Sale.list()
+  });
+
+  const { data: consumableOrders = [] } = useQuery({
+    queryKey: ['consumable-orders'],
+    queryFn: () => base44.entities.ConsumableOrder.list()
+  });
+
+  // Clientes com venda fechada (aguardando assinatura)
+  const closedSaleClients = clients.filter(c => c.sale_closed);
+
+  // Vendas realmente fechadas (com contrato assinado)
+  const confirmedSales = sales.filter(s => s.status === 'fechada' || s.status === 'entregue');
+
+  // Total de insumos vendidos
+  const totalConsumables = consumableOrders.filter(o => o.status === 'entregue').length;
+  const consumablesRevenue = consumableOrders
+    .filter(o => o.status === 'entregue')
+    .reduce((sum, o) => sum + (o.total_value || 0), 0);
+
+  // Total de equipamentos vendidos
+  const totalEquipmentsSold = confirmedSales.length;
+  const equipmentRevenue = confirmedSales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+
+  return (
+    <div className="space-y-4">
+      {/* Vendas Fechadas Aguardando Assinatura */}
+      {closedSaleClients.length > 0 && (
+        <Card className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-yellow-500 flex items-center justify-center">
+              <ShoppingCart className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800">Vendas Aguardando Assinatura</h3>
+              <p className="text-xs text-slate-600">Equipamentos fechados pendentes</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {closedSaleClients.map((client) => (
+              <div key={client.id} className="p-3 bg-white rounded-lg border-2 border-yellow-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-slate-800">{client.first_name}</p>
+                    <p className="text-sm text-slate-600">{client.equipment_sold}</p>
+                  </div>
+                  {client.contract_signature_date && (
+                    <Badge className="bg-yellow-100 text-yellow-700">
+                      📝 {new Date(client.contract_signature_date).toLocaleDateString('pt-BR')}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Resumo de Vendas Confirmadas */}
+      <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 shadow-lg">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+            <Package className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Equipamentos Vendidos</h3>
+            <p className="text-xs text-slate-600">Contratos assinados</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-white rounded-lg border border-green-200">
+            <p className="text-xs text-slate-500 mb-1">Total Vendido</p>
+            <p className="text-2xl font-bold text-green-700">{totalEquipmentsSold}</p>
+            <p className="text-xs text-slate-500">equipamentos</p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg border border-green-200">
+            <p className="text-xs text-slate-500 mb-1">Receita</p>
+            <p className="text-xl font-bold text-green-700">
+              R$ {(equipmentRevenue / 1000).toFixed(0)}k
+            </p>
+          </div>
+        </div>
+
+        {confirmedSales.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs font-semibold text-green-700">Últimas vendas:</p>
+            {confirmedSales.slice(0, 3).map((sale) => (
+              <div key={sale.id} className="p-2 bg-white rounded border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{sale.client_name}</p>
+                    <p className="text-xs text-slate-600">{sale.equipment_name}</p>
+                  </div>
+                  <p className="text-sm font-bold text-green-700">
+                    R$ {(sale.sale_value / 1000).toFixed(0)}k
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Insumos */}
+      <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-300 shadow-lg">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+            <TrendingUp className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Insumos Vendidos</h3>
+            <p className="text-xs text-slate-600">Pedidos entregues</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-white rounded-lg border border-blue-200">
+            <p className="text-xs text-slate-500 mb-1">Total Pedidos</p>
+            <p className="text-2xl font-bold text-blue-700">{totalConsumables}</p>
+            <p className="text-xs text-slate-500">entregas</p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg border border-blue-200">
+            <p className="text-xs text-slate-500 mb-1">Receita</p>
+            <p className="text-xl font-bold text-blue-700">
+              R$ {(consumablesRevenue / 1000).toFixed(0)}k
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
