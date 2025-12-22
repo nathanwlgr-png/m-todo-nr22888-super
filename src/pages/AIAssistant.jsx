@@ -22,7 +22,8 @@ import {
   FileText,
   Search,
   Brain,
-  CheckSquare
+  CheckSquare,
+  Handshake
 } from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
@@ -416,14 +417,15 @@ Seja prático e direto ao ponto.`
   };
 
   const scriptLabels = {
+    presentation: 'Como Se Apresentar',
+    insights: 'Insights Profundos',
+    prospecting: 'Prospecção',
     question: 'Pergunta',
     objection: 'Controle de Objeções',
-    closing: 'Fechamento',
-    followup: 'Follow-up',
-    prospecting: 'Prospecção',
-    needs: 'Previsão de Necessidades',
     proposal: 'Proposta Comercial',
-    insights: 'Insights Profundos',
+    closing: 'Fechamento',
+    needs: 'Previsão de Necessidades',
+    followup: 'Follow-up',
     suggestTasks: 'Sugestão de Tarefas'
   };
 
@@ -455,11 +457,25 @@ Seja prático e direto ao ponto.`
       <div className="bg-white border-b px-4 py-3">
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
           <QuickActionButton
+            icon={Handshake}
+            label="Apresentação"
+            onClick={() => generateQuickAction('presentation')}
+            loading={quickLoading.presentation}
+            className="shrink-0 bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 text-green-700 hover:bg-green-100 font-semibold"
+          />
+          <QuickActionButton
             icon={Brain}
             label="Insights Profundos"
             onClick={() => generateQuickAction('insights')}
             loading={quickLoading.insights}
             className="shrink-0 bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300 text-pink-700 hover:bg-pink-100 font-semibold"
+          />
+          <QuickActionButton
+            icon={Search}
+            label="Prospecção"
+            onClick={() => generateQuickAction('prospecting')}
+            loading={quickLoading.prospecting}
+            className="shrink-0 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
           />
           <QuickActionButton
             icon={HelpCircle}
@@ -476,25 +492,18 @@ Seja prático e direto ao ponto.`
             className="shrink-0 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
           />
           <QuickActionButton
+            icon={FileText}
+            label="Proposta"
+            onClick={() => generateQuickAction('proposal')}
+            loading={quickLoading.proposal}
+            className="shrink-0 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+          />
+          <QuickActionButton
             icon={Target}
             label="Fechamento"
             onClick={() => generateQuickAction('closing')}
             loading={quickLoading.closing}
             className="shrink-0 bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-          />
-          <QuickActionButton
-            icon={RotateCcw}
-            label="Follow-up"
-            onClick={() => generateQuickAction('followup')}
-            loading={quickLoading.followup}
-            className="shrink-0 bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-          />
-          <QuickActionButton
-            icon={Search}
-            label="Prospecção"
-            onClick={() => generateQuickAction('prospecting')}
-            loading={quickLoading.prospecting}
-            className="shrink-0 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
           />
           <QuickActionButton
             icon={TrendingUp}
@@ -504,11 +513,11 @@ Seja prático e direto ao ponto.`
             className="shrink-0 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
           />
           <QuickActionButton
-            icon={FileText}
-            label="Proposta"
-            onClick={() => generateQuickAction('proposal')}
-            loading={quickLoading.proposal}
-            className="shrink-0 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+            icon={RotateCcw}
+            label="Follow-up"
+            onClick={() => generateQuickAction('followup')}
+            loading={quickLoading.followup}
+            className="shrink-0 bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
           />
           <QuickActionButton
             icon={CheckSquare}
