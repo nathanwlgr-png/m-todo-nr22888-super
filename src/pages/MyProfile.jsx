@@ -41,6 +41,19 @@ export default function MyProfile() {
     }
   }, [user]);
 
+  // Auto-preencher com dados do usuário se estiver vazio
+  React.useEffect(() => {
+    if (user && !user.communication_style) {
+      const autoFillData = {
+        communication_style: "Técnico-consultivo, adaptável ao perfil do cliente. Formal ou descontraído conforme a intimidade. Sempre bem-humorado e próximo.",
+        personality_traits: ["técnico", "consultivo", "entusiasmado", "empático", "objetivo", "bem-humorado", "adaptável"],
+        sales_approach: "Construo relacionamento primeiro. Adapto linguagem ao perfil: técnico com técnicos, simples com leigos. Foco em dados técnicos e ROI. Uso histórias emocionais. Aceito objeções com empatia e apresento fatos para o cliente tirar próprias conclusões.",
+        signature_phrases: ["Vou te mostrar uma coisa...", "Ficou com alguma dúvida?", "Deixa eu te perguntar uma coisa..."]
+      };
+      setFormData(autoFillData);
+    }
+  }, [user]);
+
   const updateMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => {
