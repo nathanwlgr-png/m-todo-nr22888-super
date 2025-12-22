@@ -16,23 +16,30 @@ import {
   Users,
   Sparkles
 } from 'lucide-react';
+import ClientSelector from '@/components/ClientSelector';
 
 export default function ProspectingScripts() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('id');
+  const clientIdFromUrl = urlParams.get('id');
 
+  const [selectedClientId, setSelectedClientId] = useState(clientIdFromUrl || null);
   const [scripts, setScripts] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(null);
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date')
+  });
+
   const { data: client, isLoading } = useQuery({
-    queryKey: ['client', clientId],
+    queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
+      const clients = await base44.entities.Client.filter({ id: selectedClientId });
       return clients[0];
     },
-    enabled: !!clientId
+    enabled: !!selectedClientId
   });
 
   const { data: sales = [] } = useQuery({
@@ -207,19 +214,26 @@ Seja ULTRA PRÁTICO e ACIONÁVEL.`,
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-br from-emerald-900 to-teal-900 px-4 pt-4 pb-16 rounded-b-[2rem]">
+      <div className="bg-gradient-to-br from-emerald-900 to-teal-900 px-4 pt-4 pb-20 rounded-b-[2rem]">
         <div className="flex items-center gap-4 mb-4">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass hover:bg-white/10">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold text-white">Roteiros de Prospecção</h1>
-            <p className="text-sm text-emerald-200">{client?.first_name}</p>
           </div>
+        </div>
+        
+        <div className="bg-white/10 backdrop-blur rounded-2xl p-4">
+          <ClientSelector
+            clients={allClients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
         </div>
       </div>
 
-      <div className="px-6 -mt-8 space-y-4">
+      <div className="px-6 -mt-12 space-y-4">
         {!scripts && (
           <Card className="p-8 text-center">
             <Sparkles className="w-12 h-12 text-emerald-600 mx-auto mb-3" />

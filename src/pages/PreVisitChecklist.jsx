@@ -33,6 +33,7 @@ import NumerologyCard from '@/components/NumerologyCard';
 import InvestigationQuestions from '@/components/InvestigationQuestions';
 import CommitmentStrategy from '@/components/CommitmentStrategy';
 import StrategicFrameworks from '@/components/StrategicFrameworks';
+import ClientSelector from '@/components/ClientSelector';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -45,7 +46,9 @@ export default function PreVisitChecklist() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('id');
+  const clientIdFromUrl = urlParams.get('id');
+  
+  const [selectedClientId, setSelectedClientId] = React.useState(clientIdFromUrl || null);
   
   const [checklist, setChecklist] = useState({
     clarity: false,
@@ -69,18 +72,23 @@ export default function PreVisitChecklist() {
   
   const [loadingContent, setLoadingContent] = useState({});
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date')
+  });
+
   const { data: client, isLoading } = useQuery({
-    queryKey: ['client', clientId],
+    queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
+      const clients = await base44.entities.Client.filter({ id: selectedClientId });
       return clients[0];
     },
-    enabled: !!clientId
+    enabled: !!selectedClientId
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.update(clientId, data),
-    onSuccess: () => queryClient.invalidateQueries(['client', clientId])
+    mutationFn: (data) => base44.entities.Client.update(selectedClientId, data),
+    onSuccess: () => queryClient.invalidateQueries(['client', selectedClientId])
   });
 
   const generateAIContent = async (type, prompt) => {
@@ -191,18 +199,25 @@ export default function PreVisitChecklist() {
     <div className="min-h-screen bg-slate-50 pb-32">
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-3">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold text-slate-800">Checklist Pré-Visita</h1>
-            <p className="text-sm text-slate-500">{client?.first_name}</p>
           </div>
-          <div className="bg-indigo-100 px-3 py-1 rounded-full">
-            <span className="text-sm font-medium text-indigo-700">{completedCount}/{totalItems}</span>
-          </div>
+          {client && (
+            <div className="bg-indigo-100 px-3 py-1 rounded-full">
+              <span className="text-sm font-medium text-indigo-700">{completedCount}/{totalItems}</span>
+            </div>
+          )}
         </div>
+        
+        <ClientSelector
+          clients={allClients}
+          selectedClientId={selectedClientId}
+          onClientChange={setSelectedClientId}
+        />
       </div>
 
       <div className="p-4 space-y-4">

@@ -19,28 +19,35 @@ import {
   Send
 } from 'lucide-react';
 import { toast } from 'sonner';
+import ClientSelector from '@/components/ClientSelector';
 
 export default function FollowUpAssistant() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('id');
+  const clientIdFromUrl = urlParams.get('id');
 
+  const [selectedClientId, setSelectedClientId] = useState(clientIdFromUrl || null);
   const [generating, setGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date')
+  });
+
   const { data: client, isLoading } = useQuery({
-    queryKey: ['client', clientId],
+    queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
+      const clients = await base44.entities.Client.filter({ id: selectedClientId });
       return clients[0];
     },
-    enabled: !!clientId
+    enabled: !!selectedClientId
   });
 
   const { data: visits = [] } = useQuery({
-    queryKey: ['visits', clientId],
-    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
-    enabled: !!clientId
+    queryKey: ['visits', selectedClientId],
+    queryFn: () => base44.entities.Visit.filter({ client_id: selectedClientId }),
+    enabled: !!selectedClientId
   });
 
   const generateFollowUpPlan = async () => {
@@ -147,15 +154,22 @@ Considere o perfil comportamental e estilo de decisão do cliente para personali
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
-      <div className="bg-gradient-to-br from-indigo-600 to-purple-600 px-4 pt-4 pb-20 rounded-b-[2rem]">
+      <div className="bg-gradient-to-br from-indigo-600 to-purple-600 px-4 pt-4 pb-24 rounded-b-[2rem]">
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/10">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold text-white">Assistente de Follow-Up</h1>
-            <p className="text-sm text-indigo-100">{client?.first_name}</p>
           </div>
+        </div>
+
+        <div className="bg-white/10 backdrop-blur rounded-2xl p-4 mb-4">
+          <ClientSelector
+            clients={allClients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
         </div>
 
         <div className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-2xl p-4">
@@ -167,7 +181,7 @@ Considere o perfil comportamental e estilo de decisão do cliente para personali
         </div>
       </div>
 
-      <div className="px-4 -mt-12 space-y-4">
+      <div className="px-4 -mt-16 space-y-4">
         {/* Client Quick Stats */}
         <Card className="p-4 bg-white shadow-lg border-none">
           <div className="grid grid-cols-3 gap-3 text-center">

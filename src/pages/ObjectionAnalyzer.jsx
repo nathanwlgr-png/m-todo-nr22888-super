@@ -14,23 +14,30 @@ import {
   TrendingUp,
   BookOpen
 } from 'lucide-react';
+import ClientSelector from '@/components/ClientSelector';
 
 export default function ObjectionAnalyzer() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('id');
+  const clientIdFromUrl = urlParams.get('id');
 
+  const [selectedClientId, setSelectedClientId] = useState(clientIdFromUrl || null);
   const [objection, setObjection] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date')
+  });
+
   const { data: client, isLoading } = useQuery({
-    queryKey: ['client', clientId],
+    queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
+      const clients = await base44.entities.Client.filter({ id: selectedClientId });
       return clients[0];
     },
-    enabled: !!clientId
+    enabled: !!selectedClientId
   });
 
   const { data: sales = [] } = useQuery({
@@ -143,19 +150,26 @@ Seja PRÁTICO, ÉTICO e CONSULTIVO.`,
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-br from-red-900 to-orange-900 px-4 pt-4 pb-16 rounded-b-[2rem]">
+      <div className="bg-gradient-to-br from-red-900 to-orange-900 px-4 pt-4 pb-20 rounded-b-[2rem]">
         <div className="flex items-center gap-4 mb-4">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass hover:bg-white/10">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold text-white">Análise de Objeções</h1>
-            <p className="text-sm text-orange-200">{client?.first_name}</p>
           </div>
+        </div>
+        
+        <div className="bg-white/10 backdrop-blur rounded-2xl p-4">
+          <ClientSelector
+            clients={allClients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
         </div>
       </div>
 
-      <div className="px-6 -mt-8 space-y-4">
+      <div className="px-6 -mt-12 space-y-4">
         {/* Input */}
         <Card className="p-4 bg-white">
           <label className="block text-sm font-medium text-slate-700 mb-2">
