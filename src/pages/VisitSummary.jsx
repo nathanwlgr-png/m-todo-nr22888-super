@@ -70,9 +70,31 @@ export default function VisitSummary() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
       if (!clientId) throw new Error('Client ID not found');
-      return base44.entities.Client.update(clientId, data);
+      await base44.entities.Client.update(clientId, data);
+      
+      // AUTOMAÇÃO: Criar tarefa de follow-up após visita realizada
+      try {
+        const followUpDate = new Date();
+        followUpDate.setDate(followUpDate.getDate() + 2);
+        
+        await base44.entities.Task.create({
+          client_id: clientId,
+          client_name: client?.first_name || 'Cliente',
+          title: 'Follow-up após visita',
+          description: `Fazer follow-up da visita realizada. Status atual: ${data.status}`,
+          due_date: followUpDate.toISOString().split('T')[0],
+          status: 'pendente',
+          priority: data.status === 'quente' ? 'alta' : 'media',
+          type: 'follow_up',
+          auto_created: true
+        });
+      } catch (error) {
+        console.log('Follow-up task automation failed');
+      }
+      
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['client', clientId]);
