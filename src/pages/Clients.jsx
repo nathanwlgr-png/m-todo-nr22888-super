@@ -36,6 +36,8 @@ export default function Clients() {
   const [showFilters, setShowFilters] = useState(false);
   const [showFunnel, setShowFunnel] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const [visitFilter, setVisitFilter] = useState('all');
+  const [pipelineFilter, setPipelineFilter] = useState('all');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -45,6 +47,11 @@ export default function Clients() {
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
     queryFn: () => base44.entities.Sale.list(),
+  });
+
+  const { data: allVisits = [] } = useQuery({
+    queryKey: ['all-visits'],
+    queryFn: () => base44.entities.Visit.list('-scheduled_date', 500),
   });
 
   // Lista única de cidades
@@ -75,10 +82,25 @@ export default function Clients() {
         else if (scoreFilter === 'medium') matchesScore = score >= 40 && score < 70;
         else if (scoreFilter === 'low') matchesScore = score < 40;
       }
+
+      // Filtro de visitas
+      let matchesVisit = true;
+      if (visitFilter !== 'all') {
+        const hasScheduled = allVisits.some(v => v.client_id === client.id && v.status === 'agendada');
+        const hasCompleted = allVisits.some(v => v.client_id === client.id && v.status === 'realizada');
+        if (visitFilter === 'scheduled') matchesVisit = hasScheduled;
+        else if (visitFilter === 'completed') matchesVisit = hasCompleted;
+        else if (visitFilter === 'none') matchesVisit = !hasScheduled && !hasCompleted;
+      }
+
+      // Filtro de pipeline
+      const matchesPipeline = pipelineFilter === 'all' || 
+        client.visit_objective === pipelineFilter || 
+        client.pipeline_stage === pipelineFilter;
       
-      return matchesSearch && matchesStatus && matchesScore && matchesCity;
+      return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline;
     });
-  }, [clients, search, statusFilter, scoreFilter, cityFilter]);
+  }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits]);
 
   // Autocomplete suggestions
   const handleSearchChange = (value) => {
@@ -103,7 +125,7 @@ export default function Clients() {
     }
   };
 
-  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter].filter(f => f !== 'all').length;
+  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter].filter(f => f !== 'all').length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -247,12 +269,46 @@ export default function Clients() {
                 </Select>
               </div>
 
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Situação de Visita</label>
+                <Select value={visitFilter} onValueChange={setVisitFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="scheduled">📅 Com Visita Agendada</SelectItem>
+                    <SelectItem value="completed">✓ Já Visitados</SelectItem>
+                    <SelectItem value="none">Sem Visita</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Fase da Negociação</label>
+                <Select value={pipelineFilter} onValueChange={setPipelineFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Fases</SelectItem>
+                    <SelectItem value="diagnosticar_necessidades">Diagnóstico</SelectItem>
+                    <SelectItem value="apresentar_equipamento">Apresentação</SelectItem>
+                    <SelectItem value="demonstracao_tecnica">Demo Técnica</SelectItem>
+                    <SelectItem value="negociar_proposta">Negociação</SelectItem>
+                    <SelectItem value="fechar_venda">Fechamento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="ghost"
                 onClick={() => {
                   setStatusFilter('all');
                   setScoreFilter('all');
                   setCityFilter('all');
+                  setVisitFilter('all');
+                  setPipelineFilter('all');
                 }}
                 className="w-full text-sm"
               >
@@ -290,7 +346,23 @@ export default function Clients() {
               s.client_id === client.id && 
               (s.status === 'fechada' || s.status === 'entregue')
             );
-            return <ClientCard key={client.id} client={client} hasPurchase={hasPurchase} />;
+            const scheduledVisit = allVisits.find(v => 
+              v.client_id === client.id && 
+              v.status === 'agendada'
+            );
+            const lastVisit = allVisits.find(v => 
+              v.client_id === client.id && 
+              v.status === 'realizada'
+            );
+            return (
+              <ClientCard 
+                key={client.id} 
+                client={client} 
+                hasPurchase={hasPurchase} 
+                scheduledVisit={scheduledVisit}
+                lastVisit={lastVisit}
+              />
+            );
           })
         )}
       </div>

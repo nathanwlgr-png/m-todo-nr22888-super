@@ -254,6 +254,20 @@ export default function ScheduledAgenda() {
                           </div>
                         </div>
                       )}
+
+                      {/* Fase da Negociação */}
+                      {(client.visit_objective || client.pipeline_stage) && (
+                        <div className="mt-2">
+                          <Badge className="text-xs bg-indigo-100 text-indigo-700">
+                            {client.visit_objective === 'diagnosticar_necessidades' && '🔍 Diagnóstico'}
+                            {client.visit_objective === 'apresentar_equipamento' && '📊 Apresentação'}
+                            {client.visit_objective === 'demonstracao_tecnica' && '🔬 Demo Técnica'}
+                            {client.visit_objective === 'negociar_proposta' && '💼 Negociação'}
+                            {client.visit_objective === 'fechar_venda' && '✅ Fechamento'}
+                            {!client.visit_objective && client.pipeline_stage}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>

@@ -26,7 +26,7 @@ const clientTypeLabels = {
   clinica_especializada: 'Clínica Especializada'
 };
 
-export default function ClientCard({ client, hasPurchase = false }) {
+export default function ClientCard({ client, hasPurchase = false, scheduledVisit = null, lastVisit = null }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   
   const handleMoreClick = (e) => {
@@ -34,6 +34,16 @@ export default function ClientCard({ client, hasPurchase = false }) {
     e.stopPropagation();
     setShowDetailsModal(true);
   };
+
+  const pipelineStages = {
+    diagnosticar_necessidades: { label: 'Diagnóstico', color: 'bg-blue-500' },
+    apresentar_equipamento: { label: 'Apresentação', color: 'bg-purple-500' },
+    demonstracao_tecnica: { label: 'Demo Técnica', color: 'bg-orange-500' },
+    negociar_proposta: { label: 'Negociação', color: 'bg-amber-500' },
+    fechar_venda: { label: 'Fechamento', color: 'bg-green-600' }
+  };
+
+  const currentStage = client.visit_objective || client.pipeline_stage;
 
   return (
     <>
@@ -67,14 +77,37 @@ export default function ClientCard({ client, hasPurchase = false }) {
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={`${statusColors[client.status]} text-xs`}>
-                    {statusLabels[client.status]}
-                  </Badge>
-                  {client.custom_tags?.length > 0 && (
-                    <Badge variant="outline" className="text-xs flex items-center gap-1">
-                      <Tag className="w-3 h-3" />
-                      {client.custom_tags.length}
+                <div className="flex flex-col gap-1 mb-1">
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${statusColors[client.status]} text-xs`}>
+                      {statusLabels[client.status]}
+                    </Badge>
+                    {client.custom_tags?.length > 0 && (
+                      <Badge variant="outline" className="text-xs flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        {client.custom_tags.length}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {/* Indicadores de Visita */}
+                  <div className="flex items-center gap-1">
+                    {scheduledVisit && (
+                      <Badge className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
+                        📅 Agendada
+                      </Badge>
+                    )}
+                    {lastVisit && (
+                      <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
+                        ✓ Visitado
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {/* Fase da Negociação */}
+                  {currentStage && pipelineStages[currentStage] && (
+                    <Badge className={`${pipelineStages[currentStage].color} text-white text-xs px-2 py-0.5`}>
+                      {pipelineStages[currentStage].label}
                     </Badge>
                   )}
                 </div>
