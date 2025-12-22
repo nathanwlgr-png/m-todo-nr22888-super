@@ -137,10 +137,10 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
 
           <div className="space-y-4">
             <div>
-              <Label>Equipamento</Label>
+              <Label>Equipamento (selecione ou digite)</Label>
               <Select onValueChange={handleEquipmentSelect}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue placeholder="Selecione da lista" />
                 </SelectTrigger>
                 <SelectContent>
                   {equipment.map(e => (
@@ -150,14 +150,21 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
                   ))}
                 </SelectContent>
               </Select>
+              <Input
+                className="mt-2"
+                value={formData.equipment_name}
+                onChange={(e) => setFormData({ ...formData, equipment_name: e.target.value })}
+                placeholder="Ou digite o nome do equipamento"
+              />
             </div>
 
             <div>
-              <Label>Valor (R$)</Label>
+              <Label>Valor (R$) *</Label>
               <Input
                 type="number"
                 value={formData.sale_value}
                 onChange={(e) => setFormData({ ...formData, sale_value: parseFloat(e.target.value) })}
+                placeholder="Digite o valor"
               />
             </div>
 
@@ -176,11 +183,11 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
             </div>
 
             <div>
-              <Label>Condições de Pagamento</Label>
+              <Label>Condições de Pagamento *</Label>
               <Input
                 value={formData.payment_terms}
                 onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-                placeholder="Ex: 12x sem juros"
+                placeholder="Ex: 12x sem juros, à vista com 10% desconto, etc"
               />
             </div>
 
