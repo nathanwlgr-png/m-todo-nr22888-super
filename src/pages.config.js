@@ -7,6 +7,7 @@ import NewClient from './pages/NewClient';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import VisitSummary from './pages/VisitSummary';
 import Equipment from './pages/Equipment';
+import Reports from './pages/Reports';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "PreVisitChecklist": PreVisitChecklist,
     "VisitSummary": VisitSummary,
     "Equipment": Equipment,
+    "Reports": Reports,
 }
 
 export const pagesConfig = {
