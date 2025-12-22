@@ -14,7 +14,8 @@ import {
   UserCog,
   Loader2,
   ThermometerSun,
-  Phone
+  Phone,
+  Sparkles
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
@@ -171,17 +172,28 @@ export default function ClientProfile() {
 
       {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => navigate(createPageUrl(`FollowUpAssistant?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold"
+          >
+            <Sparkles className="w-4 h-4 mr-1" />
+            Follow-Up IA
+          </Button>
+
+          <Button
+            onClick={() => navigate(createPageUrl(`PreVisitChecklist?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold"
+          >
+            <ClipboardCheck className="w-4 h-4 mr-1" />
+            Checklist
+          </Button>
+        </div>
+
         <ScheduleVisitButton client={client} />
-        
-        <Button
-          onClick={() => navigate(createPageUrl(`PreVisitChecklist?id=${client.id}`))}
-          variant="outline"
-          className="w-full h-14 rounded-xl border-2 text-base font-semibold"
-        >
-          <ClipboardCheck className="w-5 h-5 mr-2" />
-          Checklist Pré-Visita
-        </Button>
-        
+
         <Button
           onClick={() => navigate(createPageUrl(`AIAssistant?id=${client.id}`))}
           className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-base font-semibold"

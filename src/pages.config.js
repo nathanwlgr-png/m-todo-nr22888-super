@@ -10,6 +10,7 @@ import Equipment from './pages/Equipment';
 import Reports from './pages/Reports';
 import Calendar from './pages/Calendar';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
+import FollowUpAssistant from './pages/FollowUpAssistant';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +27,7 @@ export const PAGES = {
     "Reports": Reports,
     "Calendar": Calendar,
     "GoogleCalendarSettings": GoogleCalendarSettings,
+    "FollowUpAssistant": FollowUpAssistant,
 }
 
 export const pagesConfig = {
