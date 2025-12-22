@@ -229,18 +229,21 @@ export default function VisitPlanner() {
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       <div className="flex items-center gap-1 text-slate-600">
                         <Clock className="w-3 h-3" />
-                        {client.daysSinceLastVisit === 999 ? 'Nunca' : `${client.daysSinceLastVisit}d`}
+                        {client.daysSinceLastVisit === 999 ? 'Nunca visitado' : `${client.daysSinceLastVisit}d atrás`}
                       </div>
                       <div className="flex items-center gap-1 text-slate-600">
                         <span className="font-medium">{client.purchase_score || 0}%</span>
                       </div>
-                      {client.projected_revenue && (
-                        <div className="flex items-center gap-1 text-slate-600">
-                          <DollarSign className="w-3 h-3" />
-                          {(client.projected_revenue / 1000).toFixed(0)}k
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1 text-slate-600">
+                        <span className="font-medium">{client.total_visits_count || 0}x visitado</span>
+                      </div>
                     </div>
+                    {client.projected_revenue && (
+                      <div className="mt-2 flex items-center gap-1 text-xs text-slate-600">
+                        <DollarSign className="w-3 h-3" />
+                        R$ {(client.projected_revenue / 1000).toFixed(0)}k pipeline
+                      </div>
+                    )}
 
                     {client.lastVisitDate && (
                       <div className="mt-2 pt-2 border-t flex items-center gap-1 text-xs text-slate-500">

@@ -81,6 +81,7 @@ import CommunicationPreferencesEditor from '@/components/CommunicationPreference
 import ClientDataEditor from '@/components/ClientDataEditor';
 import VisitReportPDF from '@/components/VisitReportPDF';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
+import ScoreExplanation from '@/components/ScoreExplanation';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',

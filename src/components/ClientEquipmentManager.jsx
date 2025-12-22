@@ -33,10 +33,29 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
     enabled: !!clientId
   });
 
+  const { data: client } = useQuery({
+    queryKey: ['client', clientId],
+    queryFn: async () => {
+      const clients = await base44.entities.Client.list();
+      return clients.find(c => c.id === clientId);
+    },
+    enabled: !!clientId
+  });
+
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Sale.create(data),
+    mutationFn: async (data) => {
+      const sale = await base44.entities.Sale.create(data);
+      
+      // AUTOMAÇÃO: Se status é "fechada", executar workflow completo
+      if (data.status === 'fechada') {
+        await handleClosedSale(sale, data);
+      }
+      
+      return sale;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['client-sales']);
+      queryClient.invalidateQueries(['client']);
       toast.success('Equipamento registrado!');
       setOpen(false);
       setFormData({
@@ -49,6 +68,96 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
       });
     }
   });
+
+  const handleClosedSale = async (sale, saleData) => {
+    try {
+      // 1. Verificar divergência com necessidades do lab
+      if (client?.lab_needs?.length > 0) {
+        const equipmentObj = equipment.find(e => e.name === saleData.equipment_name);
+        const needsMatch = checkEquipmentNeedsMatch(equipmentObj, client.lab_needs);
+        
+        if (!needsMatch.isMatch) {
+          const confirm = window.confirm(
+            `⚠️ DIVERGÊNCIA DETECTADA:\n\nEquipamento: ${saleData.equipment_name}\nNecessidades do Lab: ${client.lab_needs.join(', ')}\n\nEste equipamento pode não atender todas as necessidades. Confirma mesmo assim?`
+          );
+          if (!confirm) throw new Error('Venda cancelada pelo usuário');
+        }
+      }
+
+      // 2. Atualizar pipeline do cliente
+      await base44.entities.Client.update(clientId, {
+        pipeline_stage: 'fechado',
+        visit_objective: 'fechar_venda',
+        status: 'quente'
+      });
+
+      // 3. Enviar WhatsApp automático
+      if (client?.phone) {
+        const message = `🎉 Parabéns ${client.first_name}!\n\nSua compra foi confirmada:\n\n📦 Equipamento: ${saleData.equipment_name}\n💰 Valor: R$ ${parseFloat(saleData.sale_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n📅 Data: ${new Date(saleData.sale_date).toLocaleDateString('pt-BR')}\n💳 Pagamento: ${saleData.payment_terms}\n\n✅ Status: ${saleData.status === 'fechada' ? 'Fechado' : 'Aguardando Assinatura'}\n\nEm breve nossa equipe entrará em contato para os próximos passos.\n\nObrigado pela confiança! 🚀`;
+        
+        const cleanPhone = client.phone.replace(/\D/g, '');
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+        
+        await base44.entities.WhatsAppMessage.create({
+          contact_id: clientId,
+          contact_name: clientName,
+          contact_phone: client.phone,
+          direction: 'sent',
+          message: message,
+          status: 'sent',
+          automated: true
+        });
+
+        window.open(whatsappUrl, '_blank');
+        toast.success('Mensagem WhatsApp enviada!');
+      }
+
+      // 4. Criar tarefa para vendedor
+      const user = await base44.auth.me();
+      await base44.entities.Task.create({
+        client_id: clientId,
+        client_name: clientName,
+        title: '📋 Coletar Informações Pós-Venda',
+        description: `INFORMAÇÕES NECESSÁRIAS para ${clientName}:\n\n✓ CNPJ/CPF\n✓ Endereço completo de entrega\n✓ Email para NF-e\n✓ Dados bancários (se parcelado)\n✓ Contato técnico para instalação\n\nEquipamento: ${saleData.equipment_name}\nValor: R$ ${parseFloat(saleData.sale_value).toLocaleString('pt-BR')}`,
+        due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: 'pendente',
+        priority: 'alta',
+        type: 'outro',
+        auto_created: true,
+        assigned_to: user.email,
+        assigned_to_name: user.full_name
+      });
+
+      toast.success('Tarefa de pós-venda criada!');
+
+    } catch (error) {
+      if (error.message !== 'Venda cancelada pelo usuário') {
+        console.error('Erro na automação:', error);
+      }
+    }
+  };
+
+  const checkEquipmentNeedsMatch = (equipment, needs) => {
+    if (!equipment || !needs) return { isMatch: true };
+    
+    const equipmentCategories = {
+      'analisador_hematologico': ['hemograma'],
+      'analisador_bioquimico': ['bioquimico'],
+      'VG1': ['hemogasio'],
+      'VG2': ['hemogasio'],
+      'VI1': ['imunofluorescencia'],
+      'VQ1': ['pcr']
+    };
+
+    const covered = equipmentCategories[equipment.category] || 
+                    equipmentCategories[equipment.name] || [];
+    const missing = needs.filter(n => !covered.includes(n));
+
+    return {
+      isMatch: missing.length === 0,
+      missing: missing
+    };
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ saleId, status }) => {

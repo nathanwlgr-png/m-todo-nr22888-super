@@ -149,7 +149,7 @@ Retorne JSON:
       };
       visitHistory.push(newVisitRecord);
 
-      // 2. Atualizar visita como realizada
+      // 2. Atualizar visita como realizada e incrementar contagem
       if (visitId) {
         await updateVisitMutation.mutateAsync({
           id: visitId,
@@ -159,6 +159,10 @@ Retorne JSON:
           }
         });
       }
+
+      // Incrementar total de visitas
+      const currentVisitCount = client.total_visits_count || 0;
+      updateData.total_visits_count = currentVisitCount + 1;
 
       // 3. Atualizar perfil do cliente automaticamente
       const updatedPains = [...(client.main_pains || []), ...visitData.new_pains];
@@ -195,7 +199,7 @@ Retorne JSON:
       // 4. Gerar sugestão de equipamento
       await generateEquipmentSuggestion();
 
-      // 5. Agendar próxima visita se solicitado
+      // 5. Agendar próxima visita se solicitado - VINCULAR NOTAS
       if (visitData.schedule_next && visitData.next_visit_date) {
         await createVisitMutation.mutateAsync({
           client_id: client.id,
@@ -205,7 +209,7 @@ Retorne JSON:
           duration_minutes: 60,
           location: client.address || client.city,
           status: 'agendada',
-          notes: `Follow-up: ${visitData.next_step}`
+          notes: `Follow-up: ${visitData.next_step}\n\n📝 Contexto da última visita:\n${visitData.result_notes.substring(0, 200)}...`
         });
       }
 
