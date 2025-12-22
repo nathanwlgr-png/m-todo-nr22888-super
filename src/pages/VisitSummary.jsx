@@ -192,6 +192,19 @@ Seja direto, prático e focado em ação. Pense em ROI, economia com terceiriza�
     );
   }
 
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-500 mb-4">Cliente não encontrado</p>
+          <Button onClick={() => navigate(createPageUrl('Home'))}>
+            Voltar para Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (saved) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
