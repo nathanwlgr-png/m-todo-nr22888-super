@@ -297,7 +297,7 @@ export default function NewClient() {
         <Button
           onClick={handleSubmit}
           disabled={!isValid || loading}
-          className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-lg font-semibold disabled:opacity-50"
+          className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-xl text-lg font-semibold disabled:opacity-50 shadow-lg shadow-orange-500/30 glow-orange"
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />

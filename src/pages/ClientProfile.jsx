@@ -77,16 +77,18 @@ export default function ClientProfile() {
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
       {/* Header */}
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 px-4 pt-4 pb-24 rounded-b-[2rem]">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/10">
+      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4 pt-4 pb-24 rounded-b-[2rem] overflow-hidden tech-grid">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl"></div>
+
+        <div className="relative flex items-center gap-4 mb-6">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass hover:bg-white/10">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="text-lg font-semibold text-white">Perfil do Cliente</h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+        <div className="relative flex items-center gap-4">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg glow-orange">
             <span className="text-3xl font-bold text-white">
               {client.first_name?.charAt(0).toUpperCase()}
             </span>
@@ -200,7 +202,7 @@ export default function ClientProfile() {
 
         <Button
           onClick={() => navigate(createPageUrl(`AIAssistant?id=${client.id}`))}
-          className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-base font-semibold"
+          className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-xl text-base font-semibold shadow-lg shadow-orange-500/30 glow-orange"
         >
           <MessageSquare className="w-5 h-5 mr-2" />
           Abrir Assistente IA

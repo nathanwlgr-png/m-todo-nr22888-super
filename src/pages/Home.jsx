@@ -51,23 +51,26 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 px-6 pt-12 pb-20 rounded-b-[2.5rem]">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-amber-400" />
+      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 pt-12 pb-20 rounded-b-[2.5rem] overflow-hidden tech-grid">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
+        
+        <div className="relative flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center glow-orange">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-white">Seamaty</h1>
-            <p className="text-slate-400 text-sm">Método NR • @seamatybrasil</p>
+            <p className="text-orange-300 text-sm font-medium">Método NR • @seamatybrasil</p>
           </div>
           <Link to={createPageUrl('GlobalSearch')}>
-            <button className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-colors">
-              <Search className="w-5 h-5 text-white" />
+            <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
+              <Search className="w-5 h-5 text-orange-400 mx-auto" />
             </button>
           </Link>
         </div>
 
-        <p className="text-slate-300 text-lg font-light">
+        <p className="relative text-slate-200 text-lg font-light">
           Qual cliente você vai atender agora?
         </p>
       </div>
@@ -164,7 +167,7 @@ export default function Home() {
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
         <Link to={createPageUrl('NewClient')}>
-          <Button className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-2xl text-lg font-semibold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]">
+          <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-lg font-semibold shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98] glow-orange">
             <UserPlus className="w-5 h-5 mr-3" />
             Novo Cliente
           </Button>
