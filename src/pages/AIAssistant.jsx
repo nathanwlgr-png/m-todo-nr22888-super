@@ -20,7 +20,8 @@ import {
   Check,
   TrendingUp,
   FileText,
-  Search
+  Search,
+  Brain
 } from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
@@ -58,6 +59,18 @@ export default function AIAssistant() {
   const { data: tasks = [] } = useQuery({
     queryKey: ['client-tasks', clientId],
     queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: sales = [] } = useQuery({
+    queryKey: ['client-sales', clientId],
+    queryFn: () => base44.entities.Sale.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: followupLogs = [] } = useQuery({
+    queryKey: ['client-followup-logs', clientId],
+    queryFn: () => base44.entities.FollowUpLog.filter({ client_id: clientId }),
     enabled: !!clientId
   });
 
@@ -281,7 +294,8 @@ HISTÓRICO DE INTERAÇÕES:
     followup: 'Follow-up',
     prospecting: 'Prospecção',
     needs: 'Previsão de Necessidades',
-    proposal: 'Proposta Comercial'
+    proposal: 'Proposta Comercial',
+    insights: 'Insights Profundos'
   };
 
   return (
@@ -311,6 +325,13 @@ HISTÓRICO DE INTERAÇÕES:
       {/* Quick Actions */}
       <div className="bg-white border-b px-4 py-3">
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+          <QuickActionButton
+            icon={Brain}
+            label="Insights Profundos"
+            onClick={() => generateQuickAction('insights')}
+            loading={quickLoading.insights}
+            className="shrink-0 bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300 text-pink-700 hover:bg-pink-100 font-semibold"
+          />
           <QuickActionButton
             icon={HelpCircle}
             label="Pergunta"
