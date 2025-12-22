@@ -85,6 +85,7 @@ import ScoreExplanation from '@/components/ScoreExplanation';
 import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
 import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
 import NumerologyBestDayAI from '@/components/NumerologyBestDayAI';
+import CompetitorAnalysisAI from '@/components/CompetitorAnalysisAI';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -757,6 +758,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Numerologia - Melhor Dia */}
         <NumerologyBestDayAI client={client} />
+
+        {/* Análise de Concorrentes */}
+        <CompetitorAnalysisAI client={client} />
 
         {/* Gerador de Propostas */}
         <ProposalGenerator 
