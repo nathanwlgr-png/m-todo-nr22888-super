@@ -33,8 +33,8 @@ export default function Home() {
             <Sparkles className="w-6 h-6 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Assistente de Vendas</h1>
-            <p className="text-slate-400 text-sm">Equipamentos Veterinários</p>
+            <h1 className="text-xl font-bold text-white">Método NR</h1>
+            <p className="text-slate-400 text-sm">Assistente de Vendas</p>
           </div>
         </div>
         

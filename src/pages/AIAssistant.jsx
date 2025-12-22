@@ -62,7 +62,7 @@ export default function AIAssistant() {
     if (client && messages.length === 0) {
       setMessages([{
         role: 'assistant',
-        content: `Olá! Sou seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\nComo posso ajudar?`
+        content: `Olá! Sou o **Método NR**, seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\nComo posso ajudar?`
       }]);
     }
   }, [client]);

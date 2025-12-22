@@ -5,6 +5,7 @@ import ClientProfile from './pages/ClientProfile';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import AIAssistant from './pages/AIAssistant';
 import VisitSummary from './pages/VisitSummary';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -20,4 +21,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };
