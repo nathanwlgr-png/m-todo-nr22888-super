@@ -178,6 +178,14 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
     );
   }
 
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-500">Cliente não encontrado</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
       {/* Header */}
