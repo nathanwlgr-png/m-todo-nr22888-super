@@ -117,11 +117,43 @@ export default function NewClient() {
       numerology_number: numerologyNumber,
       behavioral_profile: getBehavioralProfile(numerologyNumber),
       decision_style: getDecisionStyle(numerologyNumber),
-      purchase_score: Math.floor(Math.random() * 40) + 30, // Initial score 30-70
+      purchase_score: Math.floor(Math.random() * 40) + 30,
       status: 'morno'
     };
 
     const client = await base44.entities.Client.create(clientData);
+
+    // AUTOMAÇÃO 1: Email de boas-vindas
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: client.created_by,
+        subject: `Novo cliente cadastrado: ${client.first_name}`,
+        body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso no Seamaty.\n\nTipo: ${client.client_type || 'Não especificado'}\nPerfil: ${client.behavioral_profile}\n\nAcesse o sistema para começar o atendimento!`
+      });
+    } catch (error) {
+      console.log('Email automation failed');
+    }
+
+    // AUTOMAÇÃO 2: Tarefa de primeira visita
+    try {
+      const threeDaysLater = new Date();
+      threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+      
+      await base44.entities.Task.create({
+        client_id: client.id,
+        client_name: client.first_name,
+        title: 'Agendar primeira visita',
+        description: `Entrar em contato com ${client.first_name} para agendar a primeira visita.`,
+        due_date: threeDaysLater.toISOString().split('T')[0],
+        status: 'pendente',
+        priority: 'alta',
+        type: 'follow_up',
+        auto_created: true
+      });
+    } catch (error) {
+      console.log('Task automation failed');
+    }
+
     navigate(createPageUrl(`ClientProfile?id=${client.id}`));
   };
 

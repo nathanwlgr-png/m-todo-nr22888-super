@@ -50,6 +50,14 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
     }
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ saleId, status }) => base44.entities.Sale.update(saleId, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['client-sales']);
+      toast.success('Status atualizado!');
+    }
+  });
+
   const handleEquipmentSelect = (equipId) => {
     const selected = equipment.find(e => e.id === equipId);
     if (selected) {
@@ -97,12 +105,21 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
           <div className="space-y-2">
             {sales.map(sale => (
               <div key={sale.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div>
+                <div className="flex-1">
                   <p className="font-medium text-slate-800 text-sm">{sale.equipment_name}</p>
                   <p className="text-xs text-slate-500">
                     R$ {sale.sale_value?.toLocaleString('pt-BR')} • {sale.status}
                   </p>
                 </div>
+                {sale.status === 'proposta' && (
+                  <Button
+                    size="sm"
+                    onClick={() => updateStatusMutation.mutate({ saleId: sale.id, status: 'fechada' })}
+                    className="bg-emerald-600 hover:bg-emerald-700 h-8 text-xs"
+                  >
+                    Marcar Paga
+                  </Button>
+                )}
                 {(sale.status === 'fechada' || sale.status === 'entregue') && (
                   <CheckCircle className="w-4 h-4 text-emerald-600" />
                 )}

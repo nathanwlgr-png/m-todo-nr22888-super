@@ -12,6 +12,7 @@ import Calendar from './pages/Calendar';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import GlobalSearch from './pages/GlobalSearch';
+import Tasks from './pages/Tasks';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "FollowUpAssistant": FollowUpAssistant,
     "GlobalSearch": GlobalSearch,
+    "Tasks": Tasks,
 }
 
 export const pagesConfig = {

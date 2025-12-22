@@ -193,11 +193,11 @@ export default function Home() {
               Agenda
             </Button>
           </Link>
-          
-          <Link to={createPageUrl('Equipment')}>
+
+          <Link to={createPageUrl('Tasks')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <Target className="w-4 h-4 mr-2" />
-              Equipamentos
+              Tarefas
             </Button>
           </Link>
         </div>
