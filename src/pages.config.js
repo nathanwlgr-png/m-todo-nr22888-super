@@ -42,6 +42,7 @@ import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import VisitPlanner from './pages/VisitPlanner';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +91,7 @@ export const PAGES = {
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
+    "VisitPlanner": VisitPlanner,
 }
 
 export const pagesConfig = {
