@@ -13,7 +13,8 @@ import {
   ThermometerSun,
   MapPin,
   DollarSign,
-  Target
+  Target,
+  Calendar
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -180,20 +181,27 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('Calendar')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
+              <Calendar className="w-4 h-4 mr-2" />
+              Agenda
+            </Button>
+          </Link>
+          
           <Link to={createPageUrl('Equipment')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <Target className="w-4 h-4 mr-2" />
               Equipamentos
             </Button>
           </Link>
-          
-          <Link to={createPageUrl('Reports')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Relatórios
-            </Button>
-          </Link>
         </div>
+
+        <Link to={createPageUrl('Reports')}>
+          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Relatórios
+          </Button>
+        </Link>
       </div>
 
       {/* Recent Clients */}

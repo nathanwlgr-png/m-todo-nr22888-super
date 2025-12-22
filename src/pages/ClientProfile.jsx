@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
+import ScheduleVisitButton from '@/components/ScheduleVisitButton';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -170,6 +171,8 @@ export default function ClientProfile() {
 
       {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-3">
+        <ScheduleVisitButton client={client} />
+        
         <Button
           onClick={() => navigate(createPageUrl(`PreVisitChecklist?id=${client.id}`))}
           variant="outline"

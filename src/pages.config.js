@@ -8,6 +8,7 @@ import PreVisitChecklist from './pages/PreVisitChecklist';
 import VisitSummary from './pages/VisitSummary';
 import Equipment from './pages/Equipment';
 import Reports from './pages/Reports';
+import Calendar from './pages/Calendar';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "Equipment": Equipment,
     "Reports": Reports,
+    "Calendar": Calendar,
 }
 
 export const pagesConfig = {
