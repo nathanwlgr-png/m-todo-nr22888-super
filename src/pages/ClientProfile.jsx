@@ -191,6 +191,8 @@ export default function ClientProfile() {
       client_type: client.client_type || '',
       decision_role: client.decision_role || '',
       client_tone: client.client_tone || '',
+      available_budget: client.available_budget || '',
+      decision_deadline: client.decision_deadline || '',
       notes: client.notes || ''
     });
     setEditDialogOpen(true);
@@ -458,7 +460,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               {clientTypeLabels[client.client_type]}
             </p>
           </Card>
-          
+
           <Card className="p-4 bg-white shadow-lg border-none">
             <div className="flex items-center gap-2 mb-1">
               <UserCog className="w-4 h-4 text-slate-400" />
@@ -468,7 +470,66 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               {roleLabels[client.decision_role]}
             </p>
           </Card>
+
+          {client.available_budget && client.available_budget !== 'nao_informado' && (
+            <Card className="p-4 bg-white shadow-lg border-none">
+              <div className="flex items-center gap-2 mb-1">
+                <DollarSign className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Orçamento</span>
+              </div>
+              <p className="font-semibold text-slate-800 text-sm">
+                {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
+                 client.available_budget === '50k_100k' ? 'R$ 50-100k' :
+                 client.available_budget === '100k_200k' ? 'R$ 100-200k' :
+                 client.available_budget === '200k_500k' ? 'R$ 200-500k' :
+                 'Acima R$ 500k'}
+              </p>
+            </Card>
+          )}
+
+          {client.decision_deadline && (
+            <Card className="p-4 bg-white shadow-lg border-none">
+              <div className="flex items-center gap-2 mb-1">
+                <Calendar className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Prazo Decisão</span>
+              </div>
+              <p className="font-semibold text-slate-800 text-sm">
+                {format(new Date(client.decision_deadline), 'dd/MM/yyyy')}
+              </p>
+            </Card>
+          )}
         </div>
+
+        {/* Motivadores e Objeções */}
+        {(client.purchase_motivators?.length > 0 || client.real_objections?.length > 0) && (
+          <div className="space-y-3">
+            {client.purchase_motivators?.length > 0 && (
+              <Card className="p-4 bg-green-50 border-green-200">
+                <p className="text-xs font-semibold text-green-700 mb-2">✓ Motivadores de Compra</p>
+                <div className="flex flex-wrap gap-2">
+                  {client.purchase_motivators.map((m, idx) => (
+                    <Badge key={idx} className="bg-green-100 text-green-700">
+                      {m}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {client.real_objections?.length > 0 && (
+              <Card className="p-4 bg-red-50 border-red-200">
+                <p className="text-xs font-semibold text-red-700 mb-2">⚠️ Objeções Reais</p>
+                <div className="flex flex-wrap gap-2">
+                  {client.real_objections.map((o, idx) => (
+                    <Badge key={idx} className="bg-red-100 text-red-700">
+                      {o}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* WhatsApp Card */}
         {client.phone && (
@@ -877,6 +938,35 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             </div>
 
             <div className="space-y-2">
+              <Label>Orçamento Disponível</Label>
+              <Select
+                value={editData.available_budget}
+                onValueChange={(value) => setEditData({...editData, available_budget: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
+                  <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
+                  <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
+                  <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
+                  <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
+                  <SelectItem value="nao_informado">Não informado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Prazo para Decisão</Label>
+              <Input
+                type="date"
+                value={editData.decision_deadline}
+                onChange={(e) => setEditData({...editData, decision_deadline: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label>Notas</Label>
               <Textarea
                 value={editData.notes}
@@ -899,7 +989,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                 </>
               )}
             </Button>
-          </div>
+            </div>
           </DialogContent>
           </Dialog>
 
