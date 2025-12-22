@@ -42,6 +42,9 @@ export default function AIAssistant() {
   const [copied, setCopied] = useState(false);
   const [whatsappSent, setWhatsappSent] = useState(false);
   const messagesEndRef = useRef(null);
+  const [rolePlayMode, setRolePlayMode] = useState(false);
+  const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
+  const fileInputRef = useRef(null);
 
   const { data: client } = useQuery({
     queryKey: ['client', clientId],
@@ -93,12 +96,12 @@ export default function AIAssistant() {
     if (client && messages.length === 0) {
       setMessages([{
         role: 'assistant',
-        content: `Olá! Sou o **Método NR**, seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\nComo posso ajudar?`
+        content: `Olá! Sou o **Método NR**, seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\n🎭 **Novo:** Ative o Modo Treinamento para simular uma conversa com ${client.first_name}!\n\nComo posso ajudar?`
       }]);
     }
   }, [client]);
 
-  const getSystemContext = () => {
+  const getSystemContext = (isRolePlay = false) => {
     if (!client) return '';
     
     const interactionHistory = `
@@ -110,6 +113,40 @@ HISTÓRICO DE INTERAÇÕES:
 - Gatilhos usados: ${client.triggers_used?.join(', ') || 'Nenhum'}
 - Notas anteriores: ${client.notes?.substring(0, 200) || 'Sem notas'}
     `;
+
+    if (isRolePlay) {
+      return `
+MODO TREINAMENTO - SIMULAÇÃO DE ROLE-PLAY
+
+Você agora É o cliente ${client.first_name}. Interprete o papel dele de forma realista.
+
+PERFIL DO CLIENTE (você):
+- Nome: ${client.first_name}
+- Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
+- Estilo de Decisão: ${client.decision_style}
+- Tom de Voz: ${client.client_tone || 'profissional'}
+- Tipo: ${client.client_type}
+- Papel: ${client.decision_role}
+- Status: ${client.status} | Score: ${client.purchase_score}%
+- Equipamento Atual: ${client.current_equipment || 'Nenhum'}
+- Dores: ${client.main_pains?.join(', ') || 'Preço alto'}
+
+${interactionHistory}
+
+INSTRUÇÕES IMPORTANTES:
+1. Responda SEMPRE em primeira pessoa como se você FOSSE ${client.first_name}
+2. Mantenha o perfil numerológico (${client.behavioral_profile})
+3. Use o tom de voz apropriado: ${client.client_tone || 'profissional'}
+4. Seja realista: levante objeções típicas do seu perfil
+5. Se perfil 4 ou 7: seja analítico, peça dados técnicos
+6. Se perfil 3 ou 5: seja mais emocional e entusiasmado
+7. Se perfil 1 ou 8: seja direto, foque em ROI
+8. NÃO quebre o personagem. NÃO dê dicas ao vendedor.
+9. Responda como um cliente REAL responderia
+
+Comece a simulação reagindo ao que o vendedor disser.
+      `;
+    }
     
     return `
       FRAMEWORKS ESTRATÉGICOS:
@@ -167,11 +204,87 @@ HISTÓRICO DE INTERAÇÕES:
     setLoading(true);
 
     const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `${getSystemContext()}\n\nMensagem do vendedor: ${userMessage}`
+      prompt: `${getSystemContext(rolePlayMode)}\n\n${rolePlayMode ? 'Vendedor diz:' : 'Mensagem do vendedor:'} ${userMessage}`
     });
 
     setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     setLoading(false);
+  };
+
+  const toggleRolePlayMode = () => {
+    if (!rolePlayMode) {
+      setMessages([{
+        role: 'assistant',
+        content: `🎭 **MODO TREINAMENTO ATIVADO**\n\nOlá, sou ${client.first_name}, ${client.decision_role} na ${client.clinic_name || 'minha clínica'}.\n\n${client.behavioral_profile}. ${client.decision_style}.\n\nComo você vai me abordar? 🤔`
+      }]);
+    } else {
+      setMessages([{
+        role: 'assistant',
+        content: `Modo Treinamento desativado. Voltando ao modo assistente normal.\n\nComo posso ajudar?`
+      }]);
+    }
+    setRolePlayMode(!rolePlayMode);
+  };
+
+  const analyzeTranscript = async (transcriptText) => {
+    setAnalyzingTranscript(true);
+    try {
+      const analysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é um coach de vendas especializado. Analise esta transcrição de conversa com o cliente.
+
+PERFIL DO CLIENTE:
+- Nome: ${client.first_name}
+- Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
+- Estilo de Decisão: ${client.decision_style}
+- Tom Ideal: ${client.recommended_communication || 'Não definido'}
+
+TRANSCRIÇÃO:
+${transcriptText}
+
+Analise e forneça feedback estruturado:
+
+**1. PONTOS FORTES** (2-3 pontos)
+- O que o vendedor fez bem
+
+**2. ÁREAS DE MELHORIA** (2-3 pontos críticos)
+- Erros de comunicação
+- Oportunidades perdidas
+
+**3. ADERÊNCIA À METODOLOGIA** (score 0-10)
+- SPIN Selling: [score/10] - comentário
+- Numerologia: [score/10] - se adaptou ao perfil?
+- Gatilhos Persuasão: [score/10] - usou quais?
+
+**4. ANÁLISE DE TOM/LINGUAGEM**
+- Tom usado vs. tom ideal para este cliente
+- Linguagem apropriada ao perfil numerológico?
+
+**5. PRÓXIMAS AÇÕES RECOMENDADAS** (3 ações específicas)
+
+Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
+      });
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `📊 **ANÁLISE DA CONVERSA**\n\n${analysis}`
+      }]);
+    } catch (error) {
+      alert('Erro ao analisar transcrição');
+    } finally {
+      setAnalyzingTranscript(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result;
+      await analyzeTranscript(text);
+    };
+    reader.readAsText(file);
   };
 
   const generateQuickAction = async (type) => {
@@ -540,9 +653,19 @@ Seja prático e direto ao ponto.`
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold text-slate-800">Assistente IA</h1>
+            <h1 className="text-lg font-semibold text-slate-800">
+              {rolePlayMode ? '🎭 Treinamento' : 'Assistente IA'}
+            </h1>
             <p className="text-sm text-slate-500">{client?.first_name}</p>
           </div>
+          <Button
+            variant={rolePlayMode ? "default" : "outline"}
+            size="sm"
+            onClick={toggleRolePlayMode}
+            className={rolePlayMode ? "bg-purple-600 hover:bg-purple-700" : ""}
+          >
+            {rolePlayMode ? '🎭 Treinar' : '🎭 Treinar'}
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -554,6 +677,45 @@ Seja prático e direto ao ponto.`
           </Button>
         </div>
       </div>
+
+      {/* Transcript Analysis */}
+      {!rolePlayMode && (
+        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-sm font-medium text-cyan-800">Análise de Conversa</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={analyzingTranscript}
+              className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+            >
+              {analyzingTranscript ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload .txt
+                </>
+              )}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="bg-white border-b px-4 py-3">
@@ -713,19 +875,26 @@ Seja prático e direto ao ponto.`
 
       {/* Input */}
       <div className="bg-white border-t p-4">
+        {rolePlayMode && (
+          <div className="mb-2 px-3 py-2 bg-purple-50 rounded-lg border border-purple-200">
+            <p className="text-xs text-purple-700">
+              🎭 Você está praticando com {client?.first_name}. Tente sua abordagem!
+            </p>
+          </div>
+        )}
         <div className="flex gap-3">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !loading && sendMessage(input)}
-            placeholder="Digite sua mensagem..."
+            placeholder={rolePlayMode ? "Sua abordagem/resposta..." : "Digite sua mensagem..."}
             className="flex-1 h-12 rounded-xl border-2"
             disabled={loading}
           />
           <Button
             onClick={() => sendMessage(input)}
             disabled={loading || !input.trim()}
-            className="h-12 w-12 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+            className={`h-12 w-12 rounded-xl ${rolePlayMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
           >
             <Send className="w-5 h-5" />
           </Button>
