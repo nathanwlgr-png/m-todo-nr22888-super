@@ -204,20 +204,6 @@ export default function NewClient() {
 
         {/* Form */}
         <div className="space-y-5">
-          {/* Full Name */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-slate-700">
-              <User className="w-4 h-4" />
-              Nome Completo (opcional)
-            </Label>
-            <Input
-              placeholder="Ex: João Silva Santos"
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
-            />
-          </div>
-
           {/* First Name */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
@@ -228,6 +214,43 @@ export default function NewClient() {
               placeholder="Ex: João"
               value={formData.first_name}
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Decision Role */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <UserCog className="w-4 h-4" />
+              Papel do Decisor *
+            </Label>
+            <Select
+              value={formData.decision_role}
+              onValueChange={(value) => setFormData({ ...formData, decision_role: value })}
+            >
+              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
+                <SelectValue placeholder="Selecione o papel" />
+              </SelectTrigger>
+              <SelectContent>
+                {decisionRoles.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Full Name */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <User className="w-4 h-4" />
+              Nome Completo (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: João Silva Santos"
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
           </div>
@@ -335,29 +358,6 @@ export default function NewClient() {
                 {clientTypes.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Decision Role */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-slate-700">
-              <UserCog className="w-4 h-4" />
-              Papel do Decisor *
-            </Label>
-            <Select
-              value={formData.decision_role}
-              onValueChange={(value) => setFormData({ ...formData, decision_role: value })}
-            >
-              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
-                <SelectValue placeholder="Selecione o papel" />
-              </SelectTrigger>
-              <SelectContent>
-                {decisionRoles.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
                   </SelectItem>
                 ))}
               </SelectContent>
