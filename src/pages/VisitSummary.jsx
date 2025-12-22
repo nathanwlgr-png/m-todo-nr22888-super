@@ -51,6 +51,7 @@ export default function VisitSummary() {
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
+      if (!clientId) return null;
       const clients = await base44.entities.Client.filter({ id: clientId });
       const c = clients[0];
       if (c) {
@@ -69,7 +70,10 @@ export default function VisitSummary() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.update(clientId, data),
+    mutationFn: (data) => {
+      if (!clientId) throw new Error('Client ID not found');
+      return base44.entities.Client.update(clientId, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['client', clientId]);
       setSaved(true);
