@@ -33,6 +33,7 @@ import {
 import { getLeadQuality } from '@/components/LeadScoringEngine';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
 
 export default function LeadProfile() {
   const navigate = useNavigate();
@@ -163,23 +164,34 @@ export default function LeadProfile() {
       <div className="px-6 -mt-16 space-y-4">
         {/* Quick Actions */}
         {lead.status !== 'convertido' && (
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => setAssignDialogOpen(true)}
-              variant="outline"
-              className="h-12 border-2"
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Atribuir
-            </Button>
-            <Button
-              onClick={() => setConvertDialogOpen(true)}
-              className="h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            >
-              <Target className="w-4 h-4 mr-2" />
-              Converter
-            </Button>
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setAssignDialogOpen(true)}
+                variant="outline"
+                className="h-12 border-2"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Atribuir
+              </Button>
+              <Button
+                onClick={() => setConvertDialogOpen(true)}
+                className="h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Converter
+              </Button>
+            </div>
+
+            {/* WhatsApp */}
+            {lead.phone && (
+              <QuickWhatsAppSend
+                contactId={lead.id}
+                contactName={lead.full_name}
+                contactPhone={lead.phone}
+              />
+            )}
+          </>
         )}
 
         {/* Info Cards */}

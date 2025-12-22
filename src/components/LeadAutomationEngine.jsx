@@ -151,11 +151,19 @@ export default function LeadAutomationEngine() {
     }
 
     if (rule.action_type === 'send_whatsapp' && entity.phone) {
-      // Simular envio de WhatsApp (na prática, integraria com API do WhatsApp Business)
       const message = rule.action_config?.whatsapp_message || 
         `Olá ${entity.full_name || entity.first_name}, tudo bem?`;
       
-      console.log(`📱 WhatsApp enviado para ${entity.phone}: ${message}`);
+      // Enviar via WhatsApp
+      await base44.entities.WhatsAppMessage.create({
+        contact_id: entityId,
+        contact_name: entity.full_name || entity.first_name,
+        contact_phone: entity.phone,
+        direction: 'sent',
+        message: message,
+        status: 'sent',
+        automated: true
+      });
       
       // Registrar no histórico
       if (isLead) {
