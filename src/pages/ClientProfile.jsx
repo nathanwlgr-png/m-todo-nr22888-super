@@ -681,52 +681,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         )}
         </div>
 
-      {/* Fixed Bottom Actions */}
+      {/* Ações Fixas - Apenas Essenciais */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={() => navigate(createPageUrl(`ProspectingScripts?id=${client.id}`))}
-            variant="outline"
-            className="h-12 rounded-xl border-2 text-sm font-semibold border-emerald-200 text-emerald-700"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Roteiros
-          </Button>
-
-          <Button
-            onClick={() => navigate(createPageUrl(`ObjectionAnalyzer?id=${client.id}`))}
-            variant="outline"
-            className="h-12 rounded-xl border-2 text-sm font-semibold border-red-200 text-red-700"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Objeções
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={() => navigate(createPageUrl(`FollowUpAssistant?id=${client.id}`))}
-            variant="outline"
-            className="h-12 rounded-xl border-2 text-sm font-semibold"
-          >
-            <Sparkles className="w-4 h-4 mr-1" />
-            Follow-Up IA
-          </Button>
-
-          <Button
-            onClick={() => navigate(createPageUrl(`PreVisitChecklist?id=${client.id}`))}
-            variant="outline"
-            className="h-12 rounded-xl border-2 text-sm font-semibold"
-          >
-            <ClipboardCheck className="w-4 h-4 mr-1" />
-            Checklist
-          </Button>
-        </div>
-
         <ScheduleVisitButton client={client} />
 
         <Button
@@ -734,7 +690,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-xl text-base font-semibold shadow-lg shadow-orange-500/30 glow-orange"
         >
           <MessageSquare className="w-5 h-5 mr-2" />
-          Abrir Assistente IA
+          Assistente IA
         </Button>
       </div>
 
