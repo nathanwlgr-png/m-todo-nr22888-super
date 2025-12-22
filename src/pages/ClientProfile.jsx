@@ -527,7 +527,10 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         <PipelineVisual 
           client={client} 
           onStageClick={(stage) => {
-            updateMutation.mutate({ visit_objective: stage });
+            updateMutation.mutate({ 
+              visit_objective: stage,
+              last_visit_date: new Date().toISOString().split('T')[0]
+            });
           }}
         />
 

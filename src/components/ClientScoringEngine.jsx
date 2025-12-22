@@ -87,20 +87,16 @@ export default function ClientScoringEngine() {
     }
 
     // 7. TEMPO SEM CONTATO (PENALIDADE -30 pontos)
+    // Usar updated_date como último contato se mais recente que last_visit_date
     const lastVisitDate = client.last_visit_date ? new Date(client.last_visit_date) : null;
-    if (lastVisitDate) {
-      const daysSinceLastContact = (now - lastVisitDate) / (1000 * 60 * 60 * 24);
-      if (daysSinceLastContact > 60) {
-        score -= 30; // Mais de 2 meses sem contato
-      } else if (daysSinceLastContact > 30) {
-        score -= 15; // Mais de 1 mês sem contato
-      }
-    } else {
-      // Nunca teve visita
-      const daysSinceCreated = (now - new Date(client.created_date)) / (1000 * 60 * 60 * 24);
-      if (daysSinceCreated > 15) {
-        score -= 20; // Criado há mais de 15 dias e nunca teve visita
-      }
+    const updatedDate = new Date(client.updated_date || client.created_date);
+    const lastContactDate = lastVisitDate && lastVisitDate > updatedDate ? lastVisitDate : updatedDate;
+    
+    const daysSinceLastContact = (now - lastContactDate) / (1000 * 60 * 60 * 24);
+    if (daysSinceLastContact > 60) {
+      score -= 30; // Mais de 2 meses sem contato
+    } else if (daysSinceLastContact > 30) {
+      score -= 15; // Mais de 1 mês sem contato
     }
 
     // 8. PROPOSTA ENVIADA (+20 pontos)
