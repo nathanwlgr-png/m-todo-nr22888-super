@@ -301,10 +301,9 @@ export default function NewClient() {
               Data de Nascimento (opcional)
             </Label>
             <Input
-              type="text"
+              type="date"
               value={formData.birthdate}
               onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
-              placeholder="DD/MM/AAAA"
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
           </div>
@@ -421,16 +420,22 @@ export default function NewClient() {
           {/* Budget */}
           <div className="space-y-2">
             <Label className="text-slate-700">Orçamento Disponível (opcional)</Label>
-            <Input
-              type="number"
+            <Select
               value={formData.available_budget}
-              onChange={(e) => setFormData({ ...formData, available_budget: e.target.value })}
-              placeholder="0 a 100.000"
-              min="0"
-              max="100000"
-              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
-            />
-            <p className="text-xs text-slate-500">Digite o valor em reais (0 a 100 mil)</p>
+              onValueChange={(value) => setFormData({ ...formData, available_budget: value })}
+            >
+              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
+                <SelectValue placeholder="Selecione a faixa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
+                <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
+                <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
+                <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
+                <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
+                <SelectItem value="nao_informado">Não informado</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Decision Deadline */}
