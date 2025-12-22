@@ -45,6 +45,7 @@ export default function ClientCard({ client }) {
                 {client.phone && (
                   <MessageCircle className="w-3 h-3 text-green-500 ml-1" />
                 )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
