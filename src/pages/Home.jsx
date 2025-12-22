@@ -22,6 +22,7 @@ import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
 import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
 import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
 import GamificationWidget from '@/components/GamificationWidget';
+import AutoTaskGenerator from '@/components/AutoTaskGenerator';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -51,6 +52,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      {/* Auto Task Generator - Background Process */}
+      <AutoTaskGenerator />
+      
       {/* Header */}
       <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 pt-12 pb-20 rounded-b-[2.5rem] overflow-hidden tech-grid">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>

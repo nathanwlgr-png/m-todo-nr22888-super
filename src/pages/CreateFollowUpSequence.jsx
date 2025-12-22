@@ -49,6 +49,9 @@ export default function CreateFollowUpSequence() {
     ]
   });
 
+  const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [loadingAI, setLoadingAI] = useState(false);
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.FollowUpSequence.create(data),
     onSuccess: () => {
@@ -122,6 +125,54 @@ Gere APENAS a mensagem, sem explicações. Português brasileiro.
     updateStep(index, 'message_template', response);
   };
 
+  const generateAIOptimalTiming = async () => {
+    setLoadingAI(true);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é um especialista em timing de vendas e psicologia do consumidor.
+
+CONTEXTO DA SEQUÊNCIA:
+- Gatilho: ${formData.trigger_type}
+- Status dos clientes: ${formData.target_status.join(', ')}
+- Dias sem contato: ${formData.trigger_days || 'N/A'}
+
+Com base em:
+1. Psicologia do consumidor (não pressionar demais, manter top-of-mind)
+2. Numerologia comportamental (diferentes perfis respondem melhor em dias diferentes)
+3. Best practices de vendas B2B veterinário
+
+Sugira uma SEQUÊNCIA OTIMIZADA de follow-ups em formato JSON:
+
+{
+  "optimal_days": [0, 2, 5, 10],
+  "reasoning": "Explicação concisa de por que esses intervalos",
+  "best_time_of_day": "Melhor horário do dia (manhã/tarde/noite)",
+  "message_tones": ["tom do 1º", "tom do 2º", "tom do 3º", "tom do 4º"]
+}
+
+Retorne APENAS o JSON, sem markdown ou explicações.`
+      });
+
+      const suggestions = JSON.parse(response);
+      setAiSuggestions(suggestions);
+
+      // Auto-apply suggestions
+      const newSteps = suggestions.optimal_days.map((day, i) => ({
+        day_offset: day,
+        channel: 'email',
+        subject: '',
+        message_template: `[Tom: ${suggestions.message_tones[i]}]\n\nOlá {{client_name}},\n\n...`,
+        use_numerology: true
+      }));
+      setFormData({ ...formData, steps: newSteps });
+    } catch (error) {
+      console.error('Erro ao gerar timing:', error);
+      alert('Erro ao gerar sugestões. Tente novamente.');
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
       {/* Header */}
@@ -192,6 +243,43 @@ Gere APENAS a mensagem, sem explicações. Português brasileiro.
               </Button>
             ))}
           </div>
+        </Card>
+
+        {/* AI Optimization */}
+        <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-purple-600 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800 mb-1">Otimização por IA</p>
+              <p className="text-xs text-slate-600 mb-3">
+                A IA sugere os melhores dias e horários baseado em psicologia do consumidor e numerologia
+              </p>
+              <Button
+                onClick={generateAIOptimalTiming}
+                disabled={loadingAI}
+                variant="outline"
+                size="sm"
+                className="border-purple-300 text-purple-700"
+              >
+                {loadingAI ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                Gerar Timing Otimizado
+              </Button>
+            </div>
+          </div>
+          
+          {aiSuggestions && (
+            <div className="mt-3 pt-3 border-t border-purple-200">
+              <p className="text-xs font-semibold text-purple-700 mb-1">Sugestões:</p>
+              <p className="text-xs text-slate-600 mb-2">{aiSuggestions.reasoning}</p>
+              <Badge className="bg-purple-100 text-purple-700 text-xs">
+                ⏰ Melhor horário: {aiSuggestions.best_time_of_day}
+              </Badge>
+            </div>
+          )}
         </Card>
 
         {/* Steps */}
