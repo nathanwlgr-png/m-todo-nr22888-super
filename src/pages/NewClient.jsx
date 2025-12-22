@@ -60,7 +60,8 @@ const calculateNumerology = (name) => {
     sum += values[char] || 0;
   }
   
-  while (sum > 9) {
+  // Preservar números mestres 11 e 22
+  while (sum > 22 || (sum > 9 && sum !== 11 && sum !== 22)) {
     sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
   }
   
@@ -77,7 +78,9 @@ const getBehavioralProfile = (number) => {
     6: 'Responsável e protetor, valoriza qualidade',
     7: 'Analítico e investigativo, valoriza conhecimento',
     8: 'Empreendedor ambicioso, foca em resultados',
-    9: 'Visionário idealista, valoriza propósito'
+    9: 'Visionário idealista, valoriza propósito',
+    11: 'Visionário iluminado, inspirador nato, intuitivo e sensível',
+    22: 'Construtor mestre, transforma visões em realidade concreta'
   };
   return profiles[number] || profiles[1];
 };
@@ -92,7 +95,9 @@ const getDecisionStyle = (number) => {
     6: 'Decide pensando na equipe',
     7: 'Decide após análise completa',
     8: 'Decide por retorno financeiro',
-    9: 'Decide por propósito maior'
+    9: 'Decide por propósito maior',
+    11: 'Decide por inspiração e visão de impacto',
+    22: 'Decide com visão de longo prazo e legado'
   };
   return styles[number] || styles[1];
 };
