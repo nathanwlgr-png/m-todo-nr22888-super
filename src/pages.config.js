@@ -24,6 +24,7 @@ import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
 import ProspectingScripts from './pages/ProspectingScripts';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
+import PerformanceDashboard from './pages/PerformanceDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -54,6 +55,7 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "ProspectingScripts": ProspectingScripts,
     "ObjectionAnalyzer": ObjectionAnalyzer,
+    "PerformanceDashboard": PerformanceDashboard,
 }
 
 export const pagesConfig = {
