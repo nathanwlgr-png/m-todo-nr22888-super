@@ -23,9 +23,9 @@ import {
 } from 'lucide-react';
 
 const clientTypes = [
-  { value: 'clinica_pequena', label: 'Clínica Pequena (até 50 exames/mês)' },
-  { value: 'clinica_media', label: 'Clínica Média (50-150 exames/mês)' },
-  { value: 'hospital_veterinario', label: 'Hospital Veterinário (150+ exames/mês)' },
+  { value: 'clinica_pequena', label: 'Clínica Pequena (até 40 exames/mês)' },
+  { value: 'clinica_media', label: 'Clínica Média (40-120 exames/mês)' },
+  { value: 'hospital_veterinario', label: 'Hospital Veterinário (120+ exames/mês)' },
   { value: 'laboratorio_terceirizado', label: 'Laboratório Terceirizado' },
   { value: 'clinica_especializada', label: 'Clínica Especializada' },
 ];
