@@ -256,10 +256,40 @@ Retorne JSON:
     );
   }
 
-  if (!client) {
+  if (!clientId) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-500">Cliente não encontrado</p>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <AlertCircle className="w-16 h-16 text-amber-500 mb-4" />
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Cliente não selecionado</h2>
+        <p className="text-slate-500 text-center mb-6">
+          Você precisa selecionar um cliente antes de registrar uma visita.
+        </p>
+        <Button
+          onClick={() => navigate(createPageUrl('Clients'))}
+          className="bg-indigo-600 hover:bg-indigo-700"
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Ver Lista de Clientes
+        </Button>
+      </div>
+    );
+  }
+
+  if (!client && !isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Cliente não encontrado</h2>
+        <p className="text-slate-500 text-center mb-6">
+          O cliente que você está procurando não existe no sistema.
+        </p>
+        <Button
+          onClick={() => navigate(createPageUrl('Clients'))}
+          className="bg-indigo-600 hover:bg-indigo-700"
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Voltar para Clientes
+        </Button>
       </div>
     );
   }
