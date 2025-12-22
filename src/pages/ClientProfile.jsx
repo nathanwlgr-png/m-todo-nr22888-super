@@ -60,6 +60,9 @@ import ClientTimeline from '@/components/ClientTimeline';
 import QuickActionDialog from '@/components/QuickActionDialog';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
 import { getClientLabelSync } from '@/components/ClientStatusLabel';
+import InteractionTimeline from '@/components/InteractionTimeline';
+import AddInteractionDialog from '@/components/AddInteractionDialog';
+import PipelineVisual from '@/components/PipelineVisual';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -136,6 +139,12 @@ export default function ClientProfile() {
   const { data: documents = [] } = useQuery({
     queryKey: ['client-documents', clientId],
     queryFn: () => base44.entities.ClientDocument.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: interactions = [] } = useQuery({
+    queryKey: ['interactions', clientId],
+    queryFn: () => base44.entities.Interaction.filter({ client_id: clientId }),
     enabled: !!clientId
   });
 
@@ -491,19 +500,38 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Equipment Manager */}
         <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
 
-        {/* Tabs: Tarefas, Documentos, Timeline */}
-        <Tabs defaultValue="tasks" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        {/* Pipeline Visual */}
+        <PipelineVisual 
+          client={client} 
+          onStageClick={(stage) => {
+            updateMutation.mutate({ visit_objective: stage });
+          }}
+        />
+
+        {/* Botão Registrar Interação */}
+        <AddInteractionDialog client={client} />
+
+        {/* Tabs: Interações, Tarefas, Documentos, Timeline */}
+        <Tabs defaultValue="interactions" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="interactions">
+              Interações ({interactions.length})
+            </TabsTrigger>
             <TabsTrigger value="tasks">
               Tarefas ({clientTasks.filter(t => t.status === 'pendente').length})
             </TabsTrigger>
             <TabsTrigger value="documents">
-              Documentos ({documents.length})
+              Docs ({documents.length})
             </TabsTrigger>
             <TabsTrigger value="timeline">
               Timeline
             </TabsTrigger>
           </TabsList>
+
+          {/* Interações */}
+          <TabsContent value="interactions" className="space-y-2 mt-4">
+            <InteractionTimeline interactions={interactions} />
+          </TabsContent>
 
           {/* Tarefas Ativas */}
           <TabsContent value="tasks" className="space-y-2 mt-4">
