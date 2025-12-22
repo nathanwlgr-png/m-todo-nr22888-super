@@ -495,7 +495,10 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">{client.first_name}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-white">{client.first_name}</h2>
+              <ScoreExplanation client={client} score={client.purchase_score || 50} />
+            </div>
             <div className="flex items-center gap-2 mt-1">
               {isClient && (
                 <Badge className="bg-green-100 text-green-700 text-xs">
@@ -505,6 +508,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <Badge className={`${statusColors[client.status]} text-white text-xs`}>
                 {client.status === 'quente' ? '🔥 Quente' : client.status === 'morno' ? '🌡️ Morno' : '❄️ Frio'}
               </Badge>
+              {client.total_visits_count > 0 && (
+                <Badge className="bg-purple-100 text-purple-700 text-xs">
+                  {client.total_visits_count}x visitado
+                </Badge>
+              )}
             </div>
           </div>
         </div>
