@@ -16,7 +16,8 @@ import {
   Target,
   Calendar,
   Search,
-  FileText
+  FileText,
+  Mic
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -226,12 +227,20 @@ export default function Home() {
 
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
-        <Link to={createPageUrl('NewClient')}>
-          <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-lg font-semibold shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98] glow-orange">
-            <UserPlus className="w-5 h-5 mr-3" />
-            Novo Cliente Potencial
-          </Button>
-        </Link>
+        <div className="grid grid-cols-2 gap-3">
+          <Link to={createPageUrl('VoiceClientScanner')}>
+            <Button className="w-full h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl text-base font-semibold shadow-lg shadow-purple-500/30">
+              <Mic className="w-5 h-5 mr-2" />
+              Scanner IA Voz
+            </Button>
+          </Link>
+          <Link to={createPageUrl('NewClient')}>
+            <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-base font-semibold shadow-lg shadow-orange-500/30">
+              <UserPlus className="w-5 h-5 mr-2" />
+              Novo Cliente
+            </Button>
+          </Link>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Link to={createPageUrl('Clients')}>

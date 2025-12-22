@@ -50,6 +50,7 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import EquipmentComparison from './pages/EquipmentComparison';
+import VoiceClientScanner from './pages/VoiceClientScanner';
 import __Layout from './Layout.jsx';
 
 
@@ -106,6 +107,7 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
     "EquipmentComparison": EquipmentComparison,
+    "VoiceClientScanner": VoiceClientScanner,
 }
 
 export const pagesConfig = {
