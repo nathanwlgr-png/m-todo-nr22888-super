@@ -25,7 +25,8 @@ import {
   ThermometerSun,
   Sparkles,
   TrendingUp,
-  Target
+  Target,
+  MessageCircle
 } from 'lucide-react';
 import ScoreBar from '@/components/ScoreBar';
 
@@ -45,7 +46,9 @@ export default function VisitSummary() {
     next_action: '',
     status: '',
     purchase_score: 50,
-    notes: ''
+    notes: '',
+    client_tone: '',
+    recommended_communication: ''
   });
 
   const { data: client, isLoading } = useQuery({
@@ -61,7 +64,9 @@ export default function VisitSummary() {
           next_action: c.next_action || '',
           status: c.status || 'morno',
           purchase_score: c.purchase_score || 50,
-          notes: c.notes || ''
+          notes: c.notes || '',
+          client_tone: c.client_tone || '',
+          recommended_communication: c.recommended_communication || ''
         });
       }
       return c;
@@ -370,6 +375,62 @@ Seja direto, prático e focado em ação. Pense em ROI, economia com terceiriza�
             </SelectContent>
           </Select>
         </Card>
+
+        {/* Client Tone */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <MessageCircle className="w-5 h-5 text-slate-600" />
+            <h3 className="font-semibold text-slate-700">Tom de Voz do Cliente</h3>
+          </div>
+          <Select
+            value={formData.client_tone}
+            onValueChange={async (value) => {
+              setFormData(prev => ({ ...prev, client_tone: value }));
+              
+              // Gerar sugestão de comunicação automaticamente
+              const prompt = `
+Cliente: ${client?.first_name}
+Número Numerológico: ${client?.numerology_number}
+Perfil: ${client?.behavioral_profile}
+Tom de voz observado: ${value}
+
+Com base na Numerologia Pitagórica e no tom de voz, sugira em 2-3 frases:
+- O melhor estilo de comunicação para esse cliente
+- Como adaptar a abordagem de vendas
+- Tipo de linguagem ideal (técnica, emocional, visual, etc)
+              `;
+              
+              const response = await base44.integrations.Core.InvokeLLM({ prompt });
+              setFormData(prev => ({ ...prev, recommended_communication: response }));
+            }}
+          >
+            <SelectTrigger className="h-12 rounded-xl">
+              <SelectValue placeholder="Como o cliente se comunicou?" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="assertivo">Assertivo - Direto e objetivo</SelectItem>
+              <SelectItem value="analitico">Analítico - Detalhista e questionador</SelectItem>
+              <SelectItem value="receptivo">Receptivo - Aberto e colaborativo</SelectItem>
+              <SelectItem value="entusiasmado">Entusiasmado - Energético e animado</SelectItem>
+              <SelectItem value="cauteloso">Cauteloso - Cuidadoso e ponderado</SelectItem>
+              <SelectItem value="direto">Direto - Prático e sem rodeios</SelectItem>
+              <SelectItem value="emocional">Emocional - Valoriza relacionamento</SelectItem>
+            </SelectContent>
+          </Select>
+        </Card>
+
+        {/* Recommended Communication */}
+        {formData.recommended_communication && (
+          <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <h3 className="font-semibold text-slate-800">Sugestão de Comunicação</h3>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              {formData.recommended_communication}
+            </p>
+          </Card>
+        )}
 
         {/* Notes */}
         <Card className="p-4">
