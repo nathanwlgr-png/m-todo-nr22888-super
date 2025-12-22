@@ -196,11 +196,18 @@ export default function Goals() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-slate-600">{metricLabels[goal.metric_type]}</span>
                         <span className="text-sm font-semibold text-slate-800">
-                          {goal.current_value} / {goal.target_value}
+                          {goal.metric_type === 'sales_value' ? (
+                            <>R$ {(goal.current_value || 0).toLocaleString('pt-BR')} / R$ {goal.target_value.toLocaleString('pt-BR')}</>
+                          ) : (
+                            <>{goal.current_value || 0} / {goal.target_value}</>
+                          )}
                         </span>
                       </div>
                       <Progress value={progress} className="h-3" />
-                      <p className="text-xs text-slate-500 mt-1">{progress.toFixed(0)}% completo</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {progress.toFixed(0)}% completo
+                        {goal.metric_type === 'sales_value' && ' (Equipamentos + Insumos)'}
+                      </p>
                     </div>
 
                     {/* Footer */}
@@ -313,7 +320,18 @@ export default function Goals() {
                 type="number"
                 value={formData.target_value}
                 onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) })}
+                placeholder={formData.metric_type === 'sales_value' ? 'Ex: 100000' : 'Ex: 10'}
               />
+              {formData.metric_type === 'sales_value' && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Inclui vendas de equipamentos e insumos
+                </p>
+              )}
+              {formData.metric_type === 'sales_count' && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Inclui vendas de equipamentos e pedidos de insumos
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">

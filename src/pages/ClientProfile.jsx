@@ -967,8 +967,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                   <DollarSign className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">Nova Possível Venda</h3>
-                  <p className="text-xs text-slate-600">Cadastre informações completas para gerar relatório mensal</p>
+                  <h3 className="font-semibold text-slate-800">Informações do Cliente</h3>
+                  <p className="text-xs text-slate-600">Dados completos para análise e vendas</p>
                 </div>
               </div>
 
@@ -984,7 +984,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                 <div className="p-3 bg-white rounded-lg">
                   <p className="text-xs text-slate-500 mb-1">Status Atual</p>
                   <p className="font-semibold text-slate-800">
-                    {isClient ? '✓ Cliente (venda fechada)' : '🎯 Possível Venda (sem venda fechada)'}
+                    {isClient ? '✓ Cliente (comprou equipamento)' : '🎯 Potencial (sem compra ainda)'}
                   </p>
                 </div>
 
@@ -992,7 +992,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-xs text-blue-700 font-medium mb-1">⚠️ Importante</p>
                     <p className="text-xs text-blue-600">
-                      Este contato será considerado "Cliente" apenas após a primeira venda de equipamento fechada.
+                      Status muda para "Cliente" após primeira venda de equipamento fechada.
                     </p>
                   </div>
                 )}
@@ -1025,11 +1025,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               currentPreferences={client.communication_preferences || {}} 
             />
 
-            {/* Histórico de Compras */}
+            {/* Histórico de Equipamentos */}
             <Card className="p-4 bg-white border-slate-200">
-              <h3 className="font-semibold text-slate-800 mb-3">
-                {isClient ? 'Histórico de Compras do Cliente' : 'Histórico de Compras do Possível Cliente'}
-              </h3>
+              <h3 className="font-semibold text-slate-800 mb-3">Equipamentos</h3>
               <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
             </Card>
 

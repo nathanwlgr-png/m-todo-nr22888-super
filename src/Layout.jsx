@@ -11,6 +11,7 @@ import AutoMessageSystem from '@/components/AutoMessageSystem';
 import SentimentAnalyzer from '@/components/SentimentAnalyzer';
 import MonthlyReportGenerator from '@/components/MonthlyReportGenerator';
 import FloatingHomeButton from '@/components/FloatingHomeButton';
+import GoalsSyncEngine from '@/components/GoalsSyncEngine';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -26,6 +27,7 @@ export default function Layout({ children, currentPageName }) {
       <AutoMessageSystem />
       <SentimentAnalyzer />
       <MonthlyReportGenerator />
+      <GoalsSyncEngine />
       <AIAssistantButton />
       <FloatingHomeButton />
       <style>{`

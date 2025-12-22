@@ -223,7 +223,7 @@ export default function Home() {
         <Link to={createPageUrl('NewClient')}>
           <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-lg font-semibold shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98] glow-orange">
             <UserPlus className="w-5 h-5 mr-3" />
-            Nova Possível Venda
+            Novo Cliente Potencial
           </Button>
         </Link>
 
@@ -231,7 +231,7 @@ export default function Home() {
           <Link to={createPageUrl('Clients')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <Users className="w-4 h-4 mr-2" />
-              Possíveis Vendas
+              Todos os Clientes
             </Button>
           </Link>
           
@@ -461,7 +461,7 @@ export default function Home() {
       {clients.length > 0 && (
         <div className="px-6 mt-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-800">Últimas Possíveis Vendas</h2>
+            <h2 className="font-semibold text-slate-800">Clientes Recentes</h2>
             <Link to={createPageUrl('Clients')} className="text-sm text-indigo-600 font-medium">
               Ver todos
             </Link>

@@ -218,7 +218,7 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Wrench className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-semibold text-slate-800">Equipamentos</h3>
+            <h3 className="font-semibold text-slate-800">Equipamentos Vendidos</h3>
           </div>
           <Button onClick={() => setOpen(true)} size="sm">
             <Plus className="w-4 h-4 mr-1" />
@@ -272,7 +272,7 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Registrar Equipamento</DialogTitle>
+            <DialogTitle>Registrar Venda de Equipamento</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
