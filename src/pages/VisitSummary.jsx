@@ -105,7 +105,7 @@ export default function VisitSummary() {
       queryClient.invalidateQueries(['client', clientId]);
       setSaved(true);
       setTimeout(() => {
-        navigate(createPageUrl(`ClientProfile?id=${clientId}`));
+        navigate(createPageUrl(`PostVisitAnalysis?id=${clientId}`));
       }, 1500);
     }
   });

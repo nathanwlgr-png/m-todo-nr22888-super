@@ -13,6 +13,8 @@ import PreVisitChecklist from './pages/PreVisitChecklist';
 import Reports from './pages/Reports';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
+import NumerologyAnalysis from './pages/NumerologyAnalysis';
+import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +34,8 @@ export const PAGES = {
     "Reports": Reports,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
+    "NumerologyAnalysis": NumerologyAnalysis,
+    "PostVisitAnalysis": PostVisitAnalysis,
 }
 
 export const pagesConfig = {

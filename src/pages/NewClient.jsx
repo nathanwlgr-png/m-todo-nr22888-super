@@ -39,7 +39,7 @@ const decisionRoles = [
   { value: 'socio', label: 'Sócio' },
 ];
 
-// Numerologia Pitagórica
+// Numerologia Pitagórica - Nome
 const calculateNumerology = (name) => {
   const values = {
     a: 1, j: 1, s: 1,
@@ -66,6 +66,25 @@ const calculateNumerology = (name) => {
   }
   
   return sum || 1;
+};
+
+// Numerologia Pitagórica - Caminho de Vida (Data de Nascimento)
+const calculateLifePath = (birthdate) => {
+  if (!birthdate) return null;
+  
+  const numbers = birthdate.replace(/\D/g, '');
+  let sum = 0;
+  
+  for (const digit of numbers) {
+    sum += parseInt(digit);
+  }
+  
+  // Preservar números mestres 11 e 22
+  while (sum > 22 || (sum > 9 && sum !== 11 && sum !== 22)) {
+    sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+  }
+  
+  return sum;
 };
 
 const getBehavioralProfile = (number) => {
@@ -108,6 +127,7 @@ export default function NewClient() {
   const [formData, setFormData] = useState({
     full_name: '',
     first_name: '',
+    birthdate: '',
     email: '',
     phone: '',
     address: '',
@@ -126,11 +146,14 @@ export default function NewClient() {
     setLoading(true);
     
     try {
-      const numerologyNumber = calculateNumerology(formData.first_name);
+      const nameForNumerology = formData.full_name || formData.first_name;
+      const numerologyNumber = calculateNumerology(nameForNumerology);
+      const lifePathNumber = calculateLifePath(formData.birthdate);
       
       const clientData = {
         ...formData,
         numerology_number: numerologyNumber,
+        life_path_number: lifePathNumber,
         behavioral_profile: getBehavioralProfile(numerologyNumber),
         decision_style: getDecisionStyle(numerologyNumber),
         purchase_score: Math.floor(Math.random() * 40) + 30,
@@ -258,6 +281,22 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
+            <p className="text-xs text-amber-600">✨ Nome completo gera numerologia mais precisa</p>
+          </div>
+
+          {/* Birthdate */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <User className="w-4 h-4" />
+              Data de Nascimento (opcional)
+            </Label>
+            <Input
+              type="date"
+              value={formData.birthdate}
+              onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+            <p className="text-xs text-purple-600">🔮 Com a data, fazemos análise numerológica completa</p>
           </div>
 
           {/* Email */}

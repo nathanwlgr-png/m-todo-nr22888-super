@@ -179,7 +179,27 @@ export default function ClientProfile() {
         </Card>
 
         {/* Numerology Profile */}
-        <NumerologyCard number={client.numerology_number || 1} />
+        <div onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}>
+          <NumerologyCard number={client.numerology_number || 1} />
+        </div>
+        {client.life_path_number && (
+          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-indigo-600 font-medium mb-1">Caminho de Vida</p>
+                <p className="text-2xl font-bold text-indigo-700">{client.life_path_number}</p>
+              </div>
+              <Button
+                onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
+                variant="outline"
+                size="sm"
+                className="border-indigo-300 text-indigo-600"
+              >
+                Ver Análise Completa
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Equipment Manager */}
         <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
