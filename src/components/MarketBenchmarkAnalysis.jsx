@@ -5,20 +5,29 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Target, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-// Dados de mercado reais (2024)
+// Dados de mercado reais - Equipamentos Laboratoriais Veterinários (2024)
+// Foco: Hemograma, Bioquímico, Hemogásio, Imunofluorescência, Urinálise, PCR
 const MARKET_DATA = {
   sao_paulo: {
     total_establishments: 322246, // Total Brasil 2024
     sao_paulo_percentage: 0.26, // SP representa ~26% do mercado pet brasileiro
-    clinics_with_lab_equipment: 0.35, // Estimativa: 35% das clínicas têm equipamento próprio
-    market_size_billions: 75.4, // R$ 75,4 bi faturamento pet 2024
-    growth_rate: 0.095, // 9,5% CAGR mercado veterinário
-    avg_equipment_investment: 80000, // Média R$ 80k por equipamento
+    clinics_with_lab_equipment: 0.18, // Apenas 18% têm equipamento laboratorial próprio
+    market_size_billions: 4.97, // US$ 4.97 bi mercado lab veterinário global
+    growth_rate: 0.0958, // 9,58% CAGR laboratórios veterinários
+    avg_equipment_investment: 85000, // Média R$ 85k por equipamento laboratorial
+    equipment_types: {
+      hemograma: { penetration: 0.12, avg_price: 65000 },
+      bioquimico: { penetration: 0.15, avg_price: 95000 },
+      hemogasio: { penetration: 0.03, avg_price: 120000 },
+      imunofluorescencia: { penetration: 0.02, avg_price: 150000 },
+      urinalise: { penetration: 0.08, avg_price: 45000 },
+      pcr: { penetration: 0.01, avg_price: 200000 }
+    }
   },
   segmentation: {
-    small_clinics: { percentage: 0.55, avg_revenue: 30000 },
-    medium_clinics: { percentage: 0.30, avg_revenue: 80000 },
-    hospitals: { percentage: 0.15, avg_revenue: 200000 }
+    small_clinics: { percentage: 0.55, avg_revenue: 30000, lab_likelihood: 0.05 },
+    medium_clinics: { percentage: 0.30, avg_revenue: 80000, lab_likelihood: 0.25 },
+    hospitals: { percentage: 0.15, avg_revenue: 200000, lab_likelihood: 0.60 }
   }
 };
 
@@ -107,23 +116,26 @@ export default function MarketBenchmarkAnalysis() {
       <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-blue-600" />
-          Panorama do Mercado - São Paulo
+          Mercado de Equipamentos Laboratoriais - SP
         </h3>
+        <p className="text-xs text-slate-500 mb-3">
+          Hemograma • Bioquímico • Hemogásio • Imunofluorescência • Urinálise • PCR
+        </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-xs text-slate-600">Total de Clínicas</p>
+            <p className="text-xs text-slate-600">Total de Clínicas SP</p>
             <p className="text-2xl font-bold text-slate-800">
               {analysis.totalClinicsSP.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-600">Com Equipamento</p>
+            <p className="text-xs text-slate-600">Com Lab Próprio</p>
             <p className="text-2xl font-bold text-green-700">
-              {MARKET_DATA.sao_paulo.clinics_with_lab_equipment * 100}%
+              {(MARKET_DATA.sao_paulo.clinics_with_lab_equipment * 100).toFixed(0)}%
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-600">Mercado Potencial</p>
+            <p className="text-xs text-slate-600">Sem Equipamento</p>
             <p className="text-2xl font-bold text-orange-700">
               {analysis.potentialMarket.toLocaleString()}
             </p>
@@ -131,7 +143,7 @@ export default function MarketBenchmarkAnalysis() {
           <div>
             <p className="text-xs text-slate-600">Seu Market Share</p>
             <p className="text-2xl font-bold text-indigo-700">
-              {analysis.marketShare.toFixed(2)}%
+              {analysis.marketShare.toFixed(3)}%
             </p>
           </div>
         </div>
@@ -271,6 +283,40 @@ export default function MarketBenchmarkAnalysis() {
         </div>
       </Card>
 
+      {/* Equipment Penetration */}
+      <Card className="p-4 bg-white border-slate-200">
+        <h3 className="font-semibold text-slate-800 mb-3">Penetração por Tipo de Equipamento (SP)</h3>
+        <div className="space-y-2">
+          {Object.entries(MARKET_DATA.sao_paulo.equipment_types).map(([type, data]) => (
+            <div key={type}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-slate-600 capitalize">
+                  {type === 'hemograma' ? '🩸 Hemograma' :
+                   type === 'bioquimico' ? '🧪 Bioquímico' :
+                   type === 'hemogasio' ? '💨 Hemogásio' :
+                   type === 'imunofluorescencia' ? '🔬 Imunofluorescência' :
+                   type === 'urinalise' ? '💧 Urinálise' : '🧬 PCR'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-700">
+                    {(data.penetration * 100).toFixed(0)}%
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    R$ {(data.avg_price / 1000).toFixed(0)}k
+                  </span>
+                </div>
+              </div>
+              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
+                  style={{ width: `${data.penetration * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
       {/* Unrealized Revenue */}
       <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
         <h3 className="font-semibold text-green-800 mb-2">Potencial Não Explorado</h3>
@@ -278,7 +324,10 @@ export default function MarketBenchmarkAnalysis() {
           R$ {(analysis.unrealizedRevenue / 1000000).toFixed(1)}M
         </p>
         <p className="text-sm text-slate-600 mt-1">
-          Baseado em {analysis.potentialMarket.toLocaleString()} clínicas ainda sem equipamento em SP
+          {analysis.potentialMarket.toLocaleString()} clínicas sem lab próprio em SP (82%)
+        </p>
+        <p className="text-xs text-slate-500 mt-2">
+          Crescimento mercado lab vet: 9,58% ao ano
         </p>
       </Card>
     </div>
