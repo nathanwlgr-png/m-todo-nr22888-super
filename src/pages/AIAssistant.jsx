@@ -179,6 +179,108 @@ HISTÓRICO DE INTERAÇÕES:
     setGeneratedScript(null);
 
     const prompts = {
+      presentation: `Você é um especialista em comunicação e vendas consultivas.
+
+Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato com ${client?.first_name}.
+
+═══════════════════════════════════════
+📊 PERFIL NUMEROLÓGICO COMPLETO
+═══════════════════════════════════════
+- Número Nome: ${client?.numerology_number} - ${client?.behavioral_profile}
+- Caminho de Vida: ${client?.life_path_number || 'Não disponível'}
+- Estilo de Decisão: ${client?.decision_style}
+- Tom Observado: ${client?.client_tone || 'Não observado'}
+- Comunicação Recomendada: ${client?.recommended_communication || 'Padrão'}
+
+═══════════════════════════════════════
+💼 CONTEXTO DO CLIENTE
+═══════════════════════════════════════
+- Tipo: ${client?.client_type}
+- Decisor: ${client?.decision_role}
+- Clínica: ${client?.clinic_name || 'Não informada'}
+- Status: ${client?.status} | Score: ${client?.purchase_score}%
+- Visitas anteriores: ${visits.length}
+- Equipamento atual: ${client?.current_equipment || 'Nenhum'}
+
+═══════════════════════════════════════
+🎯 SUA MISSÃO
+═══════════════════════════════════════
+
+Forneça um guia estruturado em MARKDOWN com:
+
+**1. APRESENTAÇÃO PESSOAL (PRESENCIAL)**
+
+**Tom e Postura Corporal:**
+- Tom de voz ideal (grave/agudo, pausado/rápido)
+- Linguagem corporal apropriada
+- Distância física ideal
+- Aperto de mão (firme/suave/médio)
+
+**Frase de Abertura:**
+- Primeira frase exata adaptada ao perfil numerológico
+- Como mencionar seu nome e empresa
+- Gancho de conexão emocional/racional
+
+**Primeiros 30 Segundos:**
+- O que falar (e o que NÃO falar)
+- Como capturar atenção imediata
+- Transição para conversa consultiva
+
+---
+
+**2. PRIMEIRO CONTATO POR CELULAR/WHATSAPP**
+
+**Mensagem de Texto (WhatsApp):**
+- Template de mensagem adaptado ao perfil
+- Melhor horário para enviar
+- Emoji strategy (usar ou não usar)
+- Call-to-action ideal
+
+**Ligação Telefônica:**
+- Script de abertura (primeiras 3 frases)
+- Como contornar secretária/recepção
+- Melhor horário para ligar
+- Tom de voz e ritmo da fala
+
+---
+
+**3. ESTRATÉGIA DE CONEXÃO EMOCIONAL**
+
+Baseado no perfil numerológico ${client?.numerology_number}:
+- Gatilho emocional principal (medo, ambição, segurança, reconhecimento)
+- Palavras-chave que ressoam
+- Histórias/analogias que funcionam
+- Erros fatais a evitar
+
+---
+
+**4. DIFERENCIAÇÃO IMEDIATA**
+
+Como se destacar da concorrência desde o primeiro contato:
+- Proposta de valor em 1 frase
+- Elemento surpresa/inesperado
+- Prova social estratégica
+- Bonificação diferencial (25 meses garantia, etc)
+
+---
+
+**5. CHECKLIST DE PREPARAÇÃO**
+
+Antes do primeiro contato, tenha em mãos:
+- [ ] ...
+- [ ] ...
+- [ ] ...
+
+---
+
+**6. SINAIS DE ALERTA**
+
+Fique atento a estes sinais no primeiro contato:
+- 🔴 Sinal de desinteresse: ...
+- 🟡 Sinal de dúvida: ...
+- 🟢 Sinal de engajamento: ...
+
+Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil numerológico.`,
       question: `Gere UMA pergunta SPIN Selling para abrir a conversa com ${client?.first_name}. 
         Numerologia: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
