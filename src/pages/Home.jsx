@@ -211,6 +211,15 @@ export default function Home() {
             Relatórios
           </Button>
         </Link>
+
+        <Link to={createPageUrl('FollowUpSequences')}>
+          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Follow-Up Automático
+          </Button>
+        </Link>
       </div>
 
       {/* Recent Clients */}
