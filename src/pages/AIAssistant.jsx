@@ -21,7 +21,8 @@ import {
   TrendingUp,
   FileText,
   Search,
-  Brain
+  Brain,
+  CheckSquare
 } from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
@@ -341,7 +342,40 @@ Com base em TODOS os dados acima, forneça uma análise ESTRATÉGICA e PROFUNDA 
    - O que pode fazer perder esta venda
    - Como recuperar se esfriar
 
-Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`
+Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`,
+      suggestTasks: `Você é um assistente de produtividade em vendas. 
+
+Analise o cliente ${client?.first_name} e sugira 3-5 tarefas CONCRETAS e ACIONÁVEIS para avançar na venda.
+
+DADOS DO CLIENTE:
+- Perfil: ${client?.numerology_number} - ${client?.behavioral_profile}
+- Status: ${client?.status} | Score: ${client?.purchase_score}%
+- Tipo: ${client?.client_type}
+- Visitas: ${visits.length}
+- Última visita: ${client?.last_visit_date || 'Nenhuma'}
+- Dores: ${client?.main_pains?.join(', ') || 'Não identificadas'}
+- Equipamento atual: ${client?.current_equipment || 'Nenhum'}
+- Notas: ${client?.notes || 'Sem notas'}
+
+Com base nisso, sugira tarefas no formato:
+
+**1. [Tipo de tarefa] - [Título]**
+Prioridade: [alta/media/baixa]
+Prazo sugerido: [dias a partir de hoje]
+Descrição: [2-3 linhas explicando o que fazer e por quê]
+
+**2. [Tipo de tarefa] - [Título]**
+...
+
+Tipos válidos: follow_up, ligacao, email, visita
+
+As tarefas devem:
+- Ser específicas para este cliente
+- Estar alinhadas com o perfil numerológico
+- Ter objetivo claro (agendar, enviar, fechar, diagnosticar)
+- Incluir timing estratégico
+
+Seja prático e direto ao ponto.`
     };
 
     const response = await base44.integrations.Core.InvokeLLM({
@@ -389,7 +423,8 @@ Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados espe
     prospecting: 'Prospecção',
     needs: 'Previsão de Necessidades',
     proposal: 'Proposta Comercial',
-    insights: 'Insights Profundos'
+    insights: 'Insights Profundos',
+    suggestTasks: 'Sugestão de Tarefas'
   };
 
   return (
@@ -474,6 +509,13 @@ Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados espe
             onClick={() => generateQuickAction('proposal')}
             loading={quickLoading.proposal}
             className="shrink-0 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+          />
+          <QuickActionButton
+            icon={CheckSquare}
+            label="Sugerir Tarefas"
+            onClick={() => generateQuickAction('suggestTasks')}
+            loading={quickLoading.suggestTasks}
+            className="shrink-0 bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100"
           />
         </div>
       </div>
