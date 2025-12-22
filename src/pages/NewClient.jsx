@@ -472,22 +472,16 @@ export default function NewClient() {
           {/* Budget */}
           <div className="space-y-2">
             <Label className="text-slate-700">Orçamento Disponível (opcional)</Label>
-            <Select
+            <Input
+              type="number"
+              placeholder="Ex: 75000"
               value={formData.available_budget}
-              onValueChange={(value) => setFormData({ ...formData, available_budget: value })}
-            >
-              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
-                <SelectValue placeholder="Selecione a faixa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
-                <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
-                <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
-                <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
-                <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
-                <SelectItem value="nao_informado">Não informado</SelectItem>
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData({ ...formData, available_budget: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+              min="0"
+              max="150000"
+            />
+            <p className="text-xs text-slate-500">De R$ 0 a R$ 150.000</p>
           </div>
 
           {/* Decision Deadline */}

@@ -1,319 +1,157 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Edit2, Save, Plus, Loader2, DollarSign, Package } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const categoryLabels = {
-  reagente: 'Reagente',
-  kit_analise: 'Kit de Análise',
-  calibrador: 'Calibrador',
-  controle_qualidade: 'Controle de Qualidade',
-  consumivel_geral: 'Consumível Geral'
-};
+import { ArrowLeft, Upload, Loader2, FileText, Trash2 } from 'lucide-react';
 
 export default function ConsumablePriceList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [editDialog, setEditDialog] = useState(false);
-  const [editData, setEditData] = useState({});
-  const [filter, setFilter] = useState('all');
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: consumables = [], isLoading } = useQuery({
     queryKey: ['consumables'],
-    queryFn: () => base44.entities.Consumable.list('-created_date', 200)
+    queryFn: () => base44.entities.Consumable.list()
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Consumable.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['consumables']);
-      setEditDialog(false);
-    }
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Consumable.delete(id),
+    onSuccess: () => queryClient.invalidateQueries(['consumables'])
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Consumable.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['consumables']);
-      setEditDialog(false);
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+
+      const extractedData = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            consumables: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  category: { type: "string" },
+                  unit_price: { type: "number" },
+                  unit_type: { type: "string" },
+                  supplier: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (extractedData.status === 'success' && extractedData.output?.consumables) {
+        for (const cons of extractedData.output.consumables) {
+          await base44.entities.Consumable.create({
+            name: cons.name,
+            category: cons.category || 'consumivel_geral',
+            unit_price: cons.unit_price || 0,
+            unit_type: cons.unit_type || 'unidade',
+            supplier: cons.supplier || '',
+            is_active: true
+          });
+        }
+        queryClient.invalidateQueries(['consumables']);
+        alert(`${extractedData.output.consumables.length} insumos importados!`);
+      } else {
+        alert('Não foi possível extrair dados');
+      }
+    } catch (error) {
+      alert('Erro ao processar arquivo');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-  });
-
-  const handleEdit = (consumable) => {
-    setEditData(consumable);
-    setEditDialog(true);
   };
-
-  const handleNew = () => {
-    setEditData({
-      name: '',
-      category: 'reagente',
-      unit_price: 0,
-      unit_type: 'unidade',
-      supplier: '',
-      description: '',
-      stock_quantity: 0,
-      min_stock: 0,
-      is_active: true
-    });
-    setEditDialog(true);
-  };
-
-  const handleSave = () => {
-    if (editData.id) {
-      updateMutation.mutate({ id: editData.id, data: editData });
-    } else {
-      createMutation.mutate(editData);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
-  }
-
-  const activeConsumables = consumables.filter(c => c.is_active);
-  const filteredConsumables = filter === 'all' 
-    ? activeConsumables 
-    : activeConsumables.filter(c => c.category === filter);
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4 mb-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+    <div className="min-h-screen bg-slate-50 pb-24">
+      <div className="bg-gradient-to-br from-slate-900 to-purple-900 px-4 pt-4 pb-16 rounded-b-[2rem]">
+        <div className="flex items-center gap-4 mb-6">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass hover:bg-white/10">
+            <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold text-slate-800">Insumos</h1>
-            <p className="text-xs text-slate-500">{activeConsumables.length} ativos</p>
-          </div>
-          <Button
-            size="sm"
-            onClick={handleNew}
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
+          <h1 className="text-lg font-semibold text-white flex-1">Lista de Preços - Insumos</h1>
         </div>
 
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="h-9">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as categorias</SelectItem>
-            <SelectItem value="reagente">Reagentes</SelectItem>
-            <SelectItem value="kit_analise">Kits de Análise</SelectItem>
-            <SelectItem value="calibrador">Calibradores</SelectItem>
-            <SelectItem value="controle_qualidade">Controle de Qualidade</SelectItem>
-            <SelectItem value="consumivel_geral">Consumíveis Gerais</SelectItem>
-          </SelectContent>
-        </Select>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx"
+          className="hidden"
+          onChange={handleFileUpload}
+        />
+
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="w-full h-14 bg-white/10 backdrop-blur hover:bg-white/20 border-2 border-white/30"
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Processando arquivo...
+            </>
+          ) : (
+            <>
+              <Upload className="w-5 h-5 mr-2" />
+              Importar PDF/Word/Excel
+            </>
+          )}
+        </Button>
       </div>
 
-      <div className="p-4 space-y-3">
-        {filteredConsumables.map((consumable) => (
-          <Card key={consumable.id} className="p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h3 className="font-semibold text-slate-800">{consumable.name}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className="text-xs">
-                    {categoryLabels[consumable.category]}
-                  </Badge>
-                  {consumable.stock_quantity <= consumable.min_stock && (
-                    <Badge className="bg-red-500 text-xs">Estoque Baixo</Badge>
+      <div className="px-4 -mt-8 space-y-3">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+          </div>
+        ) : consumables.length === 0 ? (
+          <Card className="p-8 text-center">
+            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500">Nenhum insumo cadastrado</p>
+          </Card>
+        ) : (
+          consumables.map(cons => (
+            <Card key={cons.id} className="p-4 bg-white">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-800">{cons.name}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{cons.category}</p>
+                  <p className="text-xl font-bold text-purple-600 mt-2">
+                    R$ {cons.unit_price?.toLocaleString('pt-BR')} / {cons.unit_type}
+                  </p>
+                  {cons.supplier && (
+                    <p className="text-xs text-slate-600 mt-1">Fornecedor: {cons.supplier}</p>
                   )}
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => deleteMutation.mutate(cons.id)}
+                  className="text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <button
-                onClick={() => handleEdit(consumable)}
-                className="p-2 hover:bg-slate-100 rounded-lg"
-              >
-                <Edit2 className="w-4 h-4 text-slate-600" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-green-600" />
-                <div>
-                  <p className="text-lg font-bold text-green-600">
-                    R$ {consumable.unit_price?.toLocaleString('pt-BR')}
-                  </p>
-                  <p className="text-xs text-slate-500">por {consumable.unit_type}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-blue-600" />
-                <div>
-                  <p className="text-lg font-bold text-slate-800">{consumable.stock_quantity || 0}</p>
-                  <p className="text-xs text-slate-500">em estoque</p>
-                </div>
-              </div>
-            </div>
-
-            {consumable.supplier && (
-              <p className="text-xs text-slate-600 mb-1">
-                <strong>Fornecedor:</strong> {consumable.supplier}
-              </p>
-            )}
-
-            {consumable.description && (
-              <p className="text-sm text-slate-600">{consumable.description}</p>
-            )}
-          </Card>
-        ))}
-
-        {filteredConsumables.length === 0 && (
-          <Card className="p-8 text-center">
-            <p className="text-slate-500 mb-4">Nenhum insumo encontrado</p>
-            <Button onClick={handleNew} variant="outline">
-              Adicionar Primeiro Insumo
-            </Button>
-          </Card>
+            </Card>
+          ))
         )}
       </div>
-
-      {/* Edit/Create Dialog */}
-      <Dialog open={editDialog} onOpenChange={setEditDialog}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editData.id ? 'Editar' : 'Novo'} Insumo</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div>
-              <Label>Nome *</Label>
-              <Input
-                value={editData.name || ''}
-                onChange={(e) => setEditData({...editData, name: e.target.value})}
-              />
-            </div>
-
-            <div>
-              <Label>Categoria *</Label>
-              <Select
-                value={editData.category}
-                onValueChange={(v) => setEditData({...editData, category: v})}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="reagente">Reagente</SelectItem>
-                  <SelectItem value="kit_analise">Kit de Análise</SelectItem>
-                  <SelectItem value="calibrador">Calibrador</SelectItem>
-                  <SelectItem value="controle_qualidade">Controle de Qualidade</SelectItem>
-                  <SelectItem value="consumivel_geral">Consumível Geral</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Preço Unitário (R$) *</Label>
-                <Input
-                  type="number"
-                  value={editData.unit_price || 0}
-                  onChange={(e) => setEditData({...editData, unit_price: parseFloat(e.target.value)})}
-                />
-              </div>
-              <div>
-                <Label>Tipo de Unidade *</Label>
-                <Select
-                  value={editData.unit_type}
-                  onValueChange={(v) => setEditData({...editData, unit_type: v})}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unidade">Unidade</SelectItem>
-                    <SelectItem value="caixa">Caixa</SelectItem>
-                    <SelectItem value="kit">Kit</SelectItem>
-                    <SelectItem value="litro">Litro</SelectItem>
-                    <SelectItem value="ml">ML</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label>Fornecedor</Label>
-              <Input
-                value={editData.supplier || ''}
-                onChange={(e) => setEditData({...editData, supplier: e.target.value})}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Estoque Atual</Label>
-                <Input
-                  type="number"
-                  value={editData.stock_quantity || 0}
-                  onChange={(e) => setEditData({...editData, stock_quantity: parseInt(e.target.value)})}
-                />
-              </div>
-              <div>
-                <Label>Estoque Mínimo</Label>
-                <Input
-                  type="number"
-                  value={editData.min_stock || 0}
-                  onChange={(e) => setEditData({...editData, min_stock: parseInt(e.target.value)})}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Descrição</Label>
-              <Textarea
-                value={editData.description || ''}
-                onChange={(e) => setEditData({...editData, description: e.target.value})}
-                rows={3}
-              />
-            </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={updateMutation.isPending || createMutation.isPending || !editData.name || !editData.unit_price}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-            >
-              {(updateMutation.isPending || createMutation.isPending) ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

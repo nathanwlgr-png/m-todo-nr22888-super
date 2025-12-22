@@ -48,6 +48,7 @@ import Tasks from './pages/Tasks';
 import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import RegionalSearch from './pages/RegionalSearch';
 import __Layout from './Layout.jsx';
 
 
@@ -102,6 +103,7 @@ export const PAGES = {
     "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
+    "RegionalSearch": RegionalSearch,
 }
 
 export const pagesConfig = {

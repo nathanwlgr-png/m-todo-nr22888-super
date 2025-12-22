@@ -316,20 +316,15 @@ export default function ClientDataEditor({ clientId, client }) {
         </div>
 
         <div>
-          <Label className="text-xs">Orçamento Disponível</Label>
-          <Select value={formData.available_budget} onValueChange={(v) => handleFieldChange('available_budget', v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ate_50k">Até R$ 50k</SelectItem>
-              <SelectItem value="50k_100k">R$ 50-100k</SelectItem>
-              <SelectItem value="100k_200k">R$ 100-200k</SelectItem>
-              <SelectItem value="200k_500k">R$ 200-500k</SelectItem>
-              <SelectItem value="acima_500k">Acima R$ 500k</SelectItem>
-              <SelectItem value="nao_informado">Não informado</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label className="text-xs">Orçamento Disponível (R$)</Label>
+          <Input
+            type="number"
+            value={formData.available_budget}
+            onChange={(e) => handleFieldChange('available_budget', e.target.value)}
+            placeholder="0 a 150.000"
+            min="0"
+            max="150000"
+          />
         </div>
 
         <div>

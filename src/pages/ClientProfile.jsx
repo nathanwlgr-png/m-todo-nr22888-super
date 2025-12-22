@@ -73,6 +73,7 @@ import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
 import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
+import ConsumableSalesAnalytics from '@/components/ConsumableSalesAnalytics';
 import LabNeedsEditor from '@/components/LabNeedsEditor';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
@@ -757,17 +758,13 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
           {client.available_budget && client.available_budget !== 'nao_informado' && (
             <Card className="p-4 bg-white shadow-lg border-none">
-              <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">Orçamento</span>
-              </div>
-              <p className="font-semibold text-slate-800 text-sm">
-                {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
-                 client.available_budget === '50k_100k' ? 'R$ 50-100k' :
-                 client.available_budget === '100k_200k' ? 'R$ 100-200k' :
-                 client.available_budget === '200k_500k' ? 'R$ 200-500k' :
-                 'Acima R$ 500k'}
-              </p>
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="w-4 h-4 text-slate-400" />
+              <span className="text-xs text-slate-500">Orçamento</span>
+            </div>
+            <p className="font-semibold text-slate-800 text-sm">
+              {client.available_budget ? `R$ ${Number(client.available_budget).toLocaleString('pt-BR')}` : 'Não informado'}
+            </p>
             </Card>
           )}
 
@@ -859,6 +856,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Consumable Analytics */}
         <ClientConsumableAnalytics clientId={client.id} clientName={client.first_name} />
+
+        {/* Análise de Vendas de Insumos */}
+        <ConsumableSalesAnalytics clientId={client.id} />
 
         {/* Pipeline AI Assistant */}
         <PipelineAIAssistant 
@@ -1309,23 +1309,15 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             </div>
 
             <div className="space-y-2">
-              <Label>Orçamento Disponível</Label>
-              <Select
+              <Label>Orçamento Disponível (R$)</Label>
+              <Input
+                type="number"
                 value={editData.available_budget}
-                onValueChange={(value) => setEditData({...editData, available_budget: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
-                  <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
-                  <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
-                  <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
-                  <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
-                  <SelectItem value="nao_informado">Não informado</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(e) => setEditData({...editData, available_budget: e.target.value})}
+                placeholder="0 a 150.000"
+                min="0"
+                max="150000"
+              />
             </div>
 
             <div className="space-y-2">
