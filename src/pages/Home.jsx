@@ -69,8 +69,8 @@ export default function Home() {
             <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-white">Método NR</h1>
-            <p className="text-orange-300 text-sm font-medium">Gestão de Vendas</p>
+            <h1 className="text-xl font-bold text-white">Venda NR</h1>
+            <p className="text-orange-300 text-sm font-medium">Inteligência em Vendas</p>
           </div>
           <Link to={createPageUrl('MyProfile')}>
             <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
