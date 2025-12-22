@@ -5,10 +5,8 @@ import CaptureLeads from './pages/CaptureLeads';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
-import ConsumablePriceList from './pages/ConsumablePriceList';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Equipment from './pages/Equipment';
-import EquipmentPriceList from './pages/EquipmentPriceList';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
@@ -16,7 +14,6 @@ import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import Home from './pages/Home';
 import ImportLeads from './pages/ImportLeads';
-import ImportPriceList from './pages/ImportPriceList';
 import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
 import Leads from './pages/Leads';
@@ -38,6 +35,9 @@ import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import ImportPriceList from './pages/ImportPriceList';
+import EquipmentPriceList from './pages/EquipmentPriceList';
+import ConsumablePriceList from './pages/ConsumablePriceList';
 import __Layout from './Layout.jsx';
 
 
@@ -49,10 +49,8 @@ export const PAGES = {
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
-    "ConsumablePriceList": ConsumablePriceList,
     "CreateFollowUpSequence": CreateFollowUpSequence,
     "Equipment": Equipment,
-    "EquipmentPriceList": EquipmentPriceList,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
     "GlobalSearch": GlobalSearch,
@@ -60,7 +58,6 @@ export const PAGES = {
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "Home": Home,
     "ImportLeads": ImportLeads,
-    "ImportPriceList": ImportPriceList,
     "LeadProfile": LeadProfile,
     "Leaderboard": Leaderboard,
     "Leads": Leads,
@@ -82,10 +79,13 @@ export const PAGES = {
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
+    "ImportPriceList": ImportPriceList,
+    "EquipmentPriceList": EquipmentPriceList,
+    "ConsumablePriceList": ConsumablePriceList,
 }
 
 export const pagesConfig = {
-    mainPage: "MyProfile",
+    mainPage: "Home",
     Pages: PAGES,
     Layout: __Layout,
 };
