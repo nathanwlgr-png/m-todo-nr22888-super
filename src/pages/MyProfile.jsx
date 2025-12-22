@@ -30,7 +30,9 @@ export default function MyProfile() {
   const [newTrait, setNewTrait] = useState('');
   const [newPhrase, setNewPhrase] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
   const fileInputRef = React.useRef(null);
+  const excelInputRef = React.useRef(null);
 
   React.useEffect(() => {
     if (user) {
@@ -116,6 +118,23 @@ export default function MyProfile() {
       toast.error('Erro ao fazer upload');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingExcel(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ activity_excel_url: file_url });
+      queryClient.invalidateQueries(['current-user']);
+      toast.success('Excel das atividades enviado!');
+    } catch (error) {
+      toast.error('Erro ao fazer upload');
+    } finally {
+      setUploadingExcel(false);
     }
   };
 
@@ -211,53 +230,102 @@ export default function MyProfile() {
           />
         </Card>
 
-        {/* Activity Map Upload */}
+        {/* Activity Files Upload */}
         <Card className="p-4">
           <h3 className="font-semibold text-slate-800 mb-3">Mapa de Atividades</h3>
           <p className="text-sm text-slate-500 mb-3">
-            Faça upload do PDF com suas atividades e região de atuação
+            Faça upload dos seus arquivos de atividades e região de atuação
           </p>
 
-          {user?.activity_map_url ? (
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200 mb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-green-600" />
-                <span className="text-sm text-green-700 font-medium">PDF enviado</span>
+          {/* PDF Upload */}
+          <div className="mb-4">
+            <Label className="text-xs text-slate-600 mb-2 block">PDF do Mapa</Label>
+            {user?.activity_map_url ? (
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200 mb-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-green-600" />
+                  <span className="text-sm text-green-700 font-medium">PDF enviado</span>
+                </div>
+                <a
+                  href={user.activity_map_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-600 underline"
+                >
+                  Ver arquivo
+                </a>
               </div>
-              <a
-                href={user.activity_map_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-green-600 underline"
-              >
-                Ver arquivo
-              </a>
-            </div>
-          ) : null}
+            ) : null}
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
 
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            variant="outline"
-            className="w-full h-12 border-2 border-dashed"
-          >
-            {uploading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                <Upload className="w-5 h-5 mr-2" />
-                {user?.activity_map_url ? 'Substituir PDF' : 'Fazer Upload do PDF'}
-              </>
-            )}
-          </Button>
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              variant="outline"
+              className="w-full h-10 border-2 border-dashed"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  {user?.activity_map_url ? 'Substituir PDF' : 'Upload PDF'}
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Excel Upload */}
+          <div>
+            <Label className="text-xs text-slate-600 mb-2 block">Excel de Atividades</Label>
+            {user?.activity_excel_url ? (
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200 mb-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-green-600" />
+                  <span className="text-sm text-green-700 font-medium">Excel enviado</span>
+                </div>
+                <a
+                  href={user.activity_excel_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-600 underline"
+                >
+                  Ver arquivo
+                </a>
+              </div>
+            ) : null}
+
+            <input
+              ref={excelInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleExcelUpload}
+            />
+
+            <Button
+              onClick={() => excelInputRef.current?.click()}
+              disabled={uploadingExcel}
+              variant="outline"
+              className="w-full h-10 border-2 border-dashed"
+            >
+              {uploadingExcel ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  {user?.activity_excel_url ? 'Substituir Excel' : 'Upload Excel'}
+                </>
+              )}
+            </Button>
+          </div>
         </Card>
 
         {/* Signature Phrases */}
