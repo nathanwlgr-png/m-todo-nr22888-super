@@ -93,7 +93,7 @@ export default function AIAssistant() {
   }, [messages]);
 
   useEffect(() => {
-    if (client && messages.length === 0) {
+    if (client && messages.length === 0 && client.first_name) {
       setMessages([{
         role: 'assistant',
         content: `Olá! Sou o **Método NR**, seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\n🎭 **Novo:** Ative o Modo Treinamento para simular uma conversa com ${client.first_name}!\n\nComo posso ajudar?`
@@ -232,10 +232,12 @@ Comece a simulação reagindo ao que o vendedor disser.
   };
 
   const toggleRolePlayMode = () => {
+    if (!client) return;
+    
     if (!rolePlayMode) {
       setMessages([{
         role: 'assistant',
-        content: `🎭 **MODO TREINAMENTO ATIVADO**\n\nOlá, sou ${client.first_name}, ${client.decision_role} na ${client.clinic_name || 'minha clínica'}.\n\n${client.behavioral_profile}. ${client.decision_style}.\n\nComo você vai me abordar? 🤔`
+        content: `🎭 **MODO TREINAMENTO ATIVADO**\n\nOlá, sou ${client.first_name || 'o cliente'}, ${client.decision_role || 'decisor'} na ${client.clinic_name || 'minha clínica'}.\n\n${client.behavioral_profile || 'Perfil analítico'}. ${client.decision_style || 'Decisões cuidadosas'}.\n\nComo você vai me abordar? 🤔`
       }]);
     } else {
       setMessages([{
@@ -676,7 +678,7 @@ Seja prático e direto ao ponto.`
             <h1 className="text-lg font-semibold text-slate-800">
               {rolePlayMode ? '🎭 Treinamento' : 'Assistente IA'}
             </h1>
-            <p className="text-sm text-slate-500">{client?.first_name}</p>
+            <p className="text-sm text-slate-500">{client?.first_name || 'Carregando...'}</p>
           </div>
           <Button
             variant={rolePlayMode ? "default" : "outline"}
