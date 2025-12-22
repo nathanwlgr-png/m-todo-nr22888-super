@@ -120,18 +120,19 @@ export default function NewClient() {
 
     setLoading(true);
     
-    const numerologyNumber = calculateNumerology(formData.first_name);
-    
-    const clientData = {
-      ...formData,
-      numerology_number: numerologyNumber,
-      behavioral_profile: getBehavioralProfile(numerologyNumber),
-      decision_style: getDecisionStyle(numerologyNumber),
-      purchase_score: Math.floor(Math.random() * 40) + 30,
-      status: 'morno'
-    };
+    try {
+      const numerologyNumber = calculateNumerology(formData.first_name);
+      
+      const clientData = {
+        ...formData,
+        numerology_number: numerologyNumber,
+        behavioral_profile: getBehavioralProfile(numerologyNumber),
+        decision_style: getDecisionStyle(numerologyNumber),
+        purchase_score: Math.floor(Math.random() * 40) + 30,
+        status: 'morno'
+      };
 
-    const client = await base44.entities.Client.create(clientData);
+      const client = await base44.entities.Client.create(clientData);
 
     // AUTOMAÇÃO 1: Email de boas-vindas
     try {
@@ -164,7 +165,13 @@ export default function NewClient() {
       console.log('Task automation failed');
     }
 
-    navigate(createPageUrl(`ClientProfile?id=${client.id}`));
+      navigate(createPageUrl(`ClientProfile?id=${client.id}`));
+    } catch (error) {
+      console.error('Erro ao criar cliente:', error);
+      alert('Erro ao criar cliente. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isValid = formData.first_name && formData.decision_role;
