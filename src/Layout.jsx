@@ -4,11 +4,13 @@ import AlertNotifications from '@/components/AlertNotifications';
 import LeadAutomationEngine from '@/components/LeadAutomationEngine';
 import ClientScoringEngine from '@/components/ClientScoringEngine';
 import PipelineInactivityMonitor from '@/components/PipelineInactivityMonitor';
+import OnboardingTutorial from '@/components/onboarding/OnboardingTutorial';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
   return (
     <div className="min-h-screen bg-slate-50">
+      <OnboardingTutorial />
       <TaskNotifications />
       <AlertNotifications />
       <LeadAutomationEngine />

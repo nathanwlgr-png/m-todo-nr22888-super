@@ -522,7 +522,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Tabs: Interações, Tarefas, Documentos, Timeline */}
         <Tabs defaultValue="interactions" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-4" data-tutorial="interactions">
             <TabsTrigger value="interactions">
               Interações ({interactions.length})
             </TabsTrigger>

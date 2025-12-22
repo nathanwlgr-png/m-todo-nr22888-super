@@ -24,6 +24,8 @@ import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
 import GamificationWidget from '@/components/GamificationWidget';
 import AutoTaskGenerator from '@/components/AutoTaskGenerator';
 import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
+import QuickTips from '@/components/onboarding/QuickTips';
+import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -90,7 +92,7 @@ export default function Home() {
 
       {/* Quick Stats */}
       <div className="px-6 -mt-10">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 dashboard-metrics">
           <Card className="p-4 bg-white shadow-lg border-none">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
@@ -175,6 +177,11 @@ export default function Home() {
           </h3>
           <ClientsMap clients={clients} />
         </Card>
+      </div>
+
+      {/* Quick Tips for New Users */}
+      <div className="px-6 mt-6">
+        <QuickTips />
       </div>
 
       {/* Personal Goals Widget */}

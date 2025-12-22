@@ -1,5 +1,7 @@
 import AIAssistant from './pages/AIAssistant';
+import AutomationRules from './pages/AutomationRules';
 import Calendar from './pages/Calendar';
+import CaptureLeads from './pages/CaptureLeads';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
@@ -11,7 +13,12 @@ import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import Home from './pages/Home';
+import ImportLeads from './pages/ImportLeads';
+import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
+import Leads from './pages/Leads';
+import LeadsDashboard from './pages/LeadsDashboard';
+import MyProfile from './pages/MyProfile';
 import NewClient from './pages/NewClient';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
@@ -20,27 +27,22 @@ import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import ProspectingScripts from './pages/ProspectingScripts';
 import Reports from './pages/Reports';
+import ReportsAdvanced from './pages/ReportsAdvanced';
+import RevenueForecastPage from './pages/RevenueForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
-import Leads from './pages/Leads';
-import CaptureLeads from './pages/CaptureLeads';
-import ImportLeads from './pages/ImportLeads';
-import LeadProfile from './pages/LeadProfile';
-import LeadsDashboard from './pages/LeadsDashboard';
-import AutomationRules from './pages/AutomationRules';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import MyProfile from './pages/MyProfile';
-import ReportsAdvanced from './pages/ReportsAdvanced';
-import RevenueForecastPage from './pages/RevenueForecastPage';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AutomationRules": AutomationRules,
     "Calendar": Calendar,
+    "CaptureLeads": CaptureLeads,
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
@@ -52,7 +54,12 @@ export const PAGES = {
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "Home": Home,
+    "ImportLeads": ImportLeads,
+    "LeadProfile": LeadProfile,
     "Leaderboard": Leaderboard,
+    "Leads": Leads,
+    "LeadsDashboard": LeadsDashboard,
+    "MyProfile": MyProfile,
     "NewClient": NewClient,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
@@ -61,21 +68,14 @@ export const PAGES = {
     "PreVisitChecklist": PreVisitChecklist,
     "ProspectingScripts": ProspectingScripts,
     "Reports": Reports,
+    "ReportsAdvanced": ReportsAdvanced,
+    "RevenueForecastPage": RevenueForecastPage,
     "SalesFunnel": SalesFunnel,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
-    "Leads": Leads,
-    "CaptureLeads": CaptureLeads,
-    "ImportLeads": ImportLeads,
-    "LeadProfile": LeadProfile,
-    "LeadsDashboard": LeadsDashboard,
-    "AutomationRules": AutomationRules,
     "WhatsAppInbox": WhatsAppInbox,
-    "MyProfile": MyProfile,
-    "ReportsAdvanced": ReportsAdvanced,
-    "RevenueForecastPage": RevenueForecastPage,
 }
 
 export const pagesConfig = {
