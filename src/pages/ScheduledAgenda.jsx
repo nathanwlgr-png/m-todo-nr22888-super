@@ -29,15 +29,21 @@ export default function ScheduledAgenda() {
   const cityOrder = ['Marília', 'Bauru', 'Jaú', 'Lins', 'Botucatu', 'Ourinhos', 'Assis', 'Tupã'];
 
   const clientsByCity = useMemo(() => {
-    // Se houver dados otimizados pela IA, usar eles
-    if (optimizedData?.optimized_order) {
-      return optimizedData.optimized_order.map(cityRoute => ({
-        city: cityRoute.city,
-        clients: cityRoute.clients.map(c => 
+    // Se houver dados otimizados pela IA, usar rotas diárias
+    if (optimizedData?.daily_routes) {
+      return optimizedData.daily_routes.map((dayRoute, idx) => ({
+        city: dayRoute.day_label,
+        clients: dayRoute.clients.map(c => 
           clients.find(client => client.id === c.id)
         ).filter(Boolean),
         aiOptimized: true,
-        estimatedArrival: cityRoute.estimated_arrival
+        estimatedArrival: dayRoute.departure_time,
+        dayInfo: {
+          cities: dayRoute.cities,
+          distance: dayRoute.total_distance_day,
+          tollCost: dayRoute.toll_cost_day,
+          returnTime: dayRoute.estimated_return
+        }
       }));
     }
 
@@ -149,8 +155,24 @@ export default function ScheduledAgenda() {
                 </h2>
                 <p className="text-xs text-slate-500">
                   {cityClients.length} clientes
-                  {cityClients.estimatedArrival && ` • Chegada: ${cityClients.estimatedArrival}`}
+                  {cityClients.estimatedArrival && ` • Saída: ${cityClients.estimatedArrival}`}
                 </p>
+                {cityClients.dayInfo && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                      {cityClients.dayInfo.cities?.join(' + ')}
+                    </span>
+                    <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                      {cityClients.dayInfo.distance} km
+                    </span>
+                    <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs">
+                      R$ {cityClients.dayInfo.tollCost?.toFixed(0)} pedágio
+                    </span>
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">
+                      Retorno: {cityClients.dayInfo.returnTime}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

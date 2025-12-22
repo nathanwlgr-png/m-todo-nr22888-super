@@ -53,50 +53,67 @@ export default function AIRouteOptimizer({ clients, onRouteOptimized }) {
         }));
 
       const prompt = `
-Você é um especialista em otimização de rotas de vendas.
+Você é um especialista em otimização de rotas de vendas no interior de São Paulo.
 
 DADOS DOS CLIENTES:
 ${JSON.stringify(clientsData, null, 2)}
 
-TAREFA:
-Otimize a ordem de visitas considerando:
-1. **Proximidade geográfica** - agrupar visitas por cidade e região
-2. **Prioridade do cliente** - clientes com priority_level menor são mais prioritários (1 = máxima prioridade)
-3. **Status** - clientes "quente" devem ter prioridade sobre "morno" e "frio"
-4. **Score de compra** - maiores scores indicam maior probabilidade de fechamento
-5. **Receita projetada** - priorizar clientes com maior potencial de receita
-6. **Condições de trânsito** - considere horários de pico e distâncias entre cidades do interior de São Paulo
-7. **Tempo estimado** - estime 45-60 minutos por visita
+RESTRIÇÕES CRÍTICAS:
+- **Base do vendedor**: Marília, SP
+- **Distância máxima por dia**: 200 km na IDA + 200 km na VOLTA (total 400 km/dia)
+- **Retorno diário**: O vendedor DEVE retornar para Marília ao final de TODOS os dias
+- **Cidades por dia**: Máximo de 1-2 cidades próximas por dia
+- **Tempo de visita**: 45-60 minutos por cliente
+- **Pedágios**: Considerar e calcular custos de pedágio nas rodovias do interior de SP
 
-Considere que o vendedor está começando de Marília, SP.
+TAREFA:
+Organize as visitas em DIAS, com cada dia sendo uma jornada completa:
+1. Saída de Marília pela manhã
+2. Visita a 1-2 cidades próximas (máximo 200km de distância)
+3. Retorno para Marília no mesmo dia
+
+CRITÉRIOS DE OTIMIZAÇÃO:
+1. **Proximidade geográfica** - agrupar cidades próximas no mesmo dia
+2. **Distância de Marília** - priorizar cidades mais próximas quando possível
+3. **Prioridade do cliente** - priority_level menor = mais prioritário (1 = máxima)
+4. **Status** - "quente" > "morno" > "frio"
+5. **Score de compra** - maiores scores = maior probabilidade
+6. **Receita projetada** - priorizar maior potencial
+7. **Custo de pedágio** - minimizar quando possível
 
 IMPORTANTE: 
-- Agrupe visitas por cidade para economizar tempo de deslocamento
-- Sugira horários ideais para cada visita considerando trânsito
-- Ordene as cidades pela rota mais eficiente (menor distância total)
-- Priorize clientes "quentes" no início da jornada quando o vendedor está mais energizado
+- Cada "day" deve ter rota completa: Marília → Cidades → Marília
+- Calcule distância total do dia (ida + volta)
+- Estime custo de pedágio baseado nas rodovias do interior de SP (média R$ 0,20/km em pedágios)
+- Sugira horário de saída de Marília e horário estimado de retorno
+- Priorize clientes "quentes" nos primeiros dias da semana
 
 Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
 {
   "total_clients": número,
-  "total_cities": número,
-  "estimated_total_time_hours": número,
-  "estimated_distance_km": número,
+  "total_days": número,
+  "total_distance_km": número,
+  "estimated_toll_cost": número,
   "route_efficiency_score": número de 0-100,
-  "insights": [array de strings com 3-4 insights sobre a rota],
-  "optimized_order": [
+  "insights": [array de strings com 3-4 insights sobre a rota e custos],
+  "daily_routes": [
     {
-      "city": string,
-      "order": número (ordem da cidade na rota),
-      "estimated_arrival": string (horário sugerido, ex: "09:00"),
+      "day": número,
+      "day_label": string (ex: "Dia 1 - Segunda"),
+      "departure_time": string (ex: "07:30"),
+      "estimated_return": string (ex: "18:00"),
+      "cities": [string] (cidades visitadas neste dia),
+      "total_distance_day": número (km ida + volta),
+      "toll_cost_day": número,
       "clients": [
         {
           "id": string,
           "name": string,
+          "city": string,
           "clinic_name": string,
-          "order_in_city": número,
-          "reason": string (breve explicação de por que essa ordem),
-          "estimated_visit_time": string
+          "estimated_arrival": string,
+          "estimated_visit_time": string,
+          "reason": string
         }
       ]
     }
@@ -111,19 +128,23 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
           type: "object",
           properties: {
             total_clients: { type: "number" },
-            total_cities: { type: "number" },
-            estimated_total_time_hours: { type: "number" },
-            estimated_distance_km: { type: "number" },
+            total_days: { type: "number" },
+            total_distance_km: { type: "number" },
+            estimated_toll_cost: { type: "number" },
             route_efficiency_score: { type: "number" },
             insights: { type: "array", items: { type: "string" } },
-            optimized_order: {
+            daily_routes: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
-                  city: { type: "string" },
-                  order: { type: "number" },
-                  estimated_arrival: { type: "string" },
+                  day: { type: "number" },
+                  day_label: { type: "string" },
+                  departure_time: { type: "string" },
+                  estimated_return: { type: "string" },
+                  cities: { type: "array", items: { type: "string" } },
+                  total_distance_day: { type: "number" },
+                  toll_cost_day: { type: "number" },
                   clients: {
                     type: "array",
                     items: {
@@ -131,10 +152,11 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                       properties: {
                         id: { type: "string" },
                         name: { type: "string" },
+                        city: { type: "string" },
                         clinic_name: { type: "string" },
-                        order_in_city: { type: "number" },
-                        reason: { type: "string" },
-                        estimated_visit_time: { type: "string" }
+                        estimated_arrival: { type: "string" },
+                        estimated_visit_time: { type: "string" },
+                        reason: { type: "string" }
                       }
                     }
                   }
@@ -197,20 +219,20 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                 <Card className="p-3 bg-gradient-to-br from-purple-50 to-indigo-50">
                   <div className="flex items-center gap-2 mb-1">
                     <Clock className="w-4 h-4 text-purple-600" />
-                    <p className="text-xs text-slate-600">Tempo Total</p>
+                    <p className="text-xs text-slate-600">Total de Dias</p>
                   </div>
                   <p className="text-xl font-bold text-slate-800">
-                    {optimizedRoute.estimated_total_time_hours?.toFixed(1)}h
+                    {optimizedRoute.total_days}
                   </p>
                 </Card>
 
                 <Card className="p-3 bg-gradient-to-br from-blue-50 to-cyan-50">
                   <div className="flex items-center gap-2 mb-1">
                     <Navigation className="w-4 h-4 text-blue-600" />
-                    <p className="text-xs text-slate-600">Distância</p>
+                    <p className="text-xs text-slate-600">Distância Total</p>
                   </div>
                   <p className="text-xl font-bold text-slate-800">
-                    {optimizedRoute.estimated_distance_km?.toFixed(0)} km
+                    {optimizedRoute.total_distance_km?.toFixed(0)} km
                   </p>
                 </Card>
 
@@ -227,10 +249,10 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                 <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50">
                   <div className="flex items-center gap-2 mb-1">
                     <MapPin className="w-4 h-4 text-orange-600" />
-                    <p className="text-xs text-slate-600">Cidades</p>
+                    <p className="text-xs text-slate-600">Custo Pedágio</p>
                   </div>
                   <p className="text-xl font-bold text-slate-800">
-                    {optimizedRoute.total_cities}
+                    R$ {optimizedRoute.estimated_toll_cost?.toFixed(0)}
                   </p>
                 </Card>
               </div>
@@ -253,40 +275,58 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                 </Card>
               )}
 
-              {/* Rota Otimizada */}
+              {/* Rota Otimizada por Dia */}
               <div>
-                <h4 className="font-semibold text-slate-800 mb-3">Ordem de Visitas Sugerida</h4>
-                <div className="space-y-3">
-                  {optimizedRoute.optimized_order?.map((cityRoute, idx) => (
-                    <Card key={idx} className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                          <span className="text-sm font-bold text-indigo-600">{cityRoute.order}</span>
+                <h4 className="font-semibold text-slate-800 mb-3">Roteiro Diário (Saída e Retorno de Marília)</h4>
+                <div className="space-y-4">
+                  {optimizedRoute.daily_routes?.map((dayRoute, idx) => (
+                    <Card key={idx} className="p-4 border-2">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-white">{dayRoute.day}</span>
                         </div>
-                        <div>
-                          <h5 className="font-semibold text-slate-800">{cityRoute.city}</h5>
-                          <p className="text-xs text-slate-500">
-                            Chegada prevista: {cityRoute.estimated_arrival} • {cityRoute.clients?.length} clientes
-                          </p>
+                        <div className="flex-1">
+                          <h5 className="font-semibold text-slate-800">{dayRoute.day_label}</h5>
+                          <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-600">
+                            <span className="flex items-center gap-1">
+                              🚗 Saída: {dayRoute.departure_time}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              🏠 Retorno: {dayRoute.estimated_return}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                              {dayRoute.total_distance_day} km
+                            </span>
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                              R$ {dayRoute.toll_cost_day?.toFixed(0)} pedágio
+                            </span>
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                              {dayRoute.cities?.join(' + ')}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-2 pl-11">
-                        {cityRoute.clients?.map((client, clientIdx) => (
-                          <div key={clientIdx} className="p-2 bg-slate-50 rounded-lg">
+                      <div className="space-y-2 pl-13">
+                        {dayRoute.clients?.map((client, clientIdx) => (
+                          <div key={clientIdx} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                             <div className="flex items-start gap-2">
                               <span className="text-xs font-bold text-slate-400 mt-0.5">
-                                {cityRoute.order}.{client.order_in_city}
+                                {clientIdx + 1}
                               </span>
                               <div className="flex-1">
                                 <p className="text-sm font-medium text-slate-800">{client.name}</p>
                                 {client.clinic_name && (
                                   <p className="text-xs text-slate-600">{client.clinic_name}</p>
                                 )}
-                                <p className="text-xs text-slate-500 mt-1">
-                                  ⏰ {client.estimated_visit_time}
-                                </p>
-                                <p className="text-xs text-indigo-600 mt-1 italic">{client.reason}</p>
+                                <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                                  <span>📍 {client.city}</span>
+                                  <span>🕐 {client.estimated_arrival}</span>
+                                  <span>⏱️ {client.estimated_visit_time}</span>
+                                </div>
+                                <p className="text-xs text-indigo-600 mt-2 italic">{client.reason}</p>
                               </div>
                             </div>
                           </div>
