@@ -34,6 +34,7 @@ import AutomationRules from './pages/AutomationRules';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import MyProfile from './pages/MyProfile';
 import ReportsAdvanced from './pages/ReportsAdvanced';
+import RevenueForecastPage from './pages/RevenueForecastPage';
 import __Layout from './Layout.jsx';
 
 
@@ -74,6 +75,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "MyProfile": MyProfile,
     "ReportsAdvanced": ReportsAdvanced,
+    "RevenueForecastPage": RevenueForecastPage,
 }
 
 export const pagesConfig = {

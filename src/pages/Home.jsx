@@ -260,6 +260,13 @@ export default function Home() {
               Relatórios
             </Button>
           </Link>
+
+          <Link to={createPageUrl('RevenueForecastPage')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Previsão de Receita
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

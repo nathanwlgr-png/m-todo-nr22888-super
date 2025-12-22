@@ -3,6 +3,7 @@ import TaskNotifications from '@/components/TaskNotifications';
 import AlertNotifications from '@/components/AlertNotifications';
 import LeadAutomationEngine from '@/components/LeadAutomationEngine';
 import ClientScoringEngine from '@/components/ClientScoringEngine';
+import PipelineInactivityMonitor from '@/components/PipelineInactivityMonitor';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -12,6 +13,7 @@ export default function Layout({ children, currentPageName }) {
       <AlertNotifications />
       <LeadAutomationEngine />
       <ClientScoringEngine />
+      <PipelineInactivityMonitor />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
