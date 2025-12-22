@@ -51,9 +51,29 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ saleId, status }) => base44.entities.Sale.update(saleId, { status }),
+    mutationFn: async ({ saleId, status }) => {
+      await base44.entities.Sale.update(saleId, { status });
+      
+      // Se status mudou para "fechada", atualizar pipeline do cliente
+      if (status === 'fechada') {
+        await base44.entities.Client.update(clientId, {
+          pipeline_stage: 'fechado',
+          visit_objective: 'fechar_venda',
+          status: 'quente'
+        });
+      }
+      
+      // Se mudou para "aguardando_assinatura", atualizar também
+      if (status === 'aguardando_assinatura') {
+        await base44.entities.Client.update(clientId, {
+          pipeline_stage: 'negociacao',
+          visit_objective: 'negociar_proposta'
+        });
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['client-sales']);
+      queryClient.invalidateQueries(['client']);
       toast.success('Status atualizado!');
     }
   });
@@ -111,18 +131,29 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
                     R$ {sale.sale_value?.toLocaleString('pt-BR')} • {sale.status}
                   </p>
                 </div>
-                {sale.status === 'proposta' && (
-                  <Button
-                    size="sm"
-                    onClick={() => updateStatusMutation.mutate({ saleId: sale.id, status: 'fechada' })}
-                    className="bg-emerald-600 hover:bg-emerald-700 h-8 text-xs"
-                  >
-                    Marcar Paga
-                  </Button>
-                )}
-                {(sale.status === 'fechada' || sale.status === 'entregue') && (
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                )}
+                <div className="flex gap-1">
+                  {sale.status === 'proposta' && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate({ saleId: sale.id, status: 'aguardando_assinatura' })}
+                      className="bg-blue-600 hover:bg-blue-700 h-8 text-xs"
+                    >
+                      Enviar p/ Assinar
+                    </Button>
+                  )}
+                  {sale.status === 'aguardando_assinatura' && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate({ saleId: sale.id, status: 'fechada' })}
+                      className="bg-emerald-600 hover:bg-emerald-700 h-8 text-xs"
+                    >
+                      Marcar Assinada
+                    </Button>
+                  )}
+                  {(sale.status === 'fechada' || sale.status === 'entregue') && (
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -160,12 +191,22 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
 
             <div>
               <Label>Valor (R$) *</Label>
-              <Input
-                type="number"
-                value={formData.sale_value}
-                onChange={(e) => setFormData({ ...formData, sale_value: parseFloat(e.target.value) })}
-                placeholder="Digite o valor"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">R$</span>
+                <Input
+                  type="text"
+                  value={formData.sale_value}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setFormData({ ...formData, sale_value: value ? parseFloat(value) : '' });
+                  }}
+                  placeholder="70000"
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                {formData.sale_value ? `R$ ${parseFloat(formData.sale_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Digite apenas números'}
+              </p>
             </div>
 
             <div>
@@ -176,6 +217,7 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="proposta">Proposta</SelectItem>
+                  <SelectItem value="aguardando_assinatura">Aguardando Assinatura</SelectItem>
                   <SelectItem value="fechada">Fechada</SelectItem>
                   <SelectItem value="entregue">Entregue</SelectItem>
                 </SelectContent>

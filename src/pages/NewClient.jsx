@@ -462,6 +462,22 @@ export default function NewClient() {
             />
           </div>
 
+          {/* Email for Contract Signatures */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <User className="w-4 h-4" />
+              Email para Assinaturas de Contrato (opcional)
+            </Label>
+            <Input
+              type="email"
+              placeholder="Ex: joao@clinica.com"
+              value={formData.contract_signature_email}
+              onChange={(e) => setFormData({ ...formData, contract_signature_email: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+            <p className="text-xs text-slate-500">Email que receberá os contratos para assinatura eletrônica</p>
+          </div>
+
           {/* Phone */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
@@ -597,16 +613,22 @@ export default function NewClient() {
           {/* Budget */}
           <div className="space-y-2">
             <Label className="text-slate-700">Orçamento Disponível (opcional)</Label>
-            <Input
-              type="number"
-              placeholder="Ex: 75000"
-              value={formData.available_budget}
-              onChange={(e) => setFormData({ ...formData, available_budget: e.target.value })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
-              min="0"
-              max="150000"
-            />
-            <p className="text-xs text-slate-500">De R$ 0 a R$ 150.000</p>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">R$</span>
+              <Input
+                type="text"
+                placeholder="70000"
+                value={formData.available_budget}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setFormData({ ...formData, available_budget: value ? parseInt(value) : '' });
+                }}
+                className="h-14 text-lg rounded-xl border-2 focus:border-orange-500 pl-12"
+              />
+            </div>
+            <p className="text-xs text-slate-500">
+              {formData.available_budget ? `R$ ${parseFloat(formData.available_budget).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Digite apenas números - De R$ 0 a R$ 150.000'}
+            </p>
           </div>
 
           {/* Decision Deadline */}

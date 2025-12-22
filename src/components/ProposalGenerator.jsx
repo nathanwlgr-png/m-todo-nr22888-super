@@ -162,6 +162,15 @@ export default function ProposalGenerator({ client, onProposalGenerated }) {
         related_sale_id: selectedSale || null,
         is_signed: false
       });
+
+      // Abrir email para envio
+      const emailBody = `Olá ${client.first_name},\n\nSegue em anexo a proposta comercial para ${selectedSale ? sales.find(s => s.id === selectedSale)?.equipment_name : 'nossos equipamentos'}.\n\nEstou à disposição para esclarecer qualquer dúvida.\n\nAtenciosamente,\n${user?.full_name || 'Equipe Venda NR'}`;
+      
+      const emailTo = client.contract_signature_email || client.email;
+      
+      if (emailTo) {
+        window.open(`mailto:${emailTo}?subject=${encodeURIComponent(documentTitle)}&body=${encodeURIComponent(emailBody)}`, '_blank');
+      }
     } catch (error) {
       console.error('Erro ao salvar proposta:', error);
       toast.error('Erro ao salvar proposta');
