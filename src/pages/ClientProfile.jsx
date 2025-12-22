@@ -75,6 +75,7 @@ import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
 import ConsumableSalesAnalytics from '@/components/ConsumableSalesAnalytics';
 import LabNeedsEditor from '@/components/LabNeedsEditor';
+import AIProposalSelector from '@/components/AIProposalSelector';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
 

@@ -19,7 +19,9 @@ import {
   User, 
   Building2, 
   UserCog,
-  Loader2
+  Loader2,
+  MapPin,
+  Navigation
 } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 
@@ -134,6 +136,7 @@ export default function NewClient() {
     email: '',
     phone: '',
     address: '',
+    cep: '',
     city: '',
     clinic_name: '',
     current_equipment: '',
@@ -142,11 +145,94 @@ export default function NewClient() {
     available_budget: '',
     decision_deadline: ''
   });
+
+  const [gettingLocation, setGettingLocation] = useState(false);
   
   const [motivators, setMotivators] = useState([]);
   const [newMotivator, setNewMotivator] = useState('');
   const [objections, setObjections] = useState([]);
   const [newObjection, setNewObjection] = useState('');
+
+  const getLocationAndAddress = async () => {
+    setGettingLocation(true);
+    try {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada pelo navegador');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          try {
+            // Usar API de geocoding reverso para obter endereço
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            if (data.address) {
+              const street = data.address.road || '';
+              const number = data.address.house_number || '';
+              const neighborhood = data.address.neighbourhood || data.address.suburb || '';
+              const city = data.address.city || data.address.town || data.address.village || '';
+              const state = data.address.state || '';
+              const postcode = data.address.postcode || '';
+              
+              const fullAddress = [
+                street,
+                number,
+                neighborhood,
+                city,
+                state
+              ].filter(Boolean).join(', ');
+              
+              setFormData({
+                ...formData,
+                address: fullAddress,
+                city: city,
+                cep: postcode
+              });
+              
+              alert('Localização capturada com sucesso!');
+            }
+          } catch (error) {
+            alert('Erro ao obter endereço. Tente novamente.');
+          }
+          setGettingLocation(false);
+        },
+        (error) => {
+          alert('Erro ao obter localização. Verifique as permissões.');
+          setGettingLocation(false);
+        }
+      );
+    } catch (error) {
+      alert('Erro ao acessar GPS');
+      setGettingLocation(false);
+    }
+  };
+
+  const fetchAddressByCEP = async (cep) => {
+    const cleanCEP = cep.replace(/\D/g, '');
+    if (cleanCEP.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        setFormData({
+          ...formData,
+          cep: cleanCEP,
+          address: `${data.logradouro}, ${data.bairro}`,
+          city: data.localidade
+        });
+      }
+    } catch (error) {
+      console.log('Erro ao buscar CEP');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!formData.first_name || !formData.decision_role) {
@@ -215,6 +301,7 @@ export default function NewClient() {
         email: '',
         phone: '',
         address: '',
+        cep: '',
         city: '',
         clinic_name: '',
         current_equipment: '',
@@ -388,6 +475,44 @@ export default function NewClient() {
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
             <p className="text-xs text-slate-500">Formato: código do país + DDD + número</p>
+          </div>
+
+          {/* CEP */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <MapPin className="w-4 h-4" />
+              CEP (opcional)
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ex: 00000-000"
+                value={formData.cep}
+                onChange={(e) => {
+                  const cep = e.target.value;
+                  setFormData({ ...formData, cep });
+                  if (cep.replace(/\D/g, '').length === 8) {
+                    fetchAddressByCEP(cep);
+                  }
+                }}
+                className="h-14 text-lg rounded-xl border-2 focus:border-orange-500 flex-1"
+              />
+              <Button
+                type="button"
+                onClick={getLocationAndAddress}
+                disabled={gettingLocation}
+                variant="outline"
+                className="h-14 px-4"
+              >
+                {gettingLocation ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Navigation className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-slate-500">
+              Preenche automaticamente ou use GPS →
+            </p>
           </div>
 
           {/* Address */}
