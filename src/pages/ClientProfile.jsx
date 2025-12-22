@@ -598,15 +598,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
-        {/* Pipeline AI Assistant */}
-        <PipelineAIAssistant 
-          client={client}
-          interactions={interactions}
-          visits={visits}
-          sales={sales}
-        />
-
-        {/* Pipeline Visual */}
+        {/* Pipeline Visual - Essencial para Vendas */}
         <PipelineVisual 
           client={client} 
           onStageClick={(stage) => {
@@ -617,23 +609,25 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
-        {/* Botão Registrar Interação */}
+        {/* Assistente IA - Ação Imediata */}
+        <PipelineAIAssistant 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
+        {/* Registrar Interação */}
         <AddInteractionDialog client={client} />
 
-        {/* Tabs: Interações, Tarefas, Documentos, Timeline */}
+        {/* Tabs Consolidadas */}
         <Tabs defaultValue="interactions" className="w-full">
-          <TabsList className="grid w-full grid-cols-4" data-tutorial="interactions">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="interactions">
-              Interações ({interactions.length})
+              Histórico ({interactions.length})
             </TabsTrigger>
             <TabsTrigger value="tasks">
               Tarefas ({clientTasks.filter(t => t.status === 'pendente').length})
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              Docs ({documents.length})
-            </TabsTrigger>
-            <TabsTrigger value="timeline">
-              Timeline
             </TabsTrigger>
           </TabsList>
 
@@ -642,12 +636,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             <InteractionTimeline interactions={interactions} />
           </TabsContent>
 
-          {/* Tarefas Ativas */}
+          {/* Tarefas Pendentes */}
           <TabsContent value="tasks" className="space-y-2 mt-4">
             {clientTasks.filter(t => t.status === 'pendente').length === 0 ? (
               <Card className="p-6 text-center">
                 <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Nenhuma tarefa ativa</p>
+                <p className="text-sm text-slate-500">Nenhuma tarefa pendente</p>
               </Card>
             ) : (
               clientTasks.filter(t => t.status === 'pendente').map(task => (
@@ -667,7 +661,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                           {task.priority}
                         </Badge>
                         <span className="text-xs text-slate-500">
-                          Vence: {format(new Date(task.due_date), 'dd/MM/yyyy')}
+                          {format(new Date(task.due_date), 'dd/MM/yyyy')}
                         </span>
                       </div>
                     </div>
@@ -675,70 +669,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                 </Card>
               ))
             )}
-          </TabsContent>
-
-          {/* Documentos */}
-          <TabsContent value="documents" className="space-y-2 mt-4">
-            <Button
-              onClick={() => setUploadDialogOpen(true)}
-              variant="outline"
-              className="w-full h-12 border-2 border-dashed border-indigo-300 hover:bg-indigo-50"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Fazer Upload
-            </Button>
-
-            {documents.length === 0 ? (
-              <Card className="p-6 text-center">
-                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Nenhum documento</p>
-              </Card>
-            ) : (
-              documents.map(doc => (
-                <Card key={doc.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-800">{doc.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">{doc.type}</Badge>
-                        <span className="text-xs text-slate-500">
-                          {format(new Date(doc.created_date), 'dd/MM/yyyy')}
-                        </span>
-                      </div>
-                      {doc.notes && (
-                        <p className="text-xs text-slate-600 mt-2">{doc.notes}</p>
-                      )}
-                    </div>
-                    {doc.file_url && (
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 hover:bg-slate-100 rounded-lg"
-                      >
-                        <Download className="w-4 h-4 text-indigo-600" />
-                      </a>
-                    )}
-                  </div>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-
-          {/* Timeline */}
-          <TabsContent value="timeline" className="mt-4">
-            <ClientTimeline events={timelineEvents} />
           </TabsContent>
         </Tabs>
-
-        {/* Funnel Persuasion Triggers */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🎯 Gatilhos por Etapa do Funil</h3>
-          <FunnelPersuasionTriggers client={client} />
-        </div>
 
         {/* Next Action */}
         {client.next_action && (
