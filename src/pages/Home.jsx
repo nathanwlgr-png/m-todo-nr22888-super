@@ -329,6 +329,24 @@ export default function Home() {
             WhatsApp Inbox
           </Button>
         </Link>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('ImportPriceList')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-emerald-200 text-emerald-700">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Importar Preços
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('EquipmentPriceList')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Tabela de Preços
+            </Button>
+          </Link>
+        </div>
         </div>
 
       {/* Recent Clients */}

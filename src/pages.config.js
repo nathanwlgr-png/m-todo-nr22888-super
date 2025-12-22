@@ -35,6 +35,9 @@ import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import ImportPriceList from './pages/ImportPriceList';
+import EquipmentPriceList from './pages/EquipmentPriceList';
+import ConsumablePriceList from './pages/ConsumablePriceList';
 import __Layout from './Layout.jsx';
 
 
@@ -76,6 +79,9 @@ export const PAGES = {
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
+    "ImportPriceList": ImportPriceList,
+    "EquipmentPriceList": EquipmentPriceList,
+    "ConsumablePriceList": ConsumablePriceList,
 }
 
 export const pagesConfig = {
