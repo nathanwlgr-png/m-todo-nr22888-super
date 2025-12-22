@@ -17,7 +17,8 @@ import {
   Calendar,
   Search,
   FileText,
-  Mic
+  Mic,
+  Settings
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -81,6 +82,11 @@ export default function Home() {
             <h1 className="text-xl font-bold text-white">Venda NR</h1>
             <p className="text-orange-300 text-sm font-medium">Inteligência em Vendas</p>
           </div>
+          <Link to={createPageUrl('ContactSettings')}>
+            <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
+              <Settings className="w-5 h-5 text-orange-400 mx-auto" />
+            </button>
+          </Link>
           <Link to={createPageUrl('MyProfile')}>
             <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
               <svg className="w-5 h-5 text-orange-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
