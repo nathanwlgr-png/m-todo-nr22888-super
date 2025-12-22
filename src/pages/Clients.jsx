@@ -42,6 +42,11 @@ export default function Clients() {
     queryFn: () => base44.entities.Client.list('-updated_date'),
   });
 
+  const { data: sales = [] } = useQuery({
+    queryKey: ['sales'],
+    queryFn: () => base44.entities.Sale.list(),
+  });
+
   // Lista única de cidades
   const cities = useMemo(() => {
     const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
@@ -280,9 +285,13 @@ export default function Clients() {
             </Button>
           </div>
         ) : (
-          filteredClients.map((client) => (
-            <ClientCard key={client.id} client={client} />
-          ))
+          filteredClients.map((client) => {
+            const hasPurchase = sales.some(s => 
+              s.client_id === client.id && 
+              (s.status === 'fechada' || s.status === 'entregue')
+            );
+            return <ClientCard key={client.id} client={client} hasPurchase={hasPurchase} />;
+          })
         )}
       </div>
     </div>

@@ -26,7 +26,7 @@ const clientTypeLabels = {
   clinica_especializada: 'Clínica Especializada'
 };
 
-export default function ClientCard({ client }) {
+export default function ClientCard({ client, hasPurchase = false }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   
   const handleMoreClick = (e) => {
@@ -38,7 +38,7 @@ export default function ClientCard({ client }) {
   return (
     <>
       <Link to={createPageUrl(`ClientProfile?id=${client.id}`)}>
-        <Card className="p-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-slate-800 active:scale-[0.98]">
+        <Card className={`p-4 hover:shadow-lg transition-all duration-200 border-l-4 ${hasPurchase ? 'border-l-green-600 bg-green-50/50' : 'border-l-slate-800'} active:scale-[0.98]`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
