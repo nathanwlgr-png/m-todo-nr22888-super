@@ -121,10 +121,12 @@ ${monthlySales.map(s => `
 ────────────────────────────────────
 ${newClients.map(c => `
 • ${c.first_name} (ID: ${c.id})
-  ${c.razao_social || c.clinic_name || 'Sem empresa'}
-  CNPJ: ${c.cnpj || 'N/A'} | ${c.city || 'Cidade N/A'}
-  Perfil: ${c.behavioral_profile}
-  Score: ${c.purchase_score}%
+  - Razão Social: ${c.razao_social || 'Não informada'}
+  - CNPJ: ${c.cnpj || 'Não informado'}
+  - Clínica: ${c.clinic_name || 'Não informada'}
+  - Cidade: ${c.city || 'Não informada'}
+  - Perfil: ${c.behavioral_profile}
+  - Score: ${c.purchase_score}%
 `).join('\n')}
 
 ────────────────────────────────────

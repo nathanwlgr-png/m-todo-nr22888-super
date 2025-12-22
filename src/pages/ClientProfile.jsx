@@ -1192,9 +1192,10 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             <div className="space-y-2">
               <Label>Data de Nascimento</Label>
               <Input
-                type="date"
+                type="text"
                 value={editData.birthdate}
                 onChange={(e) => setEditData({...editData, birthdate: e.target.value})}
+                placeholder="DD/MM/AAAA ou AAAA-MM-DD"
               />
             </div>
 
