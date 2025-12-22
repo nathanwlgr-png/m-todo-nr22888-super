@@ -3,20 +3,21 @@ import Calendar from './pages/Calendar';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
+import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Equipment from './pages/Equipment';
 import FollowUpAssistant from './pages/FollowUpAssistant';
+import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import Home from './pages/Home';
 import NewClient from './pages/NewClient';
+import NumerologyAnalysis from './pages/NumerologyAnalysis';
+import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import Reports from './pages/Reports';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
-import NumerologyAnalysis from './pages/NumerologyAnalysis';
-import PostVisitAnalysis from './pages/PostVisitAnalysis';
-import FollowUpSequences from './pages/FollowUpSequences';
-import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
+import SalesFunnel from './pages/SalesFunnel';
 import __Layout from './Layout.jsx';
 
 
@@ -26,20 +27,21 @@ export const PAGES = {
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
+    "CreateFollowUpSequence": CreateFollowUpSequence,
     "Equipment": Equipment,
     "FollowUpAssistant": FollowUpAssistant,
+    "FollowUpSequences": FollowUpSequences,
     "GlobalSearch": GlobalSearch,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "Home": Home,
     "NewClient": NewClient,
+    "NumerologyAnalysis": NumerologyAnalysis,
+    "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
     "Reports": Reports,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
-    "NumerologyAnalysis": NumerologyAnalysis,
-    "PostVisitAnalysis": PostVisitAnalysis,
-    "FollowUpSequences": FollowUpSequences,
-    "CreateFollowUpSequence": CreateFollowUpSequence,
+    "SalesFunnel": SalesFunnel,
 }
 
 export const pagesConfig = {

@@ -205,12 +205,21 @@ export default function Home() {
           </Link>
         </div>
 
-        <Link to={createPageUrl('Reports')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Relatórios
-          </Button>
-        </Link>
+        <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('SalesFunnel')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+              <Target className="w-4 h-4 mr-2" />
+              Funil
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('Reports')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Relatórios
+            </Button>
+          </Link>
+        </div>
 
         <Link to={createPageUrl('FollowUpSequences')}>
           <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
