@@ -79,6 +79,7 @@ import AIProposalSelector from '@/components/AIProposalSelector';
 import PostVisitDialog from '@/components/PostVisitDialog';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
+import VisitReportPDF from '@/components/VisitReportPDF';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -1021,6 +1022,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               </h3>
               <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
             </Card>
+
+            {/* Relatório PDF de Visitas */}
+            <VisitReportPDF client={client} visitHistory={client.visit_history || []} />
           </TabsContent>
 
           {/* Interações */}

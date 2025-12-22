@@ -25,7 +25,10 @@ export default function PostVisitDialog({ client, visitId, open, onOpenChange })
     next_step: '',
     schedule_next: false,
     next_visit_date: '',
-    next_visit_type: 'followup'
+    next_visit_type: 'followup',
+    triggers_used: [],
+    techniques_used: [],
+    objections_presented: []
   });
 
   const { data: equipments = [] } = useQuery({
@@ -127,7 +130,21 @@ Retorne JSON:
 
   const handleComplete = async () => {
     try {
-      // 1. Atualizar visita como realizada
+      // 1. Salvar histórico da visita no cliente
+      const visitHistory = client.visit_history || [];
+      const newVisitRecord = {
+        date: new Date().toISOString(),
+        notes: visitData.result_notes,
+        triggers_used: visitData.triggers_used,
+        techniques_used: visitData.techniques_used,
+        objections_presented: visitData.objections_presented,
+        equipment_interest: visitData.equipment_interest,
+        budget_confirmed: visitData.budget_confirmed,
+        next_action: visitData.next_step
+      };
+      visitHistory.push(newVisitRecord);
+
+      // 2. Atualizar visita como realizada
       if (visitId) {
         await updateVisitMutation.mutateAsync({
           id: visitId,
@@ -138,10 +155,10 @@ Retorne JSON:
         });
       }
 
-      // 2. Atualizar perfil do cliente automaticamente
+      // 3. Atualizar perfil do cliente automaticamente
       const updatedPains = [...(client.main_pains || []), ...visitData.new_pains];
       const updatedMotivators = [...(client.purchase_motivators || []), ...visitData.new_motivators];
-      const updatedObjections = [...(client.real_objections || []), ...visitData.new_objections];
+      const updatedObjections = [...(client.real_objections || []), ...visitData.new_objections, ...visitData.objections_presented];
 
       await updateClientMutation.mutateAsync({
         main_pains: updatedPains,
@@ -149,13 +166,14 @@ Retorne JSON:
         real_objections: updatedObjections,
         available_budget: visitData.budget_confirmed,
         last_visit_date: new Date().toISOString().split('T')[0],
-        notes: `${client.notes || ''}\n\n[${new Date().toLocaleDateString()}] ${visitData.result_notes}`.trim()
+        notes: `${client.notes || ''}\n\n[${new Date().toLocaleDateString()}] ${visitData.result_notes}`.trim(),
+        visit_history: visitHistory
       });
 
-      // 3. Gerar sugestão de equipamento
+      // 4. Gerar sugestão de equipamento
       await generateEquipmentSuggestion();
 
-      // 4. Agendar próxima visita se solicitado
+      // 5. Agendar próxima visita se solicitado
       if (visitData.schedule_next && visitData.next_visit_date) {
         await createVisitMutation.mutateAsync({
           client_id: client.id,
@@ -197,6 +215,102 @@ Retorne JSON:
                 rows={4}
                 className="resize-none"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Gatilhos Mentais Usados</Label>
+              <Input
+                placeholder="Ex: Escassez, Autoridade, Prova Social..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    setVisitData({
+                      ...visitData,
+                      triggers_used: [...visitData.triggers_used, e.target.value.trim()]
+                    });
+                    e.target.value = '';
+                  }
+                }}
+              />
+              {visitData.triggers_used.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {visitData.triggers_used.map((trigger, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm cursor-pointer"
+                      onClick={() => setVisitData({
+                        ...visitData,
+                        triggers_used: visitData.triggers_used.filter((_, i) => i !== idx)
+                      })}
+                    >
+                      {trigger} ×
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Técnicas de Vendas Usadas</Label>
+              <Input
+                placeholder="Ex: SPIN, BANT, Storytelling..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    setVisitData({
+                      ...visitData,
+                      techniques_used: [...visitData.techniques_used, e.target.value.trim()]
+                    });
+                    e.target.value = '';
+                  }
+                }}
+              />
+              {visitData.techniques_used.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {visitData.techniques_used.map((tech, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm cursor-pointer"
+                      onClick={() => setVisitData({
+                        ...visitData,
+                        techniques_used: visitData.techniques_used.filter((_, i) => i !== idx)
+                      })}
+                    >
+                      {tech} ×
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Objeções Apresentadas pelo Cliente</Label>
+              <Input
+                placeholder="Ex: Preço muito alto, preciso pensar..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    setVisitData({
+                      ...visitData,
+                      objections_presented: [...visitData.objections_presented, e.target.value.trim()]
+                    });
+                    e.target.value = '';
+                  }
+                }}
+              />
+              {visitData.objections_presented.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {visitData.objections_presented.map((obj, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm cursor-pointer"
+                      onClick={() => setVisitData({
+                        ...visitData,
+                        objections_presented: visitData.objections_presented.filter((_, i) => i !== idx)
+                      })}
+                    >
+                      {obj} ×
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
