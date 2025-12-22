@@ -30,7 +30,8 @@ import {
 import ChecklistItem from '@/components/ChecklistItem';
 import PersuasionPhrases from '@/components/PersuasionPhrases';
 import NumerologyCard from '@/components/NumerologyCard';
-import ObjectionsCard from '@/components/ObjectionsCard';
+import InvestigationQuestions from '@/components/InvestigationQuestions';
+import CommitmentStrategy from '@/components/CommitmentStrategy';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -51,7 +52,6 @@ export default function PreVisitChecklist() {
     objective: false,
     questions: false,
     pains: false,
-    objections: false,
     triggers: false,
     closing: false,
     planB: false
@@ -318,28 +318,31 @@ export default function PreVisitChecklist() {
           )}
         </Card>
 
-        {/* 6. Objections */}
-        <Card className={`p-4 ${checklist.objections ? 'border-emerald-500 border-2' : ''}`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-slate-600" />
-              <h3 className="font-semibold text-slate-700">Objeções Prováveis</h3>
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setChecklist(prev => ({ ...prev, objections: !prev.objections }))}
-            >
-              {checklist.objections ? <Check className="w-4 h-4 text-emerald-500" /> : 'Ver'}
-            </Button>
+        {/* Investigation Questions */}
+        <Card className="p-4 border-purple-200 border-2">
+          <div className="flex items-center gap-2 mb-3">
+            <HelpCircle className="w-5 h-5 text-purple-600" />
+            <h3 className="font-semibold text-slate-700">Perguntas de Investigação</h3>
           </div>
-          {checklist.objections && (
-            <ObjectionsCard 
-              clientType={client?.client_type} 
-              decisionRole={client?.decision_role} 
-            />
-          )}
+          <InvestigationQuestions 
+            clientType={client?.client_type}
+            numerologyNumber={client?.numerology_number}
+          />
         </Card>
+
+        {/* Commitment Strategy */}
+        <Card className="p-4 border-indigo-200 border-2">
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-semibold text-slate-700">Como Obter Compromisso</h3>
+          </div>
+          <CommitmentStrategy 
+            clientType={client?.client_type}
+            numerologyNumber={client?.numerology_number}
+          />
+        </Card>
+
+
 
         {/* 7. Triggers */}
         <Card className={`p-4 ${checklist.triggers ? 'border-emerald-500 border-2' : ''}`}>
