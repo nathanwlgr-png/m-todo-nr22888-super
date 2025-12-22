@@ -331,6 +331,24 @@ export default function Home() {
         </Link>
 
         <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('ProposalTemplates')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+              <FileText className="w-4 h-4 mr-2" />
+              Templates
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('SignedContracts')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Contratos
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Link to={createPageUrl('ImportPriceList')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-emerald-200 text-emerald-700">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

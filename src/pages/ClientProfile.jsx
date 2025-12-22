@@ -64,6 +64,7 @@ import InteractionTimeline from '@/components/InteractionTimeline';
 import AddInteractionDialog from '@/components/AddInteractionDialog';
 import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
+import ProposalGenerator from '@/components/ProposalGenerator';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -435,6 +436,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             Agendar Visita
           </Button>
         </div>
+
+        {/* Gerador de Propostas */}
+        <ProposalGenerator 
+          client={client}
+          onProposalGenerated={() => {
+            queryClient.invalidateQueries(['client-documents']);
+          }}
+        />
 
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
