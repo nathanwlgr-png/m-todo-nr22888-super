@@ -221,6 +221,22 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('ClientsMap')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+              <MapPin className="w-4 h-4 mr-2" />
+              Mapa de Clientes
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('ScheduledAgenda')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
+              <Calendar className="w-4 h-4 mr-2" />
+              Agenda Programada
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Link to={createPageUrl('TaskCalendar')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <Calendar className="w-4 h-4 mr-2" />
