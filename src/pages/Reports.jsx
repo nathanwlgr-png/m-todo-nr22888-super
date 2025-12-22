@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Download, FileText, Loader2, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Loader2, TrendingUp, Sparkles, Target, Users, Calendar, BarChart3, Brain } from 'lucide-react';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
 
@@ -43,6 +43,9 @@ export default function Reports() {
     clientType: 'all',
     createdBy: 'all'
   });
+
+  const [aiInsights, setAiInsights] = useState(null);
+  const [analyzingInsights, setAnalyzingInsights] = useState(false);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ['clients'],
@@ -117,6 +120,89 @@ export default function Reports() {
       cold
     };
   }, [filteredClients]);
+
+  const advancedMetrics = useMemo(() => {
+    const clientsByMonth = {};
+    clients.forEach(c => {
+      const month = c.created_date ? c.created_date.substring(0, 7) : 'unknown';
+      clientsByMonth[month] = (clientsByMonth[month] || 0) + 1;
+    });
+
+    const avgSalesCycle = visits.filter(v => v.status === 'realizada').length > 0
+      ? Math.round(visits.filter(v => v.status === 'realizada').length / (sales.filter(s => s.status === 'fechada').length || 1))
+      : 0;
+
+    const revenueByStatus = {
+      quente: clients.filter(c => c.status === 'quente').reduce((sum, c) => sum + (c.projected_revenue || 0), 0),
+      morno: clients.filter(c => c.status === 'morno').reduce((sum, c) => sum + (c.projected_revenue || 0), 0),
+      frio: clients.filter(c => c.status === 'frio').reduce((sum, c) => sum + (c.projected_revenue || 0), 0)
+    };
+
+    const revenuePerClient = clients.length > 0
+      ? Math.round(sales.filter(s => s.status === 'fechada').reduce((sum, s) => sum + (s.sale_value || 0), 0) / clients.length)
+      : 0;
+
+    return {
+      clientsByMonth,
+      avgSalesCycle,
+      revenueByStatus,
+      revenuePerClient
+    };
+  }, [clients, visits, sales]);
+
+  const generateAIInsights = async () => {
+    setAnalyzingInsights(true);
+
+    const prompt = `
+Analise os dados de vendas e clientes abaixo e forneça insights estratégicos:
+
+VENDAS:
+- Total fechadas: ${salesMetrics.total}
+- Valor total: R$ ${salesMetrics.totalValue}
+- Ticket médio: R$ ${salesMetrics.avgValue}
+- Taxa de conversão: ${salesMetrics.conversionRate}%
+- Ciclo médio de vendas: ${advancedMetrics.avgSalesCycle} visitas
+
+CLIENTES:
+- Total: ${clientMetrics.total}
+- Pipeline: R$ ${clientMetrics.totalRevenue}
+- Score médio: ${clientMetrics.avgScore}%
+- Quentes: ${clientMetrics.hot}, Mornos: ${clientMetrics.warm}, Frios: ${clientMetrics.cold}
+- Receita por status: Quentes R$${advancedMetrics.revenueByStatus.quente}, Mornos R$${advancedMetrics.revenueByStatus.morno}, Frios R$${advancedMetrics.revenueByStatus.frio}
+
+HISTÓRICO:
+- Visitas realizadas: ${visits.filter(v => v.status === 'realizada').length}
+- Crescimento de clientes nos últimos meses: ${JSON.stringify(advancedMetrics.clientsByMonth)}
+
+Com base nisso, forneça em português brasileiro:
+1. market_trends: Array com 3 tendências de mercado identificadas (seja específico sobre equipamentos veterinários)
+2. client_behavior_insights: Array com 3 insights sobre comportamento dos clientes
+3. performance_bottlenecks: Array com 2-3 gargalos que estão impedindo mais vendas
+4. proactive_actions: Array com 4-5 ações proativas e específicas para otimizar vendas (cada uma deve ser acionável e incluir quem fazer, como fazer, e resultado esperado)
+5. revenue_opportunities: Número estimado de receita adicional possível nos próximos 3 meses em R$
+6. priority_focus: String com o foco prioritário único para o próximo mês
+
+Seja específico, prático e focado em AÇÃO. Pense como um consultor de vendas veterinárias.
+    `;
+
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          market_trends: { type: "array", items: { type: "string" } },
+          client_behavior_insights: { type: "array", items: { type: "string" } },
+          performance_bottlenecks: { type: "array", items: { type: "string" } },
+          proactive_actions: { type: "array", items: { type: "string" } },
+          revenue_opportunities: { type: "number" },
+          priority_focus: { type: "string" }
+        }
+      }
+    });
+
+    setAiInsights(response);
+    setAnalyzingInsights(false);
+  };
 
   const exportClientsCSV = () => {
     const headers = ['Nome', 'Tipo', 'Status', 'Score', 'Receita Projetada', 'Cidade', 'Data Cadastro', 'Vendedor'];
@@ -246,6 +332,165 @@ export default function Reports() {
             </div>
           </div>
         </Card>
+
+        {/* Advanced Metrics Dashboard */}
+        <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 className="w-5 h-5 text-blue-600" />
+            <h3 className="font-semibold text-slate-800">Dashboard Avançado</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-slate-600">Ciclo de Vendas</p>
+              <p className="text-xl font-bold text-blue-600">{advancedMetrics.avgSalesCycle}</p>
+              <p className="text-xs text-slate-500">visitas até fechar</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-600">Receita/Cliente</p>
+              <p className="text-xl font-bold text-blue-600">
+                R$ {(advancedMetrics.revenuePerClient / 1000).toFixed(0)}k
+              </p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-xs text-slate-600 mb-2">Pipeline por Status</p>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-red-600">🔥 Quentes</span>
+                  <span className="font-semibold">R$ {(advancedMetrics.revenueByStatus.quente / 1000).toFixed(0)}k</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-yellow-600">🌡️ Mornos</span>
+                  <span className="font-semibold">R$ {(advancedMetrics.revenueByStatus.morno / 1000).toFixed(0)}k</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-blue-600">❄️ Frios</span>
+                  <span className="font-semibold">R$ {(advancedMetrics.revenueByStatus.frio / 1000).toFixed(0)}k</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* AI Insights Button */}
+        {!aiInsights && (
+          <Button
+            onClick={generateAIInsights}
+            disabled={analyzingInsights || clients.length === 0}
+            className="w-full h-14 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+          >
+            {analyzingInsights ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Analisando Dados...
+              </>
+            ) : (
+              <>
+                <Brain className="w-5 h-5 mr-2" />
+                Gerar Análise com IA
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* AI Insights */}
+        {aiInsights && (
+          <>
+            {/* Market Trends */}
+            <Card className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-5 h-5 text-violet-600" />
+                <h3 className="font-semibold text-slate-800">Tendências de Mercado</h3>
+              </div>
+              <ul className="space-y-2">
+                {aiInsights.market_trends?.map((trend, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-violet-500 mt-0.5">📊</span>
+                    {trend}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Client Behavior */}
+            <Card className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-5 h-5 text-cyan-600" />
+                <h3 className="font-semibold text-slate-800">Comportamento dos Clientes</h3>
+              </div>
+              <ul className="space-y-2">
+                {aiInsights.client_behavior_insights?.map((insight, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-cyan-500 mt-0.5">👥</span>
+                    {insight}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Performance Bottlenecks */}
+            <Card className="p-4 bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-5 h-5 text-red-600" />
+                <h3 className="font-semibold text-slate-800">Gargalos de Performance</h3>
+              </div>
+              <ul className="space-y-2">
+                {aiInsights.performance_bottlenecks?.map((bottleneck, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-red-500 mt-0.5">⚠️</span>
+                    {bottleneck}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Proactive Actions */}
+            <Card className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-semibold text-slate-800">Ações Proativas Recomendadas</h3>
+              </div>
+              <ul className="space-y-2">
+                {aiInsights.proactive_actions?.map((action, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700 bg-white p-2 rounded-lg">
+                    <span className="text-emerald-600 font-bold mt-0.5">{i + 1}.</span>
+                    {action}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Revenue Opportunity */}
+            {aiInsights.revenue_opportunities && (
+              <Card className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-600">Oportunidade de Receita (3 meses)</span>
+                  <span className="text-2xl font-bold text-amber-600">
+                    R$ {(aiInsights.revenue_opportunities / 1000).toFixed(0)}k
+                  </span>
+                </div>
+              </Card>
+            )}
+
+            {/* Priority Focus */}
+            {aiInsights.priority_focus && (
+              <Card className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-orange-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-5 h-5 text-orange-600" />
+                  <h3 className="font-semibold text-slate-800">Foco Prioritário do Mês</h3>
+                </div>
+                <p className="text-slate-700 font-medium">{aiInsights.priority_focus}</p>
+              </Card>
+            )}
+
+            <Button
+              onClick={() => setAiInsights(null)}
+              variant="outline"
+              className="w-full"
+            >
+              Gerar Nova Análise
+            </Button>
+          </>
+        )}
 
         {/* Filters */}
         <Card className="p-4">
