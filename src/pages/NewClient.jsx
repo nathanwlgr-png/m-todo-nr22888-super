@@ -154,16 +154,8 @@ export default function NewClient() {
     setLoading(true);
     
     try {
-      const nameForNumerology = formData.full_name || formData.first_name;
-      const numerologyNumber = calculateNumerology(nameForNumerology);
-      const lifePathNumber = calculateLifePath(formData.birthdate);
-      
       const clientData = {
         ...formData,
-        numerology_number: numerologyNumber,
-        life_path_number: lifePathNumber,
-        behavioral_profile: getBehavioralProfile(numerologyNumber),
-        decision_style: getDecisionStyle(numerologyNumber),
         purchase_motivators: motivators,
         real_objections: objections,
         purchase_score: Math.floor(Math.random() * 40) + 30,
@@ -177,7 +169,7 @@ export default function NewClient() {
       await base44.integrations.Core.SendEmail({
         to: client.created_by,
         subject: `Novo cliente cadastrado: ${client.first_name}`,
-        body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso.\n\nTipo: ${client.client_type || 'Não especificado'}\nPerfil: ${client.behavioral_profile}\n\nAcesse o sistema para começar o atendimento!`
+        body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso.\n\nTipo: ${client.client_type || 'Não especificado'}\n\nAcesse o sistema para começar o atendimento!`
       });
     } catch (error) {
       console.log('Email automation failed');
@@ -206,7 +198,8 @@ export default function NewClient() {
       navigate(createPageUrl(`ClientProfile?id=${client.id}`));
     } catch (error) {
       console.error('Erro ao criar cliente:', error);
-      alert('Erro ao criar cliente. Tente novamente.');
+      const errorMessage = error?.message || 'Erro desconhecido';
+      alert(`Erro ao criar cliente: ${errorMessage}\n\nTente novamente.`);
     } finally {
       setLoading(false);
     }
@@ -291,7 +284,6 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
-            <p className="text-xs text-amber-600">✨ Nome completo gera numerologia mais precisa</p>
           </div>
 
           {/* Birthdate */}
@@ -301,12 +293,12 @@ export default function NewClient() {
               Data de Nascimento (opcional)
             </Label>
             <Input
-              type="date"
+              type="text"
               value={formData.birthdate}
               onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+              placeholder="DD/MM/AAAA"
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
-            <p className="text-xs text-purple-600">🔮 Com a data, fazemos análise numerológica completa</p>
           </div>
 
           {/* Email */}
@@ -421,22 +413,16 @@ export default function NewClient() {
           {/* Budget */}
           <div className="space-y-2">
             <Label className="text-slate-700">Orçamento Disponível (opcional)</Label>
-            <Select
+            <Input
+              type="number"
               value={formData.available_budget}
-              onValueChange={(value) => setFormData({ ...formData, available_budget: value })}
-            >
-              <SelectTrigger className="h-14 text-base rounded-xl border-2">
-                <SelectValue placeholder="Faixa de investimento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
-                <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
-                <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
-                <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
-                <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
-                <SelectItem value="nao_informado">Não informado</SelectItem>
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData({ ...formData, available_budget: e.target.value })}
+              placeholder="0 a 100.000"
+              min="0"
+              max="100000"
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+            <p className="text-xs text-slate-500">Digite o valor em reais (0 a 100 mil)</p>
           </div>
 
           {/* Decision Deadline */}
