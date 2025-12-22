@@ -8,20 +8,20 @@ import Equipment from './pages/Equipment';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
+import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import Home from './pages/Home';
+import Leaderboard from './pages/Leaderboard';
 import NewClient from './pages/NewClient';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import Reports from './pages/Reports';
+import SalesFunnel from './pages/SalesFunnel';
+import TaskAutomation from './pages/TaskAutomation';
+import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
-import SalesFunnel from './pages/SalesFunnel';
-import TaskCalendar from './pages/TaskCalendar';
-import TaskAutomation from './pages/TaskAutomation';
-import Leaderboard from './pages/Leaderboard';
-import Goals from './pages/Goals';
 import __Layout from './Layout.jsx';
 
 
@@ -36,20 +36,20 @@ export const PAGES = {
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
     "GlobalSearch": GlobalSearch,
+    "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "Home": Home,
+    "Leaderboard": Leaderboard,
     "NewClient": NewClient,
     "NumerologyAnalysis": NumerologyAnalysis,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
     "Reports": Reports,
+    "SalesFunnel": SalesFunnel,
+    "TaskAutomation": TaskAutomation,
+    "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
-    "SalesFunnel": SalesFunnel,
-    "TaskCalendar": TaskCalendar,
-    "TaskAutomation": TaskAutomation,
-    "Leaderboard": Leaderboard,
-    "Goals": Goals,
 }
 
 export const pagesConfig = {
