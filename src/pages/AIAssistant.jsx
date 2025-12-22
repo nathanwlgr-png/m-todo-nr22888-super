@@ -17,7 +17,10 @@ import {
   Sparkles,
   Save,
   Copy,
-  Check
+  Check,
+  TrendingUp,
+  FileText,
+  Search
 } from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
@@ -46,6 +49,18 @@ export default function AIAssistant() {
     enabled: !!clientId
   });
 
+  const { data: visits = [] } = useQuery({
+    queryKey: ['client-visits', clientId],
+    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['client-tasks', clientId],
+    queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.update(clientId, data),
     onSuccess: () => queryClient.invalidateQueries(['client', clientId])
@@ -70,6 +85,17 @@ export default function AIAssistant() {
 
   const getSystemContext = () => {
     if (!client) return '';
+    
+    const interactionHistory = `
+HISTÓRICO DE INTERAÇÕES:
+- Total de visitas: ${visits.length}
+- Última visita: ${client.last_visit_date || 'Nenhuma ainda'}
+- Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
+- Dores identificadas: ${client.main_pains?.join(', ') || 'Não identificadas'}
+- Gatilhos usados: ${client.triggers_used?.join(', ') || 'Nenhum'}
+- Notas anteriores: ${client.notes?.substring(0, 200) || 'Sem notas'}
+    `;
+    
     return `
       Contexto do Cliente:
       - Nome: ${client.first_name}
@@ -78,9 +104,16 @@ export default function AIAssistant() {
       - Perfil comportamental: ${client.behavioral_profile}
       - Estilo de decisão: ${client.decision_style}
       - Número numerológico: ${client.numerology_number}
+      - Tom de voz: ${client.client_tone || 'não observado'}
+      - Comunicação recomendada: ${client.recommended_communication || 'padrão'}
+      - Status: ${client.status}
+      - Score de compra: ${client.purchase_score}%
       - Objetivo da visita: ${client.visit_objective || 'diagnosticar'}
       
+      ${interactionHistory}
+      
       Você é um consultor de vendas especializado em equipamentos de diagnóstico veterinário POCT.
+      Use a Numerologia Pitagórica e o histórico do cliente para personalizar suas respostas.
       
       PRODUTOS:
       - Analisadores Bioquímicos: SMT-120VP, QT3
@@ -97,6 +130,7 @@ export default function AIAssistant() {
       - Tecnologia POCT de ponta
       
       Seja CONCISO (máximo 3 frases). Foco em ações práticas.
+      Adapte tom e conteúdo ao perfil numerológico e estilo de comunicação do cliente.
       Responda em português brasileiro.
     `;
   };
@@ -140,7 +174,51 @@ export default function AIAssistant() {
       closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
         Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
       followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.
-        Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.`
+        Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.`,
+      prospecting: `Crie técnicas de prospecção personalizadas para ${client?.first_name}.
+        
+        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
+        Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
+        Tom: ${client?.client_tone || 'padrão'}
+        
+        Baseado no perfil, sugira:
+        1) Melhor canal de contato (telefone, WhatsApp, email, presencial)
+        2) Melhor horário e frequência de abordagem
+        3) Estratégia de entrada (consultiva, técnica, ROI, emocional)
+        4) Primeira frase de impacto personalizada
+        
+        Seja prático e acionável.`,
+      needs: `Analise o histórico e preveja necessidades futuras de ${client?.first_name}.
+        
+        HISTÓRICO:
+        - Visitas: ${visits.length}
+        - Dores: ${client?.main_pains?.join(', ') || 'Não identificadas'}
+        - Status: ${client?.status}, Score: ${client?.purchase_score}%
+        - Equipamento atual: ${client?.current_equipment || 'Não informado'}
+        
+        Com base nisso, identifique:
+        1) Equipamento(s) complementar(es) que ele pode precisar em breve
+        2) Dores não exploradas ainda
+        3) Momento ideal para upsell/cross-sell
+        4) Gatilho emocional/prático a explorar na próxima interação
+        
+        Seja estratégico e preditivo.`,
+      proposal: `Crie uma proposta comercial personalizada para ${client?.first_name}.
+        
+        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
+        Tom de voz: ${client?.client_tone || 'padrão'}
+        Tipo: ${client?.client_type}
+        Dores: ${client?.main_pains?.join(', ') || 'Gerais'}
+        
+        Adapte o tom da proposta (técnico, emocional, visual, ROI) ao perfil numerológico.
+        
+        Estruture em 3 parágrafos curtos:
+        1) Abertura personalizada conectando com a dor específica
+        2) Solução com diferenciais (garantia 25 meses, bonificação insumos)
+        3) Call-to-action assertivo adaptado ao estilo de decisão
+        
+        Tom: ${client?.client_tone || 'profissional equilibrado'}
+        Foco em conversão imediata.`
     };
 
     const response = await base44.integrations.Core.InvokeLLM({
@@ -184,7 +262,10 @@ export default function AIAssistant() {
     question: 'Pergunta',
     objection: 'Controle de Objeções',
     closing: 'Fechamento',
-    followup: 'Follow-up'
+    followup: 'Follow-up',
+    prospecting: 'Prospecção',
+    needs: 'Previsão de Necessidades',
+    proposal: 'Proposta Comercial'
   };
 
   return (
@@ -241,6 +322,27 @@ export default function AIAssistant() {
             onClick={() => generateQuickAction('followup')}
             loading={quickLoading.followup}
             className="shrink-0 bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+          />
+          <QuickActionButton
+            icon={Search}
+            label="Prospecção"
+            onClick={() => generateQuickAction('prospecting')}
+            loading={quickLoading.prospecting}
+            className="shrink-0 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+          />
+          <QuickActionButton
+            icon={TrendingUp}
+            label="Previsão"
+            onClick={() => generateQuickAction('needs')}
+            loading={quickLoading.needs}
+            className="shrink-0 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
+          />
+          <QuickActionButton
+            icon={FileText}
+            label="Proposta"
+            onClick={() => generateQuickAction('proposal')}
+            loading={quickLoading.proposal}
+            className="shrink-0 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
           />
         </div>
       </div>
