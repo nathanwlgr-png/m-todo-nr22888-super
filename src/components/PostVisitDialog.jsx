@@ -232,6 +232,7 @@ DADOS DA VISITA:
 - Cliente: ${client.first_name}
 - Perfil: ${client.numerology_number} - ${client.behavioral_profile}
 - Tipo: ${client.client_type}
+- Orçamento Disponível: R$ ${visitData.budget_confirmed || client.available_budget || 'Não informado'}
 - Notas: ${visitData.result_notes}
 - Gatilhos Usados: ${visitData.triggers_used.join(', ')}
 - Técnicas Usadas: ${visitData.techniques_used.join(', ')}
@@ -243,10 +244,11 @@ Analise e retorne JSON:
 {
   "what_worked": ["item1", "item2"],
   "what_failed": ["item1", "item2"],
-  "error_type": "tecnica|vendedor|timing|cliente_nao_pronto|outro",
-  "ai_insights": "Análise detalhada em 2-3 parágrafos sobre o desempenho",
+  "error_type": "tecnica|vendedor|timing|cliente_nao_pronto|orcamento_insuficiente|outro",
+  "ai_insights": "Análise detalhada em 2-3 parágrafos sobre o desempenho - INCLUA análise se orçamento foi fator limitante",
   "recommendations": ["rec1", "rec2", "rec3"],
-  "success_score": 85
+  "success_score": 85,
+  "budget_compatibility": "adequado|limite|insuficiente"
 }
 
 Seja honesto e construtivo. Foque em aprendizado contínuo.`;
