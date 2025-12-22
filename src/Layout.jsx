@@ -6,6 +6,9 @@ import ClientScoringEngine from '@/components/ClientScoringEngine';
 import PipelineInactivityMonitor from '@/components/PipelineInactivityMonitor';
 import OnboardingTutorial from '@/components/onboarding/OnboardingTutorial';
 import AutomationEngine from '@/components/AutomationEngine';
+import { AIAssistantButton } from '@/components/AIAssistantChat';
+import AutoMessageSystem from '@/components/AutoMessageSystem';
+import SentimentAnalyzer from '@/components/SentimentAnalyzer';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -18,6 +21,9 @@ export default function Layout({ children, currentPageName }) {
       <ClientScoringEngine />
       <PipelineInactivityMonitor />
       <AutomationEngine />
+      <AutoMessageSystem />
+      <SentimentAnalyzer />
+      <AIAssistantButton />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
