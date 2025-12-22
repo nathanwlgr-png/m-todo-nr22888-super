@@ -898,11 +898,27 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
           {/* Interações */}
           <TabsContent value="interactions" className="space-y-2 mt-4">
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              className="w-full mb-3 border-indigo-200 hover:bg-indigo-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar Informações do Cliente
+            </Button>
             <InteractionTimeline interactions={interactions} />
           </TabsContent>
 
           {/* Tarefas Ativas */}
           <TabsContent value="tasks" className="space-y-2 mt-4">
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              className="w-full mb-3 border-indigo-200 hover:bg-indigo-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar Informações do Cliente
+            </Button>
             {clientTasks.filter(t => t.status === 'pendente').length === 0 ? (
               <Card className="p-6 text-center">
                 <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-2" />
@@ -938,6 +954,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
           {/* Documentos */}
           <TabsContent value="documents" className="space-y-2 mt-4">
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              className="w-full mb-3 border-indigo-200 hover:bg-indigo-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar Informações do Cliente
+            </Button>
             <Button
               onClick={() => setUploadDialogOpen(true)}
               variant="outline"
@@ -989,6 +1013,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
           {/* Timeline */}
           <TabsContent value="timeline" className="mt-4">
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              className="w-full mb-3 border-indigo-200 hover:bg-indigo-50"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar Informações do Cliente
+            </Button>
             <ClientTimeline events={timelineEvents} />
           </TabsContent>
         </Tabs>

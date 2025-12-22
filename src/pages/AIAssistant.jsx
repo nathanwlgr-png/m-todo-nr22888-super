@@ -757,24 +757,37 @@ Seja prático e direto ao ponto.`
               </svg>
               <span className="text-sm font-medium text-cyan-800">Análise de Conversa</span>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={analyzingTranscript}
-              className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
-            >
-              {analyzingTranscript ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  Upload .txt
-                </>
+            <div className="flex gap-2">
+              {client?.phone && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.open(`https://wa.me/${client.phone}`, '_blank')}
+                  className="border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                >
+                  <MessageSquare className="w-4 h-4 mr-1" />
+                  WhatsApp
+                </Button>
               )}
-            </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={analyzingTranscript}
+                className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+              >
+                {analyzingTranscript ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Upload .txt
+                  </>
+                )}
+              </Button>
+            </div>
             <input
               ref={fileInputRef}
               type="file"
