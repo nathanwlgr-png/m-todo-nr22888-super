@@ -12,6 +12,7 @@ import SentimentAnalyzer from '@/components/SentimentAnalyzer';
 import MonthlyReportGenerator from '@/components/MonthlyReportGenerator';
 import FloatingHomeButton from '@/components/FloatingHomeButton';
 import GoalsSyncEngine from '@/components/GoalsSyncEngine';
+import FloatingCompetitorButton from '@/components/FloatingCompetitorButton';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -30,6 +31,7 @@ export default function Layout({ children, currentPageName }) {
       <GoalsSyncEngine />
       <AIAssistantButton />
       <FloatingHomeButton />
+      <FloatingCompetitorButton />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

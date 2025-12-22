@@ -110,10 +110,11 @@ IMPORTANTE:
 
       setAnalysis(result);
 
-      // Atualizar cliente com orçamento recomendado
+      // Atualizar cliente com orçamento recomendado e valor real de poder de compra
       if (onAnalysisComplete) {
         onAnalysisComplete({
           available_budget: result.recommended_budget,
+          valor_real_poder_compra: result.recommended_budget,
           notes: `${client.notes || ''}\n\n[ANÁLISE IA - ${new Date().toLocaleDateString('pt-BR')}]\nCapacidade: ${result.payment_capacity}\nScore: ${result.credit_score}/100\n${result.analysis_summary}`
         });
       }

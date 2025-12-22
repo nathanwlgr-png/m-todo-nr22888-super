@@ -127,6 +127,11 @@ IMPORTANTE:
       });
 
       setAnalysis(result);
+
+      // Salvar data da análise no cliente
+      await base44.entities.Client.update(client.id, {
+        competitor_analysis_date: new Date().toISOString().split('T')[0]
+      });
     } catch (error) {
       console.error('Erro:', error);
       alert('Erro ao analisar concorrentes');

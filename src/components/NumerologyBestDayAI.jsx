@@ -145,6 +145,16 @@ Retorne JSON:
       });
 
       setAnalysis(result);
+
+      // Salvar melhores dias no cliente
+      const bestDays = [
+        result.best_day,
+        ...result.alternative_days.map(d => d.date)
+      ];
+
+      await base44.entities.Client.update(client.id, {
+        melhores_dias_venda: bestDays
+      });
     } catch (error) {
       console.error('Erro:', error);
       alert('Erro ao calcular melhor dia');

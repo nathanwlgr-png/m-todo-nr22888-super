@@ -268,6 +268,22 @@ export default function ScheduledAgenda() {
                           </Badge>
                         </div>
                       )}
+
+                      {/* Alerta de Melhor Dia */}
+                      {client.melhores_dias_venda?.some(day => {
+                        const bestDay = new Date(day);
+                        const today = new Date();
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        return bestDay.toDateString() === today.toDateString() || 
+                               bestDay.toDateString() === tomorrow.toDateString();
+                      }) && (
+                        <div className="mt-2">
+                          <Badge className="text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
+                            ⭐ MELHOR DIA NUMEROLÓGICO!
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>

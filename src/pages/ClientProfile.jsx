@@ -834,6 +834,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             <p className="font-semibold text-slate-800 text-sm">
               {client.available_budget ? `R$ ${Number(client.available_budget).toLocaleString('pt-BR')}` : 'Não informado'}
             </p>
+            {client.valor_real_poder_compra && (
+              <p className="text-xs text-emerald-600 mt-1">
+                ✓ Poder real: R$ {Number(client.valor_real_poder_compra).toLocaleString('pt-BR')}
+              </p>
+            )}
             </Card>
           )}
 
