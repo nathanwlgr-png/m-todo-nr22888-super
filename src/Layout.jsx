@@ -5,6 +5,7 @@ import LeadAutomationEngine from '@/components/LeadAutomationEngine';
 import ClientScoringEngine from '@/components/ClientScoringEngine';
 import PipelineInactivityMonitor from '@/components/PipelineInactivityMonitor';
 import OnboardingTutorial from '@/components/onboarding/OnboardingTutorial';
+import AutomationEngine from '@/components/AutomationEngine';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -16,6 +17,7 @@ export default function Layout({ children, currentPageName }) {
       <LeadAutomationEngine />
       <ClientScoringEngine />
       <PipelineInactivityMonitor />
+      <AutomationEngine />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

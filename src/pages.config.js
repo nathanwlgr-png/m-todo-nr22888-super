@@ -41,6 +41,7 @@ import ProposalTemplates from './pages/ProposalTemplates';
 import SignedContracts from './pages/SignedContracts';
 import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import Home from './pages/Home';
+import AutomationManager from './pages/AutomationManager';
 import __Layout from './Layout.jsx';
 
 
@@ -88,6 +89,7 @@ export const PAGES = {
     "SignedContracts": SignedContracts,
     "ConsumableOrderHistory": ConsumableOrderHistory,
     "Home": Home,
+    "AutomationManager": AutomationManager,
 }
 
 export const pagesConfig = {
