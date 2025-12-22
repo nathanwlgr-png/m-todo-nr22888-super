@@ -31,26 +31,27 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { 
-  ArrowLeft, 
-  MessageSquare, 
-  ClipboardCheck,
-  Building2,
-  UserCog,
-  Loader2,
-  ThermometerSun,
-  Phone,
-  Sparkles,
-  Trash2,
-  Edit2,
-  Save,
-  FileText,
-  Upload,
-  Download,
-  Calendar,
-  CheckSquare,
-  Plus,
-  CheckCircle2
-} from 'lucide-react';
+        ArrowLeft, 
+        MessageSquare, 
+        ClipboardCheck,
+        Building2,
+        UserCog,
+        Loader2,
+        ThermometerSun,
+        Phone,
+        Sparkles,
+        Trash2,
+        Edit2,
+        Save,
+        FileText,
+        Upload,
+        Download,
+        Calendar,
+        CheckSquare,
+        Plus,
+        CheckCircle2,
+        DollarSign
+      } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
 import ScheduleVisitButton from '@/components/ScheduleVisitButton';
