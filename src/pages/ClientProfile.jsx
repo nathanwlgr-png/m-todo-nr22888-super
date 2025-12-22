@@ -31,27 +31,33 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { 
-        ArrowLeft, 
-        MessageSquare, 
-        ClipboardCheck,
-        Building2,
-        UserCog,
-        Loader2,
-        ThermometerSun,
-        Phone,
-        Sparkles,
-        Trash2,
-        Edit2,
-        Save,
-        FileText,
-        Upload,
-        Download,
-        Calendar,
-        CheckSquare,
-        Plus,
-        CheckCircle2,
-        DollarSign
-      } from 'lucide-react';
+  ArrowLeft, 
+  MessageSquare, 
+  ClipboardCheck,
+  Building2,
+  UserCog,
+  Loader2,
+  ThermometerSun,
+  Phone,
+  Sparkles,
+  Trash2,
+  Edit2,
+  Save,
+  FileText,
+  Upload,
+  Download,
+  Calendar,
+  CheckSquare,
+  Plus,
+  CheckCircle2,
+  DollarSign,
+  Search,
+  Shield,
+  Target,
+  RotateCcw,
+  TrendingUp,
+  Copy
+} from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
 import ScheduleVisitButton from '@/components/ScheduleVisitButton';
@@ -106,6 +112,11 @@ export default function ClientProfile() {
   const [uploadData, setUploadData] = React.useState({ title: '', type: 'proposta', notes: '' });
   const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef(null);
+  const [aiMessageDialogOpen, setAiMessageDialogOpen] = React.useState(false);
+  const [selectedMessageType, setSelectedMessageType] = React.useState('');
+  const [generatedMessage, setGeneratedMessage] = React.useState(null);
+  const [generatingMessage, setGeneratingMessage] = React.useState(false);
+  const [closingProbability, setClosingProbability] = React.useState(null);
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -231,6 +242,97 @@ export default function ClientProfile() {
   const openQuickAction = (type) => {
     setQuickActionType(type);
     setQuickActionOpen(true);
+  };
+
+  const generateContextualMessage = async (messageType) => {
+    setGeneratingMessage(true);
+    setSelectedMessageType(messageType);
+    
+    try {
+      const prompt = `Você é um especialista em vendas consultivas de equipamentos veterinários.
+
+CONTEXTO COMPLETO DO CLIENTE:
+- Nome: ${client.first_name}
+- Perfil Numerológico: ${client.numerology_number} - ${client.behavioral_profile}
+- Caminho de Vida: ${client.life_path_number || 'N/A'}
+- Estilo de Decisão: ${client.decision_style}
+- Tom: ${client.client_tone || 'Não observado'}
+- Status: ${client.status} | Score: ${client.purchase_score}%
+- Tipo: ${client.client_type}
+- Decisor: ${client.decision_role}
+- Equipamento Atual: ${client.current_equipment || 'Nenhum'}
+- Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
+- Motivadores: ${client.purchase_motivators?.join(', ') || 'Não identificados'}
+- Objeções: ${client.real_objections?.join(', ') || 'Nenhuma'}
+- Orçamento: ${client.available_budget || 'Não informado'}
+- Prazo Decisão: ${client.decision_deadline || 'Não definido'}
+- Última Visita: ${client.last_visit_date || 'Nenhuma'}
+- Objetivo Visita: ${client.visit_objective || 'Não definido'}
+- Gatilhos Usados: ${client.triggers_used?.join(', ') || 'Nenhum'}
+- Notas: ${client.notes || 'Sem notas'}
+
+HISTÓRICO:
+- Visitas Realizadas: ${visits.filter(v => v.status === 'realizada').length}
+- Vendas Fechadas: ${sales.filter(s => s.status === 'fechada').length}
+- Interações: ${interactions.length}
+
+TIPO DE MENSAGEM: ${messageType}
+
+TAREFA:
+Gere uma mensagem PERFEITA para este momento específico da venda. Retorne JSON:
+
+{
+  "message": "Mensagem completa pronta para enviar (2-4 parágrafos)",
+  "closing_probability": 75,
+  "probability_factors": {
+    "positivos": ["Fator 1", "Fator 2"],
+    "negativos": ["Fator 1", "Fator 2"]
+  },
+  "recommended_next_step": "Próxima ação concreta",
+  "best_timing": "Melhor momento para enviar",
+  "framework_used": "Framework principal usado (SPIN/Cialdini/etc)"
+}
+
+INSTRUÇÕES POR TIPO:
+- ${messageType === 'prospeccao' ? 'PROSPECÇÃO: Primeira abordagem, despertando interesse' : ''}
+- ${messageType === 'followup' ? 'FOLLOW-UP: Retomar contato sem pressão, valor agregado' : ''}
+- ${messageType === 'objecao' ? 'CONTROLE DE OBJEÇÃO: Validar + Reframing usando SPIN' : ''}
+- ${messageType === 'fechamento' ? 'FECHAMENTO: Momento decisivo, urgência ética' : ''}
+- ${messageType === 'reativacao' ? 'REATIVAÇÃO: Cliente frio, nova abordagem criativa' : ''}
+- ${messageType === 'upsell' ? 'UPSELL: Cliente já comprou, oferecer complemento' : ''}
+
+Use: Numerologia + SPIN + Cialdini + Inteligência Emocional + Arte da Guerra
+Tom: Adaptar ao perfil numerológico e tom observado
+Objetivo: Maximizar probabilidade de avanço na venda`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+            closing_probability: { type: "number" },
+            probability_factors: {
+              type: "object",
+              properties: {
+                positivos: { type: "array", items: { type: "string" } },
+                negativos: { type: "array", items: { type: "string" } }
+              }
+            },
+            recommended_next_step: { type: "string" },
+            best_timing: { type: "string" },
+            framework_used: { type: "string" }
+          }
+        }
+      });
+
+      setGeneratedMessage(result);
+      setClosingProbability(result.closing_probability);
+    } catch (error) {
+      alert('Erro ao gerar mensagem');
+    } finally {
+      setGeneratingMessage(false);
+    }
   };
 
   // Montar timeline de eventos
@@ -441,6 +543,184 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             Agendar Visita
           </Button>
         </div>
+
+        {/* AI Message Generator */}
+        <Card className="p-5 bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 border-2 border-purple-300 shadow-lg">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-slate-800 mb-1">🎯 Mensagem IA Contextual</h3>
+              <p className="text-xs text-slate-600">Gere a mensagem perfeita para este momento</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <Button
+              onClick={() => generateContextualMessage('prospeccao')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <Search className="w-3 h-3 mr-1" />
+              Prospecção
+            </Button>
+            <Button
+              onClick={() => generateContextualMessage('followup')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <MessageSquare className="w-3 h-3 mr-1" />
+              Follow-up
+            </Button>
+            <Button
+              onClick={() => generateContextualMessage('objecao')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <Shield className="w-3 h-3 mr-1" />
+              Objeção
+            </Button>
+            <Button
+              onClick={() => generateContextualMessage('fechamento')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <Target className="w-3 h-3 mr-1" />
+              Fechamento
+            </Button>
+            <Button
+              onClick={() => generateContextualMessage('reativacao')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <RotateCcw className="w-3 h-3 mr-1" />
+              Reativação
+            </Button>
+            <Button
+              onClick={() => generateContextualMessage('upsell')}
+              size="sm"
+              variant="outline"
+              className="h-auto py-2 text-xs"
+              disabled={generatingMessage}
+            >
+              <TrendingUp className="w-3 h-3 mr-1" />
+              Upsell
+            </Button>
+          </div>
+
+          {generatingMessage && (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-purple-600 mr-2" />
+              <span className="text-sm text-purple-600">Gerando mensagem perfeita...</span>
+            </div>
+          )}
+
+          {generatedMessage && (
+            <div className="space-y-3">
+              {/* Probability */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-4 border-2 border-purple-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-purple-700">PROBABILIDADE DE FECHAMENTO</span>
+                  <span className="text-2xl font-bold text-purple-600">{closingProbability}%</span>
+                </div>
+                <div className="h-2 bg-purple-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                    style={{ width: `${closingProbability}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Factors */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                  <p className="text-xs font-semibold text-green-700 mb-1">✓ Positivos</p>
+                  <ul className="text-xs text-green-600 space-y-0.5">
+                    {generatedMessage.probability_factors.positivos.map((f, i) => (
+                      <li key={i}>• {f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                  <p className="text-xs font-semibold text-red-700 mb-1">⚠ Negativos</p>
+                  <ul className="text-xs text-red-600 space-y-0.5">
+                    {generatedMessage.probability_factors.negativos.map((f, i) => (
+                      <li key={i}>• {f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Message */}
+              <div className="bg-white/80 backdrop-blur rounded-xl p-4 border-2 border-purple-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-purple-700 uppercase">{selectedMessageType}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedMessage.message);
+                      alert('Mensagem copiada!');
+                    }}
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{generatedMessage.message}</p>
+              </div>
+
+              {/* Meta Info */}
+              <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-indigo-600 font-medium">Framework</p>
+                    <p className="text-slate-700">{generatedMessage.framework_used}</p>
+                  </div>
+                  <div>
+                    <p className="text-indigo-600 font-medium">Melhor Horário</p>
+                    <p className="text-slate-700">{generatedMessage.best_timing}</p>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <p className="text-indigo-600 font-medium">Próximo Passo</p>
+                  <p className="text-slate-700">{generatedMessage.recommended_next_step}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="grid grid-cols-2 gap-2">
+                {client.phone && (
+                  <Button
+                    size="sm"
+                    onClick={() => window.open(`https://wa.me/${client.phone}?text=${encodeURIComponent(generatedMessage.message)}`, '_blank')}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <MessageSquare className="w-3 h-3 mr-1" />
+                    WhatsApp
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setGeneratedMessage(null)}
+                >
+                  Nova Mensagem
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Gerador de Propostas */}
         <ProposalGenerator 
