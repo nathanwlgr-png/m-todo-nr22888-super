@@ -21,6 +21,7 @@ import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
 import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
 import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
+import GamificationWidget from '@/components/GamificationWidget';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -164,6 +165,11 @@ export default function Home() {
         </Card>
       </div>
 
+      {/* Gamification Widget */}
+      <div className="px-6 mt-6">
+        <GamificationWidget />
+      </div>
+
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
         <Link to={createPageUrl('NewClient')}>
@@ -226,6 +232,24 @@ export default function Home() {
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <TrendingUp className="w-4 h-4 mr-2" />
               Relatórios
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('Leaderboard')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-yellow-200 text-yellow-700">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Ranking
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('Goals')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+              <Target className="w-4 h-4 mr-2" />
+              Metas
             </Button>
           </Link>
         </div>

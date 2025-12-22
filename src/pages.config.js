@@ -20,6 +20,8 @@ import VisitSummary from './pages/VisitSummary';
 import SalesFunnel from './pages/SalesFunnel';
 import TaskCalendar from './pages/TaskCalendar';
 import TaskAutomation from './pages/TaskAutomation';
+import Leaderboard from './pages/Leaderboard';
+import Goals from './pages/Goals';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +48,8 @@ export const PAGES = {
     "SalesFunnel": SalesFunnel,
     "TaskCalendar": TaskCalendar,
     "TaskAutomation": TaskAutomation,
+    "Leaderboard": Leaderboard,
+    "Goals": Goals,
 }
 
 export const pagesConfig = {
