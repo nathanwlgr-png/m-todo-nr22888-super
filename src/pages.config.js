@@ -14,17 +14,22 @@ import Home from './pages/Home';
 import Leaderboard from './pages/Leaderboard';
 import NewClient from './pages/NewClient';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
+import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
+import PerformanceDashboard from './pages/PerformanceDashboard';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
+import ProspectingScripts from './pages/ProspectingScripts';
 import Reports from './pages/Reports';
 import SalesFunnel from './pages/SalesFunnel';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
-import ProspectingScripts from './pages/ProspectingScripts';
-import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
-import PerformanceDashboard from './pages/PerformanceDashboard';
+import Leads from './pages/Leads';
+import CaptureLeads from './pages/CaptureLeads';
+import ImportLeads from './pages/ImportLeads';
+import LeadProfile from './pages/LeadProfile';
+import LeadsDashboard from './pages/LeadsDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -45,17 +50,22 @@ export const PAGES = {
     "Leaderboard": Leaderboard,
     "NewClient": NewClient,
     "NumerologyAnalysis": NumerologyAnalysis,
+    "ObjectionAnalyzer": ObjectionAnalyzer,
+    "PerformanceDashboard": PerformanceDashboard,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
+    "ProspectingScripts": ProspectingScripts,
     "Reports": Reports,
     "SalesFunnel": SalesFunnel,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
-    "ProspectingScripts": ProspectingScripts,
-    "ObjectionAnalyzer": ObjectionAnalyzer,
-    "PerformanceDashboard": PerformanceDashboard,
+    "Leads": Leads,
+    "CaptureLeads": CaptureLeads,
+    "ImportLeads": ImportLeads,
+    "LeadProfile": LeadProfile,
+    "LeadsDashboard": LeadsDashboard,
 }
 
 export const pagesConfig = {
