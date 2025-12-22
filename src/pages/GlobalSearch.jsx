@@ -31,6 +31,9 @@ export default function GlobalSearch() {
   const filteredClients = clients.filter(c => 
     searchTerm && (
       c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.phone?.includes(searchTerm) ||
       c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.city?.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -65,12 +68,20 @@ export default function GlobalSearch() {
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <Input
-            placeholder="Buscar clientes, visitas, equipamentos..."
+            placeholder="Nome, email, telefone, cidade, clínica, visitas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-12 pl-12 text-base rounded-xl border-2"
+            className="h-12 pl-12 pr-10 text-base rounded-xl border-2"
             autoFocus
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded"
+            >
+              <span className="text-slate-400 text-xl">×</span>
+            </button>
+          )}
         </div>
       </div>
 
