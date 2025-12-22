@@ -73,21 +73,22 @@ Organize as visitas em DIAS, com cada dia sendo uma jornada completa:
 2. Visita a 1-2 cidades próximas (máximo 200km de distância)
 3. Retorno para Marília no mesmo dia
 
-CRITÉRIOS DE OTIMIZAÇÃO:
-1. **Proximidade geográfica** - agrupar cidades próximas no mesmo dia
-2. **Distância de Marília** - priorizar cidades mais próximas quando possível
-3. **Prioridade do cliente** - priority_level menor = mais prioritário (1 = máxima)
-4. **Status** - "quente" > "morno" > "frio"
-5. **Score de compra** - maiores scores = maior probabilidade
-6. **Receita projetada** - priorizar maior potencial
+CRITÉRIOS DE OTIMIZAÇÃO (ORDEM DE IMPORTÂNCIA):
+1. **Prioridade do cliente** - priority_level menor = mais prioritário (1 = máxima)
+2. **Status** - "quente" > "morno" > "frio"
+3. **Score de compra** - maiores scores = maior probabilidade de fechar
+4. **Receita projetada** - priorizar maior potencial de receita
+5. **Proximidade geográfica** - agrupar cidades próximas no mesmo dia
+6. **Distância de Marília** - priorizar cidades mais próximas quando possível
 7. **Custo de pedágio** - minimizar quando possível
 
 IMPORTANTE: 
+- PRIORIZE clientes com maior probabilidade de fechar PRIMEIRO
 - Cada "day" deve ter rota completa: Marília → Cidades → Marília
 - Calcule distância total do dia (ida + volta)
 - Estime custo de pedágio baseado nas rodovias do interior de SP (média R$ 0,20/km em pedágios)
 - Sugira horário de saída de Marília e horário estimado de retorno
-- Priorize clientes "quentes" nos primeiros dias da semana
+- Priorize clientes "quentes" e com score alto nos primeiros dias
 
 Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
 {
@@ -382,6 +383,20 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                     </Card>
                   ))}
                 </div>
+              </div>
+
+              {/* Botão Sincronizar com Google Calendar */}
+              <div className="pt-4 border-t">
+                <Button
+                  onClick={handleSyncToGoogleCalendar}
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Adicionar Rota ao Google Calendar
+                </Button>
+                <p className="text-xs text-slate-500 text-center mt-2">
+                  Abrirá uma aba para cada visita na sua agenda
+                </p>
               </div>
             </div>
           )}
