@@ -28,6 +28,7 @@ import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
 import QuickTips from '@/components/onboarding/QuickTips';
 import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
 import SalesOverview from '@/components/SalesOverview';
+import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -432,7 +433,12 @@ export default function Home() {
               Automações
             </Button>
           </Link>
-        </div>
+          </div>
+
+          {/* Relatório Mensal de Insights */}
+          <div className="mt-6">
+            <MonthlyInsightsReport />
+          </div>
         </div>
 
       {/* Recent Clients */}

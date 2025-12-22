@@ -224,6 +224,75 @@ Retorne JSON:
         toast.success('Lembrete de assinatura criado!');
       }
 
+      // 7. Análise IA da Visita
+      try {
+        const analysisPrompt = `Você é um analista de vendas especializado. Analise esta visita e forneça insights estratégicos.
+
+DADOS DA VISITA:
+- Cliente: ${client.first_name}
+- Perfil: ${client.numerology_number} - ${client.behavioral_profile}
+- Tipo: ${client.client_type}
+- Notas: ${visitData.result_notes}
+- Gatilhos Usados: ${visitData.triggers_used.join(', ')}
+- Técnicas Usadas: ${visitData.techniques_used.join(', ')}
+- Objeções: ${visitData.objections_presented.join(', ')}
+- Nível de Interesse: ${visitData.interest_level}/10
+- Venda Fechada: ${autoClosedSale || visitData.sale_closed ? 'Sim' : 'Não'}
+
+Analise e retorne JSON:
+{
+  "what_worked": ["item1", "item2"],
+  "what_failed": ["item1", "item2"],
+  "error_type": "tecnica|vendedor|timing|cliente_nao_pronto|outro",
+  "ai_insights": "Análise detalhada em 2-3 parágrafos sobre o desempenho",
+  "recommendations": ["rec1", "rec2", "rec3"],
+  "success_score": 85
+}
+
+Seja honesto e construtivo. Foque em aprendizado contínuo.`;
+
+        const analysisResult = await base44.integrations.Core.InvokeLLM({
+          prompt: analysisPrompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              what_worked: { type: "array", items: { type: "string" } },
+              what_failed: { type: "array", items: { type: "string" } },
+              error_type: { type: "string" },
+              ai_insights: { type: "string" },
+              recommendations: { type: "array", items: { type: "string" } },
+              success_score: { type: "number" }
+            }
+          }
+        });
+
+        const currentUser = await base44.auth.me();
+
+        await base44.entities.VisitAnalysis.create({
+          client_id: client.id,
+          client_name: client.first_name,
+          visit_date: new Date().toISOString().split('T')[0],
+          client_profile: `${client.numerology_number} - ${client.behavioral_profile}`,
+          client_type: client.client_type,
+          triggers_used: visitData.triggers_used,
+          techniques_used: visitData.techniques_used,
+          objections_faced: visitData.objections_presented,
+          interest_level: visitData.interest_level,
+          sale_closed: autoClosedSale || visitData.sale_closed,
+          what_worked: analysisResult.what_worked,
+          what_failed: analysisResult.what_failed,
+          error_type: analysisResult.error_type,
+          ai_insights: analysisResult.ai_insights,
+          recommendations: analysisResult.recommendations,
+          salesperson_email: currentUser.email,
+          success_score: analysisResult.success_score
+        });
+
+        toast.success('✨ Análise IA salva no banco de conhecimento!');
+      } catch (error) {
+        console.error('Erro ao analisar visita:', error);
+      }
+
       setStep(3);
     } catch (error) {
       toast.error('Erro ao salvar');
