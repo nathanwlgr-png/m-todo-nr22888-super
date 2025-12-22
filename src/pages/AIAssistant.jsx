@@ -171,7 +171,7 @@ export default function AIAssistant() {
 
   const scriptLabels = {
     question: 'Pergunta',
-    objection: 'Resposta à Objeção',
+    objection: 'Controle de Objeções',
     closing: 'Fechamento',
     followup: 'Follow-up'
   };
@@ -212,7 +212,7 @@ export default function AIAssistant() {
           />
           <QuickActionButton
             icon={MessageCircle}
-            label="Objeção"
+            label="Controle de Objeções"
             onClick={() => generateQuickAction('objection')}
             loading={quickLoading.objection}
             className="shrink-0 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
