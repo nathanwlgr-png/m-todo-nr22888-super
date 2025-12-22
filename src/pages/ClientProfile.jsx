@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -102,6 +103,36 @@ export default function ClientProfile() {
       const clients = await base44.entities.Client.filter({ id: clientId });
       return clients[0];
     },
+    enabled: !!clientId
+  });
+
+  const { data: visits = [] } = useQuery({
+    queryKey: ['client-visits', clientId],
+    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: sales = [] } = useQuery({
+    queryKey: ['client-sales', clientId],
+    queryFn: () => base44.entities.Sale.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: followupLogs = [] } = useQuery({
+    queryKey: ['client-followup-logs', clientId],
+    queryFn: () => base44.entities.FollowUpLog.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: clientTasks = [] } = useQuery({
+    queryKey: ['client-tasks', clientId],
+    queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: documents = [] } = useQuery({
+    queryKey: ['client-documents', clientId],
+    queryFn: () => base44.entities.ClientDocument.filter({ client_id: clientId }),
     enabled: !!clientId
   });
 
