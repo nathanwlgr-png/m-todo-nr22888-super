@@ -72,6 +72,8 @@ export default function ClientProfile() {
   const queryClient = useQueryClient();
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [editData, setEditData] = React.useState({});
+  const [aiSummary, setAiSummary] = React.useState(null);
+  const [loadingSummary, setLoadingSummary] = React.useState(false);
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -127,6 +129,46 @@ export default function ClientProfile() {
     updateMutation.mutate(editData);
   };
 
+  const generateAISummary = async () => {
+    setLoadingSummary(true);
+    try {
+      const summary = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é um assistente de vendas especializado. Crie um resumo CONCISO e ACIONÁVEL do cliente.
+
+DADOS DO CLIENTE:
+- Nome: ${client.first_name}
+- Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
+- Caminho de Vida: ${client.life_path_number || 'N/A'}
+- Estilo de Decisão: ${client.decision_style}
+- Status: ${client.status} | Score: ${client.purchase_score}%
+- Tipo: ${client.client_type}
+- Decisor: ${client.decision_role}
+- Última visita: ${client.last_visit_date || 'Nenhuma'}
+- Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
+- Equipamento atual: ${client.current_equipment || 'Nenhum'}
+- Notas: ${client.notes || 'Sem notas'}
+
+Crie um resumo em 3-4 FRASES CURTAS que responda:
+1. Quem é esse cliente? (perfil psicológico)
+2. Momento atual da venda (quente/frio/próximo passo)
+3. Melhor abordagem estratégica (1 frase acionável)
+
+Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
+      });
+      setAiSummary(summary);
+    } catch (error) {
+      console.error('Erro ao gerar resumo:', error);
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (client && !aiSummary) {
+      generateAISummary();
+    }
+  }, [client]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -178,6 +220,29 @@ export default function ClientProfile() {
 
       {/* Content */}
       <div className="px-6 -mt-16 space-y-4">
+        {/* AI Summary */}
+        {aiSummary && (
+          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-indigo-600 mb-1">Resumo IA</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{aiSummary}</p>
+              </div>
+            </div>
+          </Card>
+        )}
+        {loadingSummary && (
+          <Card className="p-4 bg-indigo-50 border-indigo-200">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+              <p className="text-sm text-indigo-600">Gerando resumo inteligente...</p>
+            </div>
+          </Card>
+        )}
+
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="p-4 bg-white shadow-lg border-none">
