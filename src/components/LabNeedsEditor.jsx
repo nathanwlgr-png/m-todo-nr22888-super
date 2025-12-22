@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Loader2, Save, FlaskConical } from 'lucide-react';
+import { toast } from 'sonner';
 
 const availableNeeds = [
   { value: 'hemograma', label: 'Hemograma' },
@@ -22,11 +23,41 @@ export default function LabNeedsEditor({ clientId, currentNeeds = [] }) {
   const [selectedNeeds, setSelectedNeeds] = useState(currentNeeds || []);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const { data: equipments = [] } = useQuery({
+    queryKey: ['equipments'],
+    queryFn: () => base44.entities.Equipment.list()
+  });
+
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.update(clientId, data),
-    onSuccess: () => {
+    onSuccess: async (updatedClient) => {
       queryClient.invalidateQueries(['client', clientId]);
+      queryClient.invalidateQueries(['clients']);
       setHasChanges(false);
+      
+      // Gerar sugestão de equipamento quando necessidades mudam
+      try {
+        const selectedNeedsLabels = selectedNeeds.map(n => 
+          availableNeeds.find(a => a.value === n)?.label || n
+        ).join(', ');
+        
+        const prompt = `Cliente precisa de: ${selectedNeedsLabels}.
+
+Equipamentos disponíveis:
+${equipments.map(e => `${e.name} (${e.category}): R$ ${e.price?.toLocaleString('pt-BR')}`).join('\n')}
+
+Sugira o equipamento IDEAL em 1-2 frases curtas.`;
+
+        const suggestion = await base44.integrations.Core.InvokeLLM({ prompt });
+        
+        await base44.entities.Client.update(clientId, {
+          equipment_suggestion: suggestion
+        });
+        
+        queryClient.invalidateQueries(['client', clientId]);
+      } catch (error) {
+        console.log('Erro ao gerar sugestão');
+      }
     }
   });
 
