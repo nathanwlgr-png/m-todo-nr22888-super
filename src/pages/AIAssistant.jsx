@@ -25,6 +25,14 @@ import {
   CheckSquare,
   Handshake
 } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
 
@@ -32,8 +40,9 @@ export default function AIAssistant() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
-  const clientId = urlParams.get('id');
+  const clientIdFromUrl = urlParams.get('id');
   
+  const [selectedClientId, setSelectedClientId] = useState(clientIdFromUrl || null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,42 +55,47 @@ export default function AIAssistant() {
   const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
   const fileInputRef = useRef(null);
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date')
+  });
+
   const { data: client } = useQuery({
-    queryKey: ['client', clientId],
+    queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
+      const clients = await base44.entities.Client.filter({ id: selectedClientId });
       return clients[0];
     },
-    enabled: !!clientId
+    enabled: !!selectedClientId
   });
 
   const { data: visits = [] } = useQuery({
-    queryKey: ['client-visits', clientId],
-    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
-    enabled: !!clientId
+    queryKey: ['client-visits', selectedClientId],
+    queryFn: () => base44.entities.Visit.filter({ client_id: selectedClientId }),
+    enabled: !!selectedClientId
   });
 
   const { data: tasks = [] } = useQuery({
-    queryKey: ['client-tasks', clientId],
-    queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
-    enabled: !!clientId
+    queryKey: ['client-tasks', selectedClientId],
+    queryFn: () => base44.entities.Task.filter({ client_id: selectedClientId }),
+    enabled: !!selectedClientId
   });
 
   const { data: sales = [] } = useQuery({
-    queryKey: ['client-sales', clientId],
-    queryFn: () => base44.entities.Sale.filter({ client_id: clientId }),
-    enabled: !!clientId
+    queryKey: ['client-sales', selectedClientId],
+    queryFn: () => base44.entities.Sale.filter({ client_id: selectedClientId }),
+    enabled: !!selectedClientId
   });
 
   const { data: followupLogs = [] } = useQuery({
-    queryKey: ['client-followup-logs', clientId],
-    queryFn: () => base44.entities.FollowUpLog.filter({ client_id: clientId }),
-    enabled: !!clientId
+    queryKey: ['client-followup-logs', selectedClientId],
+    queryFn: () => base44.entities.FollowUpLog.filter({ client_id: selectedClientId }),
+    enabled: !!selectedClientId
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.update(clientId, data),
-    onSuccess: () => queryClient.invalidateQueries(['client', clientId])
+    mutationFn: (data) => base44.entities.Client.update(selectedClientId, data),
+    onSuccess: () => queryClient.invalidateQueries(['client', selectedClientId])
   });
 
   const scrollToBottom = () => {
@@ -650,7 +664,7 @@ Seja prático e direto ao ponto.`
         last_visit_date: new Date().toISOString().split('T')[0]
       });
     }
-    navigate(createPageUrl(`VisitSummary?id=${clientId}`));
+    navigate(createPageUrl(`VisitSummary?id=${selectedClientId}`));
   };
 
   const scriptLabels = {
@@ -670,7 +684,7 @@ Seja prático e direto ao ponto.`
     <div className="min-h-screen bg-slate-100 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-3">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
@@ -678,25 +692,57 @@ Seja prático e direto ao ponto.`
             <h1 className="text-lg font-semibold text-slate-800">
               {rolePlayMode ? '🎭 Treinamento' : 'Assistente IA'}
             </h1>
-            <p className="text-sm text-slate-500">{client?.first_name || 'Carregando...'}</p>
           </div>
           <Button
             variant={rolePlayMode ? "default" : "outline"}
             size="sm"
             onClick={toggleRolePlayMode}
+            disabled={!selectedClientId}
             className={rolePlayMode ? "bg-purple-600 hover:bg-purple-700" : ""}
           >
             {rolePlayMode ? '🎭 Treinar' : '🎭 Treinar'}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSaveAndContinue}
-            className="text-emerald-600 border-emerald-200"
+          {selectedClientId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveAndContinue}
+              className="text-emerald-600 border-emerald-200"
+            >
+              <Save className="w-4 h-4 mr-1" />
+              Salvar
+            </Button>
+          )}
+        </div>
+        
+        {/* Client Selector */}
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-600">Cliente</Label>
+          <Select
+            value={selectedClientId || ''}
+            onValueChange={(value) => {
+              setSelectedClientId(value === 'none' ? null : value);
+              setMessages([]);
+              setRolePlayMode(false);
+            }}
           >
-            <Save className="w-4 h-4 mr-1" />
-            Salvar
-          </Button>
+            <SelectTrigger className="h-12 bg-slate-50">
+              <SelectValue placeholder="Selecione um cliente..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sem cliente específico</SelectItem>
+              {allClients.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.first_name} {c.clinic_name ? `- ${c.clinic_name}` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {client && (
+            <p className="text-xs text-slate-500">
+              {client.client_type ? `${client.client_type}` : 'Cliente'} • Score: {client.purchase_score}%
+            </p>
+          )}
         </div>
       </div>
 
