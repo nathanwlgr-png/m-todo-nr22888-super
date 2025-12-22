@@ -26,6 +26,7 @@ import GamificationWidget from '@/components/GamificationWidget';
 import AutoTaskGenerator from '@/components/AutoTaskGenerator';
 import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
 import QuickTips from '@/components/onboarding/QuickTips';
+import LabBrandCompetitorAnalysis from '@/components/LabBrandCompetitorAnalysis';
 import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
 import SalesOverview from '@/components/SalesOverview';
 import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
@@ -211,6 +212,11 @@ export default function Home() {
       {/* Performance Feedback */}
       <div className="px-6 mt-6">
         <VendedorPerformanceFeedback />
+      </div>
+
+      {/* Lab Brand Competitor Analysis */}
+      <div className="px-6 mt-6">
+        <LabBrandCompetitorAnalysis />
       </div>
 
       {/* Gamification Widget */}

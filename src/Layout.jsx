@@ -13,6 +13,7 @@ import MonthlyReportGenerator from '@/components/MonthlyReportGenerator';
 import FloatingHomeButton from '@/components/FloatingHomeButton';
 import GoalsSyncEngine from '@/components/GoalsSyncEngine';
 import FloatingCompetitorButton from '@/components/FloatingCompetitorButton';
+import HealthScoreEngine from '@/components/HealthScoreEngine';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -29,6 +30,7 @@ export default function Layout({ children, currentPageName }) {
       <SentimentAnalyzer />
       <MonthlyReportGenerator />
       <GoalsSyncEngine />
+      <HealthScoreEngine />
       <AIAssistantButton />
       <FloatingHomeButton />
       <FloatingCompetitorButton />
