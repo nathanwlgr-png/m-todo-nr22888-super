@@ -56,6 +56,18 @@ const profiles = {
     description: 'Pessoa idealista, humanitária e inspiradora. Valoriza propósito e impacto.',
     decision: 'Decide por propósito maior. Mostre impacto social/profissional.',
     tips: 'Fale sobre contribuição, mostre visão de futuro, seja inspirador.'
+  },
+  11: {
+    title: 'Iluminado (Mestre)',
+    description: 'Visionário inspirador, intuitivo e sensível. Canal de transformação e inovação.',
+    decision: 'Decide por inspiração e visão de impacto profundo. Busca mudança de paradigma.',
+    tips: 'Apresente visão disruptiva, inovação transformadora, seja inspirador e mostre propósito maior.'
+  },
+  22: {
+    title: 'Construtor Mestre',
+    description: 'Transforma grandes visões em realidade concreta. Líder nato de projetos ambiciosos.',
+    decision: 'Decide com visão de longo prazo e legado duradouro. Pensa em escala.',
+    tips: 'Mostre impacto de longo prazo, escalabilidade, construção de legado, cases de transformação institucional.'
   }
 };
 
