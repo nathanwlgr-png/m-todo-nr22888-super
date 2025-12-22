@@ -672,23 +672,13 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </TabsContent>
         </Tabs>
 
-        {/* Next Action */}
+        {/* Próxima Ação - Essencial */}
         {client.next_action && (
           <Card className="p-4 bg-amber-50 border-amber-200">
-            <p className="text-xs text-amber-600 font-medium mb-1">Próxima Ação</p>
-            <p className="text-slate-700">{client.next_action}</p>
+            <p className="text-xs text-amber-600 font-medium mb-1">🎯 Próxima Ação</p>
+            <p className="text-slate-700 font-medium">{client.next_action}</p>
           </Card>
         )}
-
-        {/* Delete Button */}
-        <Button
-          onClick={handleDelete}
-          variant="outline"
-          className="w-full h-12 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Remover
-        </Button>
         </div>
 
       {/* Fixed Bottom Actions */}
