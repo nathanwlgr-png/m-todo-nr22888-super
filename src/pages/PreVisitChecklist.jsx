@@ -207,13 +207,49 @@ export default function PreVisitChecklist() {
         </div>
 
         {/* 1. Clarity */}
-        <ChecklistItem
-          title="Clareza do Cliente"
-          description={client ? `${client.client_type?.replace(/_/g, ' ') || ''} • ${client.decision_role?.replace(/_/g, ' ') || ''}` : 'Carregando...'}
-          completed={true}
-          icon={User}
-          onClick={() => {}}
-        />
+        <Card className="p-4 border-emerald-500 border-2 bg-emerald-50">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold text-slate-800">Clareza do Cliente</h3>
+                <Check className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-slate-500">Nome:</span>
+                  <span className="font-medium text-slate-800">{client?.first_name || '-'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-slate-500">Tipo:</span>
+                  <span className="font-medium text-slate-800 capitalize">
+                    {client?.client_type?.replace(/_/g, ' ') || '-'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-slate-500">Decisor:</span>
+                  <span className="font-medium text-slate-800 capitalize">
+                    {client?.decision_role?.replace(/_/g, ' ') || '-'}
+                  </span>
+                </div>
+                {client?.clinic_name && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-500">Clínica:</span>
+                    <span className="font-medium text-slate-800">{client.clinic_name}</span>
+                  </div>
+                )}
+                {client?.city && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-500">Cidade:</span>
+                    <span className="font-medium text-slate-800">{client.city}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
 
         {/* 2. Profile */}
         <Card className={`p-4 ${checklist.profile ? 'border-emerald-500 border-2' : ''}`}>
