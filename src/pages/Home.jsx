@@ -16,9 +16,9 @@ import {
   Target
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
-import StatusPieChart from '@/components/dashboard/StatusPieChart';
-import RevenueChart from '@/components/dashboard/RevenueChart';
-import ClientsMap from '@/components/dashboard/ClientsMap';
+import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
+import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
+import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
