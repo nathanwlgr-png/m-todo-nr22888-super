@@ -888,9 +888,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           Editar Informações Completas do Cliente
         </Button>
 
-        {/* Tabs: Interações, Tarefas, Documentos, Timeline */}
-        <Tabs defaultValue="interactions" className="w-full">
-          <TabsList className="grid w-full grid-cols-4" data-tutorial="interactions">
+        {/* Tabs: Interações, Tarefas, Documentos, Timeline, Possível Venda */}
+        <Tabs defaultValue="possible-sale" className="w-full">
+          <TabsList className="grid w-full grid-cols-5" data-tutorial="interactions">
+            <TabsTrigger value="possible-sale">
+              Possível Venda
+            </TabsTrigger>
             <TabsTrigger value="interactions">
               Interações ({interactions.length})
             </TabsTrigger>
@@ -904,6 +907,60 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               Timeline
             </TabsTrigger>
           </TabsList>
+
+          {/* Possível Venda */}
+          <TabsContent value="possible-sale" className="space-y-4 mt-4">
+            <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-800">Nova Possível Venda</h3>
+                  <p className="text-xs text-slate-600">Cadastre informações completas para gerar relatório mensal</p>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleEdit}
+                className="w-full bg-orange-600 hover:bg-orange-700 mb-3"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Editar Dados Completos do Cliente
+              </Button>
+
+              <div className="space-y-2 text-sm">
+                <div className="p-3 bg-white rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">Status Atual</p>
+                  <p className="font-semibold text-slate-800">
+                    {isClient ? '✓ Cliente (venda fechada)' : '🎯 Possível Venda (sem venda fechada)'}
+                  </p>
+                </div>
+
+                {!isClient && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-xs text-blue-700 font-medium mb-1">⚠️ Importante</p>
+                    <p className="text-xs text-blue-600">
+                      Este contato será considerado "Cliente" apenas após a primeira venda de equipamento fechada.
+                    </p>
+                  </div>
+                )}
+
+                {isClient && sales.filter(s => s.status === 'fechada').length > 0 && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-xs text-green-700 font-medium mb-1">✓ Vendas Fechadas</p>
+                    {sales.filter(s => s.status === 'fechada').map((sale, idx) => (
+                      <p key={idx} className="text-xs text-green-600">
+                        • {sale.equipment_name} - R$ {sale.sale_value?.toLocaleString('pt-BR')}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+          </TabsContent>
 
           {/* Interações */}
           <TabsContent value="interactions" className="space-y-2 mt-4">
