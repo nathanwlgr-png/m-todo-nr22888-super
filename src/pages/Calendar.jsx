@@ -6,9 +6,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar as CalendarIcon, Plus, Clock, MapPin, ExternalLink, Settings } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Plus, Clock, MapPin, ExternalLink, Settings, FileText } from 'lucide-react';
 import { format, parseISO, isFuture, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import AgendaReportGenerator from '@/components/AgendaReportGenerator';
 
 const visitTypeLabels = {
   primeira_visita: 'Primeira Visita',
@@ -89,6 +90,9 @@ export default function Calendar() {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Gerador de Relatório */}
+        <AgendaReportGenerator />
+
         {/* Today's Visits */}
         {todayVisits.length > 0 && (
           <div>

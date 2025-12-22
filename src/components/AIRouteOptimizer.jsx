@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp } from 'lucide-react';
+import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const cityCoordinates = {
   'Sorocaba': [-23.5015, -47.4526],
@@ -180,6 +181,52 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
       toast.error('Erro ao otimizar rota. Tente novamente.');
     } finally {
       setIsOptimizing(false);
+    }
+  };
+
+  const handleSyncToGoogleCalendar = async () => {
+    if (!optimizedRoute?.daily_routes) return;
+
+    try {
+      for (const dayRoute of optimizedRoute.daily_routes) {
+        for (const client of dayRoute.clients) {
+          const [hours, minutes] = client.estimated_arrival.split(':');
+          const visitDate = new Date();
+          visitDate.setDate(visitDate.getDate() + (dayRoute.day - 1));
+          visitDate.setHours(parseInt(hours), parseInt(minutes), 0);
+
+          const eventTitle = `Visita Comercial - ${client.name}`;
+          const eventDetails = `
+Cliente: ${client.name}
+Clínica: ${client.clinic_name || 'N/A'}
+Cidade: ${client.city}
+Motivo: ${client.reason}
+
+${dayRoute.day_label}
+Saída de Marília: ${dayRoute.departure_time}
+Retorno estimado: ${dayRoute.estimated_return}
+Distância total do dia: ${dayRoute.total_distance_day} km
+Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
+          `.trim();
+
+          const endDate = new Date(visitDate.getTime() + 60 * 60000);
+
+          const params = new URLSearchParams({
+            action: 'TEMPLATE',
+            text: eventTitle,
+            dates: `${format(visitDate, "yyyyMMdd'T'HHmmss")}/${format(endDate, "yyyyMMdd'T'HHmmss")}`,
+            details: eventDetails,
+            location: `${client.clinic_name || ''}, ${client.city}`
+          });
+
+          window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      toast.success('Eventos criados no Google Calendar!');
+    } catch (error) {
+      toast.error('Erro ao sincronizar');
     }
   };
 

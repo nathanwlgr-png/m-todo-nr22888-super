@@ -15,6 +15,7 @@ import {
   Navigation
 } from 'lucide-react';
 import AIRouteOptimizer from '@/components/AIRouteOptimizer';
+import AgendaReportGenerator from '@/components/AgendaReportGenerator';
 
 export default function ScheduledAgenda() {
   const navigate = useNavigate();
@@ -134,6 +135,8 @@ export default function ScheduledAgenda() {
           clients={clients} 
           onRouteOptimized={setOptimizedData}
         />
+
+        <AgendaReportGenerator />
       </div>
 
       {/* Cities and Clients */}
