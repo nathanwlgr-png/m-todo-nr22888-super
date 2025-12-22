@@ -170,7 +170,7 @@ export default function Reports() {
     const doc = new jsPDF();
     
     doc.setFontSize(18);
-    doc.text('Relatorio Seamaty', 20, 20);
+    doc.text('Relatorio de Vendas', 20, 20);
     doc.setFontSize(10);
     doc.text(`Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 20, 28);
 

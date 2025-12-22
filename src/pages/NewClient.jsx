@@ -128,7 +128,7 @@ export default function NewClient() {
       await base44.integrations.Core.SendEmail({
         to: client.created_by,
         subject: `Novo cliente cadastrado: ${client.first_name}`,
-        body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso no Seamaty.\n\nTipo: ${client.client_type || 'Não especificado'}\nPerfil: ${client.behavioral_profile}\n\nAcesse o sistema para começar o atendimento!`
+        body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso.\n\nTipo: ${client.client_type || 'Não especificado'}\nPerfil: ${client.behavioral_profile}\n\nAcesse o sistema para começar o atendimento!`
       });
     } catch (error) {
       console.log('Email automation failed');

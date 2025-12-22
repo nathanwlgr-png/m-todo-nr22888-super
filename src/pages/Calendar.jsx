@@ -44,7 +44,7 @@ export default function Calendar() {
     
     const params = new URLSearchParams({
       action: 'TEMPLATE',
-      text: `Visita Seamaty - ${visit.client_name}`,
+      text: `Visita Comercial - ${visit.client_name}`,
       dates: `${format(startDate, "yyyyMMdd'T'HHmmss")}/${format(endDate, "yyyyMMdd'T'HHmmss")}`,
       details: `Tipo: ${visitTypeLabels[visit.visit_type]}\nCliente: ${visit.client_name}\n${visit.notes || ''}`,
       location: visit.location || ''
