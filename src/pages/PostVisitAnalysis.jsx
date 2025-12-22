@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, 
   Sparkles,
@@ -16,7 +17,13 @@ import {
   Lightbulb,
   Loader2,
   Save,
-  Brain
+  Brain,
+  Plus,
+  Trash2,
+  Calendar,
+  Mail,
+  Phone,
+  Clock
 } from 'lucide-react';
 
 export default function PostVisitAnalysis() {
@@ -29,6 +36,8 @@ export default function PostVisitAnalysis() {
   const [objections, setObjections] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [nextSteps, setNextSteps] = useState([{ action: '', deadline: '' }]);
+  const [followupSuggestions, setFollowupSuggestions] = useState(null);
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -151,6 +160,48 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
       });
 
       setAnalysis(response);
+      
+      // Generate follow-up suggestions
+      const followupResponse = await base44.integrations.Core.InvokeLLM({
+        prompt: `Com base nesta análise de visita, sugira 3 ações de follow-up automáticas:
+
+ANÁLISE:
+${JSON.stringify(response)}
+
+CLIENTE: ${client.first_name}
+STATUS: ${client.status}
+
+Retorne JSON:
+{
+  "sugestoes": [
+    {
+      "canal": "email | whatsapp | ligacao",
+      "timing": "Quando enviar (ex: 'Amanhã às 10h', 'Daqui a 3 dias')",
+      "mensagem": "Template de mensagem curta",
+      "objetivo": "Objetivo desta ação"
+    }
+  ]
+}`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            sugestoes: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  canal: { type: "string" },
+                  timing: { type: "string" },
+                  mensagem: { type: "string" },
+                  objetivo: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      setFollowupSuggestions(followupResponse);
     } catch (error) {
       console.error('Erro ao gerar análise:', error);
       alert('Erro ao gerar análise. Tente novamente.');
@@ -159,13 +210,40 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
     }
   };
 
-  const saveAnalysis = () => {
+  const addNextStep = () => {
+    setNextSteps([...nextSteps, { action: '', deadline: '' }]);
+  };
+
+  const updateNextStep = (index, field, value) => {
+    const updated = [...nextSteps];
+    updated[index][field] = value;
+    setNextSteps(updated);
+  };
+
+  const removeNextStep = (index) => {
+    setNextSteps(nextSteps.filter((_, i) => i !== index));
+  };
+
+  const saveAnalysis = async () => {
     const updateData = {
-      notes: `${client.notes || ''}\n\n--- VISITA ${new Date().toLocaleDateString()} ---\n${visitNotes}\n\nObjeções: ${objections}`.trim(),
+      notes: `${client.notes || ''}\n\n--- VISITA ${new Date().toLocaleDateString()} ---\n${visitNotes}\n\nObjeções: ${objections}\n\nPróximos Passos:\n${nextSteps.map(s => `- ${s.action} (até ${s.deadline})`).join('\n')}`.trim(),
       numerology_tip: analysis.dica_mestre,
       next_action: analysis.proximo_passo,
       last_visit_date: new Date().toISOString().split('T')[0]
     };
+
+    // Create tasks for next steps
+    for (const step of nextSteps.filter(s => s.action && s.deadline)) {
+      await base44.entities.Task.create({
+        client_id: client.id,
+        client_name: client.first_name,
+        title: step.action,
+        due_date: step.deadline,
+        type: 'follow_up',
+        priority: 'alta',
+        auto_created: false
+      });
+    }
 
     updateMutation.mutate(updateData);
   };
@@ -267,6 +345,34 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
           </Button>
         )}
 
+        {/* Visit Summary */}
+        {visitNotes && objections && (
+          <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <h3 className="font-bold text-slate-800 mb-3">📋 Resumo da Visita</h3>
+            <div className="space-y-2">
+              <div className="bg-white rounded p-2">
+                <p className="text-xs text-slate-500 mb-1">Notas</p>
+                <p className="text-sm text-slate-700 line-clamp-3">{visitNotes}</p>
+              </div>
+              {objections && (
+                <div className="bg-white rounded p-2">
+                  <p className="text-xs text-slate-500 mb-1">Objeções</p>
+                  <p className="text-sm text-slate-700 line-clamp-2">{objections}</p>
+                </div>
+              )}
+              <div className="flex gap-2 text-xs">
+                <div className="bg-white rounded px-2 py-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-blue-600" />
+                  {new Date().toLocaleDateString()}
+                </div>
+                <div className="bg-white rounded px-2 py-1 flex items-center gap-1">
+                  <span className="text-slate-600">Score: {client.purchase_score}%</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Analysis Results */}
         {analysis && (
           <>
@@ -361,10 +467,90 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
               <p className="text-slate-700 font-semibold">{analysis.proximo_passo}</p>
             </Card>
 
+            {/* Next Steps with Deadlines */}
+            <Card className="p-4 bg-white">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-slate-800">✅ Próximos Passos Concretos</h3>
+                <Button
+                  onClick={addNextStep}
+                  size="sm"
+                  variant="outline"
+                  className="border-indigo-200 text-indigo-600"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Adicionar
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {nextSteps.map((step, i) => (
+                  <div key={i} className="flex gap-2">
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={step.action}
+                        onChange={(e) => updateNextStep(i, 'action', e.target.value)}
+                        placeholder="Ação concreta (ex: Enviar proposta comercial)"
+                        className="text-sm"
+                      />
+                      <Input
+                        type="date"
+                        value={step.deadline}
+                        onChange={(e) => updateNextStep(i, 'deadline', e.target.value)}
+                        className="text-sm"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    {nextSteps.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeNextStep(i)}
+                        className="text-red-500"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Follow-up Suggestions */}
+            {followupSuggestions && (
+              <Card className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-cyan-600" />
+                  <h3 className="font-bold text-slate-800">💡 Sugestões de Follow-Up</h3>
+                </div>
+                
+                <div className="space-y-3">
+                  {followupSuggestions.sugestoes.map((sug, i) => (
+                    <div key={i} className="bg-white rounded-lg p-3 border-l-4 border-cyan-400">
+                      <div className="flex items-center gap-2 mb-2">
+                        {sug.canal === 'email' ? (
+                          <Mail className="w-4 h-4 text-indigo-600" />
+                        ) : sug.canal === 'whatsapp' ? (
+                          <MessageCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Phone className="w-4 h-4 text-blue-600" />
+                        )}
+                        <span className="text-xs font-semibold text-slate-600 uppercase">{sug.canal}</span>
+                        <Clock className="w-3 h-3 text-slate-400 ml-auto" />
+                        <span className="text-xs text-slate-500">{sug.timing}</span>
+                      </div>
+                      
+                      <p className="text-sm text-slate-700 font-medium mb-1">{sug.objetivo}</p>
+                      <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded italic">"{sug.mensagem}"</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
             {/* Save Button */}
             <Button
               onClick={saveAnalysis}
-              disabled={updateMutation.isPending}
+              disabled={updateMutation.isPending || !nextSteps.some(s => s.action && s.deadline)}
               className="w-full h-14 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 rounded-xl text-lg font-semibold shadow-lg"
             >
               {updateMutation.isPending ? (
@@ -372,10 +558,16 @@ Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA
               ) : (
                 <>
                   <Save className="w-5 h-5 mr-2" />
-                  Salvar e Finalizar
+                  Salvar e Criar Tarefas
                 </>
               )}
             </Button>
+            
+            {!nextSteps.some(s => s.action && s.deadline) && (
+              <p className="text-xs text-amber-600 text-center -mt-2">
+                ⚠️ Preencha pelo menos um próximo passo com prazo
+              </p>
+            )}
           </>
         )}
       </div>
