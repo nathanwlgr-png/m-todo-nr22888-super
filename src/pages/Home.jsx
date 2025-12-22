@@ -30,8 +30,12 @@ import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
 import SalesOverview from '@/components/SalesOverview';
 import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
+import HotClientsDialog from '@/components/HotClientsDialog';
 
 export default function Home() {
+  const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
+  const [selectedStatus, setSelectedStatus] = React.useState('quente');
+
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list('-updated_date', 100),
@@ -114,7 +118,13 @@ export default function Home() {
             </div>
           </Card>
           
-          <Card className="p-4 bg-white shadow-lg border-none">
+          <Card 
+            className="p-4 bg-white shadow-lg border-none cursor-pointer hover:bg-red-50 transition-all"
+            onClick={() => {
+              setSelectedStatus('quente');
+              setHotClientsOpen(true);
+            }}
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
                 <ThermometerSun className="w-5 h-5 text-red-500" />
@@ -466,6 +476,12 @@ export default function Home() {
       )}
       
       <div className="h-24" />
-    </div>
-  );
-}
+
+      <HotClientsDialog 
+        open={hotClientsOpen}
+        onOpenChange={setHotClientsOpen}
+        status={selectedStatus}
+      />
+      </div>
+      );
+      }
