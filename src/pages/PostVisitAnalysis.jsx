@@ -27,6 +27,9 @@ import {
   AlertCircle,
   Users
 } from 'lucide-react';
+import LabNeedsEditor from '@/components/LabNeedsEditor';
+import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
+import ClientDataSync from '@/components/ClientDataSync';
 
 export default function PostVisitAnalysis() {
   const navigate = useNavigate();
@@ -312,6 +315,18 @@ Retorne JSON:
       </div>
 
       <div className="px-6 -mt-8 space-y-4">
+        {/* Dados Sincronizados */}
+        <ClientDataSync clientId={clientId} currentData={client} />
+
+        {/* Lab Needs */}
+        <LabNeedsEditor clientId={clientId} currentNeeds={client.lab_needs || []} />
+
+        {/* Communication Preferences */}
+        <CommunicationPreferencesEditor 
+          clientId={clientId} 
+          currentPreferences={client.communication_preferences || {}} 
+        />
+
         {/* Numerology Summary */}
         <Card className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
           <div className="flex items-center gap-3">

@@ -129,6 +129,8 @@ export default function NewClient() {
     full_name: '',
     first_name: '',
     birthdate: '',
+    cnpj: '',
+    razao_social: '',
     email: '',
     phone: '',
     address: '',
@@ -208,6 +210,8 @@ export default function NewClient() {
         full_name: '',
         first_name: '',
         birthdate: '',
+        cnpj: '',
+        razao_social: '',
         email: '',
         phone: '',
         address: '',
@@ -322,6 +326,34 @@ export default function NewClient() {
               type="date"
               value={formData.birthdate}
               onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* CNPJ */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              CNPJ (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: 00.000.000/0000-00"
+              value={formData.cnpj}
+              onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Razão Social */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Razão Social (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: Clínica Veterinária LTDA"
+              value={formData.razao_social}
+              onChange={(e) => setFormData({ ...formData, razao_social: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
           </div>
