@@ -6,13 +6,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, FileText, Trash2 } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, Upload, Loader2, FileText, Trash2, Edit2, Save } from 'lucide-react';
 
 export default function ConsumablePriceList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [editingConsumable, setEditingConsumable] = useState(null);
+  const [editData, setEditData] = useState({});
 
   const { data: consumables = [], isLoading } = useQuery({
     queryKey: ['consumables'],
@@ -22,6 +26,14 @@ export default function ConsumablePriceList() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Consumable.delete(id),
     onSuccess: () => queryClient.invalidateQueries(['consumables'])
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Consumable.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['consumables']);
+      setEditingConsumable(null);
+    }
   });
 
   const handleFileUpload = async (e) => {
@@ -76,6 +88,24 @@ export default function ConsumablePriceList() {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleEdit = (consumable) => {
+    setEditingConsumable(consumable);
+    setEditData({
+      name: consumable.name,
+      category: consumable.category,
+      unit_price: consumable.unit_price,
+      unit_type: consumable.unit_type,
+      supplier: consumable.supplier || ''
+    });
+  };
+
+  const handleSave = () => {
+    updateMutation.mutate({
+      id: editingConsumable.id,
+      data: editData
+    });
   };
 
   return (
@@ -139,19 +169,83 @@ export default function ConsumablePriceList() {
                     <p className="text-xs text-slate-600 mt-1">Fornecedor: {cons.supplier}</p>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteMutation.mutate(cons.id)}
-                  className="text-red-500"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(cons)}
+                    className="text-indigo-600"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteMutation.mutate(cons.id)}
+                    className="text-red-500"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </Card>
           ))
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingConsumable} onOpenChange={() => setEditingConsumable(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Insumo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Nome</Label>
+              <Input
+                value={editData.name}
+                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Preço Unitário (R$)</Label>
+              <Input
+                type="number"
+                value={editData.unit_price}
+                onChange={(e) => setEditData({ ...editData, unit_price: parseFloat(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label>Tipo de Unidade</Label>
+              <Input
+                value={editData.unit_type}
+                onChange={(e) => setEditData({ ...editData, unit_type: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Fornecedor</Label>
+              <Input
+                value={editData.supplier}
+                onChange={(e) => setEditData({ ...editData, supplier: e.target.value })}
+              />
+            </div>
+            <Button
+              onClick={handleSave}
+              disabled={updateMutation.isPending}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
