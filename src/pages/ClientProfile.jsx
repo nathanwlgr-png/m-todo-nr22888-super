@@ -66,7 +66,7 @@ import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
 import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
-import FunnelStageCard from '@/components/FunnelStageCard';
+import FunnelStageCard from '@/components/FunnelStageCard.jsx';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
