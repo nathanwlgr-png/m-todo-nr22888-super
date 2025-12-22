@@ -30,6 +30,9 @@ export default function Clients() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [vendorFilter, setVendorFilter] = useState('all');
+  const [budgetFilter, setBudgetFilter] = useState('all');
+  const [scoreFilter, setScoreFilter] = useState('all');
+  const [cityFilter, setCityFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
 
@@ -42,6 +45,12 @@ export default function Clients() {
   const vendors = useMemo(() => {
     const unique = [...new Set(clients.map(c => c.created_by).filter(Boolean))];
     return unique;
+  }, [clients]);
+
+  // Lista única de cidades
+  const cities = useMemo(() => {
+    const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
+    return unique.sort();
   }, [clients]);
 
   // Busca em múltiplos campos
@@ -61,8 +70,19 @@ export default function Clients() {
       const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
       const matchesType = typeFilter === 'all' || client.client_type === typeFilter;
       const matchesVendor = vendorFilter === 'all' || client.created_by === vendorFilter;
+      const matchesBudget = budgetFilter === 'all' || client.available_budget === budgetFilter;
+      const matchesCity = cityFilter === 'all' || client.city === cityFilter;
       
-      return matchesSearch && matchesStatus && matchesType && matchesVendor;
+      // Score filter
+      let matchesScore = true;
+      if (scoreFilter !== 'all') {
+        const score = client.purchase_score || 0;
+        if (scoreFilter === 'high') matchesScore = score >= 70;
+        else if (scoreFilter === 'medium') matchesScore = score >= 40 && score < 70;
+        else if (scoreFilter === 'low') matchesScore = score < 40;
+      }
+      
+      return matchesSearch && matchesStatus && matchesType && matchesVendor && matchesBudget && matchesScore && matchesCity;
     });
   }, [clients, search, statusFilter, typeFilter, vendorFilter]);
 
@@ -89,7 +109,7 @@ export default function Clients() {
     }
   };
 
-  const activeFiltersCount = [statusFilter, typeFilter, vendorFilter].filter(f => f !== 'all').length;
+  const activeFiltersCount = [statusFilter, typeFilter, vendorFilter, budgetFilter, scoreFilter, cityFilter].filter(f => f !== 'all').length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -221,12 +241,64 @@ export default function Clients() {
                 </Select>
               </div>
 
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Orçamento Disponível</label>
+                <Select value={budgetFilter} onValueChange={setBudgetFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os orçamentos</SelectItem>
+                    <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
+                    <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
+                    <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
+                    <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
+                    <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Score de Compra</label>
+                <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os scores</SelectItem>
+                    <SelectItem value="high">Alto (70-100)</SelectItem>
+                    <SelectItem value="medium">Médio (40-69)</SelectItem>
+                    <SelectItem value="low">Baixo (0-39)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Localização</label>
+                <Select value={cityFilter} onValueChange={setCityFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as cidades</SelectItem>
+                    {cities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="ghost"
                 onClick={() => {
                   setStatusFilter('all');
                   setTypeFilter('all');
                   setVendorFilter('all');
+                  setBudgetFilter('all');
+                  setScoreFilter('all');
+                  setCityFilter('all');
                 }}
                 className="w-full text-sm"
               >
