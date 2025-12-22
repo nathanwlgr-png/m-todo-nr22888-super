@@ -172,6 +172,14 @@ Seja direto, prático e focado em ação. Pense em ROI, economia com terceiriza�
     setAnalyzingInsights(false);
   };
 
+  if (!clientId) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-500">ID do cliente não encontrado</p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
