@@ -22,6 +22,8 @@ import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
 import VisitSummary from './pages/VisitSummary';
+import ProspectingScripts from './pages/ProspectingScripts';
+import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +52,8 @@ export const PAGES = {
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
     "VisitSummary": VisitSummary,
+    "ProspectingScripts": ProspectingScripts,
+    "ObjectionAnalyzer": ObjectionAnalyzer,
 }
 
 export const pagesConfig = {
