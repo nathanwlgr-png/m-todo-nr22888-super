@@ -9,7 +9,6 @@ import AutomationEngine from '@/components/AutomationEngine';
 import { AIAssistantButton } from '@/components/AIAssistantChat';
 import AutoMessageSystem from '@/components/AutoMessageSystem';
 import SentimentAnalyzer from '@/components/SentimentAnalyzer';
-import AIFunnelAssistant from '@/components/AIFunnelAssistant';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -24,7 +23,6 @@ export default function Layout({ children, currentPageName }) {
       <AutomationEngine />
       <AutoMessageSystem />
       <SentimentAnalyzer />
-      <AIFunnelAssistant />
       <AIAssistantButton />
       <style>{`
         :root {
