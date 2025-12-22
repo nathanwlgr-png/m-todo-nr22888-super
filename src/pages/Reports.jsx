@@ -17,6 +17,7 @@ import {
 import { ArrowLeft, Download, FileText, Loader2, TrendingUp, Sparkles, Target, Users, Calendar, BarChart3, Brain } from 'lucide-react';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
+import MarketBenchmarkAnalysis from '@/components/MarketBenchmarkAnalysis';
 
 const statusLabels = {
   quente: 'Quente',
@@ -302,6 +303,9 @@ Seja específico, prático e focado em AÇÃO. Pense como um consultor de vendas
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Market Benchmark */}
+        <MarketBenchmarkAnalysis />
+
         {/* Sales Metrics */}
         <Card className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200">
           <div className="flex items-center gap-2 mb-3">
