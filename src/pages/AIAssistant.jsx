@@ -247,7 +247,101 @@ HISTÓRICO DE INTERAÇÕES:
         3) Call-to-action assertivo adaptado ao estilo de decisão
         
         Tom: ${client?.client_tone || 'profissional equilibrado'}
-        Foco em conversão imediata.`
+        Foco em conversão imediata.`,
+      insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
+
+ANÁLISE PROFUNDA DO CLIENTE: ${client?.first_name}
+
+═══════════════════════════════════════
+📊 DADOS NUMEROLÓGICOS
+═══════════════════════════════════════
+- Número Nome: ${client?.numerology_number}
+- Número Caminho de Vida: ${client?.life_path_number || 'Não disponível'}
+- Perfil Comportamental: ${client?.behavioral_profile}
+- Estilo de Decisão: ${client?.decision_style}
+- Tom de Voz Observado: ${client?.client_tone || 'Não observado'}
+
+═══════════════════════════════════════
+💼 CONTEXTO PROFISSIONAL
+═══════════════════════════════════════
+- Tipo de Negócio: ${client?.client_type}
+- Papel: ${client?.decision_role}
+- Clínica: ${client?.clinic_name || 'Não informada'}
+- Equipamento Atual: ${client?.current_equipment || 'Nenhum'}
+- Status: ${client?.status} | Score: ${client?.purchase_score}%
+
+═══════════════════════════════════════
+📈 HISTÓRICO DE VENDAS
+═══════════════════════════════════════
+${sales.length > 0 ? sales.map(s => `- ${s.equipment_name}: R$ ${s.sale_value} (${s.status})`).join('\n') : '- Nenhuma venda registrada'}
+
+═══════════════════════════════════════
+📅 HISTÓRICO DE VISITAS
+═══════════════════════════════════════
+- Total de visitas: ${visits.length}
+- Última visita: ${client?.last_visit_date || 'Nenhuma ainda'}
+${visits.slice(0, 3).map(v => `- ${v.visit_type} em ${v.scheduled_date?.split('T')[0]} - ${v.status}`).join('\n')}
+
+═══════════════════════════════════════
+📝 INTERAÇÕES E FOLLOW-UPS
+═══════════════════════════════════════
+- Follow-ups enviados: ${followupLogs.length}
+- Dores identificadas: ${client?.main_pains?.join(', ') || 'Não identificadas'}
+- Gatilhos usados: ${client?.triggers_used?.join(', ') || 'Nenhum'}
+- Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
+
+═══════════════════════════════════════
+📋 NOTAS ANTERIORES
+═══════════════════════════════════════
+${client?.notes || 'Sem notas anteriores'}
+
+═══════════════════════════════════════
+🎯 SUA MISSÃO
+═══════════════════════════════════════
+
+Com base em TODOS os dados acima, forneça uma análise ESTRATÉGICA e PROFUNDA em formato estruturado:
+
+**1. PERFIL PSICOLÓGICO COMPLETO** (2-3 parágrafos)
+   - Combine numerologia + tom observado + comportamento nas visitas
+   - Motivações profundas (medo, ambição, reconhecimento, segurança?)
+   - Padrões de decisão observados no histórico
+
+**2. MOTIVADORES PRINCIPAIS** (lista)
+   - Gatilhos emocionais mais efetivos
+   - Argumentos racionais que ressoam
+   - Prova social que funciona (testemunhos, cases)
+
+**3. ESTILO DE COMUNICAÇÃO IDEAL**
+   - Tom exato (formal/informal, técnico/emocional, direto/indireto)
+   - Canais preferidos (email, WhatsApp, presencial, ligação)
+   - Frequência de contato ideal
+   - Melhores horários baseados no perfil
+
+**4. OBJEÇÕES PREVISTAS** (3-5 principais)
+   - Liste objeções específicas que ele provavelmente levantará
+   - Para cada objeção, forneça:
+     * Por que essa objeção é provável (baseado em dados)
+     * Técnica de controle (SPIN/Cialdini/Int. Emocional)
+     * Frase exata de resposta
+
+**5. ESTRATÉGIA DE PITCH PERSONALIZADA**
+   - Abertura perfeita para este cliente
+   - Sequência de argumentos (priorize ROI? Qualidade? Segurança? Inovação?)
+   - Fechamento adaptado ao estilo de decisão dele
+   - Momento ideal para pedir o fechamento
+
+**6. PRÓXIMOS PASSOS TÁTICOS** (3-4 ações)
+   - Ações imediatas para avançar na venda
+   - O que NÃO fazer com este cliente
+   - Oportunidades de upsell/cross-sell
+   - Timeline esperado até fechamento
+
+**7. ALERTA DE RISCO**
+   - Sinais de que está esfriando
+   - O que pode fazer perder esta venda
+   - Como recuperar se esfriar
+
+Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`
     };
 
     const response = await base44.integrations.Core.InvokeLLM({
