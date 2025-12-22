@@ -450,83 +450,56 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
-        {/* Dados Essenciais para Venda */}
-        <Card className="p-4 bg-white shadow-lg border-none">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+        {/* Info Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4 bg-white shadow-lg border-none">
+            <div className="flex items-center gap-2 mb-1">
+              <Building2 className="w-4 h-4 text-slate-400" />
+              <span className="text-xs text-slate-500">Tipo</span>
+            </div>
+            <p className="font-semibold text-slate-800 text-sm">
+              {clientTypeLabels[client.client_type]}
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-white shadow-lg border-none">
+            <div className="flex items-center gap-2 mb-1">
+              <UserCog className="w-4 h-4 text-slate-400" />
+              <span className="text-xs text-slate-500">Decisor</span>
+            </div>
+            <p className="font-semibold text-slate-800 text-sm">
+              {roleLabels[client.decision_role]}
+            </p>
+          </Card>
+
+          {client.available_budget && client.available_budget !== 'nao_informado' && (
+            <Card className="p-4 bg-white shadow-lg border-none">
               <div className="flex items-center gap-2 mb-1">
-                <Building2 className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">Tipo</span>
+                <DollarSign className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Orçamento</span>
               </div>
               <p className="font-semibold text-slate-800 text-sm">
-                {clientTypeLabels[client.client_type]}
+                {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
+                 client.available_budget === '50k_100k' ? 'R$ 50-100k' :
+                 client.available_budget === '100k_200k' ? 'R$ 100-200k' :
+                 client.available_budget === '200k_500k' ? 'R$ 200-500k' :
+                 'Acima R$ 500k'}
               </p>
-            </div>
+            </Card>
+          )}
 
-            <div>
+          {client.decision_deadline && (
+            <Card className="p-4 bg-white shadow-lg border-none">
               <div className="flex items-center gap-2 mb-1">
-                <UserCog className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">Decisor</span>
+                <Calendar className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Prazo Decisão</span>
               </div>
               <p className="font-semibold text-slate-800 text-sm">
-                {roleLabels[client.decision_role]}
+                {format(new Date(client.decision_deadline), 'dd/MM/yyyy')}
               </p>
-            </div>
-
-            {client.city && (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-xs text-slate-500">Localização</span>
-                </div>
-                <p className="font-semibold text-slate-800 text-sm">{client.city}</p>
-              </div>
-            )}
-
-            {client.available_budget && client.available_budget !== 'nao_informado' && (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <DollarSign className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs text-slate-500">Orçamento</span>
-                </div>
-                <p className="font-semibold text-slate-800 text-sm">
-                  {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
-                   client.available_budget === '50k_100k' ? 'R$ 50-100k' :
-                   client.available_budget === '100k_200k' ? 'R$ 100-200k' :
-                   client.available_budget === '200k_500k' ? 'R$ 200-500k' :
-                   'Acima R$ 500k'}
-                </p>
-              </div>
-            )}
-
-            {client.decision_deadline && (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Calendar className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs text-slate-500">Prazo</span>
-                </div>
-                <p className="font-semibold text-slate-800 text-sm">
-                  {format(new Date(client.decision_deadline), 'dd/MM/yyyy')}
-                </p>
-              </div>
-            )}
-
-            {client.projected_revenue && (
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <DollarSign className="w-4 h-4 text-green-500" />
-                  <span className="text-xs text-slate-500">Receita Projetada</span>
-                </div>
-                <p className="font-semibold text-green-700 text-sm">
-                  R$ {(client.projected_revenue / 1000).toFixed(0)}k
-                </p>
-              </div>
-            )}
-          </div>
-        </Card>
+            </Card>
+          )}
+        </div>
 
         {/* Motivadores e Objeções */}
         {(client.purchase_motivators?.length > 0 || client.real_objections?.length > 0) && (
@@ -570,35 +543,49 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
-        {/* Score de Compra */}
+        {/* Score */}
         <Card className="p-5 bg-white shadow-md border-none">
           <ScoreBar score={client.purchase_score || 50} />
         </Card>
 
-        {/* Perfil Numerológico - Apenas se relevante */}
-        {client.numerology_tip && (
+        {/* Numerology Profile */}
+        <div onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}>
+          <NumerologyCard number={client.numerology_number || 1} />
+        </div>
+        {client.life_path_number && (
           <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-indigo-600 mb-1">Dica Estratégica</p>
-                <p className="text-sm text-slate-700">{client.numerology_tip}</p>
-                {(client.numerology_number || client.life_path_number) && (
-                  <Button
-                    onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
-                    variant="link"
-                    size="sm"
-                    className="text-indigo-600 px-0 mt-2"
-                  >
-                    Ver Análise Completa →
-                  </Button>
-                )}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-indigo-600 font-medium mb-1">Caminho de Vida</p>
+                <p className="text-2xl font-bold text-indigo-700">{client.life_path_number}</p>
               </div>
+              <Button
+                onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
+                variant="outline"
+                size="sm"
+                className="border-indigo-300 text-indigo-600"
+              >
+                Ver Análise Completa
+              </Button>
             </div>
           </Card>
         )}
 
-        {/* Pipeline Visual - Essencial para Vendas */}
+        {/* Equipment Manager */}
+        <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+
+        {/* Consumable Analytics */}
+        <ClientConsumableAnalytics clientId={client.id} clientName={client.first_name} />
+
+        {/* Pipeline AI Assistant */}
+        <PipelineAIAssistant 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
+        {/* Pipeline Visual */}
         <PipelineVisual 
           client={client} 
           onStageClick={(stage) => {
@@ -609,25 +596,23 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
-        {/* Assistente IA - Ação Imediata */}
-        <PipelineAIAssistant 
-          client={client}
-          interactions={interactions}
-          visits={visits}
-          sales={sales}
-        />
-
-        {/* Registrar Interação */}
+        {/* Botão Registrar Interação */}
         <AddInteractionDialog client={client} />
 
-        {/* Tabs Consolidadas */}
+        {/* Tabs: Interações, Tarefas, Documentos, Timeline */}
         <Tabs defaultValue="interactions" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-4" data-tutorial="interactions">
             <TabsTrigger value="interactions">
-              Histórico ({interactions.length})
+              Interações ({interactions.length})
             </TabsTrigger>
             <TabsTrigger value="tasks">
               Tarefas ({clientTasks.filter(t => t.status === 'pendente').length})
+            </TabsTrigger>
+            <TabsTrigger value="documents">
+              Docs ({documents.length})
+            </TabsTrigger>
+            <TabsTrigger value="timeline">
+              Timeline
             </TabsTrigger>
           </TabsList>
 
@@ -636,12 +621,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             <InteractionTimeline interactions={interactions} />
           </TabsContent>
 
-          {/* Tarefas Pendentes */}
+          {/* Tarefas Ativas */}
           <TabsContent value="tasks" className="space-y-2 mt-4">
             {clientTasks.filter(t => t.status === 'pendente').length === 0 ? (
               <Card className="p-6 text-center">
                 <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Nenhuma tarefa pendente</p>
+                <p className="text-sm text-slate-500">Nenhuma tarefa ativa</p>
               </Card>
             ) : (
               clientTasks.filter(t => t.status === 'pendente').map(task => (
@@ -661,7 +646,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                           {task.priority}
                         </Badge>
                         <span className="text-xs text-slate-500">
-                          {format(new Date(task.due_date), 'dd/MM/yyyy')}
+                          Vence: {format(new Date(task.due_date), 'dd/MM/yyyy')}
                         </span>
                       </div>
                     </div>
@@ -670,19 +655,135 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               ))
             )}
           </TabsContent>
+
+          {/* Documentos */}
+          <TabsContent value="documents" className="space-y-2 mt-4">
+            <Button
+              onClick={() => setUploadDialogOpen(true)}
+              variant="outline"
+              className="w-full h-12 border-2 border-dashed border-indigo-300 hover:bg-indigo-50"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Fazer Upload
+            </Button>
+
+            {documents.length === 0 ? (
+              <Card className="p-6 text-center">
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">Nenhum documento</p>
+              </Card>
+            ) : (
+              documents.map(doc => (
+                <Card key={doc.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{doc.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">{doc.type}</Badge>
+                        <span className="text-xs text-slate-500">
+                          {format(new Date(doc.created_date), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
+                      {doc.notes && (
+                        <p className="text-xs text-slate-600 mt-2">{doc.notes}</p>
+                      )}
+                    </div>
+                    {doc.file_url && (
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 hover:bg-slate-100 rounded-lg"
+                      >
+                        <Download className="w-4 h-4 text-indigo-600" />
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          {/* Timeline */}
+          <TabsContent value="timeline" className="mt-4">
+            <ClientTimeline events={timelineEvents} />
+          </TabsContent>
         </Tabs>
 
-        {/* Próxima Ação - Essencial */}
-        {client.next_action && (
-          <Card className="p-4 bg-amber-50 border-amber-200">
-            <p className="text-xs text-amber-600 font-medium mb-1">🎯 Próxima Ação</p>
-            <p className="text-slate-700 font-medium">{client.next_action}</p>
-          </Card>
-        )}
+        {/* Funnel Persuasion Triggers */}
+        <div>
+          <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🎯 Gatilhos por Etapa do Funil</h3>
+          <FunnelPersuasionTriggers client={client} />
         </div>
 
-      {/* Ações Fixas - Apenas Essenciais */}
+        {/* Next Action */}
+        {client.next_action && (
+          <Card className="p-4 bg-amber-50 border-amber-200">
+            <p className="text-xs text-amber-600 font-medium mb-1">Próxima Ação</p>
+            <p className="text-slate-700">{client.next_action}</p>
+          </Card>
+        )}
+
+        {/* Delete Button */}
+        <Button
+          onClick={handleDelete}
+          variant="outline"
+          className="w-full h-12 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Remover
+        </Button>
+        </div>
+
+      {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => navigate(createPageUrl(`ProspectingScripts?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold border-emerald-200 text-emerald-700"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Roteiros
+          </Button>
+
+          <Button
+            onClick={() => navigate(createPageUrl(`ObjectionAnalyzer?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold border-red-200 text-red-700"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Objeções
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => navigate(createPageUrl(`FollowUpAssistant?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold"
+          >
+            <Sparkles className="w-4 h-4 mr-1" />
+            Follow-Up IA
+          </Button>
+
+          <Button
+            onClick={() => navigate(createPageUrl(`PreVisitChecklist?id=${client.id}`))}
+            variant="outline"
+            className="h-12 rounded-xl border-2 text-sm font-semibold"
+          >
+            <ClipboardCheck className="w-4 h-4 mr-1" />
+            Checklist
+          </Button>
+        </div>
+
         <ScheduleVisitButton client={client} />
 
         <Button
@@ -690,7 +791,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-xl text-base font-semibold shadow-lg shadow-orange-500/30 glow-orange"
         >
           <MessageSquare className="w-5 h-5 mr-2" />
-          Assistente IA
+          Abrir Assistente IA
         </Button>
       </div>
 
