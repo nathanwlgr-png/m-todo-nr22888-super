@@ -14,7 +14,6 @@ import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
-import Home from './pages/Home';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
 import LeadProfile from './pages/LeadProfile';
@@ -41,6 +40,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import ProposalTemplates from './pages/ProposalTemplates';
 import SignedContracts from './pages/SignedContracts';
 import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -61,7 +61,6 @@ export const PAGES = {
     "GlobalSearch": GlobalSearch,
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
-    "Home": Home,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
     "LeadProfile": LeadProfile,
@@ -88,6 +87,7 @@ export const PAGES = {
     "ProposalTemplates": ProposalTemplates,
     "SignedContracts": SignedContracts,
     "ConsumableOrderHistory": ConsumableOrderHistory,
+    "Home": Home,
 }
 
 export const pagesConfig = {
