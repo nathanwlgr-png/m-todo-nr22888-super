@@ -65,6 +65,7 @@ import AddInteractionDialog from '@/components/AddInteractionDialog';
 import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
 import ProposalGenerator from '@/components/ProposalGenerator';
+import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -509,6 +510,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Equipment Manager */}
         <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+
+        {/* Consumable Analytics */}
+        <ClientConsumableAnalytics clientId={client.id} clientName={client.first_name} />
 
         {/* Pipeline AI Assistant */}
         <PipelineAIAssistant 

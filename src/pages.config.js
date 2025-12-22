@@ -40,6 +40,7 @@ import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import ProposalTemplates from './pages/ProposalTemplates';
 import SignedContracts from './pages/SignedContracts';
+import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import __Layout from './Layout.jsx';
 
 
@@ -86,6 +87,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "ProposalTemplates": ProposalTemplates,
     "SignedContracts": SignedContracts,
+    "ConsumableOrderHistory": ConsumableOrderHistory,
 }
 
 export const pagesConfig = {
