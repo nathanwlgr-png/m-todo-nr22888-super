@@ -782,7 +782,7 @@ Seja prático e direto ao ponto.`
                   onClick={() => window.open(`https://wa.me/${client.phone}`, '_blank')}
                   className="border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
                 >
-                  <MessageSquare className="w-4 h-4 mr-1" />
+                  <MessageCircle className="w-4 h-4 mr-1" />
                   WhatsApp
                 </Button>
               )}
