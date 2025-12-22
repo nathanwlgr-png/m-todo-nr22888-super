@@ -80,6 +80,7 @@ import PostVisitDialog from '@/components/PostVisitDialog';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
 import VisitReportPDF from '@/components/VisitReportPDF';
+import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',

@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
+import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
@@ -964,12 +965,17 @@ Seja prático e direto ao ponto.`
             </p>
           </div>
         )}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
+          <VoiceRecorderButton
+            onTranscript={(transcript) => setInput(transcript)}
+            size="icon"
+            className="h-12 w-12 shrink-0"
+          />
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !loading && sendMessage(input)}
-            placeholder={rolePlayMode ? "Sua abordagem/resposta..." : "Digite sua mensagem..."}
+            placeholder={rolePlayMode ? "Sua abordagem/resposta..." : "Digite ou grave..."}
             className="flex-1 h-12 rounded-xl border-2"
             disabled={loading}
           />

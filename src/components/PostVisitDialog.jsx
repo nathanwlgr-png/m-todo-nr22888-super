@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CheckCircle2, Calendar, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 
 export default function PostVisitDialog({ client, visitId, open, onOpenChange }) {
   const queryClient = useQueryClient();
@@ -243,11 +244,17 @@ Retorne JSON:
         {step === 1 && (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Resumo da Visita *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Resumo da Visita *</Label>
+                <VoiceRecorderButton
+                  onTranscript={(transcript) => setVisitData({ ...visitData, result_notes: transcript })}
+                  size="sm"
+                />
+              </div>
               <Textarea
                 value={visitData.result_notes}
                 onChange={(e) => setVisitData({ ...visitData, result_notes: e.target.value })}
-                placeholder="O que aconteceu na visita? Pontos importantes..."
+                placeholder="O que aconteceu na visita? Pontos importantes... (ou grave áudio)"
                 rows={4}
                 className="resize-none"
               />

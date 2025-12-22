@@ -35,6 +35,7 @@ import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
+import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import RevenueForecastPage from './pages/RevenueForecastPage';
@@ -48,7 +49,6 @@ import Tasks from './pages/Tasks';
 import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import RegionalSearch from './pages/RegionalSearch';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +90,7 @@ export const PAGES = {
     "PreVisitChecklist": PreVisitChecklist,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
+    "RegionalSearch": RegionalSearch,
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
     "RevenueForecastPage": RevenueForecastPage,
@@ -103,7 +104,6 @@ export const PAGES = {
     "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
-    "RegionalSearch": RegionalSearch,
 }
 
 export const pagesConfig = {
