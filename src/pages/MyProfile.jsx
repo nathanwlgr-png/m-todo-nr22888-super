@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Sparkles, Plus, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, Plus, X, Loader2, Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function MyProfile() {
@@ -29,6 +29,8 @@ export default function MyProfile() {
 
   const [newTrait, setNewTrait] = useState('');
   const [newPhrase, setNewPhrase] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   React.useEffect(() => {
     if (user) {
@@ -98,6 +100,23 @@ export default function MyProfile() {
       ...formData,
       signature_phrases: formData.signature_phrases.filter((_, i) => i !== index)
     });
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ activity_map_url: file_url });
+      queryClient.invalidateQueries(['current-user']);
+      toast.success('PDF das atividades enviado!');
+    } catch (error) {
+      toast.error('Erro ao fazer upload');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (isLoading) {
@@ -190,6 +209,55 @@ export default function MyProfile() {
             placeholder="Ex: Prefiro construir relacionamento antes de vender. Sempre faço perguntas abertas para entender a dor real do cliente. Uso SPIN selling e foco em ROI."
             rows={4}
           />
+        </Card>
+
+        {/* Activity Map Upload */}
+        <Card className="p-4">
+          <h3 className="font-semibold text-slate-800 mb-3">Mapa de Atividades</h3>
+          <p className="text-sm text-slate-500 mb-3">
+            Faça upload do PDF com suas atividades e região de atuação
+          </p>
+
+          {user?.activity_map_url ? (
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200 mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-green-600" />
+                <span className="text-sm text-green-700 font-medium">PDF enviado</span>
+              </div>
+              <a
+                href={user.activity_map_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-green-600 underline"
+              >
+                Ver arquivo
+              </a>
+            </div>
+          ) : null}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            variant="outline"
+            className="w-full h-12 border-2 border-dashed"
+          >
+            {uploading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <Upload className="w-5 h-5 mr-2" />
+                {user?.activity_map_url ? 'Substituir PDF' : 'Fazer Upload do PDF'}
+              </>
+            )}
+          </Button>
         </Card>
 
         {/* Signature Phrases */}
