@@ -46,6 +46,7 @@ import VisitPlanner from './pages/VisitPlanner';
 import SalesAnalytics from './pages/SalesAnalytics';
 import ScheduledAgenda from './pages/ScheduledAgenda';
 import ClientsMap from './pages/ClientsMap';
+import ClosingForecast from './pages/ClosingForecast';
 import __Layout from './Layout.jsx';
 
 
@@ -98,6 +99,7 @@ export const PAGES = {
     "SalesAnalytics": SalesAnalytics,
     "ScheduledAgenda": ScheduledAgenda,
     "ClientsMap": ClientsMap,
+    "ClosingForecast": ClosingForecast,
 }
 
 export const pagesConfig = {
