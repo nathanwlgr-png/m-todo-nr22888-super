@@ -73,6 +73,8 @@ import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
 import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
+import LabNeedsEditor from '@/components/LabNeedsEditor';
+import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -959,7 +961,25 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               </div>
             </Card>
 
-            <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+            {/* Necessidades do Laboratório */}
+            <LabNeedsEditor 
+              clientId={client.id} 
+              currentNeeds={client.lab_needs || []} 
+            />
+
+            {/* Preferências de Comunicação */}
+            <CommunicationPreferencesEditor 
+              clientId={client.id} 
+              currentPreferences={client.communication_preferences || {}} 
+            />
+
+            {/* Histórico de Compras */}
+            <Card className="p-4 bg-white border-slate-200">
+              <h3 className="font-semibold text-slate-800 mb-3">
+                {isClient ? 'Histórico de Compras do Cliente' : 'Histórico de Compras do Possível Cliente'}
+              </h3>
+              <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+            </Card>
           </TabsContent>
 
           {/* Interações */}
