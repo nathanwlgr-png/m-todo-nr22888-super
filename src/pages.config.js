@@ -44,6 +44,7 @@ import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import VisitPlanner from './pages/VisitPlanner';
 import SalesAnalytics from './pages/SalesAnalytics';
+import ScheduledAgenda from './pages/ScheduledAgenda';
 import __Layout from './Layout.jsx';
 
 
@@ -94,6 +95,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "VisitPlanner": VisitPlanner,
     "SalesAnalytics": SalesAnalytics,
+    "ScheduledAgenda": ScheduledAgenda,
 }
 
 export const pagesConfig = {
