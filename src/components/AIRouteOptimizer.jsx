@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp, Calendar } from 'lucide-react';
+import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp, Calendar, Car, DollarSign, AlertTriangle } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -28,6 +29,13 @@ export default function AIRouteOptimizer({ clients, onRouteOptimized }) {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [optimizedRoute, setOptimizedRoute] = useState(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [config, setConfig] = useState({
+    departureTime: '07:30',
+    maxDistancePerDay: 200,
+    preferredDays: [],
+    avoidWeekends: true
+  });
 
   const handleOptimize = async () => {
     if (clients.length === 0) {
@@ -54,18 +62,25 @@ export default function AIRouteOptimizer({ clients, onRouteOptimized }) {
         }));
 
       const prompt = `
-Você é um especialista em otimização de rotas de vendas no interior de São Paulo.
+Você é um especialista em otimização de rotas de vendas no interior de São Paulo com acesso a dados de trânsito em tempo real.
 
 DADOS DOS CLIENTES:
 ${JSON.stringify(clientsData, null, 2)}
 
+CONFIGURAÇÕES DO VENDEDOR:
+- Horário preferencial de saída: ${config.departureTime}
+- Distância máxima por dia (ida): ${config.maxDistancePerDay} km
+${config.preferredDays.length > 0 ? `- Dias preferenciais: ${config.preferredDays.join(', ')}` : ''}
+${config.avoidWeekends ? '- Evitar finais de semana' : ''}
+
 RESTRIÇÕES CRÍTICAS:
 - **Base do vendedor**: Marília, SP
-- **Distância máxima por dia**: 200 km na IDA + 200 km na VOLTA (total 400 km/dia)
+- **Distância máxima por dia**: ${config.maxDistancePerDay} km na IDA + ${config.maxDistancePerDay} km na VOLTA (total ${config.maxDistancePerDay * 2} km/dia)
 - **Retorno diário**: O vendedor DEVE retornar para Marília ao final de TODOS os dias
 - **Cidades por dia**: Máximo de 1-2 cidades próximas por dia
 - **Tempo de visita**: 45-60 minutos por cliente
-- **Pedágios**: Considerar e calcular custos de pedágio nas rodovias do interior de SP
+- **Trânsito**: Considerar horários de pico (7h-9h e 17h-19h) nas rodovias principais
+- **Pedágios**: Calcular custos REAIS de pedágio nas rodovias SP (consultar dados atualizados)
 
 TAREFA:
 Organize as visitas em DIAS, com cada dia sendo uma jornada completa:
@@ -85,10 +100,13 @@ CRITÉRIOS DE OTIMIZAÇÃO (ORDEM DE IMPORTÂNCIA):
 IMPORTANTE: 
 - PRIORIZE clientes com maior probabilidade de fechar PRIMEIRO
 - Cada "day" deve ter rota completa: Marília → Cidades → Marília
-- Calcule distância total do dia (ida + volta)
-- Estime custo de pedágio baseado nas rodovias do interior de SP (média R$ 0,20/km em pedágios)
-- Sugira horário de saída de Marília e horário estimado de retorno
+- Calcule distância total do dia (ida + volta) usando DADOS REAIS de rotas
+- **TRÂNSITO EM TEMPO REAL**: Adicione +15-30% no tempo em horários de pico
+- **PEDÁGIOS REAIS**: Consulte valores atualizados (não use estimativa genérica)
+- **TEMPO DE VISITA**: Considere 45-60min por cliente + deslocamento entre clientes na mesma cidade
+- Sugira horário de saída de Marília (padrão: ${config.departureTime}) e horário estimado de retorno
 - Priorize clientes "quentes" e com score alto nos primeiros dias
+- **NAVEGAÇÃO**: Forneça coordenadas GPS exatas para cada destino
 
 Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
 {
@@ -96,8 +114,10 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
   "total_days": número,
   "total_distance_km": número,
   "estimated_toll_cost": número,
+  "estimated_fuel_cost": número (considere consumo médio 10km/L e gasolina R$ 5,50/L),
+  "traffic_adjusted_time": string (tempo total considerando trânsito),
   "route_efficiency_score": número de 0-100,
-  "insights": [array de strings com 3-4 insights sobre a rota e custos],
+  "insights": [array de strings com 3-4 insights sobre rota, custos e trânsito],
   "daily_routes": [
     {
       "day": número,
@@ -107,14 +127,22 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
       "cities": [string] (cidades visitadas neste dia),
       "total_distance_day": número (km ida + volta),
       "toll_cost_day": número,
+      "toll_locations": [array de strings com os pedágios do trajeto],
+      "traffic_status": string (leve/moderado/pesado),
+      "weather_alert": string ou null (alertas meteorológicos se houver),
+      "navigation_url": string (URL Google Maps com waypoints),
       "clients": [
         {
           "id": string,
           "name": string,
           "city": string,
           "clinic_name": string,
+          "address": string,
+          "latitude": número,
+          "longitude": número,
           "estimated_arrival": string,
           "estimated_visit_time": string,
+          "driving_time_from_previous": string,
           "reason": string
         }
       ]
@@ -133,6 +161,8 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
             total_days: { type: "number" },
             total_distance_km: { type: "number" },
             estimated_toll_cost: { type: "number" },
+            estimated_fuel_cost: { type: "number" },
+            traffic_adjusted_time: { type: "string" },
             route_efficiency_score: { type: "number" },
             insights: { type: "array", items: { type: "string" } },
             daily_routes: {
@@ -147,6 +177,10 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                   cities: { type: "array", items: { type: "string" } },
                   total_distance_day: { type: "number" },
                   toll_cost_day: { type: "number" },
+                  toll_locations: { type: "array", items: { type: "string" } },
+                  traffic_status: { type: "string" },
+                  weather_alert: { type: "string" },
+                  navigation_url: { type: "string" },
                   clients: {
                     type: "array",
                     items: {
@@ -156,8 +190,12 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
                         name: { type: "string" },
                         city: { type: "string" },
                         clinic_name: { type: "string" },
+                        address: { type: "string" },
+                        latitude: { type: "number" },
+                        longitude: { type: "number" },
                         estimated_arrival: { type: "string" },
                         estimated_visit_time: { type: "string" },
+                        driving_time_from_previous: { type: "string" },
                         reason: { type: "string" }
                       }
                     }
@@ -231,25 +269,87 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
     }
   };
 
+  const openNavigation = (dayRoute) => {
+    if (!dayRoute.navigation_url && dayRoute.clients?.length > 0) {
+      // Fallback: construir URL do Google Maps
+      const waypoints = dayRoute.clients
+        .map(c => `${c.latitude},${c.longitude}`)
+        .join('|');
+      const url = `https://www.google.com/maps/dir/?api=1&origin=Marília,SP&destination=Marília,SP&waypoints=${waypoints}&travelmode=driving`;
+      window.open(url, '_blank');
+    } else if (dayRoute.navigation_url) {
+      window.open(dayRoute.navigation_url, '_blank');
+    }
+  };
+
+  const openClientNavigation = (client) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${client.latitude},${client.longitude}&travelmode=driving`;
+    window.open(url, '_blank');
+  };
+
+  const openWazeNavigation = (dayRoute) => {
+    // Waze não suporta múltiplos waypoints, abrir para o primeiro cliente
+    if (dayRoute.clients?.length > 0) {
+      const first = dayRoute.clients[0];
+      const url = `https://waze.com/ul?ll=${first.latitude},${first.longitude}&navigate=yes`;
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <>
-      <Button
-        onClick={handleOptimize}
-        disabled={isOptimizing || clients.length === 0}
-        className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-      >
-        {isOptimizing ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Otimizando com IA...
-          </>
-        ) : (
-          <>
-            <Sparkles className="w-5 h-5 mr-2" />
-            Otimizar Rota com IA
-          </>
+      <div className="space-y-2">
+        <Button
+          onClick={() => setShowConfig(!showConfig)}
+          variant="outline"
+          className="w-full h-10 text-sm"
+        >
+          {showConfig ? 'Ocultar' : 'Configurar'} Preferências
+        </Button>
+
+        {showConfig && (
+          <Card className="p-4 space-y-3">
+            <div>
+              <label className="text-xs text-slate-600 mb-1 block">Horário de Saída</label>
+              <Input
+                type="time"
+                value={config.departureTime}
+                onChange={(e) => setConfig({ ...config, departureTime: e.target.value })}
+                className="h-9"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-600 mb-1 block">Distância Máxima por Dia (km)</label>
+              <Input
+                type="number"
+                value={config.maxDistancePerDay}
+                onChange={(e) => setConfig({ ...config, maxDistancePerDay: parseInt(e.target.value) })}
+                className="h-9"
+                min="50"
+                max="300"
+              />
+            </div>
+          </Card>
         )}
-      </Button>
+
+        <Button
+          onClick={handleOptimize}
+          disabled={isOptimizing || clients.length === 0}
+          className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+        >
+          {isOptimizing ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Otimizando com IA + Trânsito...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5 mr-2" />
+              Otimizar Rota com IA
+            </>
+          )}
+        </Button>
+      </div>
 
       <Dialog open={showResults} onOpenChange={setShowResults}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -263,7 +363,7 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
           {optimizedRoute && (
             <div className="space-y-4">
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Card className="p-3 bg-gradient-to-br from-purple-50 to-indigo-50">
                   <div className="flex items-center gap-2 mb-1">
                     <Clock className="w-4 h-4 text-purple-600" />
@@ -297,10 +397,30 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                 <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50">
                   <div className="flex items-center gap-2 mb-1">
                     <MapPin className="w-4 h-4 text-orange-600" />
-                    <p className="text-xs text-slate-600">Custo Pedágio</p>
+                    <p className="text-xs text-slate-600">Pedágio</p>
                   </div>
                   <p className="text-xl font-bold text-slate-800">
                     R$ {optimizedRoute.estimated_toll_cost?.toFixed(0)}
+                  </p>
+                </Card>
+
+                <Card className="p-3 bg-gradient-to-br from-red-50 to-pink-50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Car className="w-4 h-4 text-red-600" />
+                    <p className="text-xs text-slate-600">Combustível</p>
+                  </div>
+                  <p className="text-xl font-bold text-slate-800">
+                    R$ {optimizedRoute.estimated_fuel_cost?.toFixed(0)}
+                  </p>
+                </Card>
+
+                <Card className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-cyan-600" />
+                    <p className="text-xs text-slate-600">Tempo Total</p>
+                  </div>
+                  <p className="text-lg font-bold text-slate-800">
+                    {optimizedRoute.traffic_adjusted_time || 'N/A'}
                   </p>
                 </Card>
               </div>
@@ -354,6 +474,61 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                               {dayRoute.cities?.join(' + ')}
                             </span>
                           </div>
+
+                          {/* Traffic & Weather Alerts */}
+                          {(dayRoute.traffic_status || dayRoute.weather_alert) && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {dayRoute.traffic_status && (
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  dayRoute.traffic_status === 'leve' ? 'bg-green-100 text-green-700' :
+                                  dayRoute.traffic_status === 'moderado' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-red-100 text-red-700'
+                                }`}>
+                                  🚦 Trânsito: {dayRoute.traffic_status}
+                                </span>
+                              )}
+                              {dayRoute.weather_alert && (
+                                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  {dayRoute.weather_alert}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Toll Locations */}
+                          {dayRoute.toll_locations?.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs text-slate-500 mb-1">Pedágios no trajeto:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {dayRoute.toll_locations.map((toll, i) => (
+                                  <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                                    {toll}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Navigation Buttons */}
+                          <div className="mt-3 flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => openNavigation(dayRoute)}
+                              className="flex-1 bg-blue-600 hover:bg-blue-700 h-9"
+                            >
+                              <Navigation className="w-3 h-3 mr-1" />
+                              Google Maps
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => openWazeNavigation(dayRoute)}
+                              className="flex-1 bg-cyan-600 hover:bg-cyan-700 h-9"
+                            >
+                              <Car className="w-3 h-3 mr-1" />
+                              Waze
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
@@ -374,7 +549,24 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                                   <span>🕐 {client.estimated_arrival}</span>
                                   <span>⏱️ {client.estimated_visit_time}</span>
                                 </div>
+                                {client.driving_time_from_previous && (
+                                  <p className="text-xs text-slate-500 mt-1">
+                                    🚗 {client.driving_time_from_previous} de carro
+                                  </p>
+                                )}
+                                {client.address && (
+                                  <p className="text-xs text-slate-500 mt-1">{client.address}</p>
+                                )}
                                 <p className="text-xs text-indigo-600 mt-2 italic">{client.reason}</p>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openClientNavigation(client)}
+                                  className="mt-2 h-7 text-xs"
+                                >
+                                  <Navigation className="w-3 h-3 mr-1" />
+                                  Navegar para este cliente
+                                </Button>
                               </div>
                             </div>
                           </div>
