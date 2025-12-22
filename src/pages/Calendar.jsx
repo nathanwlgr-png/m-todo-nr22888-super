@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar as CalendarIcon, Plus, Clock, MapPin, ExternalLink,
 import { format, parseISO, isFuture, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import AgendaReportGenerator from '@/components/AgendaReportGenerator';
+import ClientSelector from '@/components/ClientSelector';
 
 const visitTypeLabels = {
   primeira_visita: 'Primeira Visita',
@@ -28,6 +29,12 @@ const statusColors = {
 export default function Calendar() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [selectedClientId, setSelectedClientId] = React.useState(null);
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list()
+  });
 
   const { data: visits = [] } = useQuery({
     queryKey: ['visits'],
@@ -54,9 +61,13 @@ export default function Calendar() {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
-  const upcomingVisits = visits.filter(v => v.status === 'agendada' && isFuture(parseISO(v.scheduled_date)));
-  const todayVisits = visits.filter(v => v.status === 'agendada' && isToday(parseISO(v.scheduled_date)));
-  const pastVisits = visits.filter(v => v.status === 'agendada' && isPast(parseISO(v.scheduled_date)) && !isToday(parseISO(v.scheduled_date)));
+  const filteredVisits = selectedClientId
+    ? visits.filter(v => v.client_id === selectedClientId)
+    : visits;
+
+  const upcomingVisits = filteredVisits.filter(v => v.status === 'agendada' && isFuture(parseISO(v.scheduled_date)));
+  const todayVisits = filteredVisits.filter(v => v.status === 'agendada' && isToday(parseISO(v.scheduled_date)));
+  const pastVisits = filteredVisits.filter(v => v.status === 'agendada' && isPast(parseISO(v.scheduled_date)) && !isToday(parseISO(v.scheduled_date)));
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
@@ -90,6 +101,15 @@ export default function Calendar() {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Filtro de Cliente */}
+        <Card className="p-4 bg-white shadow-md">
+          <ClientSelector
+            clients={clients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
+        </Card>
+
         {/* Gerador de Relatório */}
         <AgendaReportGenerator />
 

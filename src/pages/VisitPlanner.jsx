@@ -16,9 +16,11 @@ import {
   Clock,
   DollarSign
 } from 'lucide-react';
+import ClientSelector from '@/components/ClientSelector';
 
 export default function VisitPlanner() {
   const navigate = useNavigate();
+  const [selectedClientId, setSelectedClientId] = React.useState(null);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ['clients'],
@@ -33,8 +35,13 @@ export default function VisitPlanner() {
   const suggestedRoute = useMemo(() => {
     if (!clients.length) return [];
 
+    // Filtrar por cliente selecionado se houver
+    const filteredClients = selectedClientId 
+      ? clients.filter(c => c.id === selectedClientId)
+      : clients;
+
     // Calcular prioridade para cada cliente
-    const clientsWithPriority = clients.map(client => {
+    const clientsWithPriority = filteredClients.map(client => {
       // 1. Dias desde última visita
       const lastVisit = visits
         .filter(v => v.client_id === client.id && v.status === 'realizada')
@@ -99,7 +106,7 @@ export default function VisitPlanner() {
     }).sort((a, b) => b.avgPriority - a.avgPriority);
 
     return cityGroups;
-  }, [clients, visits]);
+  }, [clients, visits, selectedClientId]);
 
   const totalClients = suggestedRoute.reduce((sum, group) => sum + group.count, 0);
 
@@ -146,6 +153,15 @@ export default function VisitPlanner() {
 
       {/* Route Suggestions */}
       <div className="px-4 -mt-8 space-y-4">
+        {/* Client Filter */}
+        <Card className="p-4 bg-white shadow-md">
+          <ClientSelector
+            clients={clients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
+        </Card>
+
         {suggestedRoute.length === 0 ? (
           <Card className="p-8 text-center">
             <Navigation className="w-12 h-12 text-slate-300 mx-auto mb-3" />

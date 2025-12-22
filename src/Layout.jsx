@@ -10,6 +10,7 @@ import { AIAssistantButton } from '@/components/AIAssistantChat';
 import AutoMessageSystem from '@/components/AutoMessageSystem';
 import SentimentAnalyzer from '@/components/SentimentAnalyzer';
 import MonthlyReportGenerator from '@/components/MonthlyReportGenerator';
+import FloatingHomeButton from '@/components/FloatingHomeButton';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -26,6 +27,7 @@ export default function Layout({ children, currentPageName }) {
       <SentimentAnalyzer />
       <MonthlyReportGenerator />
       <AIAssistantButton />
+      <FloatingHomeButton />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

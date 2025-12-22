@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import AIRouteOptimizer from '@/components/AIRouteOptimizer';
 import AgendaReportGenerator from '@/components/AgendaReportGenerator';
+import ClientSelector from '@/components/ClientSelector';
 
 export default function ScheduledAgenda() {
   const navigate = useNavigate();
   const [optimizedData, setOptimizedData] = useState(null);
+  const [selectedClientId, setSelectedClientId] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -30,6 +32,11 @@ export default function ScheduledAgenda() {
   const cityOrder = ['Marília', 'Bauru', 'Jaú', 'Lins', 'Botucatu', 'Ourinhos', 'Assis', 'Tupã'];
 
   const clientsByCity = useMemo(() => {
+    // Filtrar por cliente selecionado
+    const filteredClients = selectedClientId
+      ? clients.filter(c => c.id === selectedClientId)
+      : clients;
+
     // Se houver dados otimizados pela IA, usar rotas diárias
     if (optimizedData?.daily_routes) {
       return optimizedData.daily_routes.map((dayRoute, idx) => ({
@@ -51,7 +58,7 @@ export default function ScheduledAgenda() {
     // Caso contrário, usar ordenação padrão
     const grouped = {};
     
-    clients.forEach(client => {
+    filteredClients.forEach(client => {
       const city = client.city || 'Sem cidade';
       if (!grouped[city]) {
         grouped[city] = [];
@@ -78,7 +85,7 @@ export default function ScheduledAgenda() {
       city,
       clients: grouped[city]
     }));
-  }, [clients, optimizedData]);
+  }, [clients, optimizedData, selectedClientId]);
 
   const statusColors = {
     quente: 'bg-red-100 text-red-700 border-red-300',
@@ -112,6 +119,14 @@ export default function ScheduledAgenda() {
 
       {/* Summary */}
       <div className="px-4 -mt-8 mb-4 space-y-3">
+        <Card className="p-4 bg-white shadow-lg">
+          <ClientSelector
+            clients={clients}
+            selectedClientId={selectedClientId}
+            onClientChange={setSelectedClientId}
+          />
+        </Card>
+
         <Card className="p-4 bg-white shadow-lg">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
