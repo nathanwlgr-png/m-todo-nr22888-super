@@ -6,6 +6,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   ArrowLeft, 
   MessageSquare, 
@@ -16,7 +33,9 @@ import {
   ThermometerSun,
   Phone,
   Sparkles,
-  Trash2
+  Trash2,
+  Edit2,
+  Save
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
@@ -51,6 +70,8 @@ export default function ClientProfile() {
   const clientId = urlParams.get('id');
 
   const queryClient = useQueryClient();
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [editData, setEditData] = React.useState({});
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -69,10 +90,41 @@ export default function ClientProfile() {
     }
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (data) => base44.entities.Client.update(clientId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['client', clientId]);
+      setEditDialogOpen(false);
+    }
+  });
+
   const handleDelete = () => {
     if (window.confirm(`Tem certeza que deseja remover ${client.first_name}?`)) {
       deleteMutation.mutate(client.id);
     }
+  };
+
+  const handleEdit = () => {
+    setEditData({
+      first_name: client.first_name || '',
+      full_name: client.full_name || '',
+      birthdate: client.birthdate || '',
+      email: client.email || '',
+      phone: client.phone || '',
+      address: client.address || '',
+      city: client.city || '',
+      clinic_name: client.clinic_name || '',
+      current_equipment: client.current_equipment || '',
+      client_type: client.client_type || '',
+      decision_role: client.decision_role || '',
+      client_tone: client.client_tone || '',
+      notes: client.notes || ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    updateMutation.mutate(editData);
   };
 
   if (isLoading) {
@@ -102,6 +154,9 @@ export default function ClientProfile() {
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="text-lg font-semibold text-white">Perfil do Cliente</h1>
+          <button onClick={handleEdit} className="ml-auto p-2 rounded-full glass hover:bg-white/10">
+            <Edit2 className="w-5 h-5 text-white" />
+          </button>
         </div>
 
         <div className="relative flex items-center gap-4">
@@ -255,6 +310,176 @@ export default function ClientProfile() {
           Abrir Assistente IA
         </Button>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Primeiro Nome *</Label>
+              <Input
+                value={editData.first_name}
+                onChange={(e) => setEditData({...editData, first_name: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nome Completo</Label>
+              <Input
+                value={editData.full_name}
+                onChange={(e) => setEditData({...editData, full_name: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Data de Nascimento</Label>
+              <Input
+                type="date"
+                value={editData.birthdate}
+                onChange={(e) => setEditData({...editData, birthdate: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={editData.email}
+                onChange={(e) => setEditData({...editData, email: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>WhatsApp</Label>
+              <Input
+                value={editData.phone}
+                onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                placeholder="5511999999999"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Endereço</Label>
+              <Input
+                value={editData.address}
+                onChange={(e) => setEditData({...editData, address: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cidade</Label>
+              <Input
+                value={editData.city}
+                onChange={(e) => setEditData({...editData, city: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nome da Clínica/Hospital</Label>
+              <Input
+                value={editData.clinic_name}
+                onChange={(e) => setEditData({...editData, clinic_name: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Equipamento Atual</Label>
+              <Input
+                value={editData.current_equipment}
+                onChange={(e) => setEditData({...editData, current_equipment: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de Cliente</Label>
+              <Select
+                value={editData.client_type}
+                onValueChange={(value) => setEditData({...editData, client_type: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clinica_pequena">Clínica Pequena</SelectItem>
+                  <SelectItem value="clinica_media">Clínica Média</SelectItem>
+                  <SelectItem value="hospital_veterinario">Hospital Veterinário</SelectItem>
+                  <SelectItem value="laboratorio_terceirizado">Lab. Terceirizado</SelectItem>
+                  <SelectItem value="clinica_especializada">Clínica Especializada</SelectItem>
+                  <SelectItem value="sem_equipamento">Sem Equipamento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Papel do Decisor *</Label>
+              <Select
+                value={editData.decision_role}
+                onValueChange={(value) => setEditData({...editData, decision_role: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="proprietario">Proprietário</SelectItem>
+                  <SelectItem value="veterinario_responsavel">Veterinário Responsável</SelectItem>
+                  <SelectItem value="gestor_laboratorio">Gestor de Laboratório</SelectItem>
+                  <SelectItem value="coordenador_tecnico">Coordenador Técnico</SelectItem>
+                  <SelectItem value="socio">Sócio</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tom de Voz Observado</Label>
+              <Select
+                value={editData.client_tone}
+                onValueChange={(value) => setEditData({...editData, client_tone: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="assertivo">Assertivo</SelectItem>
+                  <SelectItem value="analitico">Analítico</SelectItem>
+                  <SelectItem value="receptivo">Receptivo</SelectItem>
+                  <SelectItem value="entusiasmado">Entusiasmado</SelectItem>
+                  <SelectItem value="cauteloso">Cauteloso</SelectItem>
+                  <SelectItem value="direto">Direto</SelectItem>
+                  <SelectItem value="emocional">Emocional</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notas</Label>
+              <Textarea
+                value={editData.notes}
+                onChange={(e) => setEditData({...editData, notes: e.target.value})}
+                rows={4}
+              />
+            </div>
+
+            <Button
+              onClick={handleSaveEdit}
+              disabled={updateMutation.isPending}
+              className="w-full bg-indigo-600 hover:bg-indigo-700"
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
