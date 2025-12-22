@@ -22,7 +22,10 @@ import {
   ArrowRight,
   Loader2,
   Check,
-  ThermometerSun
+  ThermometerSun,
+  Sparkles,
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import ScoreBar from '@/components/ScoreBar';
 
@@ -34,6 +37,8 @@ export default function VisitSummary() {
   
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [insights, setInsights] = useState(null);
+  const [analyzingInsights, setAnalyzingInsights] = useState(false);
   const [formData, setFormData] = useState({
     main_pains: [],
     triggers_used: [],
@@ -116,6 +121,46 @@ export default function VisitSummary() {
         ? prev.triggers_used.filter(t => t !== trigger)
         : [...prev.triggers_used, trigger]
     }));
+  };
+
+  const generateInsights = async () => {
+    setAnalyzingInsights(true);
+    
+    const prompt = `
+Analise este resumo de visita de vendas de equipamentos veterinários e forneça insights estratégicos:
+
+Cliente: ${client?.first_name}
+Tipo: ${client?.client_type}
+Perfil: ${client?.behavioral_profile}
+Status: ${formData.status}
+Score: ${formData.purchase_score}%
+
+Dores identificadas: ${formData.main_pains.join(', ') || 'Nenhuma'}
+Gatilhos utilizados: ${formData.triggers_used.join(', ') || 'Nenhum'}
+Observações: ${formData.notes || 'Sem observações'}
+
+Forneça em português brasileiro:
+1. key_takeaways: Array com 3 pontos principais da visita (frases curtas)
+2. strategy_adjustments: Array com 2-3 ajustes estratégicos recomendados
+3. opportunities: Array com 2-3 oportunidades de upsell/cross-sell específicas de equipamentos veterinários
+
+Seja direto, prático e focado em ação.
+    `;
+
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: prompt,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          key_takeaways: { type: "array", items: { type: "string" } },
+          strategy_adjustments: { type: "array", items: { type: "string" } },
+          opportunities: { type: "array", items: { type: "string" } }
+        }
+      }
+    });
+
+    setInsights(response);
+    setAnalyzingInsights(false);
   };
 
   if (isLoading) {
@@ -279,6 +324,84 @@ export default function VisitSummary() {
             className="min-h-[100px] rounded-xl border-2"
           />
         </Card>
+
+        {/* AI Insights Button */}
+        {!insights && (
+          <Button
+            onClick={generateInsights}
+            disabled={analyzingInsights || formData.main_pains.length === 0}
+            variant="outline"
+            className="w-full h-12 border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+          >
+            {analyzingInsights ? (
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            ) : (
+              <Sparkles className="w-5 h-5 mr-2" />
+            )}
+            {analyzingInsights ? 'Analisando Visita...' : 'Gerar Insights com IA'}
+          </Button>
+        )}
+
+        {/* AI Insights */}
+        {insights && (
+          <>
+            {/* Key Takeaways */}
+            <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-semibold text-slate-800">Principais Conclusões</h3>
+              </div>
+              <ul className="space-y-2">
+                {insights.key_takeaways?.map((takeaway, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-indigo-500 mt-0.5 font-bold">•</span>
+                    {takeaway}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Strategy Adjustments */}
+            <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-5 h-5 text-amber-600" />
+                <h3 className="font-semibold text-slate-800">Ajustes de Estratégia</h3>
+              </div>
+              <ul className="space-y-2">
+                {insights.strategy_adjustments?.map((adjustment, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-amber-600 mt-0.5 font-bold">{i + 1}.</span>
+                    {adjustment}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Opportunities */}
+            <Card className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-semibold text-slate-800">Oportunidades</h3>
+              </div>
+              <ul className="space-y-2">
+                {insights.opportunities?.map((opportunity, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-emerald-600 mt-0.5 font-bold">→</span>
+                    {opportunity}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Button
+              onClick={() => setInsights(null)}
+              variant="ghost"
+              className="w-full"
+            >
+              Gerar Novos Insights
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Fixed Bottom */}
