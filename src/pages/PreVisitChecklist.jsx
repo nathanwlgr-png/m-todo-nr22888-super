@@ -103,11 +103,11 @@ export default function PreVisitChecklist() {
   const handleGenerateQuestions = () => {
     generateAIContent('questions', `
       Gere 2 perguntas de abertura para uma visita de vendas de equipamentos laboratoriais veterinários.
-      Cliente: ${client.first_name}
-      Tipo: ${client.client_type}
-      Decisor: ${client.decision_role}
-      Perfil: ${client.behavioral_profile}
-      Objetivo: ${client.visit_objective || 'diagnosticar'}
+      Cliente: ${client?.first_name || 'Cliente'}
+      Tipo: ${client?.client_type || 'não especificado'}
+      Decisor: ${client?.decision_role || 'não especificado'}
+      Perfil: ${client?.behavioral_profile || 'não especificado'}
+      Objetivo: ${client?.visit_objective || 'diagnosticar'}
       
       Retorne perguntas consultivas e profissionais, em português brasileiro.
     `);
@@ -116,8 +116,8 @@ export default function PreVisitChecklist() {
   const handleGeneratePains = () => {
     generateAIContent('pains', `
       Liste 4 dores prováveis de um cliente veterinário que precisa de equipamentos laboratoriais.
-      Tipo: ${client.client_type}
-      Decisor: ${client.decision_role}
+      Tipo: ${client?.client_type || 'não especificado'}
+      Decisor: ${client?.decision_role || 'não especificado'}
       
       Considere dores operacionais, financeiras e de gestão. Português brasileiro, frases curtas.
     `);
@@ -126,7 +126,7 @@ export default function PreVisitChecklist() {
   const handleGenerateObjections = () => {
     generateAIContent('objections', `
       Liste 4 objeções comuns e suas respostas para venda de equipamentos laboratoriais veterinários.
-      Tipo cliente: ${client.client_type}
+      Tipo cliente: ${client?.client_type || 'não especificado'}
       
       Formato: "Objeção: [objeção] → Resposta: [resposta curta]"
       Português brasileiro, prático e direto.
@@ -136,7 +136,7 @@ export default function PreVisitChecklist() {
   const handleGenerateTriggers = () => {
     generateAIContent('triggers', `
       Liste 3 gatilhos de persuasão éticos para usar na venda de equipamentos veterinários.
-      Perfil do cliente: ${client.behavioral_profile}
+      Perfil do cliente: ${client?.behavioral_profile || 'não especificado'}
       
       Use apenas: prova social, reciprocidade, segurança. Evite urgência artificial.
       Português brasileiro, frases práticas.
@@ -146,8 +146,8 @@ export default function PreVisitChecklist() {
   const handleGenerateClosing = () => {
     generateAIContent('closing', `
       Sugira 2 estratégias de fechamento para venda de equipamentos veterinários.
-      Perfil: ${client.behavioral_profile}
-      Objetivo: ${client.visit_objective || 'apresentar_solucao'}
+      Perfil: ${client?.behavioral_profile || 'não especificado'}
+      Objetivo: ${client?.visit_objective || 'apresentar_solucao'}
       
       Inclua tipo de fechamento e próximo passo lógico. Português brasileiro.
     `);
@@ -156,7 +156,7 @@ export default function PreVisitChecklist() {
   const handleGeneratePlanB = () => {
     generateAIContent('planB', `
       Crie um plano B caso a venda não feche nesta visita.
-      Tipo cliente: ${client.client_type}
+      Tipo cliente: ${client?.client_type || 'não especificado'}
       
       Inclua: tipo de follow-up, material a enviar, prazo sugerido.
       Português brasileiro, 3 itens práticos.
@@ -209,7 +209,7 @@ export default function PreVisitChecklist() {
         {/* 1. Clarity */}
         <ChecklistItem
           title="Clareza do Cliente"
-          description={`${client?.client_type?.replace('_', ' ')} • ${client?.decision_role?.replace('_', ' ')}`}
+          description={client ? `${client.client_type?.replace(/_/g, ' ') || ''} • ${client.decision_role?.replace(/_/g, ' ') || ''}` : 'Carregando...'}
           completed={true}
           icon={User}
           onClick={() => {}}
@@ -432,15 +432,17 @@ export default function PreVisitChecklist() {
       </div>
 
       {/* Fixed Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-        <Button
-          onClick={() => navigate(createPageUrl(`AIAssistant?id=${client.id}`))}
-          className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-base font-semibold"
-        >
-          <MessageSquare className="w-5 h-5 mr-2" />
-          Abrir Assistente IA
-        </Button>
-      </div>
+      {client && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+          <Button
+            onClick={() => navigate(createPageUrl(`AIAssistant?id=${client.id}`))}
+            className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-base font-semibold"
+          >
+            <MessageSquare className="w-5 h-5 mr-2" />
+            Abrir Assistente IA
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
