@@ -245,6 +245,13 @@ export default function Home() {
           </Button>
         </Link>
 
+        <Link to={createPageUrl('SalesAnalytics')}>
+          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Dashboard de Vendas
+          </Button>
+        </Link>
+
         <Link to={createPageUrl('TaskAutomation')}>
           <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
