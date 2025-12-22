@@ -124,8 +124,10 @@ export default function AIAssistant() {
       question: `Gere UMA pergunta consultiva poderosa para abrir a conversa com ${client?.first_name}. 
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
         Seja específico e profissional.`,
-      objection: `Dê uma resposta curta e eficaz para a objeção mais comum de ${client?.client_type}.
-        Considere o perfil: ${client?.behavioral_profile}.`,
+      objection: `Sugira técnicas de vendas para controlar objeções e ter autoridade com ${client?.first_name}.
+        Tipo: ${client?.client_type}, Perfil: ${client?.behavioral_profile}.
+        Inclua: 1) Técnica específica, 2) Como aplicar com autoridade, 3) Frase exemplo.
+        Seja direto e prático.`,
       closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
         Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
       followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.
