@@ -55,8 +55,8 @@ export default function Home() {
             <Sparkles className="w-6 h-6 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Método NR</h1>
-            <p className="text-slate-400 text-sm">Assistente de Vendas</p>
+            <h1 className="text-xl font-bold text-white">Seamaty</h1>
+            <p className="text-slate-400 text-sm">Método NR • @seamatybrasil</p>
           </div>
         </div>
         
