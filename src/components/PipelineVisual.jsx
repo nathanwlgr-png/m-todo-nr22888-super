@@ -6,7 +6,7 @@ import { TrendingUp } from 'lucide-react';
 const pipelineStages = [
   { key: 'diagnosticar_necessidades', label: 'Diagnóstico', color: 'bg-blue-500' },
   { key: 'apresentar_equipamento', label: 'Apresentação', color: 'bg-indigo-500' },
-  { key: 'demonstracao_tecnica', label: 'Demo', color: 'bg-purple-500' },
+  { key: 'demonstracao_tecnica', label: 'Demonstração Técnica', color: 'bg-purple-500' },
   { key: 'negociar_proposta', label: 'Negociação', color: 'bg-orange-500' },
   { key: 'fechar_venda', label: 'Fechamento', color: 'bg-green-500' }
 ];
