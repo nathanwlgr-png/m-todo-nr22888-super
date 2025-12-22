@@ -76,6 +76,7 @@ import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
 import ConsumableSalesAnalytics from '@/components/ConsumableSalesAnalytics';
 import LabNeedsEditor from '@/components/LabNeedsEditor';
 import AIProposalSelector from '@/components/AIProposalSelector';
+import PostVisitDialog from '@/components/PostVisitDialog';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
 
@@ -122,6 +123,8 @@ export default function ClientProfile() {
   const [generatedMessage, setGeneratedMessage] = React.useState(null);
   const [generatingMessage, setGeneratingMessage] = React.useState(false);
   const [closingProbability, setClosingProbability] = React.useState(null);
+  const [postVisitOpen, setPostVisitOpen] = React.useState(false);
+  const [selectedVisitId, setSelectedVisitId] = React.useState(null);
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -737,6 +740,36 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Seletor de Proposta Inteligente com IA */}
         <AIProposalSelector client={client} />
+
+        {/* Botão Pós-Visita */}
+        <Button
+          onClick={() => setPostVisitOpen(true)}
+          className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+        >
+          <CheckSquare className="w-5 h-5 mr-2" />
+          Registrar Pós-Visita
+        </Button>
+
+        {/* Sugestão de Equipamento IA */}
+        {client.equipment_suggestion && (
+          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-purple-700 mb-1">Sugestão de Equipamento IA</p>
+                <p className="font-semibold text-slate-800 mb-1">{client.equipment_suggestion}</p>
+                <p className="text-sm text-slate-600 mb-2">{client.equipment_suggestion_reason}</p>
+                {client.equipment_suggestion_alternative && (
+                  <p className="text-xs text-slate-500">
+                    Alternativa: {client.equipment_suggestion_alternative}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
@@ -1434,6 +1467,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           open={quickActionOpen}
           onOpenChange={setQuickActionOpen}
           actionType={quickActionType}
+          />
+
+          {/* Post Visit Dialog */}
+          <PostVisitDialog
+            client={client}
+            visitId={selectedVisitId}
+            open={postVisitOpen}
+            onOpenChange={setPostVisitOpen}
           />
           </div>
           );
