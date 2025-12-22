@@ -48,7 +48,8 @@ import {
   Download,
   Calendar,
   CheckSquare,
-  Plus
+  Plus,
+  CheckCircle2
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
@@ -58,6 +59,7 @@ import FunnelPersuasionTriggers from '@/components/FunnelPersuasionTriggers';
 import ClientTimeline from '@/components/ClientTimeline';
 import QuickActionDialog from '@/components/QuickActionDialog';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
+import { getClientLabelSync } from '@/components/ClientStatusLabel';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -136,6 +138,9 @@ export default function ClientProfile() {
     queryFn: () => base44.entities.ClientDocument.filter({ client_id: clientId }),
     enabled: !!clientId
   });
+
+  const clientLabel = getClientLabelSync(sales);
+  const isClient = clientLabel === 'Cliente';
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Client.delete(id),
@@ -344,21 +349,30 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass hover:bg-white/10">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="text-lg font-semibold text-white">Perfil do Cliente</h1>
+          <h1 className="text-lg font-semibold text-white">{clientLabel}</h1>
           <button onClick={handleEdit} className="ml-auto p-2 rounded-full glass hover:bg-white/10">
             <Edit2 className="w-5 h-5 text-white" />
           </button>
         </div>
 
         <div className="relative flex items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg glow-orange">
-            <span className="text-3xl font-bold text-white">
-              {client.first_name?.charAt(0).toUpperCase()}
-            </span>
+          <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${isClient ? 'from-green-500 to-emerald-600' : 'from-orange-500 to-orange-600'} flex items-center justify-center shadow-lg ${isClient ? 'glow-green' : 'glow-orange'}`}>
+            {isClient ? (
+              <CheckCircle2 className="w-10 h-10 text-white" />
+            ) : (
+              <span className="text-3xl font-bold text-white">
+                {client.first_name?.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">{client.first_name}</h2>
             <div className="flex items-center gap-2 mt-1">
+              {isClient && (
+                <Badge className="bg-green-100 text-green-700 text-xs">
+                  ✓ Cliente
+                </Badge>
+              )}
               <Badge className={`${statusColors[client.status]} text-white text-xs`}>
                 {client.status === 'quente' ? '🔥 Quente' : client.status === 'morno' ? '🌡️ Morno' : '❄️ Frio'}
               </Badge>
@@ -604,7 +618,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           className="w-full h-12 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50"
         >
           <Trash2 className="w-4 h-4 mr-2" />
-          Remover Cliente
+          Remover
         </Button>
         </div>
 

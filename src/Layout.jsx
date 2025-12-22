@@ -55,6 +55,10 @@ export default function Layout({ children, currentPageName }) {
           box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
 
+        .glow-green {
+          box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
         /* Tech grid background */
         .tech-grid {
           background-image: 

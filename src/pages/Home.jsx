@@ -66,7 +66,7 @@ export default function Home() {
           </div>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-white">Método NR</h1>
-            <p className="text-orange-300 text-sm font-medium">Sistema de Vendas Inteligente</p>
+            <p className="text-orange-300 text-sm font-medium">Gestão de Vendas</p>
           </div>
           <Link to={createPageUrl('MyProfile')}>
             <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
@@ -83,7 +83,7 @@ export default function Home() {
         </div>
 
         <p className="relative text-slate-200 text-lg font-light">
-          Qual cliente você vai atender agora?
+          Qual possível venda você vai trabalhar agora?
         </p>
       </div>
 
@@ -186,7 +186,7 @@ export default function Home() {
         <Link to={createPageUrl('NewClient')}>
           <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-lg font-semibold shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98] glow-orange">
             <UserPlus className="w-5 h-5 mr-3" />
-            Novo Cliente
+            Nova Possível Venda
           </Button>
         </Link>
 
@@ -194,7 +194,7 @@ export default function Home() {
           <Link to={createPageUrl('Clients')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <Users className="w-4 h-4 mr-2" />
-              Clientes Ativos
+              Possíveis Vendas
             </Button>
           </Link>
           
@@ -315,7 +315,7 @@ export default function Home() {
       {clients.length > 0 && (
         <div className="px-6 mt-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-800">Últimos Clientes</h2>
+            <h2 className="font-semibold text-slate-800">Últimas Possíveis Vendas</h2>
             <Link to={createPageUrl('Clients')} className="text-sm text-indigo-600 font-medium">
               Ver todos
             </Link>
