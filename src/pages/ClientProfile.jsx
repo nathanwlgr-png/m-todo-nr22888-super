@@ -450,56 +450,83 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 bg-white shadow-lg border-none">
-            <div className="flex items-center gap-2 mb-1">
-              <Building2 className="w-4 h-4 text-slate-400" />
-              <span className="text-xs text-slate-500">Tipo</span>
-            </div>
-            <p className="font-semibold text-slate-800 text-sm">
-              {clientTypeLabels[client.client_type]}
-            </p>
-          </Card>
-
-          <Card className="p-4 bg-white shadow-lg border-none">
-            <div className="flex items-center gap-2 mb-1">
-              <UserCog className="w-4 h-4 text-slate-400" />
-              <span className="text-xs text-slate-500">Decisor</span>
-            </div>
-            <p className="font-semibold text-slate-800 text-sm">
-              {roleLabels[client.decision_role]}
-            </p>
-          </Card>
-
-          {client.available_budget && client.available_budget !== 'nao_informado' && (
-            <Card className="p-4 bg-white shadow-lg border-none">
+        {/* Dados Essenciais para Venda */}
+        <Card className="p-4 bg-white shadow-lg border-none">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">Orçamento</span>
+                <Building2 className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Tipo</span>
               </div>
               <p className="font-semibold text-slate-800 text-sm">
-                {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
-                 client.available_budget === '50k_100k' ? 'R$ 50-100k' :
-                 client.available_budget === '100k_200k' ? 'R$ 100-200k' :
-                 client.available_budget === '200k_500k' ? 'R$ 200-500k' :
-                 'Acima R$ 500k'}
+                {clientTypeLabels[client.client_type]}
               </p>
-            </Card>
-          )}
+            </div>
 
-          {client.decision_deadline && (
-            <Card className="p-4 bg-white shadow-lg border-none">
+            <div>
               <div className="flex items-center gap-2 mb-1">
-                <Calendar className="w-4 h-4 text-slate-400" />
-                <span className="text-xs text-slate-500">Prazo Decisão</span>
+                <UserCog className="w-4 h-4 text-slate-400" />
+                <span className="text-xs text-slate-500">Decisor</span>
               </div>
               <p className="font-semibold text-slate-800 text-sm">
-                {format(new Date(client.decision_deadline), 'dd/MM/yyyy')}
+                {roleLabels[client.decision_role]}
               </p>
-            </Card>
-          )}
-        </div>
+            </div>
+
+            {client.city && (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-xs text-slate-500">Localização</span>
+                </div>
+                <p className="font-semibold text-slate-800 text-sm">{client.city}</p>
+              </div>
+            )}
+
+            {client.available_budget && client.available_budget !== 'nao_informado' && (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs text-slate-500">Orçamento</span>
+                </div>
+                <p className="font-semibold text-slate-800 text-sm">
+                  {client.available_budget === 'ate_50k' ? 'Até R$ 50k' :
+                   client.available_budget === '50k_100k' ? 'R$ 50-100k' :
+                   client.available_budget === '100k_200k' ? 'R$ 100-200k' :
+                   client.available_budget === '200k_500k' ? 'R$ 200-500k' :
+                   'Acima R$ 500k'}
+                </p>
+              </div>
+            )}
+
+            {client.decision_deadline && (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs text-slate-500">Prazo</span>
+                </div>
+                <p className="font-semibold text-slate-800 text-sm">
+                  {format(new Date(client.decision_deadline), 'dd/MM/yyyy')}
+                </p>
+              </div>
+            )}
+
+            {client.projected_revenue && (
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-4 h-4 text-green-500" />
+                  <span className="text-xs text-slate-500">Receita Projetada</span>
+                </div>
+                <p className="font-semibold text-green-700 text-sm">
+                  R$ {(client.projected_revenue / 1000).toFixed(0)}k
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {/* Motivadores e Objeções */}
         {(client.purchase_motivators?.length > 0 || client.real_objections?.length > 0) && (
