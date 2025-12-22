@@ -19,8 +19,9 @@ import {
   User, 
   Building2, 
   UserCog,
-  Loader2 
+  Loader2
 } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
 
 const clientTypes = [
   { value: 'clinica_pequena', label: 'Clínica Pequena (até 40 exames/mês)' },
@@ -135,8 +136,15 @@ export default function NewClient() {
     clinic_name: '',
     current_equipment: '',
     client_type: '',
-    decision_role: ''
+    decision_role: '',
+    available_budget: '',
+    decision_deadline: ''
   });
+  
+  const [motivators, setMotivators] = useState([]);
+  const [newMotivator, setNewMotivator] = useState('');
+  const [objections, setObjections] = useState([]);
+  const [newObjection, setNewObjection] = useState('');
 
   const handleSubmit = async () => {
     if (!formData.first_name || !formData.decision_role) {
@@ -156,6 +164,8 @@ export default function NewClient() {
         life_path_number: lifePathNumber,
         behavioral_profile: getBehavioralProfile(numerologyNumber),
         decision_style: getDecisionStyle(numerologyNumber),
+        purchase_motivators: motivators,
+        real_objections: objections,
         purchase_score: Math.floor(Math.random() * 40) + 30,
         status: 'morno'
       };
@@ -406,6 +416,129 @@ export default function NewClient() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Budget */}
+          <div className="space-y-2">
+            <Label className="text-slate-700">Orçamento Disponível (opcional)</Label>
+            <Select
+              value={formData.available_budget}
+              onValueChange={(value) => setFormData({ ...formData, available_budget: value })}
+            >
+              <SelectTrigger className="h-14 text-base rounded-xl border-2">
+                <SelectValue placeholder="Faixa de investimento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ate_50k">Até R$ 50.000</SelectItem>
+                <SelectItem value="50k_100k">R$ 50.000 - R$ 100.000</SelectItem>
+                <SelectItem value="100k_200k">R$ 100.000 - R$ 200.000</SelectItem>
+                <SelectItem value="200k_500k">R$ 200.000 - R$ 500.000</SelectItem>
+                <SelectItem value="acima_500k">Acima de R$ 500.000</SelectItem>
+                <SelectItem value="nao_informado">Não informado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Decision Deadline */}
+          <div className="space-y-2">
+            <Label className="text-slate-700">Prazo para Decisão (opcional)</Label>
+            <Input
+              type="date"
+              value={formData.decision_deadline}
+              onChange={(e) => setFormData({ ...formData, decision_deadline: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2"
+            />
+            <p className="text-xs text-slate-500">Quando precisam decidir sobre a compra</p>
+          </div>
+
+          {/* Motivators */}
+          <div className="space-y-2">
+            <Label className="text-slate-700">Motivadores de Compra (opcional)</Label>
+            <div className="flex gap-2">
+              <Input
+                value={newMotivator}
+                onChange={(e) => setNewMotivator(e.target.value)}
+                placeholder="Ex: Reduzir custos"
+                className="h-12 rounded-xl"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && newMotivator.trim()) {
+                    e.preventDefault();
+                    setMotivators([...motivators, newMotivator.trim()]);
+                    setNewMotivator('');
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (newMotivator.trim()) {
+                    setMotivators([...motivators, newMotivator.trim()]);
+                    setNewMotivator('');
+                  }
+                }}
+              >
+                +
+              </Button>
+            </div>
+            {motivators.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {motivators.map((m, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm cursor-pointer hover:bg-red-50"
+                    onClick={() => setMotivators(motivators.filter((_, i) => i !== idx))}
+                  >
+                    {m} ×
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Objections */}
+          <div className="space-y-2">
+            <Label className="text-slate-700">Objeções Reais (opcional)</Label>
+            <div className="flex gap-2">
+              <Input
+                value={newObjection}
+                onChange={(e) => setNewObjection(e.target.value)}
+                placeholder="Ex: Preço alto"
+                className="h-12 rounded-xl"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && newObjection.trim()) {
+                    e.preventDefault();
+                    setObjections([...objections, newObjection.trim()]);
+                    setNewObjection('');
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (newObjection.trim()) {
+                    setObjections([...objections, newObjection.trim()]);
+                    setNewObjection('');
+                  }
+                }}
+              >
+                +
+              </Button>
+            </div>
+            {objections.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {objections.map((o, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm cursor-pointer hover:bg-red-50"
+                    onClick={() => setObjections(objections.filter((_, i) => i !== idx))}
+                  >
+                    {o} ×
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
