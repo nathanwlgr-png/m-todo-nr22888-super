@@ -172,22 +172,22 @@ export default function NewClient() {
 
       const client = await base44.entities.Client.create(clientData);
 
-    // AUTOMAÇÃO 1: Email de boas-vindas
-    try {
+      // AUTOMAÇÃO 1: Email de boas-vindas
+      try {
       await base44.integrations.Core.SendEmail({
         to: client.created_by,
         subject: `Novo cliente cadastrado: ${client.first_name}`,
         body: `Olá!\n\nO cliente ${client.first_name} foi cadastrado com sucesso.\n\nTipo: ${client.client_type || 'Não especificado'}\nPerfil: ${client.behavioral_profile}\n\nAcesse o sistema para começar o atendimento!`
       });
-    } catch (error) {
+      } catch (error) {
       console.log('Email automation failed');
-    }
+      }
 
-    // AUTOMAÇÃO 2: Tarefa de primeira visita
-    try {
+      // AUTOMAÇÃO 2: Tarefa de primeira visita
+      try {
       const threeDaysLater = new Date();
       threeDaysLater.setDate(threeDaysLater.getDate() + 3);
-      
+
       await base44.entities.Task.create({
         client_id: client.id,
         client_name: client.first_name,
@@ -199,11 +199,29 @@ export default function NewClient() {
         type: 'follow_up',
         auto_created: true
       });
-    } catch (error) {
+      } catch (error) {
       console.log('Task automation failed');
-    }
+      }
 
-      navigate(createPageUrl(`ClientProfile?id=${client.id}`));
+      // Resetar formulário em vez de navegar
+      setFormData({
+        full_name: '',
+        first_name: '',
+        birthdate: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        clinic_name: '',
+        current_equipment: '',
+        client_type: '',
+        decision_role: '',
+        available_budget: '',
+        decision_deadline: ''
+      });
+      setMotivators([]);
+      setObjections([]);
+      alert(`Cliente ${client.first_name} cadastrado com sucesso!`);
     } catch (error) {
       console.error('Erro ao criar cliente:', error);
       const errorMessage = error?.message || 'Erro desconhecido';

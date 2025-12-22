@@ -664,7 +664,7 @@ Seja prático e direto ao ponto.`
         last_visit_date: new Date().toISOString().split('T')[0]
       });
     }
-    navigate(createPageUrl(`VisitSummary?id=${selectedClientId}`));
+    alert('Conversa salva com sucesso!');
   };
 
   const scriptLabels = {

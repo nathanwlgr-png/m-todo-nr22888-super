@@ -12,6 +12,7 @@ import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Equipment from './pages/Equipment';
+import EquipmentCatalog from './pages/EquipmentCatalog';
 import EquipmentPriceList from './pages/EquipmentPriceList';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
@@ -47,7 +48,6 @@ import Tasks from './pages/Tasks';
 import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import EquipmentCatalog from './pages/EquipmentCatalog';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +66,7 @@ export const PAGES = {
     "ConsumablePriceList": ConsumablePriceList,
     "CreateFollowUpSequence": CreateFollowUpSequence,
     "Equipment": Equipment,
+    "EquipmentCatalog": EquipmentCatalog,
     "EquipmentPriceList": EquipmentPriceList,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
@@ -101,7 +102,6 @@ export const PAGES = {
     "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
-    "EquipmentCatalog": EquipmentCatalog,
 }
 
 export const pagesConfig = {
