@@ -65,7 +65,7 @@ export default function ClientEquipmentManager({ clientId, clientName }) {
         ...formData,
         equipment_id: equipId,
         equipment_name: selected.name,
-        sale_value: selected.price
+        sale_value: selected.price || ''
       });
     }
   };
