@@ -144,6 +144,27 @@ Retorne JSON:
         }
       });
 
+      // Recomendações por perfil
+      const profileRecommendations = {};
+      const uniqueProfiles = [...new Set(monthAnalyses.map(a => a.client_profile))];
+      
+      for (const profile of uniqueProfiles) {
+        const profileAnalyses = monthAnalyses.filter(a => a.client_profile === profile);
+        const successfulTechniques = [];
+        
+        profileAnalyses.filter(a => a.sale_closed).forEach(a => {
+          a.techniques_used?.forEach(tech => {
+            if (!successfulTechniques.includes(tech)) {
+              successfulTechniques.push(tech);
+            }
+          });
+        });
+
+        if (successfulTechniques.length > 0) {
+          profileRecommendations[profile] = successfulTechniques.slice(0, 3);
+        }
+      }
+
       const report = {
         month: new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
         totalVisits,
@@ -154,7 +175,8 @@ Retorne JSON:
         bestProfiles,
         topWorked,
         topFailed,
-        strategicAnalysis
+        strategicAnalysis,
+        profileRecommendations
       };
 
       setReportData(report);
@@ -207,6 +229,28 @@ Retorne JSON:
       yPos += 6;
     });
     yPos += 8;
+
+    // Recomendações por Perfil
+    if (Object.keys(reportData.profileRecommendations).length > 0) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.setFontSize(14);
+      doc.text('Técnicas Recomendadas por Perfil', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      Object.entries(reportData.profileRecommendations).forEach(([profile, techniques]) => {
+        doc.text(`${profile}:`, 25, yPos);
+        yPos += 6;
+        techniques.forEach(tech => {
+          doc.text(`  - ${tech}`, 30, yPos);
+          yPos += 5;
+        });
+        yPos += 3;
+      });
+      yPos += 8;
+    }
 
     // Perfis com melhor conversão
     doc.setFontSize(14);
@@ -353,6 +397,27 @@ Retorne JSON:
                   ))}
                 </ul>
               </Card>
+
+              {/* Recomendações por Perfil */}
+              {Object.keys(reportData.profileRecommendations).length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-3">🎯 Técnicas Recomendadas por Perfil</h3>
+                  <div className="space-y-3">
+                    {Object.entries(reportData.profileRecommendations).map(([profile, techniques]) => (
+                      <Card key={profile} className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50">
+                        <p className="text-sm font-semibold text-indigo-700 mb-2">{profile}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {techniques.map((tech, idx) => (
+                            <Badge key={idx} className="bg-indigo-100 text-indigo-700">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <Button onClick={downloadPDF} className="w-full" size="lg">
                 <Download className="w-4 h-4 mr-2" />

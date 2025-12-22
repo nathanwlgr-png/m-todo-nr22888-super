@@ -29,6 +29,7 @@ import QuickTips from '@/components/onboarding/QuickTips';
 import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
 import SalesOverview from '@/components/SalesOverview';
 import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
+import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -195,6 +196,11 @@ export default function Home() {
       {/* Personal Goals Widget */}
       <div className="px-6 mt-6">
         <PersonalGoalsWidget />
+      </div>
+
+      {/* Performance Feedback */}
+      <div className="px-6 mt-6">
+        <VendedorPerformanceFeedback />
       </div>
 
       {/* Gamification Widget */}

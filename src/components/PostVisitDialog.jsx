@@ -224,34 +224,55 @@ Retorne JSON:
         toast.success('Lembrete de assinatura criado!');
       }
 
-      // 7. Análise IA da Visita
+      // 7. Análise IA Aprofundada da Visita
       try {
-        const analysisPrompt = `Você é um analista de vendas especializado. Analise esta visita e forneça insights estratégicos.
+        const analysisPrompt = `Você é um analista de vendas expert em psicologia comportamental e estatística de vendas.
 
 DADOS DA VISITA:
 - Cliente: ${client.first_name}
-- Perfil: ${client.numerology_number} - ${client.behavioral_profile}
-- Tipo: ${client.client_type}
+- Perfil Numerológico: ${client.numerology_number} - ${client.behavioral_profile}
+- Tipo de Negócio: ${client.client_type}
 - Orçamento Disponível: R$ ${visitData.budget_confirmed || client.available_budget || 'Não informado'}
-- Notas: ${visitData.result_notes}
-- Gatilhos Usados: ${visitData.triggers_used.join(', ')}
-- Técnicas Usadas: ${visitData.techniques_used.join(', ')}
-- Objeções: ${visitData.objections_presented.join(', ')}
+- Equipamento de Interesse: ${visitData.equipment_interest}
+- Notas Completas: ${visitData.result_notes}
+- Gatilhos Mentais Usados: ${visitData.triggers_used.join(', ') || 'Nenhum'}
+- Técnicas de Vendas Usadas: ${visitData.techniques_used.join(', ') || 'Nenhuma'}
+- Objeções Apresentadas: ${visitData.objections_presented.join(', ') || 'Nenhuma'}
 - Nível de Interesse: ${visitData.interest_level}/10
 - Venda Fechada: ${autoClosedSale || visitData.sale_closed ? 'Sim' : 'Não'}
 
-Analise e retorne JSON:
+CONTEXTO HISTÓRICO DO CLIENTE:
+- Dores Anteriores: ${client.main_pains?.join(', ') || 'Nenhuma'}
+- Score Anterior: ${client.purchase_score}%
+
+TAREFA - ANÁLISE CRÍTICA E ESTATÍSTICA:
+Analise profundamente esta visita considerando:
+
+1. COMPATIBILIDADE TÉCNICA/PERFIL: As técnicas usadas são adequadas para este perfil numerológico?
+2. ERRO DE VENDEDOR vs ERRO DE TÉCNICA: Se não fechou, foi execução ruim ou técnica inadequada?
+3. ORÇAMENTO: Foi fator limitante? Cliente tem budget para o equipamento sugerido?
+4. PADRÕES DE SUCESSO: Quais elementos desta visita podem ser replicados?
+5. PADRÕES DE FALHA: O que deve ser evitado em visitas futuras com perfis similares?
+
+Retorne JSON estruturado:
 {
-  "what_worked": ["item1", "item2"],
-  "what_failed": ["item1", "item2"],
+  "what_worked": ["Elemento específico que funcionou", "Outro elemento"],
+  "what_failed": ["Erro específico cometido", "Outro erro"],
   "error_type": "tecnica|vendedor|timing|cliente_nao_pronto|orcamento_insuficiente|outro",
-  "ai_insights": "Análise detalhada em 2-3 parágrafos sobre o desempenho - INCLUA análise se orçamento foi fator limitante",
-  "recommendations": ["rec1", "rec2", "rec3"],
+  "error_details": "Explicação detalhada do erro principal",
+  "technique_profile_match": "adequado|parcial|inadequado",
+  "technique_match_explanation": "Por que as técnicas foram ou não adequadas ao perfil",
+  "ai_insights": "Análise em 2-3 parágrafos: (1) O que aconteceu (2) Por que aconteceu (3) Como melhorar",
+  "recommendations": ["Recomendação acionável 1", "Recomendação 2", "Recomendação 3"],
+  "recommendations_for_profile": ["Técnica específica para perfil ${client.numerology_number}", "Gatilho específico"],
   "success_score": 85,
-  "budget_compatibility": "adequado|limite|insuficiente"
+  "budget_compatibility": "adequado|limite|insuficiente",
+  "budget_analysis": "Análise específica da relação orçamento vs equipamento",
+  "salesperson_skill_rating": {"timing": 8, "rapport": 7, "objection_handling": 6, "closing": 5},
+  "learning_pattern": "Padrão identificado que pode ser usado em clientes similares"
 }
 
-Seja honesto e construtivo. Foque em aprendizado contínuo.`;
+Seja HONESTO, CRÍTICO e CONSTRUTIVO. Este feedback é para aprendizado de máquina e melhoria contínua.`;
 
         const analysisResult = await base44.integrations.Core.InvokeLLM({
           prompt: analysisPrompt,
@@ -261,9 +282,25 @@ Seja honesto e construtivo. Foque em aprendizado contínuo.`;
               what_worked: { type: "array", items: { type: "string" } },
               what_failed: { type: "array", items: { type: "string" } },
               error_type: { type: "string" },
+              error_details: { type: "string" },
+              technique_profile_match: { type: "string" },
+              technique_match_explanation: { type: "string" },
               ai_insights: { type: "string" },
               recommendations: { type: "array", items: { type: "string" } },
-              success_score: { type: "number" }
+              recommendations_for_profile: { type: "array", items: { type: "string" } },
+              success_score: { type: "number" },
+              budget_compatibility: { type: "string" },
+              budget_analysis: { type: "string" },
+              salesperson_skill_rating: { 
+                type: "object",
+                properties: {
+                  timing: { type: "number" },
+                  rapport: { type: "number" },
+                  objection_handling: { type: "number" },
+                  closing: { type: "number" }
+                }
+              },
+              learning_pattern: { type: "string" }
             }
           }
         });
@@ -284,11 +321,44 @@ Seja honesto e construtivo. Foque em aprendizado contínuo.`;
           what_worked: analysisResult.what_worked,
           what_failed: analysisResult.what_failed,
           error_type: analysisResult.error_type,
-          ai_insights: analysisResult.ai_insights,
-          recommendations: analysisResult.recommendations,
+          ai_insights: `${analysisResult.ai_insights}\n\nCompatibilidade Técnica-Perfil: ${analysisResult.technique_match_explanation}\n\nOrçamento: ${analysisResult.budget_analysis}\n\nPadrão Identificado: ${analysisResult.learning_pattern}`,
+          recommendations: [...analysisResult.recommendations, ...analysisResult.recommendations_for_profile],
           salesperson_email: currentUser.email,
           success_score: analysisResult.success_score
         });
+
+        // Atualizar estatísticas de performance por técnica
+        const monthYear = new Date().toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' });
+        for (const technique of visitData.techniques_used) {
+          const existingPerf = await base44.entities.TechniquePerformance.filter({
+            technique_name: technique,
+            client_profile: `${client.numerology_number}`,
+            salesperson_email: currentUser.email,
+            month_year: monthYear
+          });
+
+          if (existingPerf.length > 0) {
+            const perf = existingPerf[0];
+            await base44.entities.TechniquePerformance.update(perf.id, {
+              total_uses: (perf.total_uses || 0) + 1,
+              success_count: (perf.success_count || 0) + (autoClosedSale || visitData.sale_closed ? 1 : 0),
+              success_rate: ((perf.success_count + (autoClosedSale || visitData.sale_closed ? 1 : 0)) / (perf.total_uses + 1) * 100),
+              avg_interest_level: ((perf.avg_interest_level || 0) * (perf.total_uses || 0) + visitData.interest_level) / (perf.total_uses + 1)
+            });
+          } else {
+            await base44.entities.TechniquePerformance.create({
+              technique_name: technique,
+              client_profile: `${client.numerology_number}`,
+              client_type: client.client_type,
+              total_uses: 1,
+              success_count: autoClosedSale || visitData.sale_closed ? 1 : 0,
+              success_rate: autoClosedSale || visitData.sale_closed ? 100 : 0,
+              avg_interest_level: visitData.interest_level,
+              salesperson_email: currentUser.email,
+              month_year: monthYear
+            });
+          }
+        }
 
         toast.success('✨ Análise IA salva no banco de conhecimento!');
       } catch (error) {
