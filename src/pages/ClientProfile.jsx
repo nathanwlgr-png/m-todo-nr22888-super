@@ -83,6 +83,8 @@ import VisitReportPDF from '@/components/VisitReportPDF';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import ScoreExplanation from '@/components/ScoreExplanation';
 import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
+import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
+import NumerologyBestDayAI from '@/components/NumerologyBestDayAI';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -749,6 +751,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             updateMutation.mutate(updates);
           }}
         />
+
+        {/* Análise Probabilística com Dados */}
+        <ProbabilityAnalysisAI client={client} />
+
+        {/* Numerologia - Melhor Dia */}
+        <NumerologyBestDayAI client={client} />
 
         {/* Gerador de Propostas */}
         <ProposalGenerator 
