@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -14,9 +14,11 @@ import {
   Loader2,
   Navigation
 } from 'lucide-react';
+import AIRouteOptimizer from '@/components/AIRouteOptimizer';
 
 export default function ScheduledAgenda() {
   const navigate = useNavigate();
+  const [optimizedData, setOptimizedData] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -27,6 +29,19 @@ export default function ScheduledAgenda() {
   const cityOrder = ['Marília', 'Bauru', 'Jaú', 'Lins', 'Botucatu', 'Ourinhos', 'Assis', 'Tupã'];
 
   const clientsByCity = useMemo(() => {
+    // Se houver dados otimizados pela IA, usar eles
+    if (optimizedData?.optimized_order) {
+      return optimizedData.optimized_order.map(cityRoute => ({
+        city: cityRoute.city,
+        clients: cityRoute.clients.map(c => 
+          clients.find(client => client.id === c.id)
+        ).filter(Boolean),
+        aiOptimized: true,
+        estimatedArrival: cityRoute.estimated_arrival
+      }));
+    }
+
+    // Caso contrário, usar ordenação padrão
     const grouped = {};
     
     clients.forEach(client => {
@@ -56,7 +71,7 @@ export default function ScheduledAgenda() {
       city,
       clients: grouped[city]
     }));
-  }, [clients]);
+  }, [clients, optimizedData]);
 
   const statusColors = {
     quente: 'bg-red-100 text-red-700 border-red-300',
@@ -89,7 +104,7 @@ export default function ScheduledAgenda() {
       </div>
 
       {/* Summary */}
-      <div className="px-4 -mt-8 mb-4">
+      <div className="px-4 -mt-8 mb-4 space-y-3">
         <Card className="p-4 bg-white shadow-lg">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
@@ -108,6 +123,11 @@ export default function ScheduledAgenda() {
             </div>
           </div>
         </Card>
+
+        <AIRouteOptimizer 
+          clients={clients} 
+          onRouteOptimized={setOptimizedData}
+        />
       </div>
 
       {/* Cities and Clients */}
@@ -119,12 +139,18 @@ export default function ScheduledAgenda() {
               <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                 <span className="text-sm font-bold text-indigo-600">{cityIndex + 1}</span>
               </div>
-              <div>
+              <div className="flex-1">
                 <h2 className="font-semibold text-slate-800 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-indigo-600" />
                   {city}
+                  {cityClients.aiOptimized && (
+                    <Badge className="bg-purple-100 text-purple-700 text-xs">✨ IA</Badge>
+                  )}
                 </h2>
-                <p className="text-xs text-slate-500">{cityClients.length} clientes</p>
+                <p className="text-xs text-slate-500">
+                  {cityClients.length} clientes
+                  {cityClients.estimatedArrival && ` • Chegada: ${cityClients.estimatedArrival}`}
+                </p>
               </div>
             </div>
 

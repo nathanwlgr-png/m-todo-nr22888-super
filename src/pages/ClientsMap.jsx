@@ -17,6 +17,7 @@ import {
 import { ArrowLeft, MapPin, Loader2, Filter, X } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import AIRouteOptimizer from '@/components/AIRouteOptimizer';
 
 // Fix para ícones do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -248,7 +249,7 @@ export default function ClientsMap() {
       </div>
 
       {/* Stats */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 space-y-3">
         <div className="grid grid-cols-3 gap-3">
           <Card className="p-3">
             <p className="text-xs text-slate-500 mb-1">Total</p>
@@ -267,6 +268,8 @@ export default function ClientsMap() {
             </p>
           </Card>
         </div>
+
+        <AIRouteOptimizer clients={filteredClients} />
       </div>
 
       {/* Mapa */}
