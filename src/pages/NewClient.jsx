@@ -94,6 +94,8 @@ export default function NewClient() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    city: '',
+    clinic_name: '',
     first_name: '',
     phone: '',
     client_type: '',
@@ -152,6 +154,34 @@ export default function NewClient() {
 
         {/* Form */}
         <div className="space-y-5">
+          {/* City */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Cidade (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: São Paulo"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+            />
+          </div>
+
+          {/* Clinic Name */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Nome da Clínica/Hospital (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: Clínica Vida Animal"
+              value={formData.clinic_name}
+              onChange={(e) => setFormData({ ...formData, clinic_name: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+            />
+          </div>
+
           {/* First Name */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import NewClient from './pages/NewClient';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import VisitSummary from './pages/VisitSummary';
+import ClientsByCity from './pages/ClientsByCity';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "NewClient": NewClient,
     "PreVisitChecklist": PreVisitChecklist,
     "VisitSummary": VisitSummary,
+    "ClientsByCity": ClientsByCity,
 }
 
 export const pagesConfig = {
