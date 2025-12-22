@@ -734,6 +734,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
+        {/* Seletor de Proposta Inteligente com IA */}
+        <AIProposalSelector client={client} />
+
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="p-4 bg-white shadow-lg border-none">
