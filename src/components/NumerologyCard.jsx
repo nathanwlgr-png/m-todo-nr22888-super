@@ -7,7 +7,7 @@ const profiles = {
     title: 'Líder Natural',
     description: 'Pessoa decidida, independente e pioneira. Valoriza inovação e autonomia.',
     decision: 'Decide rápido quando vê benefício claro. Mostre liderança de mercado.',
-    tips: 'Seja direto, mostre que é novidade, destaque exclusividade.'
+    tips: 'Seja direto, mostre tecnologia de ponta, destaque "seja o primeiro da região com este equipamento".'
   },
   2: {
     title: 'Diplomata',
@@ -25,7 +25,7 @@ const profiles = {
     title: 'Construtor',
     description: 'Pessoa prática, organizada e metódica. Valoriza estabilidade e processos.',
     decision: 'Decide com dados e garantias. Apresente números e certificações.',
-    tips: 'Seja técnico, mostre garantia, apresente cronograma claro.'
+    tips: 'Seja técnico, mostre especificações, certificações ANVISA, garantia estendida, ROI calculado.'
   },
   5: {
     title: 'Aventureiro',
@@ -49,7 +49,7 @@ const profiles = {
     title: 'Empreendedor',
     description: 'Pessoa ambiciosa, prática e focada em resultados. Valoriza ROI e eficiência.',
     decision: 'Decide por retorno financeiro. Mostre ROI e economia.',
-    tips: 'Fale em números, mostre lucro, apresente cases de sucesso.'
+    tips: 'Calcule economia vs. terceirização, payback em meses, aumento de margem por exame, fidelização de clientes.'
   },
   9: {
     title: 'Visionário',

@@ -23,19 +23,18 @@ import {
 } from 'lucide-react';
 
 const clientTypes = [
-  { value: 'clinica_pequena', label: 'Clínica Pequena' },
-  { value: 'clinica_media', label: 'Clínica Média' },
-  { value: 'hospital_veterinario', label: 'Hospital Veterinário' },
-  { value: 'laboratorio', label: 'Laboratório' },
-  { value: 'pet_shop', label: 'Pet Shop' },
-  { value: 'agronegocio', label: 'Agronegócio' },
+  { value: 'clinica_pequena', label: 'Clínica Pequena (até 50 exames/mês)' },
+  { value: 'clinica_media', label: 'Clínica Média (50-150 exames/mês)' },
+  { value: 'hospital_veterinario', label: 'Hospital Veterinário (150+ exames/mês)' },
+  { value: 'laboratorio_terceirizado', label: 'Laboratório Terceirizado' },
+  { value: 'clinica_especializada', label: 'Clínica Especializada' },
 ];
 
 const decisionRoles = [
   { value: 'proprietario', label: 'Proprietário' },
-  { value: 'gerente', label: 'Gerente' },
-  { value: 'veterinario_chefe', label: 'Veterinário-Chefe' },
-  { value: 'comprador', label: 'Comprador' },
+  { value: 'veterinario_responsavel', label: 'Veterinário Responsável' },
+  { value: 'gestor_laboratorio', label: 'Gestor de Laboratório' },
+  { value: 'coordenador_tecnico', label: 'Coordenador Técnico' },
   { value: 'socio', label: 'Sócio' },
 ];
 

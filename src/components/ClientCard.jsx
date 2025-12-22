@@ -21,9 +21,8 @@ const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
   clinica_media: 'Clínica Média',
   hospital_veterinario: 'Hospital Veterinário',
-  laboratorio: 'Laboratório',
-  pet_shop: 'Pet Shop',
-  agronegocio: 'Agronegócio'
+  laboratorio_terceirizado: 'Lab. Terceirizado',
+  clinica_especializada: 'Clínica Especializada'
 };
 
 export default function ClientCard({ client }) {

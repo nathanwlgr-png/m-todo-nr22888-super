@@ -89,20 +89,23 @@ export default function VisitSummary() {
   };
 
   const commonPains = [
-    'Resultados demorados',
-    'Terceirização cara',
-    'Falta de confiabilidade',
-    'Equipamento obsoleto',
-    'Perda de clientes',
-    'Falta de treinamento'
+    'Demora nos resultados (terceirização)',
+    'Custo alto de envio para laboratórios',
+    'Perda de clientes por espera',
+    'Equipamento atual desatualizado',
+    'Resultados imprecisos/duvidosos',
+    'Falta de autonomia diagnóstica',
+    'Necessidade de repetir exames',
+    'Custos de reagentes elevados'
   ];
 
   const commonTriggers = [
-    'Prova social',
-    'Reciprocidade',
-    'Segurança',
-    'Autoridade',
-    'Escassez'
+    'ROI e economia comprovada',
+    'Casos de sucesso de clínicas similares',
+    'Agilidade no diagnóstico',
+    'Autonomia e independência',
+    'Fidelização de clientes',
+    'Diferencial competitivo'
   ];
 
   const togglePain = (pain) => {
@@ -127,7 +130,7 @@ export default function VisitSummary() {
     setAnalyzingInsights(true);
     
     const prompt = `
-Analise este resumo de visita de vendas de equipamentos veterinários e forneça insights estratégicos:
+Analise este resumo de visita de vendas de EQUIPAMENTOS LABORATORIAIS VETERINÁRIOS (analisadores hematológicos, bioquímicos, contadores de células) e forneça insights estratégicos:
 
 Cliente: ${client?.first_name}
 Tipo: ${client?.client_type}
@@ -140,11 +143,11 @@ Gatilhos utilizados: ${formData.triggers_used.join(', ') || 'Nenhum'}
 Observações: ${formData.notes || 'Sem observações'}
 
 Forneça em português brasileiro:
-1. key_takeaways: Array com 3 pontos principais da visita (frases curtas)
-2. strategy_adjustments: Array com 2-3 ajustes estratégicos recomendados
-3. opportunities: Array com 2-3 oportunidades de upsell/cross-sell específicas de equipamentos veterinários
+1. key_takeaways: Array com 3 pontos principais da visita (frases curtas e objetivas)
+2. strategy_adjustments: Array com 2-3 ajustes estratégicos recomendados (foco em equipamentos laboratoriais)
+3. opportunities: Array com 2-3 oportunidades específicas de equipamentos complementares (ex: se tem analisador bioquímico, sugerir hematológico; reagentes; manutenção; treinamento; upgrades)
 
-Seja direto, prático e focado em ação.
+Seja direto, prático e focado em ação. Pense em ROI, economia com terceirização, agilidade diagnóstica.
     `;
 
     const response = await base44.integrations.Core.InvokeLLM({
@@ -303,13 +306,14 @@ Seja direto, prático e focado em ação.
               <SelectValue placeholder="Selecione a próxima ação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Enviar proposta comercial">Enviar proposta comercial</SelectItem>
-              <SelectItem value="Agendar demonstração">Agendar demonstração</SelectItem>
-              <SelectItem value="Enviar material técnico">Enviar material técnico</SelectItem>
+              <SelectItem value="Enviar proposta comercial detalhada">Enviar proposta comercial detalhada</SelectItem>
+              <SelectItem value="Agendar demonstração técnica in loco">Agendar demonstração técnica in loco</SelectItem>
+              <SelectItem value="Enviar especificações técnicas e estudos">Enviar especificações técnicas e estudos</SelectItem>
+              <SelectItem value="Calcular ROI personalizado">Calcular ROI personalizado</SelectItem>
               <SelectItem value="Follow-up em 3 dias">Follow-up em 3 dias</SelectItem>
               <SelectItem value="Follow-up em 1 semana">Follow-up em 1 semana</SelectItem>
-              <SelectItem value="Aguardar retorno">Aguardar retorno</SelectItem>
-              <SelectItem value="Visita de fechamento">Visita de fechamento</SelectItem>
+              <SelectItem value="Agendar visita de fechamento">Agendar visita de fechamento</SelectItem>
+              <SelectItem value="Aguardar aprovação do orçamento">Aguardar aprovação do orçamento</SelectItem>
             </SelectContent>
           </Select>
         </Card>
