@@ -15,7 +15,8 @@ import {
   DollarSign,
   Target,
   Calendar,
-  Search
+  Search,
+  FileText
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
