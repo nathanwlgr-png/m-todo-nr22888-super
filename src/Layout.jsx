@@ -1,11 +1,15 @@
 import React from 'react';
 import TaskNotifications from '@/components/TaskNotifications';
+import AlertNotifications from '@/components/AlertNotifications';
+import LeadAutomationEngine from '@/components/LeadAutomationEngine';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
   return (
     <div className="min-h-screen bg-slate-50">
       <TaskNotifications />
+      <AlertNotifications />
+      <LeadAutomationEngine />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

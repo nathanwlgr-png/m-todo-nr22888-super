@@ -30,6 +30,7 @@ import CaptureLeads from './pages/CaptureLeads';
 import ImportLeads from './pages/ImportLeads';
 import LeadProfile from './pages/LeadProfile';
 import LeadsDashboard from './pages/LeadsDashboard';
+import AutomationRules from './pages/AutomationRules';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "ImportLeads": ImportLeads,
     "LeadProfile": LeadProfile,
     "LeadsDashboard": LeadsDashboard,
+    "AutomationRules": AutomationRules,
 }
 
 export const pagesConfig = {
