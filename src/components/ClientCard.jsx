@@ -63,5 +63,12 @@ export default function ClientCard({ client }) {
         </div>
       </Card>
     </Link>
+    
+    <ClientDetailsModal 
+      client={client}
+      open={showDetailsModal}
+      onOpenChange={setShowDetailsModal}
+    />
+    </>
   );
 }
