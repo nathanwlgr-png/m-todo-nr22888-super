@@ -254,7 +254,7 @@ export default function Home() {
             </Button>
           </Link>
 
-          <Link to={createPageUrl('Reports')}>
+          <Link to={createPageUrl('ReportsAdvanced')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
               <TrendingUp className="w-4 h-4 mr-2" />
               Relatórios
