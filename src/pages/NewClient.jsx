@@ -431,6 +431,9 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
+            <p className="text-xs text-indigo-600 font-medium">
+              💡 Com CNPJ, a IA pode avaliar capacidade financeira via Google
+            </p>
           </div>
 
           {/* Razão Social */}

@@ -82,6 +82,7 @@ import ClientDataEditor from '@/components/ClientDataEditor';
 import VisitReportPDF from '@/components/VisitReportPDF';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import ScoreExplanation from '@/components/ScoreExplanation';
+import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -740,6 +741,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             </div>
           )}
         </Card>
+
+        {/* Análise de Capitalização IA */}
+        <CapitalAnalysisAI 
+          client={client}
+          onAnalysisComplete={(updates) => {
+            updateMutation.mutate(updates);
+          }}
+        />
 
         {/* Gerador de Propostas */}
         <ProposalGenerator 
