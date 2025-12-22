@@ -146,6 +146,9 @@ Forneça em português brasileiro:
 1. key_takeaways: Array com 3 pontos principais da visita (frases curtas e objetivas)
 2. strategy_adjustments: Array com 2-3 ajustes estratégicos recomendados (foco em equipamentos laboratoriais)
 3. opportunities: Array com 2-3 oportunidades específicas de equipamentos complementares (ex: se tem analisador bioquímico, sugerir hematológico; reagentes; manutenção; treinamento; upgrades)
+4. projected_revenue: Número estimado de receita potencial desta venda em R$ (considere equipamentos entre 15k-80k)
+5. probability_percentage: Porcentagem de probabilidade de fechamento (0-100) baseado no status e observações
+6. recommended_next_steps: Array com 2-3 próximos passos específicos e práticos
 
 Seja direto, prático e focado em ação. Pense em ROI, economia com terceirização, agilidade diagnóstica.
     `;
@@ -157,7 +160,10 @@ Seja direto, prático e focado em ação. Pense em ROI, economia com terceiriza�
         properties: {
           key_takeaways: { type: "array", items: { type: "string" } },
           strategy_adjustments: { type: "array", items: { type: "string" } },
-          opportunities: { type: "array", items: { type: "string" } }
+          opportunities: { type: "array", items: { type: "string" } },
+          projected_revenue: { type: "number" },
+          probability_percentage: { type: "number" },
+          recommended_next_steps: { type: "array", items: { type: "string" } }
         }
       }
     });
@@ -396,6 +402,45 @@ Seja direto, prático e focado em ação. Pense em ROI, economia com terceiriza�
                 ))}
               </ul>
             </Card>
+
+            {/* Sales Projection */}
+            {insights.projected_revenue && (
+              <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-600">Receita Projetada</span>
+                  <span className="text-2xl font-bold text-green-700">
+                    R$ {insights.projected_revenue.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Probabilidade de Fechamento</span>
+                  <span className="text-lg font-semibold text-green-600">
+                    {insights.probability_percentage}%
+                  </span>
+                </div>
+                <div className="mt-2 h-2 bg-green-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 transition-all duration-500"
+                    style={{ width: `${insights.probability_percentage}%` }}
+                  />
+                </div>
+              </Card>
+            )}
+
+            {/* Next Steps */}
+            {insights.recommended_next_steps && (
+              <Card className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200">
+                <h3 className="font-semibold text-slate-800 mb-3">Próximos Passos Recomendados</h3>
+                <ul className="space-y-2">
+                  {insights.recommended_next_steps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                      <span className="text-violet-600 mt-0.5 font-bold">{i + 1}.</span>
+                      {step}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
 
             <Button
               onClick={() => setInsights(null)}

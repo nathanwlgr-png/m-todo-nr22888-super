@@ -28,6 +28,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import ChecklistItem from '@/components/ChecklistItem';
+import PersuasionPhrases from '@/components/PersuasionPhrases';
 import NumerologyCard from '@/components/NumerologyCard';
 
 const visitObjectives = [

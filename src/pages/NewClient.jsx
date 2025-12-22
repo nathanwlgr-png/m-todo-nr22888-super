@@ -170,7 +170,7 @@ export default function NewClient() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
               <User className="w-4 h-4" />
-              WhatsApp
+              WhatsApp (opcional)
             </Label>
             <Input
               placeholder="Ex: 5511999999999"
@@ -178,7 +178,7 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
               className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
             />
-            <p className="text-xs text-slate-500">Formato: código do país + DDD + número (sem espaços)</p>
+            <p className="text-xs text-slate-500">Formato: código do país + DDD + número. Pode adicionar depois.</p>
           </div>
 
           {/* Client Type */}
