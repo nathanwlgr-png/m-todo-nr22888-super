@@ -20,6 +20,7 @@ import {
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
 import ScheduleVisitButton from '@/components/ScheduleVisitButton';
+import ClientEquipmentManager from '@/components/ClientEquipmentManager';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -161,6 +162,9 @@ export default function ClientProfile() {
         {/* Numerology Profile */}
         <NumerologyCard number={client.numerology_number || 1} />
 
+        {/* Equipment Manager */}
+        <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
+
         {/* Next Action */}
         {client.next_action && (
           <Card className="p-4 bg-amber-50 border-amber-200">
@@ -168,7 +172,7 @@ export default function ClientProfile() {
             <p className="text-slate-700">{client.next_action}</p>
           </Card>
         )}
-      </div>
+        </div>
 
       {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t space-y-3">

@@ -14,7 +14,8 @@ import {
   MapPin,
   DollarSign,
   Target,
-  Calendar
+  Calendar,
+  Search
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -55,12 +56,17 @@ export default function Home() {
           <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-amber-400" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold text-white">Seamaty</h1>
             <p className="text-slate-400 text-sm">Método NR • @seamatybrasil</p>
           </div>
+          <Link to={createPageUrl('GlobalSearch')}>
+            <button className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition-colors">
+              <Search className="w-5 h-5 text-white" />
+            </button>
+          </Link>
         </div>
-        
+
         <p className="text-slate-300 text-lg font-light">
           Qual cliente você vai atender agora?
         </p>
