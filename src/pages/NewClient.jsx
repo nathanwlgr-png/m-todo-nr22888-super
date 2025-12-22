@@ -95,10 +95,14 @@ export default function NewClient() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    full_name: '',
+    first_name: '',
+    email: '',
+    phone: '',
+    address: '',
     city: '',
     clinic_name: '',
-    first_name: '',
-    phone: '',
+    current_equipment: '',
     client_type: '',
     decision_role: ''
   });
@@ -187,31 +191,17 @@ export default function NewClient() {
 
         {/* Form */}
         <div className="space-y-5">
-          {/* City */}
+          {/* Full Name */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
-              <Building2 className="w-4 h-4" />
-              Cidade (opcional)
+              <User className="w-4 h-4" />
+              Nome Completo (opcional)
             </Label>
             <Input
-              placeholder="Ex: São Paulo"
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
-            />
-          </div>
-
-          {/* Clinic Name */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-slate-700">
-              <Building2 className="w-4 h-4" />
-              Nome da Clínica/Hospital (opcional)
-            </Label>
-            <Input
-              placeholder="Ex: Clínica Vida Animal"
-              value={formData.clinic_name}
-              onChange={(e) => setFormData({ ...formData, clinic_name: e.target.value })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+              placeholder="Ex: João Silva Santos"
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
           </div>
 
@@ -219,13 +209,28 @@ export default function NewClient() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
               <User className="w-4 h-4" />
-              Primeiro Nome
+              Primeiro Nome *
             </Label>
             <Input
               placeholder="Ex: João"
               value={formData.first_name}
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <User className="w-4 h-4" />
+              Email (opcional)
+            </Label>
+            <Input
+              type="email"
+              placeholder="Ex: joao@clinica.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
           </div>
 
@@ -239,9 +244,65 @@ export default function NewClient() {
               placeholder="Ex: 5511999999999"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
-              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
-            <p className="text-xs text-slate-500">Formato: código do país + DDD + número. Pode adicionar depois.</p>
+            <p className="text-xs text-slate-500">Formato: código do país + DDD + número</p>
+          </div>
+
+          {/* Address */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Endereço (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: Rua das Flores, 123, Centro"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* City */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Cidade (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: São Paulo"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Clinic Name */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Nome da Clínica/Hospital (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: Clínica Vida Animal"
+              value={formData.clinic_name}
+              onChange={(e) => setFormData({ ...formData, clinic_name: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+          </div>
+
+          {/* Current Equipment */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Máquina/Equipamento Atual (opcional)
+            </Label>
+            <Input
+              placeholder="Ex: Analisador BC-2800"
+              value={formData.current_equipment}
+              onChange={(e) => setFormData({ ...formData, current_equipment: e.target.value })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
           </div>
 
           {/* Client Type */}
@@ -254,7 +315,7 @@ export default function NewClient() {
               value={formData.client_type}
               onValueChange={(value) => setFormData({ ...formData, client_type: value })}
             >
-              <SelectTrigger className="h-14 text-base rounded-xl border-2">
+              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
                 <SelectValue placeholder="Pode editar depois" />
               </SelectTrigger>
               <SelectContent>
@@ -271,13 +332,13 @@ export default function NewClient() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
               <UserCog className="w-4 h-4" />
-              Papel do Decisor
+              Papel do Decisor *
             </Label>
             <Select
               value={formData.decision_role}
               onValueChange={(value) => setFormData({ ...formData, decision_role: value })}
             >
-              <SelectTrigger className="h-14 text-base rounded-xl border-2">
+              <SelectTrigger className="h-14 text-base rounded-xl border-2 focus:border-orange-500">
                 <SelectValue placeholder="Selecione o papel" />
               </SelectTrigger>
               <SelectContent>
