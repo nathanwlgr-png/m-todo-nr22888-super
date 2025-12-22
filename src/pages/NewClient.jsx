@@ -96,6 +96,7 @@ export default function NewClient() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
+    phone: '',
     client_type: '',
     decision_role: ''
   });
@@ -164,6 +165,21 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
             />
+          </div>
+
+          {/* Phone */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <User className="w-4 h-4" />
+              WhatsApp
+            </Label>
+            <Input
+              placeholder="Ex: 5511999999999"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-indigo-500"
+            />
+            <p className="text-xs text-slate-500">Formato: código do país + DDD + número (sem espaços)</p>
           </div>
 
           {/* Client Type */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Building2, ThermometerSun, ChevronRight } from 'lucide-react';
+import { User, Building2, ThermometerSun, ChevronRight, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
@@ -42,7 +42,9 @@ export default function ClientCard({ client }) {
               <div className="flex items-center gap-2 text-sm text-slate-500">
                 <Building2 className="w-3 h-3" />
                 <span>{clientTypeLabels[client.client_type] || client.client_type}</span>
-              </div>
+                {client.phone && (
+                  <MessageCircle className="w-3 h-3 text-green-500 ml-1" />
+                )}
             </div>
           </div>
           <div className="flex items-center gap-3">
