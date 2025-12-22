@@ -75,7 +75,7 @@ import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
 import LabNeedsEditor from '@/components/LabNeedsEditor';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
-import ClientDataSync from '@/components/ClientDataSync';
+import ClientDataEditor from '@/components/ClientDataEditor';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -962,8 +962,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               </div>
             </Card>
 
-            {/* Dados Cadastrais Sincronizados */}
-            <ClientDataSync clientId={client.id} currentData={client} />
+            {/* Dados do Cliente Editáveis */}
+            <ClientDataEditor clientId={client.id} client={client} />
 
             {/* Necessidades do Laboratório */}
             <LabNeedsEditor 

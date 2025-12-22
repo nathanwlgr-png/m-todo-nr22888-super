@@ -328,6 +328,7 @@ export default function NewClient() {
               onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
+            <p className="text-xs text-slate-500">Para cálculo completo de numerologia</p>
           </div>
 
           {/* CNPJ */}
@@ -351,7 +352,7 @@ export default function NewClient() {
               Razão Social (opcional)
             </Label>
             <Input
-              placeholder="Ex: Clínica Veterinária LTDA"
+              placeholder="Ex: Clínica Veterinária Vida Animal LTDA"
               value={formData.razao_social}
               onChange={(e) => setFormData({ ...formData, razao_social: e.target.value })}
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"

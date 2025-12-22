@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import LabNeedsEditor from '@/components/LabNeedsEditor';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
-import ClientDataSync from '@/components/ClientDataSync';
+import ClientDataEditor from '@/components/ClientDataEditor';
 
 export default function PostVisitAnalysis() {
   const navigate = useNavigate();
@@ -315,18 +315,6 @@ Retorne JSON:
       </div>
 
       <div className="px-6 -mt-8 space-y-4">
-        {/* Dados Sincronizados */}
-        <ClientDataSync clientId={clientId} currentData={client} />
-
-        {/* Lab Needs */}
-        <LabNeedsEditor clientId={clientId} currentNeeds={client.lab_needs || []} />
-
-        {/* Communication Preferences */}
-        <CommunicationPreferencesEditor 
-          clientId={clientId} 
-          currentPreferences={client.communication_preferences || {}} 
-        />
-
         {/* Numerology Summary */}
         <Card className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
           <div className="flex items-center gap-3">
@@ -344,6 +332,21 @@ Retorne JSON:
             )}
           </div>
         </Card>
+
+        {/* Dados do Cliente Editáveis */}
+        <ClientDataEditor clientId={clientId} client={client} />
+
+        {/* Necessidades do Laboratório */}
+        <LabNeedsEditor 
+          clientId={clientId} 
+          currentNeeds={client.lab_needs || []} 
+        />
+
+        {/* Preferências de Comunicação */}
+        <CommunicationPreferencesEditor 
+          clientId={clientId} 
+          currentPreferences={client.communication_preferences || {}} 
+        />
 
         {/* Visit Notes */}
         <Card className="p-4 bg-white">
