@@ -21,6 +21,7 @@ export default function PostVisitDialog({ client, visitId, open, onOpenChange })
     new_motivators: [],
     new_objections: [],
     equipment_interest: '',
+    interest_level: 5,
     budget_confirmed: client.available_budget || '',
     next_step: '',
     schedule_next: false,
@@ -28,7 +29,10 @@ export default function PostVisitDialog({ client, visitId, open, onOpenChange })
     next_visit_type: 'followup',
     triggers_used: [],
     techniques_used: [],
-    objections_presented: []
+    objections_presented: [],
+    sale_closed: false,
+    equipment_sold: '',
+    contract_signature_date: ''
   });
 
   const { data: equipments = [] } = useQuery({
@@ -160,15 +164,32 @@ Retorne JSON:
       const updatedMotivators = [...(client.purchase_motivators || []), ...visitData.new_motivators];
       const updatedObjections = [...(client.real_objections || []), ...visitData.new_objections, ...visitData.objections_presented];
 
-      await updateClientMutation.mutateAsync({
+      const updateData = {
         main_pains: updatedPains,
         purchase_motivators: updatedMotivators,
         real_objections: updatedObjections,
         available_budget: visitData.budget_confirmed,
         last_visit_date: new Date().toISOString().split('T')[0],
         notes: `${client.notes || ''}\n\n[${new Date().toLocaleDateString()}] ${visitData.result_notes}`.trim(),
-        visit_history: visitHistory
-      });
+        visit_history: visitHistory,
+        visit_objective: 'fechar_venda'
+      };
+
+      // Atualizar score baseado no interesse
+      if (visitData.interest_level) {
+        updateData.purchase_score = Math.min(100, Math.round((visitData.interest_level * 10) + (client.purchase_score || 0) * 0.3));
+      }
+
+      // Se venda fechada
+      if (autoClosedSale || visitData.sale_closed) {
+        updateData.sale_closed = true;
+        updateData.equipment_sold = autoClosedSale ? visitData.equipment_interest : visitData.equipment_sold;
+        updateData.contract_signature_date = visitData.contract_signature_date;
+        updateData.status = 'quente';
+        updateData.visit_objective = 'fechar_venda';
+      }
+
+      await updateClientMutation.mutateAsync(updateData);
 
       // 4. Gerar sugestão de equipamento
       await generateEquipmentSuggestion();
@@ -185,6 +206,21 @@ Retorne JSON:
           status: 'agendada',
           notes: `Follow-up: ${visitData.next_step}`
         });
+      }
+
+      // 6. Se venda fechada, criar lembrete de assinatura
+      if ((autoClosedSale || visitData.sale_closed) && visitData.contract_signature_date) {
+        await createVisitMutation.mutateAsync({
+          client_id: client.id,
+          client_name: client.first_name,
+          scheduled_date: new Date(visitData.contract_signature_date).toISOString(),
+          visit_type: 'fechamento',
+          duration_minutes: 60,
+          location: client.address || client.city,
+          status: 'agendada',
+          notes: `🎉 ASSINATURA DE CONTRATO - ${autoClosedSale ? visitData.equipment_interest : visitData.equipment_sold}`
+        });
+        toast.success('Lembrete de assinatura criado!');
       }
 
       setStep(3);
@@ -365,6 +401,34 @@ Retorne JSON:
             </div>
 
             <div className="space-y-2">
+              <Label>Nível de Interesse (1-10)</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={visitData.interest_level}
+                  onChange={(e) => setVisitData({ ...visitData, interest_level: parseInt(e.target.value) })}
+                  className="flex-1 h-2 rounded-lg appearance-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, 
+                      rgb(254 202 202) 0%, 
+                      rgb(254 249 195) 50%, 
+                      rgb(34 197 94) 100%)`
+                  }}
+                />
+                <span className="text-2xl font-bold text-slate-800 w-12 text-center">
+                  {visitData.interest_level}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                {visitData.interest_level <= 3 && '❄️ Interesse baixo'}
+                {visitData.interest_level >= 4 && visitData.interest_level <= 7 && '🌡️ Interesse moderado'}
+                {visitData.interest_level >= 8 && '🔥 Interesse alto'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label>Orçamento Confirmado (R$)</Label>
               <Input
                 type="number"
@@ -374,9 +438,54 @@ Retorne JSON:
               />
             </div>
 
+            <div className="p-4 bg-green-50 rounded-lg border-2 border-green-200 space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={visitData.sale_closed}
+                  onCheckedChange={(checked) => setVisitData({ ...visitData, sale_closed: checked })}
+                />
+                <Label className="text-green-700 font-semibold">✅ Cliente Fechou Equipamento</Label>
+              </div>
+
+              {visitData.sale_closed && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Equipamento Vendido *</Label>
+                    <Select
+                      value={visitData.equipment_sold}
+                      onValueChange={(value) => setVisitData({ ...visitData, equipment_sold: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {equipments.map(eq => (
+                          <SelectItem key={eq.id} value={eq.name}>
+                            {eq.name} - R$ {eq.price?.toLocaleString('pt-BR')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Data de Assinatura do Contrato *</Label>
+                    <Input
+                      type="date"
+                      value={visitData.contract_signature_date}
+                      onChange={(e) => setVisitData({ ...visitData, contract_signature_date: e.target.value })}
+                    />
+                    <p className="text-xs text-green-600">
+                      💡 Lembrete criado na agenda
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
             <Button
               onClick={() => setStep(2)}
-              disabled={!visitData.result_notes}
+              disabled={!visitData.result_notes || (visitData.sale_closed && (!visitData.equipment_sold || !visitData.contract_signature_date))}
               className="w-full"
             >
               Continuar
