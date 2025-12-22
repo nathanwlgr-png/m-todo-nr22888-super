@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -31,7 +29,6 @@ const visitTypeLabels = {
 };
 
 export default function ScheduleVisitButton({ client }) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,7 +57,14 @@ export default function ScheduleVisitButton({ client }) {
       }
       
       setOpen(false);
-      navigate(createPageUrl('Calendar'));
+      // Resetar formulário
+      setFormData({
+        scheduled_date: '',
+        visit_type: 'primeira_visita',
+        duration_minutes: 60,
+        location: client?.city || '',
+        notes: ''
+      });
     }
   });
 
