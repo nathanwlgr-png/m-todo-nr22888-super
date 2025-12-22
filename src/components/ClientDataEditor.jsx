@@ -185,9 +185,10 @@ export default function ClientDataEditor({ clientId, client }) {
         <div>
           <Label className="text-xs">Data de Nascimento</Label>
           <Input
-            type="date"
+            type="text"
             value={formData.birthdate}
             onChange={(e) => handleFieldChange('birthdate', e.target.value)}
+            placeholder="DD/MM/AAAA ou AAAA-MM-DD"
           />
           {formData.birthdate && (
             <p className="text-xs text-green-600 mt-1">

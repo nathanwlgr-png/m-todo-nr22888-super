@@ -323,9 +323,10 @@ export default function NewClient() {
               Data de Nascimento (opcional)
             </Label>
             <Input
-              type="date"
+              type="text"
               value={formData.birthdate}
               onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+              placeholder="DD/MM/AAAA ou AAAA-MM-DD"
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
             <p className="text-xs text-slate-500">Para cálculo completo de numerologia</p>

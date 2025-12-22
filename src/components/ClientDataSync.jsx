@@ -88,9 +88,10 @@ export default function ClientDataSync({ clientId, currentData = {} }) {
         <div>
           <Label className="text-xs text-slate-600">Data de Nascimento</Label>
           <Input
-            type="date"
+            type="text"
             value={formData.birthdate}
             onChange={(e) => handleChange('birthdate', e.target.value)}
+            placeholder="DD/MM/AAAA ou AAAA-MM-DD"
             className="bg-white"
           />
         </div>
