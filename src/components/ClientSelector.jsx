@@ -41,9 +41,12 @@ export default function ClientSelector({ clients = [], selectedClientId, onClien
           <div className="flex-1">
             <p className="font-semibold text-slate-800">{selectedClient.first_name}</p>
             <p className="text-xs text-slate-500">
+              {selectedClient.razao_social && `${selectedClient.razao_social} • `}
               {selectedClient.clinic_name && `${selectedClient.clinic_name} • `}
+              {selectedClient.cnpj && `CNPJ: ${selectedClient.cnpj} • `}
               {selectedClient.city}
             </p>
+            <p className="text-xs text-slate-400 mt-0.5">ID: {selectedClient.id}</p>
           </div>
           <button
             onClick={handleClearSelection}
@@ -78,7 +81,9 @@ export default function ClientSelector({ clients = [], selectedClientId, onClien
                     >
                       <p className="font-semibold text-slate-800">{client.first_name}</p>
                       <p className="text-xs text-slate-500">
+                        {client.razao_social && `${client.razao_social} • `}
                         {client.clinic_name && `${client.clinic_name} • `}
+                        {client.cnpj && `CNPJ: ${client.cnpj} • `}
                         {client.city}
                       </p>
                     </button>
