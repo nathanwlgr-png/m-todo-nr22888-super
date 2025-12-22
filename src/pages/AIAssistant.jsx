@@ -97,6 +97,14 @@ HISTÓRICO DE INTERAÇÕES:
     `;
     
     return `
+      FRAMEWORKS ESTRATÉGICOS:
+      Você tem acesso a:
+      1. A Arte da Guerra (Sun Tzu): Estratégia, timing, conhecer o inimigo
+      2. SPIN Selling (Neil Rackham): Situation, Problem, Implication, Need-Payoff questions
+      3. As Armas da Persuasão (Cialdini): 6 princípios de persuasão ética
+      4. Inteligência Emocional (Goleman): Empatia, autorregulação, motivação
+      5. Numerologia Pitagórica: Perfis comportamentais 1-9, 11, 22
+
       Contexto do Cliente:
       - Nome: ${client.first_name}
       - Tipo: ${client.client_type}
@@ -130,7 +138,8 @@ HISTÓRICO DE INTERAÇÕES:
       - Tecnologia POCT de ponta
       
       Seja CONCISO (máximo 3 frases). Foco em ações práticas.
-      Adapte tom e conteúdo ao perfil numerológico e estilo de comunicação do cliente.
+      SEMPRE cite qual framework está usando (ex: "Usando SPIN - Implication:" ou "Arte da Guerra - Timing:")
+      Combine Numerologia + SPIN + Persuasão + Inteligência Emocional + Arte da Guerra.
       Responda em português brasileiro.
     `;
   };
@@ -155,22 +164,29 @@ HISTÓRICO DE INTERAÇÕES:
     setGeneratedScript(null);
 
     const prompts = {
-      question: `Gere UMA pergunta consultiva poderosa para abrir a conversa com ${client?.first_name}. 
+      question: `Gere UMA pergunta SPIN Selling para abrir a conversa com ${client?.first_name}. 
+        Numerologia: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
-        Seja específico e profissional.`,
-      objection: `Sugira técnicas de vendas para controlar objeções e ter autoridade com ${client?.first_name}.
         
-        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
-        Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
-        Tom de voz observado: ${client?.client_tone || 'ainda não identificado'}
+        Use SPIN (Situation/Problem/Implication/Need-Payoff) adaptado ao perfil numerológico.
+        Indique qual tipo SPIN você usou.`,
+      objection: `Controle de objeção estratégico para ${client?.first_name}.
         
-        Baseado na Numerologia Pitagórica e perfil comportamental, forneça:
-        1) Técnica de controle de objeção específica para esse número
-        2) Tom e estilo de comunicação ideal (assertivo, consultivo, empático, técnico)
-        3) Frase exemplo aplicando autoridade
-        4) Como adaptar ao tom de voz do cliente
+        PERFIL: Numerologia ${client?.numerology_number} - ${client?.behavioral_profile}
+        Tipo: ${client?.client_type}, Tom: ${client?.client_tone || 'padrão'}
         
-        Seja direto e prático.`,
+        Combine:
+        1. SPIN Selling: Transforme objeção em pergunta de Implication
+        2. Persuasão (Cialdini): Use autoridade, prova social ou reciprocidade
+        3. Inteligência Emocional: Empatia + autorregulação
+        4. Numerologia: Adapte ao perfil comportamental
+        
+        Forneça:
+        - Técnica principal (cite o framework)
+        - Frase exemplo usando SPIN
+        - Tom emocional ideal (Int. Emocional)
+        
+        Seja estratégico e multi-framework.`,
       closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
         Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
       followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.

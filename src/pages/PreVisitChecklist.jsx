@@ -32,6 +32,7 @@ import PersuasionPhrases from '@/components/PersuasionPhrases';
 import NumerologyCard from '@/components/NumerologyCard';
 import InvestigationQuestions from '@/components/InvestigationQuestions';
 import CommitmentStrategy from '@/components/CommitmentStrategy';
+import StrategicFrameworks from '@/components/StrategicFrameworks';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -102,14 +103,16 @@ export default function PreVisitChecklist() {
 
   const handleGenerateQuestions = () => {
     generateAIContent('questions', `
-      Gere 2 perguntas de abertura para uma visita de vendas de equipamentos laboratoriais veterinários.
+      Gere 2 perguntas SPIN Selling (Situation, Problem, Implication, Need-Payoff) para uma visita de vendas.
+      
       Cliente: ${client?.first_name || 'Cliente'}
       Tipo: ${client?.client_type || 'não especificado'}
       Decisor: ${client?.decision_role || 'não especificado'}
-      Perfil: ${client?.behavioral_profile || 'não especificado'}
+      Perfil Numerológico: ${client?.numerology_number} - ${client?.behavioral_profile || 'não especificado'}
       Objetivo: ${client?.visit_objective || 'diagnosticar'}
       
-      Retorne perguntas consultivas e profissionais, em português brasileiro.
+      Use SPIN Selling de Neil Rackham + Numerologia Pitagórica + princípios de A Arte da Guerra (conhecer o cliente).
+      Retorne perguntas consultivas e estratégicas, em português brasileiro.
     `);
   };
 
@@ -125,11 +128,16 @@ export default function PreVisitChecklist() {
 
   const handleGenerateObjections = () => {
     generateAIContent('objections', `
-      Liste 4 objeções comuns e suas respostas para venda de equipamentos laboratoriais veterinários.
-      Tipo cliente: ${client?.client_type || 'não especificado'}
+      Liste 3 objeções comuns e suas respostas baseadas em:
+      - Persuasão (Cialdini): autoridade, prova social, compromisso
+      - Inteligência Emocional: empatia e autorregulação
+      - SPIN Selling: transformar objeção em necessidade
       
-      Formato: "Objeção: [objeção] → Resposta: [resposta curta]"
-      Português brasileiro, prático e direto.
+      Tipo cliente: ${client?.client_type || 'não especificado'}
+      Perfil: ${client?.behavioral_profile || 'não especificado'}
+      
+      Formato: "Objeção: [objeção] → Técnica: [técnica] → Resposta: [resposta empática]"
+      Português brasileiro, prático e emocionalmente inteligente.
     `);
   };
 
@@ -388,6 +396,16 @@ export default function PreVisitChecklist() {
             clientType={client?.client_type}
             numerologyNumber={client?.numerology_number}
           />
+        </Card>
+
+        {/* Strategic Frameworks */}
+        <Card className="p-4 bg-gradient-to-br from-slate-900 to-indigo-900 border-none">
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-5 h-5 text-orange-400" />
+            <h3 className="font-semibold text-white">Frameworks Estratégicos</h3>
+          </div>
+          <p className="text-xs text-slate-300 mb-3">Baseado em numerologia + livros clássicos de vendas e estratégia</p>
+          <StrategicFrameworks numerologyNumber={client?.numerology_number || 1} />
         </Card>
 
 

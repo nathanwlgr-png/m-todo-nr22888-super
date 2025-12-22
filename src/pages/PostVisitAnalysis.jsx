@@ -80,27 +80,41 @@ VISITA ATUAL:
 Notas: ${visitNotes}
 Objeções levantadas: ${objections || 'Nenhuma objeção registrada'}
 
+FRAMEWORKS ESTRATÉGICOS:
+Use os seguintes livros como base:
+1. A Arte da Guerra (Sun Tzu): Estratégia, timing, conhecer o oponente (objeções)
+2. SPIN Selling (Neil Rackham): Situation, Problem, Implication, Need-Payoff
+3. As Armas da Persuasão (Cialdini): Reciprocidade, compromisso, prova social, autoridade, simpatia, escassez
+4. Inteligência Emocional (Goleman): Autoconhecimento, empatia, motivação, autorregulação
+
 TAREFA:
-Com base na Numerologia Pitagórica e nos dados acima, faça uma análise COMPLETA em formato JSON com:
+Com base na Numerologia Pitagórica + Frameworks acima, faça uma análise COMPLETA em formato JSON com:
 
 1. impedimentos: Array com 3 principais fatores que estão impedindo o fechamento (seja específico e honesto)
 
 2. controle_objecao: Objeto com:
-   - tecnica_principal: Técnica específica para o perfil numerológico dele
+   - tecnica_principal: Técnica específica combinando Persuasão (Cialdini) + Numerologia + Inteligência Emocional
    - abordagem_tom: Como adaptar ao tom de voz observado
-   - frase_exemplo: Frase pronta para usar
+   - frase_exemplo: Frase pronta usando SPIN Selling
+   - framework_usado: Qual framework usar (Arte da Guerra/SPIN/Persuasão/Int. Emocional)
 
 3. nova_estrategia: Objeto com:
-   - mudanca_necessaria: O que precisa mudar na abordagem
-   - melhor_tecnica: Melhor técnica de persuasão para este perfil
-   - timing_ideal: Quando e como abordar novamente
-   - canal_comunicacao: Melhor canal (presencial, WhatsApp, telefone)
+   - mudanca_necessaria: O que precisa mudar na abordagem (Arte da Guerra: adaptar estratégia)
+   - melhor_tecnica: Melhor técnica combinando SPIN + Persuasão (Cialdini) + Numerologia
+   - timing_ideal: Quando e como abordar (Arte da Guerra: timing perfeito)
+   - canal_comunicacao: Melhor canal baseado em perfil numerológico e inteligência emocional
+   - spin_approach: Qual tipo de pergunta SPIN usar (S/P/I/N)
 
-4. dica_mestre: String com UMA dica estratégica poderosa e específica para fechar este cliente
+4. dica_mestre: String com UMA dica estratégica PODEROSA combinando:
+   - Arte da Guerra (estratégia vencedora)
+   - SPIN Selling (tipo de pergunta ideal)
+   - Persuasão Cialdini (gatilho principal a usar)
+   - Inteligência Emocional (tom emocional ideal)
+   - Numerologia Pitagórica (perfil comportamental)
 
-5. proximo_passo: Ação concreta e específica para dar agora
+5. proximo_passo: Ação concreta usando framework específico (ex: "Enviar WhatsApp com pergunta IMPLICATION sobre perda de clientes")
 
-Seja direto, prático e baseado em Numerologia Pitagórica. Foque em PERSUASÃO e FECHAMENTO.
+Seja EXTREMAMENTE direto, prático e multi-framework. Foque em PERSUASÃO ÉTICA e FECHAMENTO CONSULTIVO.
     `;
 
     try {

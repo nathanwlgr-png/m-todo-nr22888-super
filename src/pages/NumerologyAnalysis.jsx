@@ -20,6 +20,7 @@ import {
   Zap,
   Loader2
 } from 'lucide-react';
+import StrategicFrameworks from '@/components/StrategicFrameworks';
 
 const nameProfiles = {
   1: {
@@ -296,14 +297,24 @@ export default function NumerologyAnalysis() {
         <Card className="p-5 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-5 h-5 text-orange-600" />
-            <h3 className="font-bold text-slate-800">💡 Dica Estratégica</h3>
+            <h3 className="font-bold text-slate-800">💡 Dica Estratégica Multi-Framework</h3>
           </div>
           
           <div className="bg-white rounded-lg p-4 border-2 border-orange-200">
+            <p className="text-xs text-orange-600 font-medium mb-2">Numerologia + SPIN + Persuasão + Arte da Guerra + Int. Emocional</p>
             <p className="text-sm text-slate-700 leading-relaxed">
               {getSalesTip(client.numerology_number, client.life_path_number, client.behavioral_profile)}
             </p>
           </div>
+        </Card>
+
+        {/* Strategic Frameworks */}
+        <Card className="p-5 bg-gradient-to-br from-slate-900 to-indigo-900 border-none">
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-5 h-5 text-orange-400" />
+            <h3 className="font-bold text-white">Frameworks Estratégicos</h3>
+          </div>
+          <StrategicFrameworks numerologyNumber={client.numerology_number} />
         </Card>
 
         {/* Perfil Comportamental */}
