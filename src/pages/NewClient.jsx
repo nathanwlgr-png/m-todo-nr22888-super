@@ -28,6 +28,7 @@ const clientTypes = [
   { value: 'hospital_veterinario', label: 'Hospital Veterinário (120+ exames/mês)' },
   { value: 'laboratorio_terceirizado', label: 'Laboratório Terceirizado' },
   { value: 'clinica_especializada', label: 'Clínica Especializada' },
+  { value: 'sem_equipamento', label: 'Ainda não tem equipamento' },
 ];
 
 const decisionRoles = [
@@ -103,7 +104,7 @@ export default function NewClient() {
   });
 
   const handleSubmit = async () => {
-    if (!formData.first_name || !formData.client_type || !formData.decision_role) {
+    if (!formData.first_name || !formData.decision_role) {
       return;
     }
 
@@ -124,7 +125,7 @@ export default function NewClient() {
     navigate(createPageUrl(`ClientProfile?id=${client.id}`));
   };
 
-  const isValid = formData.first_name && formData.client_type && formData.decision_role;
+  const isValid = formData.first_name && formData.decision_role;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -215,14 +216,14 @@ export default function NewClient() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
               <Building2 className="w-4 h-4" />
-              Tipo de Cliente
+              Tipo de Cliente (opcional)
             </Label>
             <Select
               value={formData.client_type}
               onValueChange={(value) => setFormData({ ...formData, client_type: value })}
             >
               <SelectTrigger className="h-14 text-base rounded-xl border-2">
-                <SelectValue placeholder="Selecione o tipo" />
+                <SelectValue placeholder="Pode editar depois" />
               </SelectTrigger>
               <SelectContent>
                 {clientTypes.map((type) => (
