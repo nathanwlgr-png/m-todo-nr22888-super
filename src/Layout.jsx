@@ -2,6 +2,7 @@ import React from 'react';
 import TaskNotifications from '@/components/TaskNotifications';
 import AlertNotifications from '@/components/AlertNotifications';
 import LeadAutomationEngine from '@/components/LeadAutomationEngine';
+import ClientScoringEngine from '@/components/ClientScoringEngine';
 
 export default function Layout({ children, currentPageName }) {
   // Full-screen layout without navigation for mobile-first experience
@@ -10,6 +11,7 @@ export default function Layout({ children, currentPageName }) {
       <TaskNotifications />
       <AlertNotifications />
       <LeadAutomationEngine />
+      <ClientScoringEngine />
       <style>{`
         :root {
           --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
