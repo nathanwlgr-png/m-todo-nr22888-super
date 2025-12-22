@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,8 @@ import {
   Loader2,
   ThermometerSun,
   Phone,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';
@@ -49,6 +50,8 @@ export default function ClientProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const clientId = urlParams.get('id');
 
+  const queryClient = useQueryClient();
+
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
@@ -57,6 +60,20 @@ export default function ClientProfile() {
     },
     enabled: !!clientId
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Client.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['clients']);
+      navigate(createPageUrl('Home'));
+    }
+  });
+
+  const handleDelete = () => {
+    if (window.confirm(`Tem certeza que deseja remover ${client.first_name}?`)) {
+      deleteMutation.mutate(client.id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -174,6 +191,16 @@ export default function ClientProfile() {
             <p className="text-slate-700">{client.next_action}</p>
           </Card>
         )}
+
+        {/* Delete Button */}
+        <Button
+          onClick={handleDelete}
+          variant="outline"
+          className="w-full h-12 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Remover Cliente
+        </Button>
         </div>
 
       {/* Fixed Bottom Actions */}
