@@ -66,7 +66,6 @@ import PipelineVisual from '@/components/PipelineVisual';
 import PipelineAIAssistant from '@/components/PipelineAIAssistant';
 import ProposalGenerator from '@/components/ProposalGenerator';
 import ClientConsumableAnalytics from '@/components/ClientConsumableAnalytics';
-import FunnelStageCard from '@/components/FunnelStageCard.jsx';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -547,9 +546,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         <Card className="p-5 bg-white shadow-md border-none">
           <ScoreBar score={client.purchase_score || 50} />
         </Card>
-
-        {/* Funnel Stage with AI Analysis */}
-        <FunnelStageCard client={client} />
 
         {/* Numerology Profile */}
         <div onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}>
