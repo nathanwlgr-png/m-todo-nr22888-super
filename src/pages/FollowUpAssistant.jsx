@@ -38,8 +38,9 @@ export default function FollowUpAssistant() {
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', selectedClientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: selectedClientId });
-      return clients[0];
+      if (!selectedClientId) return null;
+      const clients = await base44.entities.Client.list();
+      return clients.find(c => c.id === selectedClientId);
     },
     enabled: !!selectedClientId
   });
