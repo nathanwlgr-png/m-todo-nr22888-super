@@ -6,6 +6,8 @@ import CaptureLeads from './pages/CaptureLeads';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
+import ClientsMap from './pages/ClientsMap';
+import ClosingForecast from './pages/ClosingForecast';
 import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
@@ -35,18 +37,16 @@ import ProspectingScripts from './pages/ProspectingScripts';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import RevenueForecastPage from './pages/RevenueForecastPage';
+import SalesAnalytics from './pages/SalesAnalytics';
 import SalesFunnel from './pages/SalesFunnel';
+import ScheduledAgenda from './pages/ScheduledAgenda';
 import SignedContracts from './pages/SignedContracts';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
+import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import VisitPlanner from './pages/VisitPlanner';
-import SalesAnalytics from './pages/SalesAnalytics';
-import ScheduledAgenda from './pages/ScheduledAgenda';
-import ClientsMap from './pages/ClientsMap';
-import ClosingForecast from './pages/ClosingForecast';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +59,8 @@ export const PAGES = {
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
+    "ClientsMap": ClientsMap,
+    "ClosingForecast": ClosingForecast,
     "ConsumableOrderHistory": ConsumableOrderHistory,
     "ConsumablePriceList": ConsumablePriceList,
     "CreateFollowUpSequence": CreateFollowUpSequence,
@@ -88,18 +90,16 @@ export const PAGES = {
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
     "RevenueForecastPage": RevenueForecastPage,
+    "SalesAnalytics": SalesAnalytics,
     "SalesFunnel": SalesFunnel,
+    "ScheduledAgenda": ScheduledAgenda,
     "SignedContracts": SignedContracts,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
+    "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
     "WhatsAppInbox": WhatsAppInbox,
-    "VisitPlanner": VisitPlanner,
-    "SalesAnalytics": SalesAnalytics,
-    "ScheduledAgenda": ScheduledAgenda,
-    "ClientsMap": ClientsMap,
-    "ClosingForecast": ClosingForecast,
 }
 
 export const pagesConfig = {
