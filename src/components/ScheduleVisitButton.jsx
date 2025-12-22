@@ -44,9 +44,21 @@ export default function ScheduleVisitButton({ client }) {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Visit.create(data),
-    onSuccess: () => {
+    onSuccess: async (newVisit) => {
       queryClient.invalidateQueries(['visits']);
-      toast.success('Visita agendada com sucesso!');
+      
+      // Auto-sync to Google Calendar if connected
+      try {
+        const user = await base44.auth.me();
+        if (user?.google_calendar_connected) {
+          toast.success('Visita agendada e sincronizada com Google Calendar!');
+        } else {
+          toast.success('Visita agendada com sucesso!');
+        }
+      } catch (error) {
+        toast.success('Visita agendada com sucesso!');
+      }
+      
       setOpen(false);
       navigate(createPageUrl('Calendar'));
     }

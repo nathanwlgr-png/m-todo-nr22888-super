@@ -9,6 +9,7 @@ import VisitSummary from './pages/VisitSummary';
 import Equipment from './pages/Equipment';
 import Reports from './pages/Reports';
 import Calendar from './pages/Calendar';
+import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "Equipment": Equipment,
     "Reports": Reports,
     "Calendar": Calendar,
+    "GoogleCalendarSettings": GoogleCalendarSettings,
 }
 
 export const pagesConfig = {

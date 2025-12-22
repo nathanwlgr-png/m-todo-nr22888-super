@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar as CalendarIcon, Plus, Clock, MapPin, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Plus, Clock, MapPin, ExternalLink, Settings } from 'lucide-react';
 import { format, parseISO, isFuture, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -72,12 +72,19 @@ export default function Calendar() {
               <p className="text-xs text-slate-500">{upcomingVisits.length} visitas agendadas</p>
             </div>
           </div>
-          <Link to={createPageUrl('Clients')}>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-              <Plus className="w-4 h-4 mr-1" />
-              Nova
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to={createPageUrl('GoogleCalendarSettings')}>
+              <Button size="sm" variant="outline">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('Clients')}>
+              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="w-4 h-4 mr-1" />
+                Nova
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
