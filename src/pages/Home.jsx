@@ -178,6 +178,13 @@ export default function Home() {
             </Button>
           </Link>
         </div>
+
+        <Link to={createPageUrl('Equipment')}>
+          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
+            <Target className="w-4 h-4 mr-2" />
+            Equipamentos
+          </Button>
+        </Link>
       </div>
 
       {/* Recent Clients */}

@@ -5,8 +5,9 @@ const strategyByType = {
     strategy: "Demonstração Prática com ROI",
     steps: [
       "Mostre economia vs. terceirização em 12 meses",
-      "Ofereça teste gratuito por 7 dias",
-      "Destaque a fidelização de clientes pela agilidade",
+      "Destaque: 25 meses de garantia + manutenção vitalícia",
+      "Apresente bonificação em insumos do mês",
+      "Destaque fidelização de clientes pela agilidade",
       "Proposta de financiamento acessível"
     ]
   },
@@ -15,8 +16,9 @@ const strategyByType = {
     steps: [
       "Calcule aumento de margem por exame próprio",
       "Apresente casos de crescimento após equipamento",
-      "Mostre redução de custos operacionais",
-      "Ofereça garantia estendida e treinamento"
+      "Destaque: 25 meses de garantia + manutenção vitalícia",
+      "Mostre bonificação em insumos (sem desconto no equipamento)",
+      "Demonstre redução de custos operacionais"
     ]
   },
   hospital_veterinario: {
@@ -24,8 +26,9 @@ const strategyByType = {
     steps: [
       "Apresente ganho em emergências e UTI",
       "Calcule payback baseado no volume atual",
-      "Demonstre integração com sistemas existentes",
-      "Ofereça suporte técnico 24/7"
+      "Garantia de 25 meses + manutenção vitalícia = zero preocupação",
+      "Bonificação em insumos para começar operando",
+      "Demonstre integração com sistemas existentes"
     ]
   },
   laboratorio_terceirizado: {
@@ -33,8 +36,9 @@ const strategyByType = {
     steps: [
       "Mostre aumento de throughput",
       "Demonstre redução de custo por exame",
-      "Apresente novos parâmetros disponíveis",
-      "Ofereça upgrade de equipamentos antigos"
+      "25 meses de garantia + manutenção vitalícia = segurança operacional",
+      "Bonificação em reagentes para teste inicial",
+      "Apresente novos parâmetros disponíveis"
     ]
   },
   clinica_especializada: {
@@ -42,8 +46,9 @@ const strategyByType = {
     steps: [
       "Destaque precisão para casos complexos",
       "Mostre parâmetros específicos disponíveis",
-      "Demonstre agilidade em diagnósticos críticos",
-      "Ofereça consultoria técnica especializada"
+      "Garantia estendida de 25 meses + manutenção vitalícia",
+      "Bonificação em insumos especializados",
+      "Demonstre agilidade em diagnósticos críticos"
     ]
   }
 };
@@ -93,6 +98,15 @@ export default function CommitmentStrategy({ clientType, numerologyNumber }) {
 
   return (
     <div className="space-y-4">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-3">
+        <p className="text-xs text-emerald-700 font-bold mb-1">✓ DIFERENCIAIS</p>
+        <ul className="text-xs text-emerald-800 space-y-1">
+          <li>• 25 meses de garantia (não 12!)</li>
+          <li>• Manutenção vitalícia inclusa</li>
+          <li>• Bonificação em insumos (não damos desconto no equipamento)</li>
+        </ul>
+      </div>
+
       <div>
         <p className="text-xs text-indigo-600 font-medium mb-2 uppercase">Estratégia por Tipo</p>
         <p className="font-semibold text-slate-800 mb-2">{typeStrategy.strategy}</p>
