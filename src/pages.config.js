@@ -32,6 +32,7 @@ import LeadProfile from './pages/LeadProfile';
 import LeadsDashboard from './pages/LeadsDashboard';
 import AutomationRules from './pages/AutomationRules';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import MyProfile from './pages/MyProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -70,6 +71,7 @@ export const PAGES = {
     "LeadsDashboard": LeadsDashboard,
     "AutomationRules": AutomationRules,
     "WhatsAppInbox": WhatsAppInbox,
+    "MyProfile": MyProfile,
 }
 
 export const pagesConfig = {

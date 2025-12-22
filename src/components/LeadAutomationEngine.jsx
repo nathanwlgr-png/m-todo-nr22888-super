@@ -151,8 +151,30 @@ export default function LeadAutomationEngine() {
     }
 
     if (rule.action_type === 'send_whatsapp' && entity.phone) {
-      const message = rule.action_config?.whatsapp_message || 
+      let message = rule.action_config?.whatsapp_message || 
         `Olá ${entity.full_name || entity.first_name}, tudo bem?`;
+      
+      // Se o vendedor tem personalidade configurada, personalizar a mensagem
+      if (currentUser && rule.action_config?.personalize_with_ai) {
+        const personalityPrompt = currentUser.communication_style || currentUser.personality_traits?.length > 0
+          ? `Reescreva esta mensagem no estilo de ${currentUser.full_name}:
+Estilo: ${currentUser.communication_style || 'profissional'}
+Características: ${currentUser.personality_traits?.join(', ') || 'empático'}
+
+Mensagem original: ${message}
+
+Reescreva mantendo a essência mas usando o estilo pessoal do vendedor. Seja breve (2-3 linhas).`
+          : message;
+        
+        try {
+          const personalizedMessage = await base44.integrations.Core.InvokeLLM({
+            prompt: personalityPrompt
+          });
+          message = personalizedMessage;
+        } catch (error) {
+          // Se falhar, usa mensagem original
+        }
+      }
       
       // Enviar via WhatsApp
       await base44.entities.WhatsAppMessage.create({

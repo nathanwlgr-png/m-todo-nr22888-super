@@ -68,6 +68,13 @@ export default function Home() {
             <h1 className="text-xl font-bold text-white">Método NR</h1>
             <p className="text-orange-300 text-sm font-medium">Sistema de Vendas Inteligente</p>
           </div>
+          <Link to={createPageUrl('MyProfile')}>
+            <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
+              <svg className="w-5 h-5 text-orange-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+          </Link>
           <Link to={createPageUrl('GlobalSearch')}>
             <button className="w-10 h-10 rounded-xl glass hover:bg-white/10 transition-all">
               <Search className="w-5 h-5 text-orange-400 mx-auto" />

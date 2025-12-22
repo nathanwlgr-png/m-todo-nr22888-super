@@ -79,13 +79,27 @@ export default function QuickWhatsAppSend({ contactId, contactName, contactPhone
   const generateWithAI = async () => {
     setGeneratingAI(true);
     try {
+      const personalityContext = currentUser.communication_style || currentUser.personality_traits?.length > 0
+        ? `
+PERSONALIDADE DO VENDEDOR (${currentUser.full_name}):
+- Estilo: ${currentUser.communication_style || 'Profissional e consultivo'}
+- Características: ${currentUser.personality_traits?.join(', ') || 'empático, direto'}
+- Abordagem: ${currentUser.sales_approach || 'Foco em relacionamento e entendimento das dores'}
+${currentUser.signature_phrases?.length > 0 ? `- Frases típicas: ${currentUser.signature_phrases.slice(0, 2).join(', ')}` : ''}
+
+IMPORTANTE: Escreva EXATAMENTE como ${currentUser.full_name} escreveria, usando o estilo dele.`
+        : '';
+
       const aiMessage = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é um assistente de vendas. Crie uma mensagem WhatsApp CURTA e AMIGÁVEL para ${contactName}.
+        prompt: `Você é ${currentUser.full_name}, vendedor de equipamentos de diagnóstico veterinário POCT.
 
-Contexto: Vendemos equipamentos de diagnóstico veterinário POCT.
+${personalityContext}
 
-Escreva uma mensagem de follow-up profissional mas descontraída, em português brasileiro.
-Máximo 2-3 linhas. Sem emojis excessivos.`
+Crie uma mensagem WhatsApp CURTA para ${contactName}.
+- Máximo 2-3 linhas
+- Use SEU estilo pessoal de comunicação
+- Seja autêntico, como você realmente fala
+- Em português brasileiro`
       });
       setMessage(aiMessage);
     } catch (error) {

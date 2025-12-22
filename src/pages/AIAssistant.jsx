@@ -101,8 +101,26 @@ export default function AIAssistant() {
     }
   }, [client]);
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me()
+  });
+
   const getSystemContext = (isRolePlay = false) => {
     if (!client) return '';
+    
+    const vendorPersonality = currentUser && (currentUser.communication_style || currentUser.personality_traits?.length > 0)
+      ? `
+PERSONALIDADE DO VENDEDOR (você):
+- Nome: ${currentUser.full_name}
+- Estilo: ${currentUser.communication_style || 'Profissional'}
+- Características: ${currentUser.personality_traits?.join(', ') || 'empático, consultivo'}
+- Abordagem: ${currentUser.sales_approach || 'Consultiva'}
+${currentUser.signature_phrases?.length > 0 ? `- Frases típicas: ${currentUser.signature_phrases.join(', ')}` : ''}
+
+IMPORTANTE: Todas as sugestões devem refletir o estilo pessoal de ${currentUser.full_name}.
+      `
+      : '';
     
     const interactionHistory = `
 HISTÓRICO DE INTERAÇÕES:
@@ -149,6 +167,8 @@ Comece a simulação reagindo ao que o vendedor disser.
     }
     
     return `
+      ${vendorPersonality}
+
       FRAMEWORKS ESTRATÉGICOS:
       Você tem acesso a:
       1. A Arte da Guerra (Sun Tzu): Estratégia, timing, conhecer o inimigo
