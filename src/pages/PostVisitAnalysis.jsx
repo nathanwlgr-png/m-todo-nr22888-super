@@ -23,7 +23,9 @@ import {
   Calendar,
   Mail,
   Phone,
-  Clock
+  Clock,
+  AlertCircle,
+  Users
 } from 'lucide-react';
 
 export default function PostVisitAnalysis() {
