@@ -23,6 +23,7 @@ import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
 import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
 import GamificationWidget from '@/components/GamificationWidget';
 import AutoTaskGenerator from '@/components/AutoTaskGenerator';
+import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
 
 export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
@@ -174,6 +175,11 @@ export default function Home() {
           </h3>
           <ClientsMap clients={clients} />
         </Card>
+      </div>
+
+      {/* Personal Goals Widget */}
+      <div className="px-6 mt-6">
+        <PersonalGoalsWidget />
       </div>
 
       {/* Gamification Widget */}
