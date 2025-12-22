@@ -570,39 +570,33 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
-        {/* Score */}
+        {/* Score de Compra */}
         <Card className="p-5 bg-white shadow-md border-none">
           <ScoreBar score={client.purchase_score || 50} />
         </Card>
 
-        {/* Numerology Profile */}
-        <div onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}>
-          <NumerologyCard number={client.numerology_number || 1} />
-        </div>
-        {client.life_path_number && (
+        {/* Perfil Numerológico - Apenas se relevante */}
+        {client.numerology_tip && (
           <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-indigo-600 font-medium mb-1">Caminho de Vida</p>
-                <p className="text-2xl font-bold text-indigo-700">{client.life_path_number}</p>
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-indigo-600 mb-1">Dica Estratégica</p>
+                <p className="text-sm text-slate-700">{client.numerology_tip}</p>
+                {(client.numerology_number || client.life_path_number) && (
+                  <Button
+                    onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
+                    variant="link"
+                    size="sm"
+                    className="text-indigo-600 px-0 mt-2"
+                  >
+                    Ver Análise Completa →
+                  </Button>
+                )}
               </div>
-              <Button
-                onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
-                variant="outline"
-                size="sm"
-                className="border-indigo-300 text-indigo-600"
-              >
-                Ver Análise Completa
-              </Button>
             </div>
           </Card>
         )}
-
-        {/* Equipment Manager */}
-        <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
-
-        {/* Consumable Analytics */}
-        <ClientConsumableAnalytics clientId={client.id} clientName={client.first_name} />
 
         {/* Pipeline AI Assistant */}
         <PipelineAIAssistant 
