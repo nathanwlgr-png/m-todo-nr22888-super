@@ -30,6 +30,7 @@ import {
 import ChecklistItem from '@/components/ChecklistItem';
 import PersuasionPhrases from '@/components/PersuasionPhrases';
 import NumerologyCard from '@/components/NumerologyCard';
+import ObjectionsCard from '@/components/ObjectionsCard';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -324,25 +325,19 @@ export default function PreVisitChecklist() {
               <Shield className="w-5 h-5 text-slate-600" />
               <h3 className="font-semibold text-slate-700">Objeções Prováveis</h3>
             </div>
-            {checklist.objections && <Check className="w-4 h-4 text-emerald-500" />}
-          </div>
-          {generatedContent.objections ? (
-            <div className="space-y-2">
-              {generatedContent.objections.map((o, i) => (
-                <div key={i} className="p-3 bg-red-50 rounded-xl text-sm text-slate-700">
-                  {o}
-                </div>
-              ))}
-            </div>
-          ) : (
             <Button
-              onClick={handleGenerateObjections}
-              disabled={loadingContent.objections}
-              variant="outline"
-              className="w-full"
+              size="sm"
+              variant="ghost"
+              onClick={() => setChecklist(prev => ({ ...prev, objections: !prev.objections }))}
             >
-              {loadingContent.objections ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Antecipar Objeções'}
+              {checklist.objections ? <Check className="w-4 h-4 text-emerald-500" /> : 'Ver'}
             </Button>
+          </div>
+          {checklist.objections && (
+            <ObjectionsCard 
+              clientType={client?.client_type} 
+              decisionRole={client?.decision_role} 
+            />
           )}
         </Card>
 
