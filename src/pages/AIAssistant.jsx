@@ -125,8 +125,17 @@ export default function AIAssistant() {
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
         Seja específico e profissional.`,
       objection: `Sugira técnicas de vendas para controlar objeções e ter autoridade com ${client?.first_name}.
-        Tipo: ${client?.client_type}, Perfil: ${client?.behavioral_profile}.
-        Inclua: 1) Técnica específica, 2) Como aplicar com autoridade, 3) Frase exemplo.
+        
+        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
+        Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
+        Tom de voz observado: ${client?.client_tone || 'ainda não identificado'}
+        
+        Baseado na Numerologia Pitagórica e perfil comportamental, forneça:
+        1) Técnica de controle de objeção específica para esse número
+        2) Tom e estilo de comunicação ideal (assertivo, consultivo, empático, técnico)
+        3) Frase exemplo aplicando autoridade
+        4) Como adaptar ao tom de voz do cliente
+        
         Seja direto e prático.`,
       closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
         Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
