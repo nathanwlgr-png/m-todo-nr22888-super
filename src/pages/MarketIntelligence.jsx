@@ -470,7 +470,6 @@ Retorne lista priorizada de oportunidades.`,
                   </div>
                 </>
               )}
-            </div>
 
               <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg">
                 <h4 className="font-semibold text-indigo-800 mb-3">O que vamos descobrir:</h4>
@@ -758,22 +757,17 @@ Retorne lista priorizada de oportunidades.`,
                       </div>
                     </div>
                   ))}
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <p className="text-sm text-green-700 font-semibold">
-                      ✅ Essas clínicas foram cadastradas automaticamente no sistema!
-                    </p>
                   </div>
-                </div>
-              ) : (
-                <p className="text-sm text-green-600">Nenhuma oportunidade de alta prioridade identificada</p>
-                )}
+                  ) : (
+                  <p className="text-sm text-green-600">Nenhuma oportunidade de alta prioridade identificada</p>
+                  )}
 
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-700">
-                💡 <strong>Dica:</strong> Use estas oportunidades para planejar suas visitas e abordagens de vendas.
-                </p>
-                </div>
-                </Card>
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    💡 <strong>Dica:</strong> Use estas oportunidades para planejar suas visitas e abordagens de vendas.
+                  </p>
+                  </div>
+                  </Card>
 
                 {/* Oportunidades de Média Prioridade */}
             {results.opportunities.medium_priority && results.opportunities.medium_priority.length > 0 && (
