@@ -22,13 +22,17 @@ export default function DocumentMonitorAI() {
   const { data: documents = [] } = useQuery({
     queryKey: ['all-documents'],
     queryFn: () => base44.entities.ClientDocument.list('-created_date', 100),
-    refetchInterval: monitoring ? 30000 : false, // Check every 30s when monitoring
-    staleTime: 20000
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000
   });
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 200)
+    queryFn: () => base44.entities.Client.list('-updated_date', 200),
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: 10 * 60 * 1000
   });
 
   const updateDocumentMutation = useMutation({
@@ -46,22 +50,11 @@ export default function DocumentMonitorAI() {
 
       for (const doc of unanalyzedDocs) {
         try {
-          // Análise otimizada e focada
-          const analysis = await base44.integrations.Core.InvokeLLM({
-            prompt: `Documento: ${doc.title} (${doc.type}) - Cliente: ${doc.client_name}
+          // Análise manual (não automática para evitar rate limit)
+          const analysis = `Documento: ${doc.title}\nTipo: ${doc.type}\nCliente: ${doc.client_name}\nData: ${new Date(doc.created_date).toLocaleDateString('pt-BR')}`;
 
-Análise RÁPIDA:
-1. Valor(s) mencionado(s): [extraia R$]
-2. Data(s) importante(s): [extraia datas]
-3. Equipamento(s): [liste]
-4. Status: [pendente/assinado/cancelado]
-
-Seja BREVE e DIRETO.`,
-            add_context_from_internet: false
-          });
-
-          // Update document with analysis
-          const notes = `🤖 Análise IA:\n${analysis}\n\n[Analisado em ${new Date().toLocaleString('pt-BR')}]`;
+          // Update document with basic info (sem chamada IA)
+          const notes = `📄 Documento registrado:\n${analysis}\n\n[Registrado em ${new Date().toLocaleString('pt-BR')}]`;
           
           await updateDocumentMutation.mutateAsync({
             id: doc.id,
