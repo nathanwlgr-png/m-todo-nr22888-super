@@ -66,8 +66,9 @@ import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
 import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
 import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
-import NetworkModeToggle from '@/components/NetworkModeToggle';
-import DataUsageMonitor from '@/components/DataUsageMonitor';
+import FloatingTokenCounter from '@/components/FloatingTokenCounter';
+import FloatingUploadButton from '@/components/FloatingUploadButton';
+import CompletePDFManual from '@/components/CompletePDFManual';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -135,16 +136,9 @@ export default function Home() {
       {/* Auto Task Generator - Background Process */}
       <AutoTaskGenerator />
 
-      {/* Voice Command System + Upload */}
+      {/* Voice Command System */}
       <div className="px-6 mt-4">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <VoiceCommandSystem />
-          </div>
-          <div className="relative">
-            <UniversalFileUploader />
-          </div>
-        </div>
+        <VoiceCommandSystem />
       </div>
 
       {/* Rate Limit Warning */}
@@ -317,6 +311,7 @@ export default function Home() {
       {/* CRM + Gestão IA Unificado */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 gap-3">
+          <CompletePDFManual />
           <CRMExternalSync />
           <AITaskManager />
           <PersonalizedContentGenerator />
@@ -355,13 +350,9 @@ export default function Home() {
       {/* Botão Flutuante Material Técnico */}
       <FloatingTechnicalMaterial />
 
-      {/* Controle de Modo de Rede e Performance */}
-      <NetworkModeToggle />
-
-      {/* Monitor de Dados */}
-      <div className="fixed bottom-20 right-4 z-40 w-64">
-        <DataUsageMonitor />
-      </div>
+      {/* Floating Buttons - Draggable */}
+      <FloatingTokenCounter />
+      <FloatingUploadButton />
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">
