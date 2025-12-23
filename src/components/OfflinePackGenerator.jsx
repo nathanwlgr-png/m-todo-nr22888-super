@@ -176,7 +176,7 @@ ${i + 1}. ${c.first_name} - ${c.clinic_name || 'N/A'}
 8. Desidratação severa
 
 ✅ *VANTAGENS:*
-• Diagnóstico em 2-5 minutos
+• Diagnóstico em 4 minutos
 • Previne mortalidade (exaustão, IR)
 • Otimiza performance atlética
 • Diferencial competitivo

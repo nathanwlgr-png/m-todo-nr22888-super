@@ -37,7 +37,7 @@ export default function HemogasEquineGuide() {
             Em equinos atletas, é essencial para monitorar performance, detectar fadiga precoce e otimizar treinamento.
           </p>
           <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm font-semibold text-blue-800">⚡ Análise em tempo real (2-5 minutos)</p>
+            <p className="text-sm font-semibold text-blue-800">⚡ Análise em tempo real (4 minutos)</p>
           </div>
         </Card>
 
