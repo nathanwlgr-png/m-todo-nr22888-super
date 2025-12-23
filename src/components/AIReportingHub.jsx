@@ -32,35 +32,48 @@ export default function AIReportingHub() {
     queryKey: ['clients'],
     queryFn: async () => {
       try {
-        const data = await base44.entities.Client.list();
+        const data = await base44.entities.Client.list('-updated_date', 100);
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
+        // Silenciar erros de clientes não encontrados
+        if (error.message?.includes('not found')) {
+          console.warn('Cliente deletado referenciado, ignorando');
+        } else {
+          console.error('Erro ao carregar clientes:', error);
+        }
         return [];
       }
     },
+    retry: 1,
+    retryDelay: 500,
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
     queryFn: async () => {
       try {
-        return await base44.entities.Sale.list();
+        const data = await base44.entities.Sale.list();
+        return data.filter(s => s && s.id);
       } catch (error) {
+        console.warn('Erro ao carregar vendas:', error);
         return [];
       }
     },
+    retry: 1,
   });
 
   const { data: visits = [] } = useQuery({
     queryKey: ['all-visits'],
     queryFn: async () => {
       try {
-        return await base44.entities.Visit.list();
+        const data = await base44.entities.Visit.list();
+        return data.filter(v => v && v.id);
       } catch (error) {
+        console.warn('Erro ao carregar visitas:', error);
         return [];
       }
     },
+    retry: 1,
   });
 
   // Gerar relatório customizado via linguagem natural

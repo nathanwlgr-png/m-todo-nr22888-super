@@ -109,11 +109,14 @@ export default function Home() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Client.list('-updated_date', 100);
-        return data.filter(c => c && c.id && c.first_name);
+        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
-        toast.error('Erro de conexão ao carregar dados');
-        throw error;
+        // Não mostrar toast para erros de clientes deletados
+        if (!error.message?.includes('not found')) {
+          toast.error('Erro de conexão ao carregar dados');
+        }
+        return []; // Retorna array vazio em vez de throw
       }
     },
     retry: 2,
