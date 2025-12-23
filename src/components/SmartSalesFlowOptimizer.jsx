@@ -38,22 +38,30 @@ export default function SmartSalesFlowOptimizer() {
         return [];
       }
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false
   });
 
   const { data: interactions = [] } = useQuery({
     queryKey: ['all-interactions'],
     queryFn: () => base44.entities.Interaction.list('-interaction_date', 200),
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    enabled: false // Só carrega quando necessário
   });
 
   const { data: visits = [] } = useQuery({
     queryKey: ['all-visits'],
     queryFn: () => base44.entities.Visit.list('-scheduled_date', 100),
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    enabled: false // Só carrega quando necessário
   });
 
   const analyzeTopClients = async () => {
