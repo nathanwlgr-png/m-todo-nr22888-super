@@ -61,6 +61,7 @@ export default function Clients() {
   const [tableData, setTableData] = useState('');
   const [processing, setProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -242,8 +243,8 @@ export default function Clients() {
   };
 
   const handleImportTable = async () => {
-    if (!tableData.trim() && !uploadedFile) {
-      toast.error('Cole os dados da tabela ou faça upload de um arquivo');
+    if (!tableData.trim() && !uploadedFile && !googleSheetsUrl.trim()) {
+      toast.error('Cole os dados da tabela, link do Google Sheets ou faça upload de um arquivo/imagem');
       return;
     }
 
@@ -260,7 +261,9 @@ export default function Clients() {
       }
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise ${fileUrl ? 'este arquivo Excel/planilha' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
+        prompt: `Analise ${fileUrl ? 'este arquivo/imagem' : googleSheetsUrl ? 'esta planilha do Google Sheets' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
+
+${googleSheetsUrl ? `LINK DO GOOGLE SHEETS: ${googleSheetsUrl}\n\nBusque e extraia TODOS os dados desta planilha do Google.` : ''}
 
 ${!fileUrl ? `DADOS DA TABELA:\n${tableData}` : ''}
 
@@ -280,6 +283,7 @@ Se não houver informação sobre um campo, deixe vazio ou null.
 
 Retorne JSON válido com TODOS os clientes encontrados.`,
         file_urls: fileUrl ? [fileUrl] : undefined,
+        add_context_from_internet: googleSheetsUrl ? true : false,
         response_json_schema: {
           type: "object",
           properties: {
@@ -346,6 +350,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
         setShowImportDialog(false);
         setTableData('');
         setUploadedFile(null);
+        setGoogleSheetsUrl('');
       } else {
         toast.warning('Nenhum cliente foi cadastrado');
       }
@@ -757,12 +762,37 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Opção 1: Upload de Arquivo Excel/CSV
+                  Opção 1: Link do Google Sheets
+                </label>
+                <Input
+                  placeholder="Cole o link da planilha do Google aqui..."
+                  value={googleSheetsUrl}
+                  onChange={(e) => setGoogleSheetsUrl(e.target.value)}
+                  className="h-12"
+                  disabled={!!uploadedFile || !!tableData.trim()}
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Ex: https://docs.google.com/spreadsheets/d/1abc.../edit
+                </p>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-slate-500">OU</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Opção 2: Upload de Imagem ou Arquivo
                 </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
                   <input
                     type="file"
-                    accept=".xlsx,.xls,.csv"
+                    accept=".xlsx,.xls,.csv,.jpg,.jpeg,.png,.pdf"
                     onChange={handleFileUpload}
                     className="hidden"
                     id="file-upload"
@@ -773,11 +803,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                       {uploadedFile ? (
                         <span className="text-green-600 font-medium">✓ {uploadedFile.name}</span>
                       ) : (
-                        <>Clique para fazer upload da planilha</>
+                        <>Clique para fazer upload</>
                       )}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Formatos: Excel (.xlsx, .xls) ou CSV
+                      Formatos: Excel, CSV, PDF ou Imagem (JPG, PNG)
                     </p>
                   </label>
                 </div>
@@ -794,7 +824,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Opção 2: Cole os dados da tabela
+                  Opção 3: Cole os dados da tabela
                 </label>
                 <Textarea
                   value={tableData}
@@ -805,7 +835,7 @@ João Silva  | Clínica Vida Animal  | Marília       | 14999999999   | BC-2800
 Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipamento
 ..."
                   className="min-h-[200px] font-mono text-sm"
-                  disabled={!!uploadedFile}
+                  disabled={!!uploadedFile || !!googleSheetsUrl.trim()}
                 />
               </div>
             </div>
@@ -813,7 +843,7 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
             <div className="flex gap-2">
               <Button
                 onClick={handleImportTable}
-                disabled={(!tableData.trim() && !uploadedFile) || processing}
+                disabled={(!tableData.trim() && !uploadedFile && !googleSheetsUrl.trim()) || processing}
                 className="flex-1 bg-orange-600 hover:bg-orange-700"
               >
                 {processing ? (
@@ -834,6 +864,7 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
                   setShowImportDialog(false);
                   setTableData('');
                   setUploadedFile(null);
+                  setGoogleSheetsUrl('');
                 }}
               >
                 Cancelar
