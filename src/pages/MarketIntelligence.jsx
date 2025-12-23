@@ -228,7 +228,7 @@ CLÍNICAS (${allClinics.length} no total):
 ${JSON.stringify(allClinics, null, 2)}
 
 Para cada clínica, pesquise e identifique:
-1. Tem equipamento SEAMAT BRASIL instalado? (sim/não)
+1. Tem equipamento SEAMATY instalado? (sim/não)
 2. CONCORRENTES - Tem equipamento IDEXX instalado? (sim/não)
 3. CONCORRENTES - Tem equipamento ZOETIS instalado? (sim/não)
 4. Tem analisador hematológico (hemograma)? (marca/modelo se possível)
@@ -239,7 +239,7 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
         response_json_schema: {
           type: "object",
           properties: {
-            seamat_count: { type: "number" },
+            seamaty_count: { type: "number" },
             idexx_count: { type: "number" },
             zoetis_count: { type: "number" },
             hemograma_count: { type: "number" },
@@ -247,11 +247,11 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
             statistical_comparison: {
               type: "object",
               properties: {
-                seamat_market_share_percent: { type: "number" },
+                seamaty_market_share_percent: { type: "number" },
                 idexx_market_share_percent: { type: "number" },
                 zoetis_market_share_percent: { type: "number" },
-                seamat_vs_idexx_comparison: { type: "string" },
-                seamat_vs_zoetis_comparison: { type: "string" },
+                seamaty_vs_idexx_comparison: { type: "string" },
+                seamaty_vs_zoetis_comparison: { type: "string" },
                 market_leader: { type: "string" }
               }
             },
@@ -262,7 +262,7 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
                 properties: {
                   clinic_name: { type: "string" },
                   city: { type: "string" },
-                  has_seamat: { type: "boolean" },
+                  has_seamaty: { type: "boolean" },
                   has_idexx: { type: "boolean" },
                   has_zoetis: { type: "boolean" },
                   has_hemograma: { type: "boolean" },
@@ -656,12 +656,12 @@ Retorne lista priorizada de oportunidades.`,
                   <p className="text-3xl font-bold">{results.equipment.hemograma_count}</p>
                 </div>
                 <div className="p-3 bg-green-400/30 rounded-lg">
-                  <p className="text-sm opacity-90">✅ SEAMAT BRASIL</p>
-                  <p className="text-3xl font-bold">{results.equipment.seamat_count}</p>
+                  <p className="text-sm opacity-90">✅ SEAMATY</p>
+                  <p className="text-3xl font-bold">{results.equipment.seamaty_count}</p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-lg">
                   <p className="text-sm opacity-90">🎯 Oportunidades</p>
-                  <p className="text-3xl font-bold">{(results.clinics.classification_summary?.total_clinics || 0) - results.equipment.seamat_count - results.equipment.idexx_count - results.equipment.zoetis_count}</p>
+                  <p className="text-3xl font-bold">{(results.clinics.classification_summary?.total_clinics || 0) - results.equipment.seamaty_count - results.equipment.idexx_count - results.equipment.zoetis_count}</p>
                 </div>
                 <div className="p-3 bg-red-400/30 rounded-lg">
                   <p className="text-sm opacity-90">⚠️ IDEXX</p>
@@ -681,9 +681,9 @@ Retorne lista priorizada de oportunidades.`,
                 
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="p-3 bg-green-100 rounded-lg text-center">
-                    <p className="text-xs text-green-700 mb-1">SEAMAT BRASIL</p>
+                    <p className="text-xs text-green-700 mb-1">SEAMATY</p>
                     <p className="text-3xl font-bold text-green-800">
-                      {results.equipment.statistical_comparison.seamat_market_share_percent}%
+                      {results.equipment.statistical_comparison.seamaty_market_share_percent}%
                     </p>
                     <p className="text-xs text-green-600 mt-1">Market Share</p>
                   </div>
@@ -707,13 +707,13 @@ Retorne lista priorizada de oportunidades.`,
 
                 <div className="space-y-3">
                   <div className="p-3 bg-white rounded-lg border-l-4 border-green-500">
-                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMAT vs IDEXX:</p>
-                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamat_vs_idexx_comparison}</p>
+                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMATY vs IDEXX:</p>
+                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamaty_vs_idexx_comparison}</p>
                   </div>
                   
                   <div className="p-3 bg-white rounded-lg border-l-4 border-green-500">
-                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMAT vs Zoetis:</p>
-                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamat_vs_zoetis_comparison}</p>
+                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMATY vs Zoetis:</p>
+                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamaty_vs_zoetis_comparison}</p>
                   </div>
                   
                   <div className="p-3 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-lg">
@@ -809,9 +809,9 @@ Retorne lista priorizada de oportunidades.`,
                       </span>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      {clinic.has_seamat && (
+                      {clinic.has_seamaty && (
                         <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
-                          SEAMAT BRASIL ✓
+                          SEAMATY ✓
                         </span>
                       )}
                       {clinic.has_idexx && (
@@ -836,7 +836,7 @@ Retorne lista priorizada de oportunidades.`,
                           </span>
                         ))
                       )}
-                      {!clinic.has_seamat && !clinic.has_idexx && !clinic.has_zoetis && !clinic.has_hemograma && (
+                      {!clinic.has_seamaty && !clinic.has_idexx && !clinic.has_zoetis && !clinic.has_hemograma && (
                         <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded">
                           Sem equipamento identificado
                         </span>
