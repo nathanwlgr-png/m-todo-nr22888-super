@@ -16,6 +16,7 @@ import { ArrowLeft, Calendar as CalendarIcon, Sparkles, Loader2, Target, Zap } f
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import CampaignAIGenerator from '@/components/CampaignAIGenerator';
 
 export default function NewCampaign() {
   const navigate = useNavigate();
@@ -224,6 +225,18 @@ Seja criativo, persuasivo e técnico ao mesmo tempo!`,
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
+        {/* AI Strategy Generator */}
+        <CampaignAIGenerator
+          onStrategyGenerated={(aiStrategy) => {
+            setFormData({
+              ...formData,
+              ...aiStrategy
+            });
+            toast.success('Formulário preenchido com estratégia IA!');
+            setStep(1);
+          }}
+        />
+
         {step === 1 && (
           <Card className="p-6 space-y-4">
             <h2 className="font-semibold text-lg flex items-center gap-2">
