@@ -51,30 +51,113 @@ export default function MonthlyVisitPlanner() {
   const generatePlan = async () => {
     setGenerating(true);
     try {
-      const prompt = `Crie um planejamento completo de visitas para JANEIRO DE 2026 considerando:
+      toast.info('🤖 IA 1: Analisando perfis dos clientes...');
+      
+      // IA 1: Análise profunda de cada cliente
+      const clientAnalysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise cada cliente e retorne insights estratégicos:
 
-CLIENTES DISPONÍVEIS:
-${targetClients.map(c => `- ${c.first_name} (${c.clinic_name || 'N/A'}) em ${c.city} - Status: ${c.status} - Score: ${c.purchase_score || 0}%`).join('\n')}
+CLIENTES:
+${targetClients.map(c => `
+- ${c.first_name} (${c.clinic_name || 'N/A'})
+  Cidade: ${c.city}
+  Status: ${c.status}
+  Score: ${c.purchase_score || 0}%
+  Equipamento atual: ${c.current_equipment || 'Nenhum'}
+  Perfil: ${c.behavioral_profile || 'N/A'}
+  Estilo de decisão: ${c.decision_style || 'N/A'}
+`).join('\n')}
 
-ESTRUTURA DO MÊS:
-- Semana 1 (06-10 Jan): 3 dias em Jaú e região
-- Semana 2 (13-17 Jan): 3 dias em Botucatu e região (São Manuel, Denóis Paulista)
-- Semana 3 (20-24 Jan): Região de Marília e Bauru
-- Semana 4 (27-31 Jan): Lençóis Paulista
-
-REGRAS:
-1. Agrupar visitas por proximidade geográfica
-2. Priorizar clientes com status "quente" e score alto
-3. 2-3 visitas por dia
-4. Incluir endereço completo quando disponível
-
-Retorne um planejamento estruturado por semana e dia.`;
-
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
+Para cada cliente, identifique:
+1. Potencial de fechamento (1-10)
+2. Melhor abordagem de vendas
+3. Produtos recomendados
+4. Gatilhos emocionais
+`,
         response_json_schema: {
           type: "object",
           properties: {
+            clients: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  closing_potential: { type: "number" },
+                  approach: { type: "string" },
+                  recommended_products: { type: "string" },
+                  emotional_triggers: { type: "string" },
+                  talking_points: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      toast.info('🤖 IA 2: Otimizando rotas geográficas...');
+
+      // IA 2: Otimização de rotas
+      const routeOptimization = await base44.integrations.Core.InvokeLLM({
+        prompt: `Otimize as rotas considerando:
+
+CLIENTES POR CIDADE:
+${Object.entries(targetClients.reduce((acc, c) => {
+  if (!acc[c.city]) acc[c.city] = [];
+  acc[c.city].push(c);
+  return acc;
+}, {})).map(([city, clients]) => `${city}: ${clients.length} clientes`).join('\n')}
+
+ESTRUTURA:
+- Semana 1: Jaú (3 dias úteis)
+- Semana 2: Botucatu e região (3 dias úteis)
+- Semana 3: Marília e Bauru (5 dias úteis)
+- Semana 4: Lençóis Paulista (5 dias úteis)
+
+Retorne a melhor ordem de visitas por dia para minimizar deslocamento.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            route_strategy: { type: "string" },
+            estimated_km: { type: "number" },
+            fuel_cost_estimate: { type: "number" }
+          }
+        }
+      });
+
+      toast.info('🤖 IA 3: Criando planejamento estratégico...');
+
+      // IA 3: Planejamento final integrado
+      const finalPlan = await base44.integrations.Core.InvokeLLM({
+        prompt: `Crie o planejamento COMPLETO de Janeiro 2026 integrando as análises:
+
+ANÁLISE DE CLIENTES:
+${JSON.stringify(clientAnalysis.clients, null, 2)}
+
+OTIMIZAÇÃO DE ROTAS:
+${JSON.stringify(routeOptimization, null, 2)}
+
+CLIENTES DISPONÍVEIS:
+${targetClients.map(c => `- ${c.first_name} (${c.clinic_name || 'N/A'}) em ${c.city} - Status: ${c.status} - Score: ${c.purchase_score || 0}% - Endereço: ${c.address || 'N/A'}`).join('\n')}
+
+CALENDÁRIO:
+- Semana 1: 06-10 Jan (Seg-Sex) - Jaú
+- Semana 2: 13-17 Jan (Seg-Sex) - Botucatu e São Manuel
+- Semana 3: 20-24 Jan (Seg-Sex) - Marília e Bauru
+- Semana 4: 27-31 Jan (Seg-Sex) - Lençóis Paulista
+
+REGRAS:
+- 2-3 visitas por dia (9h, 14h, 16h)
+- Priorizar alto potencial de fechamento
+- Agrupar por proximidade
+- Incluir script de abordagem para cada visita
+
+Retorne planejamento detalhado com TODAS as visitas possíveis.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            summary: { type: "string" },
+            total_visits: { type: "number" },
             weeks: {
               type: "array",
               items: {
@@ -83,6 +166,7 @@ Retorne um planejamento estruturado por semana e dia.`;
                   week_number: { type: "number" },
                   region: { type: "string" },
                   dates: { type: "string" },
+                  strategy: { type: "string" },
                   days: {
                     type: "array",
                     items: {
@@ -101,7 +185,10 @@ Retorne um planejamento estruturado por semana e dia.`;
                               city: { type: "string" },
                               address: { type: "string" },
                               priority: { type: "string" },
-                              objective: { type: "string" }
+                              objective: { type: "string" },
+                              approach_script: { type: "string" },
+                              products_to_present: { type: "string" },
+                              closing_probability: { type: "string" }
                             }
                           }
                         }
@@ -115,8 +202,8 @@ Retorne um planejamento estruturado por semana e dia.`;
         }
       });
 
-      setPlan(response);
-      toast.success('Planejamento gerado com sucesso!');
+      setPlan(finalPlan);
+      toast.success(`✅ Planejamento completo! ${finalPlan.total_visits} visitas agendadas`);
     } catch (error) {
       console.error('Erro ao gerar planejamento:', error);
       toast.error('Erro ao gerar planejamento');
@@ -230,10 +317,15 @@ Retorne um planejamento estruturado por semana e dia.`;
                 <Calendar className="w-8 h-8 text-indigo-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2">Gerar Planejamento</h3>
-                <p className="text-sm text-slate-600">
-                  Crie um planejamento completo de visitas para janeiro de 2026
+                <h3 className="font-semibold text-lg mb-2">Planejamento Multi-IA</h3>
+                <p className="text-sm text-slate-600 mb-2">
+                  3 IAs trabalhando em conjunto para criar o melhor planejamento
                 </p>
+                <div className="text-xs text-slate-500 space-y-1">
+                  <p>🤖 IA 1: Análise de perfil e potencial de cada cliente</p>
+                  <p>🤖 IA 2: Otimização de rotas e logística</p>
+                  <p>🤖 IA 3: Estratégia de vendas e scripts personalizados</p>
+                </div>
               </div>
               <Button
                 onClick={generatePlan}
@@ -245,7 +337,7 @@ Retorne um planejamento estruturado por semana e dia.`;
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5 mr-2" />
-                    Gerar com IA
+                    Gerar com 3 IAs
                   </>
                 )}
               </Button>
@@ -253,6 +345,19 @@ Retorne um planejamento estruturado por semana e dia.`;
           </Card>
         ) : (
           <div className="space-y-6">
+            {/* Summary */}
+            {plan.summary && (
+              <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <h3 className="font-semibold text-purple-800 mb-2">📊 Resumo do Planejamento</h3>
+                <p className="text-sm text-purple-700">{plan.summary}</p>
+                {plan.total_visits && (
+                  <p className="text-sm font-bold text-purple-800 mt-2">
+                    Total: {plan.total_visits} visitas programadas
+                  </p>
+                )}
+              </Card>
+            )}
+
             {/* Sync Button */}
             <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50">
               <Button
@@ -272,6 +377,11 @@ Retorne um planejamento estruturado por semana e dia.`;
                     Semana {week.week_number} - {week.region}
                   </h3>
                   <p className="text-sm text-slate-600">{week.dates}</p>
+                  {week.strategy && (
+                    <div className="mt-2 p-2 bg-indigo-50 rounded-lg">
+                      <p className="text-xs text-indigo-700">💡 {week.strategy}</p>
+                    </div>
+                  )}
                   
                   {/* Route Link */}
                   {week.days[0]?.visits?.length > 0 && (
@@ -323,15 +433,31 @@ Retorne um planejamento estruturado por semana e dia.`;
                                 {visit.objective && (
                                   <p className="text-xs text-indigo-600 mt-1">🎯 {visit.objective}</p>
                                 )}
-                                {visit.priority && (
-                                  <span className={`inline-block text-xs px-2 py-0.5 rounded mt-1 ${
-                                    visit.priority === 'alta' ? 'bg-red-100 text-red-700' :
-                                    visit.priority === 'média' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-green-100 text-green-700'
-                                  }`}>
-                                    {visit.priority}
-                                  </span>
+                                {visit.approach_script && (
+                                  <div className="mt-2 p-2 bg-purple-50 rounded border border-purple-200">
+                                    <p className="text-xs font-semibold text-purple-700 mb-1">📝 Script de Abordagem:</p>
+                                    <p className="text-xs text-purple-600">{visit.approach_script}</p>
+                                  </div>
                                 )}
+                                {visit.products_to_present && (
+                                  <p className="text-xs text-green-600 mt-1">💼 {visit.products_to_present}</p>
+                                )}
+                                <div className="flex items-center gap-2 mt-1">
+                                  {visit.priority && (
+                                    <span className={`inline-block text-xs px-2 py-0.5 rounded ${
+                                      visit.priority === 'alta' ? 'bg-red-100 text-red-700' :
+                                      visit.priority === 'média' ? 'bg-yellow-100 text-yellow-700' :
+                                      'bg-green-100 text-green-700'
+                                    }`}>
+                                      {visit.priority}
+                                    </span>
+                                  )}
+                                  {visit.closing_probability && (
+                                    <span className="inline-block text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                                      🎲 {visit.closing_probability}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                               <a
                                 href={getGoogleMapsLink(visit)}
