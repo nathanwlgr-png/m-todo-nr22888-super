@@ -40,14 +40,15 @@ export default function AdvancedSalesIntelligence() {
       const hotClients = clients.filter(c => c.status === 'quente' || c.purchase_score > 60);
       
       for (const client of hotClients.slice(0, 10)) {
-        const clientInteractions = interactions.filter(i => i.client_id === client.id);
-        const similarClients = clients.filter(c => 
-          c.client_type === client.client_type && 
-          c.id !== client.id
-        );
-        const similarSales = sales.filter(s => 
-          similarClients.some(sc => sc.id === s.client_id)
-        );
+        try {
+          const clientInteractions = interactions.filter(i => i.client_id === client.id);
+          const similarClients = clients.filter(c => 
+            c.client_type === client.client_type && 
+            c.id !== client.id
+          );
+          const similarSales = sales.filter(s => 
+            similarClients.some(sc => sc.id === s.client_id)
+          );
 
         const analysis = await base44.integrations.Core.InvokeLLM({
           prompt: `Você é um especialista em inteligência de vendas B2B com IA avançada.
@@ -111,15 +112,19 @@ Objeções: ${client.real_objections?.join(', ') || 'N/A'}
           }
         });
 
-        await updateClientMutation.mutateAsync({
-          id: client.id,
-          data: {
-            ai_sales_intelligence: {
-              ...analysis,
-              last_ai_analysis: new Date().toISOString()
+          await updateClientMutation.mutateAsync({
+            id: client.id,
+            data: {
+              ai_sales_intelligence: {
+                ...analysis,
+                last_ai_analysis: new Date().toISOString()
+              }
             }
-          }
-        });
+          });
+        } catch (error) {
+          console.error(`Erro ao analisar cliente ${client.first_name}:`, error);
+          continue;
+        }
       }
 
       toast.success(`✅ Análise IA completa em ${hotClients.slice(0, 10).length} clientes!`);

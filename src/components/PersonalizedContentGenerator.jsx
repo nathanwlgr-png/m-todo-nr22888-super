@@ -31,6 +31,12 @@ export default function PersonalizedContentGenerator() {
     setGenerating(true);
     try {
       const client = clients.find(c => c.id === selectedClient);
+      if (!client) {
+        toast.error('Cliente não encontrado');
+        setSelectedClient('');
+        setGenerating(false);
+        return;
+      }
       
       const content = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um especialista em vendas consultivas B2B para medicina veterinária.
@@ -117,7 +123,12 @@ APRESENTAÇÃO EXECUTIVA:
 
   const sendWhatsApp = () => {
     const client = clients.find(c => c.id === selectedClient);
-    if (client?.phone) {
+    if (!client) {
+      toast.error('Cliente não encontrado');
+      setSelectedClient('');
+      return;
+    }
+    if (client.phone) {
       window.open(`https://wa.me/${client.phone}?text=${encodeURIComponent(generatedContent.content)}`, '_blank');
     } else {
       toast.error('Cliente sem WhatsApp cadastrado');
