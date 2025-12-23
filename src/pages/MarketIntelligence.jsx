@@ -35,7 +35,7 @@ export default function MarketIntelligence() {
   const [selectedCities, setSelectedCities] = useState([]);
   const [searchMode, setSearchMode] = useState('region'); // 'region' ou 'radius'
   const [customAddress, setCustomAddress] = useState('');
-  const [searchRadius, setSearchRadius] = useState(50); // km
+  const [searchRadius, setSearchRadius] = useState(30); // km
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
 
@@ -75,10 +75,18 @@ export default function MarketIntelligence() {
 
       let searchPrompt = '';
       if (searchMode === 'radius') {
-        searchPrompt = `Busque TODAS as cidades veterinárias em um raio de ${searchRadius}km do endereço: ${customAddress}.
-        
-1. Identifique as cidades dentro do raio especificado
-2. Para cada cidade encontrada, busque dados do IBGE 2024`;
+        searchPrompt = `Você é um especialista em análise geográfica veterinária. Sua missão:
+
+**ENDEREÇO BASE:** ${customAddress}
+**RAIO DE BUSCA:** ${searchRadius}km
+
+ETAPAS OBRIGATÓRIAS:
+1. Identifique a latitude e longitude EXATA do endereço base
+2. Calcule TODAS as cidades dentro do raio de ${searchRadius}km usando distância geodésica
+3. Liste cada cidade encontrada com sua distância exata do ponto central
+4. Para cada cidade, busque dados do IBGE 2024
+
+IMPORTANTE: Seja PRECISO na identificação geográfica. Use cálculo de distância real entre coordenadas.`;
       } else {
         searchPrompt = `Busque dados EXATOS do IBGE 2024 para estas cidades: ${citiesToAnalyze.join(', ')}`;
       }
@@ -103,12 +111,23 @@ NÃO PULE NENHUMA CIDADE. Se não encontrar dados, indique como "não disponíve
         response_json_schema: {
           type: "object",
           properties: {
+            center_coordinates: {
+              type: "object",
+              properties: {
+                latitude: { type: "number" },
+                longitude: { type: "number" },
+                address: { type: "string" }
+              }
+            },
             cities_complete_data: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
                   city: { type: "string" },
+                  distance_km: { type: "number" },
+                  latitude: { type: "number" },
+                  longitude: { type: "number" },
                   population: { type: "number" },
                   veterinary_establishments_ibge: { type: "number" },
                   expected_clinics_by_population: { type: "number" },
@@ -135,14 +154,33 @@ NÃO PULE NENHUMA CIDADE. Se não encontrar dados, indique como "não disponíve
       
       const discoveredCities = demographicData.cities_complete_data?.map(c => c.city) || citiesToAnalyze;
       
-      // IA 2: BUSCA COMPLETA DE CLÍNICAS - CIDADE POR CIDADE
-      const clinicsSearch = await base44.integrations.Core.InvokeLLM({
-        prompt: `Faça uma busca EXAUSTIVA e COMPLETA de clínicas veterinárias em TODAS estas cidades: ${discoveredCities.join(', ')}.
+      // IA 2: BUSCA COMPLETA DE CLÍNICAS - CIDADE POR CIDADE OU POR RAIO
+      let clinicSearchPrompt = '';
+      if (searchMode === 'radius' && demographicData.center_coordinates) {
+        clinicSearchPrompt = `Você é um especialista em mapeamento veterinário. Sua missão:
+
+**BUSCA POR RAIO GEOGRÁFICO:**
+- Centro: ${customAddress} (${demographicData.center_coordinates.latitude}, ${demographicData.center_coordinates.longitude})
+- Raio: ${searchRadius}km
+
+ETAPAS OBRIGATÓRIAS:
+1. Busque TODAS as clínicas veterinárias dentro do raio de ${searchRadius}km do ponto central
+2. Para cada clínica, calcule a distância EXATA do centro em km
+3. Inclua OBRIGATORIAMENTE as coordenadas (latitude, longitude) de cada clínica
+4. Liste endereço completo, telefone, email se disponível
+5. Classifique cada clínica`;
+      } else {
+        clinicSearchPrompt = `Faça uma busca EXAUSTIVA e COMPLETA de clínicas veterinárias em TODAS estas cidades: ${discoveredCities.join(', ')}.
 
 PARA CADA CIDADE:
 1. Busque no Google Maps, Google Business, redes sociais, diretórios veterinários
 2. Liste TODAS as clínicas encontradas (nome, endereço, telefone, email)
-3. Classifique cada clínica:
+3. INCLUA as coordenadas geográficas (latitude, longitude) de cada clínica
+4. Classifique cada clínica`;
+      }
+
+      const clinicsSearch = await base44.integrations.Core.InvokeLLM({
+        prompt: `${clinicSearchPrompt}:
    - "clinica_pequena": até 2 veterinários, atendimento básico
    - "clinica_media": 3-10 veterinários, atendimentos gerais
    - "hospital_veterinario": 10+ veterinários, especialidades, internação
@@ -170,6 +208,9 @@ Compare o número de clínicas encontradas com os dados do IBGE. Se encontrar me
                       properties: {
                         name: { type: "string" },
                         address: { type: "string" },
+                        latitude: { type: "number" },
+                        longitude: { type: "number" },
+                        distance_from_center_km: { type: "number" },
                         phone: { type: "string" },
                         email: { type: "string" },
                         classification: { type: "string" },
@@ -199,6 +240,9 @@ Compare o número de clínicas encontradas com os dados do IBGE. Se encontrar me
                   name: { type: "string" },
                   address: { type: "string" },
                   city: { type: "string" },
+                  latitude: { type: "number" },
+                  longitude: { type: "number" },
+                  distance_from_center_km: { type: "number" },
                   phone: { type: "string" },
                   email: { type: "string" },
                   classification: { 
@@ -327,6 +371,9 @@ Retorne lista priorizada de oportunidades.`,
 
       setResults({
         region: searchMode === 'region' ? `Cidades Selecionadas (${citiesToAnalyze.length})` : `Raio ${searchRadius}km de ${customAddress}`,
+        searchMode,
+        searchRadius,
+        centerCoordinates: demographicData.center_coordinates,
         demographicData,
         clinics: clinicsSearch,
         equipment: equipmentAnalysis,
@@ -477,7 +524,7 @@ Retorne lista priorizada de oportunidades.`,
                   <p>📊 <strong>Etapa 1:</strong> Dados demográficos do IBGE de TODAS as cidades</p>
                   <p>📊 <strong>Média:</strong> 1 clínica a cada 5.000 habitantes</p>
                   <p>🏥 <strong>Etapa 2:</strong> Busca completa cidade por cidade</p>
-                  <p>✅ <strong>Etapa 3:</strong> Identificação de SEAMAT BRASIL</p>
+                  <p>✅ <strong>Etapa 3:</strong> Identificação de SEAMATY</p>
                   <p>⚠️ <strong>Concorrentes:</strong> IDEXX e Zoetis com market share</p>
                   <p>🎯 <strong>Etapa 4:</strong> Oportunidades prioritárias</p>
                 </div>
@@ -514,9 +561,20 @@ Retorne lista priorizada de oportunidades.`,
             {results.demographicData && (
               <>
                 <Card className="p-5 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-                  <h3 className="font-bold text-xl mb-4">📊 Análise Demográfica Completa - {results.region}</h3>
-                  
-                  <div className="grid grid-cols-2 gap-3 mb-4">
+                 <h3 className="font-bold text-xl mb-4">📊 Análise Demográfica Completa - {results.region}</h3>
+
+                 {results.searchMode === 'radius' && results.centerCoordinates && (
+                   <div className="mb-4 p-3 bg-white/10 rounded-lg">
+                     <p className="text-sm font-semibold mb-1">📍 Centro da Busca:</p>
+                     <p className="text-xs opacity-90">{results.centerCoordinates.address}</p>
+                     <p className="text-xs opacity-75">
+                       Lat: {results.centerCoordinates.latitude.toFixed(6)}, Lng: {results.centerCoordinates.longitude.toFixed(6)}
+                     </p>
+                     <p className="text-xs opacity-75 mt-1">Raio: {results.searchRadius}km</p>
+                   </div>
+                 )}
+
+                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-3 bg-white/20 rounded-lg">
                       <p className="text-xs opacity-90">População Total</p>
                       <p className="text-2xl font-bold">{results.demographicData.region_summary.total_population?.toLocaleString()}</p>
@@ -552,6 +610,7 @@ Retorne lista priorizada de oportunidades.`,
                           <div>
                             <p>👥 População: {city.population?.toLocaleString()}</p>
                             <p>🏥 IBGE: {city.veterinary_establishments} clínicas</p>
+                            {city.distance_km && <p>📍 Distância: {city.distance_km.toFixed(1)}km</p>}
                           </div>
                           <div>
                             <p>📊 Esperado: {city.expected_clinics_by_population} clínicas</p>
@@ -592,6 +651,9 @@ Retorne lista priorizada de oportunidades.`,
                                   <div className="flex-1">
                                     <p className="font-medium text-slate-800">{clinic.name}</p>
                                     <p className="text-slate-500">{clinic.address}</p>
+                                    {clinic.distance_from_center_km && (
+                                      <p className="text-blue-600">📍 {clinic.distance_from_center_km.toFixed(1)}km do centro</p>
+                                    )}
                                     {clinic.phone && <p className="text-green-600">{clinic.phone}</p>}
                                   </div>
                                   <span className={`text-xs px-2 py-0.5 rounded ${classInfo.color} ml-2`}>
