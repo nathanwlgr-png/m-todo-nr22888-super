@@ -43,6 +43,9 @@ import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
 import CRMExternalSync from '@/components/CRMExternalSync';
+import VoiceCommandSystem from '@/components/VoiceCommandSystem';
+import AIConfigCenter from '@/components/AIConfigCenter';
+import AdvancedAIHub from '@/components/AdvancedAIHub';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -109,6 +112,11 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Auto Task Generator - Background Process */}
       <AutoTaskGenerator />
+
+      {/* Voice Command System */}
+      <div className="px-6 mt-4">
+        <VoiceCommandSystem />
+      </div>
       
       {/* Header */}
       <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 pt-6 pb-12 rounded-b-[2.5rem] overflow-hidden tech-grid">
@@ -285,6 +293,17 @@ export default function Home() {
       {/* Integrador CRM Externo */}
       <div className="px-6 mt-6">
         <CRMExternalSync />
+      </div>
+
+      {/* Central de Configuração IA */}
+      <div className="px-6 mt-6">
+        <AIConfigCenter />
+      </div>
+
+      {/* Hub de IAs Avançadas */}
+      <div className="px-6 mt-6">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🤖 Hub de IAs Ativas</h3>
+        <AdvancedAIHub />
       </div>
 
       {/* Lab Brand Competitor Analysis */}

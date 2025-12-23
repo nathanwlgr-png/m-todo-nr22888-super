@@ -108,6 +108,7 @@ export default function AutoTaskGenerator() {
   useEffect(() => {
     if (clients.length === 0) return;
 
+    // Executar análise a cada 10 minutos
     const checkBehaviors = async () => {
       const today = new Date();
       const threeDaysAgo = new Date(today);
@@ -274,6 +275,10 @@ Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de ma
     };
 
     checkBehaviors();
+    
+    // Agendar próxima verificação em 10 minutos
+    const interval = setInterval(checkBehaviors, 600000);
+    return () => clearInterval(interval);
   }, [clients, followupLogs, tasks, interactions, documents]);
 
   return null; // Silent background component
