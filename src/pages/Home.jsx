@@ -80,6 +80,8 @@ export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list('-updated_date', 100),
+    retry: 1,
+    onError: (error) => console.error('Erro ao carregar clientes:', error)
   });
 
   const { data: user } = useQuery({

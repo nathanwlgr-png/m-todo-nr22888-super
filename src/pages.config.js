@@ -1,4 +1,5 @@
 import AIAssistant from './pages/AIAssistant';
+import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
@@ -49,6 +50,7 @@ import OfflineMode from './pages/OfflineMode';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
+import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
 import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
@@ -60,6 +62,7 @@ import SalesAnalytics from './pages/SalesAnalytics';
 import SalesFunnel from './pages/SalesFunnel';
 import ScheduledAgenda from './pages/ScheduledAgenda';
 import SignedContracts from './pages/SignedContracts';
+import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
@@ -67,14 +70,12 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import AdvancedReports from './pages/AdvancedReports';
-import ProposalGenerator from './pages/ProposalGenerator';
-import SystemAudit from './pages/SystemAudit';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
@@ -125,6 +126,7 @@ export const PAGES = {
     "PerformanceDashboard": PerformanceDashboard,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
+    "ProposalGenerator": ProposalGenerator,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
     "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
@@ -136,6 +138,7 @@ export const PAGES = {
     "SalesFunnel": SalesFunnel,
     "ScheduledAgenda": ScheduledAgenda,
     "SignedContracts": SignedContracts,
+    "SystemAudit": SystemAudit,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
@@ -143,9 +146,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "AdvancedReports": AdvancedReports,
-    "ProposalGenerator": ProposalGenerator,
-    "SystemAudit": SystemAudit,
 }
 
 export const pagesConfig = {
