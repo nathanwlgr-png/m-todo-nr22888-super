@@ -201,33 +201,46 @@ export default function SalesOverview() {
         </div>
       </Card>
 
-      {/* Insumos */}
-      <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-300 shadow-lg">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-800">Insumos Vendidos</h3>
-            <p className="text-xs text-slate-600">Receita recorrente</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-white rounded-lg border border-blue-200">
-            <p className="text-xs text-slate-500 mb-1">Total Pedidos</p>
-            <p className="text-2xl font-bold text-blue-700">{analytics.totalConsumables}</p>
-            <p className="text-xs text-slate-500">entregas</p>
+      {/* Cliente Recente: Dr. Fausto */}
+      {clients.some(c => c.first_name?.includes('Fausto')) && (
+        <Card className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
+              <Package className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800">Cliente Recém-Cadastrado</h3>
+              <p className="text-xs text-slate-600">Dr. Fausto - CEDVET Marília</p>
+            </div>
           </div>
 
-          <div className="p-3 bg-white rounded-lg border border-blue-200">
-            <p className="text-xs text-slate-500 mb-1">Receita</p>
-            <p className="text-xl font-bold text-blue-700">
-              R$ {(analytics.consumablesRevenue / 1000).toFixed(0)}k
-            </p>
-          </div>
-        </div>
-      </Card>
+          {clients.filter(c => c.first_name?.includes('Fausto')).map(client => (
+            <div key={client.id} className="space-y-2">
+              <div className="p-3 bg-white rounded-lg border border-purple-200">
+                <p className="font-semibold text-slate-800 mb-1">{client.first_name}</p>
+                <p className="text-sm text-slate-600 mb-2">{client.clinic_name}</p>
+                
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="text-center p-2 bg-purple-50 rounded">
+                    <p className="text-lg font-bold text-purple-700">{client.total_visits_count || 0}</p>
+                    <p className="text-xs text-slate-600">Visitas</p>
+                  </div>
+                  <div className="text-center p-2 bg-orange-50 rounded">
+                    <p className="text-lg font-bold text-orange-700">{client.purchase_score || 0}%</p>
+                    <p className="text-xs text-slate-600">Score</p>
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-600 space-y-1">
+                  <p>🎯 <strong>Interesse:</strong> {client.equipment_interest || 'VG2'}</p>
+                  <p>⚠️ <strong>Objeção:</strong> Descapitalizado pós-reforma</p>
+                  <p>📅 <strong>Próximo:</strong> Follow-up estruturado</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </Card>
+      )}
     </div>
   );
 }
