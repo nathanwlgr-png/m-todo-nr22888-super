@@ -26,7 +26,8 @@ import {
   WifiOff,
   Package,
   AlertCircle,
-  RotateCcw
+  RotateCcw,
+  Download
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -531,6 +532,38 @@ export default function Home() {
 
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
+        {/* Export Data Button */}
+        <Button
+          onClick={() => {
+            const dataToExport = {
+              clientes: clients.map(c => ({
+                nome: c.first_name,
+                cidade: c.city,
+                status: c.status,
+                score: c.purchase_score,
+                email: c.email,
+                telefone: c.phone,
+                clinica: c.clinic_name,
+                equipamento_atual: c.current_equipment
+              })),
+              total: clients.length,
+              data_exportacao: new Date().toLocaleString('pt-BR')
+            };
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clientes_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Dados exportados com sucesso!');
+          }}
+          className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-base font-semibold shadow-lg"
+        >
+          <Download className="w-5 h-5 mr-2" />
+          Exportar Dados (JSON)
+        </Button>
+
         {/* Sync Offline Button */}
         <Button
           onClick={handleSyncOfflineData}
