@@ -18,50 +18,55 @@ export default function HemogasReportGenerator() {
   const generateReport = async () => {
     setGenerating(true);
     try {
-      // Buscar informações científicas sobre hemogasômetro
+      // Buscar informações científicas sobre hemogasômetro em cavalos
       const aiReport = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é um especialista em diagnóstico veterinário. Crie um material técnico COMPLETO sobre HEMOGASÔMETRO com 17 PARÂMETROS.
+        prompt: `Você é um especialista em medicina equina e hemogasometria. Crie um material técnico COMPLETO sobre HEMOGASÔMETRO EM CAVALOS com 17 PARÂMETROS.
+
+FOCO: MEDICINA EQUINA (cavalos)
 
 ESTRUTURA DO MATERIAL:
 
 1. INTRODUÇÃO
-- O que é hemogasometria
-- Importância na medicina veterinária
+- O que é hemogasometria equina
+- Importância crítica em cavalos de alto desempenho
+- Aplicações em emergências equinas
 
-2. OS 17 PARÂMETROS (com explicação detalhada):
-- pH (equilíbrio ácido-base)
-- pO2 (pressão parcial de oxigênio)
-- pCO2 (pressão parcial de dióxido de carbono)
-- HCO3- (bicarbonato)
+2. OS 17 PARÂMETROS EM CAVALOS (valores de referência EQUINOS):
+- pH (equilíbrio ácido-base em equinos - normal: 7.35-7.45)
+- pO2 (pressão parcial de oxigênio - normal equino: 90-100 mmHg)
+- pCO2 (pressão parcial de CO2 - normal equino: 38-46 mmHg)
+- HCO3- (bicarbonato - normal equino: 24-30 mmol/L)
 - TCO2 (dióxido de carbono total)
 - BE/BB (excesso/déficit de base)
-- SO2 (saturação de oxigênio)
-- Hb (hemoglobina)
-- Hct (hematócrito)
-- Na+ (sódio)
-- K+ (potássio)
-- Ca++ (cálcio iônico)
-- Cl- (cloreto)
-- Glicose
-- Lactato
-- Creatinina
-- BUN (ureia)
+- SO2 (saturação de oxigênio - normal equino: >95%)
+- Hb (hemoglobina - normal equino: 11-19 g/dL)
+- Hct (hematócrito - normal equino: 32-53%)
+- Na+ (sódio - normal equino: 132-146 mmol/L)
+- K+ (potássio - normal equino: 2.4-4.7 mmol/L)
+- Ca++ (cálcio iônico - normal equino: 1.2-1.4 mmol/L)
+- Cl- (cloreto - normal equino: 99-109 mmol/L)
+- Glicose (normal equino: 75-115 mg/dL)
+- Lactato (normal equino: <2 mmol/L, crítico em cólica)
+- Creatinina (normal equino: 1.0-2.0 mg/dL)
+- BUN (ureia - normal equino: 10-24 mg/dL)
 
-3. INTERPRETAÇÃO CLÍNICA
-- Acidose metabólica
-- Acidose respiratória
-- Alcalose metabólica
-- Alcalose respiratória
+3. INTERPRETAÇÃO CLÍNICA EM CAVALOS
+- Acidose metabólica (cólica, exaustão)
+- Acidose respiratória (obstrução de vias aéreas)
+- Alcalose metabólica (transporte prolongado)
+- Alcalose respiratória (hiperventilação)
 
-4. APLICAÇÕES PRÁTICAS
-- Emergências veterinárias
-- Monitoramento anestésico
-- Cuidados intensivos
-- Cirurgias críticas
+4. APLICAÇÕES PRÁTICAS EM CAVALOS
+- Cólica equina (lactato elevado = prognóstico grave)
+- Cavalos de competição (fadiga, desidratação)
+- Anestesia equina (monitoramento crítico)
+- Neonatos equinos (potros prematuros)
+- Cavalos de corrida (performance)
 
-5. REFERÊNCIAS CIENTÍFICAS
-- Estudos recentes
-- Guidelines veterinárias
+5. ESTUDOS CIENTÍFICOS EM INGLÊS
+- Artigos peer-reviewed sobre equine blood gas analysis
+- Guidelines internacionais de hemogasometria equina
+- Casos clínicos publicados
 
 Retorne JSON formatado para PDF:`,
         response_json_schema: {
@@ -104,7 +109,14 @@ Retorne JSON formatado para PDF:`,
       // Título
       pdf.setFontSize(18);
       pdf.setFont(undefined, 'bold');
-      pdf.text(aiReport.title || 'Hemogasômetro - Guia Completo', 20, yPos);
+      pdf.text(aiReport.title || 'Hemogasômetro em Cavalos - Guia Completo', 20, yPos);
+      yPos += 10;
+      
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, 'normal');
+      pdf.setTextColor(220, 38, 38);
+      pdf.text('ESPECIALIZADO EM MEDICINA EQUINA', 20, yPos);
+      pdf.setTextColor(0, 0, 0);
       yPos += 15;
 
       // Introdução
@@ -215,18 +227,19 @@ Retorne JSON formatado para PDF:`,
       const pdfUrl = URL.createObjectURL(pdfBlob);
       
       // Preparar mensagem WhatsApp
-      const message = `📚 *MATERIAL TÉCNICO: HEMOGASÔMETRO*\n\n` +
-        `✅ 17 Parâmetros Completos\n` +
-        `📊 Interpretação Clínica\n` +
-        `🔬 Referências Científicas\n` +
-        `💉 Aplicações Práticas\n\n` +
+      const message = `🐴 *HEMOGASÔMETRO EM CAVALOS*\n\n` +
+        `✅ 17 Parâmetros Equinos\n` +
+        `📊 Valores de Referência Cavalos\n` +
+        `🔬 Estudos Científicos em Inglês\n` +
+        `🏇 Aplicações: Cólica, Corrida, Anestesia\n` +
+        `💉 Medicina Equina Avançada\n\n` +
         `Material gerado em ${new Date().toLocaleString('pt-BR')}\n\n` +
         `_Download do PDF disponível_`;
 
       // Abrir link para download
       const link = document.createElement('a');
       link.href = pdfUrl;
-      link.download = 'Hemogasometro_17_Parametros.pdf';
+      link.download = 'Hemogasometro_Equino_17_Parametros.pdf';
       link.click();
 
       // Copiar mensagem e abrir WhatsApp
@@ -256,8 +269,8 @@ Retorne JSON formatado para PDF:`,
           <FileText className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-slate-800 text-sm">Material Hemogasômetro</h3>
-          <p className="text-xs text-slate-600">17 parâmetros + estudos</p>
+          <h3 className="font-semibold text-slate-800 text-sm">Hemogasômetro Equino</h3>
+          <p className="text-xs text-slate-600">Cavalos • 17 parâmetros</p>
         </div>
       </div>
 

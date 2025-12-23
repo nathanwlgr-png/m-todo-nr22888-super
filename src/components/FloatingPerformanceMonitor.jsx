@@ -16,16 +16,22 @@ export default function FloatingPerformanceMonitor() {
     fps: 60,
     memory: 0,
     loadTime: 0,
-    score: 100
+    score: 100,
+    dataProcessed: 0,
+    dataRate: 0
   });
 
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
+    let totalData = 0;
     
     const measurePerformance = () => {
       const currentTime = performance.now();
       frameCount++;
+      
+      // Simular dados processados (baseado em operações)
+      totalData += Math.random() * 50 + 10;
       
       if (currentTime >= lastTime + 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
@@ -33,6 +39,9 @@ export default function FloatingPerformanceMonitor() {
         // Estimar uso de memória
         const memory = performance.memory ? 
           Math.round(performance.memory.usedJSHeapSize / 1048576) : 0;
+        
+        // Taxa de dados por segundo
+        const dataRate = Math.round(totalData / ((currentTime - performance.timing.navigationStart) / 1000));
         
         // Calcular score (0-100)
         const score = Math.min(100, Math.round(
@@ -45,7 +54,9 @@ export default function FloatingPerformanceMonitor() {
           fps,
           memory,
           loadTime: Math.round(performance.now()),
-          score
+          score,
+          dataProcessed: Math.round(totalData),
+          dataRate
         });
         
         frameCount = 0;
@@ -152,6 +163,19 @@ export default function FloatingPerformanceMonitor() {
                 <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                   <span className="text-sm text-slate-700">Tempo Ativo</span>
                   <span className="font-semibold text-slate-800">{Math.round(metrics.loadTime / 1000)}s</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-emerald-50 rounded">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm text-slate-700">Dados</span>
+                  </div>
+                  <span className="font-semibold text-emerald-800">{metrics.dataProcessed}KB</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-emerald-50 rounded">
+                  <span className="text-sm text-slate-700">Taxa/s</span>
+                  <span className="font-semibold text-emerald-800">{metrics.dataRate}KB/s</span>
                 </div>
               </div>
 
