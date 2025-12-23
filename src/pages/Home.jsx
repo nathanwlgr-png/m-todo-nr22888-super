@@ -529,10 +529,10 @@ export default function Home() {
             </Button>
           </Link>
 
-          <Link to={createPageUrl('ReportsAdvanced')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
+          <Link to={createPageUrl('AdvancedReports')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Relatórios
+              Relatórios IA
             </Button>
           </Link>
 

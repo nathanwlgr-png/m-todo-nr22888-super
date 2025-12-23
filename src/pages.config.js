@@ -27,6 +27,7 @@ import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
+import HemogasEquineGuide from './pages/HemogasEquineGuide';
 import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
@@ -66,7 +67,7 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import HemogasEquineGuide from './pages/HemogasEquineGuide';
+import AdvancedReports from './pages/AdvancedReports';
 import __Layout from './Layout.jsx';
 
 
@@ -100,6 +101,7 @@ export const PAGES = {
     "GlobalSearch": GlobalSearch,
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
+    "HemogasEquineGuide": HemogasEquineGuide,
     "Home": Home,
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
@@ -139,7 +141,7 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "HemogasEquineGuide": HemogasEquineGuide,
+    "AdvancedReports": AdvancedReports,
 }
 
 export const pagesConfig = {
