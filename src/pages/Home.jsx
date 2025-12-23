@@ -240,6 +240,33 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Network Error Alert */}
+      {isError && (
+        <div className="px-6 mt-4">
+          <Card className="p-4 bg-red-50 border-red-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-red-800">Erro de Conexão</p>
+                  <p className="text-sm text-red-600">Não foi possível carregar os dados</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => refetch()}
+                size="sm"
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <RotateCcw className="w-4 h-4 mr-1" />
+                Tentar Novamente
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Busca e Filtros */}
       <div className="px-6 mt-4">
         <div className="space-y-3">
