@@ -30,7 +30,6 @@ import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import HemogasEquineGuide from './pages/HemogasEquineGuide';
-import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
@@ -71,6 +70,8 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import Home from './pages/Home';
+import DocumentRepository from './pages/DocumentRepository';
 import __Layout from './Layout.jsx';
 
 
@@ -107,7 +108,6 @@ export const PAGES = {
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "HemogasEquineGuide": HemogasEquineGuide,
-    "Home": Home,
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
@@ -148,6 +148,8 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
+    "Home": Home,
+    "DocumentRepository": DocumentRepository,
 }
 
 export const pagesConfig = {

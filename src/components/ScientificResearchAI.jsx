@@ -88,7 +88,21 @@ ${response}
 `;
 
       setReport(fullReport);
-      toast.success('Pesquisa concluída com sucesso!');
+      
+      // Salvar automaticamente no repositório
+      try {
+        await base44.entities.GeneratedDocument.create({
+          title: `Pesquisa Científica - Líquido Sinovial Equino`,
+          type: 'pesquisa_cientifica',
+          content: fullReport,
+          summary: 'Pesquisa com 18+ artigos sobre pH sinovial em equinos - normal vs infeccioso',
+          tags: ['líquido sinovial', 'equinos', 'pH', 'infecção', 'artrite']
+        });
+      } catch (error) {
+        console.error('Erro ao salvar no repositório:', error);
+      }
+      
+      toast.success('Pesquisa concluída e salva automaticamente!');
     } catch (error) {
       console.error('Erro na pesquisa:', error);
       toast.error('Erro ao conduzir pesquisa científica');

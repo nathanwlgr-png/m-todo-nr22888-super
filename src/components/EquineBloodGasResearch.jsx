@@ -137,7 +137,21 @@ LÍQUIDO SINOVIAL - INFECÇÃO:
 `;
 
       setReport(fullReport);
-      toast.success('Relatório de hemogasometria gerado!');
+      
+      // Salvar automaticamente no repositório
+      try {
+        await base44.entities.GeneratedDocument.create({
+          title: 'Guia Técnico - Hemogasometria em Equinos',
+          type: 'hemogasometria',
+          content: fullReport,
+          summary: 'Guia completo de hemogasometria equina com correlações clínicas, potros, líquido sinovial e infecções',
+          tags: ['hemogasometria', 'equinos', 'pH', 'lactato', 'potros', 'líquido sinovial']
+        });
+      } catch (error) {
+        console.error('Erro ao salvar no repositório:', error);
+      }
+      
+      toast.success('Relatório gerado e salvo automaticamente!');
     } catch (error) {
       console.error('Erro:', error);
       toast.error('Erro ao gerar relatório');
@@ -226,7 +240,21 @@ ${response}
 `;
 
       setArticles(articlesReport);
-      toast.success('Artigos traduzidos com sucesso!');
+      
+      // Salvar automaticamente no repositório
+      try {
+        await base44.entities.GeneratedDocument.create({
+          title: 'Artigos Científicos - Contaminação Líquido Sinovial (Traduzidos)',
+          type: 'pesquisa_cientifica',
+          content: articlesReport,
+          summary: '5 artigos científicos traduzidos do inglês sobre contaminação e pH do líquido sinovial',
+          tags: ['artigos', 'tradução', 'líquido sinovial', 'contaminação', 'pH', 'bacteriana']
+        });
+      } catch (error) {
+        console.error('Erro ao salvar no repositório:', error);
+      }
+      
+      toast.success('Artigos traduzidos e salvos automaticamente!');
     } catch (error) {
       console.error('Erro:', error);
       toast.error('Erro ao pesquisar artigos');
