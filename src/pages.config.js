@@ -10,6 +10,7 @@ import ClientsMap from './pages/ClientsMap';
 import ClosingForecast from './pages/ClosingForecast';
 import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
+import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
@@ -51,7 +52,6 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import ContactSettings from './pages/ContactSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +68,7 @@ export const PAGES = {
     "ClosingForecast": ClosingForecast,
     "ConsumableOrderHistory": ConsumableOrderHistory,
     "ConsumablePriceList": ConsumablePriceList,
+    "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
@@ -109,7 +110,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "ContactSettings": ContactSettings,
 }
 
 export const pagesConfig = {

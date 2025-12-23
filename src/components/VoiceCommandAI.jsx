@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { Mic, Volume2 } from 'lucide-react';
+import DraggableButton from './DraggableButton';
 
 export default function VoiceCommandAI() {
   const [listening, setListening] = useState(false);
@@ -253,33 +254,47 @@ Retorne:
 
   return (
     <>
-      {/* Botão flutuante */}
-      <button
-        onClick={() => listening ? stopListening() : startListening()}
-        className={`fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center z-50 transition-all ${
-          listening 
-            ? activated
-              ? 'bg-gradient-to-br from-green-500 to-emerald-600 animate-pulse scale-110'
-              : 'bg-gradient-to-br from-blue-500 to-indigo-600 animate-pulse'
-            : 'bg-gradient-to-br from-slate-600 to-slate-700'
-        }`}
+      {/* Botão flutuante draggable */}
+      <DraggableButton 
+        defaultPosition={{ id: 'voice-ai', x: window.innerWidth - 100, y: window.innerHeight - 100 }}
+        zIndexBase={50}
       >
-        {processing ? (
-          <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
-        ) : listening ? (
-          activated ? (
-            <Volume2 className="w-7 h-7 text-white animate-bounce" />
+        <button
+          onClick={() => listening ? stopListening() : startListening()}
+          className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all ${
+            listening 
+              ? activated
+                ? 'bg-gradient-to-br from-green-500 to-emerald-600 animate-pulse scale-110'
+                : 'bg-gradient-to-br from-blue-500 to-indigo-600 animate-pulse'
+              : 'bg-gradient-to-br from-slate-600 to-slate-700'
+          }`}
+        >
+          {processing ? (
+            <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
+          ) : listening ? (
+            activated ? (
+              <Volume2 className="w-7 h-7 text-white animate-bounce" />
+            ) : (
+              <Mic className="w-7 h-7 text-white" />
+            )
           ) : (
-            <Mic className="w-7 h-7 text-white" />
-          )
-        ) : (
-          <Mic className="w-7 h-7 text-white opacity-50" />
-        )}
-      </button>
+            <Mic className="w-7 h-7 text-white opacity-50" />
+          )}
+        </button>
+      </DraggableButton>
 
-      {/* Indicador de status */}
+      {/* Indicador de status - clicável para enviar para trás */}
       {listening && (
-        <div className="fixed bottom-24 right-6 bg-black/90 text-white text-sm px-4 py-3 rounded-2xl z-50 shadow-2xl backdrop-blur">
+        <div 
+          onClick={(e) => {
+            e.currentTarget.style.zIndex = '10';
+            setTimeout(() => {
+              e.currentTarget.style.zIndex = '45';
+            }, 3000);
+          }}
+          className="fixed bottom-24 right-6 bg-black/90 text-white text-sm px-4 py-3 rounded-2xl shadow-2xl backdrop-blur cursor-pointer hover:bg-black/95 transition-all"
+          style={{ zIndex: 45 }}
+        >
           {processing ? (
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />

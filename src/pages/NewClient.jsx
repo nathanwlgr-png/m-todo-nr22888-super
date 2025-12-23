@@ -246,14 +246,22 @@ export default function NewClient() {
       const numerologyNumber = calculateNumerology(nameForNumerology);
       const lifePathNumber = calculateLifePath(formData.birthdate);
       
+      // Remove campos vazios para evitar erros
+      const cleanedData = {};
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== '' && formData[key] !== null && formData[key] !== undefined) {
+          cleanedData[key] = formData[key];
+        }
+      });
+
       const clientData = {
-        ...formData,
+        ...cleanedData,
         numerology_number: numerologyNumber,
         life_path_number: lifePathNumber,
         behavioral_profile: getBehavioralProfile(numerologyNumber),
         decision_style: getDecisionStyle(numerologyNumber),
-        purchase_motivators: motivators,
-        real_objections: objections,
+        purchase_motivators: motivators.length > 0 ? motivators : undefined,
+        real_objections: objections.length > 0 ? objections : undefined,
         purchase_score: Math.floor(Math.random() * 40) + 30,
         status: 'morno'
       };
