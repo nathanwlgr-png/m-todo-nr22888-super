@@ -389,6 +389,20 @@ ${material.numerology_22_insights}
           </div>
         </div>
       )}
+
+      {/* Guia de Hemogasometria */}
+      <Card className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 mt-4">
+        <h3 className="text-lg font-semibold text-blue-800 mb-2">📚 Quer estudar Hemogasometria Equina?</h3>
+        <p className="text-sm text-slate-700 mb-3">
+          Guia completo com 7 artigos científicos traduzidos, valores de referência e situações clínicas práticas.
+        </p>
+        <Button
+          onClick={() => window.location.href = '/HemogasEquineGuide'}
+          className="w-full bg-blue-600 hover:bg-blue-700"
+        >
+          📖 Abrir Guia de Estudo
+        </Button>
+      </Card>
     </div>
   );
 }
