@@ -89,7 +89,11 @@ Gere um relatório em JSON com:
             concerns: { type: "array", items: { type: "string" } },
             recommendations: { type: "array", items: { type: "string" } },
             forecast: { type: "string" },
-            priority_actions: { type: "array", items: { type: "string" } }
+            priority_actions: { type: "array", items: { type: "string" } },
+            trends_analysis: { type: "string" },
+            equine_market_insights: { type: "string" },
+            conversion_optimization: { type: "array", items: { type: "string" } },
+            client_retention_strategies: { type: "array", items: { type: "string" } }
           }
         }
       });
