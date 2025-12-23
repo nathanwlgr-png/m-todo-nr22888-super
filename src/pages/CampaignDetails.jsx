@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import TeamChat from '@/components/TeamChat';
 import CollaborationIndicator from '@/components/CollaborationIndicator';
 import CampaignTemplateUploader from '@/components/CampaignTemplateUploader';
+import FinancialTablesManager from '@/components/FinancialTablesManager';
 
 export default function CampaignDetails() {
   const navigate = useNavigate();
@@ -298,6 +299,8 @@ export default function CampaignDetails() {
 
           <TabsContent value="templates" className="space-y-4 mt-4">
             <CampaignTemplateUploader campaignId={campaignId} />
+
+            <FinancialTablesManager />
 
             <Card className="p-4 bg-blue-50 border-blue-200">
               <p className="text-sm font-semibold text-blue-900 mb-2">💡 Como usar:</p>
