@@ -40,6 +40,9 @@ import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
 import HotClientsDialog from '@/components/HotClientsDialog';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
+import AutoReportGenerator from '@/components/AutoReportGenerator';
+import AITaskManager from '@/components/AITaskManager';
+import CRMExternalSync from '@/components/CRMExternalSync';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -267,6 +270,21 @@ export default function Home() {
       {/* Mensagens Estruturadas */}
       <div className="px-6 mt-6">
         <ScheduledMessagesWidget />
+      </div>
+
+      {/* Relatórios Automáticos IA */}
+      <div className="px-6 mt-6">
+        <AutoReportGenerator />
+      </div>
+
+      {/* Gestor de Tarefas IA */}
+      <div className="px-6 mt-6">
+        <AITaskManager />
+      </div>
+
+      {/* Integrador CRM Externo */}
+      <div className="px-6 mt-6">
+        <CRMExternalSync />
       </div>
 
       {/* Lab Brand Competitor Analysis */}
