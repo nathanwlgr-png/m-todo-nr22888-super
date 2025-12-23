@@ -182,7 +182,340 @@ export default function CompleteCaseStudyReport() {
     }
   };
 
-  // CASO 2: CNPJ Real - São Paulo
+  // CASO 2: Análise Profunda - Dra. Marina
+  const deepAnalysisCase = {
+    name: "Análise Profunda - Perfil Executivo Premium",
+    client: {
+      name: "Dra. Marina Oliveira Campos",
+      birthdate: "08/11/1980",
+      clinic: "Hospital Veterinário Supremo",
+      cnpj: "15.987.654/0001-22",
+      city: "São Paulo",
+      address: "Av. Brigadeiro Faria Lima, 3000 - Itaim Bibi",
+      phone: "+55 11 99887-6655",
+      email: "marina@hvsupermo.com.br",
+      numerology: 8,
+      profile: "EXECUTIVO - Focada em resultados, decisões rápidas baseadas em ROI"
+    },
+    current_situation: {
+      business_age: "15 anos no mercado",
+      team_size: "24 funcionários (8 veterinários, 16 equipe apoio)",
+      monthly_exams: "450-520 exames/mês",
+      current_equipment: "Mindray BC-3000 Plus (4 anos) + Bioquímico terceirizado",
+      monthly_revenue: "R$ 280.000/mês",
+      lab_revenue: "R$ 42.000/mês (15% do total)",
+      pain_points: [
+        "Gargalo no laboratório - fila de espera 4-6 horas",
+        "Terceirização bioquímico custa R$ 8.500/mês (45% margem perdida)",
+        "Clientes VIP migrando para concorrente com resultado rápido",
+        "Equipamento atual quebrou 3x nos últimos 6 meses",
+        "Perda de R$ 15.000/mês em oportunidades por lentidão"
+      ],
+      investment_capacity: "R$ 120.000 disponível imediato",
+      urgency: "ALTA - Contrato grande empresa depende de lab ágil"
+    },
+    numerology_deep_dive: {
+      life_path: 8,
+      expression_number: 1,
+      soul_urge: 9,
+      personality: "Líder nata, ambiciosa, movida por conquistas. Toma decisões rápidas quando vê ROI claro. Valoriza poder, status e reconhecimento profissional.",
+      best_approach: "Dados concretos + Cases de sucesso de grandes hospitais + Enfatizar vantagem competitiva + Demonstração de poder financeiro (ROI)",
+      best_days: ["26/12/2025", "08/01/2026", "17/01/2026", "26/01/2026"],
+      current_cycle: "Ano Pessoal 8 (Poder e Conquista) + Mês Pessoal 8 = MOMENTO PERFEITO PARA EXPANSÃO",
+      motivational_phrase: "O sucesso não é um acidente. É trabalho duro, perseverança, aprendizado e sacrifício.",
+      decision_triggers: ["ROI comprovado", "Diferencial competitivo", "Status/Prestígio", "Rapidez na decisão"],
+      communication_style: "Direta, objetiva, sem rodeios. Detesta perder tempo. Quer números e fatos."
+    },
+    journey: [
+      {
+        date: "28/11/2025",
+        stage: "Primeiro Contato - Networking Evento",
+        score: 52,
+        status: "morno",
+        action: "Encontro em congresso veterinário (20min)",
+        notes: "Conheci Dra. Marina em palestra sobre inovação laboratorial. Muito interessada em tecnologia. Trocamos cartões. Mencionou problemas com lab atual.",
+        questions: [
+          "Q: Seu hospital tem lab próprio?",
+          "R: Sim, mas só hemograma. Bioquímico terceirizo por R$ 8.500/mês",
+          "Q: Já pensou em internalizar?",
+          "R: Sim, mas preciso ver números. Quanto custa? Quanto tempo retorno?"
+        ],
+        interest_level: 6
+      },
+      {
+        date: "02/12/2025",
+        stage: "Follow-up Estratégico",
+        score: 48,
+        status: "morno",
+        action: "WhatsApp + Envio de case study (15min conversa)",
+        notes: "Enviei case Hospital VetLife (similar porte). Ela leu em 8 minutos. Respondeu: 'Interessante, mas preciso ver ao vivo'. Score caiu pois não agendou visita imediata.",
+        questions: [
+          "Q: Esse case é real?",
+          "R: Sim, posso te conectar com Dr. Fernando (dono)",
+          "Q: ROI foi mesmo 12 meses?",
+          "R: Sim, detalhado na simulação que enviei",
+          "Q: Você tem equipamento para demonstração?",
+          "R: Sim, posso levar no seu hospital"
+        ],
+        interest_level: 7
+      },
+      {
+        date: "05/12/2025",
+        stage: "Primeira Visita - Diagnóstico Profundo",
+        score: 64,
+        status: "quente",
+        action: "Visita ao hospital (2h15min)",
+        notes: "Visitei hospital. Estrutura premium, 6 salas consulta, 2 cirúrgicas, UTI. Lab pequeno e desorganizado. Equipamento antigo quebrando. Dra. Marina frustrada com situação. Fiz análise completa do fluxo.",
+        objections: [
+          {
+            objection: "Investimento alto, preciso avaliar com contador",
+            response: "Calculei na frente dela: custo terceirização R$ 8.500/mês x 12 = R$ 102k/ano. Equipamento novo: R$ 95k + R$ 3.200 reagentes/mês. Economia R$ 5.300/mês = ROI 15 meses. PLUS: pode cobrar mais caro por resultado rápido.",
+            result: "Muito impressionada. Pediu simulação formal escrita."
+          },
+          {
+            objection: "E se quebrar? Meu atual quebra direto",
+            response: "Garantia 3 anos full (peças + mão de obra) + suporte local 24/7 + equipamento backup enquanto manutenção. Zero risco.",
+            result: "Gostou. Perguntou sobre reputação da marca."
+          },
+          {
+            objection: "Tenho contrato com laboratório terceirizado até março",
+            response: "Perfeito! Podemos entregar em janeiro, treinar equipe em fevereiro, e você ativa em março quando contrato vence. Zero conflito.",
+            result: "Aliviada. Barreira removida."
+          }
+        ],
+        techniques_used: ["SPIN Selling", "Análise in loco", "Cálculo ROI ao vivo", "Value Selling"],
+        triggers: ["Autoridade (cases)", "Prova Social", "Segurança (garantia)", "Timing perfeito"],
+        interest_level: 8,
+        key_moment: "Mostrei vídeo de análise sendo feita em 8 minutos. Ela disse: 'Isso muda tudo!'"
+      },
+      {
+        date: "09/12/2025",
+        stage: "Envio Proposta Premium",
+        score: 71,
+        status: "quente",
+        action: "Proposta personalizada + Simulação financeira detalhada",
+        notes: "Proposta 12 páginas com: análise atual vs futuro, ROI detalhado, comparativo concorrência, plano implantação, treinamento, garantias. Ela visualizou 3x (total 42min leitura). Baixou simulação Excel 2x.",
+        questions: [
+          "Q: Posso ajustar forma pagamento?",
+          "R: Sim. Ofereci: à vista com 8% desconto OU 36x Santander sem juros",
+          "Q: Treinamento está incluído?",
+          "R: Sim, 5 dias completos no seu hospital + suporte remoto 60 dias",
+          "Q: E se eu quiser módulo extra depois?",
+          "R: Arquitetura modular. Adiciona quando quiser."
+        ],
+        interest_level: 8
+      },
+      {
+        date: "12/12/2025",
+        stage: "Segunda Visita - Demonstração Técnica VIP",
+        score: 79,
+        status: "quente",
+        action: "Demonstração com equipamento real + Equipe técnica (3h)",
+        notes: "Levei Seamaty SD1 + técnico especialista. Fizemos 15 análises reais de pacientes do hospital. Toda equipe testou. Dra. Marina cronometrou: 8min por análise completa vs 4-6h atual. Equipe empolgada. Ela já visualizando impacto.",
+        objections: [
+          {
+            objection: "Minha equipe consegue operar isso? Parece complexo",
+            response: "Interface touch intuitiva igual smartphone. Técnico treinou auxiliar júnior em 20 minutos - ela já operou sozinha. Mostrei vídeos de outros hospitais: técnicos dominam em 2 dias.",
+            result: "Convencida após ver auxiliar operando"
+          },
+          {
+            objection: "Preciso ver custo real por exame, não só teoria",
+            response: "Calculamos juntos baseado no volume dela: R$ 11,50/exame completo (reagente + depreciação + manutenção). Ela cobra R$ 85/exame. Margem 86%. Atual: terceiriza por R$ 45, cobra R$ 75, margem 40%.",
+            result: "Chocada com diferença. Disse: 'Dobra minha margem!'"
+          },
+          {
+            objection: "Concorrente ofereceu equipamento mais barato",
+            response: "Comparei specs técnicas lado a lado: nosso 60% mais rápido, interface melhor, garantia 3 anos vs 1 ano, suporte local vs telefone. Custo real por exame 22% menor no longo prazo.",
+            result: "Aceitou que preço não é tudo"
+          }
+        ],
+        techniques_used: ["Demonstração hands-on", "Proof of concept", "TCO (Total Cost)", "Consultive Selling"],
+        triggers: ["Experiência real", "Prova tangível", "Comparação competitiva", "Empoderamento equipe"],
+        interest_level: 9,
+        key_moment: "Quando viu resultado em 8min, disse: 'Posso oferecer resultado urgente e cobrar premium!'"
+      },
+      {
+        date: "16/12/2025",
+        stage: "Follow-up - Negociação Final",
+        score: 73,
+        status: "quente",
+        action: "Reunião com sócios + contador (1h40min)",
+        notes: "Dra. Marina marcou reunião com 2 sócios + contador. Apresentei formalmente: business case, projeções 3 anos, análise risco. Contador validou números. Sócios aprovaram. MAS: pediram melhorar condições.",
+        objections: [
+          {
+            objection: "Valor está no limite do orçamento. Consegue fechar em R$ 90k?",
+            response: "Proposta: mantenho R$ 95k MAS incluo kit premium reagentes 6 meses (valor R$ 15k) + treinamento avançado gestão lab (valor R$ 5k). Total R$ 115k por R$ 95k. Mais vantajoso que desconto.",
+            result: "Sócios adoraram. Mais valor por mesmo preço."
+          },
+          {
+            objection: "Podemos começar em fevereiro? Janeiro está corrido",
+            response: "Melhor ainda. Entrego em janeiro, instalo tranquilo sem pressa, fevereiro inteiro treinamento, março ativa 100%. Perfeito para substituir terceirizado sem risco.",
+            result: "Todos concordaram. Timing ideal."
+          },
+          {
+            objection: "E se não atingirmos volume projetado?",
+            response: "Cenário pessimista: mesmo com 30% menos volume, ROI 22 meses. PLUS: equipamento permite oferecer pacotes check-up completo (aumenta ticket e volume).",
+            result: "Contador aprovou. Risco controlado."
+          }
+        ],
+        techniques_used: ["Negociação valor agregado", "Gestão de stakeholders", "Análise risco financeiro"],
+        triggers: ["Compromisso/Consistência", "Prova Social (contador validou)", "Escassez (entrega janeiro)"],
+        interest_level: 9,
+        key_moment: "Contador disse: 'Faz sentido financeiramente'. Sócios balançaram cabeça afirmativamente."
+      },
+      {
+        date: "19/12/2025",
+        stage: "Terceira Visita - Fechamento Executivo",
+        score: 87,
+        status: "quente",
+        action: "Fechamento oficial + Assinatura contrato (1h10min)",
+        notes: "Reunião formal. Dra. Marina decidida. Assinou contrato. Pagamento: entrada R$ 15k + 36x R$ 2.500 Santander. Entrega agendada 15/01/2026. Instalação 20/01. Treinamento 27/01-31/01. Ativação 01/03.",
+        final_conditions: "R$ 95.000 total + Kit reagentes 6 meses (R$ 15k) + Treinamento avançado (R$ 5k) = R$ 115k valor entregue",
+        closed: true,
+        celebration: "Dra. Marina disse: 'Isso vai transformar meu hospital. Obrigada pela paciência e profissionalismo.'"
+      }
+    ],
+    competitors_analysis: {
+      region: "Itaim Bibi / Faria Lima, São Paulo/SP",
+      market_level: "PREMIUM - Renda altíssima",
+      competitors: [
+        { 
+          name: "Pet Hospital Itaim", 
+          distance: "400m", 
+          equipment: "Seamaty SD1 + Catalyst (líder região)", 
+          level: "Premium++",
+          threat: "ALTO - Referência em diagnóstico rápido",
+          price_position: "15-20% acima média mercado"
+        },
+        { 
+          name: "VetCare Executive", 
+          distance: "850m", 
+          equipment: "Mindray BC-5000 + Bioquímico próprio", 
+          level: "Premium",
+          threat: "MÉDIO - Bom lab mas sem diferencial velocidade"
+        },
+        { 
+          name: "Clínica Bicho Chic", 
+          distance: "1.1km", 
+          equipment: "Terceiriza 100%", 
+          level: "Intermediário+",
+          threat: "BAIXO - Atende público diferente"
+        },
+        { 
+          name: "Hospital Vet Faria Lima", 
+          distance: "1.4km", 
+          equipment: "Mindray BC-3000 (igual cliente)", 
+          level: "Premium",
+          threat: "MÉDIO - Mesmo problema que cliente (lentidão)"
+        }
+      ],
+      market_gap: "Apenas 1 concorrente premium tem lab rápido completo. Demanda reprimida altíssima por resultado urgente em região com poder aquisitivo premium.",
+      opportunity: "Cliente corporativo grande (500+ pets) quer contrato com hospital que garanta resultado lab em <30min. Pet Hospital Itaim está saturado. Hospital Supremo pode pegar contrato se equipar.",
+      competitive_advantage: "Com novo equipamento: 2º hospital premium com resultado rápido na região + pode cobrar 25% acima média + diferencial atendimento VIP empresarial"
+    },
+    regional_context: {
+      neighborhood: "Itaim Bibi / Faria Lima",
+      avg_income: "R$ 18.500/capita (top 2% São Paulo)",
+      density: "15.200 hab/km²",
+      pet_density: "1 pet a cada 2 habitantes (executivos solteiros/casais sem filhos)",
+      corporate_presence: "120+ empresas grandes (potencial contratos corporativos)",
+      nearby_events: [
+        "Expo Pet Premium (Transamérica 15-17/01/2026)",
+        "Summit Gestão Hospitais Vet (WTC 25/01/2026)",
+        "Workshop Medicina Preventiva Corporativa (28/01/2026)"
+      ],
+      economic_indicators: {
+        gdp_contribution: "3,2% PIB municipal",
+        employment_rate: "97%",
+        credit_availability: "Altíssima - 15 bancos com linhas empresariais",
+        growth_trend: "+4,1% ao ano setor pet premium"
+      },
+      market_opportunity: "Região com maior concentração de pets de alto valor (raças puras, importados). Donos dispostos pagar premium por qualidade e velocidade. Contratos corporativos pet care em expansão (empresas oferecem benefício).",
+      strategic_positioning: "Hospital Supremo pode se posicionar como referência diagnóstico rápido premium, atrair clientela corporativa de alta renda, e diferenciar de concorrência tradicional."
+    },
+    recommended_strategy: {
+      equipment: "Seamaty SD1 Premium + Módulo Bioquímico Avançado + Hemogasometria",
+      investment: "R$ 95.000 (equipamento) + R$ 15.000 (kit 6 meses) = R$ 110k",
+      financing: "Entrada R$ 15k + 36x R$ 2.500 Santander (taxa 0,99%/mês)",
+      bonus_included: [
+        "Kit premium reagentes 6 meses (R$ 15.000)",
+        "Treinamento avançado 5 dias + gestão lab (R$ 5.000)",
+        "Suporte prioritário 90 dias",
+        "Equipamento backup durante manutenções",
+        "Consultoria implantação check-ups premium"
+      ],
+      value_proposition: "Transformar lab em centro de lucro + capturar contrato corporativo R$ 25k/mês + aumentar ticket médio 35% com resultados urgentes + eliminar terceirização (economia R$ 8.500/mês)",
+      projected_results: {
+        roi_months: 15,
+        payback_date: "Março/2027",
+        monthly_net_increase: 12800,
+        year_1_profit: 89600,
+        year_3_accumulated: 345600,
+        corporate_contract_value: "R$ 300k/ano (se capturar)",
+        margin_improvement: "40% → 86% em exames lab"
+      },
+      key_triggers: [
+        "AUTORIDADE: Usado por Pet Hospital Itaim (líder premium)",
+        "URGÊNCIA: Contrato corporativo depende de lab rápido",
+        "ESCASSEZ: Única forma competir com líder mercado",
+        "PROVA SOCIAL: Contador e sócios validaram",
+        "RECIPROCIDADE: Bônus R$ 20k incluídos",
+        "COMPROMISSO: Investiu tempo em 3 visitas, demonstração, reuniões"
+      ],
+      implementation_plan: {
+        week_1: "Entrega equipamento (15/01) + Instalação (20/01)",
+        week_2_3: "Treinamento intensivo equipe (27-31/01)",
+        week_4: "Período teste paralelo com terceirizado",
+        month_2: "Fevereiro inteiro refinamento + treinamento avançado",
+        month_3: "01/03 - Ativação 100% + Fim contrato terceirizado",
+        month_4: "Lançamento pacotes check-up premium",
+        month_5: "Apresentação proposta contrato corporativo"
+      }
+    },
+    scoring_breakdown: {
+      base_score: 52,
+      adjustments: [
+        { factor: "Volume altíssimo (500+ exames/mês)", points: 20 },
+        { factor: "Orçamento R$ 120k confirmado (aprovado sócios)", points: 25 },
+        { factor: "Localização premium (Faria Lima)", points: 15 },
+        { factor: "Ciclo numerológico 8+8 (poder máximo)", points: 10 },
+        { factor: "Dor urgente crítica (perda clientes + contrato risco)", points: 18 },
+        { factor: "Engajamento alto (3 visitas + 2h reuniões)", points: 12 },
+        { factor: "Validação stakeholders (sócios + contador)", points: 8 }
+      ],
+      final_score: 87,
+      status: "QUENTE (FECHAMENTO IMINENTE)",
+      conversion_probability: "94%",
+      recommended_action: "Manter pressão positiva, reforçar urgência contrato corporativo, facilitar processo assinatura, garantir suporte premium pós-venda para gerar case de sucesso e indicações.",
+      success_factors: [
+        "Perfil executivo 8 alinhado com abordagem direta e ROI",
+        "Dor real e mensurável (R$ 15k/mês perdido)",
+        "Timing perfeito (ciclo numerológico + contrato corporativo)",
+        "Demonstração prática removeu dúvidas técnicas",
+        "Validação financeira por contador (credibilidade)",
+        "Proposta valor agregado melhor que desconto puro"
+      ]
+    },
+    lessons_learned: {
+      what_worked: [
+        "Conhecer cliente em evento (networking warm)",
+        "Análise in loco profunda na primeira visita",
+        "Cálculo ROI ao vivo na frente dela (impacto visual)",
+        "Demonstração hands-on com equipe real",
+        "Envolver stakeholders cedo (sócios + contador)",
+        "Proposta valor agregado vs desconto preço",
+        "Paciência em 3 visitas sem pressionar fechamento",
+        "Timing alinhado com ciclo numerológico (ela sentiu 'momento certo')"
+      ],
+      what_could_improve: [
+        "Poderia ter identificado oportunidade contrato corporativo mais cedo",
+        "Primeira proposta poderia incluir bônus já (economizaria 1 iteração)"
+      ],
+      key_insight: "Cliente perfil 8 (Executivo) decide rápido quando vê ROI claro + validação de terceiros confiáveis (contador). Investir tempo em relacionamento e demonstração prática vale mais que pressão por fechamento rápido."
+    }
+  };
+
+  // CASO 3: CNPJ Real - São Paulo
   const realCase = {
     name: "Análise Completa - Cliente Real São Paulo",
     client: {
@@ -762,6 +1095,15 @@ export default function CompleteCaseStudyReport() {
         </Button>
 
         <Button
+          onClick={() => generatePDF(deepAnalysisCase)}
+          disabled={generating}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+        >
+          <FileText className="w-4 h-4 mr-2" />
+          {generating ? 'Gerando...' : 'Gerar PDF - Dra. Marina (Perfil 8)'}
+        </Button>
+
+        <Button
           onClick={() => generatePDF(realCase)}
           disabled={generating}
           className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -774,6 +1116,7 @@ export default function CompleteCaseStudyReport() {
       <div className="mt-3 p-2 bg-green-50 rounded border border-green-200">
         <p className="text-[10px] text-green-700 leading-relaxed">
           💡 <strong>Teste Único:</strong> Cliente frio → morno → frio → quente → fechado (jornada completa)<br/>
+          💡 <strong>Dra. Marina:</strong> Perfil 8 Executivo, 3 visitas, objeções detalhadas, fechamento R$ 95k<br/>
           💡 <strong>Cliente Real SP:</strong> Análise profunda CNPJ real Jardim Paulista com contexto regional
         </p>
       </div>
