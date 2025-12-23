@@ -108,7 +108,8 @@ export default function AutoTaskGenerator() {
   useEffect(() => {
     if (clients.length === 0) return;
 
-    // Executar análise a cada 10 minutos
+    // DESABILITADO: Evitar rate limit
+    // Executar apenas manualmente
     const checkBehaviors = async () => {
       const today = new Date();
       const threeDaysAgo = new Date(today);
@@ -271,11 +272,13 @@ Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de ma
       }
     };
 
-    // Executar apenas 1x ao carregar, depois desabilitar automático
+    // DESABILITADO: Evitar rate limit
     // checkBehaviors();
-    
-    // DESABILITADO: Evitar rate limit. Usuário pode acionar manualmente se necessário
-  }, [clients, followupLogs, tasks, interactions, documents]);
+    };
+
+    // NÃO executar automaticamente
+    // Usuário aciona manualmente quando necessário
+    }, []);
 
   return null; // Silent background component
 }

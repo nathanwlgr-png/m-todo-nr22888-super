@@ -196,11 +196,11 @@ export default function AIErrorCorrectionSystem() {
       console.log(`✅ Verificação completa: ${allIssues.length} issues encontrados`);
     };
 
-    runAllChecks();
-    const interval = setInterval(runAllChecks, 10 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [clients, tasks, sales]);
+    // DESABILITADO: Evitar rate limit
+    // runAllChecks();
+    // const interval = setInterval(runAllChecks, 10 * 60 * 1000);
+    // return () => clearInterval(interval);
+  }, []);
 
   const handleDrag = (e, data) => {
     setPosition({ x: data.x, y: data.y });
