@@ -138,7 +138,7 @@ export default function ContactSettings() {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-slate-800">Notificações Automáticas</p>
-              <p className="text-xs text-slate-600">Receber atualizações via WhatsApp</p>
+              <p className="text-xs text-slate-600">Sistema prepara mensagens para você encaminhar</p>
             </div>
             <Switch
               checked={enableNotifications}
@@ -161,7 +161,17 @@ export default function ContactSettings() {
                   />
                   <span className="text-sm text-slate-600 whitespace-nowrap">minutos</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">Sistema enviará atualizações a cada {notificationInterval} minutos</p>
+                <p className="text-xs text-slate-500 mt-1">Mensagem copiada a cada {notificationInterval} min - você encaminha pro seu grupo</p>
+              </div>
+
+              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-xs font-semibold text-green-800 mb-1">💡 Como funciona:</p>
+                <ol className="text-xs text-green-700 space-y-0.5">
+                  <li>1. Sistema copia mensagem automaticamente</li>
+                  <li>2. Aparece notificação no tablet</li>
+                  <li>3. Você clica e abre seu WhatsApp</li>
+                  <li>4. Encaminha pro grupo ou contato que quiser</li>
+                </ol>
               </div>
             </div>
           )}
@@ -174,10 +184,10 @@ export default function ContactSettings() {
             <div>
               <p className="text-sm font-semibold text-amber-800 mb-1">Como funciona?</p>
               <ul className="text-xs text-slate-700 space-y-1">
-                <li>• <strong>Notificações automáticas:</strong> Sistema avisa sobre clientes quentes, tarefas urgentes e análises IA</li>
-                <li>• <strong>Sincronização offline:</strong> Use o botão na Home para enviar dados quando estiver sem internet</li>
-                <li>• <strong>WhatsApp preferencial:</strong> Todas mensagens vão direto para seu WhatsApp cadastrado</li>
-                <li>• <strong>Encaminhamento rápido:</strong> Encaminhe análises direto para clientes pelo tablet</li>
+                <li>• <strong>Notificações automáticas:</strong> Sistema copia mensagem, você encaminha pro seu grupo do WhatsApp</li>
+                <li>• <strong>Sincronização offline:</strong> Botão na Home envia resumo quando estiver sem internet</li>
+                <li>• <strong>Seu grupo do WhatsApp:</strong> Use o grupo que você já tem (normal ou Business)</li>
+                <li>• <strong>Encaminhamento rápido:</strong> Mensagem já copiada, só colar no grupo</li>
               </ul>
             </div>
           </div>
