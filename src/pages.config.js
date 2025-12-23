@@ -69,6 +69,7 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import AdvancedReports from './pages/AdvancedReports';
 import ProposalGenerator from './pages/ProposalGenerator';
+import SystemAudit from './pages/SystemAudit';
 import __Layout from './Layout.jsx';
 
 
@@ -144,6 +145,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "AdvancedReports": AdvancedReports,
     "ProposalGenerator": ProposalGenerator,
+    "SystemAudit": SystemAudit,
 }
 
 export const pagesConfig = {

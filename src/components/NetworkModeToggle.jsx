@@ -163,72 +163,61 @@ export default function NetworkModeToggle() {
 
   return (
     <div className="fixed top-20 right-4 z-40">
-      <Card className="p-4 bg-white shadow-xl border-2 border-slate-300 w-72">
-        <div className="space-y-4">
+      <Card className="p-2 bg-white shadow-lg border border-slate-200 w-44">
+        <div className="space-y-2">
           {/* Network Mode */}
-          <div>
-            <p className="text-xs font-semibold text-slate-700 mb-2">Modo de Rede</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={networkMode === 'wifi' ? 'default' : 'outline'}
-                onClick={() => networkMode !== 'wifi' && toggleNetworkMode()}
-                className={networkMode === 'wifi' ? 'bg-green-600 hover:bg-green-700' : ''}
-              >
-                <Wifi className="w-3 h-3 mr-1" />
-                WiFi
-              </Button>
-              <Button
-                size="sm"
-                variant={networkMode === 'mobile' ? 'default' : 'outline'}
-                onClick={() => networkMode !== 'mobile' && toggleNetworkMode()}
-                className={networkMode === 'mobile' ? 'bg-orange-600 hover:bg-orange-700' : ''}
-              >
-                <Radio className="w-3 h-3 mr-1" />
-                3G/4G
-              </Button>
-            </div>
+          <div className="grid grid-cols-2 gap-1">
+            <Button
+              size="sm"
+              variant={networkMode === 'wifi' ? 'default' : 'outline'}
+              onClick={() => networkMode !== 'wifi' && toggleNetworkMode()}
+              className={`h-7 text-xs ${networkMode === 'wifi' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            >
+              <Wifi className="w-3 h-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant={networkMode === 'mobile' ? 'default' : 'outline'}
+              onClick={() => networkMode !== 'mobile' && toggleNetworkMode()}
+              className={`h-7 text-xs ${networkMode === 'mobile' ? 'bg-orange-600 hover:bg-orange-700' : ''}`}
+            >
+              <Radio className="w-3 h-3" />
+            </Button>
           </div>
 
           {/* Performance Mode */}
-          <div>
-            <p className="text-xs font-semibold text-slate-700 mb-2">Performance</p>
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                size="sm"
-                variant={performanceMode === 'turbo' ? 'default' : 'outline'}
-                onClick={() => setPerformanceLevel('turbo')}
-                className={performanceMode === 'turbo' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-                disabled={networkMode === 'mobile'}
-              >
-                <Zap className="w-3 h-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant={performanceMode === 'normal' ? 'default' : 'outline'}
-                onClick={() => setPerformanceLevel('normal')}
-                className={performanceMode === 'normal' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-              >
-                Normal
-              </Button>
-              <Button
-                size="sm"
-                variant={performanceMode === 'slow' ? 'default' : 'outline'}
-                onClick={() => setPerformanceLevel('slow')}
-                className={performanceMode === 'slow' ? 'bg-slate-600 hover:bg-slate-700' : ''}
-              >
-                <Battery className="w-3 h-3" />
-              </Button>
-            </div>
+          <div className="grid grid-cols-3 gap-1">
+            <Button
+              size="sm"
+              variant={performanceMode === 'turbo' ? 'default' : 'outline'}
+              onClick={() => setPerformanceLevel('turbo')}
+              className={`h-6 ${performanceMode === 'turbo' ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+              disabled={networkMode === 'mobile'}
+            >
+              <Zap className="w-2 h-2" />
+            </Button>
+            <Button
+              size="sm"
+              variant={performanceMode === 'normal' ? 'default' : 'outline'}
+              onClick={() => setPerformanceLevel('normal')}
+              className={`h-6 text-xs ${performanceMode === 'normal' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+            >
+              N
+            </Button>
+            <Button
+              size="sm"
+              variant={performanceMode === 'slow' ? 'default' : 'outline'}
+              onClick={() => setPerformanceLevel('slow')}
+              className={`h-6 ${performanceMode === 'slow' ? 'bg-slate-600 hover:bg-slate-700' : ''}`}
+            >
+              <Battery className="w-2 h-2" />
+            </Button>
           </div>
 
           {/* Status Info */}
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <p className="text-xs font-semibold text-slate-700 mb-1">
-              {getPerformanceConfig().description}
-            </p>
+          <div className="p-1 bg-slate-50 rounded text-center">
             <p className="text-xs text-slate-600">
-              {networkMode === 'wifi' ? '📶 Conexão completa' : '📱 Modo economia'}
+              {networkMode === 'wifi' ? '📶' : '📱'} {performanceMode === 'turbo' ? '🚀' : performanceMode === 'normal' ? '⚡' : '🐢'}
             </p>
           </div>
         </div>
