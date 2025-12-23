@@ -152,9 +152,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: visits = [] } = useQuery({
@@ -168,9 +170,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: sales = [] } = useQuery({
@@ -184,9 +188,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: followupLogs = [] } = useQuery({
@@ -200,9 +206,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: clientTasks = [] } = useQuery({
@@ -216,9 +224,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: documents = [] } = useQuery({
@@ -232,9 +242,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: interactions = [] } = useQuery({
@@ -248,9 +260,11 @@ export default function ClientProfile() {
       }
     },
     enabled: !!clientId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: 1
+    refetchOnMount: false,
+    retry: 0
   });
 
   const clientLabel = getClientLabelSync(sales);

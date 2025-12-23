@@ -102,10 +102,12 @@ export default function Home() {
         return [];
       }
     },
-    retry: 1,
+    retry: 0,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000
+    refetchOnMount: false,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
   });
 
   const { data: user } = useQuery({

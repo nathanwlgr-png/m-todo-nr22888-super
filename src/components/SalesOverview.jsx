@@ -20,9 +20,12 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchInterval: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: sales = [] } = useQuery({
@@ -35,9 +38,12 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchInterval: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: consumableOrders = [] } = useQuery({
@@ -50,9 +56,12 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchInterval: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 0
   });
 
   const { data: visits = [] } = useQuery({
@@ -65,9 +74,12 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchInterval: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 0
   });
 
   // Análise expandida de vendas
