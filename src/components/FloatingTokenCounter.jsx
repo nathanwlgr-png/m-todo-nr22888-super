@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Card } from '@/components/ui/card';
 import { Zap, Wifi, Radio, Battery, Database } from 'lucide-react';
