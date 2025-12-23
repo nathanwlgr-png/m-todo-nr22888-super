@@ -127,6 +127,7 @@ Retorne JSON válido.`;
       
       if (rejected.length > 0) {
         toast.warning(`${rejected.length} clientes rejeitados (fora da região laranja)`);
+      }
       
     } catch (error) {
       console.error('Erro ao importar:', error);
