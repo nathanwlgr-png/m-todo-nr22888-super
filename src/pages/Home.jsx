@@ -196,21 +196,20 @@ export default function Home() {
       </div>
       
       {/* Header Fixo */}
-      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 shadow-lg border-b-2 border-orange-500">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 flex items-center justify-center shadow-xl relative">
-            <div className="absolute inset-0 rounded-xl bg-white opacity-20 animate-pulse"></div>
-            <span className="text-white font-black text-lg z-10">NR</span>
-            <span className="absolute -bottom-1 -right-1 bg-orange-500 text-white text-[8px] font-bold px-1 rounded">22</span>
+      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-3 py-1.5 shadow-lg border-b border-orange-500">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 flex items-center justify-center shadow-xl relative">
+            <span className="text-white font-black text-xs z-10">NR</span>
+            <span className="absolute -bottom-0.5 -right-0.5 bg-orange-500 text-white text-[7px] font-bold px-0.5 rounded">22</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-base font-black text-white tracking-tight">Método NR22</h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] text-orange-400 font-semibold">CRM Automático</span>
-              <span className="text-[9px] text-slate-400">•</span>
-              <span className="text-[9px] text-blue-400 font-semibold">IA Adversary</span>
-              <span className="text-[9px] text-slate-400">•</span>
-              <span className="text-[9px] text-purple-400 font-semibold">Magnétic Tools</span>
+            <h1 className="text-xs font-black text-white tracking-tight">Método NR22</h1>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[7px] text-orange-400 font-semibold">CRM Automático</span>
+              <span className="text-[7px] text-slate-400">•</span>
+              <span className="text-[7px] text-blue-400 font-semibold">IA Adversary</span>
+              <span className="text-[7px] text-slate-400">•</span>
+              <span className="text-[7px] text-purple-400 font-semibold">Magnétic Tools</span>
             </div>
           </div>
           
