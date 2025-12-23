@@ -508,6 +508,24 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
+          <Link to={createPageUrl('LoadPremiumDifferentials')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Diferenciais
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('EquipmentSalesCenter')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-orange-200 text-orange-700">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              Kit Vendas
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Link to={createPageUrl('ConsumableOrderHistory')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

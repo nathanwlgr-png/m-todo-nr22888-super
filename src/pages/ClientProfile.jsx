@@ -774,6 +774,28 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           }}
         />
 
+        {/* Kit de Vendas de Equipamento */}
+        <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              Material de Vendas Seamaty
+            </h3>
+          </div>
+          <p className="text-sm text-slate-700 mb-3">
+            Acesse frases de efeito, gatilhos de persuasão, casos clínicos e templates prontos para cada equipamento.
+          </p>
+          <Button
+            onClick={() => navigate(createPageUrl('EquipmentSalesCenter'))}
+            className="w-full bg-orange-600 hover:bg-orange-700"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Abrir Central de Equipamentos
+          </Button>
+        </Card>
+
         {/* Seletor de Proposta Inteligente com IA */}
         <AIProposalSelector client={client} />
 
