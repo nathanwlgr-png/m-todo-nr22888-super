@@ -69,6 +69,7 @@ import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 import FloatingTokenCounter from '@/components/FloatingTokenCounter';
 import FloatingUploadButton from '@/components/FloatingUploadButton';
 import CompletePDFManual from '@/components/CompletePDFManual';
+import ExportAllReports from '@/components/ExportAllReports';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -311,6 +312,7 @@ export default function Home() {
       {/* CRM + Gestão IA Unificado */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 gap-3">
+          <ExportAllReports />
           <CompletePDFManual />
           <CRMExternalSync />
           <AITaskManager />
