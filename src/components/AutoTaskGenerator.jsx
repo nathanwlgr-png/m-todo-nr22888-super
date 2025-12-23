@@ -274,11 +274,8 @@ Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de ma
 
     // DESABILITADO: Evitar rate limit
     // checkBehaviors();
-    };
-
-    // NÃO executar automaticamente
-    // Usuário aciona manualmente quando necessário
-    }, []);
+    // NÃO executar automaticamente - usuário aciona manualmente
+  }, []);
 
   return null; // Silent background component
 }
