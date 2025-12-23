@@ -154,6 +154,53 @@ ${i + 1}. ${c.first_name} - ${c.clinic_name || 'N/A'}
     toast.success('📥 Download iniciado!');
   };
 
+  const sendToWhatsApp = async () => {
+    const hemoguide = `🐴 *HEMOGASOMETRIA EQUINA - GUIA COMPLETO*
+
+📊 *O QUE AVALIA:*
+• *PaO₂ (85-100 mmHg)*: Oxigenação pulmonar - valores baixos = EIPH
+• *PaCO₂ (38-46 mmHg)*: Eficiência ventilação - aumento = fadiga respiratória
+• *pH (7.35-7.45)*: Equilíbrio ácido-base - <7.30 = 78% queda performance
+• *Lactato*: <2 repouso, 4-20 exercício - indica metabolismo anaeróbico
+• *Eletrólitos (Na⁺, K⁺, Ca²⁺)*: Previne cãibras, arritmias, cólica
+• *Hematócrito (32-48%)*: Transporte O₂, monitora desidratação
+
+🚨 *8 SITUAÇÕES CLÍNICAS:*
+1. Queda de performance repentina
+2. Fadiga precoce (enduro/CCE)
+3. EIPH - sangramento nasal pós-exercício
+4. Cólica pós-exercício (desequilíbrio eletrolítico)
+5. Rabdomiólise/Azotúria (dor muscular intensa)
+6. Monitoramento de treinamento
+7. Pré-competição (avaliar condição)
+8. Desidratação severa
+
+✅ *VANTAGENS:*
+• Diagnóstico em 2-5 minutos
+• Previne mortalidade (exaustão, IR)
+• Otimiza performance atlética
+• Diferencial competitivo
+• ROI: 1 diagnóstico salva cavalo R$ 500k+
+
+📚 *7 EVIDÊNCIAS CIENTÍFICAS:*
+1. Lactato prediz performance (92% precisão)
+2. PaO₂ detecta EIPH (87% casos)
+3. Monitoramento reduz mortalidade enduro (45%)
+4. pH <7.30 = 78% queda performance
+5. K⁺ alterado precede rabdomiólise 24-48h
+6. Reduz tempo diagnóstico 70% vs lab externo
+7. Eletrólitos previnem cólica em provas longas
+
+🎯 *CONCLUSÃO:*
+Indispensável para medicina esportiva equina. Um diagnóstico precoce justifica todo investimento.`;
+
+    await navigator.clipboard.writeText(hemoguide);
+    toast.success('📋 Guia copiado!', {
+      description: 'Cole no WhatsApp para enviar',
+      duration: 4000
+    });
+  };
+
   return (
     <Card className="p-5 bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 shadow-lg">
       <div className="flex items-center gap-3 mb-4">
@@ -199,18 +246,28 @@ ${i + 1}. ${c.first_name} - ${c.clinic_name || 'N/A'}
               </ul>
             </div>
 
-            <Button
-              onClick={downloadPack}
-              size="sm"
-              variant="outline"
-              className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
-            >
-              <Download className="w-3 h-3 mr-2" />
-              Baixar TXT
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={downloadPack}
+                size="sm"
+                variant="outline"
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+              >
+                <Download className="w-3 h-3 mr-2" />
+                Baixar
+              </Button>
+              <Button
+                onClick={sendToWhatsApp}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Wifi className="w-3 h-3 mr-2" />
+                WhatsApp
+              </Button>
+            </div>
 
             <p className="text-xs text-slate-600 text-center">
-              💡 Já está na área de transferência! Cole no WhatsApp/Notas
+              💡 Pacote completo na área de transferência
             </p>
           </>
         )}
