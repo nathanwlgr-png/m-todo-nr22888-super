@@ -68,7 +68,6 @@ import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 import FloatingTokenCounter from '@/components/FloatingTokenCounter';
 import FloatingUploadButton from '@/components/FloatingUploadButton';
-import CompletePDFManual from '@/components/CompletePDFManual';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -311,7 +310,6 @@ export default function Home() {
       {/* CRM + Gestão IA Unificado */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 gap-3">
-          <CompletePDFManual />
           <CRMExternalSync />
           <AITaskManager />
           <PersonalizedContentGenerator />
