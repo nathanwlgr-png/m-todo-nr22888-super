@@ -18,7 +18,8 @@ import {
   Search,
   FileText,
   Mic,
-  Settings
+  Settings,
+  Play
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
