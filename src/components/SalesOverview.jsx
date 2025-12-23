@@ -20,13 +20,13 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 0,
-    onError: () => []
+    enabled: false
   });
 
   const { data: sales = [] } = useQuery({
@@ -41,13 +41,13 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 0,
-    enabled: clients.length > 0
+    enabled: false
   });
 
   const { data: consumableOrders = [] } = useQuery({
@@ -60,12 +60,13 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0
+    retry: 0,
+    enabled: false
   });
 
   const { data: visits = [] } = useQuery({
@@ -80,13 +81,13 @@ export default function SalesOverview() {
         return [];
       }
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 0,
-    enabled: clients.length > 0
+    enabled: false
   });
 
   // Análise expandida de vendas

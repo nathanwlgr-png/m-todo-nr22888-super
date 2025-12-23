@@ -106,9 +106,9 @@ export default function Home() {
     retry: 0,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
-    staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     onError: () => []
   });
 
