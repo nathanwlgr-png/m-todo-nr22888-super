@@ -156,17 +156,14 @@ Formato: [TIPO] - [Título curto] | Descrição em 1 linha
 Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de mais informações técnicas`
               });
 
-              const [type, rest] = aiSuggestion.split(' - ');
-              const [title, description] = rest?.split(' | ') || ['Follow-up', 'Entrar em contato'];
-
               const priority = engagementScore > 60 ? 'alta' : client.status === 'quente' ? 'alta' : 'media';
-              
+
               await createTaskMutation.mutateAsync({
                 client_id: client.id,
                 client_name: client.first_name,
-                title: title?.trim() || 'Follow-up necessário',
-                description: `${description?.trim() || 'Cliente não respondeu aos últimos contatos'} | Engagement: ${engagementScore}%`,
-                type: type?.trim() || 'follow_up',
+                title: task.title,
+                description: `${task.description} | Engagement: ${engagementScore}% | Perfil: ${client.numerology_number || 'N/A'}`,
+                type: task.type,
                 priority,
                 due_date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0],
                 status: 'pendente',

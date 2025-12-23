@@ -41,29 +41,22 @@ export default function DocumentMonitorAI() {
     const newFindings = [];
 
     try {
-      // Find unanalyzed documents
-      const unanalyzedDocs = documents.filter(d => !d.notes || d.notes === '');
+      // Find unanalyzed documents (últimos 3 apenas para otimização)
+      const unanalyzedDocs = documents.filter(d => !d.notes || d.notes === '').slice(0, 3);
 
-      for (const doc of unanalyzedDocs.slice(0, 5)) {
+      for (const doc of unanalyzedDocs) {
         try {
-          // Analyze document with LLM
+          // Análise otimizada e focada
           const analysis = await base44.integrations.Core.InvokeLLM({
-            prompt: `Analise este documento:
-Tipo: ${doc.type}
-Nome: ${doc.title}
-Cliente: ${doc.client_name}
+            prompt: `Documento: ${doc.title} (${doc.type}) - Cliente: ${doc.client_name}
 
-Extraia:
-1. Tipo real do documento (proposta, contrato, relatório, etc)
-2. Informações-chave (valores, datas, equipamentos mencionados)
-3. Status do documento (pendente, assinado, cancelado)
-4. Resumo em 1 linha
+Análise RÁPIDA:
+1. Valor(s) mencionado(s): [extraia R$]
+2. Data(s) importante(s): [extraia datas]
+3. Equipamento(s): [liste]
+4. Status: [pendente/assinado/cancelado]
 
-Retorne em formato:
-TIPO: [tipo]
-VALORES: [valores se houver]
-STATUS: [status]
-RESUMO: [resumo]`,
+Seja BREVE e DIRETO.`,
             add_context_from_internet: false
           });
 

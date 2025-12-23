@@ -73,6 +73,7 @@ import QuickToolsPanel from '@/components/QuickToolsPanel';
 import { Input } from '@/components/ui/input';
 import DocumentMonitorAI from '@/components/DocumentMonitorAI';
 import SystemManualPDF from '@/components/SystemManualPDF';
+import MarketAnalysisAI from '@/components/MarketAnalysisAI';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -659,6 +660,11 @@ export default function Home() {
 
             {/* Manual do Sistema PDF */}
             <SystemManualPDF />
+
+            {/* Análise de Mercado com GPS + IBGE */}
+            <div className="mt-6">
+              <MarketAnalysisAI />
+            </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Link to={createPageUrl('RevenueForecastPage')}>
