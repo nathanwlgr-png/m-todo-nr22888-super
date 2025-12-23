@@ -201,6 +201,33 @@ export default function SalesOverview() {
         </div>
       </Card>
 
+      {/* Insumos */}
+      <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-300 shadow-lg">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+            <TrendingUp className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Insumos Vendidos</h3>
+            <p className="text-xs text-slate-600">Receita recorrente</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 bg-white rounded-lg border border-blue-200">
+            <p className="text-xs text-slate-500 mb-1">Total Pedidos</p>
+            <p className="text-2xl font-bold text-blue-700">{analytics.totalConsumables}</p>
+            <p className="text-xs text-slate-500">entregas</p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg border border-blue-200">
+            <p className="text-xs text-slate-500 mb-1">Receita</p>
+            <p className="text-xl font-bold text-blue-700">
+              R$ {(analytics.consumablesRevenue / 1000).toFixed(0)}k
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }
