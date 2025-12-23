@@ -114,10 +114,11 @@ export default function AutoTaskGenerator() {
   };
 
   useEffect(() => {
+    // TOTALMENTE DESABILITADO PARA EVITAR RATE LIMIT
+    return;
+    
     if (clients.length === 0) return;
 
-    // DESABILITADO: Evitar rate limit
-    // Executar apenas manualmente
     const checkBehaviors = async () => {
       const today = new Date();
       const threeDaysAgo = new Date(today);

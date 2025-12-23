@@ -57,6 +57,7 @@ export default function SmartSalesFlowOptimizer() {
   });
 
   const analyzeTopClients = async () => {
+    if (analyzing) return; // Prevent double clicks
     setAnalyzing(true);
     try {
       // Pegar top 5 clientes por prioridade
