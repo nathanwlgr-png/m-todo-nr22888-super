@@ -25,14 +25,17 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0
+    retry: 0,
+    onError: () => []
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
     queryFn: async () => {
       try {
-        return await base44.entities.Sale.list();
+        const allSales = await base44.entities.Sale.list();
+        const validClientIds = new Set(clients.map(c => c.id));
+        return allSales.filter(s => !s.client_id || validClientIds.has(s.client_id));
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
         return [];
@@ -43,7 +46,8 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0
+    retry: 0,
+    enabled: clients.length > 0
   });
 
   const { data: consumableOrders = [] } = useQuery({
@@ -68,7 +72,9 @@ export default function SalesOverview() {
     queryKey: ['all-visits'],
     queryFn: async () => {
       try {
-        return await base44.entities.Visit.list('-scheduled_date', 100);
+        const allVisits = await base44.entities.Visit.list('-scheduled_date', 100);
+        const validClientIds = new Set(clients.map(c => c.id));
+        return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
       } catch (error) {
         console.error('Erro ao carregar visitas:', error);
         return [];
@@ -79,7 +85,8 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0
+    retry: 0,
+    enabled: clients.length > 0
   });
 
   // Análise expandida de vendas

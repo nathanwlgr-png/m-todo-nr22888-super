@@ -108,7 +108,8 @@ export default function Home() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     staleTime: 30 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000,
+    onError: () => []
   });
 
   const { data: user } = useQuery({
