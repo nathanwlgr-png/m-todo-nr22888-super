@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Upload, Loader2, MapPin, Route } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Região Nathan (Laranja) - APENAS ESTAS CIDADES
@@ -123,6 +125,62 @@ Retorne JSON válido.`;
 
       if (createdClients.length > 0) {
         toast.success(`${createdClients.length} clientes da região laranja cadastrados!`);
+        
+        // Gerar planejamento de visitas usando IA
+        try {
+          const planPrompt = `Analise estes clientes cadastrados e crie um planejamento estratégico de visitas.
+
+CLIENTES CADASTRADOS:
+${createdClients.map(c => `- ${c.first_name} (${c.clinic_name || 'N/A'}) em ${c.city} - Equipamento: ${c.current_equipment || 'Nenhum'}`).join('\n')}
+
+REGIÃO: Laranja (Nathan) - Marília, Presidente Prudente, Assis, Tupã, Adamantina, Bauru, Araçatuba, Ourinhos, Dracena, Lins
+
+Crie um planejamento considerando:
+1. Rota logística otimizada (proximidade geográfica)
+2. Prioridade por tipo de cliente (sem equipamento = maior prioridade)
+3. Agrupamento por cidade para eficiência
+4. Sugestão de abordagem por cliente
+
+Retorne uma estratégia de visitas estruturada.`;
+
+          const plan = await base44.integrations.Core.InvokeLLM({
+            prompt: planPrompt,
+            response_json_schema: {
+              type: "object",
+              properties: {
+                suggested_route: { type: "string" },
+                priority_clients: { type: "array", items: { type: "string" } },
+                visit_strategy: { type: "string" },
+                estimated_days: { type: "number" }
+              }
+            }
+          });
+
+          setResult({
+            total: response.clients.length,
+            created: createdClients.length,
+            rejected: rejected.length,
+            rejectedDetails: rejected,
+            clients: createdClients,
+            visitPlan: plan
+          });
+        } catch (error) {
+          console.log('Erro ao gerar planejamento:', error);
+          setResult({
+            total: response.clients.length,
+            created: createdClients.length,
+            rejected: rejected.length,
+            rejectedDetails: rejected,
+            clients: createdClients
+          });
+        }
+      } else {
+        setResult({
+          total: response.clients.length,
+          created: 0,
+          rejected: rejected.length,
+          rejectedDetails: rejected
+        });
       }
       
       if (rejected.length > 0) {
@@ -221,6 +279,92 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
                 )}
               </div>
             </Card>
+
+            {/* Clientes Cadastrados */}
+            {result.clients && result.clients.length > 0 && (
+              <Card className="p-4 bg-blue-50 border-blue-200">
+                <h3 className="font-semibold text-blue-800 mb-3">📋 Clientes Cadastrados</h3>
+                <div className="text-sm text-blue-700 space-y-2 max-h-60 overflow-y-auto">
+                  {result.clients.map((client, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2 bg-white rounded-lg">
+                      <span className="font-bold text-blue-600">{idx + 1}.</span>
+                      <div className="flex-1">
+                        <p className="font-semibold">{client.first_name}</p>
+                        {client.clinic_name && <p className="text-xs text-slate-600">{client.clinic_name}</p>}
+                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {client.city}
+                        </p>
+                        {client.current_equipment && (
+                          <p className="text-xs text-green-600 mt-1">✅ Tem: {client.current_equipment}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-4 space-y-2">
+                  <Link to={createPageUrl('Home')}>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Ver no Mapa de Vendas
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('Clients')}>
+                    <Button variant="outline" className="w-full">
+                      Ver Lista de Clientes
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            )}
+
+            {/* Planejamento de Visitas */}
+            {result.visitPlan && (
+              <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <h3 className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                  <Route className="w-5 h-5" />
+                  🎯 Planejamento Estratégico de Visitas
+                </h3>
+                <div className="text-sm space-y-3">
+                  <div>
+                    <p className="font-medium text-purple-800">Rota Sugerida:</p>
+                    <p className="text-purple-700">{result.visitPlan.suggested_route}</p>
+                  </div>
+                  
+                  {result.visitPlan.priority_clients && result.visitPlan.priority_clients.length > 0 && (
+                    <div>
+                      <p className="font-medium text-purple-800">Prioridade Alta:</p>
+                      <ul className="text-purple-700 space-y-1">
+                        {result.visitPlan.priority_clients.map((client, idx) => (
+                          <li key={idx}>• {client}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <p className="font-medium text-purple-800">Estratégia:</p>
+                    <p className="text-purple-700">{result.visitPlan.visit_strategy}</p>
+                  </div>
+                  
+                  {result.visitPlan.estimated_days && (
+                    <div className="pt-2 border-t border-purple-200">
+                      <p className="text-purple-800">
+                        ⏱️ Tempo estimado: <span className="font-bold">{result.visitPlan.estimated_days} dias</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+                
+                <Link to={createPageUrl('VisitPlanner')}>
+                  <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
+                    <Route className="w-4 h-4 mr-2" />
+                    Abrir Planejador de Rotas
+                  </Button>
+                </Link>
+              </Card>
+            )}
 
             {result.rejectedDetails && result.rejectedDetails.length > 0 && (
               <Card className="p-4 bg-orange-50 border-orange-200">
