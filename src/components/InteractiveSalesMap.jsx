@@ -9,59 +9,22 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import 'leaflet/dist/leaflet.css';
 
-// Regiões do mapa de vendas (coordenadas aproximadas das regiões de SP)
+// Região Laranja (Nathan) - Delimitada pelas cidades de referência
 const salesRegions = [
   {
-    id: 'amanda',
-    name: 'Amanda',
-    color: '#FCD34D',
-    cities: ['São Paulo', 'Guarulhos', 'Osasco', 'Santo André', 'São Bernardo do Campo', 'Campinas', 'Sorocaba'],
-    coordinates: [
-      [-23.5, -46.6],
-      [-23.0, -46.5],
-      [-22.8, -47.0],
-      [-23.5, -47.5],
-      [-24.0, -47.0],
-      [-24.0, -46.5]
-    ]
-  },
-  {
-    id: 'gabi',
-    name: 'Gabi',
-    color: '#60A5FA',
-    cities: ['Ribeirão Preto', 'Araraquara', 'São Carlos', 'Franca', 'Jaboticabal'],
-    coordinates: [
-      [-21.0, -47.5],
-      [-21.0, -48.5],
-      [-22.0, -48.5],
-      [-22.5, -47.5],
-      [-22.0, -47.0]
-    ]
-  },
-  {
-    id: 'nando',
-    name: 'Nando',
-    color: '#34D399',
-    cities: ['Santos', 'São Vicente', 'Praia Grande', 'Guarujá', 'Registro'],
-    coordinates: [
-      [-23.9, -46.3],
-      [-24.5, -47.0],
-      [-25.0, -48.0],
-      [-24.5, -48.5],
-      [-23.9, -47.5]
-    ]
-  },
-  {
     id: 'nathan',
-    name: 'Nathan',
-    color: '#FB923C',
-    cities: ['Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins'],
+    name: 'Região Laranja',
+    color: '#FF8C00',
+    cities: ['Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins', 'Iporanga', 'Itapetininga', 'Rancharia', 'Guaiçara', 'Ribeirão Bonito'],
+    // Polígono baseado nas cidades limite mostradas nas imagens
     coordinates: [
-      [-21.5, -49.5],
-      [-21.5, -51.5],
-      [-22.5, -51.5],
-      [-23.0, -50.5],
-      [-22.5, -49.0]
+      [-24.587, -48.597], // Iporanga (sul)
+      [-24.587, -51.017], // Sudoeste
+      [-22.674, -51.983], // Rancharia (oeste)
+      [-21.833, -49.950], // Guaiçara (norte)
+      [-21.833, -48.100], // Nordeste
+      [-22.000, -48.100], // Ribeirão Bonito (leste)
+      [-23.593, -48.100], // Itapetininga (sudeste)
     ]
   }
 ];
