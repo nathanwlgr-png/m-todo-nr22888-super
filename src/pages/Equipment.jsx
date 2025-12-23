@@ -284,27 +284,28 @@ export default function Equipment() {
                   </div>
                 </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <DollarSign className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold text-emerald-700">
-                  R$ {eq.price.toLocaleString('pt-BR')}
-                </span>
-              </div>
-
-              {eq.monthly_bonus && (
-                <div className="flex items-start gap-2 text-sm">
-                  <Gift className="w-4 h-4 text-amber-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-amber-700">Bonificação:</p>
-                    <p className="text-slate-600">{eq.monthly_bonus}</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="w-4 h-4 text-emerald-600" />
+                    <span className="font-semibold text-emerald-700">
+                      R$ {eq.price.toLocaleString('pt-BR')}
+                    </span>
                   </div>
-                </div>
-              )}
 
-              {eq.bonus_details && (
-                <p className="text-xs text-slate-500 pl-6">{eq.bonus_details}</p>
-              )}
+                  {eq.monthly_bonus && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Gift className="w-4 h-4 text-amber-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-700">Bonificação:</p>
+                        <p className="text-slate-600">{eq.monthly_bonus}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {eq.bonus_details && (
+                    <p className="text-xs text-slate-500 pl-6">{eq.bonus_details}</p>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
