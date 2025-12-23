@@ -29,6 +29,7 @@ import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
 import Leads from './pages/Leads';
 import LeadsDashboard from './pages/LeadsDashboard';
+import MarketIntelligence from './pages/MarketIntelligence';
 import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
 import NewClient from './pages/NewClient';
@@ -39,6 +40,7 @@ import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
+import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
@@ -54,8 +56,6 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
-import MarketIntelligence from './pages/MarketIntelligence';
 import __Layout from './Layout.jsx';
 
 
@@ -91,6 +91,7 @@ export const PAGES = {
     "Leaderboard": Leaderboard,
     "Leads": Leads,
     "LeadsDashboard": LeadsDashboard,
+    "MarketIntelligence": MarketIntelligence,
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
     "NewClient": NewClient,
@@ -101,6 +102,7 @@ export const PAGES = {
     "PreVisitChecklist": PreVisitChecklist,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
+    "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
     "RegionalSearch": RegionalSearch,
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
@@ -116,8 +118,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
-    "MarketIntelligence": MarketIntelligence,
 }
 
 export const pagesConfig = {

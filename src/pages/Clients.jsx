@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Upload,
   ArrowUpDown,
-  Table
+  Table,
+  FileDown
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
@@ -37,6 +38,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const ORANGE_REGION_CITIES = [
   'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
@@ -189,6 +192,79 @@ export default function Clients() {
 
   const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter].filter(f => f !== 'all').length;
 
+  const generatePDF = () => {
+    const doc = new jsPDF('landscape');
+    
+    // Título
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('Lista Completa de Clientes - Nathan', 14, 15);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Total: ${clients.length} clientes | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
+    
+    // Preparar dados da tabela
+    const tableData = clients.map((client, index) => [
+      index + 1,
+      client.first_name || '-',
+      client.clinic_name || '-',
+      client.city || '-',
+      client.phone || '-',
+      client.email || '-',
+      client.current_equipment || '-',
+      client.status === 'quente' ? '🔥 Quente' : 
+        client.status === 'morno' ? '🌡️ Morno' : '❄️ Frio',
+      client.purchase_score ? `${client.purchase_score}%` : '-'
+    ]);
+    
+    // Criar tabela
+    doc.autoTable({
+      head: [['#', 'Nome', 'Clínica', 'Cidade', 'Telefone', 'Email', 'Equipamento', 'Status', 'Score']],
+      body: tableData,
+      startY: 28,
+      styles: { 
+        fontSize: 7,
+        cellPadding: 2,
+      },
+      headStyles: { 
+        fillColor: [255, 140, 0],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 40 },
+        6: { cellWidth: 35 },
+        7: { cellWidth: 20 },
+        8: { cellWidth: 15 }
+      },
+      margin: { top: 28 }
+    });
+    
+    // Adicionar resumo no final
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Resumo:', 14, finalY);
+    
+    doc.setFont(undefined, 'normal');
+    doc.text(`Clientes Quentes: ${clients.filter(c => c.status === 'quente').length}`, 14, finalY + 6);
+    doc.text(`Clientes Mornos: ${clients.filter(c => c.status === 'morno').length}`, 14, finalY + 12);
+    doc.text(`Clientes Frios: ${clients.filter(c => c.status === 'frio').length}`, 14, finalY + 18);
+    
+    // Salvar PDF
+    doc.save(`clientes-nathan-${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('PDF gerado com sucesso!');
+  };
+
   const handleImportTable = async () => {
     if (!tableData.trim()) {
       toast.error('Cole os dados da tabela primeiro');
@@ -315,6 +391,14 @@ Retorne JSON válido.`,
             className={`mr-2 ${showFunnel ? 'bg-indigo-600' : ''}`}
           >
             <TrendingUp className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={generatePDF}
+            className="mr-2"
+          >
+            <FileDown className="w-4 h-4" />
           </Button>
           <Button
             size="sm"
