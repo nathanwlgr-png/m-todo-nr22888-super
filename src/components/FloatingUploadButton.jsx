@@ -12,7 +12,7 @@ export default function FloatingUploadButton() {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const timeoutRef = React.useRef(null);
+  const timeoutRef = useRef(null);
 
   React.useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('uploaded_docs') || '[]');

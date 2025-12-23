@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Draggable from 'react-draggable';
 import { Card } from '@/components/ui/card';
 import { Zap, Wifi, Radio, Battery, Database } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function FloatingTokenCounter() {
   const [performanceMode, setPerformanceMode] = useState('normal');
   const [dataUsage, setDataUsage] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const timeoutRef = React.useRef(null);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const saved = parseInt(localStorage.getItem('tokens_remaining') || '117000000');
