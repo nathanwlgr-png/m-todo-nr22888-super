@@ -385,7 +385,13 @@ export default function MyProfile() {
             Quanto mais detalhado seu perfil, melhor a IA consegue imitar seu estilo nas mensagens automáticas e sugestões de vendas.
           </p>
         </Card>
-      </div>
-    </div>
-  );
-}
+
+        {/* Treinamento de Oratória */}
+        <SpeechTrainingModule />
+
+        {/* Análise de Linguagem Corporal */}
+        <BodyLanguageAnalyzer />
+        </div>
+        </div>
+        );
+        }

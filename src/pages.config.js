@@ -1,7 +1,10 @@
 import AIAssistant from './pages/AIAssistant';
+import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
 import Calendar from './pages/Calendar';
+import CampaignDetails from './pages/CampaignDetails';
+import Campaigns from './pages/Campaigns';
 import CaptureLeads from './pages/CaptureLeads';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
@@ -16,6 +19,7 @@ import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
 import EquipmentComparison from './pages/EquipmentComparison';
 import EquipmentPriceList from './pages/EquipmentPriceList';
+import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
 import GlobalSearch from './pages/GlobalSearch';
@@ -29,9 +33,12 @@ import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
 import Leads from './pages/Leads';
 import LeadsDashboard from './pages/LeadsDashboard';
+import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
+import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
+import NewCampaign from './pages/NewCampaign';
 import NewClient from './pages/NewClient';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
@@ -56,21 +63,17 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import Campaigns from './pages/Campaigns';
-import NewCampaign from './pages/NewCampaign';
-import CampaignDetails from './pages/CampaignDetails';
-import AdvancedSalesReports from './pages/AdvancedSalesReports';
-import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
-import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
-import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AdvancedSalesReports": AdvancedSalesReports,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
     "Calendar": Calendar,
+    "CampaignDetails": CampaignDetails,
+    "Campaigns": Campaigns,
     "CaptureLeads": CaptureLeads,
     "ClientProfile": ClientProfile,
     "Clients": Clients,
@@ -85,6 +88,7 @@ export const PAGES = {
     "EquipmentCatalog": EquipmentCatalog,
     "EquipmentComparison": EquipmentComparison,
     "EquipmentPriceList": EquipmentPriceList,
+    "EquipmentSalesCenter": EquipmentSalesCenter,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
     "GlobalSearch": GlobalSearch,
@@ -98,9 +102,12 @@ export const PAGES = {
     "Leaderboard": Leaderboard,
     "Leads": Leads,
     "LeadsDashboard": LeadsDashboard,
+    "LoadEquipmentCatalog": LoadEquipmentCatalog,
+    "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
+    "NewCampaign": NewCampaign,
     "NewClient": NewClient,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
@@ -125,13 +132,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "Campaigns": Campaigns,
-    "NewCampaign": NewCampaign,
-    "CampaignDetails": CampaignDetails,
-    "AdvancedSalesReports": AdvancedSalesReports,
-    "LoadEquipmentCatalog": LoadEquipmentCatalog,
-    "EquipmentSalesCenter": EquipmentSalesCenter,
-    "LoadPremiumDifferentials": LoadPremiumDifferentials,
 }
 
 export const pagesConfig = {

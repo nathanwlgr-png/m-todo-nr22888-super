@@ -87,6 +87,7 @@ import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
 import NumerologyBestDayAI from '@/components/NumerologyBestDayAI';
 import CompetitorAnalysisAI from '@/components/CompetitorAnalysisAI';
 import ClientHealthScore from '@/components/ClientHealthScore';
+import ObjectionHandlingByProfile from '@/components/ObjectionHandlingByProfile';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -765,6 +766,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Client Health Score */}
         <ClientHealthScore client={client} />
+
+        {/* Controle de Objeções por Perfil */}
+        <ObjectionHandlingByProfile client={client} />
 
         {/* Gerador de Propostas */}
         <ProposalGenerator 
