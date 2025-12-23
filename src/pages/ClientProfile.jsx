@@ -88,6 +88,8 @@ import NumerologyBestDayAI from '@/components/NumerologyBestDayAI';
 import CompetitorAnalysisAI from '@/components/CompetitorAnalysisAI';
 import ClientHealthScore from '@/components/ClientHealthScore';
 import ObjectionHandlingByProfile from '@/components/ObjectionHandlingByProfile';
+import TeamChat from '@/components/TeamChat';
+import CollaborationIndicator from '@/components/CollaborationIndicator';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -526,6 +528,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
       {/* Content */}
       <div className="px-6 -mt-16 space-y-4">
+        {/* Collaboration Indicator */}
+        <CollaborationIndicator contextType="client" contextId={clientId} />
+
         {/* AI Summary */}
         {aiSummary && (
           <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
@@ -1267,10 +1272,18 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         >
           <MessageSquare className="w-5 h-5 mr-2" />
           Abrir Assistente IA
-        </Button>
-      </div>
+          </Button>
+          </div>
 
-      {/* Edit Dialog */}
+          {/* Team Chat */}
+          <TeamChat 
+          contextType="client" 
+          contextId={clientId} 
+          contextName={client.first_name}
+          compact={true}
+          />
+
+          {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>

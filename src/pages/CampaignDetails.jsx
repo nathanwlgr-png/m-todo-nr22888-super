@@ -23,6 +23,8 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import TeamChat from '@/components/TeamChat';
+import CollaborationIndicator from '@/components/CollaborationIndicator';
 
 export default function CampaignDetails() {
   const navigate = useNavigate();
@@ -143,6 +145,9 @@ export default function CampaignDetails() {
       </div>
 
       <div className="px-4 -mt-8 space-y-4">
+        {/* Collaboration Indicator */}
+        <CollaborationIndicator contextType="campaign" contextId={campaignId} />
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full">
             <TabsTrigger value="overview" className="flex-1">Visão Geral</TabsTrigger>
@@ -345,7 +350,15 @@ export default function CampaignDetails() {
             })}
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
-  );
-}
+
+        {/* Team Chat */}
+        <TeamChat 
+          contextType="campaign" 
+          contextId={campaignId} 
+          contextName={campaign.name}
+          compact={true}
+        />
+        </div>
+        </div>
+        );
+        }
