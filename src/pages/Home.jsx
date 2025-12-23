@@ -83,6 +83,7 @@ import AITokenCounter from '@/components/AITokenCounter';
 import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
 import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
 import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
+import SmartSalesFlowOptimizer from '@/components/SmartSalesFlowOptimizer';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -298,6 +299,11 @@ export default function Home() {
         {/* Sales Overview */}
         <div className="mb-6">
           <SalesOverview />
+        </div>
+
+        {/* Smart Sales Flow Optimizer */}
+        <div className="mb-6">
+          <SmartSalesFlowOptimizer />
         </div>
 
         <div className="grid grid-cols-2 gap-3 dashboard-metrics">
