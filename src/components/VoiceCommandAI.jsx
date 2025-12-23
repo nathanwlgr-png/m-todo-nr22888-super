@@ -22,17 +22,26 @@ export default function VoiceCommandAI() {
 
       recognitionRef.current.onresult = async (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-        console.log('Ouvido:', transcript);
+        console.log('🎤 Ouvido:', transcript);
+        toast.info(`Ouvi: ${transcript}`, { duration: 2000 });
 
-        // Detecta ativação com "NR" ou "Hey NR"
-        if (transcript.includes('nr') || transcript.includes('hey nr') || transcript.includes('ei nr')) {
+        // Detecta ativação com "NR" ou variações
+        const activationWords = ['nr', 'ene erre', 'enr', 'hey nr', 'ei nr', 'oi nr', 'venda nr'];
+        const isActivation = activationWords.some(word => transcript.includes(word));
+        
+        if (isActivation) {
           setActivated(true);
           speak('Sim, estou aqui. O que você precisa?');
+          toast.success('✅ NR ativado!');
           
-          // Remove "nr" do comando
-          const command = transcript.replace(/nr|hey nr|ei nr/gi, '').trim();
+          // Remove palavras de ativação do comando
+          let command = transcript;
+          activationWords.forEach(word => {
+            command = command.replace(new RegExp(word, 'gi'), '');
+          });
+          command = command.trim();
           
-          if (command.length > 0) {
+          if (command.length > 3) {
             await processCommand(command);
           }
         } else if (activated) {
@@ -89,10 +98,23 @@ export default function VoiceCommandAI() {
   };
 
   const speak = (text) => {
+    // Cancela qualquer fala anterior
+    window.speechSynthesis.cancel();
+    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 1.1;
-    utterance.pitch = 1;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    utterance.onstart = () => {
+      console.log('🔊 Falando:', text);
+    };
+    
+    utterance.onerror = (error) => {
+      console.error('Erro ao falar:', error);
+    };
+    
     window.speechSynthesis.speak(utterance);
   };
 
@@ -257,8 +279,23 @@ Retorne:
 
       {/* Indicador de status */}
       {listening && (
-        <div className="fixed bottom-24 right-6 bg-black/80 text-white text-xs px-4 py-2 rounded-full z-50">
-          {processing ? '⚡ Processando...' : activated ? '🎤 Ouvindo comando' : '👂 Diga "NR"'}
+        <div className="fixed bottom-24 right-6 bg-black/90 text-white text-sm px-4 py-3 rounded-2xl z-50 shadow-2xl backdrop-blur">
+          {processing ? (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+              <span>⚡ Processando...</span>
+            </div>
+          ) : activated ? (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span>🎤 Diga seu comando</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+              <span>👂 Diga "NR" para ativar</span>
+            </div>
+          )}
         </div>
       )}
     </>
