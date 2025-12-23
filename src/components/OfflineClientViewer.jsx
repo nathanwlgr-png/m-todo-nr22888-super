@@ -168,6 +168,6 @@ export default function OfflineClientViewer() {
           </Card>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
