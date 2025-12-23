@@ -53,6 +53,7 @@ import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import ImportClientsTable from './pages/ImportClientsTable';
+import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import __Layout from './Layout.jsx';
 
 
@@ -112,6 +113,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
     "ImportClientsTable": ImportClientsTable,
+    "MonthlyVisitPlanner": MonthlyVisitPlanner,
 }
 
 export const pagesConfig = {
