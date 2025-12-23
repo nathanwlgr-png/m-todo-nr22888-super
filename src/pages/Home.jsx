@@ -66,11 +66,8 @@ import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
 import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
 import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
-import FloatingTokenCounter from '@/components/FloatingTokenCounter';
-import FloatingUploadButton from '@/components/FloatingUploadButton';
 import CompletePDFManual from '@/components/CompletePDFManual';
 import ExportAllReports from '@/components/ExportAllReports';
-import FloatingDocumentImporter from '@/components/FloatingDocumentImporter';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -350,16 +347,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sistema de Correção Automática com 3 IAs - Botão Flutuante */}
-      <AIErrorCorrectionSystem />
-
       {/* Botão Flutuante Material Técnico */}
       <FloatingTechnicalMaterial />
-
-      {/* Floating Buttons - Draggable com Auto-Reset 5s */}
-      <FloatingDocumentImporter />
-      <FloatingTokenCounter />
-      <FloatingUploadButton />
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">

@@ -8,10 +8,12 @@ import SystemHealthChecker from './components/SystemHealthChecker';
 import TestFlowSimulator from './components/TestFlowSimulator';
 import FollowUpAutomation from './components/FollowUpAutomation';
 import WhatsAppNotificationService from './components/WhatsAppNotificationService';
+import TopToolbar from './components/TopToolbar';
 
 export default function Layout({ children }) {
   return (
     <ErrorRecoverySystem>
+      <TopToolbar />
       <SystemHealthChecker />
       <TestFlowSimulator />
       <SystemHealthMonitor />
@@ -20,7 +22,9 @@ export default function Layout({ children }) {
       <GoogleSheetsIntegration />
       <FollowUpAutomation />
       <WhatsAppNotificationService />
-      {children}
+      <div className="pt-14">
+        {children}
+      </div>
     </ErrorRecoverySystem>
   );
 }
