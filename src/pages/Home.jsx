@@ -47,6 +47,8 @@ import VoiceCommandSystem from '@/components/VoiceCommandSystem';
 import AIConfigCenter from '@/components/AIConfigCenter';
 import AdvancedAIHub from '@/components/AdvancedAIHub';
 import AIRateLimitManager from '@/components/AIRateLimitManager';
+import FloatingPerformanceMonitor from '@/components/FloatingPerformanceMonitor';
+import WorkflowAutomationAI from '@/components/WorkflowAutomationAI';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -266,10 +268,7 @@ export default function Home() {
         </Card>
       </div>
 
-      {/* Quick Tips for New Users */}
-      <div className="px-6 mt-6">
-        <QuickTips />
-      </div>
+
 
       {/* Personal Goals Widget */}
       <div className="px-6 mt-6">
@@ -312,15 +311,17 @@ export default function Home() {
         <AdvancedAIHub />
       </div>
 
-      {/* Lab Brand Competitor Analysis */}
+      {/* Workflow Automation AI */}
       <div className="px-6 mt-6">
-        <LabBrandCompetitorAnalysis />
+        <WorkflowAutomationAI />
       </div>
 
-      {/* Gamification Widget */}
-      <div className="px-6 mt-6">
-        <GamificationWidget />
-      </div>
+      {/* Floating Performance Monitor */}
+      <FloatingPerformanceMonitor />
+
+
+
+
 
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
