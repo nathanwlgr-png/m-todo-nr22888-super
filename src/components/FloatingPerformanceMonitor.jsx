@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
  */
 export default function FloatingPerformanceMonitor() {
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const [metrics, setMetrics] = useState({
     fps: 60,
     memory: 0,
@@ -70,18 +72,26 @@ export default function FloatingPerformanceMonitor() {
 
   return (
     <>
-      {/* Botão Flutuante */}
+      {/* Botão Flutuante Arrastável */}
       <motion.div
+        drag
+        dragMomentum={false}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={(e, info) => {
+          setIsDragging(false);
+          setPosition({ x: info.offset.x, y: info.offset.y });
+        }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed bottom-24 right-6 z-50"
+        className="fixed bottom-24 right-6 z-50 cursor-move"
+        style={{ x: position.x, y: position.y }}
       >
         <Button
-          onClick={() => setOpen(!open)}
+          onClick={() => !isDragging && setOpen(!open)}
           size="lg"
-          className={`w-16 h-16 rounded-full shadow-2xl bg-gradient-to-r ${getScoreColor(metrics.score)}`}
+          className={`w-14 h-14 rounded-full shadow-2xl bg-gradient-to-r ${getScoreColor(metrics.score)}`}
         >
-          <Activity className="w-7 h-7 text-white" />
+          <Activity className="w-6 h-6 text-white" />
         </Button>
       </motion.div>
 
