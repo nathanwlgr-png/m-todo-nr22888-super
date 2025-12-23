@@ -62,6 +62,7 @@ export default function Clients() {
   const [processing, setProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
+  const [results, setResults] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -276,7 +277,11 @@ Extraia e retorne um array de clientes com os seguintes campos (se disponíveis)
 - address (endereço)
 - cnpj
 - current_equipment (equipamento/máquina atual que possui)
-- decision_role (se mencionado: proprietario, veterinario_responsavel, etc)
+- decision_role: Sugira automaticamente baseado no nome da clínica:
+  * Se tiver "Hospital", "Centro" ou "Clínica Grande" → "veterinario_responsavel"
+  * Se tiver "Dr.", "Dra.", nome próprio → "veterinario_responsavel"
+  * Casos simples como "Clínica", "Pet Shop" → "proprietario"
+  * Se não conseguir determinar → "proprietario"
 
 Se o cliente já possui equipamento mencionado, capture em "current_equipment".
 Se não houver informação sobre um campo, deixe vazio ou null.
@@ -308,56 +313,91 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
         }
       });
 
+      // Buscar clientes existentes
+      const existingClients = await base44.entities.Client.list('-updated_date', 500);
+      
       const createdClients = [];
+      const updatedClients = [];
       const rejected = [];
+      const duplicates = [];
       
       for (const clientData of response.clients) {
-        if (clientData.first_name) {
-          const cityMatch = ORANGE_REGION_CITIES.some(validCity => 
-            clientData.city?.toLowerCase().includes(validCity.toLowerCase())
-          );
-          
-          if (!cityMatch) {
-            rejected.push({ 
-              name: clientData.first_name, 
-              city: clientData.city, 
-              reason: 'Cidade fora da região laranja' 
-            });
-            continue;
-          }
-          
-          try {
-            const client = await base44.entities.Client.create({
-              ...clientData,
-              decision_role: clientData.decision_role || 'proprietario',
-              status: 'morno',
-              purchase_score: 50
-            });
-            createdClients.push(client);
-          } catch (error) {
-            console.error('Erro ao criar cliente:', clientData.first_name, error);
-            rejected.push({ 
-              name: clientData.first_name, 
-              city: clientData.city, 
-              reason: 'Erro ao cadastrar' 
-            });
-          }
+        if (!clientData.first_name) continue;
+        
+        const cityMatch = ORANGE_REGION_CITIES.some(validCity => 
+          clientData.city?.toLowerCase().includes(validCity.toLowerCase())
+        );
+        
+        if (!cityMatch) {
+          rejected.push({ 
+            name: clientData.first_name, 
+            city: clientData.city, 
+            reason: 'Cidade fora da região laranja' 
+          });
+          continue;
+        }
+        
+        // Verificar duplicatas por nome ou telefone
+        const duplicate = existingClients.find(c => 
+          (c.first_name?.toLowerCase() === clientData.first_name?.toLowerCase()) ||
+          (clientData.phone && c.phone && c.phone.replace(/\D/g, '') === clientData.phone.replace(/\D/g, ''))
+        );
+        
+        if (duplicate) {
+          duplicates.push({ 
+            existing: duplicate,
+            new: clientData,
+            name: clientData.first_name 
+          });
+          continue;
+        }
+        
+        try {
+          const client = await base44.entities.Client.create({
+            ...clientData,
+            decision_role: clientData.decision_role || 'proprietario',
+            status: 'morno',
+            purchase_score: 50
+          });
+          createdClients.push(client);
+        } catch (error) {
+          console.error('Erro ao criar cliente:', clientData.first_name, error);
+          rejected.push({ 
+            name: clientData.first_name, 
+            city: clientData.city, 
+            reason: 'Erro ao cadastrar' 
+          });
         }
       }
 
-      if (createdClients.length > 0) {
-        toast.success(`${createdClients.length} clientes cadastrados com sucesso!`);
-        setShowImportDialog(false);
-        setTableData('');
-        setUploadedFile(null);
-        setGoogleSheetsUrl('');
+      // Mostrar resumo
+      let summary = [];
+      if (createdClients.length > 0) summary.push(`${createdClients.length} novos`);
+      if (updatedClients.length > 0) summary.push(`${updatedClients.length} atualizados`);
+      if (rejected.length > 0) summary.push(`${rejected.length} rejeitados`);
+      if (duplicates.length > 0) summary.push(`${duplicates.length} duplicados`);
+      
+      if (createdClients.length > 0 || updatedClients.length > 0) {
+        toast.success(`Importação concluída: ${summary.join(', ')}`);
+        if (duplicates.length === 0) {
+          setShowImportDialog(false);
+          setTableData('');
+          setUploadedFile(null);
+          setGoogleSheetsUrl('');
+        }
+      } else if (duplicates.length > 0) {
+        toast.info(`${duplicates.length} clientes duplicados encontrados - revise abaixo`);
       } else {
-        toast.warning('Nenhum cliente foi cadastrado');
+        toast.warning('Nenhum cliente foi importado');
       }
       
       if (rejected.length > 0) {
         console.log('Clientes rejeitados:', rejected);
-        toast.warning(`${rejected.length} clientes rejeitados (fora da região)`);
+      }
+      
+      // Armazenar duplicatas para revisão
+      if (duplicates.length > 0) {
+        setResults({ duplicates, createdClients, rejected });
       }
       
     } catch (error) {
@@ -840,6 +880,78 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
               </div>
             </div>
 
+            {results?.duplicates?.length > 0 && (
+              <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
+                <h4 className="font-semibold text-slate-800">Clientes Duplicados Encontrados:</h4>
+                {results.duplicates.map((dup, idx) => (
+                  <div key={idx} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="font-semibold text-slate-800 mb-2">{dup.name}</p>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-2 bg-white rounded">
+                        <p className="font-semibold text-slate-600 mb-1">Existente:</p>
+                        <p>Clínica: {dup.existing.clinic_name || '-'}</p>
+                        <p>Tel: {dup.existing.phone || '-'}</p>
+                        <p>Cidade: {dup.existing.city || '-'}</p>
+                      </div>
+                      <div className="p-2 bg-green-50 rounded">
+                        <p className="font-semibold text-green-700 mb-1">Novo:</p>
+                        <p>Clínica: {dup.new.clinic_name || '-'}</p>
+                        <p>Tel: {dup.new.phone || '-'}</p>
+                        <p>Cidade: {dup.new.city || '-'}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await base44.entities.Client.update(dup.existing.id, {
+                              ...dup.new,
+                              decision_role: dup.new.decision_role || 'proprietario',
+                            });
+                            toast.success(`Cliente ${dup.name} atualizado!`);
+                            setResults(prev => ({
+                              ...prev,
+                              duplicates: prev.duplicates.filter((_, i) => i !== idx)
+                            }));
+                          } catch (error) {
+                            toast.error('Erro ao atualizar');
+                          }
+                        }}
+                        className="flex-1 bg-blue-600"
+                      >
+                        Atualizar Existente
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            await base44.entities.Client.create({
+                              ...dup.new,
+                              decision_role: dup.new.decision_role || 'proprietario',
+                              status: 'morno',
+                              purchase_score: 50
+                            });
+                            toast.success(`Novo cliente ${dup.name} criado!`);
+                            setResults(prev => ({
+                              ...prev,
+                              duplicates: prev.duplicates.filter((_, i) => i !== idx)
+                            }));
+                          } catch (error) {
+                            toast.error('Erro ao criar');
+                          }
+                        }}
+                        className="flex-1"
+                      >
+                        Criar Novo
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button
                 onClick={handleImportTable}
@@ -865,6 +977,7 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
                   setTableData('');
                   setUploadedFile(null);
                   setGoogleSheetsUrl('');
+                  setResults(null);
                 }}
               >
                 Cancelar
