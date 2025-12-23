@@ -39,6 +39,136 @@ export default function DocumentRepository() {
     queryFn: () => base44.entities.GeneratedDocument.list('-created_date')
   });
 
+  // Adicionar perfil do Rodrigo automaticamente
+  React.useEffect(() => {
+    const addRodrigoProfile = async () => {
+      if (documents.length > 0 && documents.some(d => d.title?.includes('Rodrigo Sávio Mavetto'))) {
+        return; // Já existe
+      }
+
+      const rodrigoProfile = `
+╔═══════════════════════════════════════════════════════════════════════╗
+║                     PERFIL COMPLETO DE CLIENTE                        ║
+║                     Método NR22 - Análise Numerológica                ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════
+📋 DADOS BÁSICOS
+═══════════════════════════════════════════════════════════════════════
+
+Nome Completo: Rodrigo Sávio Mavetto
+Profissão: Veterinário
+Empresa: Spice e Cavalos
+Localização: Marília, SP
+
+
+═══════════════════════════════════════════════════════════════════════
+🔢 ANÁLISE NUMEROLÓGICA COMPLETA
+═══════════════════════════════════════════════════════════════════════
+
+Número do Nome: 8
+Número Principal: 8
+
+NÚMERO 8: O CONSTRUTOR DE IMPÉRIOS
+
+
+═══════════════════════════════════════════════════════════════════════
+👤 PERFIL COMPORTAMENTAL: O Magnata
+═══════════════════════════════════════════════════════════════════════
+
+CARACTERÍSTICAS:
+Ambicioso, determinado, pragmático. Foco em resultados e poder. Visão de longo prazo.
+Gosta de controle, autoridade e crescimento patrimonial. Pensa em ROI e expansão.
+
+ESTILO DE COMUNICAÇÃO PREFERIDO:
+Direto, objetivo, focado em números. Fala de investimento, retorno, lucro.
+Não gosta de conversa fiada. Vai direto ao ponto: quanto custa, quanto rende.
+
+GATILHOS MENTAIS MAIS EFETIVOS:
+✓ ROI e Payback
+✓ Crescimento e Expansão
+✓ Status e Reconhecimento
+✓ Controle e Poder
+✓ Resultados Comprovados
+
+OBJEÇÕES PROVÁVEIS:
+⚠️ "É caro demais"
+⚠️ "Qual o retorno real?"
+⚠️ "Preciso ver os números"
+⚠️ "Não tenho dinheiro agora"
+
+MELHOR ABORDAGEM DE VENDAS:
+Mostre ROI claro e comprovado. Use dados, gráficos, cases de sucesso.
+Fale de crescimento patrimonial e status. Equipamento como INVESTIMENTO, não gasto.
+
+
+═══════════════════════════════════════════════════════════════════════
+🎯 ESTRATÉGIA DE VENDAS PERSONALIZADA
+═══════════════════════════════════════════════════════════════════════
+
+PRIMEIRO CONTATO:
+- Canal recomendado: Reunião presencial ou videochamada
+- Melhor horário: Manhã (energia alta, produtividade)
+- Tom: Profissional, direto, focado em resultados
+
+APRESENTAÇÃO DO EQUIPAMENTO:
+- Foco total em ROI e lucro
+- Aumento de produtividade e receita
+- Payback rápido (mostrar em meses)
+- Equipamento como diferencial competitivo
+- Status e reconhecimento no mercado
+
+FECHAMENTO:
+Proposta com números claros, plano de investimento estruturado.
+Mostrar como o equipamento vai multiplicar o faturamento da clínica.
+
+
+═══════════════════════════════════════════════════════════════════════
+📊 PERFIL COMPLETO PARA CRM
+═══════════════════════════════════════════════════════════════════════
+
+{
+  "first_name": "Rodrigo",
+  "full_name": "Rodrigo Sávio Mavetto",
+  "empresa_vinculada": "Spice e Cavalos",
+  "city": "Marília",
+  "numerology_number": 8,
+  "behavioral_profile": "O Magnata",
+  "decision_style": "Direto, objetivo, focado em números",
+  "recommended_communication": "ROI, investimento, payback, crescimento",
+  "client_tone": "assertivo",
+  "purchase_motivators": ["ROI e Payback", "Crescimento", "Status", "Poder", "Resultados"],
+  "numerology_tip": "Cliente Número 8 - Fala a língua do DINHEIRO. Apresente ROI claro, payback rápido e visão de expansão."
+}
+
+
+═══════════════════════════════════════════════════════════════════════
+✅ PERFIL GERADO COM SUCESSO
+Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}
+Método: NR22 - Numerologia Aplicada a Vendas
+═══════════════════════════════════════════════════════════════════════
+`;
+
+      try {
+        await base44.entities.GeneratedDocument.create({
+          title: 'Perfil Completo - Rodrigo Sávio Mavetto (Spice e Cavalos)',
+          type: 'relatorio',
+          content: rodrigoProfile,
+          summary: 'Perfil numerológico e estratégia de vendas para Rodrigo (Número 8 - O Magnata)',
+          tags: ['rodrigo', 'spice e cavalos', 'marília', 'numerologia', 'número 8', 'perfil']
+        });
+        console.log('Perfil do Rodrigo adicionado automaticamente');
+      } catch (error) {
+        console.error('Erro ao adicionar perfil:', error);
+      }
+    };
+
+    if (!isLoading && documents) {
+      addRodrigoProfile();
+    }
+  }, [documents, isLoading]);
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.GeneratedDocument.create(data),
     onSuccess: () => {
