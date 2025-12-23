@@ -68,6 +68,7 @@ import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 import CompletePDFManual from '@/components/CompletePDFManual';
 import ExportAllReports from '@/components/ExportAllReports';
+import QuickToolsPanel from '@/components/QuickToolsPanel';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -578,7 +579,10 @@ export default function Home() {
                 Modo Offline
               </Button>
             </Link>
-            </div>
+              </div>
+
+            {/* Ferramentas Rápidas */}
+            <QuickToolsPanel />
 
           <div className="grid grid-cols-2 gap-4">
             <Link to={createPageUrl('RevenueForecastPage')}>
