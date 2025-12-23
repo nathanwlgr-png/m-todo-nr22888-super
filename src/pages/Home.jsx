@@ -62,6 +62,9 @@ import AdvancedSalesIntelligence from '@/components/AdvancedSalesIntelligence';
 import OfflinePackGenerator from '@/components/OfflinePackGenerator';
 import CompanionAnimalLabGuide from '@/components/CompanionAnimalLabGuide';
 import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
+import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
+import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
+import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -318,8 +321,20 @@ export default function Home() {
         </div>
       </div>
 
+      {/* IAs de Otimização */}
+      <div className="px-6 mt-6">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">⚡ Otimização Avançada</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <PipelineOptimizationAI />
+          <DashboardPerformanceAI />
+        </div>
+      </div>
+
       {/* Sistema de Correção Automática com 3 IAs */}
       <AIErrorCorrectionSystem />
+
+      {/* Botão Flutuante Material Técnico */}
+      <FloatingTechnicalMaterial />
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">
