@@ -55,6 +55,84 @@ export default function DataExportButton() {
           total_revenue: sales.reduce((sum, s) => sum + (s.sale_value || 0), 0),
           pipeline_value: clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0)
         },
+        training_guide: {
+          title: "GUIA COMPLETO VENDA NR - TREINAMENTO BÁSICO",
+          platform_overview: "Sistema completo de CRM veterinário com IA integrada para gestão de vendas, clientes e análises preditivas.",
+          getting_started: {
+            step1: "CADASTRO DE CLIENTES - Menu 'Novo Cliente' - Preencha dados básicos + numerologia para perfil comportamental",
+            step2: "IMPORTAÇÃO EM MASSA - Use 'Importar Tabela' para carregar planilhas de leads/clientes existentes",
+            step3: "SCANNER DE VOZ IA - 'Scanner IA Voz' transcreve ligações e extrai dados automaticamente",
+            step4: "GESTÃO DE TAREFAS - Tarefas são criadas automaticamente pela IA baseado em comportamento do cliente",
+            step5: "CAMPANHAS - Crie campanhas segmentadas com material personalizado por IA"
+          },
+          main_features: {
+            client_management: "Perfil 360° com numerologia, score de compra, engagement, health score, pipeline e histórico completo",
+            ai_task_automation: "IA monitora clientes e cria tarefas automáticas (follow-ups, visitas, reengajamento)",
+            sales_intelligence: "IA analisa padrões e sugere melhor abordagem, gatilhos mentais e momento ideal para contato",
+            predictive_analytics: "Previsão de fechamento, probabilidade de conversão, análise de tendências",
+            document_generation: "Propostas, contratos e relatórios gerados automaticamente com dados do cliente",
+            whatsapp_integration: "Envio de mensagens estruturadas, notificações e material de vendas via WhatsApp",
+            offline_mode: "Pacote de estudo offline com guias, tarefas prioritárias e material científico",
+            performance_monitoring: "Dashboards em tempo real com métricas de vendas, funil, conversão e performance individual"
+          },
+          ai_systems_active: {
+            total_ais: 15,
+            list: [
+              "IA 1 - Auto Task Generator: Monitora comportamento e cria tarefas automáticas (cooldown 48h)",
+              "IA 2 - Sales Intelligence: Analisa perfil e sugere melhor estratégia de abordagem",
+              "IA 3 - Predictive Analytics: Prevê fechamento e probabilidade de conversão",
+              "IA 4 - Content Generator: Cria mensagens personalizadas por cliente",
+              "IA 5 - Report Generator: Relatórios diários/semanais/mensais automáticos",
+              "IA 6 - Task Manager: Prioriza tarefas inteligentemente por urgência e impacto",
+              "IA 7 - CRM External Sync: Importa e mapeia dados de CRMs externos",
+              "IA 8 - Workflow Automation: Cria workflows automáticos baseados em padrões",
+              "IA 9 - Numerology Analysis: Calcula perfil comportamental e sugere abordagem",
+              "IA 10 - Market Intelligence: Analisa concorrência e mercado regional",
+              "IA 11 - Equipment Selector: Sugere equipamento ideal por perfil do cliente",
+              "IA 12 - Objection Handler: Prevê objeções e gera respostas personalizadas",
+              "IA 13 - Voice Scanner: Transcreve ligações e extrai dados estruturados",
+              "IA 14 - Health Score Calculator: Calcula saúde do cliente e risco de churn",
+              "IA 15 - Follow-up Sequencer: Cria sequências automáticas de follow-up"
+            ],
+            correction_system: {
+              ia_validator_1: "Monitora dados inconsistentes (scores inválidos, campos obrigatórios, duplicatas)",
+              ia_validator_2: "Valida lógica de negócio (clientes quentes inativos, alto score sem ação)",
+              ia_validator_3: "Otimiza performance (detecta gargalos, sugere melhorias, previne bugs)"
+            }
+          },
+          ai_planning_workflow: {
+            detection: "IAs monitoram eventos (novo cliente, email enviado, visita, status mudou, score alterado)",
+            analysis: "IA analisa contexto (perfil numerológico, histórico, engagement, pipeline, concorrência)",
+            decision: "IA decide ação (criar tarefa, enviar mensagem, agendar follow-up, mudar prioridade)",
+            execution: "Ação executada automaticamente ou sugerida para vendedor",
+            learning: "IA aprende com resultados (quais técnicas funcionaram, padrões de sucesso)"
+          },
+          best_practices: [
+            "Mantenha dados atualizados - IA depende de informações precisas",
+            "Complete perfil do cliente - quanto mais dados, melhor a análise IA",
+            "Registre todas interações - alimenta learning das IAs",
+            "Revise tarefas automáticas diariamente - IA sugere, você decide",
+            "Use material científico nos pitches - diferencial técnico",
+            "Configure WhatsApp - receba alertas e envie materiais rapidamente",
+            "Exporte dados regularmente - backup e análise externa",
+            "Monitore health score - previne churn de clientes quentes"
+          ],
+          troubleshooting: {
+            ia_not_creating_tasks: "Verifique cooldown de 48h - IA não duplica tarefas recentes do mesmo tipo",
+            low_engagement_score: "Registre mais interações - score baseado em visualizações, downloads, respostas",
+            wrong_equipment_suggestion: "Complete 'lab_needs' e 'current_volume' para sugestão precisa",
+            duplicated_clients: "Use IA de correção ou busque por email antes de criar novo"
+          },
+          shortcuts: {
+            home: "Dashboard principal - visão geral e acesso rápido",
+            new_client: "Cadastro completo com IA - análise numerológica automática",
+            voice_scanner: "Transcrição de ligações - extração automática de dados",
+            tasks: "Gestão de tarefas - auto-criadas pela IA + manuais",
+            campaigns: "Campanhas segmentadas - material gerado por IA",
+            analytics: "Dashboards avançados - performance e previsões",
+            export: "Exportar tudo - dados + artigos científicos + treinamento"
+          }
+        },
         clients: clients.map(c => ({
           id: c.id,
           name: c.first_name,
@@ -182,34 +260,84 @@ export default function DataExportButton() {
       link.click();
 
       // Criar resumo para WhatsApp
-      const whatsappMessage = `📊 *EXPORTAÇÃO COMPLETA DO SISTEMA*\n\n` +
-        `📅 Data: ${new Date().toLocaleString('pt-BR')}\n\n` +
-        `📈 RESUMO:\n` +
-        `• ${clients.length} clientes cadastrados\n` +
-        `• ${sales.length} vendas registradas\n` +
-        `• ${tasks.length} tarefas criadas\n` +
-        `• ${visits.length} visitas programadas\n` +
-        `• ${campaigns.length} campanhas ativas\n\n` +
-        `💰 FINANCEIRO:\n` +
-        `• Receita: R$ ${sales.reduce((sum, s) => sum + (s.sale_value || 0), 0).toLocaleString()}\n` +
-        `• Pipeline: R$ ${clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0).toLocaleString()}\n\n` +
-        `🔬 *ARTIGOS CIENTÍFICOS INCLUÍDOS:*\n\n` +
-        `1️⃣ Arterial Blood Gas in Equine Colic\n` +
-        `   https://pmc.ncbi.nlm.nih.gov/articles/PMC10603645/\n\n` +
-        `2️⃣ Reference Intervals for Equine ABG\n` +
-        `   https://www.sciencedirect.com/science/article/abs/pii/S1467298719301412\n\n` +
-        `3️⃣ Blood Gas Analysis Predicting Survival\n` +
-        `   https://onlinelibrary.wiley.com/doi/full/10.1002/vms3.70210\n\n` +
-        `4️⃣ GEM Premier Performance Evaluation\n` +
-        `   https://www.mdpi.com/2306-7381/10/2/114\n\n` +
-        `5️⃣ Lactate in Colic Surgery\n` +
-        `   https://vetsci.org/DOIx.php?id=10.4142/jvs.22038\n\n` +
-        `6️⃣ Exercise-Induced Acidosis in Horses\n` +
-        `   https://www.scielo.br/j/cr/a/jWPqYZP7XQz8ZtQs8tCWy5w/\n\n` +
-        `7️⃣ Treatment of Metabolic Acidosis\n` +
-        `   https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2024.1376578/full\n\n` +
-        `✅ Arquivo JSON baixado com todos os dados\n` +
-        `🐴 Referências científicas em inglês sobre cavalos`;
+      const whatsappMessage = `📊 *EXPORTAÇÃO COMPLETA VENDA NR*\n\n` +
+        `📅 ${new Date().toLocaleString('pt-BR')}\n\n` +
+        `📈 RESUMO DADOS:\n` +
+        `• ${clients.length} clientes\n` +
+        `• ${sales.length} vendas\n` +
+        `• ${tasks.length} tarefas\n` +
+        `• ${visits.length} visitas\n` +
+        `• ${campaigns.length} campanhas\n\n` +
+        `💰 R$ ${sales.reduce((sum, s) => sum + (s.sale_value || 0), 0).toLocaleString()} receita\n` +
+        `💎 R$ ${clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0).toLocaleString()} pipeline\n\n` +
+        `${'='.repeat(50)}\n` +
+        `🤖 *SISTEMA DE IA - 15 IAs ATIVAS*\n\n` +
+        `*PRINCIPAIS:*\n` +
+        `1. Auto Task Generator - cria tarefas automáticas\n` +
+        `2. Sales Intelligence - sugere melhor abordagem\n` +
+        `3. Predictive Analytics - prevê fechamento\n` +
+        `4. Content Generator - mensagens personalizadas\n` +
+        `5. Report Generator - relatórios automáticos\n` +
+        `6. Task Manager - priorização inteligente\n` +
+        `7. CRM Sync - importa dados externos\n` +
+        `8. Workflow Automation - fluxos automáticos\n` +
+        `9. Numerology Analysis - perfil comportamental\n` +
+        `10. Market Intelligence - análise mercado\n` +
+        `11. Equipment Selector - sugere equipamento\n` +
+        `12. Objection Handler - prevê objeções\n` +
+        `13. Voice Scanner - transcreve ligações\n` +
+        `14. Health Score - risco churn\n` +
+        `15. Follow-up Sequencer - sequências automáticas\n\n` +
+        `*SISTEMA DE CORREÇÃO (3 IAs):*\n` +
+        `✅ IA Validadora 1 - dados inconsistentes\n` +
+        `✅ IA Validadora 2 - lógica de negócio\n` +
+        `✅ IA Validadora 3 - performance\n\n` +
+        `${'='.repeat(50)}\n` +
+        `📚 *GUIA DE USO - POR ONDE COMEÇAR*\n\n` +
+        `*PASSO 1:* Cadastre clientes (Novo Cliente)\n` +
+        `*PASSO 2:* Importe planilhas (Importar Tabela)\n` +
+        `*PASSO 3:* Use Scanner IA Voz para ligações\n` +
+        `*PASSO 4:* IAs criam tarefas automaticamente\n` +
+        `*PASSO 5:* Crie campanhas com IA\n\n` +
+        `*PRINCIPAIS TELAS:*\n` +
+        `• Home - Dashboard e acesso rápido\n` +
+        `• Clientes - Gestão completa 360°\n` +
+        `• Tarefas - Auto-criadas pela IA\n` +
+        `• Campanhas - Material personalizado\n` +
+        `• Analytics - Performance e previsões\n\n` +
+        `*COMO FUNCIONA A IA:*\n` +
+        `1. Detecção - monitora eventos (novo cliente, email, visita)\n` +
+        `2. Análise - perfil, histórico, engagement\n` +
+        `3. Decisão - criar tarefa, enviar msg, follow-up\n` +
+        `4. Execução - automática ou sugerida\n` +
+        `5. Aprendizado - melhora com resultados\n\n` +
+        `*DICAS:*\n` +
+        `✓ Complete perfil do cliente - melhor análise IA\n` +
+        `✓ Registre todas interações - alimenta learning\n` +
+        `✓ Revise tarefas automáticas diariamente\n` +
+        `✓ Use material científico nos pitches\n` +
+        `✓ Configure WhatsApp para alertas\n` +
+        `✓ Monitore health score - previne churn\n\n` +
+        `${'='.repeat(50)}\n` +
+        `🔬 *ARTIGOS CIENTÍFICOS (7)*\n\n` +
+        `*EQUINOS:*\n` +
+        `1. Blood Gas in Colic\n` +
+        `   pmc.ncbi.nlm.nih.gov/articles/PMC10603645\n\n` +
+        `2. Reference Intervals ABG\n` +
+        `   sciencedirect.com/science/article/abs/pii/S1467298719301412\n\n` +
+        `3. Survival Prediction\n` +
+        `   onlinelibrary.wiley.com/doi/full/10.1002/vms3.70210\n\n` +
+        `4. GEM Premier Evaluation\n` +
+        `   mdpi.com/2306-7381/10/2/114\n\n` +
+        `5. Lactate Surgery\n` +
+        `   vetsci.org/DOIx.php?id=10.4142/jvs.22038\n\n` +
+        `6. Exercise Acidosis\n` +
+        `   scielo.br/j/cr/a/jWPqYZP7XQz8ZtQs8tCWy5w\n\n` +
+        `7. Metabolic Acidosis Treatment\n` +
+        `   frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2024.1376578\n\n` +
+        `✅ Arquivo JSON completo baixado\n` +
+        `📖 Treinamento completo incluído\n` +
+        `🤖 15 IAs + 3 validadoras ativas`;
 
       // Copiar para clipboard e abrir WhatsApp
       await navigator.clipboard.writeText(whatsappMessage);

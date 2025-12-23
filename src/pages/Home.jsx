@@ -60,6 +60,8 @@ import ThreeDXSalesMaterial from '@/components/3DXSalesMaterial';
 import PersonalizedContentGenerator from '@/components/PersonalizedContentGenerator';
 import AdvancedSalesIntelligence from '@/components/AdvancedSalesIntelligence';
 import OfflinePackGenerator from '@/components/OfflinePackGenerator';
+import CompanionAnimalLabGuide from '@/components/CompanionAnimalLabGuide';
+import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -311,7 +313,13 @@ export default function Home() {
           <PredictiveAnalyticsAI />
           <DataExportButton />
         </div>
+        <div className="grid grid-cols-1 gap-3">
+          <CompanionAnimalLabGuide />
+        </div>
       </div>
+
+      {/* Sistema de Correção Automática com 3 IAs */}
+      <AIErrorCorrectionSystem />
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">
