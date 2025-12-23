@@ -7,6 +7,7 @@ import GoogleSheetsIntegration from './components/GoogleSheetsIntegration';
 import SystemHealthChecker from './components/SystemHealthChecker';
 import TestFlowSimulator from './components/TestFlowSimulator';
 import FollowUpAutomation from './components/FollowUpAutomation';
+import WhatsAppNotificationService from './components/WhatsAppNotificationService';
 
 export default function Layout({ children }) {
   return (
@@ -18,6 +19,7 @@ export default function Layout({ children }) {
       <VoiceCommandAI />
       <GoogleSheetsIntegration />
       <FollowUpAutomation />
+      <WhatsAppNotificationService />
       {children}
     </ErrorRecoverySystem>
   );

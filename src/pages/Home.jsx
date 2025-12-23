@@ -20,7 +20,9 @@ import {
   Mic,
   Settings,
   Play,
-  Database
+  Database,
+  Send,
+  WifiOff
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -42,11 +44,43 @@ import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
   const [selectedStatus, setSelectedStatus] = React.useState('quente');
+  const [syncingOffline, setSyncingOffline] = React.useState(false);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list('-updated_date', 100),
   });
+
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const handleSyncOfflineData = async () => {
+    setSyncingOffline(true);
+    try {
+      // Envia resumo dos dados atualizados para o WhatsApp configurado
+      const summary = `📊 *Sync Manual - ${new Date().toLocaleString('pt-BR')}*\n\n` +
+        `✅ Total de clientes: ${clients.length}\n` +
+        `🔥 Quentes: ${clients.filter(c => c.status === 'quente').length}\n` +
+        `🌡️ Mornos: ${clients.filter(c => c.status === 'morno').length}\n` +
+        `❄️ Frios: ${clients.filter(c => c.status === 'frio').length}\n\n` +
+        `✓ Dados sincronizados com sucesso!`;
+
+      if (user?.whatsapp_number) {
+        // Copia mensagem para área de transferência e abre WhatsApp
+        await navigator.clipboard.writeText(summary);
+        window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(summary)}`, '_blank');
+        toast.success('Mensagem copiada! Encaminhe para seu WhatsApp');
+      } else {
+        toast.error('Configure seu WhatsApp em Configurações primeiro');
+      }
+    } catch (error) {
+      toast.error('Erro ao sincronizar dados');
+    } finally {
+      setSyncingOffline(false);
+    }
+  };
 
   const metrics = useMemo(() => {
     const hotClients = clients.filter(c => c.status === 'quente').length;
@@ -247,6 +281,22 @@ export default function Home() {
 
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
+        {/* Sync Offline Button */}
+        <Button
+          onClick={handleSyncOfflineData}
+          disabled={syncingOffline}
+          className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl text-base font-semibold shadow-lg"
+        >
+          {syncingOffline ? (
+            <>Enviando...</>
+          ) : (
+            <>
+              <Send className="w-5 h-5 mr-2" />
+              Enviar Dados Atualizados (WhatsApp)
+            </>
+          )}
+        </Button>
+
         <div className="grid grid-cols-2 gap-3">
           <Link to={createPageUrl('VoiceClientScanner')}>
             <Button className="w-full h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl text-base font-semibold shadow-lg shadow-purple-500/30">

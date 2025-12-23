@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Mail, Phone, Check, AlertCircle } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Mail, Phone, Check, AlertCircle, Bell, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ContactSettings() {
@@ -14,6 +15,8 @@ export default function ContactSettings() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [enableNotifications, setEnableNotifications] = useState(true);
+  const [notificationInterval, setNotificationInterval] = useState(15);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -21,6 +24,8 @@ export default function ContactSettings() {
       const u = await base44.auth.me();
       setEmail(u.email || '');
       setWhatsapp(u.whatsapp_number || '');
+      setEnableNotifications(u.enable_whatsapp_notifications ?? true);
+      setNotificationInterval(u.notification_interval_minutes || 15);
       return u;
     }
   });
@@ -54,7 +59,9 @@ export default function ContactSettings() {
     updateMutation.mutate({
       email: email,
       whatsapp_number: cleanWhatsapp,
-      contract_signature_email: email
+      contract_signature_email: email,
+      enable_whatsapp_notifications: enableNotifications,
+      notification_interval_minutes: notificationInterval
     });
   };
 
@@ -123,17 +130,54 @@ export default function ContactSettings() {
           </div>
         </Card>
 
+        {/* Notificações WhatsApp */}
+        <Card className="p-5 bg-white shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <Bell className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-800">Notificações Automáticas</p>
+              <p className="text-xs text-slate-600">Receber atualizações via WhatsApp</p>
+            </div>
+            <Switch
+              checked={enableNotifications}
+              onCheckedChange={setEnableNotifications}
+            />
+          </div>
+
+          {enableNotifications && (
+            <div className="space-y-3 pt-3 border-t">
+              <div>
+                <Label className="text-sm text-slate-700">Intervalo de notificações (minutos)</Label>
+                <div className="flex items-center gap-3 mt-2">
+                  <Input
+                    type="number"
+                    value={notificationInterval}
+                    onChange={(e) => setNotificationInterval(Number(e.target.value))}
+                    min="5"
+                    max="60"
+                    className="h-12"
+                  />
+                  <span className="text-sm text-slate-600 whitespace-nowrap">minutos</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">Sistema enviará atualizações a cada {notificationInterval} minutos</p>
+              </div>
+            </div>
+          )}
+        </Card>
+
         {/* Info */}
         <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-800 mb-1">Por que configurar?</p>
+              <p className="text-sm font-semibold text-amber-800 mb-1">Como funciona?</p>
               <ul className="text-xs text-slate-700 space-y-1">
-                <li>• Receber alertas de clientes quentes</li>
-                <li>• Notificações de tarefas urgentes</li>
-                <li>• Follow-ups automáticos</li>
-                <li>• Análises de IA do sistema</li>
+                <li>• <strong>Notificações automáticas:</strong> Sistema avisa sobre clientes quentes, tarefas urgentes e análises IA</li>
+                <li>• <strong>Sincronização offline:</strong> Use o botão na Home para enviar dados quando estiver sem internet</li>
+                <li>• <strong>WhatsApp preferencial:</strong> Todas mensagens vão direto para seu WhatsApp cadastrado</li>
+                <li>• <strong>Encaminhamento rápido:</strong> Encaminhe análises direto para clientes pelo tablet</li>
               </ul>
             </div>
           </div>
