@@ -68,6 +68,7 @@ import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import AdvancedReports from './pages/AdvancedReports';
+import ProposalGenerator from './pages/ProposalGenerator';
 import __Layout from './Layout.jsx';
 
 
@@ -142,6 +143,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
     "AdvancedReports": AdvancedReports,
+    "ProposalGenerator": ProposalGenerator,
 }
 
 export const pagesConfig = {

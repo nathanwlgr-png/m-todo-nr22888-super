@@ -44,6 +44,7 @@ import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
 import CRMExternalSync from '@/components/CRMExternalSync';
 import VoiceCommandSystem from '@/components/VoiceCommandSystem';
+import UniversalFileUploader from '@/components/UniversalFileUploader';
 import AIConfigCenter from '@/components/AIConfigCenter';
 import AdvancedAIHub from '@/components/AdvancedAIHub';
 import AIRateLimitManager from '@/components/AIRateLimitManager';
@@ -133,9 +134,12 @@ export default function Home() {
       {/* Auto Task Generator - Background Process */}
       <AutoTaskGenerator />
 
-      {/* Voice Command System */}
-      <div className="px-6 mt-4">
-        <VoiceCommandSystem />
+      {/* Voice Command System + Upload */}
+      <div className="px-6 mt-4 flex items-center gap-3">
+        <div className="flex-1">
+          <VoiceCommandSystem />
+        </div>
+        <UniversalFileUploader />
       </div>
 
       {/* Rate Limit Warning */}
@@ -633,10 +637,10 @@ export default function Home() {
         </Link>
 
         <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ProposalTemplates')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+          <Link to={createPageUrl('ProposalGenerator')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-orange-200 text-orange-700">
               <FileText className="w-4 h-4 mr-2" />
-              Templates
+              Gerar Proposta
             </Button>
           </Link>
 
