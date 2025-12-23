@@ -255,11 +255,19 @@ export default function SalesOverview() {
                   </div>
                 </div>
 
-                <div className="text-xs text-slate-600 space-y-1">
+                <div className="text-xs text-slate-600 space-y-1 mb-3">
                   <p>🎯 <strong>Interesse:</strong> {client.equipment_interest || 'VG2'}</p>
                   <p>⚠️ <strong>Objeção:</strong> Descapitalizado pós-reforma</p>
+                  <p>💡 <strong>Decisor:</strong> Marcos (sócio hesitante)</p>
                   <p>📅 <strong>Próximo:</strong> Follow-up estruturado</p>
                 </div>
+
+                <Link to={createPageUrl(`ClientProfile?id=${client.id}`)}>
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Ver Perfil Completo
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}
