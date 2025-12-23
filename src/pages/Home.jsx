@@ -136,11 +136,15 @@ export default function Home() {
       <AutoTaskGenerator />
 
       {/* Voice Command System + Upload */}
-      <div className="px-6 mt-4 flex items-center gap-3">
-        <div className="flex-1">
-          <VoiceCommandSystem />
+      <div className="px-6 mt-4">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <VoiceCommandSystem />
+          </div>
+          <div className="relative">
+            <UniversalFileUploader />
+          </div>
         </div>
-        <UniversalFileUploader />
       </div>
 
       {/* Rate Limit Warning */}

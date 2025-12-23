@@ -73,27 +73,40 @@ export default function UniversalFileUploader() {
 
   return (
     <>
-      {/* Compact Button */}
+      {/* Compact Button - Maior área de toque */}
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpanded(!expanded);
+        }}
+        className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 shadow-xl flex items-center justify-center hover:shadow-2xl transition-all active:scale-95 touch-manipulation"
+        style={{ 
+          WebkitTapHighlightColor: 'transparent',
+          touchAction: 'manipulation'
+        }}
       >
-        <Upload className="w-5 h-5 text-white" />
+        <Upload className="w-6 h-6 text-white" />
       </button>
 
       {/* Expanded Panel */}
       {expanded && (
-        <div className="absolute top-12 right-0 z-50">
-          <Card className="w-80 p-4 bg-white shadow-2xl border-2 border-purple-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-slate-800">Upload Universal</h3>
-              <button onClick={() => setExpanded(false)}>
-                <X className="w-4 h-4 text-slate-500" />
+        <div className="fixed top-32 right-4 z-[60]">
+          <Card className="w-80 p-5 bg-white shadow-2xl border-2 border-purple-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-800 text-base">📤 Upload Universal</h3>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded(false);
+                }}
+                className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center touch-manipulation"
+              >
+                <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
 
             {/* Upload Button */}
-            <label className="block">
+            <label className="block touch-manipulation">
               <input
                 type="file"
                 onChange={handleFileUpload}
@@ -104,9 +117,9 @@ export default function UniversalFileUploader() {
               <Button
                 as="span"
                 disabled={uploading}
-                className="w-full bg-purple-600 hover:bg-purple-700 mb-3 cursor-pointer"
+                className="w-full h-12 bg-purple-600 hover:bg-purple-700 mb-3 cursor-pointer text-base font-semibold touch-manipulation"
               >
-                {uploading ? 'Enviando...' : 'Selecionar Arquivo'}
+                {uploading ? '⏳ Enviando...' : '📁 Selecionar Arquivo'}
               </Button>
             </label>
 
