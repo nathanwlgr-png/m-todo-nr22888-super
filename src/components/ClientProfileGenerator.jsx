@@ -14,6 +14,8 @@ export default function ClientProfileGenerator() {
   const [birthdate, setBirthdate] = useState('');
   const [profile, setProfile] = useState(null);
   const [savedProfiles, setSavedProfiles] = useState([]);
+  const [empresaVinculada, setEmpresaVinculada] = useState('');
+  const [saveToDatabase, setSaveToDatabase] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -140,17 +142,47 @@ Método: NR22 - Numerologia Aplicada a Vendas
 
       setProfile(profileDoc);
       
-      // Salvar perfil na lista
+      // Salvar perfil na lista local
       const newProfile = {
         name: clientName,
         birthdate: birthdate,
+        empresa: empresaVinculada,
         date: new Date().toLocaleString('pt-BR'),
         content: profileDoc
       };
       setSavedProfiles([...savedProfiles, newProfile]);
       
-      await navigator.clipboard.writeText(profileDoc);
-      toast.success('✅ Perfil gerado e salvo!');
+      // Salvar no banco de dados se habilitado
+      if (saveToDatabase) {
+        try {
+          const clientData = {
+            first_name: clientName.split(' ')[0],
+            full_name: clientName,
+            birthdate: birthdate || null,
+            empresa_vinculada: empresaVinculada || null,
+            numerology_number: numeroFinal,
+            life_path_number: numeroCaminho || null,
+            behavioral_profile: perfil.name,
+            decision_style: perfil.communication,
+            recommended_communication: numeroFinal === 22 ? 'Visão de longo prazo, ambição, construção de império' : numeroFinal === 11 ? 'Inspiração, transformação, propósito maior' : perfil.communication,
+            client_tone: numeroFinal === 22 ? 'assertivo' : numeroFinal === 11 ? 'entusiasmado' : 'analitico',
+            purchase_motivators: perfil.triggers,
+            numerology_tip: numeroFinal === 22 ? 'Cliente Número Mestre 22 - Pensa GRANDE. Apresente visão de expansão e domínio de mercado.' : numeroFinal === 11 ? 'Cliente Número Mestre 11 - Altamente intuitivo. Use abordagem inspiradora e transformadora.' : perfil.approach,
+            perfil_completo_gerado: profileDoc,
+            status: 'morno',
+            purchase_score: 60
+          };
+          
+          await base44.entities.Client.create(clientData);
+          toast.success('✅ Perfil gerado, salvo e cadastrado no CRM!');
+        } catch (error) {
+          console.error('Erro ao salvar no banco:', error);
+          toast.warning('Perfil gerado mas erro ao salvar no CRM');
+        }
+      } else {
+        await navigator.clipboard.writeText(profileDoc);
+        toast.success('✅ Perfil gerado e salvo!');
+      }
 
     } catch (error) {
       toast.error('Erro ao gerar perfil');
@@ -204,6 +236,22 @@ Método: NR22 - Numerologia Aplicada a Vendas
           value={birthdate}
           onChange={(e) => setBirthdate(e.target.value)}
         />
+        
+        <Input
+          placeholder="Empresa vinculada (ex: Spice e Cavalos)"
+          value={empresaVinculada}
+          onChange={(e) => setEmpresaVinculada(e.target.value)}
+        />
+        
+        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={saveToDatabase}
+            onChange={(e) => setSaveToDatabase(e.target.checked)}
+            className="w-4 h-4 rounded border-slate-300"
+          />
+          Salvar automaticamente no CRM
+        </label>
 
         <Button
           onClick={generateProfile}
@@ -251,6 +299,9 @@ Método: NR22 - Numerologia Aplicada a Vendas
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <p className="font-semibold text-sm text-slate-800">{savedProfile.name}</p>
+                    {savedProfile.empresa && (
+                      <p className="text-xs font-medium text-purple-600">🏢 {savedProfile.empresa}</p>
+                    )}
                     <p className="text-xs text-slate-500">{savedProfile.date}</p>
                   </div>
                   <Button 
