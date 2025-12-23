@@ -8,7 +8,15 @@ import { ShoppingCart, Package, TrendingUp, DollarSign, TrendingDown } from 'luc
 export default function SalesOverview() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
+    queryFn: async () => {
+      try {
+        const data = await base44.entities.Client.list();
+        return data.filter(c => c && c.id && c.first_name);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        return [];
+      }
+    },
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false
