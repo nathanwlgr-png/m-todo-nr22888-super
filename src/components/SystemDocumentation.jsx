@@ -27,6 +27,28 @@ comportamento humano e inteligência artificial de última geração, criando um
 sistema revolucionário de CRM que não apenas gerencia, mas COMPREENDE e 
 ANTECIPA o comportamento de compra.
 
+🧠 OBJETIVO PRINCIPAL: FORTALECIMENTO MENTAL E RESILIÊNCIA
+──────────────────────────────────────────────────────────────────────────
+O NR22 vai além de vendas - seu propósito é FORTALECER A MENTE do vendedor:
+
+✓ TOMADA DE DECISÕES: Sistema treina você a decidir com dados, não emoção
+✓ LIDAR COM PERDA: Quando cliente não fecha, a IA mostra O QUE APRENDER
+✓ RECUPERAÇÃO RÁPIDA: Não perca tempo lamentando - próximo cliente aguarda
+✓ APRENDIZADO CONTÍNUO: Cada "não" é uma lição que melhora seu score geral
+✓ CONTROLE EMOCIONAL: Você se torna controlável, focado, imparável
+✓ FOCO NO OBJETIVO: Uma coisa de cada vez - o sistema lembra e guia
+
+NÃO É SÓ VENDA - É VIDA:
+"O método te ensina a ser resiliente não apenas no trabalho, mas em TUDO.
+Você aprende que perda faz parte, que foco vence dispersão, e que dados
+vencem achismo. Isso vale para vendas, relacionamentos, finanças, saúde."
+
+O SISTEMA LEMBRA O QUE VOCÊ JÁ SABE (mas esquece):
+• "Foco" - uma coisa de cada vez
+• "Dados" - não invente, analise
+• "Aprenda" - perda é professor
+• "Avance" - passado não muda, futuro sim
+
 📸 HISTÓRIA DE IMPACTO NO MERCADO:
 ──────────────────────────────────────────────────────────────────────────
 O sistema causou uma "fotografia tão forte" no mercado devido à sua rápida 
