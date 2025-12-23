@@ -55,6 +55,7 @@ import PowerBooster from '@/components/PowerBooster';
 import HemogasReportGenerator from '@/components/HemogasReportGenerator';
 import PredictiveAnalyticsAI from '@/components/PredictiveAnalyticsAI';
 import ProcessingSpeedMonitor from '@/components/ProcessingSpeedMonitor';
+import DataExportButton from '@/components/DataExportButton';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -295,9 +296,9 @@ export default function Home() {
           <HemogasReportGenerator />
           <ProcessingSpeedMonitor />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <PredictiveAnalyticsAI />
-          <PredictiveAnalyticsAI />
+          <DataExportButton />
         </div>
       </div>
 
