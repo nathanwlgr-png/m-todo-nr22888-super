@@ -42,6 +42,7 @@ export default function Equipment() {
     monthly_bonus: '',
     bonus_details: '',
     specifications: '',
+    image_url: '',
     is_active: true
   });
 
@@ -81,6 +82,7 @@ export default function Equipment() {
       monthly_bonus: '',
       bonus_details: '',
       specifications: '',
+      image_url: '',
       is_active: true
     });
     setEditingEquipment(null);
@@ -108,9 +110,22 @@ export default function Equipment() {
       monthly_bonus: eq.monthly_bonus || '',
       bonus_details: eq.bonus_details || '',
       specifications: eq.specifications || '',
+      image_url: eq.image_url || '',
       is_active: eq.is_active
     });
     setDialogOpen(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, image_url: file_url });
+    } catch (error) {
+      console.error('Erro ao fazer upload da imagem');
+    }
   };
 
   return (
@@ -207,6 +222,19 @@ export default function Equipment() {
                   />
                 </div>
 
+                <div>
+                  <Label>Imagem do Equipamento</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full text-sm"
+                  />
+                  {formData.image_url && (
+                    <img src={formData.image_url} alt="Preview" className="mt-2 w-full h-32 object-cover rounded" />
+                  )}
+                </div>
+
                 <Button
                   onClick={handleSubmit}
                   disabled={!formData.name || !formData.category || !formData.price}
@@ -223,29 +251,38 @@ export default function Equipment() {
       <div className="p-4 space-y-3">
         {equipment.map((eq) => (
           <Card key={eq.id} className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-semibold text-slate-800">{eq.name}</h3>
-                <p className="text-sm text-slate-500">{categoryLabels[eq.category]}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleEdit(eq)}
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => deleteMutation.mutate(eq.id)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+            <div className="flex gap-4 mb-3">
+              {eq.image_url && (
+                <img 
+                  src={eq.image_url} 
+                  alt={eq.name}
+                  className="w-24 h-24 object-cover rounded-lg"
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-slate-800">{eq.name}</h3>
+                    <p className="text-sm text-slate-500">{categoryLabels[eq.category]}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEdit(eq)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => deleteMutation.mutate(eq.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
@@ -268,6 +305,7 @@ export default function Equipment() {
               {eq.bonus_details && (
                 <p className="text-xs text-slate-500 pl-6">{eq.bonus_details}</p>
               )}
+              </div>
             </div>
           </Card>
         ))}
