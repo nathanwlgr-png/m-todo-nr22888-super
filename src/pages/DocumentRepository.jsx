@@ -39,12 +39,11 @@ export default function DocumentRepository() {
     queryFn: () => base44.entities.GeneratedDocument.list('-created_date')
   });
 
-  // Adicionar perfil do Rodrigo automaticamente
+  // Adicionar documentos automaticamente
   React.useEffect(() => {
-    const addRodrigoProfile = async () => {
-      if (documents.length > 0 && documents.some(d => d.title?.includes('Rodrigo Sávio Mavetto'))) {
-        return; // Já existe
-      }
+    const addDefaultDocuments = async () => {
+      // Perfil do Rodrigo
+      if (!documents.some(d => d.title?.includes('Rodrigo Sávio Mavetto'))) {
 
       const rodrigoProfile = `
 ╔═══════════════════════════════════════════════════════════════════════╗
@@ -150,22 +149,70 @@ Método: NR22 - Numerologia Aplicada a Vendas
 ═══════════════════════════════════════════════════════════════════════
 `;
 
-      try {
-        await base44.entities.GeneratedDocument.create({
-          title: 'Perfil Completo - Rodrigo Sávio Mavetto (Spice e Cavalos)',
-          type: 'relatorio',
-          content: rodrigoProfile,
-          summary: 'Perfil numerológico e estratégia de vendas para Rodrigo (Número 8 - O Magnata)',
-          tags: ['rodrigo', 'spice e cavalos', 'marília', 'numerologia', 'número 8', 'perfil']
-        });
-        console.log('Perfil do Rodrigo adicionado automaticamente');
-      } catch (error) {
-        console.error('Erro ao adicionar perfil:', error);
+        try {
+          await base44.entities.GeneratedDocument.create({
+            title: 'Perfil Completo - Rodrigo Sávio Mavetto (Spice e Cavalos)',
+            type: 'relatorio',
+            content: rodrigoProfile,
+            summary: 'Perfil numerológico e estratégia de vendas para Rodrigo (Número 8 - O Magnata)',
+            tags: ['rodrigo', 'spice e cavalos', 'marília', 'numerologia', 'número 8', 'perfil']
+          });
+          console.log('Perfil do Rodrigo adicionado');
+        } catch (error) {
+          console.error('Erro:', error);
+        }
+      }
+
+      // Pesquisa de 8 artigos sobre potros
+      if (!documents.some(d => d.title?.includes('8 Artigos') && d.title?.includes('Potros'))) {
+        const pesquisaPotros = `
+╔═══════════════════════════════════════════════════════════════════════╗
+║     8 ARTIGOS CIENTÍFICOS: LÍQUIDO SINOVIAL EM POTROS E CAVALOS      ║
+║           Contaminação Bacteriana e Alteração de pH                   ║
+║                    Traduzidos para Português                          ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+📋 INSTRUÇÕES PARA GERAR OS ARTIGOS:
+
+1. Vá para a página inicial (Home)
+2. Role até encontrar o card "Pesquisa Potros - 8 Artigos"
+3. Clique no botão "Gerar Pesquisa (8 Artigos)"
+4. Aguarde 30-60 segundos enquanto a IA pesquisa
+5. O relatório completo será salvo aqui automaticamente
+
+O relatório incluirá:
+✓ 8 artigos científicos completos
+✓ Tradução inglês → português
+✓ Links diretos (DOI/PubMed)
+✓ Abstract completo de cada artigo
+✓ Metodologia e resultados
+✓ Análise comparativa dos 8 estudos
+✓ Protocolo diagnóstico baseado em evidências
+✓ Valores de pH normal vs infecção
+✓ Correlações clínicas (pH x leucócitos, pH x cultura)
+
+📍 Localização do botão: Home > Role até "Pesquisa Potros - 8 Artigos"
+
+⚠️ Este é apenas um placeholder. Clique no botão para gerar o conteúdo real!
+`;
+
+        try {
+          await base44.entities.GeneratedDocument.create({
+            title: '8 Artigos - Líquido Sinovial em Potros (INSTRUÇÕES)',
+            type: 'pesquisa_cientifica',
+            content: pesquisaPotros,
+            summary: 'Instruções para gerar pesquisa com 8 artigos sobre pH do líquido sinovial em potros com contaminação bacteriana',
+            tags: ['potros', 'líquido sinovial', 'pH', 'contaminação', 'instruções']
+          });
+          console.log('Placeholder da pesquisa adicionado');
+        } catch (error) {
+          console.error('Erro:', error);
+        }
       }
     };
 
     if (!isLoading && documents) {
-      addRodrigoProfile();
+      addDefaultDocuments();
     }
   }, [documents, isLoading]);
 
