@@ -172,9 +172,9 @@ OUTPUTS:
   • Estratégia de abordagem recomendada
 
 
-2.3 IA DE SCORING PREDITIVO (ClientScoringEngine)
+2.3 IA DE SCORING PREDITIVO COM ATUALIZAÇÕES DIÁRIAS (ClientScoringEngine)
 ──────────────────────────────────────────────────────────────────────────
-FUNÇÃO: Calcular probabilidade de compra (0-100)
+FUNÇÃO: Calcular probabilidade de compra (0-100) e projeções previsíveis
 
 VARIÁVEIS ANALISADAS:
 ✓ Tipo de cliente (peso 15%)
@@ -192,10 +192,69 @@ Score = (tipo_cliente * 0.15) +
         (engajamento * 0.15) + 
         (urgencia * 0.15)
 
+🔄 ATUALIZAÇÕES AUTOMÁTICAS E FREQUÊNCIA:
+────────────────────────────────────────────────────────────────────────
+O sistema NÃO é estático - atualiza constantemente:
+
+ATUALIZAÇÕES DIÁRIAS (A CADA 24H):
+• Recálculo de score baseado em novas interações
+• Análise de ciclos numerológicos (dias mais propícios)
+• Monitoramento de eventos na região do cliente
+• Avaliação de economia local (PIB, emprego)
+• Densidade demográfica e poder de compra
+• Ajuste de prioridades no funil
+
+ATUALIZAÇÕES EM TEMPO REAL:
+• Visualização de proposta → Score +10 imediato
+• Resposta no WhatsApp → Score +15 imediato
+• Download de tabela → Score +15 imediato
+• Agendamento de visita → Status "Quente" automático
+
+📊 CONTROLE DE PROJEÇÕES PREVISÍVEIS:
+────────────────────────────────────────────────────────────────────────
+Com base no perfil e histórico, o sistema PROJETA:
+
+1. PROBABILIDADE DE FECHAMENTO:
+   "Cliente X tem 73% de chance de fechar nos próximos 15 dias"
+   Baseado em: Score atual + Padrão comportamental + Ciclo numerológico
+
+2. MELHOR MOMENTO DE ABORDAGEM:
+   "Contatar Cliente Y na próxima terça-feira, 10h-12h"
+   Baseado em: Numerologia (dia favorável) + Histórico de respostas
+
+3. INFLUÊNCIA NO MERCADO:
+   • Identifica tendências de compra por região
+   • Prevê demanda sazonal
+   • Detecta movimentação de concorrentes
+   • Ajusta estratégia regional automaticamente
+
 CORRELAÇÕES:
 - Score > 70 = Status "Quente" (prioridade máxima)
 - Score 40-70 = Status "Morno" (nurturing)
 - Score < 40 = Status "Frio" (reengajamento)
+
+📍 ANÁLISE CONTEXTUAL REGIONAL:
+────────────────────────────────────────────────────────────────────────
+A IA avalia fatores externos que influenciam compra:
+
+✓ EVENTOS NA REGIÃO:
+  • Congressos veterinários próximos
+  • Feiras de equipamentos
+  • Eventos de networking
+  • Oportunidade: "Congresso em SP dia 15/01 - 8 clientes seus estarão lá"
+
+✓ ECONOMIA LOCAL:
+  • PIB do município
+  • Taxa de emprego
+  • Renda média per capita
+  • Crédito disponível (linhas de financiamento)
+
+✓ DENSIDADE E PODER DE COMPRA:
+  • Habitantes por km²
+  • Número de pets per capita
+  • Gasto médio com veterinário
+  • Poder aquisitivo da região
+  • Exemplo: "Região X: alta densidade + renda alta = mercado premium"
 
 
 2.4 IA DE NUMEROLOGIA AVANÇADA (NumerologyCard)
@@ -233,6 +292,29 @@ APLICAÇÃO:
 - Gatilhos mentais mais efetivos (baseados em Cialdini)
 - Objeções prováveis
 - Frase motivacional diária personalizada
+
+🌟 MOMENTO MAIS PROPÍCIO DE COMPRA (Ciclos Numerológicos):
+────────────────────────────────────────────────────────────────────────
+A numerologia identifica JANELAS DE OPORTUNIDADE:
+
+CICLOS PESSOAIS DO CLIENTE:
+• Ano Pessoal: Fase de crescimento ou consolidação
+• Mês Pessoal: Melhor período para investimentos
+• Dia Pessoal: Data exata ideal para fechamento
+
+EXEMPLO PRÁTICO:
+Cliente perfil 8 (Executivo) + Ano Pessoal 4 (Construção):
+→ "Este é um ano de investimentos estruturais para ele"
+→ "Melhor mês: Março (coincide com mês pessoal 8 - poder)"
+→ "Melhor dia: Dia 17 (soma 8) - energia favorável"
+→ Sistema agenda: "Enviar proposta dia 15, ligar dia 17, fechar dia 17"
+
+ATUALIZAÇÕES DIÁRIAS:
+Todos os dias o sistema recalcula:
+✓ Qual cliente está em ciclo favorável HOJE
+✓ Quem evitar contatar (ciclo desfavorável)
+✓ Janelas de 3-7 dias de alta propensão
+✓ Alertas: "Cliente X entrando em ciclo propício amanhã!"
 
 💬 SISTEMA DE FRASES MOTIVACIONAIS DIÁRIAS:
 ────────────────────────────────────────────────────────────────────────
