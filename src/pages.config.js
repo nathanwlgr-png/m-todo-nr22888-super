@@ -21,6 +21,7 @@ import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
 import EquipmentComparison from './pages/EquipmentComparison';
+import EquipmentConsumables from './pages/EquipmentConsumables';
 import EquipmentPriceList from './pages/EquipmentPriceList';
 import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
 import FollowUpAssistant from './pages/FollowUpAssistant';
@@ -70,7 +71,6 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import EquipmentConsumables from './pages/EquipmentConsumables';
 import __Layout from './Layout.jsx';
 
 
@@ -98,6 +98,7 @@ export const PAGES = {
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
     "EquipmentComparison": EquipmentComparison,
+    "EquipmentConsumables": EquipmentConsumables,
     "EquipmentPriceList": EquipmentPriceList,
     "EquipmentSalesCenter": EquipmentSalesCenter,
     "FollowUpAssistant": FollowUpAssistant,
@@ -147,7 +148,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "EquipmentConsumables": EquipmentConsumables,
 }
 
 export const pagesConfig = {
