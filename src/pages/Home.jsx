@@ -67,6 +67,7 @@ import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
 import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 import NetworkModeToggle from '@/components/NetworkModeToggle';
+import DataUsageMonitor from '@/components/DataUsageMonitor';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -148,13 +149,22 @@ export default function Home() {
       </div>
       
       {/* Header Fixo */}
-      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4 py-3 shadow-lg">
+      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 shadow-lg border-b-2 border-orange-500">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 flex items-center justify-center shadow-xl relative">
+            <div className="absolute inset-0 rounded-xl bg-white opacity-20 animate-pulse"></div>
+            <span className="text-white font-black text-lg z-10">NR</span>
+            <span className="absolute -bottom-1 -right-1 bg-orange-500 text-white text-[8px] font-bold px-1 rounded">22</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-sm font-bold text-white">Venda NR</h1>
+            <h1 className="text-base font-black text-white tracking-tight">Método NR22</h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[9px] text-orange-400 font-semibold">CRM Automático</span>
+              <span className="text-[9px] text-slate-400">•</span>
+              <span className="text-[9px] text-blue-400 font-semibold">IA Adversary</span>
+              <span className="text-[9px] text-slate-400">•</span>
+              <span className="text-[9px] text-purple-400 font-semibold">Magnétic Tools</span>
+            </div>
           </div>
           <Link to={createPageUrl('ContactSettings')}>
             <button className="w-8 h-8 rounded-lg glass hover:bg-white/10 transition-all">
@@ -343,6 +353,11 @@ export default function Home() {
 
       {/* Controle de Modo de Rede e Performance */}
       <NetworkModeToggle />
+
+      {/* Monitor de Dados */}
+      <div className="fixed bottom-20 right-4 z-40 w-64">
+        <DataUsageMonitor />
+      </div>
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">

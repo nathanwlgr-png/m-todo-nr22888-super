@@ -12,14 +12,41 @@ import { toast } from 'sonner';
 export default function NetworkModeToggle() {
   const [networkMode, setNetworkMode] = useState('wifi'); // 'wifi' ou 'mobile'
   const [performanceMode, setPerformanceMode] = useState('normal'); // 'turbo', 'normal', 'slow'
+  const [tokensRemaining, setTokensRemaining] = useState(120000000); // 120 milhões
+  const [dataUsage, setDataUsage] = useState(0); // KB
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
     // Carregar do localStorage
     const savedNetworkMode = localStorage.getItem('network_mode') || 'wifi';
     const savedPerformanceMode = localStorage.getItem('performance_mode') || 'normal';
+    const savedTokens = parseInt(localStorage.getItem('tokens_remaining') || '120000000');
+    const savedData = parseInt(localStorage.getItem('data_usage_kb') || '0');
+    
     setNetworkMode(savedNetworkMode);
     setPerformanceMode(savedPerformanceMode);
+    setTokensRemaining(savedTokens);
+    setDataUsage(savedData);
   }, []);
+
+  useEffect(() => {
+    // Simular uso de dados baseado no modo
+    const interval = setInterval(() => {
+      const increment = networkMode === 'wifi' ? 
+        (performanceMode === 'turbo' ? 50 : performanceMode === 'normal' ? 20 : 5) :
+        (performanceMode === 'normal' ? 10 : 5);
+      
+      setDataUsage(prev => {
+        const newUsage = prev + increment;
+        localStorage.setItem('data_usage_kb', newUsage.toString());
+        return newUsage;
+      });
+      
+      setLastUpdate(new Date());
+    }, 60000); // A cada 1 minuto
+
+    return () => clearInterval(interval);
+  }, [networkMode, performanceMode]);
 
   const toggleNetworkMode = () => {
     const newMode = networkMode === 'wifi' ? 'mobile' : 'wifi';
@@ -215,10 +242,15 @@ export default function NetworkModeToggle() {
           </div>
 
           {/* Status Info */}
-          <div className="p-1 bg-slate-50 rounded text-center">
-            <p className="text-xs text-slate-600">
+          <div className="p-2 bg-slate-50 rounded space-y-1">
+            <p className="text-xs text-slate-600 text-center">
               {networkMode === 'wifi' ? '📶' : '📱'} {performanceMode === 'turbo' ? '🚀' : performanceMode === 'normal' ? '⚡' : '🐢'}
             </p>
+            <div className="text-xs text-slate-700">
+              <p className="font-semibold">🎯 {(tokensRemaining / 1000000).toFixed(1)}M tokens</p>
+              <p className="text-slate-500">{(dataUsage / 1024).toFixed(1)}MB usado</p>
+              <p className="text-slate-400 text-[10px]">Atualiza: 1min</p>
+            </div>
           </div>
         </div>
       </Card>
