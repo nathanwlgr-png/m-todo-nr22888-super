@@ -16,8 +16,21 @@ export default function WhatsAppInbox() {
 
   const { data: messages = [] } = useQuery({
     queryKey: ['all-whatsapp-messages'],
-    queryFn: () => base44.entities.WhatsAppMessage.list('-created_date', 500),
-    refetchInterval: 5000
+    queryFn: async () => {
+      try {
+        return await base44.entities.WhatsAppMessage.list('-created_date', 500);
+      } catch (error) {
+        console.error('Erro ao carregar mensagens:', error);
+        return [];
+      }
+    },
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+    retryDelay: 3000
   });
 
   // Agrupar mensagens por contato
