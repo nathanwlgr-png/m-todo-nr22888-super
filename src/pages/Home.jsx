@@ -91,6 +91,7 @@ import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
 import SmartSalesFlowOptimizer from '@/components/SmartSalesFlowOptimizer';
 import AIReportingHub from '@/components/AIReportingHub';
 import ScientificResearchAI from '@/components/ScientificResearchAI';
+import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -544,6 +545,11 @@ export default function Home() {
       {/* Pesquisa Científica Veterinária */}
       <div className="px-6 mt-6">
         <ScientificResearchAI />
+      </div>
+
+      {/* Pesquisa Hemogasometria Equina */}
+      <div className="px-6 mt-6">
+        <EquineBloodGasResearch />
       </div>
 
       {/* AI Reporting Hub */}
