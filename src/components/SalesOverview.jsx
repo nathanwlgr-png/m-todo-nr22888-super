@@ -24,7 +24,14 @@ export default function SalesOverview() {
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
-    queryFn: () => base44.entities.Sale.list(),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Sale.list();
+      } catch (error) {
+        console.error('Erro ao carregar vendas:', error);
+        return [];
+      }
+    },
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false
@@ -32,7 +39,14 @@ export default function SalesOverview() {
 
   const { data: consumableOrders = [] } = useQuery({
     queryKey: ['consumable-orders'],
-    queryFn: () => base44.entities.ConsumableOrder.list(),
+    queryFn: async () => {
+      try {
+        return await base44.entities.ConsumableOrder.list();
+      } catch (error) {
+        console.error('Erro ao carregar pedidos:', error);
+        return [];
+      }
+    },
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false
@@ -40,7 +54,14 @@ export default function SalesOverview() {
 
   const { data: visits = [] } = useQuery({
     queryKey: ['all-visits'],
-    queryFn: () => base44.entities.Visit.list('-scheduled_date', 100),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Visit.list('-scheduled_date', 100);
+      } catch (error) {
+        console.error('Erro ao carregar visitas:', error);
+        return [];
+      }
+    },
     staleTime: 10 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false
