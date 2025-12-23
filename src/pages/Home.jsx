@@ -92,12 +92,19 @@ export default function Home() {
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 100),
+    queryFn: async () => {
+      try {
+        const data = await base44.entities.Client.list('-updated_date', 100);
+        return data.filter(c => c && c.id && c.first_name);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        return [];
+      }
+    },
     retry: 1,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
-    onError: (error) => console.error('Erro ao carregar clientes:', error)
+    staleTime: 5 * 60 * 1000
   });
 
   const { data: user } = useQuery({

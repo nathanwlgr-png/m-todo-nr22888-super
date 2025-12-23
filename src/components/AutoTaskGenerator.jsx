@@ -30,8 +30,16 @@ export default function AutoTaskGenerator() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 100),
-    refetchInterval: 300000, // Check every 5 minutes
+    queryFn: async () => {
+      try {
+        const data = await base44.entities.Client.list('-updated_date', 100);
+        return data.filter(c => c && c.id);
+      } catch (error) {
+        console.error('Erro AutoTask:', error);
+        return [];
+      }
+    },
+    refetchInterval: 300000,
     staleTime: 240000
   });
 
