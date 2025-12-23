@@ -57,6 +57,8 @@ import PredictiveAnalyticsAI from '@/components/PredictiveAnalyticsAI';
 import ProcessingSpeedMonitor from '@/components/ProcessingSpeedMonitor';
 import DataExportButton from '@/components/DataExportButton';
 import ThreeDXSalesMaterial from '@/components/3DXSalesMaterial';
+import PersonalizedContentGenerator from '@/components/PersonalizedContentGenerator';
+import AdvancedSalesIntelligence from '@/components/AdvancedSalesIntelligence';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -287,6 +289,8 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-3">
           <CRMExternalSync />
           <AITaskManager />
+          <PersonalizedContentGenerator />
+          <AdvancedSalesIntelligence />
         </div>
       </div>
 
