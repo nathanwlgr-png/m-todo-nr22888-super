@@ -44,11 +44,149 @@ export default function MarketIntelligence() {
     const region = REGIONS.find(r => r.name === selectedRegion);
     
     try {
-      toast.info('🔍 Buscando dados do IBGE e clínicas veterinárias...');
+      toast.info('🔍 Etapa 1/4: Coletando dados populacionais do IBGE...');
 
-      // IA 1: Buscar dados do IBGE + clínicas com classificação
+      // IA 1: DADOS DEMOGRÁFICOS E IBGE DE TODAS AS CIDADES
+      const demographicData = await base44.integrations.Core.InvokeLLM({
+        prompt: `Busque dados EXATOS do IBGE 2024 para TODAS estas cidades: ${region.cities.join(', ')}.
+
+PARA CADA CIDADE, OBRIGATORIAMENTE:
+1. População total atualizada (IBGE 2024)
+2. Número de estabelecimentos veterinários registrados no CNAE (IBGE)
+3. PIB per capita
+4. Área urbana
+
+ANÁLISE ESTATÍSTICA:
+- Calcule: a cada 5.000 habitantes = 1 clínica veterinária esperada
+- Compare: clínicas esperadas vs clínicas registradas no IBGE
+- Identifique cidades saturadas ou com oportunidades
+
+NÃO PULE NENHUMA CIDADE. Se não encontrar dados, indique como "não disponível".`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            cities_complete_data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  city: { type: "string" },
+                  population: { type: "number" },
+                  veterinary_establishments_ibge: { type: "number" },
+                  expected_clinics_by_population: { type: "number" },
+                  market_saturation: { type: "string" },
+                  pib_per_capita: { type: "number" },
+                  opportunity_level: { type: "string" }
+                }
+              }
+            },
+            region_summary: {
+              type: "object",
+              properties: {
+                total_population: { type: "number" },
+                total_establishments_ibge: { type: "number" },
+                expected_clinics_total: { type: "number" },
+                market_gap: { type: "number" }
+              }
+            }
+          }
+        }
+      });
+
+      toast.info('🏥 Etapa 2/4: Mapeando TODAS as clínicas veterinárias da região...');
+      
+      // IA 2: BUSCA COMPLETA DE CLÍNICAS - CIDADE POR CIDADE
       const clinicsSearch = await base44.integrations.Core.InvokeLLM({
-        prompt: `Pesquise e forneça os seguintes dados para as cidades: ${region.cities.join(', ')}:
+        prompt: `Faça uma busca EXAUSTIVA e COMPLETA de clínicas veterinárias em TODAS estas cidades: ${region.cities.join(', ')}.
+
+PARA CADA CIDADE:
+1. Busque no Google Maps, Google Business, redes sociais, diretórios veterinários
+2. Liste TODAS as clínicas encontradas (nome, endereço, telefone, email)
+3. Classifique cada clínica:
+   - "clinica_pequena": até 2 veterinários, atendimento básico
+   - "clinica_media": 3-10 veterinários, atendimentos gerais
+   - "hospital_veterinario": 10+ veterinários, especialidades, internação
+   - "veterinario_autonomo": atendimento domiciliar sem estrutura fixa
+
+DADOS DEMOGRÁFICOS PARA CONTEXTO:
+${JSON.stringify(demographicData.cities_complete_data, null, 2)}
+
+Compare o número de clínicas encontradas com os dados do IBGE. Se encontrar menos clínicas do que o IBGE indica, continue buscando.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            clinics_by_city: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  city: { type: "string" },
+                  clinics_found: { type: "number" },
+                  clinics: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        address: { type: "string" },
+                        phone: { type: "string" },
+                        email: { type: "string" },
+                        classification: { type: "string" },
+                        staff_size: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            classification_summary: {
+              type: "object",
+              properties: {
+                total_clinics: { type: "number" },
+                clinica_pequena: { type: "number" },
+                clinica_media: { type: "number" },
+                hospital_veterinario: { type: "number" },
+                veterinario_autonomo: { type: "number" }
+              }
+            },
+            total_clinics_found: { type: "number" },
+            clinics: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  address: { type: "string" },
+                  city: { type: "string" },
+                  phone: { type: "string" },
+                  email: { type: "string" },
+                  classification: { 
+                    type: "string",
+                    enum: ["clinica_pequena", "clinica_media", "hospital_veterinario", "veterinario_autonomo"]
+                  },
+                  staff_size: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      toast.info('🔬 Etapa 3/4: Identificando equipamentos instalados...');
+      
+      // Flatten all clinics from all cities
+      const allClinics = clinicsSearch.clinics_by_city?.flatMap(city => 
+        city.clinics.map(clinic => ({ ...clinic, city: city.city }))
+      ) || clinicsSearch.clinics || [];
+      
+      // IA 3: Identificar equipamentos instalados
+      const equipmentAnalysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise PROFUNDAMENTE cada clínica e identifique equipamentos instalados:
+
+CLÍNICAS (${allClinics.length} no total):
+${JSON.stringify(allClinics, null, 2)}
 
 1. DADOS DO IBGE:
    - População total de cada cidade
@@ -126,14 +264,7 @@ Seja EXTREMAMENTE detalhado e preciso na busca.`,
         }
       });
 
-      toast.info('🔬 Analisando equipamentos e concorrentes (IDEXX, Zoetis)...');
 
-      // IA 2: Identificar equipamentos e concorrentes
-      const equipmentAnalysis = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise as clínicas veterinárias e identifique equipamentos instalados:
-
-CLÍNICAS:
-${JSON.stringify(clinicsSearch.clinics, null, 2)}
 
 Para cada clínica, pesquise e identifique:
 1. Tem equipamento SEAMAT BRASIL instalado? (sim/não)
@@ -184,14 +315,15 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
         }
       });
 
-      toast.info('🎯 Identificando oportunidades de venda...');
-
-      // IA 3: Identificar oportunidades
+      toast.info('🎯 Etapa 4/4: Analisando oportunidades de venda...');
+      
+      // IA 4: Análise final e oportunidades
       const opportunities = await base44.integrations.Core.InvokeLLM({
-        prompt: `Com base nos dados das clínicas e equipamentos instalados, identifique:
+        prompt: `Baseado em TODOS os dados coletados, identifique oportunidades de venda:
 
-DADOS:
-${JSON.stringify(equipmentAnalysis, null, 2)}
+DADOS DEMOGRÁFICOS: ${JSON.stringify(demographicData, null, 2)}
+CLÍNICAS POR CIDADE: ${JSON.stringify(clinicsSearch, null, 2)}
+EQUIPAMENTOS: ${JSON.stringify(equipmentAnalysis, null, 2)}
 
 Identifique:
 1. Clínicas SEM hemograma (oportunidade de venda)
@@ -234,9 +366,10 @@ Retorne lista priorizada de oportunidades.`,
 
       setResults({
         region: selectedRegion,
+        demographicData,
         clinics: clinicsSearch,
         equipment: equipmentAnalysis,
-        opportunities: opportunities
+        opportunities
       });
 
       toast.success('✅ Análise completa!');
