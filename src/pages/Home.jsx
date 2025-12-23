@@ -74,6 +74,8 @@ import { Input } from '@/components/ui/input';
 import DocumentMonitorAI from '@/components/DocumentMonitorAI';
 import SystemManualPDF from '@/components/SystemManualPDF';
 import MarketAnalysisAI from '@/components/MarketAnalysisAI';
+import ClientDataImporter from '@/components/ClientDataImporter';
+import ContractProposalGenerator from '@/components/ContractProposalGenerator';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -660,6 +662,16 @@ export default function Home() {
 
             {/* Manual do Sistema PDF */}
             <SystemManualPDF />
+
+            {/* Importador de Planilha */}
+            <div className="mt-6">
+              <ClientDataImporter />
+            </div>
+
+            {/* Gerador de Contrato e Proposta */}
+            <div className="mt-6">
+              <ContractProposalGenerator />
+            </div>
 
             {/* Análise de Mercado com GPS + IBGE */}
             <div className="mt-6">
