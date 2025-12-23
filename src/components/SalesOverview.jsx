@@ -25,8 +25,8 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0,
-    enabled: false
+    retry: 1,
+    retryDelay: 2000
   });
 
   const { data: sales = [] } = useQuery({
@@ -46,8 +46,9 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0,
-    enabled: false
+    retry: 1,
+    retryDelay: 2000,
+    enabled: clients.length > 0
   });
 
   const { data: consumableOrders = [] } = useQuery({
@@ -65,8 +66,8 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0,
-    enabled: false
+    retry: 1,
+    retryDelay: 2000
   });
 
   const { data: visits = [] } = useQuery({
@@ -86,8 +87,9 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0,
-    enabled: false
+    retry: 1,
+    retryDelay: 2000,
+    enabled: clients.length > 0
   });
 
   // Análise expandida de vendas
