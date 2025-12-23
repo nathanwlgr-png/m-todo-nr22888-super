@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 
 const priorityColors = {
   alta: 'bg-red-100 text-red-700 border-red-300',
@@ -138,6 +139,9 @@ export default function TaskCalendar() {
       </div>
 
       <div className="px-6 -mt-8 space-y-4">
+        {/* Mensagens Estruturadas */}
+        <ScheduledMessagesWidget />
+        
         {/* Month Navigation */}
         <Card className="p-4 bg-white shadow-lg">
           <div className="flex items-center justify-between mb-4">

@@ -35,6 +35,7 @@ import SalesOverview from '@/components/SalesOverview';
 import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
 import HotClientsDialog from '@/components/HotClientsDialog';
+import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -225,6 +226,11 @@ export default function Home() {
       {/* Performance Feedback */}
       <div className="px-6 mt-6">
         <VendedorPerformanceFeedback />
+      </div>
+
+      {/* Mensagens Estruturadas */}
+      <div className="px-6 mt-6">
+        <ScheduledMessagesWidget />
       </div>
 
       {/* Lab Brand Competitor Analysis */}
