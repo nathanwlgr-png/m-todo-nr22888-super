@@ -61,6 +61,7 @@ import NewCampaign from './pages/NewCampaign';
 import CampaignDetails from './pages/CampaignDetails';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
+import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -128,6 +129,7 @@ export const PAGES = {
     "CampaignDetails": CampaignDetails,
     "AdvancedSalesReports": AdvancedSalesReports,
     "LoadEquipmentCatalog": LoadEquipmentCatalog,
+    "EquipmentSalesCenter": EquipmentSalesCenter,
 }
 
 export const pagesConfig = {
