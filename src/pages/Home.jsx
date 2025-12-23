@@ -535,6 +535,16 @@ export default function Home() {
         {/* Export Data Button */}
         <Button
           onClick={() => {
+            const citiesCount = clients.reduce((acc, c) => {
+              const city = c.city || 'Sem cidade';
+              acc[city] = (acc[city] || 0) + 1;
+              return acc;
+            }, {});
+            
+            const citiesList = Object.entries(citiesCount)
+              .map(([city, count]) => `• ${city}: ${count}`)
+              .join('\n');
+            
             const summary = `📊 *Exportação CRM - ${new Date().toLocaleString('pt-BR')}*\n\n` +
               `✅ Total de clientes: ${clients.length}\n` +
               `🔥 Quentes: ${metrics.hot}\n` +
@@ -542,15 +552,7 @@ export default function Home() {
               `❄️ Frios: ${metrics.cold}\n\n` +
               `💰 Pipeline Total: R$ ${(metrics.totalRevenue / 1000).toFixed(0)}k\n` +
               `📈 Score Médio: ${metrics.avgScore}%\n\n` +
-              `*Clientes por Cidade:*\n` +
-              clients.reduce((acc, c) => {
-                const city = c.city || 'Sem cidade';
-                acc[city] = (acc[city] || 0) + 1;
-                return acc;
-              }, {})
-              |> Object.entries(%)
-              |> %.map(([city, count]) => `• ${city}: ${count}`)
-              |> %.join('\n');
+              `*Clientes por Cidade:*\n${citiesList}`;
             
             window.open(`https://wa.me/?text=${encodeURIComponent(summary)}`, '_blank');
             toast.success('Dados prontos para enviar!');
