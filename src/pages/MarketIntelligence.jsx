@@ -320,49 +320,59 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
         }
       });
 
-      toast.info('🎯 Etapa 4/4: Analisando oportunidades de venda...');
+      toast.info('🎯 Etapa 4/4: Scoring de leads com IA...');
       
-      // IA 4: Análise final e oportunidades
+      // IA 4: Lead Scoring e Análise de Oportunidades
       const opportunities = await base44.integrations.Core.InvokeLLM({
-        prompt: `Baseado em TODOS os dados coletados, identifique oportunidades de venda:
+        prompt: `Você é um especialista em qualificação de leads veterinários. Analise TODOS os dados e atribua um LEAD SCORE (0-100) para cada clínica.
 
 DADOS DEMOGRÁFICOS: ${JSON.stringify(demographicData, null, 2)}
 CLÍNICAS POR CIDADE: ${JSON.stringify(clinicsSearch, null, 2)}
 EQUIPAMENTOS: ${JSON.stringify(equipmentAnalysis, null, 2)}
 
-Identifique:
-1. Clínicas SEM hemograma (oportunidade de venda)
-2. Clínicas com equipamentos antigos IRIX/OET (oportunidade de upgrade)
-3. Clínicas grandes sem laboratório próprio
-4. Prioridade de abordagem (alta/média/baixa)
+CRITÉRIOS DE SCORING (0-100):
+1. **Ausência de Equipamento** (30 pontos): Sem hemograma = 30, Com concorrente = 10, Com SEAMATY = 0
+2. **Tamanho da Clínica** (25 pontos): Hospital = 25, Média = 15, Pequena = 8, Autônomo = 3
+3. **Demografia Local** (20 pontos): Cidade com gap de mercado = 20, Saturada = 5
+4. **Potencial de Receita** (15 pontos): PIB per capita alto + população grande = 15
+5. **Acessibilidade** (10 pontos): Distância do centro (se raio) ou facilidade logística
 
-Retorne lista priorizada de oportunidades.`,
+PARA CADA CLÍNICA:
+- Calcule o lead score (0-100)
+- Classifique: 🔥 HOT (80-100), ⭐ WARM (60-79), 💡 COLD (0-59)
+- Explique brevemente o score
+- Sugira abordagem ideal
+
+Priorize clínicas SEM equipamento, hospitais grandes, e regiões com gap de mercado.`,
         response_json_schema: {
           type: "object",
           properties: {
-            high_priority: {
+            scored_leads: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
                   clinic_name: { type: "string" },
                   city: { type: "string" },
+                  lead_score: { type: "number" },
+                  score_category: { type: "string", enum: ["HOT", "WARM", "COLD"] },
+                  score_explanation: { type: "string" },
                   opportunity_type: { type: "string" },
-                  reason: { type: "string" },
-                  estimated_value: { type: "string" }
+                  estimated_value: { type: "string" },
+                  recommended_approach: { type: "string" },
+                  priority_rank: { type: "number" }
                 }
               }
             },
-            medium_priority: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  clinic_name: { type: "string" },
-                  city: { type: "string" },
-                  opportunity_type: { type: "string" },
-                  reason: { type: "string" }
-                }
+            scoring_summary: {
+              type: "object",
+              properties: {
+                total_leads: { type: "number" },
+                hot_leads: { type: "number" },
+                warm_leads: { type: "number" },
+                cold_leads: { type: "number" },
+                avg_score: { type: "number" },
+                total_pipeline_value: { type: "string" }
               }
             }
           }
@@ -786,69 +796,104 @@ Retorne lista priorizada de oportunidades.`,
               </Card>
             )}
 
-            {/* Oportunidades de Alta Prioridade */}
-            <Card className="p-5 bg-gradient-to-r from-green-50 to-emerald-50">
-              <h3 className="font-bold text-lg text-green-800 mb-4 flex items-center gap-2">
-                🎯 Oportunidades ALTA Prioridade
-                <span className="text-sm font-normal text-green-600">
-                  ({results.opportunities.high_priority?.length || 0} clínicas)
-                </span>
-              </h3>
-              
-              {results.opportunities.high_priority && results.opportunities.high_priority.length > 0 ? (
-                <div className="space-y-3">
-                  {results.opportunities.high_priority.map((opp, idx) => (
-                    <div key={idx} className="p-4 bg-white rounded-lg border-l-4 border-green-500">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="font-bold text-slate-800">{opp.clinic_name}</p>
-                          <p className="text-sm text-slate-500">{opp.city}</p>
-                        </div>
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm">
-                          <span className="font-semibold text-green-700">Tipo:</span> {opp.opportunity_type}
-                        </p>
-                        <p className="text-sm text-slate-600">{opp.reason}</p>
-                        {opp.estimated_value && (
-                          <p className="text-sm font-bold text-green-700 mt-2">
-                            💰 {opp.estimated_value}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+            {/* Lead Scoring Summary */}
+            {results.opportunities.scoring_summary && (
+              <Card className="p-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <h3 className="font-bold text-xl mb-4">📊 Resumo de Lead Scoring</h3>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Total de Leads</p>
+                    <p className="text-3xl font-bold">{results.opportunities.scoring_summary.total_leads}</p>
                   </div>
-                  ) : (
-                  <p className="text-sm text-green-600">Nenhuma oportunidade de alta prioridade identificada</p>
-                  )}
-
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    💡 <strong>Dica:</strong> Use estas oportunidades para planejar suas visitas e abordagens de vendas.
-                  </p>
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Score Médio</p>
+                    <p className="text-3xl font-bold">{results.opportunities.scoring_summary.avg_score}</p>
                   </div>
-                  </Card>
-
-                {/* Oportunidades de Média Prioridade */}
-            {results.opportunities.medium_priority && results.opportunities.medium_priority.length > 0 && (
-              <Card className="p-5 bg-gradient-to-r from-yellow-50 to-amber-50">
-                <h3 className="font-bold text-lg text-amber-800 mb-4">
-                  ⭐ Oportunidades MÉDIA Prioridade ({results.opportunities.medium_priority.length})
-                </h3>
-                <div className="space-y-3">
-                  {results.opportunities.medium_priority.map((opp, idx) => (
-                    <div key={idx} className="p-3 bg-white rounded-lg border-l-4 border-amber-500">
-                      <p className="font-semibold text-slate-800">{opp.clinic_name}</p>
-                      <p className="text-xs text-slate-500 mb-1">{opp.city}</p>
-                      <p className="text-sm text-amber-700">{opp.opportunity_type}</p>
-                      <p className="text-xs text-slate-600 mt-1">{opp.reason}</p>
-                    </div>
-                  ))}
+                  <div className="p-3 bg-red-400/30 rounded-lg">
+                    <p className="text-xs opacity-90">🔥 HOT Leads (80-100)</p>
+                    <p className="text-3xl font-bold">{results.opportunities.scoring_summary.hot_leads}</p>
+                  </div>
+                  <div className="p-3 bg-yellow-400/30 rounded-lg">
+                    <p className="text-xs opacity-90">⭐ WARM Leads (60-79)</p>
+                    <p className="text-3xl font-bold">{results.opportunities.scoring_summary.warm_leads}</p>
+                  </div>
                 </div>
+                {results.opportunities.scoring_summary.total_pipeline_value && (
+                  <div className="p-3 bg-green-400/30 rounded-lg text-center">
+                    <p className="text-sm opacity-90">Pipeline Estimado</p>
+                    <p className="text-2xl font-bold">{results.opportunities.scoring_summary.total_pipeline_value}</p>
+                  </div>
+                )}
               </Card>
             )}
+
+            {/* Leads Ranqueados por Score */}
+            <Card className="p-5 bg-gradient-to-r from-green-50 to-emerald-50">
+              <h3 className="font-bold text-lg text-green-800 mb-4">
+                🎯 Leads Ranqueados por Score IA
+              </h3>
+
+              {results.opportunities.scored_leads && results.opportunities.scored_leads.length > 0 ? (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {results.opportunities.scored_leads
+                    .sort((a, b) => b.lead_score - a.lead_score)
+                    .map((lead, idx) => {
+                      const categoryStyles = {
+                        HOT: { bg: 'bg-red-50', border: 'border-red-500', badge: 'bg-red-500 text-white', icon: '🔥' },
+                        WARM: { bg: 'bg-yellow-50', border: 'border-yellow-500', badge: 'bg-yellow-500 text-white', icon: '⭐' },
+                        COLD: { bg: 'bg-blue-50', border: 'border-blue-500', badge: 'bg-blue-500 text-white', icon: '💡' }
+                      };
+                      const style = categoryStyles[lead.score_category] || categoryStyles.COLD;
+
+                      return (
+                        <div key={idx} className={`p-4 ${style.bg} rounded-lg border-l-4 ${style.border}`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-slate-800">#{lead.priority_rank}</span>
+                                <p className="font-bold text-slate-800">{lead.clinic_name}</p>
+                              </div>
+                              <p className="text-sm text-slate-600">{lead.city}</p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold ${style.badge}`}>
+                                {style.icon} {lead.score_category}
+                              </span>
+                              <span className="text-2xl font-bold text-slate-800">{lead.lead_score}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 mt-3">
+                            <div className="p-2 bg-white/70 rounded">
+                              <p className="text-xs font-semibold text-slate-700">💡 Score:</p>
+                              <p className="text-sm text-slate-600">{lead.score_explanation}</p>
+                            </div>
+
+                            <div className="p-2 bg-white/70 rounded">
+                              <p className="text-xs font-semibold text-slate-700">🎯 Oportunidade:</p>
+                              <p className="text-sm text-slate-600">{lead.opportunity_type}</p>
+                            </div>
+
+                            {lead.estimated_value && (
+                              <div className="p-2 bg-green-100 rounded">
+                                <p className="text-xs font-semibold text-green-800">💰 Valor Estimado:</p>
+                                <p className="text-sm font-bold text-green-900">{lead.estimated_value}</p>
+                              </div>
+                            )}
+
+                            <div className="p-2 bg-indigo-50 rounded">
+                              <p className="text-xs font-semibold text-indigo-800">📋 Abordagem Recomendada:</p>
+                              <p className="text-sm text-indigo-700">{lead.recommended_approach}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                <p className="text-sm text-green-600">Nenhum lead encontrado</p>
+              )}
+            </Card>
 
             {/* Equipamentos por Clínica */}
             <Card className="p-5">
