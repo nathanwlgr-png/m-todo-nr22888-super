@@ -55,6 +55,7 @@ import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
+import MarketIntelligence from './pages/MarketIntelligence';
 import __Layout from './Layout.jsx';
 
 
@@ -116,6 +117,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
     "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
+    "MarketIntelligence": MarketIntelligence,
 }
 
 export const pagesConfig = {

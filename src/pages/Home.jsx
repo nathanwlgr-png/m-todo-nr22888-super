@@ -353,10 +353,10 @@ export default function Home() {
               Performance
             </Button>
           </Link>
-          <Link to={createPageUrl('RegionalCompetitorAnalysis')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-red-200 text-red-700">
+          <Link to={createPageUrl('MarketIntelligence')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
               <Search className="w-4 h-4 mr-2" />
-              Concorrentes
+              Análise Mercado
             </Button>
           </Link>
         </div>
