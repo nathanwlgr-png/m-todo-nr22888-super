@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
-import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -14,7 +13,7 @@ export default function FloatingUploadButton() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const timeoutRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('uploaded_docs') || '[]');
     setUploadedFiles(saved);
   }, []);
