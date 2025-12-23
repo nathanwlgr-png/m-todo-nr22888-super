@@ -107,6 +107,99 @@ export default function DataExportButton() {
             execution: "Ação executada automaticamente ou sugerida para vendedor",
             learning: "IA aprende com resultados (quais técnicas funcionaram, padrões de sucesso)"
           },
+          performance_modes: {
+            network_modes: {
+              wifi: "Modo completo - Todas IAs ativas, sync em tempo real, relatórios automáticos",
+              mobile_3g_4g: "Modo economia - IAs essenciais, polling reduzido, economia de dados/bateria"
+            },
+            performance_levels: {
+              turbo: "18 IAs ativas - Máxima performance, análises em tempo real, auto-correção",
+              normal: "12 IAs principais - Balanceamento ideal entre performance e consumo",
+              slow: "6 IAs essenciais - Economia máxima, acionamento manual"
+            }
+          },
+          complete_functions_manual: {
+            client_management: {
+              new_client: "Cadastro completo com análise numerológica automática e perfil comportamental",
+              import_table: "Importação em massa de planilhas Excel/CSV com mapeamento inteligente",
+              voice_scanner: "Transcrição de ligações e extração automática de dados estruturados",
+              client_profile: "Perfil 360° com histórico, timeline, documentos, análises IA",
+              client_editor: "Edição rápida de campos, lab needs, preferências de comunicação",
+              duplicate_detection: "IA detecta e sugere merge de clientes duplicados"
+            },
+            sales_tools: {
+              equipment_selector: "IA sugere equipamento ideal baseado em perfil e necessidades",
+              proposal_generator: "Geração automática de propostas personalizadas com numerologia",
+              price_simulator: "Simulações financeiras Santander e ROI calculado",
+              objection_handler: "IA prevê objeções e gera respostas personalizadas por perfil",
+              closing_scripts: "Scripts de fechamento adaptados ao perfil numerológico",
+              whatsapp_sender: "Envio de mensagens estruturadas e material técnico via WhatsApp"
+            },
+            task_automation: {
+              auto_task_generator: "Cria tarefas automaticamente baseado em comportamento (cooldown 48h)",
+              task_manager_ai: "Prioriza tarefas inteligentemente por urgência e impacto",
+              task_calendar: "Calendário visual com drag-and-drop e sincronização Google",
+              follow_up_sequences: "Sequências automáticas de follow-up com gatilhos personalizados",
+              task_notifications: "Alertas via WhatsApp de tarefas urgentes"
+            },
+            analytics_intelligence: {
+              sales_analytics: "Dashboard completo com funil, conversão, performance por vendedor",
+              predictive_analytics: "IA prevê fechamento e probabilidade de conversão",
+              pipeline_optimization: "IA analisa funil e sugere ações para mover clientes entre estágios",
+              dashboard_performance: "Análise SWOT + previsões + nota de performance (A-F)",
+              health_score: "Calcula saúde do cliente e risco de churn",
+              engagement_score: "Score baseado em visualizações, downloads, respostas"
+            },
+            campaigns: {
+              campaign_creation: "Criação de campanhas segmentadas com público-alvo definido",
+              ai_content_generator: "IA gera mensagens, emails, WhatsApp personalizados por cliente",
+              campaign_automation: "Envio automático com tracking de abertura e resposta",
+              campaign_templates: "Templates de proposta e contrato vinculados a campanhas",
+              campaign_analytics: "Métricas de sucesso (leads, reuniões, vendas, receita)"
+            },
+            reports_exports: {
+              auto_reports: "Relatórios diários/semanais/mensais gerados automaticamente por IA",
+              monthly_insights: "Análise mensal com insights, tendências e recomendações",
+              data_export: "Exportação completa JSON com todos dados + artigos científicos + treinamento",
+              performance_feedback: "Feedback personalizado de performance do vendedor",
+              visit_reports: "Relatórios de visita com análise de técnicas que funcionaram"
+            },
+            integrations: {
+              google_sheets: "Sincronização bidirecional com planilhas Google",
+              crm_external_sync: "Importação e mapeamento de dados de CRMs externos",
+              whatsapp_integration: "Envio de mensagens, notificações e materiais via WhatsApp",
+              voice_commands: "Comandos de voz para operações rápidas",
+              offline_mode: "Pacote offline com guias, tarefas e material científico"
+            },
+            technical_materials: {
+              hemogasometry_guide: "Guia completo hemogasometria equina (7 artigos científicos)",
+              lab_equipment_guide: "Material de 5 equipamentos para cães/gatos (valores, evidências, ROI)",
+              differential_materials: "Foco em eletrólitos, coagulação, amônia, cistatina C, PCR, imunofluorescência",
+              sales_scripts: "Scripts baseados em perfil numerológico e gatilhos mentais",
+              competitor_analysis: "Análise de concorrentes com IA (marcas, preços, diferenciais)"
+            },
+            gamification: {
+              points_system: "Sistema de pontos por tarefas, vendas e visitas concluídas",
+              levels_badges: "Níveis de vendedor e badges conquistadas",
+              leaderboard: "Ranking de vendedores com métricas comparativas",
+              goals_tracking: "Metas individuais e de equipe com progresso visual",
+              power_booster: "Multiplicadores temporários de performance"
+            },
+            error_correction: {
+              ia_validator_1: "Monitora dados inconsistentes (scores inválidos, campos obrigatórios)",
+              ia_validator_2: "Valida lógica de negócio (clientes quentes inativos, alto score sem ação)",
+              ia_validator_3: "Otimiza performance (detecta gargalos, sugere melhorias)"
+            },
+            advanced_features: {
+              numerology_analysis: "Análise completa de perfil comportamental e melhor abordagem",
+              best_closing_days: "IA calcula melhores dias para fechar venda baseado em numerologia",
+              market_intelligence: "Análise de mercado regional com dados demográficos e concorrência",
+              visit_planner: "Planejador de rotas otimizado com Google Maps",
+              monthly_visit_calendar: "Calendário mensal visual para planejamento de visitas",
+              capital_analysis: "Análise de poder de compra real via CNPJ",
+              workflow_automation: "Criação de workflows automáticos baseados em padrões"
+            }
+          },
           best_practices: [
             "Mantenha dados atualizados - IA depende de informações precisas",
             "Complete perfil do cliente - quanto mais dados, melhor a análise IA",

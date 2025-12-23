@@ -65,6 +65,7 @@ import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
 import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
 import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
 import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
+import NetworkModeToggle from '@/components/NetworkModeToggle';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -335,6 +336,9 @@ export default function Home() {
 
       {/* Botão Flutuante Material Técnico */}
       <FloatingTechnicalMaterial />
+
+      {/* Controle de Modo de Rede e Performance */}
+      <NetworkModeToggle />
 
       {/* Material de Vendas 3DX */}
       <div className="px-6 mt-6">
