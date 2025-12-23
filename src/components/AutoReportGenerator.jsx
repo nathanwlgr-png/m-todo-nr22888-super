@@ -178,17 +178,10 @@ Gere um relatório em JSON com:
     toast.success('PDF exportado!');
   };
 
-  // Agendar relatório diário automático (7h da manhã)
+  // DESABILITADO: Relatórios automáticos para evitar rate limit
+  // Usuário pode gerar manualmente quando necessário
   useEffect(() => {
-    const checkDailyReport = () => {
-      const now = new Date();
-      if (now.getHours() === 7 && now.getMinutes() === 0) {
-        generateReport('daily');
-      }
-    };
-
-    const interval = setInterval(checkDailyReport, 60000); // Check every minute
-    return () => clearInterval(interval);
+    // Auto-reports desabilitados por padrão
   }, []);
 
   return (

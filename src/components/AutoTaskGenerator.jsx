@@ -274,11 +274,10 @@ Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de ma
       }
     };
 
-    checkBehaviors();
+    // Executar apenas 1x ao carregar, depois desabilitar automático
+    // checkBehaviors();
     
-    // Agendar próxima verificação em 10 minutos
-    const interval = setInterval(checkBehaviors, 600000);
-    return () => clearInterval(interval);
+    // DESABILITADO: Evitar rate limit. Usuário pode acionar manualmente se necessário
   }, [clients, followupLogs, tasks, interactions, documents]);
 
   return null; // Silent background component

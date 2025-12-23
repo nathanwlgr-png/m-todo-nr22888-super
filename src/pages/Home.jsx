@@ -46,6 +46,7 @@ import CRMExternalSync from '@/components/CRMExternalSync';
 import VoiceCommandSystem from '@/components/VoiceCommandSystem';
 import AIConfigCenter from '@/components/AIConfigCenter';
 import AdvancedAIHub from '@/components/AdvancedAIHub';
+import AIRateLimitManager from '@/components/AIRateLimitManager';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -116,6 +117,11 @@ export default function Home() {
       {/* Voice Command System */}
       <div className="px-6 mt-4">
         <VoiceCommandSystem />
+      </div>
+
+      {/* Rate Limit Warning */}
+      <div className="px-6 mt-4">
+        <AIRateLimitManager />
       </div>
       
       {/* Header */}
