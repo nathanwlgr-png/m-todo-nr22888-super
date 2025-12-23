@@ -66,7 +66,16 @@ export default function Clients() {
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date'),
+    queryFn: async () => {
+      try {
+        const data = await base44.entities.Client.list('-updated_date');
+        return data.filter(c => c && c.id && c.first_name);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        return [];
+      }
+    },
+    retry: 1
   });
 
   const { data: sales = [] } = useQuery({
