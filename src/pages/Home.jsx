@@ -90,6 +90,7 @@ import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
 import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
 import SmartSalesFlowOptimizer from '@/components/SmartSalesFlowOptimizer';
 import AIReportingHub from '@/components/AIReportingHub';
+import ScientificResearchAI from '@/components/ScientificResearchAI';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -538,6 +539,11 @@ export default function Home() {
       {/* Modo Offline N */}
       <div className="px-6 mt-6">
         <OfflinePackGenerator />
+      </div>
+
+      {/* Pesquisa Científica Veterinária */}
+      <div className="px-6 mt-6">
+        <ScientificResearchAI />
       </div>
 
       {/* AI Reporting Hub */}
