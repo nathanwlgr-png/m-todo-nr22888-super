@@ -27,6 +27,25 @@ comportamento humano e inteligência artificial de última geração, criando um
 sistema revolucionário de CRM que não apenas gerencia, mas COMPREENDE e 
 ANTECIPA o comportamento de compra.
 
+🎓 VERSÃO 1.1 - LANÇAMENTO PREVISTO:
+──────────────────────────────────────────────────────────────────────────
+A próxima versão incluirá TRÊS CURSOS COMPLETOS integrados:
+
+1️⃣ Curso de Técnicas de Vendas Avançadas
+   • SPIN Selling na prática
+   • Consultive Selling aplicado
+   • Neurolinguística para vendedores
+
+2️⃣ Curso de Numerologia Aplicada a Negócios
+   • Interpretação avançada de perfis
+   • Melhores dias para fechamento
+   • Compatibilidade cliente-vendedor
+
+3️⃣ Curso de Inteligência Competitiva
+   • Análise profunda de concorrentes
+   • Estratégias de diferenciação
+   • Monitoramento de mercado em tempo real
+
 
 ══════════════════════════════════════════════════════════════════════════
 📚 ÍNDICE
@@ -89,9 +108,9 @@ CORRELAÇÕES:
 - Endereço → Geolocalização GPS
 
 
-2.2 IA DE ANÁLISE DE MERCADO (MarketAnalysisAI)
+2.2 IA DE ANÁLISE DE MERCADO E CONCORRENTES (MarketAnalysisAI + CompetitorAnalysis)
 ──────────────────────────────────────────────────────────────────────────
-FUNÇÃO: Identificar oportunidades de negócio por região
+FUNÇÃO: Identificar oportunidades de negócio e analisar concorrência profundamente
 
 DADOS COLETADOS:
 • GPS: Coordenadas e raio de busca
@@ -100,20 +119,57 @@ DADOS COLETADOS:
 • Google: Busca por clínicas veterinárias na região
 • Redes Sociais: Presença digital das clínicas
 • CNPJs: Validação de empresas ativas
+• Banco de Dados Concretos: Informações verificadas e atualizadas
 
-ANÁLISE:
+🔍 ANÁLISE AVANÇADA DE CONCORRENTES:
+────────────────────────────────────────────────────────────────────────
+A análise VAI ALÉM DO CNPJ - é uma investigação completa:
+
+1. REDES SOCIAIS (Instagram, Facebook, Google Meu Negócio):
+   • Raspagem de fotos postadas pela clínica
+   • Identificação de equipamentos nas fotos
+   • Análise de estrutura física (tamanho, modernidade)
+   • Avaliação de movimento (quantidade de posts, engajamento)
+
+2. EQUIPAMENTOS IDENTIFICADOS:
+   • IA de reconhecimento de imagem identifica marcas e modelos
+   • Microscópios, centrífugas, analisadores hematológicos
+   • Equipamentos de diagnóstico por imagem
+   • Estado de conservação (novo, usado, obsoleto)
+
+3. AVALIAÇÃO DE PATRIMÔNIO COMPLETO:
+   • Estimativa de investimento total em equipamentos
+   • Classificação: Clínica Básica / Intermediária / Premium / Hospital
+   • Capacidade de atendimento estimada
+   • Nível tecnológico (0-10)
+
+4. INTELIGÊNCIA COMPETITIVA:
+   • Quais equipamentos eles NÃO têm (oportunidade)
+   • Equipamentos obsoletos (necessidade de upgrade)
+   • Expansões recentes (orçamento disponível)
+   • Parcerias e fornecedores atuais
+
+ANÁLISE GERAL:
 1. Calcula demanda potencial = População / 5.000
-2. Busca clínicas existentes (Google + cadastros)
-3. Identifica GAP: Demanda - Oferta
-4. Ranqueia regiões por oportunidade
-5. Pesquisa CNPJs para auto-registro de leads
-6. Cruza com base atual para evitar duplicatas
+2. Busca clínicas existentes (Google + cadastros + redes sociais)
+3. Analisa CADA concorrente em profundidade
+4. Identifica GAP: Demanda - Oferta
+5. Ranqueia regiões por oportunidade E facilidade de entrada
+6. Pesquisa CNPJs para auto-registro de leads
+7. Cruza com base atual para evitar duplicatas
+8. Gera dossiê completo do concorrente
 
 OUTPUTS:
 - Lista de cidades sub-atendidas
 - Estimativa de mercado em R$
 - Leads qualificados com CNPJ
 - Mapa de calor de oportunidades
+- DOSSIÊ COMPLETO DO CONCORRENTE:
+  • Fotos da clínica
+  • Lista de equipamentos identificados
+  • Valor estimado do patrimônio
+  • Pontos fracos (equipamentos faltantes)
+  • Estratégia de abordagem recomendada
 
 
 2.3 IA DE SCORING PREDITIVO (ClientScoringEngine)
