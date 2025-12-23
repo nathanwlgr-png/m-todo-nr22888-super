@@ -90,6 +90,7 @@ import ClientHealthScore from '@/components/ClientHealthScore';
 import ObjectionHandlingByProfile from '@/components/ObjectionHandlingByProfile';
 import TeamChat from '@/components/TeamChat';
 import CollaborationIndicator from '@/components/CollaborationIndicator';
+import ProposalContractGenerator from '@/components/ProposalContractGenerator';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -782,6 +783,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             queryClient.invalidateQueries(['client-documents']);
           }}
         />
+
+        {/* Gerador Proposta/Contrato com Templates */}
+        <ProposalContractGenerator client={client} campaignId={null} />
 
         {/* Kit de Vendas de Equipamento */}
         <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">

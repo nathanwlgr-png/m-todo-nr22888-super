@@ -25,6 +25,7 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import TeamChat from '@/components/TeamChat';
 import CollaborationIndicator from '@/components/CollaborationIndicator';
+import CampaignTemplateUploader from '@/components/CampaignTemplateUploader';
 
 export default function CampaignDetails() {
   const navigate = useNavigate();
@@ -149,10 +150,11 @@ export default function CampaignDetails() {
         <CollaborationIndicator contextType="campaign" contextId={campaignId} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full">
-            <TabsTrigger value="overview" className="flex-1">Visão Geral</TabsTrigger>
-            <TabsTrigger value="content" className="flex-1">Conteúdo</TabsTrigger>
-            <TabsTrigger value="clients" className="flex-1">Clientes</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-4">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="content">Conteúdo</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="clients">Clientes</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -292,6 +294,21 @@ export default function CampaignDetails() {
                 </div>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-4 mt-4">
+            <CampaignTemplateUploader campaignId={campaignId} />
+
+            <Card className="p-4 bg-blue-50 border-blue-200">
+              <p className="text-sm font-semibold text-blue-900 mb-2">💡 Como usar:</p>
+              <ol className="text-xs text-blue-800 space-y-1">
+                <li>1. Faça upload da Tabela de Retorno Financeiro</li>
+                <li>2. Envie o Modelo de Proposta</li>
+                <li>3. Envie o Modelo de Contrato</li>
+                <li>4. Configure as condições de pagamento</li>
+                <li>5. Na aba "Clientes", gere propostas/contratos automaticamente</li>
+              </ol>
+            </Card>
           </TabsContent>
 
           <TabsContent value="clients" className="space-y-3">
