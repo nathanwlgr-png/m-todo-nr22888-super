@@ -7,6 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Sparkles, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Região Nathan (Laranja) - APENAS ESTAS CIDADES
+const ORANGE_REGION_CITIES = [
+  'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
+  'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins'
+];
+
 export default function ImportClientsTable() {
   const navigate = useNavigate();
   const [tableData, setTableData] = useState('');
@@ -69,10 +75,26 @@ Retorne JSON válido.`;
         }
       });
 
-      // Cadastra todos os clientes
+      // Cadastra apenas clientes da região laranja (Nathan)
       const createdClients = [];
+      const rejected = [];
+      
       for (const clientData of response.clients) {
         if (clientData.first_name) {
+          // Valida se a cidade está na região laranja
+          const cityMatch = ORANGE_REGION_CITIES.some(validCity => 
+            clientData.city?.toLowerCase().includes(validCity.toLowerCase())
+          );
+          
+          if (!cityMatch) {
+            rejected.push({ 
+              name: clientData.first_name, 
+              city: clientData.city, 
+              reason: 'Cidade fora da região laranja (Nathan)' 
+            });
+            continue;
+          }
+          
           try {
             const client = await base44.entities.Client.create({
               ...clientData,
@@ -83,6 +105,11 @@ Retorne JSON válido.`;
             createdClients.push(client);
           } catch (error) {
             console.error('Erro ao criar cliente:', clientData.first_name, error);
+            rejected.push({ 
+              name: clientData.first_name, 
+              city: clientData.city, 
+              reason: 'Erro ao cadastrar' 
+            });
           }
         }
       }
@@ -90,10 +117,16 @@ Retorne JSON válido.`;
       setResult({
         total: response.clients.length,
         created: createdClients.length,
-        failed: response.clients.length - createdClients.length
+        rejected: rejected.length,
+        rejectedDetails: rejected
       });
 
-      toast.success(`${createdClients.length} clientes cadastrados com sucesso!`);
+      if (createdClients.length > 0) {
+        toast.success(`${createdClients.length} clientes da região laranja cadastrados!`);
+      }
+      
+      if (rejected.length > 0) {
+        toast.warning(`${rejected.length} clientes rejeitados (fora da região laranja)`);
       
     } catch (error) {
       console.error('Erro ao importar:', error);
@@ -116,6 +149,28 @@ Retorne JSON válido.`;
       </div>
 
       <div className="p-6 space-y-6">
+        {/* Região Nathan - Laranja */}
+        <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 bg-orange-600 rounded-full" />
+            </div>
+            <div>
+              <p className="font-bold text-orange-900 mb-2">🟠 Região Nathan (Laranja)</p>
+              <p className="text-sm text-orange-800 mb-2">
+                Apenas clientes destas cidades serão cadastrados:
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {ORANGE_REGION_CITIES.map(city => (
+                  <span key={city} className="px-2 py-0.5 bg-orange-200 text-orange-900 rounded-full text-xs font-medium">
+                    {city}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {/* Instruções */}
         <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
           <div className="flex items-start gap-3">
@@ -128,6 +183,7 @@ Retorne JSON válido.`;
                 <li>Cole sua tabela do Excel, Google Sheets ou lista de clientes abaixo</li>
                 <li>A IA vai extrair automaticamente: nome, clínica, cidade, contatos, CNPJ, etc.</li>
                 <li>Se houver informação sobre máquina atual, será capturada também</li>
+                <li>⚠️ Apenas cidades da região LARANJA serão cadastradas</li>
                 <li>Clique em "Processar e Cadastrar"</li>
               </ol>
             </div>
@@ -153,14 +209,31 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
 
         {/* Resultado */}
         {result && (
-          <Card className="p-4 bg-green-50 border-green-200">
-            <h3 className="font-semibold text-green-800 mb-2">✅ Importação Concluída</h3>
-            <div className="text-sm text-green-700 space-y-1">
-              <p>• Total processados: {result.total}</p>
-              <p>• Cadastrados com sucesso: {result.created}</p>
-              {result.failed > 0 && <p>• Falhas: {result.failed}</p>}
-            </div>
-          </Card>
+          <div className="space-y-3">
+            <Card className="p-4 bg-green-50 border-green-200">
+              <h3 className="font-semibold text-green-800 mb-2">✅ Importação Concluída</h3>
+              <div className="text-sm text-green-700 space-y-1">
+                <p>• Total processados: {result.total}</p>
+                <p>• Cadastrados na região laranja: {result.created}</p>
+                {result.rejected > 0 && (
+                  <p className="text-orange-700">• Rejeitados (fora da região): {result.rejected}</p>
+                )}
+              </div>
+            </Card>
+
+            {result.rejectedDetails && result.rejectedDetails.length > 0 && (
+              <Card className="p-4 bg-orange-50 border-orange-200">
+                <h3 className="font-semibold text-orange-800 mb-2">⚠️ Clientes Rejeitados</h3>
+                <div className="text-sm text-orange-700 space-y-1 max-h-40 overflow-y-auto">
+                  {result.rejectedDetails.map((rejected, idx) => (
+                    <p key={idx}>
+                      • {rejected.name} ({rejected.city || 'Sem cidade'}) - {rejected.reason}
+                    </p>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
         )}
 
         {/* Botão */}
