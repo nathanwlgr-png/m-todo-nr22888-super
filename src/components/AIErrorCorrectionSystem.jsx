@@ -20,16 +20,22 @@ export default function AIErrorCorrectionSystem() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list('-updated_date', 500),
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ['all-tasks'],
     queryFn: () => base44.entities.Task.list('-created_date', 500),
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['all-sales'],
     queryFn: () => base44.entities.Sale.list('-sale_date', 500),
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: false
   });
 
   // IA 1: Monitor de Dados Inconsistentes

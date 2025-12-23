@@ -8,22 +8,30 @@ import { ShoppingCart, Package, TrendingUp, DollarSign, TrendingDown } from 'luc
 export default function SalesOverview() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list()
+    queryFn: () => base44.entities.Client.list(),
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
-    queryFn: () => base44.entities.Sale.list()
+    queryFn: () => base44.entities.Sale.list(),
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: consumableOrders = [] } = useQuery({
     queryKey: ['consumable-orders'],
-    queryFn: () => base44.entities.ConsumableOrder.list()
+    queryFn: () => base44.entities.ConsumableOrder.list(),
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: false
   });
 
   const { data: visits = [] } = useQuery({
     queryKey: ['all-visits'],
     queryFn: () => base44.entities.Visit.list('-scheduled_date', 100),
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: false
   });
 
   // Análise expandida de vendas
