@@ -65,6 +65,30 @@ export default function ContactSettings() {
     });
   };
 
+  const sendTestMessage = async () => {
+    const cleanWhatsapp = whatsapp.replace(/\D/g, '');
+    
+    if (!cleanWhatsapp || cleanWhatsapp.length < 10) {
+      toast.error('Configure o WhatsApp primeiro');
+      return;
+    }
+
+    const testMessage = `🧪 *TESTE DO SISTEMA*\n\n` +
+      `✅ WhatsApp configurado com sucesso!\n` +
+      `📱 Número: ${cleanWhatsapp}\n` +
+      `⏰ Intervalo: ${notificationInterval} minutos\n\n` +
+      `O sistema está pronto para enviar notificações.\n\n` +
+      `_Teste realizado em ${new Date().toLocaleString('pt-BR')}_`;
+
+    try {
+      await navigator.clipboard.writeText(testMessage);
+      window.open(`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(testMessage)}`, '_blank');
+      toast.success('Mensagem de teste enviada!');
+    } catch (error) {
+      toast.error('Erro ao enviar teste');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -192,6 +216,16 @@ export default function ContactSettings() {
             </div>
           </div>
         </Card>
+
+        {/* Test Button */}
+        <Button
+          onClick={sendTestMessage}
+          variant="outline"
+          className="w-full h-12 border-2 border-green-300 text-green-700 hover:bg-green-50"
+        >
+          <Send className="w-5 h-5 mr-2" />
+          Enviar Mensagem de Teste
+        </Button>
 
         {/* Save Button */}
         <Button
