@@ -73,12 +73,23 @@ export default function WhatsAppNotificationService() {
 
         message += `_Próxima atualização em ${intervalMinutes} minutos_`;
 
-        // Abrir WhatsApp com mensagem
-        window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(message)}`, '_blank');
+        // Copiar mensagem e mostrar toast discreto
+        await navigator.clipboard.writeText(message);
         
-        console.log(`📱 Notificação enviada: ${new Date().toLocaleTimeString()}`);
+        toast.info('📱 Atualização disponível!', {
+          description: 'Mensagem copiada. Clique para abrir WhatsApp.',
+          action: {
+            label: 'Abrir WhatsApp',
+            onClick: () => {
+              window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(message)}`, '_blank');
+            }
+          },
+          duration: 10000
+        });
+        
+        console.log(`📱 Notificação preparada: ${new Date().toLocaleTimeString()}`);
       } catch (error) {
-        console.error('Erro ao enviar notificação WhatsApp:', error);
+        console.error('Erro ao preparar notificação WhatsApp:', error);
       }
     };
 
