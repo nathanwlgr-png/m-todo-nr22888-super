@@ -151,37 +151,79 @@ export default function ClientProfile() {
 
   const { data: visits = [] } = useQuery({
     queryKey: ['client-visits', clientId],
-    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Visit.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar visitas:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['client-sales', clientId],
-    queryFn: () => base44.entities.Sale.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Sale.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar vendas:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
   const { data: followupLogs = [] } = useQuery({
     queryKey: ['client-followup-logs', clientId],
-    queryFn: () => base44.entities.FollowUpLog.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.FollowUpLog.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar follow-ups:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
   const { data: clientTasks = [] } = useQuery({
     queryKey: ['client-tasks', clientId],
-    queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Task.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar tarefas:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
   const { data: documents = [] } = useQuery({
     queryKey: ['client-documents', clientId],
-    queryFn: () => base44.entities.ClientDocument.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.ClientDocument.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar documentos:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
   const { data: interactions = [] } = useQuery({
     queryKey: ['interactions', clientId],
-    queryFn: () => base44.entities.Interaction.filter({ client_id: clientId }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Interaction.filter({ client_id: clientId });
+      } catch (error) {
+        console.error('Erro ao carregar interações:', error);
+        return [];
+      }
+    },
     enabled: !!clientId
   });
 
