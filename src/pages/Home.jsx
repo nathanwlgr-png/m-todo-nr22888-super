@@ -24,7 +24,9 @@ import {
   Database,
   Send,
   WifiOff,
-  Package
+  Package,
+  AlertCircle,
+  RotateCcw
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -92,7 +94,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
 
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
       try {
@@ -100,16 +102,17 @@ export default function Home() {
         return data.filter(c => c && c.id && c.first_name);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
-        return [];
+        toast.error('Erro de conexão ao carregar dados');
+        throw error;
       }
     },
-    retry: 0,
+    retry: 2,
+    retryDelay: 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     staleTime: 60 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    onError: () => []
+    gcTime: 60 * 60 * 1000
   });
 
   const { data: user } = useQuery({
