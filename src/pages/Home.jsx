@@ -59,6 +59,7 @@ import DataExportButton from '@/components/DataExportButton';
 import ThreeDXSalesMaterial from '@/components/3DXSalesMaterial';
 import PersonalizedContentGenerator from '@/components/PersonalizedContentGenerator';
 import AdvancedSalesIntelligence from '@/components/AdvancedSalesIntelligence';
+import OfflinePackGenerator from '@/components/OfflinePackGenerator';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -282,6 +283,11 @@ export default function Home() {
       {/* Mensagens Estruturadas */}
       <div className="px-6 mt-6">
         <ScheduledMessagesWidget />
+      </div>
+
+      {/* Modo Offline N */}
+      <div className="px-6 mt-6">
+        <OfflinePackGenerator />
       </div>
 
       {/* CRM + Gestão IA Unificado */}
