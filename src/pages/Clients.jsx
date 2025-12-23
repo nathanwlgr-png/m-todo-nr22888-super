@@ -666,6 +666,66 @@ Retorne JSON válido.`,
           </>
         )}
       </div>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Importar Clientes da Planilha</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-sm text-orange-800 font-medium mb-2">🟠 Região Laranja (Nathan)</p>
+              <p className="text-xs text-orange-700">
+                Apenas cidades: Marília, Presidente Prudente, Assis, Tupã, Adamantina, Bauru, Araçatuba, Ourinhos, Dracena, Lins
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Cole a tabela ou lista de clientes:
+              </label>
+              <Textarea
+                value={tableData}
+                onChange={(e) => setTableData(e.target.value)}
+                placeholder="Ex:
+Nome        | Clínica              | Cidade        | Telefone      | Equipamento
+João Silva  | Clínica Vida Animal  | Marília       | 14999999999   | BC-2800
+Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipamento
+..."
+                className="min-h-[300px] font-mono text-sm"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleImportTable}
+                disabled={!tableData.trim() || processing}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+              >
+                {processing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar Clientes
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowImportDialog(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
