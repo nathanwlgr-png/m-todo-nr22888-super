@@ -22,7 +22,9 @@ import {
   Filter,
   X,
   Tag,
-  TrendingUp
+  TrendingUp,
+  Upload,
+  ArrowUpDown
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
@@ -38,6 +40,7 @@ export default function Clients() {
   const [suggestions, setSuggestions] = useState([]);
   const [visitFilter, setVisitFilter] = useState('all');
   const [pipelineFilter, setPipelineFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('city'); // 'city', 'alpha', 'importance'
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -60,9 +63,9 @@ export default function Clients() {
     return unique.sort();
   }, [clients]);
 
-  // Busca em múltiplos campos
+  // Busca e ordenação
   const filteredClients = useMemo(() => {
-    return clients.filter(client => {
+    let filtered = clients.filter(client => {
       // Busca por nome do cliente ou clínica
       const matchesSearch = !search || (
         client.first_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -100,7 +103,31 @@ export default function Clients() {
       
       return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline;
     });
-  }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits]);
+
+    // Ordenação
+    if (sortBy === 'city') {
+      // Agrupa por cidade e ordena alfabeticamente dentro de cada grupo
+      filtered.sort((a, b) => {
+        const cityA = a.city || 'Sem cidade';
+        const cityB = b.city || 'Sem cidade';
+        if (cityA !== cityB) return cityA.localeCompare(cityB);
+        return (a.first_name || '').localeCompare(b.first_name || '');
+      });
+    } else if (sortBy === 'alpha') {
+      // Ordem alfabética por nome
+      filtered.sort((a, b) => (a.first_name || '').localeCompare(b.first_name || ''));
+    } else if (sortBy === 'importance') {
+      // Ordem de importância: status + score
+      filtered.sort((a, b) => {
+        const statusPriority = { quente: 3, morno: 2, frio: 1 };
+        const priorityA = (statusPriority[a.status] || 0) * 100 + (a.purchase_score || 0);
+        const priorityB = (statusPriority[b.status] || 0) * 100 + (b.purchase_score || 0);
+        return priorityB - priorityA;
+      });
+    }
+
+    return filtered;
+  }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits, sortBy]);
 
   // Autocomplete suggestions
   const handleSearchChange = (value) => {
@@ -143,6 +170,14 @@ export default function Clients() {
             className={`mr-2 ${showFunnel ? 'bg-indigo-600' : ''}`}
           >
             <TrendingUp className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(createPageUrl('ImportClientsTable'))}
+            className="mr-2"
+          >
+            <Upload className="w-4 h-4" />
           </Button>
           <Button
             size="sm"
@@ -210,6 +245,23 @@ export default function Clients() {
               <TabsTrigger value="frio" className="flex-1 rounded-lg text-xs">❄️</TabsTrigger>
             </TabsList>
           </Tabs>
+        </div>
+
+        {/* Ordenação */}
+        <div className="px-4 pb-3">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-10 border-2">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4" />
+                <SelectValue />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="city">🏙️ Por Cidade (agrupado)</SelectItem>
+              <SelectItem value="alpha">🔤 Ordem Alfabética</SelectItem>
+              <SelectItem value="importance">⭐ Por Importância</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Funnel Chart */}
@@ -341,29 +393,75 @@ export default function Clients() {
             </Button>
           </div>
         ) : (
-          filteredClients.map((client) => {
-            const hasPurchase = sales.some(s => 
-              s.client_id === client.id && 
-              (s.status === 'fechada' || s.status === 'entregue')
-            );
-            const scheduledVisit = allVisits.find(v => 
-              v.client_id === client.id && 
-              v.status === 'agendada'
-            );
-            const lastVisit = allVisits.find(v => 
-              v.client_id === client.id && 
-              v.status === 'realizada'
-            );
-            return (
-              <ClientCard 
-                key={client.id} 
-                client={client} 
-                hasPurchase={hasPurchase} 
-                scheduledVisit={scheduledVisit}
-                lastVisit={lastVisit}
-              />
-            );
-          })
+          <>
+            {sortBy === 'city' && (() => {
+              // Agrupa por cidade
+              const grouped = filteredClients.reduce((acc, client) => {
+                const city = client.city || 'Sem cidade';
+                if (!acc[city]) acc[city] = [];
+                acc[city].push(client);
+                return acc;
+              }, {});
+
+              return Object.entries(grouped).map(([city, cityClients]) => (
+                <div key={city} className="space-y-3">
+                  <div className="sticky top-20 bg-slate-50 py-2 z-10">
+                    <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide flex items-center gap-2">
+                      📍 {city}
+                      <span className="text-xs font-normal text-slate-500">({cityClients.length})</span>
+                    </h3>
+                  </div>
+                  {cityClients.map((client) => {
+                    const hasPurchase = sales.some(s => 
+                      s.client_id === client.id && 
+                      (s.status === 'fechada' || s.status === 'entregue')
+                    );
+                    const scheduledVisit = allVisits.find(v => 
+                      v.client_id === client.id && 
+                      v.status === 'agendada'
+                    );
+                    const lastVisit = allVisits.find(v => 
+                      v.client_id === client.id && 
+                      v.status === 'realizada'
+                    );
+                    return (
+                      <ClientCard 
+                        key={client.id} 
+                        client={client} 
+                        hasPurchase={hasPurchase} 
+                        scheduledVisit={scheduledVisit}
+                        lastVisit={lastVisit}
+                      />
+                    );
+                  })}
+                </div>
+              ));
+            })()}
+
+            {sortBy !== 'city' && filteredClients.map((client) => {
+              const hasPurchase = sales.some(s => 
+                s.client_id === client.id && 
+                (s.status === 'fechada' || s.status === 'entregue')
+              );
+              const scheduledVisit = allVisits.find(v => 
+                v.client_id === client.id && 
+                v.status === 'agendada'
+              );
+              const lastVisit = allVisits.find(v => 
+                v.client_id === client.id && 
+                v.status === 'realizada'
+              );
+              return (
+                <ClientCard 
+                  key={client.id} 
+                  client={client} 
+                  hasPurchase={hasPurchase} 
+                  scheduledVisit={scheduledVisit}
+                  lastVisit={lastVisit}
+                />
+              );
+            })}
+          </>
         )}
       </div>
     </div>
