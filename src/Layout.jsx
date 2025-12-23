@@ -5,11 +5,13 @@ import SecurityLayerSystem from './components/SecurityLayerSystem';
 import VoiceCommandAI from './components/VoiceCommandAI';
 import GoogleSheetsIntegration from './components/GoogleSheetsIntegration';
 import SystemHealthChecker from './components/SystemHealthChecker';
+import TestFlowSimulator from './components/TestFlowSimulator';
 
 export default function Layout({ children }) {
   return (
     <ErrorRecoverySystem>
       <SystemHealthChecker />
+      <TestFlowSimulator />
       <SystemHealthMonitor />
       <SecurityLayerSystem />
       <VoiceCommandAI />
