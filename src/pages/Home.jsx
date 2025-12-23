@@ -160,17 +160,24 @@ export default function Home() {
     }, [clients]);
 
     const filteredClients = useMemo(() => {
-    return clients.filter(c => {
-      const matchesSearch = !searchTerm || 
-        c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.city?.toLowerCase().includes(searchTerm.toLowerCase());
+      return clients
+        .filter(c => {
+          const matchesSearch = !searchTerm || 
+            c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+          const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
-    });
+          return matchesSearch && matchesStatus;
+        })
+        .sort((a, b) => {
+          // Ordenar por cidade primeiro, depois por nome
+          const cityCompare = (a.city || '').localeCompare(b.city || '', 'pt-BR');
+          if (cityCompare !== 0) return cityCompare;
+          return (a.first_name || '').localeCompare(b.first_name || '', 'pt-BR');
+        });
     }, [clients, searchTerm, statusFilter]);
 
   return (
