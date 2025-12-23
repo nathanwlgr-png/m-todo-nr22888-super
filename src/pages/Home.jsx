@@ -77,6 +77,11 @@ import MarketAnalysisAI from '@/components/MarketAnalysisAI';
 import ClientDataImporter from '@/components/ClientDataImporter';
 import ProfessionalContractGenerator from '@/components/ProfessionalContractGenerator';
 import SystemDocumentation from '@/components/SystemDocumentation';
+import ClientProfileGenerator from '@/components/ClientProfileGenerator';
+import AITokenCounter from '@/components/AITokenCounter';
+import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
+import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -190,6 +195,10 @@ export default function Home() {
               <span className="text-[9px] text-purple-400 font-semibold">Magnétic Tools</span>
             </div>
           </div>
+          
+          {/* Botões em formato de 8 */}
+          <FloatingButtonsGroup />
+          
           <Link to={createPageUrl('ContactSettings')}>
             <button className="w-8 h-8 rounded-lg glass hover:bg-white/10 transition-all">
               <Settings className="w-4 h-4 text-orange-400 mx-auto" />
@@ -258,6 +267,11 @@ export default function Home() {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Contador de Tokens IA */}
+      <div className="px-6 mt-4">
+        <AITokenCounter />
       </div>
 
       {/* Quick Stats */}
@@ -674,9 +688,19 @@ export default function Home() {
               <ClientDataImporter />
             </div>
 
+            {/* Gerador de Perfil Completo (Rodrigo Sávio Mavetto) */}
+            <div className="mt-6">
+              <ClientProfileGenerator />
+            </div>
+
             {/* Gerador de Contrato Oficial COMPET */}
             <div className="mt-6">
               <ProfessionalContractGenerator />
+            </div>
+
+            {/* Análise de Mercado - Marília */}
+            <div className="mt-6">
+              <MariliaMarketAnalysis />
             </div>
 
             {/* Análise de Mercado com GPS + IBGE */}
