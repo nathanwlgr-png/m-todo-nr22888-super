@@ -75,6 +75,8 @@ import CompletePDFManual from '@/components/CompletePDFManual';
 import ExportAllReports from '@/components/ExportAllReports';
 import QuickToolsPanel from '@/components/QuickToolsPanel';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Filter, X } from 'lucide-react';
 import DocumentMonitorAI from '@/components/DocumentMonitorAI';
 import SystemManualPDF from '@/components/SystemManualPDF';
 import MarketAnalysisAI from '@/components/MarketAnalysisAI';
@@ -94,6 +96,9 @@ export default function Home() {
   const [syncingOffline, setSyncingOffline] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
+  const [cityFilter, setCityFilter] = React.useState('all');
+  const [scoreFilter, setScoreFilter] = React.useState('all');
+  const [showFilters, setShowFilters] = React.useState(false);
 
   const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clients'],
@@ -167,6 +172,12 @@ export default function Home() {
     };
     }, [clients]);
 
+    // Lista única de cidades
+    const cities = useMemo(() => {
+      const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
+      return unique.sort();
+    }, [clients]);
+
     const filteredClients = useMemo(() => {
       return clients
         .filter(c => {
@@ -177,8 +188,18 @@ export default function Home() {
             c.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
           const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+          
+          const matchesCity = cityFilter === 'all' || c.city === cityFilter;
+          
+          let matchesScore = true;
+          if (scoreFilter !== 'all') {
+            const score = c.purchase_score || 0;
+            if (scoreFilter === 'high') matchesScore = score >= 70;
+            else if (scoreFilter === 'medium') matchesScore = score >= 40 && score < 70;
+            else if (scoreFilter === 'low') matchesScore = score < 40;
+          }
 
-          return matchesSearch && matchesStatus;
+          return matchesSearch && matchesStatus && matchesCity && matchesScore;
         })
         .sort((a, b) => {
           // Ordenar por cidade primeiro, depois por nome
@@ -186,7 +207,7 @@ export default function Home() {
           if (cityCompare !== 0) return cityCompare;
           return (a.first_name || '').localeCompare(b.first_name || '', 'pt-BR');
         });
-    }, [clients, searchTerm, statusFilter]);
+    }, [clients, searchTerm, statusFilter, cityFilter, scoreFilter]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -318,6 +339,69 @@ export default function Home() {
               ❄️ Frios ({metrics.cold})
             </Button>
           </div>
+
+          {/* Advanced Filters Toggle */}
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full border-2 border-slate-200 hover:bg-slate-50 h-11 rounded-xl"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            Filtros Avançados
+            {(cityFilter !== 'all' || scoreFilter !== 'all') && (
+              <span className="ml-2 bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full">
+                {[cityFilter !== 'all', scoreFilter !== 'all'].filter(Boolean).length}
+              </span>
+            )}
+          </Button>
+
+          {showFilters && (
+            <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 to-indigo-50 rounded-xl border-2 border-indigo-200 shadow-sm">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-2 block">Cidade</label>
+                <Select value={cityFilter} onValueChange={setCityFilter}>
+                  <SelectTrigger className="h-11 border-2 rounded-lg">
+                    <SelectValue placeholder="Todas as cidades" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as cidades</SelectItem>
+                    {cities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        📍 {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-2 block">Score de Compra</label>
+                <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                  <SelectTrigger className="h-11 border-2 rounded-lg">
+                    <SelectValue placeholder="Todos os scores" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os scores</SelectItem>
+                    <SelectItem value="high">⭐ Alto (70-100)</SelectItem>
+                    <SelectItem value="medium">📊 Médio (40-69)</SelectItem>
+                    <SelectItem value="low">📉 Baixo (0-39)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setCityFilter('all');
+                  setScoreFilter('all');
+                }}
+                className="w-full text-sm hover:bg-white/50"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Limpar Filtros
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -967,7 +1051,7 @@ export default function Home() {
         </div>
 
       {/* Filtered Clients */}
-      {(searchTerm || statusFilter !== 'all') && (
+      {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all' || scoreFilter !== 'all') && (
         <div className="px-6 mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-slate-800">
@@ -979,11 +1063,35 @@ export default function Home() {
               onClick={() => {
                 setSearchTerm('');
                 setStatusFilter('all');
+                setCityFilter('all');
+                setScoreFilter('all');
               }}
             >
-              Limpar
+              Limpar Todos
             </Button>
           </div>
+
+          {/* Active Filters Summary */}
+          {(cityFilter !== 'all' || scoreFilter !== 'all') && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {cityFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+                  📍 {cityFilter}
+                  <button onClick={() => setCityFilter('all')} className="hover:bg-indigo-200 rounded-full p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {scoreFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  {scoreFilter === 'high' ? '⭐ Alto' : scoreFilter === 'medium' ? '📊 Médio' : '📉 Baixo'}
+                  <button onClick={() => setScoreFilter('all')} className="hover:bg-purple-200 rounded-full p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="space-y-3">
             {filteredClients.slice(0, 10).map((client) => (
