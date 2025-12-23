@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Package, TrendingUp, DollarSign } from 'lucide-react';
+import { ShoppingCart, Package, TrendingUp, DollarSign, TrendingDown } from 'lucide-react';
 
 export default function SalesOverview() {
   const { data: clients = [] } = useQuery({
@@ -21,26 +21,69 @@ export default function SalesOverview() {
     queryFn: () => base44.entities.ConsumableOrder.list()
   });
 
-  // Clientes com venda fechada (aguardando assinatura)
-  const closedSaleClients = clients.filter(c => c.sale_closed);
+  const { data: visits = [] } = useQuery({
+    queryKey: ['all-visits'],
+    queryFn: () => base44.entities.Visit.list('-scheduled_date', 100),
+  });
 
-  // Vendas realmente fechadas (com contrato assinado)
-  const confirmedSales = sales.filter(s => s.status === 'fechada' || s.status === 'entregue');
+  // Análise expandida de vendas
+  const analytics = useMemo(() => {
+    const now = new Date();
+    const thisMonth = sales.filter(s => {
+      const saleDate = new Date(s.sale_date);
+      return saleDate.getMonth() === now.getMonth() && 
+             saleDate.getFullYear() === now.getFullYear();
+    });
 
-  // Total de insumos vendidos
-  const totalConsumables = consumableOrders.filter(o => o.status === 'entregue').length;
-  const consumablesRevenue = consumableOrders
-    .filter(o => o.status === 'entregue')
-    .reduce((sum, o) => sum + (o.total_value || 0), 0);
+    const lastMonth = sales.filter(s => {
+      const saleDate = new Date(s.sale_date);
+      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1);
+      return saleDate.getMonth() === lastMonthDate.getMonth() && 
+             saleDate.getFullYear() === lastMonthDate.getFullYear();
+    });
 
-  // Total de equipamentos vendidos
-  const totalEquipmentsSold = confirmedSales.length;
-  const equipmentRevenue = confirmedSales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+    const confirmedSales = sales.filter(s => s.status === 'fechada' || s.status === 'entregue');
+    const equipmentRevenue = confirmedSales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+    const avgDealSize = confirmedSales.length > 0 ? equipmentRevenue / confirmedSales.length : 0;
+
+    const hotClients = clients.filter(c => c.status === 'quente').length;
+    const warmClients = clients.filter(c => c.status === 'morno').length;
+    const completedVisits = visits.filter(v => v.status === 'realizada').length;
+    const scheduledVisits = visits.filter(v => v.status === 'agendada').length;
+
+    const monthGrowth = lastMonth.length > 0 
+      ? ((thisMonth.length - lastMonth.length) / lastMonth.length) * 100 
+      : 0;
+
+    const conversionRate = clients.length > 0 ? (confirmedSales.length / clients.length) * 100 : 0;
+
+    // Insumos
+    const totalConsumables = consumableOrders.filter(o => o.status === 'entregue').length;
+    const consumablesRevenue = consumableOrders
+      .filter(o => o.status === 'entregue')
+      .reduce((sum, o) => sum + (o.total_value || 0), 0);
+
+    return {
+      thisMonthSales: thisMonth.length,
+      totalSales: confirmedSales.length,
+      equipmentRevenue,
+      avgDealSize,
+      monthGrowth,
+      conversionRate,
+      hotClients,
+      warmClients,
+      completedVisits,
+      scheduledVisits,
+      totalConsumables,
+      consumablesRevenue,
+      closedSaleClients: clients.filter(c => c.sale_closed)
+    };
+  }, [sales, clients, visits, consumableOrders]);
 
   return (
     <div className="space-y-4">
       {/* Vendas Fechadas Aguardando Assinatura */}
-      {closedSaleClients.length > 0 && (
+      {analytics.closedSaleClients.length > 0 && (
         <Card className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-lg">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-xl bg-yellow-500 flex items-center justify-center">
@@ -53,7 +96,7 @@ export default function SalesOverview() {
           </div>
 
           <div className="space-y-2">
-            {closedSaleClients.map((client) => (
+            {analytics.closedSaleClients.map((client) => (
               <div key={client.id} className="p-3 bg-white rounded-lg border-2 border-yellow-200">
                 <div className="flex items-center justify-between">
                   <div>
@@ -72,51 +115,70 @@ export default function SalesOverview() {
         </Card>
       )}
 
-      {/* Resumo de Vendas Confirmadas */}
+      {/* Análise Expandida de Vendas */}
       <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 shadow-lg">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
             <Package className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Equipamentos Vendidos</h3>
-            <p className="text-xs text-slate-600">Contratos assinados</p>
+            <h3 className="font-bold text-slate-800">Análise de Vendas</h3>
+            <p className="text-xs text-slate-600">Performance detalhada</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-white rounded-lg border border-green-200">
-            <p className="text-xs text-slate-500 mb-1">Total Vendido</p>
-            <p className="text-2xl font-bold text-green-700">{totalEquipmentsSold}</p>
-            <p className="text-xs text-slate-500">equipamentos</p>
+        {/* Métricas Principais */}
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="text-center p-3 bg-white rounded-lg border border-green-200">
+            <p className="text-2xl font-bold text-green-700">{analytics.thisMonthSales}</p>
+            <p className="text-xs text-slate-600">Este Mês</p>
+            {analytics.monthGrowth !== 0 && (
+              <div className="flex items-center justify-center gap-1 mt-1">
+                {analytics.monthGrowth > 0 ? (
+                  <TrendingUp className="w-3 h-3 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-3 h-3 text-red-600" />
+                )}
+                <p className={`text-[10px] font-semibold ${analytics.monthGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(analytics.monthGrowth).toFixed(0)}%
+                </p>
+              </div>
+            )}
           </div>
 
-          <div className="p-3 bg-white rounded-lg border border-green-200">
-            <p className="text-xs text-slate-500 mb-1">Receita</p>
-            <p className="text-xl font-bold text-green-700">
-              R$ {(equipmentRevenue / 1000).toFixed(0)}k
+          <div className="text-center p-3 bg-white rounded-lg border border-green-200">
+            <p className="text-2xl font-bold text-green-700">
+              R$ {(analytics.equipmentRevenue / 1000).toFixed(0)}k
+            </p>
+            <p className="text-xs text-slate-600">Receita Total</p>
+            <p className="text-[10px] text-slate-500 mt-1">
+              Ticket: R$ {(analytics.avgDealSize / 1000).toFixed(0)}k
             </p>
           </div>
+
+          <div className="text-center p-3 bg-white rounded-lg border border-green-200">
+            <p className="text-2xl font-bold text-green-700">
+              {analytics.conversionRate.toFixed(1)}%
+            </p>
+            <p className="text-xs text-slate-600">Conversão</p>
+          </div>
         </div>
 
-        {confirmedSales.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-xs font-semibold text-green-700">Últimas vendas:</p>
-            {confirmedSales.slice(0, 3).map((sale) => (
-              <div key={sale.id} className="p-2 bg-white rounded border border-green-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{sale.client_name}</p>
-                    <p className="text-xs text-slate-600">{sale.equipment_name}</p>
-                  </div>
-                  <p className="text-sm font-bold text-green-700">
-                    R$ {(sale.sale_value / 1000).toFixed(0)}k
-                  </p>
-                </div>
-              </div>
-            ))}
+        {/* Métricas Secundárias */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 bg-red-50 rounded-lg border border-red-200">
+            <p className="text-lg font-bold text-red-600">{analytics.hotClients}</p>
+            <p className="text-[10px] text-slate-600">Quentes</p>
           </div>
-        )}
+          <div className="text-center p-2 bg-orange-50 rounded-lg border border-orange-200">
+            <p className="text-lg font-bold text-orange-600">{analytics.warmClients}</p>
+            <p className="text-[10px] text-slate-600">Mornos</p>
+          </div>
+          <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-lg font-bold text-green-600">{analytics.completedVisits}</p>
+            <p className="text-[10px] text-slate-600">Visitas</p>
+          </div>
+        </div>
       </Card>
 
       {/* Insumos */}
@@ -127,21 +189,21 @@ export default function SalesOverview() {
           </div>
           <div>
             <h3 className="font-bold text-slate-800">Insumos Vendidos</h3>
-            <p className="text-xs text-slate-600">Pedidos entregues</p>
+            <p className="text-xs text-slate-600">Receita recorrente</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 bg-white rounded-lg border border-blue-200">
             <p className="text-xs text-slate-500 mb-1">Total Pedidos</p>
-            <p className="text-2xl font-bold text-blue-700">{totalConsumables}</p>
+            <p className="text-2xl font-bold text-blue-700">{analytics.totalConsumables}</p>
             <p className="text-xs text-slate-500">entregas</p>
           </div>
 
           <div className="p-3 bg-white rounded-lg border border-blue-200">
             <p className="text-xs text-slate-500 mb-1">Receita</p>
             <p className="text-xl font-bold text-blue-700">
-              R$ {(consumablesRevenue / 1000).toFixed(0)}k
+              R$ {(analytics.consumablesRevenue / 1000).toFixed(0)}k
             </p>
           </div>
         </div>

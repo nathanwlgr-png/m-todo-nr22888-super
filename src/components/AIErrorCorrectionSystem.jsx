@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, AlertTriangle, CheckCircle, Zap } from 'lucide-react';
+import { ShieldCheck, CheckCircle, Zap, AlertTriangle, X } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 /**
@@ -14,6 +15,7 @@ export default function AIErrorCorrectionSystem() {
   const [status, setStatus] = useState({ ia1: 'idle', ia2: 'idle', ia3: 'idle' });
   const [lastCheck, setLastCheck] = useState(null);
   const [errorsFound, setErrorsFound] = useState([]);
+  const [expanded, setExpanded] = useState(false);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -36,24 +38,17 @@ export default function AIErrorCorrectionSystem() {
     const errors = [];
 
     try {
-      // Validações automáticas
       clients.forEach(client => {
-        // Validar campos obrigatórios
         if (!client.first_name) errors.push({ type: 'missing_name', client_id: client.id });
         if (!client.email && !client.phone) errors.push({ type: 'no_contact', client_id: client.id });
-        
-        // Validar consistência de dados
         if (client.purchase_score > 100 || client.purchase_score < 0) {
           errors.push({ type: 'invalid_score', client_id: client.id, value: client.purchase_score });
         }
-        
-        // Validar status vs score
         if (client.status === 'quente' && client.purchase_score < 50) {
           errors.push({ type: 'inconsistent_status_score', client_id: client.id });
         }
       });
 
-      // Validar tarefas órfãs
       tasks.forEach(task => {
         if (task.client_id && !clients.find(c => c.id === task.client_id)) {
           errors.push({ type: 'orphan_task', task_id: task.id, client_id: task.client_id });
@@ -74,9 +69,7 @@ export default function AIErrorCorrectionSystem() {
     const warnings = [];
 
     try {
-      // Validar regras de negócio
       clients.forEach(client => {
-        // Cliente quente sem ação há 7+ dias
         const lastUpdate = new Date(client.updated_date);
         const daysSinceUpdate = Math.floor((Date.now() - lastUpdate) / (1000 * 60 * 60 * 24));
         
@@ -89,7 +82,6 @@ export default function AIErrorCorrectionSystem() {
           });
         }
 
-        // Score alto sem próxima ação definida
         if (client.purchase_score > 70 && !client.next_action) {
           warnings.push({
             type: 'high_score_no_action',
@@ -98,7 +90,6 @@ export default function AIErrorCorrectionSystem() {
           });
         }
 
-        // Pipeline alto sem visita agendada
         if ((client.projected_revenue || 0) > 50000 && !client.last_visit_date) {
           warnings.push({
             type: 'high_pipeline_no_visit',
@@ -122,9 +113,6 @@ export default function AIErrorCorrectionSystem() {
     const optimizations = [];
 
     try {
-      // Detectar performance issues
-      
-      // Muitos clientes frios sem ação
       const coldClients = clients.filter(c => c.status === 'frio');
       if (coldClients.length > 50) {
         optimizations.push({
@@ -134,7 +122,6 @@ export default function AIErrorCorrectionSystem() {
         });
       }
 
-      // Muitas tarefas pendentes acumuladas
       const overdueTasks = tasks.filter(t => 
         t.status === 'pendente' && 
         new Date(t.due_date) < new Date()
@@ -147,7 +134,6 @@ export default function AIErrorCorrectionSystem() {
         });
       }
 
-      // Clientes duplicados (mesmo nome ou email)
       const emails = {};
       clients.forEach(client => {
         if (client.email) {
@@ -171,7 +157,6 @@ export default function AIErrorCorrectionSystem() {
     }
   };
 
-  // Executar verificações a cada 10 minutos
   useEffect(() => {
     const runAllChecks = async () => {
       console.log('🤖 Sistema de Correção Automática - Iniciando verificações...');
@@ -186,7 +171,6 @@ export default function AIErrorCorrectionSystem() {
       setErrorsFound(allIssues);
       setLastCheck(new Date());
 
-      // Notificar se encontrou issues críticos
       const criticalIssues = allIssues.filter(i => 
         i.type === 'missing_name' || 
         i.type === 'hot_client_inactive' || 
@@ -203,71 +187,92 @@ export default function AIErrorCorrectionSystem() {
       console.log(`✅ Verificação completa: ${allIssues.length} issues encontrados`);
     };
 
-    // Executar na montagem e depois a cada 10 minutos
     runAllChecks();
     const interval = setInterval(runAllChecks, 10 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [clients, tasks, sales]);
 
-  // Componente visual discreto
   return (
-    <div className="fixed bottom-4 left-4 z-50">
-      <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-64">
-        <div className="flex items-center gap-2 mb-2">
-          <Shield className="w-4 h-4 text-green-600" />
-          <span className="text-xs font-semibold text-slate-700">Sistema de Correção IA</span>
-        </div>
-        
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-600">IA 1 - Validação Dados</span>
-            {status.ia1 === 'completed' ? (
-              <CheckCircle className="w-3 h-3 text-green-600" />
-            ) : status.ia1 === 'running' ? (
-              <Zap className="w-3 h-3 text-yellow-600 animate-pulse" />
-            ) : (
-              <AlertTriangle className="w-3 h-3 text-red-600" />
-            )}
+    <div className="fixed bottom-6 left-6 z-40">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-300 shadow-xl flex items-center justify-center hover:shadow-red-500/50 transition-all active:scale-95"
+        style={{ 
+          WebkitTapHighlightColor: 'transparent',
+          touchAction: 'manipulation'
+        }}
+      >
+        <ShieldCheck className="w-6 h-6 text-white" />
+      </button>
+
+      {expanded && (
+        <Card className="absolute bottom-16 left-0 w-72 p-4 bg-white border-red-200 shadow-2xl">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 text-sm">Correção IA</h3>
+                <p className="text-xs text-slate-600">3 validadoras</p>
+              </div>
+            </div>
+            <button onClick={() => setExpanded(false)} className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center">
+              <X className="w-4 h-4 text-slate-500" />
+            </button>
           </div>
           
-          <div className="flex items-center justify-between">
-            <span className="text-slate-600">IA 2 - Lógica Negócio</span>
-            {status.ia2 === 'completed' ? (
-              <CheckCircle className="w-3 h-3 text-green-600" />
-            ) : status.ia2 === 'running' ? (
-              <Zap className="w-3 h-3 text-yellow-600 animate-pulse" />
-            ) : (
-              <AlertTriangle className="w-3 h-3 text-red-600" />
-            )}
+          <div className="space-y-2 text-xs mb-3">
+            <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+              <span className="text-slate-700">IA 1 - Dados</span>
+              {status.ia1 === 'completed' ? (
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              ) : status.ia1 === 'running' ? (
+                <Zap className="w-4 h-4 text-yellow-600 animate-pulse" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+              <span className="text-slate-700">IA 2 - Lógica</span>
+              {status.ia2 === 'completed' ? (
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              ) : status.ia2 === 'running' ? (
+                <Zap className="w-4 h-4 text-yellow-600 animate-pulse" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+              <span className="text-slate-700">IA 3 - Performance</span>
+              {status.ia3 === 'completed' ? (
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              ) : status.ia3 === 'running' ? (
+                <Zap className="w-4 h-4 text-yellow-600 animate-pulse" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+              )}
+            </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-slate-600">IA 3 - Performance</span>
-            {status.ia3 === 'completed' ? (
-              <CheckCircle className="w-3 h-3 text-green-600" />
-            ) : status.ia3 === 'running' ? (
-              <Zap className="w-3 h-3 text-yellow-600 animate-pulse" />
-            ) : (
-              <AlertTriangle className="w-3 h-3 text-red-600" />
-            )}
-          </div>
-        </div>
 
-        {lastCheck && (
-          <p className="text-xs text-slate-500 mt-2">
-            Última verificação: {lastCheck.toLocaleTimeString('pt-BR')}
-          </p>
-        )}
-
-        {errorsFound.length > 0 && (
-          <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-            <p className="text-xs text-yellow-800">
-              ⚠️ {errorsFound.length} issues encontrados
+          {lastCheck && (
+            <p className="text-xs text-slate-500">
+              Última: {lastCheck.toLocaleTimeString('pt-BR')}
             </p>
-          </div>
-        )}
-      </div>
+          )}
+
+          {errorsFound.length > 0 && (
+            <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+              <p className="text-xs text-yellow-800">
+                ⚠️ {errorsFound.length} issues
+              </p>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
