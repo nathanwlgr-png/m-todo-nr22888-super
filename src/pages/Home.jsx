@@ -81,6 +81,7 @@ import ClientProfileGenerator from '@/components/ClientProfileGenerator';
 import AITokenCounter from '@/components/AITokenCounter';
 import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
 import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
+import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -698,6 +699,11 @@ export default function Home() {
             {/* Gerador de Contrato Oficial COMPET */}
             <div className="mt-6">
               <ProfessionalContractGenerator />
+            </div>
+
+            {/* Relatórios Completos de Caso com Jornada */}
+            <div className="mt-6">
+              <CompleteCaseStudyReport />
             </div>
 
             {/* Análise de Mercado - Marília */}
