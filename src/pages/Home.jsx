@@ -215,22 +215,22 @@ export default function Home() {
           
           {/* Botões em formato de 8 */}
           <FloatingButtonsGroup />
-          
+
           <Link to={createPageUrl('ContactSettings')}>
-            <button className="w-8 h-8 rounded-lg glass hover:bg-white/10 transition-all">
-              <Settings className="w-4 h-4 text-orange-400 mx-auto" />
+            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
+              <Settings className="w-3.5 h-3.5 text-orange-400 mx-auto" />
             </button>
           </Link>
           <Link to={createPageUrl('MyProfile')}>
-            <button className="w-8 h-8 rounded-lg glass hover:bg-white/10 transition-all">
-              <svg className="w-4 h-4 text-orange-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
+              <svg className="w-3.5 h-3.5 text-orange-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
           </Link>
           <Link to={createPageUrl('RegionalSearch')}>
-            <button className="w-8 h-8 rounded-lg glass hover:bg-white/10 transition-all">
-              <Search className="w-4 h-4 text-orange-400 mx-auto" />
+            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
+              <Search className="w-3.5 h-3.5 text-orange-400 mx-auto" />
             </button>
           </Link>
         </div>
