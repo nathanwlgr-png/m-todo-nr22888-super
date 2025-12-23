@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Draggable from 'react-draggable';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +18,7 @@ export default function AIErrorCorrectionSystem() {
   const [errorsFound, setErrorsFound] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const timeoutRef = React.useRef(null);
+  const timeoutRef = useRef(null);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
