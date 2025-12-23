@@ -13,6 +13,7 @@ export default function ClientProfileGenerator() {
   const [clientName, setClientName] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [profile, setProfile] = useState(null);
+  const [savedProfiles, setSavedProfiles] = useState([]);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -138,8 +139,18 @@ Método: NR22 - Numerologia Aplicada a Vendas
 `;
 
       setProfile(profileDoc);
+      
+      // Salvar perfil na lista
+      const newProfile = {
+        name: clientName,
+        birthdate: birthdate,
+        date: new Date().toLocaleString('pt-BR'),
+        content: profileDoc
+      };
+      setSavedProfiles([...savedProfiles, newProfile]);
+      
       await navigator.clipboard.writeText(profileDoc);
-      toast.success('✅ Perfil copiado para área de transferência!');
+      toast.success('✅ Perfil gerado e salvo!');
 
     } catch (error) {
       toast.error('Erro ao gerar perfil');
@@ -149,12 +160,12 @@ Método: NR22 - Numerologia Aplicada a Vendas
     }
   };
 
-  const downloadProfile = () => {
-    const blob = new Blob([profile], { type: 'text/plain;charset=utf-8' });
+  const downloadProfile = (profileContent = profile, name = clientName) => {
+    const blob = new Blob([profileContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PERFIL_${clientName.replace(/ /g, '_')}_${Date.now()}.txt`;
+    a.download = `PERFIL_${name.replace(/ /g, '_')}_${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -219,7 +230,7 @@ Método: NR22 - Numerologia Aplicada a Vendas
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              <Button size="sm" variant="outline" onClick={downloadProfile}>
+              <Button size="sm" variant="outline" onClick={() => downloadProfile()}>
                 <Download className="w-3 h-3 mr-1" />
                 Baixar
               </Button>
@@ -228,6 +239,30 @@ Método: NR22 - Numerologia Aplicada a Vendas
                 WhatsApp
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Perfis Salvos */}
+        {savedProfiles.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <h4 className="text-sm font-semibold text-slate-700">Perfis Salvos ({savedProfiles.length})</h4>
+            {savedProfiles.map((savedProfile, idx) => (
+              <div key={idx} className="p-3 bg-white rounded-lg border border-purple-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-semibold text-sm text-slate-800">{savedProfile.name}</p>
+                    <p className="text-xs text-slate-500">{savedProfile.date}</p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => downloadProfile(savedProfile.content, savedProfile.name)}
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
