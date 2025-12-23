@@ -139,16 +139,23 @@ export default function ClientProfile() {
   const [postVisitOpen, setPostVisitOpen] = React.useState(false);
   const [selectedVisitId, setSelectedVisitId] = React.useState(null);
 
-  const { data: client, isLoading } = useQuery({
+  const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
       if (!clientId) return null;
       try {
         const clients = await base44.entities.Client.list();
-        return clients.find(c => c.id === clientId);
+        const foundClient = clients.find(c => c.id === clientId && !c.is_deleted);
+        if (!foundClient) {
+          toast.error('Cliente não encontrado');
+          setTimeout(() => navigate(createPageUrl('Home')), 1500);
+          return null;
+        }
+        return foundClient;
       } catch (error) {
         console.error('Erro ao carregar cliente:', error);
-        return null;
+        toast.error('Erro ao carregar dados do cliente');
+        throw error;
       }
     },
     enabled: !!clientId,
@@ -156,7 +163,7 @@ export default function ClientProfile() {
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 0
+    retry: 1
   });
 
   const { data: visits = [] } = useQuery({

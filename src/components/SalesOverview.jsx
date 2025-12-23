@@ -34,8 +34,8 @@ export default function SalesOverview() {
     queryFn: async () => {
       try {
         const allSales = await base44.entities.Sale.list();
-        const validClientIds = new Set(clients.map(c => c.id));
-        return allSales.filter(s => !s.client_id || validClientIds.has(s.client_id));
+        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
+        return allSales.filter(s => s && s.client_id && validClientIds.has(s.client_id));
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
         return [];
