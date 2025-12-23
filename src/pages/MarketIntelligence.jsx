@@ -291,13 +291,12 @@ Retorne lista priorizada de oportunidades.`,
               <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg">
                 <h4 className="font-semibold text-indigo-800 mb-3">O que vamos descobrir:</h4>
                 <div className="space-y-2 text-sm text-indigo-700">
-                  <p>📊 Dados do IBGE (população e estabelecimentos)</p>
-                  <p>🏥 Todas as clínicas veterinárias (Google + IBGE)</p>
-                  <p>✅ Nosso equipamento: SEAMAT BRASIL</p>
-                  <p>⚠️ Concorrentes: IDEXX e Zoetis</p>
-                  <p>📊 Comparação estatística (market share %)</p>
-                  <p>🩸 Quantas clínicas têm hemograma (marca/modelo)</p>
-                  <p>🎯 Oportunidades prioritárias identificadas</p>
+                  <p>📊 <strong>Etapa 1:</strong> Dados demográficos do IBGE de TODAS as cidades</p>
+                  <p>📊 <strong>Média:</strong> 1 clínica a cada 5.000 habitantes</p>
+                  <p>🏥 <strong>Etapa 2:</strong> Busca completa cidade por cidade</p>
+                  <p>✅ <strong>Etapa 3:</strong> Identificação de SEAMAT BRASIL</p>
+                  <p>⚠️ <strong>Concorrentes:</strong> IDEXX e Zoetis com market share</p>
+                  <p>🎯 <strong>Etapa 4:</strong> Oportunidades prioritárias</p>
                 </div>
               </div>
 
@@ -322,35 +321,114 @@ Retorne lista priorizada de oportunidades.`,
           </Card>
         ) : (
           <div className="space-y-6">
-            {/* Dados IBGE */}
-            {results.clinics.ibge_data && (
-              <Card className="p-5 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-                <h3 className="font-bold text-xl mb-4">📊 Dados IBGE - {results.region}</h3>
-                <div className="p-3 bg-white/20 rounded-lg mb-3">
-                  <p className="text-sm opacity-90">Estabelecimentos Veterinários (IBGE)</p>
-                  <p className="text-3xl font-bold">{results.clinics.ibge_data.total_establishments_ibge}</p>
-                </div>
-                <div className="space-y-2">
-                  {results.clinics.ibge_data.cities_data?.map((city, idx) => (
-                    <div key={idx} className="p-2 bg-white/10 rounded text-sm">
-                      <p className="font-semibold">{city.city}</p>
-                      <p className="text-xs opacity-90">
-                        Pop: {city.population?.toLocaleString()} | Estabelecimentos: {city.veterinary_establishments}
-                      </p>
+            {/* Dados Demográficos Completos */}
+            {results.demographicData && (
+              <>
+                <Card className="p-5 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                  <h3 className="font-bold text-xl mb-4">📊 Análise Demográfica Completa - {results.region}</h3>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/20 rounded-lg">
+                      <p className="text-xs opacity-90">População Total</p>
+                      <p className="text-2xl font-bold">{results.demographicData.region_summary.total_population?.toLocaleString()}</p>
                     </div>
-                  ))}
-                </div>
-              </Card>
+                    <div className="p-3 bg-white/20 rounded-lg">
+                      <p className="text-xs opacity-90">Estabelecimentos IBGE</p>
+                      <p className="text-2xl font-bold">{results.demographicData.region_summary.total_establishments_ibge}</p>
+                    </div>
+                    <div className="p-3 bg-white/20 rounded-lg">
+                      <p className="text-xs opacity-90">Clínicas Esperadas (5k hab)</p>
+                      <p className="text-2xl font-bold">{results.demographicData.region_summary.expected_clinics_total}</p>
+                    </div>
+                    <div className="p-3 bg-white/20 rounded-lg">
+                      <p className="text-xs opacity-90">Gap de Mercado</p>
+                      <p className="text-2xl font-bold">{results.demographicData.region_summary.market_gap}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {results.demographicData.cities_complete_data?.map((city, idx) => (
+                      <div key={idx} className="p-3 bg-white/10 rounded-lg text-sm">
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-bold text-base">{city.city}</p>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            city.opportunity_level === 'alta' ? 'bg-red-200 text-red-800' :
+                            city.opportunity_level === 'media' ? 'bg-yellow-200 text-yellow-800' :
+                            'bg-green-200 text-green-800'
+                          }`}>
+                            {city.opportunity_level}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs opacity-90">
+                          <div>
+                            <p>👥 População: {city.population?.toLocaleString()}</p>
+                            <p>🏥 IBGE: {city.veterinary_establishments} clínicas</p>
+                          </div>
+                          <div>
+                            <p>📊 Esperado: {city.expected_clinics_by_population} clínicas</p>
+                            <p className="font-semibold">{city.market_saturation}</p>
+                          </div>
+                        </div>
+                        {city.pib_per_capita && (
+                          <p className="text-xs opacity-75 mt-1">💰 PIB per capita: R$ {city.pib_per_capita?.toLocaleString()}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Clínicas por Cidade */}
+                {results.clinics.clinics_by_city && (
+                  <Card className="p-5 bg-white">
+                    <h3 className="font-bold text-lg text-slate-800 mb-4">🏥 Clínicas Encontradas por Cidade</h3>
+                    <div className="space-y-3">
+                      {results.clinics.clinics_by_city.map((cityData, idx) => (
+                        <div key={idx} className="border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-slate-800">{cityData.city}</h4>
+                            <span className="text-sm text-slate-600">{cityData.clinics_found} clínicas</span>
+                          </div>
+                          <div className="space-y-1">
+                            {cityData.clinics.map((clinic, cidx) => {
+                              const classLabels = {
+                                clinica_pequena: { text: 'Pequena', color: 'bg-blue-100 text-blue-700' },
+                                clinica_media: { text: 'Média', color: 'bg-purple-100 text-purple-700' },
+                                hospital_veterinario: { text: 'Hospital', color: 'bg-red-100 text-red-700' },
+                                veterinario_autonomo: { text: 'Autônomo', color: 'bg-green-100 text-green-700' }
+                              };
+                              const classInfo = classLabels[clinic.classification] || { text: 'N/A', color: 'bg-gray-100 text-gray-700' };
+                              
+                              return (
+                                <div key={cidx} className="text-xs p-2 bg-slate-50 rounded flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-slate-800">{clinic.name}</p>
+                                    <p className="text-slate-500">{clinic.address}</p>
+                                    {clinic.phone && <p className="text-green-600">{clinic.phone}</p>}
+                                  </div>
+                                  <span className={`text-xs px-2 py-0.5 rounded ${classInfo.color} ml-2`}>
+                                    {classInfo.text}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+              </>
             )}
 
             {/* Classificação de Clínicas */}
             {results.clinics.classification_summary && (
               <Card className="p-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-                <h3 className="font-bold text-xl mb-4">🏥 Classificação Detalhada</h3>
+                <h3 className="font-bold text-xl mb-4">🏥 Classificação por Tipo</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-white/20 rounded-lg col-span-2">
                     <p className="text-sm opacity-90">Total Encontrado</p>
                     <p className="text-4xl font-bold">{results.clinics.classification_summary.total_clinics}</p>
+                    <p className="text-xs opacity-75 mt-1">em {results.demographicData?.cities_complete_data?.length || 0} cidades</p>
                   </div>
                   <div className="p-3 bg-white/20 rounded-lg">
                     <p className="text-xs opacity-90">Clínicas Pequenas</p>
@@ -381,8 +459,8 @@ Retorne lista priorizada de oportunidades.`,
               <h3 className="font-bold text-xl mb-4">🔬 Equipamentos Instalados</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm opacity-90">Clínicas Encontradas</p>
-                  <p className="text-3xl font-bold">{results.clinics.total_clinics_found}</p>
+                  <p className="text-sm opacity-90">Clínicas Analisadas</p>
+                  <p className="text-3xl font-bold">{results.clinics.classification_summary?.total_clinics || 0}</p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-lg">
                   <p className="text-sm opacity-90">Com Hemograma</p>
@@ -393,8 +471,8 @@ Retorne lista priorizada de oportunidades.`,
                   <p className="text-3xl font-bold">{results.equipment.seamat_count}</p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm opacity-90">Sem Equipamento</p>
-                  <p className="text-3xl font-bold">{results.clinics.total_clinics_found - results.equipment.seamat_count - results.equipment.idexx_count - results.equipment.zoetis_count}</p>
+                  <p className="text-sm opacity-90">🎯 Oportunidades</p>
+                  <p className="text-3xl font-bold">{(results.clinics.classification_summary?.total_clinics || 0) - results.equipment.seamat_count - results.equipment.idexx_count - results.equipment.zoetis_count}</p>
                 </div>
                 <div className="p-3 bg-red-400/30 rounded-lg">
                   <p className="text-sm opacity-90">⚠️ IDEXX</p>
