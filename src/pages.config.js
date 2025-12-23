@@ -59,6 +59,8 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import Campaigns from './pages/Campaigns';
 import NewCampaign from './pages/NewCampaign';
 import CampaignDetails from './pages/CampaignDetails';
+import AdvancedSalesReports from './pages/AdvancedSalesReports';
+import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import __Layout from './Layout.jsx';
 
 
@@ -124,6 +126,8 @@ export const PAGES = {
     "Campaigns": Campaigns,
     "NewCampaign": NewCampaign,
     "CampaignDetails": CampaignDetails,
+    "AdvancedSalesReports": AdvancedSalesReports,
+    "LoadEquipmentCatalog": LoadEquipmentCatalog,
 }
 
 export const pagesConfig = {
