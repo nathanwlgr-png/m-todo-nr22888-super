@@ -58,9 +58,27 @@ export default function Clients() {
   });
 
   // Lista única de cidades
+  // Cidades da região laranja (Nathan)
+  const ORANGE_REGION_CITIES = [
+    'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
+    'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins'
+  ];
+
   const cities = useMemo(() => {
     const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
     return unique.sort();
+  }, [clients]);
+
+  const cityCoverage = useMemo(() => {
+    const clientCities = new Set(clients.map(c => c.city).filter(Boolean));
+    const covered = ORANGE_REGION_CITIES.filter(city => 
+      Array.from(clientCities).some(clientCity => 
+        clientCity.toLowerCase().includes(city.toLowerCase())
+      )
+    );
+    const missing = ORANGE_REGION_CITIES.filter(city => !covered.includes(city));
+    
+    return { covered, missing, clientCities: Array.from(clientCities) };
   }, [clients]);
 
   // Busca e ordenação
@@ -262,6 +280,63 @@ export default function Clients() {
               <SelectItem value="importance">⭐ Por Importância</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* City Coverage - Região Laranja */}
+        <div className="px-4 pb-4 bg-gradient-to-r from-orange-50 to-amber-50 border-t">
+          <div className="p-4">
+            <h3 className="font-bold text-orange-900 mb-3 flex items-center gap-2">
+              🟠 Cobertura - Região Laranja
+              <span className="text-sm font-normal text-orange-700">
+                ({cityCoverage.covered.length}/{ORANGE_REGION_CITIES.length} cidades)
+              </span>
+            </h3>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 bg-green-100 rounded-lg text-center">
+                <p className="text-3xl font-bold text-green-800">{cityCoverage.covered.length}</p>
+                <p className="text-xs text-green-700">Com Clientes</p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-lg text-center">
+                <p className="text-3xl font-bold text-red-800">{cityCoverage.missing.length}</p>
+                <p className="text-xs text-red-700">Sem Clientes</p>
+              </div>
+            </div>
+
+            {cityCoverage.covered.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-green-800 mb-2">✅ Cidades com Clientes:</p>
+                <div className="flex flex-wrap gap-1">
+                  {cityCoverage.covered.map(city => (
+                    <span key={city} className="px-2 py-1 bg-green-200 text-green-900 rounded-full text-xs font-medium">
+                      {city}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {cityCoverage.missing.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-red-800 mb-2">⚠️ Cidades Faltando:</p>
+                <div className="flex flex-wrap gap-1">
+                  {cityCoverage.missing.map(city => (
+                    <span key={city} className="px-2 py-1 bg-red-200 text-red-900 rounded-full text-xs font-medium">
+                      {city}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {cityCoverage.clientCities.length > ORANGE_REGION_CITIES.length && (
+              <div className="mt-3 p-2 bg-blue-100 rounded-lg">
+                <p className="text-xs text-blue-800">
+                  ℹ️ Há {cityCoverage.clientCities.length - cityCoverage.covered.length} clientes em cidades fora da região laranja
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Funnel Chart */}
