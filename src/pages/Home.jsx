@@ -81,7 +81,6 @@ import ClientProfileGenerator from '@/components/ClientProfileGenerator';
 import AITokenCounter from '@/components/AITokenCounter';
 import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
 import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
-import { useQuery } from '@tanstack/react-query';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
