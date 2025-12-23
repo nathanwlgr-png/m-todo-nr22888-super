@@ -136,24 +136,33 @@ CLÍNICAS:
 ${JSON.stringify(clinicsSearch.clinics, null, 2)}
 
 Para cada clínica, pesquise e identifique:
-1. Tem equipamento IRIX instalado? (sim/não)
-2. Tem equipamento OET instalado? (sim/não)
-3. CONCORRENTES - Tem equipamento IDEXX instalado? (sim/não)
-4. CONCORRENTES - Tem equipamento ZOETIS instalado? (sim/não)
-5. Tem analisador hematológico (hemograma)? (marca/modelo se possível)
-6. Outras marcas de equipamentos identificadas
+1. Tem equipamento SEAMAT BRASIL instalado? (sim/não)
+2. CONCORRENTES - Tem equipamento IDEXX instalado? (sim/não)
+3. CONCORRENTES - Tem equipamento ZOETIS instalado? (sim/não)
+4. Tem analisador hematológico (hemograma)? (marca/modelo se possível)
+5. Outras marcas de equipamentos identificadas
 
 Use busca online, redes sociais, sites das clínicas, fornecedores, posts em grupos veterinários.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
           properties: {
-            irix_count: { type: "number" },
-            oet_count: { type: "number" },
+            seamat_count: { type: "number" },
             idexx_count: { type: "number" },
             zoetis_count: { type: "number" },
             hemograma_count: { type: "number" },
             market_share_summary: { type: "string" },
+            statistical_comparison: {
+              type: "object",
+              properties: {
+                seamat_market_share_percent: { type: "number" },
+                idexx_market_share_percent: { type: "number" },
+                zoetis_market_share_percent: { type: "number" },
+                seamat_vs_idexx_comparison: { type: "string" },
+                seamat_vs_zoetis_comparison: { type: "string" },
+                market_leader: { type: "string" }
+              }
+            },
             clinics_with_equipment: {
               type: "array",
               items: {
@@ -161,8 +170,7 @@ Use busca online, redes sociais, sites das clínicas, fornecedores, posts em gru
                 properties: {
                   clinic_name: { type: "string" },
                   city: { type: "string" },
-                  has_irix: { type: "boolean" },
-                  has_oet: { type: "boolean" },
+                  has_seamat: { type: "boolean" },
                   has_idexx: { type: "boolean" },
                   has_zoetis: { type: "boolean" },
                   has_hemograma: { type: "boolean" },
@@ -233,40 +241,6 @@ Retorne lista priorizada de oportunidades.`,
 
       toast.success('✅ Análise completa!');
 
-      // Cadastrar automaticamente as oportunidades de alta prioridade
-      if (opportunities.high_priority && opportunities.high_priority.length > 0) {
-        toast.info('📝 Cadastrando oportunidades prioritárias...');
-        
-        let registered = 0;
-        for (const opp of opportunities.high_priority) {
-          try {
-            const clinicData = clinicsSearch.clinics.find(c => 
-              c.name.toLowerCase().includes(opp.clinic_name.toLowerCase())
-            );
-            
-            await base44.entities.Client.create({
-              first_name: opp.clinic_name,
-              clinic_name: opp.clinic_name,
-              city: opp.city,
-              address: clinicData?.address || '',
-              phone: clinicData?.phone || '',
-              email: clinicData?.email || '',
-              decision_role: 'proprietario',
-              status: 'quente',
-              purchase_score: 80,
-              notes: `OPORTUNIDADE: ${opp.opportunity_type}\n${opp.reason}\nValor estimado: ${opp.estimated_value || 'N/A'}`
-            });
-            registered++;
-          } catch (error) {
-            console.log('Erro ao cadastrar:', opp.clinic_name);
-          }
-        }
-        
-        if (registered > 0) {
-          toast.success(`✅ ${registered} clínicas cadastradas automaticamente!`);
-        }
-      }
-
     } catch (error) {
       console.error('Erro:', error);
       toast.error('Erro ao analisar mercado');
@@ -319,11 +293,11 @@ Retorne lista priorizada de oportunidades.`,
                 <div className="space-y-2 text-sm text-indigo-700">
                   <p>📊 Dados do IBGE (população e estabelecimentos)</p>
                   <p>🏥 Todas as clínicas veterinárias (Google + IBGE)</p>
-                  <p>✅ Nossos equipamentos: IRIX e OET</p>
+                  <p>✅ Nosso equipamento: SEAMAT BRASIL</p>
                   <p>⚠️ Concorrentes: IDEXX e Zoetis</p>
+                  <p>📊 Comparação estatística (market share %)</p>
                   <p>🩸 Quantas clínicas têm hemograma (marca/modelo)</p>
-                  <p>🎯 Oportunidades prioritárias</p>
-                  <p>✅ Cadastro automático no sistema</p>
+                  <p>🎯 Oportunidades prioritárias identificadas</p>
                 </div>
               </div>
 
@@ -415,29 +389,73 @@ Retorne lista priorizada de oportunidades.`,
                   <p className="text-3xl font-bold">{results.equipment.hemograma_count}</p>
                 </div>
                 <div className="p-3 bg-green-400/30 rounded-lg">
-                  <p className="text-sm opacity-90">✅ IRIX (Nosso)</p>
-                  <p className="text-3xl font-bold">{results.equipment.irix_count}</p>
+                  <p className="text-sm opacity-90">✅ SEAMAT BRASIL</p>
+                  <p className="text-3xl font-bold">{results.equipment.seamat_count}</p>
                 </div>
-                <div className="p-3 bg-green-400/30 rounded-lg">
-                  <p className="text-sm opacity-90">✅ OET (Nosso)</p>
-                  <p className="text-3xl font-bold">{results.equipment.oet_count}</p>
+                <div className="p-3 bg-white/20 rounded-lg">
+                  <p className="text-sm opacity-90">Sem Equipamento</p>
+                  <p className="text-3xl font-bold">{results.clinics.total_clinics_found - results.equipment.seamat_count - results.equipment.idexx_count - results.equipment.zoetis_count}</p>
                 </div>
                 <div className="p-3 bg-red-400/30 rounded-lg">
-                  <p className="text-sm opacity-90">⚠️ IDEXX (Concorrente)</p>
+                  <p className="text-sm opacity-90">⚠️ IDEXX</p>
                   <p className="text-3xl font-bold">{results.equipment.idexx_count}</p>
                 </div>
-                <div className="p-3 bg-red-400/30 rounded-lg">
-                  <p className="text-sm opacity-90">⚠️ Zoetis (Concorrente)</p>
+                <div className="p-3 bg-orange-400/30 rounded-lg">
+                  <p className="text-sm opacity-90">⚠️ Zoetis</p>
                   <p className="text-3xl font-bold">{results.equipment.zoetis_count}</p>
                 </div>
               </div>
-              {results.equipment.market_share_summary && (
-                <div className="mt-4 p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm font-semibold mb-1">Market Share:</p>
-                  <p className="text-xs opacity-90">{results.equipment.market_share_summary}</p>
-                </div>
-              )}
             </Card>
+
+            {/* Comparação Estatística */}
+            {results.equipment.statistical_comparison && (
+              <Card className="p-5 bg-gradient-to-r from-green-50 to-emerald-50">
+                <h3 className="font-bold text-lg text-green-800 mb-4">📊 Comparação Estatística</h3>
+                
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="p-3 bg-green-100 rounded-lg text-center">
+                    <p className="text-xs text-green-700 mb-1">SEAMAT BRASIL</p>
+                    <p className="text-3xl font-bold text-green-800">
+                      {results.equipment.statistical_comparison.seamat_market_share_percent}%
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">Market Share</p>
+                  </div>
+                  
+                  <div className="p-3 bg-red-100 rounded-lg text-center">
+                    <p className="text-xs text-red-700 mb-1">IDEXX</p>
+                    <p className="text-3xl font-bold text-red-800">
+                      {results.equipment.statistical_comparison.idexx_market_share_percent}%
+                    </p>
+                    <p className="text-xs text-red-600 mt-1">Market Share</p>
+                  </div>
+                  
+                  <div className="p-3 bg-orange-100 rounded-lg text-center">
+                    <p className="text-xs text-orange-700 mb-1">Zoetis</p>
+                    <p className="text-3xl font-bold text-orange-800">
+                      {results.equipment.statistical_comparison.zoetis_market_share_percent}%
+                    </p>
+                    <p className="text-xs text-orange-600 mt-1">Market Share</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-white rounded-lg border-l-4 border-green-500">
+                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMAT vs IDEXX:</p>
+                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamat_vs_idexx_comparison}</p>
+                  </div>
+                  
+                  <div className="p-3 bg-white rounded-lg border-l-4 border-green-500">
+                    <p className="text-sm font-semibold text-slate-800 mb-1">SEAMAT vs Zoetis:</p>
+                    <p className="text-sm text-slate-600">{results.equipment.statistical_comparison.seamat_vs_zoetis_comparison}</p>
+                  </div>
+                  
+                  <div className="p-3 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-lg">
+                    <p className="text-sm font-semibold text-amber-800 mb-1">🏆 Líder de Mercado:</p>
+                    <p className="text-sm font-bold text-amber-900">{results.equipment.statistical_comparison.market_leader}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* Oportunidades de Alta Prioridade */}
             <Card className="p-5 bg-gradient-to-r from-green-50 to-emerald-50">
@@ -480,10 +498,16 @@ Retorne lista priorizada de oportunidades.`,
                 </div>
               ) : (
                 <p className="text-sm text-green-600">Nenhuma oportunidade de alta prioridade identificada</p>
-              )}
-            </Card>
+                )}
 
-            {/* Oportunidades de Média Prioridade */}
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                💡 <strong>Dica:</strong> Use estas oportunidades para planejar suas visitas e abordagens de vendas.
+                </p>
+                </div>
+                </Card>
+
+                {/* Oportunidades de Média Prioridade */}
             {results.opportunities.medium_priority && results.opportunities.medium_priority.length > 0 && (
               <Card className="p-5 bg-gradient-to-r from-yellow-50 to-amber-50">
                 <h3 className="font-bold text-lg text-amber-800 mb-4">
@@ -523,14 +547,9 @@ Retorne lista priorizada de oportunidades.`,
                       </span>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      {clinic.has_irix && (
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                          IRIX ✓
-                        </span>
-                      )}
-                      {clinic.has_oet && (
-                        <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-                          OET ✓
+                      {clinic.has_seamat && (
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                          SEAMAT BRASIL ✓
                         </span>
                       )}
                       {clinic.has_idexx && (
@@ -544,7 +563,7 @@ Retorne lista priorizada de oportunidades.`,
                         </span>
                       )}
                       {clinic.has_hemograma && (
-                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
                           Hemograma {clinic.hemograma_brand ? `(${clinic.hemograma_brand})` : '✓'}
                         </span>
                       )}
@@ -555,8 +574,8 @@ Retorne lista priorizada de oportunidades.`,
                           </span>
                         ))
                       )}
-                      {!clinic.has_irix && !clinic.has_oet && !clinic.has_hemograma && (
-                        <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded">
+                      {!clinic.has_seamat && !clinic.has_idexx && !clinic.has_zoetis && !clinic.has_hemograma && (
+                        <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded">
                           Sem equipamento identificado
                         </span>
                       )}
