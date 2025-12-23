@@ -44,25 +44,43 @@ export default function MarketIntelligence() {
     const region = REGIONS.find(r => r.name === selectedRegion);
     
     try {
-      toast.info('🔍 Buscando clínicas veterinárias no Google...');
+      toast.info('🔍 Buscando dados do IBGE e clínicas veterinárias...');
 
-      // IA 1: Buscar todas as clínicas veterinárias da região
+      // IA 1: Buscar dados do IBGE + clínicas
       const clinicsSearch = await base44.integrations.Core.InvokeLLM({
-        prompt: `Pesquise e liste TODAS as clínicas veterinárias cadastradas no Google nas seguintes cidades: ${region.cities.join(', ')}.
+        prompt: `Pesquise e forneça os seguintes dados para as cidades: ${region.cities.join(', ')}:
 
-Para cada clínica veterinária encontrada, extraia:
-- Nome da clínica
-- Endereço completo
-- Cidade
-- Telefone (se disponível)
-- Email (se disponível)
+1. DADOS DO IBGE:
+   - População total de cada cidade
+   - Número estimado de estabelecimentos veterinários cadastrados no IBGE
+   - Dados demográficos relevantes
 
-Busque no Google Maps, Google Business e outras fontes públicas.
-Seja COMPLETO e detalhado na busca.`,
+2. CLÍNICAS VETERINÁRIAS (Google Maps/Business):
+   - Liste TODAS as clínicas veterinárias cadastradas
+   - Para cada clínica: nome, endereço, cidade, telefone, email
+
+Combine dados do IBGE com busca no Google para ser completo.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
           properties: {
+            ibge_data: {
+              type: "object",
+              properties: {
+                total_establishments_ibge: { type: "number" },
+                cities_data: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      city: { type: "string" },
+                      population: { type: "number" },
+                      veterinary_establishments: { type: "number" }
+                    }
+                  }
+                }
+              }
+            },
             total_clinics_found: { type: "number" },
             clinics: {
               type: "array",
@@ -81,11 +99,11 @@ Seja COMPLETO e detalhado na busca.`,
         }
       });
 
-      toast.info('🔬 Analisando equipamentos instalados (IRIX, OET)...');
+      toast.info('🔬 Analisando equipamentos e concorrentes (IDEXX, Zoetis)...');
 
-      // IA 2: Identificar quais têm equipamentos específicos
+      // IA 2: Identificar equipamentos e concorrentes
       const equipmentAnalysis = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise as clínicas veterinárias listadas e identifique:
+        prompt: `Analise as clínicas veterinárias e identifique equipamentos instalados:
 
 CLÍNICAS:
 ${JSON.stringify(clinicsSearch.clinics, null, 2)}
@@ -93,17 +111,22 @@ ${JSON.stringify(clinicsSearch.clinics, null, 2)}
 Para cada clínica, pesquise e identifique:
 1. Tem equipamento IRIX instalado? (sim/não)
 2. Tem equipamento OET instalado? (sim/não)
-3. Tem analisador hematológico (hemograma)? (sim/não/desconhecido)
-4. Outras marcas de equipamentos que você conseguir identificar
+3. CONCORRENTES - Tem equipamento IDEXX instalado? (sim/não)
+4. CONCORRENTES - Tem equipamento ZOETIS instalado? (sim/não)
+5. Tem analisador hematológico (hemograma)? (marca/modelo se possível)
+6. Outras marcas de equipamentos identificadas
 
-Use busca online, redes sociais, sites das clínicas para identificar.`,
+Use busca online, redes sociais, sites das clínicas, fornecedores, posts em grupos veterinários.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
           properties: {
             irix_count: { type: "number" },
             oet_count: { type: "number" },
+            idexx_count: { type: "number" },
+            zoetis_count: { type: "number" },
             hemograma_count: { type: "number" },
+            market_share_summary: { type: "string" },
             clinics_with_equipment: {
               type: "array",
               items: {
@@ -113,7 +136,10 @@ Use busca online, redes sociais, sites das clínicas para identificar.`,
                   city: { type: "string" },
                   has_irix: { type: "boolean" },
                   has_oet: { type: "boolean" },
+                  has_idexx: { type: "boolean" },
+                  has_zoetis: { type: "boolean" },
                   has_hemograma: { type: "boolean" },
+                  hemograma_brand: { type: "string" },
                   other_equipment: { type: "array", items: { type: "string" } },
                   confidence_level: { type: "string" }
                 }
@@ -264,12 +290,13 @@ Retorne lista priorizada de oportunidades.`,
               <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg">
                 <h4 className="font-semibold text-indigo-800 mb-3">O que vamos descobrir:</h4>
                 <div className="space-y-2 text-sm text-indigo-700">
-                  <p>🏥 Todas as clínicas veterinárias cadastradas no Google</p>
-                  <p>🔬 Quantos aparelhos IRIX instalados</p>
-                  <p>🔬 Quantos aparelhos OET instalados</p>
-                  <p>🩸 Quantas clínicas têm hemograma</p>
-                  <p>🎯 Oportunidades de venda prioritárias</p>
-                  <p>✅ Cadastro automático das melhores oportunidades</p>
+                  <p>📊 Dados do IBGE (população e estabelecimentos)</p>
+                  <p>🏥 Todas as clínicas veterinárias (Google + IBGE)</p>
+                  <p>✅ Nossos equipamentos: IRIX e OET</p>
+                  <p>⚠️ Concorrentes: IDEXX e Zoetis</p>
+                  <p>🩸 Quantas clínicas têm hemograma (marca/modelo)</p>
+                  <p>🎯 Oportunidades prioritárias</p>
+                  <p>✅ Cadastro automático no sistema</p>
                 </div>
               </div>
 
@@ -294,27 +321,62 @@ Retorne lista priorizada de oportunidades.`,
           </Card>
         ) : (
           <div className="space-y-6">
+            {/* Dados IBGE */}
+            {results.clinics.ibge_data && (
+              <Card className="p-5 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                <h3 className="font-bold text-xl mb-4">📊 Dados IBGE - {results.region}</h3>
+                <div className="p-3 bg-white/20 rounded-lg mb-3">
+                  <p className="text-sm opacity-90">Estabelecimentos Veterinários (IBGE)</p>
+                  <p className="text-3xl font-bold">{results.clinics.ibge_data.total_establishments_ibge}</p>
+                </div>
+                <div className="space-y-2">
+                  {results.clinics.ibge_data.cities_data?.map((city, idx) => (
+                    <div key={idx} className="p-2 bg-white/10 rounded text-sm">
+                      <p className="font-semibold">{city.city}</p>
+                      <p className="text-xs opacity-90">
+                        Pop: {city.population?.toLocaleString()} | Estabelecimentos: {city.veterinary_establishments}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
             {/* Resumo Geral */}
             <Card className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-              <h3 className="font-bold text-xl mb-4">📊 Resumo da Região: {results.region}</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="font-bold text-xl mb-4">🔬 Equipamentos Instalados</h3>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm opacity-90">Total de Clínicas</p>
+                  <p className="text-sm opacity-90">Clínicas Encontradas</p>
                   <p className="text-3xl font-bold">{results.clinics.total_clinics_found}</p>
-                </div>
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm opacity-90">Aparelhos IRIX</p>
-                  <p className="text-3xl font-bold">{results.equipment.irix_count}</p>
-                </div>
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <p className="text-sm opacity-90">Aparelhos OET</p>
-                  <p className="text-3xl font-bold">{results.equipment.oet_count}</p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-lg">
                   <p className="text-sm opacity-90">Com Hemograma</p>
                   <p className="text-3xl font-bold">{results.equipment.hemograma_count}</p>
                 </div>
+                <div className="p-3 bg-green-400/30 rounded-lg">
+                  <p className="text-sm opacity-90">✅ IRIX (Nosso)</p>
+                  <p className="text-3xl font-bold">{results.equipment.irix_count}</p>
+                </div>
+                <div className="p-3 bg-green-400/30 rounded-lg">
+                  <p className="text-sm opacity-90">✅ OET (Nosso)</p>
+                  <p className="text-3xl font-bold">{results.equipment.oet_count}</p>
+                </div>
+                <div className="p-3 bg-red-400/30 rounded-lg">
+                  <p className="text-sm opacity-90">⚠️ IDEXX (Concorrente)</p>
+                  <p className="text-3xl font-bold">{results.equipment.idexx_count}</p>
+                </div>
+                <div className="p-3 bg-red-400/30 rounded-lg">
+                  <p className="text-sm opacity-90">⚠️ Zoetis (Concorrente)</p>
+                  <p className="text-3xl font-bold">{results.equipment.zoetis_count}</p>
+                </div>
               </div>
+              {results.equipment.market_share_summary && (
+                <div className="mt-4 p-3 bg-white/20 rounded-lg">
+                  <p className="text-sm font-semibold mb-1">Market Share:</p>
+                  <p className="text-xs opacity-90">{results.equipment.market_share_summary}</p>
+                </div>
+              )}
             </Card>
 
             {/* Oportunidades de Alta Prioridade */}
@@ -411,9 +473,19 @@ Retorne lista priorizada de oportunidades.`,
                           OET ✓
                         </span>
                       )}
+                      {clinic.has_idexx && (
+                        <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded">
+                          IDEXX ⚠️
+                        </span>
+                      )}
+                      {clinic.has_zoetis && (
+                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded">
+                          Zoetis ⚠️
+                        </span>
+                      )}
                       {clinic.has_hemograma && (
                         <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
-                          Hemograma ✓
+                          Hemograma {clinic.hemograma_brand ? `(${clinic.hemograma_brand})` : '✓'}
                         </span>
                       )}
                       {clinic.other_equipment && clinic.other_equipment.length > 0 && (
