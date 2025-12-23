@@ -454,6 +454,237 @@ const PREMIUM_EQUIPMENT_DATA = [
       '🎯 Diagnóstico diferencial mais preciso',
       '💡 Dados do paciente juntos - decisões melhores'
     ]
+  },
+  {
+    equipment_name: 'Seamaty - Confiança dos Maiores',
+    category: 'Credibilidade e Referências',
+    summary: 'Presente nos MAIORES hospitais do Brasil: IVETE, ECAM, IVETEMASTER, EXOCT-PETS. Se os melhores confiam, você também pode.',
+    competitive_advantages: {
+      vs_competitor: 'Concorrentes não têm presença nos hospitais de referência',
+      unique_features: [
+        'Toda linha grande de SP e RJ usa Seamaty',
+        'IVETE (maior franquia vet do Brasil) - equipamento padrão',
+        'ECAM, IVETEMASTER, EXOCT-PETS confiam',
+        'Hospitais de referência validam nossa qualidade'
+      ],
+      social_proof: 'Se os maiores hospitais veterinários do Brasil escolheram Seamaty, isso diz tudo sobre qualidade'
+    },
+    persuasion_triggers: {
+      authority: [
+        'IVETE - maior franquia veterinária do Brasil usa Seamaty',
+        'Hospitais referência em SP e RJ confiam na nossa linha',
+        'Padrão de excelência dos melhores hospitais'
+      ],
+      social_proof: [
+        'IVETE, ECAM, IVETEMASTER, EXOCT-PETS - todos usam',
+        'Se é bom para os maiores, imagine para sua clínica',
+        'Mesma tecnologia de hospitais premium'
+      ],
+      scarcity: [
+        'A mesma linha que equipa os melhores hospitais',
+        'Tecnologia de elite acessível para sua clínica'
+      ]
+    },
+    catchphrases: [
+      '🏆 IVETE confia. ECAM confia. Os maiores confiam.',
+      '⭐ Mesma tecnologia dos melhores hospitais de SP e RJ',
+      '🎯 Se é bom pro IVETE, é perfeito pra você',
+      '💎 Qualidade validada pelos gigantes do mercado'
+    ],
+    whatsapp_templates: [
+      '{nome}, sabe o que IVETE, ECAM, IVETEMASTER e EXOCT-PETS têm em comum? Seamaty! Os MAIORES hospitais veterinários de São Paulo e Rio escolheram nossa linha. {clinica} merece a mesma tecnologia dos gigantes!'
+    ]
+  },
+  {
+    equipment_name: 'Seamaty Social - ONGs e Universidades',
+    category: 'Responsabilidade Social',
+    summary: 'Apoiamos ONGs e universidades com equipamentos para estudos e cuidado animal. NESP e instituições parceiras. Empresa que valoriza vidas.',
+    competitive_advantages: {
+      unique_features: [
+        'Equipamentos em ONGs para ajudar animais',
+        'Parceria com universidades para desenvolvimento',
+        'NESP e outras instituições beneficiadas',
+        'Empresa com propósito social'
+      ]
+    },
+    catchphrases: [
+      '❤️ Equipamos ONGs - amor pelos animais',
+      '🎓 Universidades parceiras - ciência veterinária avança',
+      '🐾 NESP e instituições confiam em nós',
+      '💫 Lucro com propósito - ajudamos quem ajuda'
+    ],
+    persuasion_triggers: {
+      reciprocity: [
+        'Empresa que devolve para a comunidade veterinária',
+        'Ajudamos ONGs - você ajuda com sua compra'
+      ],
+      social_proof: [
+        'Universidades escolhem Seamaty para pesquisa',
+        'NESP confia na nossa tecnologia'
+      ]
+    },
+    whatsapp_templates: [
+      '{nome}, além de excelência, Seamaty tem PROPÓSITO. Equipamos ONGs e universidades como NESP. Quando {clinica} compra, você faz parte de algo maior - tecnologia que também salva animais em ONGs.'
+    ]
+  },
+  {
+    equipment_name: 'Point-of-Care - Beira de Leito',
+    category: 'Mobilidade e Conveniência',
+    summary: 'Leve o laboratório ATÉ o animal! Hemogasometria à beira de leito - sem estressar paciente internado. Amostra válida só 30min.',
+    competitive_advantages: {
+      unique_features: [
+        'Hemogasometria portátil à beira de leito',
+        'Animal não precisa se mover - menos estresse',
+        'Amostra válida apenas 30min - precisão total',
+        'Aumente receita com serviço diferenciado',
+        'Internações mais seguras e lucrativas'
+      ],
+      exclusivity: 'Mobilidade que transforma internação em serviço premium'
+    },
+    catchphrases: [
+      '🏥 Leve o laboratório ATÉ o paciente!',
+      '⏰ Hemogasometria só vale 30min - faça na hora',
+      '🐕 Animal internado? Sem estresse, máxima precisão',
+      '💰 Serviço premium = receita premium',
+      '❤️ Conforto para o animal, segurança pro tutor'
+    ],
+    persuasion_triggers: {
+      urgency: [
+        'Hemogasometria só é precisa em 30min - terceirizar = perder acurácia',
+        'Animal crítico não pode esperar - decisões EM TEMPO REAL'
+      ],
+      reciprocity: [
+        'Ofereça conforto ao animal - cliente vai valorizar MUITO',
+        'Diferencial que justifica preço premium de internação'
+      ]
+    },
+    whatsapp_templates: [
+      '{nome}, imagina oferecer em {clinica}: "Seu pet não sai da internação, levamos o exame até ele". Hemogasometria à beira de leito! Animal sem estresse, você com decisões rápidas, cliente impressionado. Aumente sua receita com serviço que NINGUÉM tem!'
+    ],
+    clinical_cases: [
+      {
+        case_title: 'UTI Felina - Hemogaso à Beira de Leito',
+        problem: 'Gato em insuficiência renal aguda, muito debilitado. Mover para coleta estressaria demais.',
+        solution: 'VG1 portátil levado até a internação. Hemogasometria sem mover o animal.',
+        outcome: 'Fluidoterapia ajustada em tempo real. Gato recuperado. Tutor elogiou "tecnologia e cuidado que nunca viu".'
+      }
+    ]
+  },
+  {
+    equipment_name: 'Seamaty - Compacta, Sofisticada, Poderosa',
+    category: 'Design e Tecnologia',
+    summary: 'Ultratecnológica, compacta, sofisticada. Uma máquina pequena faz GRANDES coisas. Sem computadores enormes - liberdade e praticidade.',
+    competitive_advantages: {
+      unique_features: [
+        'Design compacto sem perder sofisticação',
+        'Não precisa computador enorme',
+        'Liberdade de espaço e mobilidade',
+        'Tecnologia de ponta em tamanho inteligente',
+        'Acesso prático e intuitivo'
+      ]
+    },
+    catchphrases: [
+      '📱 Pequena no tamanho, GIGANTE na tecnologia',
+      '✨ Sofisticação que não ocupa sua sala',
+      '🚀 Liberdade - sem computadores gigantes',
+      '💎 Compacta, elegante, ultrapotente',
+      '🎯 Máquina pequena, GRANDES resultados'
+    ],
+    persuasion_triggers: {
+      scarcity: [
+        'Design premium em formato compacto - raríssimo no mercado',
+        'Tecnologia avançada sem ocupar espaço'
+      ],
+      social_proof: [
+        'Clínicas modernas preferem equipamentos compactos',
+        'Tendência global: menos espaço, mais tecnologia'
+      ]
+    }
+  },
+  {
+    equipment_name: 'Seamaty - Pós-Venda Excepcional',
+    category: 'Suporte e Parceria',
+    summary: 'Você NÃO compra só equipamento - compra PARCERIA VITALÍCIA. Assistência técnica premium, assessoria constante, benefício da dúvida sempre.',
+    competitive_advantages: {
+      vs_competitor: 'Concorrentes vendem e somem. Nós vendemos e FICAMOS.',
+      unique_features: [
+        'Assistência técnica vitalícia',
+        'Assessoria técnica contínua',
+        'Benefício da dúvida sempre',
+        'Suporte que não abandona',
+        'Parceria, não transação'
+      ],
+      exclusivity: 'Pós-venda é nosso MAIOR diferencial - cliente vira parceiro'
+    },
+    catchphrases: [
+      '🤝 Não vendemos máquina - criamos PARCERIA',
+      '🛡️ Assistência vitalícia - nunca te abandonamos',
+      '💬 Benefício da dúvida SEMPRE',
+      '⭐ Pós-venda que vira amizade',
+      '🔧 Problema? Estamos aqui - pra sempre'
+    ],
+    persuasion_triggers: {
+      reciprocity: [
+        'Assistência vitalícia - investimento em relacionamento',
+        'Benefício da dúvida sempre - confiança total',
+        'Assessoria sem custo adicional'
+      ],
+      authority: [
+        'Pós-venda referência no mercado veterinário',
+        'Clientes viram defensores da marca'
+      ],
+      social_proof: [
+        'Taxa de satisfação pós-venda acima de 95%',
+        'Clientes antigos continuam comprando - prova de confiança'
+      ]
+    },
+    whatsapp_templates: [
+      '{nome}, nosso MAIOR diferencial? Pós-venda! Você não compra equipamento em {clinica} - compra PARCERIA VITALÍCIA. Assistência técnica sempre, assessoria constante, benefício da dúvida. Outros vendem e somem. Nós vendemos e FICAMOS. Isso não tem preço!'
+    ],
+    objection_handling: [
+      {
+        objection: 'E se der problema depois?',
+        response: 'EXATAMENTE por isso somos diferentes! Assistência técnica vitalícia, assessoria sem custo. Problema? Ligou, resolvemos. Benefício da dúvida sempre é seu. Você não compra máquina - compra SEGURANÇA eterna.',
+        proof_point: 'Tempo médio de resposta técnica: 2 horas'
+      }
+    ]
+  },
+  {
+    equipment_name: 'Seamaty - Valores e Propósito',
+    category: 'Filosofia da Marca',
+    summary: 'Valorizamos vidas dos animais e profissionais que querem crescer. Buscamos perfis que se igualam a nós: excelência, cuidado, evolução.',
+    competitive_advantages: {
+      unique_features: [
+        'Empresa com valores claros',
+        'Foco em salvar vidas animais',
+        'Parceria com profissionais que querem crescer',
+        'Selecionamos clientes que compartilham nossos valores'
+      ]
+    },
+    catchphrases: [
+      '❤️ Valorizamos vidas - animais e profissionais',
+      '🌟 Buscamos quem quer crescer JUNTO',
+      '🎯 Não vendemos pra qualquer um - escolhemos parceiros',
+      '💫 Seu crescimento é nosso crescimento',
+      '🤝 Perfis que se igualam - excelência reconhece excelência'
+    ],
+    persuasion_triggers: {
+      scarcity: [
+        'Escolhemos nossos parceiros criteriosamente',
+        'Não é só comprar - é fazer parte de algo maior'
+      ],
+      social_proof: [
+        'Profissionais que querem crescer escolhem Seamaty',
+        'Comunidade de excelência veterinária'
+      ],
+      reciprocity: [
+        'Investimos no seu crescimento profissional',
+        'Cursos, treinamentos, networking - tudo incluso'
+      ]
+    },
+    whatsapp_templates: [
+      '{nome}, Seamaty não vende pra qualquer um. Valorizamos vidas - dos animais e dos profissionais que querem CRESCER. Vi que {clinica} busca excelência. Nossos perfis se igualam. Que tal crescermos juntos? Não é compra - é parceria de quem pensa grande!'
+    ]
   }
 ];
 
@@ -519,9 +750,14 @@ export default function LoadPremiumDifferentials() {
                   <p>✅ <strong>Cistatina C</strong> - Detecta DRC 2 anos antes</p>
                   <p>✅ <strong>PCR Canina</strong> - Inflamação e sepse precoce</p>
                   <p>✅ <strong>SAA Felina</strong> - Padrão ouro em gatos</p>
-                  <p>✅ <strong>Check-up 24 parâmetros</strong> - Mais barato do mercado</p>
-                  <p>✅ <strong>Hemogasometria</strong> - 4min + curso grátis</p>
-                  <p>✅ <strong>Sistema Cloud</strong> - Acesso remoto total</p>
+                  <p>✅ <strong>Check-up 24</strong> - Mais barato do mercado</p>
+                  <p>✅ <strong>Hemogaso 4min</strong> - Curso grátis incluso</p>
+                  <p>✅ <strong>Cloud Total</strong> - Acesse de qualquer lugar</p>
+                  <p>✅ <strong>Credibilidade</strong> - IVETE, ECAM, EXOCT-PETS confiam</p>
+                  <p>✅ <strong>Social</strong> - ONGs e universidades parceiras</p>
+                  <p>✅ <strong>Beira de Leito</strong> - Mobilidade que salva</p>
+                  <p>✅ <strong>Pós-Venda</strong> - Parceria vitalícia</p>
+                  <p>✅ <strong>Design Compacto</strong> - Sofisticação inteligente</p>
                   <p>✅ Frases de efeito sofisticadas</p>
                   <p>✅ Gatilhos de persuasão (Cialdini)</p>
                   <p>✅ Casos clínicos reais</p>
