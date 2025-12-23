@@ -386,12 +386,7 @@ export default function MyProfile() {
           </p>
         </Card>
 
-        {/* Treinamento de Oratória */}
-        <SpeechTrainingModule />
-
-        {/* Análise de Linguagem Corporal */}
-        <BodyLanguageAnalyzer />
-        </div>
-        </div>
-        );
-        }
+      </div>
+    </div>
+  );
+}
