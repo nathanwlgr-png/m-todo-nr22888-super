@@ -55,8 +55,12 @@ export default function FloatingTokenCounter() {
         {!expanded ? (
           <button
             onClick={() => setExpanded(true)}
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 shadow-2xl flex flex-col items-center justify-center hover:shadow-orange-500/50 transition-all active:scale-95"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 shadow-2xl flex flex-col items-center justify-center hover:shadow-orange-500/50 transition-all active:scale-95"
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation',
+              padding: '24px'
+            }}
           >
             <span className="text-white font-black text-2xl">{Math.floor(tokensRemaining / 1000000)}</span>
             <span className="text-white text-xs font-semibold">milhões</span>

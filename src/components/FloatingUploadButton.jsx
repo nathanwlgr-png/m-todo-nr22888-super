@@ -61,14 +61,18 @@ export default function FloatingUploadButton() {
 
   return (
     <Draggable>
-      <div className="fixed bottom-32 right-6 z-50 cursor-move">
+      <div className="fixed bottom-44 right-6 z-50 cursor-move">
         {!expanded ? (
           <button
             onClick={() => setExpanded(true)}
-            className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 shadow-xl flex items-center justify-center hover:shadow-purple-500/50 transition-all active:scale-95"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 shadow-2xl flex items-center justify-center hover:shadow-purple-500/50 transition-all active:scale-95"
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation',
+              padding: '20px'
+            }}
           >
-            <Upload className="w-6 h-6 text-white" />
+            <Upload className="w-7 h-7 text-white" />
           </button>
         ) : (
           <Card className="w-80 p-4 bg-white shadow-2xl border-2 border-purple-200">
