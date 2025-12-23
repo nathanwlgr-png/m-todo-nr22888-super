@@ -534,7 +534,7 @@ export default function Home() {
       <div className="px-6 mt-6 space-y-4">
         {/* Export Data Button */}
         <Button
-          onClick={() => {
+          onClick={async () => {
             const citiesCount = clients.reduce((acc, c) => {
               const city = c.city || 'Sem cidade';
               acc[city] = (acc[city] || 0) + 1;
@@ -545,22 +545,22 @@ export default function Home() {
               .map(([city, count]) => `• ${city}: ${count}`)
               .join('\n');
             
-            const summary = `📊 *Exportação CRM - ${new Date().toLocaleString('pt-BR')}*\n\n` +
+            const summary = `📊 Exportação CRM - ${new Date().toLocaleString('pt-BR')}\n\n` +
               `✅ Total de clientes: ${clients.length}\n` +
               `🔥 Quentes: ${metrics.hot}\n` +
               `🌡️ Mornos: ${metrics.warm}\n` +
               `❄️ Frios: ${metrics.cold}\n\n` +
               `💰 Pipeline Total: R$ ${(metrics.totalRevenue / 1000).toFixed(0)}k\n` +
               `📈 Score Médio: ${metrics.avgScore}%\n\n` +
-              `*Clientes por Cidade:*\n${citiesList}`;
+              `Clientes por Cidade:\n${citiesList}`;
             
-            window.open(`https://wa.me/?text=${encodeURIComponent(summary)}`, '_blank');
-            toast.success('Dados prontos para enviar!');
+            await navigator.clipboard.writeText(summary);
+            toast.success('Dados copiados! Cole no WhatsApp Web');
           }}
           className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-base font-semibold shadow-lg"
         >
           <Download className="w-5 h-5 mr-2" />
-          Exportar Dados (WhatsApp)
+          Exportar Dados (Copiar)
         </Button>
 
         {/* Sync Offline Button */}
