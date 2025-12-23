@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Search, Loader2, Building2, CheckCircle, MapPin } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
 import {
   Select,
@@ -31,24 +32,60 @@ const REGIONS = [
 export default function MarketIntelligence() {
   const navigate = useNavigate();
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [searchMode, setSearchMode] = useState('region'); // 'region' ou 'radius'
+  const [customAddress, setCustomAddress] = useState('');
+  const [searchRadius, setSearchRadius] = useState(50); // km
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
 
+  const toggleCity = (city) => {
+    setSelectedCities(prev => 
+      prev.includes(city) ? prev.filter(c => c !== city) : [...prev, city]
+    );
+  };
+
+  const selectAllCities = () => {
+    const region = REGIONS.find(r => r.name === selectedRegion);
+    if (region) setSelectedCities(region.cities);
+  };
+
   const analyzeMarket = async () => {
-    if (!selectedRegion) {
-      toast.error('Selecione uma região primeiro');
-      return;
+    let citiesToAnalyze = [];
+    
+    if (searchMode === 'region') {
+      if (selectedCities.length === 0) {
+        toast.error('Selecione pelo menos uma cidade');
+        return;
+      }
+      citiesToAnalyze = selectedCities;
+    } else if (searchMode === 'radius') {
+      if (!customAddress) {
+        toast.error('Digite um endereço para busca por raio');
+        return;
+      }
+      // IA vai descobrir as cidades dentro do raio
+      citiesToAnalyze = []; // Será preenchido pela IA
     }
 
     setAnalyzing(true);
-    const region = REGIONS.find(r => r.name === selectedRegion);
     
     try {
       toast.info('🔍 Etapa 1/4: Coletando dados populacionais do IBGE...');
 
+      let searchPrompt = '';
+      if (searchMode === 'radius') {
+        searchPrompt = `Busque TODAS as cidades veterinárias em um raio de ${searchRadius}km do endereço: ${customAddress}.
+        
+1. Identifique as cidades dentro do raio especificado
+2. Para cada cidade encontrada, busque dados do IBGE 2024`;
+      } else {
+        searchPrompt = `Busque dados EXATOS do IBGE 2024 para estas cidades: ${citiesToAnalyze.join(', ')}`;
+      }
+
       // IA 1: DADOS DEMOGRÁFICOS E IBGE DE TODAS AS CIDADES
       const demographicData = await base44.integrations.Core.InvokeLLM({
-        prompt: `Busque dados EXATOS do IBGE 2024 para TODAS estas cidades: ${region.cities.join(', ')}.
+        prompt: `${searchPrompt}.
 
 PARA CADA CIDADE, OBRIGATORIAMENTE:
 1. População total atualizada (IBGE 2024)
@@ -96,9 +133,11 @@ NÃO PULE NENHUMA CIDADE. Se não encontrar dados, indique como "não disponíve
 
       toast.info('🏥 Etapa 2/4: Mapeando TODAS as clínicas veterinárias da região...');
       
+      const discoveredCities = demographicData.cities_complete_data?.map(c => c.city) || citiesToAnalyze;
+      
       // IA 2: BUSCA COMPLETA DE CLÍNICAS - CIDADE POR CIDADE
       const clinicsSearch = await base44.integrations.Core.InvokeLLM({
-        prompt: `Faça uma busca EXAUSTIVA e COMPLETA de clínicas veterinárias em TODAS estas cidades: ${region.cities.join(', ')}.
+        prompt: `Faça uma busca EXAUSTIVA e COMPLETA de clínicas veterinárias em TODAS estas cidades: ${discoveredCities.join(', ')}.
 
 PARA CADA CIDADE:
 1. Busque no Google Maps, Google Business, redes sociais, diretórios veterinários
@@ -287,7 +326,7 @@ Retorne lista priorizada de oportunidades.`,
       });
 
       setResults({
-        region: selectedRegion,
+        region: searchMode === 'region' ? `Cidades Selecionadas (${citiesToAnalyze.length})` : `Raio ${searchRadius}km de ${customAddress}`,
         demographicData,
         clinics: clinicsSearch,
         equipment: equipmentAnalysis,
@@ -319,29 +358,119 @@ Retorne lista priorizada de oportunidades.`,
         {!results ? (
           <Card className="p-6">
             <div className="space-y-6">
+              {/* Modo de Busca */}
               <div>
-                <h3 className="font-semibold text-lg mb-2">Selecione sua região</h3>
-                <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                  <SelectTrigger className="h-14 text-base">
-                    <SelectValue placeholder="Escolha a região" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {REGIONS.map((region) => (
-                      <SelectItem key={region.name} value={region.name}>
-                        {region.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedRegion && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-700 font-medium">Cidades:</p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      {REGIONS.find(r => r.name === selectedRegion)?.cities.join(', ')}
-                    </p>
-                  </div>
-                )}
+                <h3 className="font-semibold text-lg mb-3">Modo de Busca</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={searchMode === 'region' ? 'default' : 'outline'}
+                    onClick={() => setSearchMode('region')}
+                    className="h-auto py-4"
+                  >
+                    <div className="text-left">
+                      <p className="font-semibold">Por Região</p>
+                      <p className="text-xs opacity-80">Selecione cidades específicas</p>
+                    </div>
+                  </Button>
+                  <Button
+                    variant={searchMode === 'radius' ? 'default' : 'outline'}
+                    onClick={() => setSearchMode('radius')}
+                    className="h-auto py-4"
+                  >
+                    <div className="text-left">
+                      <p className="font-semibold">Por Raio</p>
+                      <p className="text-xs opacity-80">Endereço + distância</p>
+                    </div>
+                  </Button>
+                </div>
               </div>
+
+              {/* Busca por Região */}
+              {searchMode === 'region' && (
+                <>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Selecione a região base</h3>
+                    <Select value={selectedRegion} onValueChange={(val) => {
+                      setSelectedRegion(val);
+                      setSelectedCities([]);
+                    }}>
+                      <SelectTrigger className="h-14 text-base">
+                        <SelectValue placeholder="Escolha a região" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGIONS.map((region) => (
+                          <SelectItem key={region.name} value={region.name}>
+                            {region.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedRegion && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-base">Selecione as cidades ({selectedCities.length})</h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={selectAllCities}
+                          className="text-xs"
+                        >
+                          Todas
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-2 bg-slate-50 rounded-lg">
+                        {REGIONS.find(r => r.name === selectedRegion)?.cities.map((city) => (
+                          <button
+                            key={city}
+                            onClick={() => toggleCity(city)}
+                            className={`p-2 rounded-lg text-sm text-left transition-all ${
+                              selectedCities.includes(city)
+                                ? 'bg-indigo-600 text-white font-medium'
+                                : 'bg-white border hover:border-indigo-300'
+                            }`}
+                          >
+                            {city}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Busca por Raio */}
+              {searchMode === 'radius' && (
+                <>
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Endereço Central</h3>
+                    <Input
+                      placeholder="Ex: Rua das Flores, 123 - Marília/SP"
+                      value={customAddress}
+                      onChange={(e) => setCustomAddress(e.target.value)}
+                      className="h-12"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base mb-2">Raio de Busca: {searchRadius}km</h3>
+                    <input
+                      type="range"
+                      min="10"
+                      max="200"
+                      step="10"
+                      value={searchRadius}
+                      onChange={(e) => setSearchRadius(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                      <span>10km</span>
+                      <span>200km</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
 
               <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg">
                 <h4 className="font-semibold text-indigo-800 mb-3">O que vamos descobrir:</h4>
@@ -357,7 +486,11 @@ Retorne lista priorizada de oportunidades.`,
 
               <Button
                 onClick={analyzeMarket}
-                disabled={!selectedRegion || analyzing}
+                disabled={
+                  (searchMode === 'region' && selectedCities.length === 0) ||
+                  (searchMode === 'radius' && !customAddress) ||
+                  analyzing
+                }
                 className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600"
               >
                 {analyzing ? (
@@ -368,7 +501,9 @@ Retorne lista priorizada de oportunidades.`,
                 ) : (
                   <>
                     <Search className="w-5 h-5 mr-2" />
-                    Analisar Mercado Completo
+                    {searchMode === 'region' 
+                      ? `Analisar ${selectedCities.length} cidade(s)` 
+                      : `Analisar raio de ${searchRadius}km`}
                   </>
                 )}
               </Button>
