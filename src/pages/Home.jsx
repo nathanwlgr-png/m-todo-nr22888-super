@@ -532,55 +532,35 @@ export default function Home() {
 
       {/* Main Actions */}
       <div className="px-6 mt-6 space-y-4">
-        {/* Export Rodrigo Savio Mavetto PDF Button */}
+        {/* Export Data Button */}
         <Button
           onClick={async () => {
-            const rodrigo = clients.find(c => 
-              c.first_name?.toLowerCase().includes('rodrigo') && 
-              c.first_name?.toLowerCase().includes('savio')
-            );
+            const citiesCount = clients.reduce((acc, c) => {
+              const city = c.city || 'Sem cidade';
+              acc[city] = (acc[city] || 0) + 1;
+              return acc;
+            }, {});
             
-            if (!rodrigo) {
-              toast.error('Cliente Rodrigo Sávio Mavetto não encontrado');
-              return;
-            }
-
-            try {
-              const { jsPDF } = await import('jspdf');
-              const doc = new jsPDF();
-              
-              doc.setFontSize(18);
-              doc.text('PERFIL COMPLETO DO CLIENTE', 20, 20);
-              
-              doc.setFontSize(12);
-              doc.text(`Nome: ${rodrigo.first_name || 'N/A'}`, 20, 35);
-              doc.text(`Empresa: ${rodrigo.empresa_vinculada || 'Spice e Cavalos'}`, 20, 45);
-              doc.text(`Cidade: ${rodrigo.city || 'Marília'}`, 20, 55);
-              doc.text(`Email: ${rodrigo.email || 'N/A'}`, 20, 65);
-              doc.text(`Telefone: ${rodrigo.phone || 'N/A'}`, 20, 75);
-              doc.text(`Status: ${rodrigo.status || 'N/A'}`, 20, 85);
-              doc.text(`Score: ${rodrigo.purchase_score || 0}%`, 20, 95);
-              doc.text(`Clínica: ${rodrigo.clinic_name || 'N/A'}`, 20, 105);
-              doc.text(`Tipo: ${rodrigo.client_type || 'N/A'}`, 20, 115);
-              doc.text(`Equipamento Atual: ${rodrigo.current_equipment || 'N/A'}`, 20, 125);
-              
-              if (rodrigo.notes) {
-                doc.text('Observações:', 20, 140);
-                const lines = doc.splitTextToSize(rodrigo.notes, 170);
-                doc.text(lines, 20, 150);
-              }
-              
-              doc.save(`rodrigo_savio_mavetto_${new Date().toISOString().split('T')[0]}.pdf`);
-              toast.success('PDF gerado com sucesso!');
-            } catch (error) {
-              console.error(error);
-              toast.error('Erro ao gerar PDF');
-            }
+            const citiesList = Object.entries(citiesCount)
+              .map(([city, count]) => `• ${city}: ${count}`)
+              .join('\n');
+            
+            const summary = `📊 Exportação CRM - ${new Date().toLocaleString('pt-BR')}\n\n` +
+              `✅ Total de clientes: ${clients.length}\n` +
+              `🔥 Quentes: ${metrics.hot}\n` +
+              `🌡️ Mornos: ${metrics.warm}\n` +
+              `❄️ Frios: ${metrics.cold}\n\n` +
+              `💰 Pipeline Total: R$ ${(metrics.totalRevenue / 1000).toFixed(0)}k\n` +
+              `📈 Score Médio: ${metrics.avgScore}%\n\n` +
+              `Clientes por Cidade:\n${citiesList}`;
+            
+            await navigator.clipboard.writeText(summary);
+            toast.success('Dados copiados! Cole no WhatsApp Web');
           }}
           className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-base font-semibold shadow-lg"
         >
           <Download className="w-5 h-5 mr-2" />
-          Exportar Rodrigo Sávio (PDF)
+          Exportar Dados (Copiar)
         </Button>
 
         {/* Sync Offline Button */}
