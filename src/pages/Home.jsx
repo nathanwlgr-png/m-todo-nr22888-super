@@ -70,7 +70,7 @@ export default function Home() {
       <AutoTaskGenerator />
       
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 pt-12 pb-20 rounded-b-[2.5rem] overflow-hidden tech-grid">
+      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 pt-6 pb-12 rounded-b-[2.5rem] overflow-hidden tech-grid">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
         
@@ -107,7 +107,7 @@ export default function Home() {
       </div>
 
       {/* Quick Stats */}
-      <div className="px-6 -mt-10">
+      <div className="px-6 -mt-6">
         {/* Sales Overview */}
         <div className="mb-6">
           <SalesOverview />
