@@ -3,7 +3,9 @@ import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
 import Calendar from './pages/Calendar';
+import CampaignDemo from './pages/CampaignDemo';
 import CampaignDetails from './pages/CampaignDetails';
+import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
 import Campaigns from './pages/Campaigns';
 import CaptureLeads from './pages/CaptureLeads';
 import ClientProfile from './pages/ClientProfile';
@@ -42,6 +44,7 @@ import NewCampaign from './pages/NewCampaign';
 import NewClient from './pages/NewClient';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
+import OfflineMode from './pages/OfflineMode';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
@@ -63,9 +66,6 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import CampaignDemo from './pages/CampaignDemo';
-import OfflineMode from './pages/OfflineMode';
-import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
 import __Layout from './Layout.jsx';
 
 
@@ -75,7 +75,9 @@ export const PAGES = {
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
     "Calendar": Calendar,
+    "CampaignDemo": CampaignDemo,
     "CampaignDetails": CampaignDetails,
+    "CampaignTemplatesDemo": CampaignTemplatesDemo,
     "Campaigns": Campaigns,
     "CaptureLeads": CaptureLeads,
     "ClientProfile": ClientProfile,
@@ -114,6 +116,7 @@ export const PAGES = {
     "NewClient": NewClient,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
+    "OfflineMode": OfflineMode,
     "PerformanceDashboard": PerformanceDashboard,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
@@ -135,9 +138,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "CampaignDemo": CampaignDemo,
-    "OfflineMode": OfflineMode,
-    "CampaignTemplatesDemo": CampaignTemplatesDemo,
 }
 
 export const pagesConfig = {

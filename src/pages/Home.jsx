@@ -52,6 +52,9 @@ import WorkflowAutomationAI from '@/components/WorkflowAutomationAI';
 import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
 import LevelScoreSystem from '@/components/LevelScoreSystem';
 import PowerBooster from '@/components/PowerBooster';
+import HemogasReportGenerator from '@/components/HemogasReportGenerator';
+import PredictiveAnalyticsAI from '@/components/PredictiveAnalyticsAI';
+import ProcessingSpeedMonitor from '@/components/ProcessingSpeedMonitor';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -277,30 +280,25 @@ export default function Home() {
         <ScheduledMessagesWidget />
       </div>
 
-      {/* Relatórios Automáticos IA */}
+      {/* CRM + Gestão IA Unificado */}
       <div className="px-6 mt-6">
-        <AutoReportGenerator />
+        <div className="grid grid-cols-1 gap-3">
+          <CRMExternalSync />
+          <AITaskManager />
+        </div>
       </div>
 
-      {/* Gestor de Tarefas IA */}
+      {/* Hub de IAs Unificado */}
       <div className="px-6 mt-6">
-        <AITaskManager />
-      </div>
-
-      {/* Integrador CRM Externo */}
-      <div className="px-6 mt-6">
-        <CRMExternalSync />
-      </div>
-
-      {/* Central de Configuração IA */}
-      <div className="px-6 mt-6">
-        <AIConfigCenter />
-      </div>
-
-      {/* Hub de IAs Avançadas */}
-      <div className="px-6 mt-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🤖 Hub de IAs Ativas</h3>
-        <AdvancedAIHub />
+        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🤖 Central de IAs</h3>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <HemogasReportGenerator />
+          <ProcessingSpeedMonitor />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <PredictiveAnalyticsAI />
+          <PredictiveAnalyticsAI />
+        </div>
       </div>
 
       {/* Workflow Automation AI */}
