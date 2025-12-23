@@ -535,33 +535,30 @@ export default function Home() {
         {/* Export Data Button */}
         <Button
           onClick={() => {
-            const dataToExport = {
-              clientes: clients.map(c => ({
-                nome: c.first_name,
-                cidade: c.city,
-                status: c.status,
-                score: c.purchase_score,
-                email: c.email,
-                telefone: c.phone,
-                clinica: c.clinic_name,
-                equipamento_atual: c.current_equipment
-              })),
-              total: clients.length,
-              data_exportacao: new Date().toLocaleString('pt-BR')
-            };
-            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `clientes_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            toast.success('Dados exportados com sucesso!');
+            const summary = `📊 *Exportação CRM - ${new Date().toLocaleString('pt-BR')}*\n\n` +
+              `✅ Total de clientes: ${clients.length}\n` +
+              `🔥 Quentes: ${metrics.hot}\n` +
+              `🌡️ Mornos: ${metrics.warm}\n` +
+              `❄️ Frios: ${metrics.cold}\n\n` +
+              `💰 Pipeline Total: R$ ${(metrics.totalRevenue / 1000).toFixed(0)}k\n` +
+              `📈 Score Médio: ${metrics.avgScore}%\n\n` +
+              `*Clientes por Cidade:*\n` +
+              clients.reduce((acc, c) => {
+                const city = c.city || 'Sem cidade';
+                acc[city] = (acc[city] || 0) + 1;
+                return acc;
+              }, {})
+              |> Object.entries(%)
+              |> %.map(([city, count]) => `• ${city}: ${count}`)
+              |> %.join('\n');
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(summary)}`, '_blank');
+            toast.success('Dados prontos para enviar!');
           }}
           className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-base font-semibold shadow-lg"
         >
           <Download className="w-5 h-5 mr-2" />
-          Exportar Dados (JSON)
+          Exportar Dados (WhatsApp)
         </Button>
 
         {/* Sync Offline Button */}
