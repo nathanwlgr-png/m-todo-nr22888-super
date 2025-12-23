@@ -89,6 +89,7 @@ import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
 import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
 import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
 import SmartSalesFlowOptimizer from '@/components/SmartSalesFlowOptimizer';
+import AIReportingHub from '@/components/AIReportingHub';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -537,6 +538,11 @@ export default function Home() {
       {/* Modo Offline N */}
       <div className="px-6 mt-6">
         <OfflinePackGenerator />
+      </div>
+
+      {/* AI Reporting Hub */}
+      <div className="px-6 mt-6">
+        <AIReportingHub />
       </div>
 
       {/* CRM + Gestão IA Unificado */}
