@@ -22,7 +22,8 @@ import {
   Play,
   Database,
   Send,
-  WifiOff
+  WifiOff,
+  Package
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -202,6 +203,56 @@ export default function Home() {
               <Search className="w-4 h-4 text-orange-400 mx-auto" />
             </button>
           </Link>
+        </div>
+      </div>
+
+      {/* Busca e Filtros */}
+      <div className="px-6 mt-4">
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar clientes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-12 rounded-xl border-2"
+            />
+          </div>
+          
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <Button
+              size="sm"
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
+              onClick={() => setStatusFilter('all')}
+              className="rounded-full whitespace-nowrap"
+            >
+              Todos ({clients.length})
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'quente' ? 'default' : 'outline'}
+              onClick={() => setStatusFilter('quente')}
+              className="rounded-full whitespace-nowrap bg-red-500 hover:bg-red-600 text-white"
+            >
+              🔥 Quentes ({metrics.hot})
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'morno' ? 'default' : 'outline'}
+              onClick={() => setStatusFilter('morno')}
+              className="rounded-full whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              🌡️ Mornos ({metrics.warm})
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'frio' ? 'default' : 'outline'}
+              onClick={() => setStatusFilter('frio')}
+              className="rounded-full whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              ❄️ Frios ({metrics.cold})
+            </Button>
+          </div>
         </div>
       </div>
 
