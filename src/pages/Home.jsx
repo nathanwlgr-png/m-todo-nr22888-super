@@ -56,6 +56,7 @@ import HemogasReportGenerator from '@/components/HemogasReportGenerator';
 import PredictiveAnalyticsAI from '@/components/PredictiveAnalyticsAI';
 import ProcessingSpeedMonitor from '@/components/ProcessingSpeedMonitor';
 import DataExportButton from '@/components/DataExportButton';
+import ThreeDXSalesMaterial from '@/components/3DXSalesMaterial';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -300,6 +301,11 @@ export default function Home() {
           <PredictiveAnalyticsAI />
           <DataExportButton />
         </div>
+      </div>
+
+      {/* Material de Vendas 3DX */}
+      <div className="px-6 mt-6">
+        <ThreeDXSalesMaterial />
       </div>
 
       {/* Workflow Automation AI */}
