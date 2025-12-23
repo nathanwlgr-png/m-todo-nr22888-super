@@ -16,6 +16,8 @@ export default function ClientProfileGenerator() {
   const [savedProfiles, setSavedProfiles] = useState([]);
   const [empresaVinculada, setEmpresaVinculada] = useState('');
   const [saveToDatabase, setSaveToDatabase] = useState(false);
+  const [cnpjEmpresa, setCnpjEmpresa] = useState('');
+  const [cidadeCliente, setCidadeCliente] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -160,6 +162,8 @@ Método: NR22 - Numerologia Aplicada a Vendas
             full_name: clientName,
             birthdate: birthdate || null,
             empresa_vinculada: empresaVinculada || null,
+            cnpj: cnpjEmpresa || null,
+            city: cidadeCliente || null,
             numerology_number: numeroFinal,
             life_path_number: numeroCaminho || null,
             behavioral_profile: perfil.name,
@@ -170,7 +174,8 @@ Método: NR22 - Numerologia Aplicada a Vendas
             numerology_tip: numeroFinal === 22 ? 'Cliente Número Mestre 22 - Pensa GRANDE. Apresente visão de expansão e domínio de mercado.' : numeroFinal === 11 ? 'Cliente Número Mestre 11 - Altamente intuitivo. Use abordagem inspiradora e transformadora.' : perfil.approach,
             perfil_completo_gerado: profileDoc,
             status: 'morno',
-            purchase_score: 60
+            purchase_score: 60,
+            lead_source: 'importacao_planilha'
           };
           
           await base44.entities.Client.create(clientData);
@@ -241,6 +246,18 @@ Método: NR22 - Numerologia Aplicada a Vendas
           placeholder="Empresa vinculada (ex: Spice e Cavalos)"
           value={empresaVinculada}
           onChange={(e) => setEmpresaVinculada(e.target.value)}
+        />
+        
+        <Input
+          placeholder="CNPJ da empresa (opcional)"
+          value={cnpjEmpresa}
+          onChange={(e) => setCnpjEmpresa(e.target.value)}
+        />
+        
+        <Input
+          placeholder="Cidade (ex: Jaú, Marília)"
+          value={cidadeCliente}
+          onChange={(e) => setCidadeCliente(e.target.value)}
         />
         
         <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
