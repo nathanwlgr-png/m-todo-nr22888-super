@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Draggable from 'react-draggable';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldCheck, CheckCircle, Zap, AlertTriangle, X } from 'lucide-react';
@@ -16,6 +17,8 @@ export default function AIErrorCorrectionSystem() {
   const [lastCheck, setLastCheck] = useState(null);
   const [errorsFound, setErrorsFound] = useState([]);
   const [expanded, setExpanded] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const timeoutRef = useState(null)[1];
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -199,8 +202,25 @@ export default function AIErrorCorrectionSystem() {
     return () => clearInterval(interval);
   }, [clients, tasks, sales]);
 
+  const handleDrag = (e, data) => {
+    setPosition({ x: data.x, y: data.y });
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    timeoutRef.current = setTimeout(() => {
+      setPosition({ x: 0, y: 0 });
+    }, 5000);
+  };
+
+  const initialPosition = { x: 24, y: window.innerHeight - 80 };
+
   return (
-    <div className="fixed bottom-6 left-6 z-40">
+    <Draggable 
+      position={position}
+      onDrag={handleDrag}
+      defaultPosition={initialPosition}
+    >
+      <div className="fixed z-40 cursor-move" style={{ bottom: 24, left: 24 }}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-300 shadow-xl flex items-center justify-center hover:shadow-red-500/50 transition-all active:scale-95"

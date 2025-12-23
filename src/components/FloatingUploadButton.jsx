@@ -11,6 +11,8 @@ export default function FloatingUploadButton() {
   const [expanded, setExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const timeoutRef = React.useRef(null);
 
   React.useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('uploaded_docs') || '[]');
@@ -59,9 +61,25 @@ export default function FloatingUploadButton() {
     return '📁';
   };
 
+  const handleDrag = (e, data) => {
+    setPosition({ x: data.x, y: data.y });
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    timeoutRef.current = setTimeout(() => {
+      setPosition({ x: 0, y: 0 });
+    }, 5000);
+  };
+
+  const initialPosition = { x: window.innerWidth - 90, y: window.innerHeight - 200 };
+
   return (
-    <Draggable>
-      <div className="fixed bottom-44 right-6 z-50 cursor-move">
+    <Draggable 
+      position={position}
+      onDrag={handleDrag}
+      defaultPosition={initialPosition}
+    >
+      <div className="fixed z-50 cursor-move" style={{ bottom: 176, right: 24 }}>
         {!expanded ? (
           <button
             onClick={() => setExpanded(true)}

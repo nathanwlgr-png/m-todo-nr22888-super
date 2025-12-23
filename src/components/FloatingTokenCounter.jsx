@@ -10,6 +10,8 @@ export default function FloatingTokenCounter() {
   const [networkMode, setNetworkMode] = useState('wifi');
   const [performanceMode, setPerformanceMode] = useState('normal');
   const [dataUsage, setDataUsage] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const timeoutRef = React.useRef(null);
 
   useEffect(() => {
     const saved = parseInt(localStorage.getItem('tokens_remaining') || '117000000');
@@ -49,9 +51,25 @@ export default function FloatingTokenCounter() {
     localStorage.setItem('performance_mode', level);
   };
 
+  const handleDrag = (e, data) => {
+    setPosition({ x: data.x, y: data.y });
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    timeoutRef.current = setTimeout(() => {
+      setPosition({ x: 0, y: 0 });
+    }, 5000);
+  };
+
+  const initialPosition = { x: window.innerWidth - 130, y: window.innerHeight / 2 - 60 };
+
   return (
-    <Draggable>
-      <div className="fixed top-1/2 right-6 transform -translate-y-1/2 z-50 cursor-move">
+    <Draggable 
+      position={position}
+      onDrag={handleDrag}
+      defaultPosition={initialPosition}
+    >
+      <div className="fixed z-50 cursor-move" style={{ top: '50%', right: 24, transform: 'translateY(-50%)' }}>
         {!expanded ? (
           <button
             onClick={() => setExpanded(true)}

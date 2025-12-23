@@ -70,6 +70,7 @@ import FloatingTokenCounter from '@/components/FloatingTokenCounter';
 import FloatingUploadButton from '@/components/FloatingUploadButton';
 import CompletePDFManual from '@/components/CompletePDFManual';
 import ExportAllReports from '@/components/ExportAllReports';
+import FloatingDocumentImporter from '@/components/FloatingDocumentImporter';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -353,7 +354,8 @@ export default function Home() {
       {/* Botão Flutuante Material Técnico */}
       <FloatingTechnicalMaterial />
 
-      {/* Floating Buttons - Draggable */}
+      {/* Floating Buttons - Draggable com Auto-Reset 5s */}
+      <FloatingDocumentImporter />
       <FloatingTokenCounter />
       <FloatingUploadButton />
 
