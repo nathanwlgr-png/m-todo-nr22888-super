@@ -13,13 +13,15 @@ export default function AutoTaskGenerator() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list('-updated_date', 100),
-    refetchInterval: 60000 // Check every minute
+    refetchInterval: 300000, // Check every 5 minutes
+    staleTime: 240000
   });
 
   const { data: followupLogs = [] } = useQuery({
     queryKey: ['all-followup-logs'],
     queryFn: () => base44.entities.FollowUpLog.list('-sent_date', 200),
-    refetchInterval: 60000
+    refetchInterval: 300000,
+    staleTime: 240000
   });
 
   const { data: tasks = [] } = useQuery({

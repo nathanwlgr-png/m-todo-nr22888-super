@@ -23,7 +23,8 @@ export default function CollaborationIndicator({ contextType, contextId }) {
         return (now - lastSeen) < 30000 && u.user_email !== currentUser?.email;
       });
     },
-    refetchInterval: 5000,
+    refetchInterval: 20000,
+    staleTime: 15000,
     enabled: !!contextId && !!currentUser,
   });
 
