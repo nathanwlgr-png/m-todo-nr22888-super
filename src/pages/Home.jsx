@@ -69,11 +69,16 @@ import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
 import CompletePDFManual from '@/components/CompletePDFManual';
 import ExportAllReports from '@/components/ExportAllReports';
 import QuickToolsPanel from '@/components/QuickToolsPanel';
+import { Input } from '@/components/ui/input';
+import DocumentMonitorAI from '@/components/DocumentMonitorAI';
+import SystemManualPDF from '@/components/SystemManualPDF';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
   const [selectedStatus, setSelectedStatus] = React.useState('quente');
   const [syncingOffline, setSyncingOffline] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('all');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -122,7 +127,7 @@ export default function Home() {
     const avgScore = clients.length > 0 
       ? Math.round(clients.reduce((sum, c) => sum + (c.purchase_score || 0), 0) / clients.length)
       : 0;
-    
+
     return {
       total: clients.length,
       hot: hotClients,
@@ -131,7 +136,21 @@ export default function Home() {
       totalRevenue,
       avgScore
     };
-  }, [clients]);
+    }, [clients]);
+
+    const filteredClients = useMemo(() => {
+    return clients.filter(c => {
+      const matchesSearch = !searchTerm || 
+        c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.city?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+    }, [clients, searchTerm, statusFilter]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -584,6 +603,12 @@ export default function Home() {
             {/* Ferramentas Rápidas */}
             <QuickToolsPanel />
 
+            {/* IA Monitor de Documentos */}
+            <DocumentMonitorAI />
+
+            {/* Manual do Sistema PDF */}
+            <SystemManualPDF />
+
           <div className="grid grid-cols-2 gap-4">
             <Link to={createPageUrl('RevenueForecastPage')}>
               <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
@@ -689,6 +714,20 @@ export default function Home() {
               Tabela de Preços
             </Button>
           </Link>
+
+          <Link to={createPageUrl('Equipment')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
+              <Package className="w-4 h-4 mr-2" />
+              Equipamentos
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('EquipmentConsumables')}>
+            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
+              <Package className="w-4 h-4 mr-2" />
+              Insumos
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -735,8 +774,35 @@ export default function Home() {
           </div>
         </div>
 
+      {/* Filtered Clients */}
+      {(searchTerm || statusFilter !== 'all') && (
+        <div className="px-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-slate-800">
+              Resultados ({filteredClients.length})
+            </h2>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('all');
+              }}
+            >
+              Limpar
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {filteredClients.slice(0, 10).map((client) => (
+              <ClientCard key={client.id} client={client} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent Clients */}
-      {clients.length > 0 && (
+      {!searchTerm && statusFilter === 'all' && clients.length > 0 && (
         <div className="px-6 mt-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-slate-800">Clientes Recentes</h2>
@@ -744,7 +810,7 @@ export default function Home() {
               Ver todos
             </Link>
           </div>
-          
+
           <div className="space-y-3">
             {clients.slice(0, 3).map((client) => (
               <ClientCard key={client.id} client={client} />
