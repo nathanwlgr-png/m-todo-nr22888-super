@@ -49,6 +49,9 @@ import AdvancedAIHub from '@/components/AdvancedAIHub';
 import AIRateLimitManager from '@/components/AIRateLimitManager';
 import FloatingPerformanceMonitor from '@/components/FloatingPerformanceMonitor';
 import WorkflowAutomationAI from '@/components/WorkflowAutomationAI';
+import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
+import LevelScoreSystem from '@/components/LevelScoreSystem';
+import PowerBooster from '@/components/PowerBooster';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -221,10 +224,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Interactive Sales Map */}
-      <div className="px-6 mt-6">
-        <InteractiveSalesMap />
-      </div>
+
 
       {/* Dashboard Charts */}
       <div className="px-6 mt-6 space-y-4">
@@ -308,8 +308,25 @@ export default function Home() {
         <WorkflowAutomationAI />
       </div>
 
-      {/* Floating Performance Monitor */}
+      {/* Level Score System */}
+      <div className="px-6 mt-6">
+        <div className="grid grid-cols-2 gap-3">
+          <LevelScoreSystem />
+          <PowerBooster />
+        </div>
+      </div>
+
+      {/* Segunda linha */}
+      <div className="px-6 mt-3">
+        <div className="grid grid-cols-2 gap-3">
+          <LevelScoreSystem />
+          <PowerBooster />
+        </div>
+      </div>
+
+      {/* Floating Buttons */}
       <FloatingPerformanceMonitor />
+      <FloatingWhatsAppButton />
 
 
 

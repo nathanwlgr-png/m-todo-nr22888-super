@@ -43,7 +43,13 @@ ${clients.slice(0, 30).map(c =>
 TAREFAS RECENTES (${tasks.length}):
 ${tasks.slice(0, 20).map(t => `- ${t.title}: ${t.status}, prioridade=${t.priority}`).join('\n')}
 
-ANALISE e crie um WORKFLOW AUTOMÁTICO otimizado. Retorne JSON:
+ANALISE e crie um WORKFLOW AUTOMÁTICO AVANÇADO com:
+- Triggers inteligentes baseados em padrões
+- Automações em cascata
+- Priorização dinâmica
+- Otimização de tempo
+
+Retorne JSON:
 {
   "workflow_name": "Nome do workflow",
   "triggers": [
