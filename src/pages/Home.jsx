@@ -24,6 +24,7 @@ import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
 import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
 import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
+import InteractiveSalesMap from '@/components/InteractiveSalesMap';
 import GamificationWidget from '@/components/GamificationWidget';
 import AutoTaskGenerator from '@/components/AutoTaskGenerator';
 import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
@@ -170,6 +171,11 @@ export default function Home() {
             </div>
           </Card>
         </div>
+      </div>
+
+      {/* Interactive Sales Map */}
+      <div className="px-6 mt-6">
+        <InteractiveSalesMap />
       </div>
 
       {/* Dashboard Charts */}
