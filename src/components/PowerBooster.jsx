@@ -23,22 +23,32 @@ export default function PowerBooster() {
   const boostPipeline = async () => {
     setBoosting(true);
     try {
-      const weakClients = clients.filter(c => c.purchase_score < 50 && c.status !== 'frio');
+      const weakClients = clients.filter(c => c.id && c.purchase_score < 50 && c.status !== 'frio');
+      let boosted = 0;
       
       for (const client of weakClients.slice(0, 10)) {
-        const boost = Math.floor(Math.random() * 15) + 5;
-        await updateClientMutation.mutateAsync({
-          id: client.id,
-          data: {
-            purchase_score: Math.min(100, (client.purchase_score || 0) + boost),
-            notes: `${client.notes || ''}\n\n🚀 Power Boost: +${boost}% (${new Date().toLocaleDateString('pt-BR')})`
-          }
-        });
+        try {
+          const boost = Math.floor(Math.random() * 15) + 5;
+          await updateClientMutation.mutateAsync({
+            id: client.id,
+            data: {
+              purchase_score: Math.min(100, (client.purchase_score || 0) + boost),
+              notes: `${client.notes || ''}\n\n🚀 Power Boost: +${boost}% (${new Date().toLocaleDateString('pt-BR')})`
+            }
+          });
+          boosted++;
+        } catch (err) {
+          console.log(`Cliente ${client.id} não existe mais, pulando...`);
+        }
       }
 
-      toast.success(`⚡ ${weakClients.slice(0, 10).length} clientes impulsionados!`, {
-        description: 'Scores aumentados estrategicamente'
-      });
+      if (boosted > 0) {
+        toast.success(`⚡ ${boosted} clientes impulsionados!`, {
+          description: 'Scores aumentados estrategicamente'
+        });
+      } else {
+        toast.info('Nenhum cliente para impulsionar no momento');
+      }
     } catch (error) {
       toast.error('Erro ao impulsionar');
     } finally {
