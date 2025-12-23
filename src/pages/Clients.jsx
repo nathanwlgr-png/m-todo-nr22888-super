@@ -24,10 +24,24 @@ import {
   Tag,
   TrendingUp,
   Upload,
-  ArrowUpDown
+  ArrowUpDown,
+  Table
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from 'sonner';
+
+const ORANGE_REGION_CITIES = [
+  'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
+  'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins'
+];
 
 export default function Clients() {
   const navigate = useNavigate();
@@ -41,6 +55,9 @@ export default function Clients() {
   const [visitFilter, setVisitFilter] = useState('all');
   const [pipelineFilter, setPipelineFilter] = useState('all');
   const [sortBy, setSortBy] = useState('city'); // 'city', 'alpha', 'importance'
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [tableData, setTableData] = useState('');
+  const [processing, setProcessing] = useState(false);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -172,6 +189,116 @@ export default function Clients() {
 
   const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter].filter(f => f !== 'all').length;
 
+  const handleImportTable = async () => {
+    if (!tableData.trim()) {
+      toast.error('Cole os dados da tabela primeiro');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise esta tabela/lista de clientes e extraia as informações estruturadas.
+
+DADOS DA TABELA:
+${tableData}
+
+Extraia e retorne um array de clientes com os seguintes campos (se disponíveis):
+- first_name (nome do responsável)
+- clinic_name (nome da clínica)
+- city (cidade)
+- phone (telefone/WhatsApp)
+- email
+- address (endereço)
+- cnpj
+- current_equipment (equipamento/máquina atual que possui)
+- decision_role (se mencionado: proprietario, veterinario_responsavel, etc)
+
+Se o cliente já possui equipamento mencionado, capture em "current_equipment".
+Se não houver informação sobre um campo, deixe vazio ou null.
+
+Retorne JSON válido.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            clients: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  first_name: { type: "string" },
+                  clinic_name: { type: "string" },
+                  city: { type: "string" },
+                  phone: { type: "string" },
+                  email: { type: "string" },
+                  address: { type: "string" },
+                  cnpj: { type: "string" },
+                  current_equipment: { type: "string" },
+                  decision_role: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const createdClients = [];
+      const rejected = [];
+      
+      for (const clientData of response.clients) {
+        if (clientData.first_name) {
+          const cityMatch = ORANGE_REGION_CITIES.some(validCity => 
+            clientData.city?.toLowerCase().includes(validCity.toLowerCase())
+          );
+          
+          if (!cityMatch) {
+            rejected.push({ 
+              name: clientData.first_name, 
+              city: clientData.city, 
+              reason: 'Cidade fora da região laranja' 
+            });
+            continue;
+          }
+          
+          try {
+            const client = await base44.entities.Client.create({
+              ...clientData,
+              decision_role: clientData.decision_role || 'proprietario',
+              status: 'morno',
+              purchase_score: 50
+            });
+            createdClients.push(client);
+          } catch (error) {
+            console.error('Erro ao criar cliente:', clientData.first_name, error);
+            rejected.push({ 
+              name: clientData.first_name, 
+              city: clientData.city, 
+              reason: 'Erro ao cadastrar' 
+            });
+          }
+        }
+      }
+
+      if (createdClients.length > 0) {
+        toast.success(`${createdClients.length} clientes cadastrados!`);
+        setShowImportDialog(false);
+        setTableData('');
+      } else {
+        toast.warning('Nenhum cliente foi cadastrado');
+      }
+      
+      if (rejected.length > 0) {
+        toast.warning(`${rejected.length} clientes rejeitados`);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao importar:', error);
+      toast.error('Erro ao processar a tabela');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -192,10 +319,10 @@ export default function Clients() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => navigate(createPageUrl('ImportClientsTable'))}
+            onClick={() => setShowImportDialog(true)}
             className="mr-2"
           >
-            <Upload className="w-4 h-4" />
+            <Table className="w-4 h-4" />
           </Button>
           <Button
             size="sm"
