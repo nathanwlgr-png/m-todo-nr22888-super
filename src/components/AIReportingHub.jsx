@@ -30,17 +30,37 @@ export default function AIReportingHub() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
+    queryFn: async () => {
+      try {
+        const data = await base44.entities.Client.list();
+        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        return [];
+      }
+    },
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
-    queryFn: () => base44.entities.Sale.list(),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Sale.list();
+      } catch (error) {
+        return [];
+      }
+    },
   });
 
   const { data: visits = [] } = useQuery({
     queryKey: ['all-visits'],
-    queryFn: () => base44.entities.Visit.list(),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Visit.list();
+      } catch (error) {
+        return [];
+      }
+    },
   });
 
   // Gerar relatório customizado via linguagem natural
