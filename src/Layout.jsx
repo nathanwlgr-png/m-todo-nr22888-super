@@ -9,6 +9,7 @@ import TestFlowSimulator from './components/TestFlowSimulator';
 import FollowUpAutomation from './components/FollowUpAutomation';
 import WhatsAppNotificationService from './components/WhatsAppNotificationService';
 import TopToolbar from './components/TopToolbar';
+import DocumentAIAnalyzer from './components/DocumentAIAnalyzer';
 
 export default function Layout({ children }) {
   return (
@@ -22,9 +23,10 @@ export default function Layout({ children }) {
       <GoogleSheetsIntegration />
       <FollowUpAutomation />
       <WhatsAppNotificationService />
-      <div className="pt-14">
+      <div className="pt-14 pb-20">
         {children}
       </div>
+      <DocumentAIAnalyzer />
     </ErrorRecoverySystem>
   );
 }

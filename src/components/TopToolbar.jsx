@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { 
   Zap, Upload, FileText, ShieldCheck, 
-  CheckCircle, AlertTriangle, Copy, X, Sparkles, Brain, FileSearch
+  CheckCircle, AlertTriangle, Copy, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,8 +16,6 @@ export default function TopToolbar() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadedDocs, setUploadedDocs] = useState({ contract: null, proposal: null, others: [] });
   const [status, setStatus] = useState({ ia1: 'idle', ia2: 'idle', ia3: 'idle' });
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState({ contract: null, proposal: null, others: [] });
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -86,180 +84,6 @@ export default function TopToolbar() {
     
     await navigator.clipboard.writeText(summary);
     toast.success('📋 Copiado!');
-  };
-
-  // IA 1: Análise de Contrato
-  const analyzeContract = async () => {
-    if (!uploadedDocs.contract) {
-      toast.error('Nenhum contrato carregado');
-      return;
-    }
-
-    setAnalyzing(true);
-    try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise este contrato e extraia as seguintes informações chave:
-
-ARQUIVO: ${uploadedDocs.contract.name}
-URL: ${uploadedDocs.contract.url}
-
-Por favor, extraia e estruture:
-1. Partes envolvidas (contratante e contratado)
-2. Objeto do contrato (o que está sendo contratado)
-3. Valores e condições de pagamento
-4. Datas importantes (início, término, vencimentos)
-5. Cláusulas críticas ou restritivas
-6. Multas e penalidades
-7. Direitos e obrigações principais
-
-Seja detalhado e específico.`,
-        file_urls: [uploadedDocs.contract.url],
-        response_json_schema: {
-          type: "object",
-          properties: {
-            partes: { 
-              type: "object",
-              properties: {
-                contratante: { type: "string" },
-                contratado: { type: "string" }
-              }
-            },
-            objeto: { type: "string" },
-            valores: {
-              type: "object",
-              properties: {
-                total: { type: "string" },
-                forma_pagamento: { type: "string" }
-              }
-            },
-            datas_importantes: {
-              type: "array",
-              items: { 
-                type: "object",
-                properties: {
-                  tipo: { type: "string" },
-                  data: { type: "string" },
-                  descricao: { type: "string" }
-                }
-              }
-            },
-            clausulas_criticas: { type: "array", items: { type: "string" } },
-            multas: { type: "string" },
-            resumo_executivo: { type: "string" }
-          }
-        }
-      });
-
-      setAnalysisResults(prev => ({ ...prev, contract: result }));
-      toast.success('✅ Contrato analisado com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao analisar contrato');
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  // IA 2: Análise de Proposta
-  const analyzeProposal = async () => {
-    if (!uploadedDocs.proposal) {
-      toast.error('Nenhuma proposta carregada');
-      return;
-    }
-
-    setAnalyzing(true);
-    try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise esta proposta comercial com olhar crítico e estratégico:
-
-ARQUIVO: ${uploadedDocs.proposal.name}
-URL: ${uploadedDocs.proposal.url}
-
-Identifique e estruture:
-1. Pontos Fortes: O que destaca esta proposta positivamente
-2. Pontos Fracos: Gaps, informações faltantes ou aspectos que podem ser melhorados
-3. Riscos Potenciais: Possíveis problemas ou armadilhas contratuais
-4. Oportunidades: Aspectos que podem ser melhor explorados ou negociados
-5. Clareza: Quão clara e compreensível é a proposta (nota 1-10)
-6. Competitividade: Análise de custo-benefício (nota 1-10)
-7. Recomendações: Sugestões práticas de melhoria
-
-Seja objetivo e crítico.`,
-        file_urls: [uploadedDocs.proposal.url],
-        response_json_schema: {
-          type: "object",
-          properties: {
-            pontos_fortes: { type: "array", items: { type: "string" } },
-            pontos_fracos: { type: "array", items: { type: "string" } },
-            riscos: { type: "array", items: { type: "string" } },
-            oportunidades: { type: "array", items: { type: "string" } },
-            clareza_nota: { type: "number" },
-            clareza_justificativa: { type: "string" },
-            competitividade_nota: { type: "number" },
-            competitividade_justificativa: { type: "string" },
-            recomendacoes: { type: "array", items: { type: "string" } },
-            resumo_geral: { type: "string" }
-          }
-        }
-      });
-
-      setAnalysisResults(prev => ({ ...prev, proposal: result }));
-      toast.success('✅ Proposta analisada com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao analisar proposta');
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  // IA 3: Resumo de Múltiplos Documentos
-  const summarizeOthers = async () => {
-    if (!uploadedDocs.others || uploadedDocs.others.length === 0) {
-      toast.error('Nenhum documento "outros" carregado');
-      return;
-    }
-
-    setAnalyzing(true);
-    try {
-      const summaries = [];
-      
-      for (const doc of uploadedDocs.others) {
-        const result = await base44.integrations.Core.InvokeLLM({
-          prompt: `Analise este documento e crie um resumo conciso e estruturado:
-
-ARQUIVO: ${doc.name}
-URL: ${doc.url}
-
-Gere um resumo com:
-1. Tipo de documento (ex: relatório, apresentação, nota técnica, etc)
-2. Tema principal
-3. Pontos-chave (principais informações)
-4. Informações críticas (datas, valores, decisões, etc)
-5. Resumo executivo (2-3 frases)
-
-Seja direto e informativo.`,
-          file_urls: [doc.url],
-          response_json_schema: {
-            type: "object",
-            properties: {
-              tipo_documento: { type: "string" },
-              tema_principal: { type: "string" },
-              pontos_chave: { type: "array", items: { type: "string" } },
-              informacoes_criticas: { type: "array", items: { type: "string" } },
-              resumo_executivo: { type: "string" }
-            }
-          }
-        });
-
-        summaries.push({ ...result, nome_arquivo: doc.name });
-      }
-
-      setAnalysisResults(prev => ({ ...prev, others: summaries }));
-      toast.success(`✅ ${summaries.length} documento(s) resumido(s)!`);
-    } catch (error) {
-      toast.error('Erro ao resumir documentos');
-    } finally {
-      setAnalyzing(false);
-    }
   };
 
   const toggleSection = (section) => {
@@ -406,105 +230,10 @@ Seja direto e informativo.`,
                   <p className="text-xs text-green-600 mt-1">✅ {uploadedDocs.others.length} arquivo(s)</p>
                 )}
               </div>
-              <Button onClick={copyDocsToClipboard} variant="outline" className="w-full mb-2" size="sm">
+              <Button onClick={copyDocsToClipboard} variant="outline" className="w-full" size="sm">
                 <Copy className="w-3 h-3 mr-1" />
                 Copiar Resumo
               </Button>
-
-              {/* Botões de Análise IA */}
-              <div className="border-t pt-2 space-y-2">
-                <p className="text-xs font-semibold text-slate-700 mb-1">🤖 Análises IA</p>
-                
-                <Button 
-                  onClick={analyzeContract} 
-                  disabled={!uploadedDocs.contract || analyzing}
-                  variant="outline" 
-                  className="w-full" 
-                  size="sm"
-                >
-                  <Brain className="w-3 h-3 mr-1" />
-                  {analyzing ? 'Analisando...' : 'Analisar Contrato'}
-                </Button>
-
-                <Button 
-                  onClick={analyzeProposal} 
-                  disabled={!uploadedDocs.proposal || analyzing}
-                  variant="outline" 
-                  className="w-full" 
-                  size="sm"
-                >
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {analyzing ? 'Analisando...' : 'Analisar Proposta'}
-                </Button>
-
-                <Button 
-                  onClick={summarizeOthers} 
-                  disabled={!uploadedDocs.others?.length || analyzing}
-                  variant="outline" 
-                  className="w-full" 
-                  size="sm"
-                >
-                  <FileSearch className="w-3 h-3 mr-1" />
-                  {analyzing ? 'Resumindo...' : `Resumir Outros (${uploadedDocs.others?.length || 0})`}
-                </Button>
-              </div>
-
-              {/* Resultados das Análises */}
-              {analysisResults.contract && (
-                <div className="border-t pt-2 mt-2">
-                  <p className="text-xs font-semibold text-green-700 mb-1">✅ Análise do Contrato</p>
-                  <div className="bg-green-50 rounded p-2 text-xs space-y-1">
-                    <p><strong>Contratante:</strong> {analysisResults.contract.partes?.contratante}</p>
-                    <p><strong>Contratado:</strong> {analysisResults.contract.partes?.contratado}</p>
-                    <p><strong>Valor:</strong> {analysisResults.contract.valores?.total}</p>
-                    <p><strong>Resumo:</strong> {analysisResults.contract.resumo_executivo}</p>
-                    {analysisResults.contract.datas_importantes?.length > 0 && (
-                      <div>
-                        <strong>Datas:</strong>
-                        {analysisResults.contract.datas_importantes.map((d, i) => (
-                          <p key={i} className="ml-2">• {d.tipo}: {d.data}</p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {analysisResults.proposal && (
-                <div className="border-t pt-2 mt-2">
-                  <p className="text-xs font-semibold text-blue-700 mb-1">✅ Análise da Proposta</p>
-                  <div className="bg-blue-50 rounded p-2 text-xs space-y-1">
-                    <p><strong>Clareza:</strong> {analysisResults.proposal.clareza_nota}/10</p>
-                    <p><strong>Competitividade:</strong> {analysisResults.proposal.competitividade_nota}/10</p>
-                    <div>
-                      <strong>Pontos Fortes:</strong>
-                      {analysisResults.proposal.pontos_fortes?.slice(0, 3).map((p, i) => (
-                        <p key={i} className="ml-2 text-green-700">✓ {p}</p>
-                      ))}
-                    </div>
-                    <div>
-                      <strong>Riscos:</strong>
-                      {analysisResults.proposal.riscos?.slice(0, 2).map((r, i) => (
-                        <p key={i} className="ml-2 text-red-700">⚠ {r}</p>
-                      ))}
-                    </div>
-                    <p className="text-slate-600 italic">{analysisResults.proposal.resumo_geral}</p>
-                  </div>
-                </div>
-              )}
-
-              {analysisResults.others?.length > 0 && (
-                <div className="border-t pt-2 mt-2 max-h-48 overflow-y-auto">
-                  <p className="text-xs font-semibold text-purple-700 mb-1">✅ Resumos dos Documentos</p>
-                  {analysisResults.others.map((doc, i) => (
-                    <div key={i} className="bg-purple-50 rounded p-2 text-xs mb-2">
-                      <p className="font-semibold text-purple-900">{doc.nome_arquivo}</p>
-                      <p><strong>Tipo:</strong> {doc.tipo_documento}</p>
-                      <p className="text-slate-600 italic">{doc.resumo_executivo}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
