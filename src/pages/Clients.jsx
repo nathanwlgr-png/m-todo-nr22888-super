@@ -60,6 +60,7 @@ export default function Clients() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [tableData, setTableData] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -232,19 +233,36 @@ export default function Clients() {
     toast.success('PDF gerado com sucesso!');
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadedFile(file);
+    toast.info('Arquivo selecionado! Clique em Importar para processar.');
+  };
+
   const handleImportTable = async () => {
-    if (!tableData.trim()) {
-      toast.error('Cole os dados da tabela primeiro');
+    if (!tableData.trim() && !uploadedFile) {
+      toast.error('Cole os dados da tabela ou faça upload de um arquivo');
       return;
     }
 
     setProcessing(true);
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise esta tabela/lista de clientes e extraia as informações estruturadas.
+      let fileUrl = null;
+      
+      // Se houver arquivo, fazer upload primeiro
+      if (uploadedFile) {
+        toast.info('Fazendo upload do arquivo...');
+        const uploadResult = await base44.integrations.Core.UploadFile({ file: uploadedFile });
+        fileUrl = uploadResult.file_url;
+        toast.info('Extraindo dados do arquivo...');
+      }
 
-DADOS DA TABELA:
-${tableData}
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise ${fileUrl ? 'este arquivo Excel/planilha' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
+
+${!fileUrl ? `DADOS DA TABELA:\n${tableData}` : ''}
 
 Extraia e retorne um array de clientes com os seguintes campos (se disponíveis):
 - first_name (nome do responsável)
@@ -260,7 +278,8 @@ Extraia e retorne um array de clientes com os seguintes campos (se disponíveis)
 Se o cliente já possui equipamento mencionado, capture em "current_equipment".
 Se não houver informação sobre um campo, deixe vazio ou null.
 
-Retorne JSON válido.`,
+Retorne JSON válido com TODOS os clientes encontrados.`,
+        file_urls: fileUrl ? [fileUrl] : undefined,
         response_json_schema: {
           type: "object",
           properties: {
@@ -323,20 +342,22 @@ Retorne JSON válido.`,
       }
 
       if (createdClients.length > 0) {
-        toast.success(`${createdClients.length} clientes cadastrados!`);
+        toast.success(`${createdClients.length} clientes cadastrados com sucesso!`);
         setShowImportDialog(false);
         setTableData('');
+        setUploadedFile(null);
       } else {
         toast.warning('Nenhum cliente foi cadastrado');
       }
       
       if (rejected.length > 0) {
-        toast.warning(`${rejected.length} clientes rejeitados`);
+        console.log('Clientes rejeitados:', rejected);
+        toast.warning(`${rejected.length} clientes rejeitados (fora da região)`);
       }
       
     } catch (error) {
       console.error('Erro ao importar:', error);
-      toast.error('Erro ao processar a tabela');
+      toast.error('Erro ao processar: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setProcessing(false);
     }
@@ -733,26 +754,66 @@ Retorne JSON válido.`,
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Cole a tabela ou lista de clientes:
-              </label>
-              <Textarea
-                value={tableData}
-                onChange={(e) => setTableData(e.target.value)}
-                placeholder="Ex:
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Opção 1: Upload de Arquivo Excel/CSV
+                </label>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+                    <p className="text-sm text-slate-600">
+                      {uploadedFile ? (
+                        <span className="text-green-600 font-medium">✓ {uploadedFile.name}</span>
+                      ) : (
+                        <>Clique para fazer upload da planilha</>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Formatos: Excel (.xlsx, .xls) ou CSV
+                    </p>
+                  </label>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-slate-500">OU</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Opção 2: Cole os dados da tabela
+                </label>
+                <Textarea
+                  value={tableData}
+                  onChange={(e) => setTableData(e.target.value)}
+                  placeholder="Ex:
 Nome        | Clínica              | Cidade        | Telefone      | Equipamento
 João Silva  | Clínica Vida Animal  | Marília       | 14999999999   | BC-2800
 Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipamento
 ..."
-                className="min-h-[300px] font-mono text-sm"
-              />
+                  className="min-h-[200px] font-mono text-sm"
+                  disabled={!!uploadedFile}
+                />
+              </div>
             </div>
 
             <div className="flex gap-2">
               <Button
                 onClick={handleImportTable}
-                disabled={!tableData.trim() || processing}
+                disabled={(!tableData.trim() && !uploadedFile) || processing}
                 className="flex-1 bg-orange-600 hover:bg-orange-700"
               >
                 {processing ? (
@@ -769,7 +830,11 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowImportDialog(false)}
+                onClick={() => {
+                  setShowImportDialog(false);
+                  setTableData('');
+                  setUploadedFile(null);
+                }}
               >
                 Cancelar
               </Button>
