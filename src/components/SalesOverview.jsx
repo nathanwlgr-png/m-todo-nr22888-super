@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Package, TrendingUp, DollarSign, TrendingDown } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Package, TrendingUp, DollarSign, TrendingDown, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function SalesOverview() {
   const { data: clients = [] } = useQuery({
