@@ -122,7 +122,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-800">{metrics.total}</p>
-                <p className="text-xs text-slate-500">Total</p>
+                <p className="text-xs text-slate-500">Clientes Cadastrados</p>
               </div>
             </div>
           </Card>

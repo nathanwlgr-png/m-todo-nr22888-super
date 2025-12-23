@@ -46,20 +46,32 @@ export default function MarketIntelligence() {
     try {
       toast.info('🔍 Buscando dados do IBGE e clínicas veterinárias...');
 
-      // IA 1: Buscar dados do IBGE + clínicas
+      // IA 1: Buscar dados do IBGE + clínicas com classificação
       const clinicsSearch = await base44.integrations.Core.InvokeLLM({
         prompt: `Pesquise e forneça os seguintes dados para as cidades: ${region.cities.join(', ')}:
 
 1. DADOS DO IBGE:
    - População total de cada cidade
-   - Número estimado de estabelecimentos veterinários cadastrados no IBGE
+   - Número EXATO de estabelecimentos veterinários cadastrados no IBGE
    - Dados demográficos relevantes
 
-2. CLÍNICAS VETERINÁRIAS (Google Maps/Business):
+2. CLÍNICAS VETERINÁRIAS (Google Maps/Business/LinkedIn):
    - Liste TODAS as clínicas veterinárias cadastradas
    - Para cada clínica: nome, endereço, cidade, telefone, email
+   - CLASSIFIQUE cada clínica como:
+     * "clinica_pequena" (até 2 veterinários, clínica de bairro)
+     * "clinica_media" (3-10 veterinários, atendimento geral)
+     * "hospital_veterinario" (10+ veterinários, especialidades, internação)
+     * "veterinario_autonomo" (atendimento domiciliar, sem estrutura física fixa)
 
-Combine dados do IBGE com busca no Google para ser completo.`,
+3. CONTAGEM EXATA:
+   - Total geral
+   - Pequenas
+   - Médias  
+   - Hospitais
+   - Autônomos
+
+Seja EXTREMAMENTE detalhado e preciso na busca.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -81,6 +93,16 @@ Combine dados do IBGE com busca no Google para ser completo.`,
                 }
               }
             },
+            classification_summary: {
+              type: "object",
+              properties: {
+                total_clinics: { type: "number" },
+                clinica_pequena: { type: "number" },
+                clinica_media: { type: "number" },
+                hospital_veterinario: { type: "number" },
+                veterinario_autonomo: { type: "number" }
+              }
+            },
             total_clinics_found: { type: "number" },
             clinics: {
               type: "array",
@@ -91,7 +113,12 @@ Combine dados do IBGE com busca no Google para ser completo.`,
                   address: { type: "string" },
                   city: { type: "string" },
                   phone: { type: "string" },
-                  email: { type: "string" }
+                  email: { type: "string" },
+                  classification: { 
+                    type: "string",
+                    enum: ["clinica_pequena", "clinica_media", "hospital_veterinario", "veterinario_autonomo"]
+                  },
+                  staff_size: { type: "string" }
                 }
               }
             }
@@ -342,6 +369,39 @@ Retorne lista priorizada de oportunidades.`,
               </Card>
             )}
 
+            {/* Classificação de Clínicas */}
+            {results.clinics.classification_summary && (
+              <Card className="p-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <h3 className="font-bold text-xl mb-4">🏥 Classificação Detalhada</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white/20 rounded-lg col-span-2">
+                    <p className="text-sm opacity-90">Total Encontrado</p>
+                    <p className="text-4xl font-bold">{results.clinics.classification_summary.total_clinics}</p>
+                  </div>
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Clínicas Pequenas</p>
+                    <p className="text-2xl font-bold">{results.clinics.classification_summary.clinica_pequena}</p>
+                    <p className="text-xs opacity-75 mt-1">até 2 veterinários</p>
+                  </div>
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Clínicas Médias</p>
+                    <p className="text-2xl font-bold">{results.clinics.classification_summary.clinica_media}</p>
+                    <p className="text-xs opacity-75 mt-1">3-10 veterinários</p>
+                  </div>
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Hospitais Veterinários</p>
+                    <p className="text-2xl font-bold">{results.clinics.classification_summary.hospital_veterinario}</p>
+                    <p className="text-xs opacity-75 mt-1">10+ veterinários</p>
+                  </div>
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <p className="text-xs opacity-90">Veterinários Autônomos</p>
+                    <p className="text-2xl font-bold">{results.clinics.classification_summary.veterinario_autonomo}</p>
+                    <p className="text-xs opacity-75 mt-1">domiciliar</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Resumo Geral */}
             <Card className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
               <h3 className="font-bold text-xl mb-4">🔬 Equipamentos Instalados</h3>
@@ -512,17 +572,33 @@ Retorne lista priorizada de oportunidades.`,
                 🏥 Todas as Clínicas da Região ({results.clinics.total_clinics_found})
               </h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {results.clinics.clinics.map((clinic, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 rounded-lg text-sm">
-                    <p className="font-semibold text-slate-800">{clinic.name}</p>
-                    <p className="text-xs text-slate-600">{clinic.address}</p>
-                    <div className="flex gap-2 mt-1">
-                      <span className="text-xs text-slate-500">{clinic.city}</span>
-                      {clinic.phone && <span className="text-xs text-green-600">{clinic.phone}</span>}
-                      {clinic.email && <span className="text-xs text-blue-600">{clinic.email}</span>}
+                {results.clinics.clinics.map((clinic, idx) => {
+                  const classLabels = {
+                    clinica_pequena: { text: 'Pequena', color: 'bg-blue-100 text-blue-700' },
+                    clinica_media: { text: 'Média', color: 'bg-purple-100 text-purple-700' },
+                    hospital_veterinario: { text: 'Hospital', color: 'bg-red-100 text-red-700' },
+                    veterinario_autonomo: { text: 'Autônomo', color: 'bg-green-100 text-green-700' }
+                  };
+                  const classInfo = classLabels[clinic.classification] || { text: 'Não classificado', color: 'bg-gray-100 text-gray-700' };
+                  
+                  return (
+                    <div key={idx} className="p-3 bg-slate-50 rounded-lg text-sm">
+                      <div className="flex items-start justify-between mb-1">
+                        <p className="font-semibold text-slate-800">{clinic.name}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded ${classInfo.color}`}>
+                          {classInfo.text}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600">{clinic.address}</p>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        <span className="text-xs text-slate-500">{clinic.city}</span>
+                        {clinic.staff_size && <span className="text-xs text-slate-500">👥 {clinic.staff_size}</span>}
+                        {clinic.phone && <span className="text-xs text-green-600">{clinic.phone}</span>}
+                        {clinic.email && <span className="text-xs text-blue-600">{clinic.email}</span>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
