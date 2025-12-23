@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, X, Upload, CheckCircle } from 'lucide-react';
+import { FileText, X, Upload, CheckCircle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function FloatingDocumentImporter() {
@@ -33,6 +33,17 @@ export default function FloatingDocumentImporter() {
     timeoutRef.current = setTimeout(() => {
       setPosition({ x: 0, y: 0 });
     }, 5000);
+  };
+
+  const copyToClipboard = async () => {
+    const summary = `📋 DOCUMENTOS CARREGADOS\n\n` +
+      `${uploadedDocs.contract ? '✅ Contrato: ' + uploadedDocs.contract.name : '❌ Contrato: não carregado'}\n` +
+      `${uploadedDocs.proposal ? '✅ Proposta: ' + uploadedDocs.proposal.name : '❌ Proposta: não carregado'}\n` +
+      `${uploadedDocs.others?.length > 0 ? `✅ Outros: ${uploadedDocs.others.length} arquivo(s)` : '❌ Outros: nenhum'}\n\n` +
+      `Pronto para usar!`;
+    
+    await navigator.clipboard.writeText(summary);
+    toast.success('📋 Copiado para área de transferência!');
   };
 
   const handleFileUpload = async (e, docType) => {
@@ -211,6 +222,16 @@ export default function FloatingDocumentImporter() {
                 </div>
               )}
             </div>
+
+            <Button
+              onClick={copyToClipboard}
+              variant="outline"
+              className="w-full h-10 mb-2"
+              size="sm"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copiar Resumo
+            </Button>
 
             <p className="text-xs text-slate-500 text-center">
               PDF, Word, Excel, CSV, Imagens
