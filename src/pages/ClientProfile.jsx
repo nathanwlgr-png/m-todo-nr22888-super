@@ -143,10 +143,18 @@ export default function ClientProfile() {
     queryKey: ['client', clientId],
     queryFn: async () => {
       if (!clientId) return null;
-      const clients = await base44.entities.Client.list();
-      return clients.find(c => c.id === clientId);
+      try {
+        const clients = await base44.entities.Client.list();
+        return clients.find(c => c.id === clientId);
+      } catch (error) {
+        console.error('Erro ao carregar cliente:', error);
+        return null;
+      }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: visits = [] } = useQuery({
@@ -159,7 +167,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: sales = [] } = useQuery({
@@ -172,7 +183,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: followupLogs = [] } = useQuery({
@@ -185,7 +199,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: clientTasks = [] } = useQuery({
@@ -198,7 +215,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: documents = [] } = useQuery({
@@ -211,7 +231,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const { data: interactions = [] } = useQuery({
@@ -224,7 +247,10 @@ export default function ClientProfile() {
         return [];
       }
     },
-    enabled: !!clientId
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   const clientLabel = getClientLabelSync(sales);
@@ -498,11 +524,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
     }
   };
 
-  React.useEffect(() => {
-    if (client && !aiSummary) {
-      generateAISummary();
-    }
-  }, [client]);
+  // Removido: geração automática de resumo IA para evitar rate limit
+  // Agora é acionado apenas manualmente pelo botão
 
   if (isLoading) {
     return (
@@ -576,6 +599,27 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         <CollaborationIndicator contextType="client" contextId={clientId} />
 
         {/* AI Summary */}
+        {!aiSummary && !loadingSummary && (
+          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-indigo-600 mb-1">Resumo IA</p>
+                <p className="text-xs text-slate-600 mb-2">Gere um resumo inteligente deste cliente</p>
+                <Button 
+                  onClick={generateAISummary} 
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Gerar Resumo
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
         {aiSummary && (
           <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
             <div className="flex items-start gap-3">
@@ -585,6 +629,15 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <div className="flex-1">
                 <p className="text-xs font-semibold text-indigo-600 mb-1">Resumo IA</p>
                 <p className="text-sm text-slate-700 leading-relaxed">{aiSummary}</p>
+                <Button 
+                  onClick={generateAISummary} 
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                >
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Atualizar
+                </Button>
               </div>
             </div>
           </Card>
