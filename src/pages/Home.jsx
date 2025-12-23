@@ -19,7 +19,8 @@ import {
   FileText,
   Mic,
   Settings,
-  Play
+  Play,
+  Database
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
@@ -406,7 +407,14 @@ export default function Home() {
                 Campanhas
               </Button>
             </Link>
-          </div>
+
+            <Link to={createPageUrl('OfflineMode')}>
+              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
+                <Database className="w-4 h-4 mr-2" />
+                Modo Offline
+              </Button>
+            </Link>
+            </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Link to={createPageUrl('RevenueForecastPage')}>

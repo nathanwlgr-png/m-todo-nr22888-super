@@ -64,6 +64,7 @@ import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import CampaignDemo from './pages/CampaignDemo';
+import OfflineMode from './pages/OfflineMode';
 import __Layout from './Layout.jsx';
 
 
@@ -134,6 +135,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
     "CampaignDemo": CampaignDemo,
+    "OfflineMode": OfflineMode,
 }
 
 export const pagesConfig = {
