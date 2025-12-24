@@ -123,11 +123,17 @@ Use formatação markdown para melhor legibilidade.`,
       });
       toast.success('Relatório gerado!');
     } catch (error) {
-      toast.error('Erro ao gerar relatório');
-      console.error(error);
-    } finally {
-      setGenerating(false);
-    }
+        if (error.message?.includes('Rate limit')) {
+          toast.error('Limite de IA atingido. Aguarde alguns minutos.');
+        } else if (error.message?.includes('Network')) {
+          toast.error('Erro de conexão. Verifique sua internet.');
+        } else {
+          toast.error('Erro ao gerar relatório');
+        }
+        console.error(error);
+      } finally {
+        setGenerating(false);
+      }
   };
 
   // Gerar resumo automático diário/semanal
@@ -166,11 +172,17 @@ Use emojis e formatação clara.`,
       });
       toast.success('Resumo gerado!');
     } catch (error) {
-      toast.error('Erro ao gerar resumo');
-      console.error(error);
-    } finally {
-      setGenerating(false);
-    }
+        if (error.message?.includes('Rate limit')) {
+          toast.error('Limite de IA atingido. Aguarde alguns minutos.');
+        } else if (error.message?.includes('Network')) {
+          toast.error('Erro de conexão. Verifique sua internet.');
+        } else {
+          toast.error('Erro ao gerar resumo');
+        }
+        console.error(error);
+      } finally {
+        setGenerating(false);
+      }
   };
 
   // Gerar análise preditiva
@@ -247,11 +259,17 @@ Seja específico com números e probabilidades.`,
       });
       toast.success('Análise preditiva concluída!');
     } catch (error) {
-      toast.error('Erro ao gerar análise');
-      console.error(error);
-    } finally {
-      setGenerating(false);
-    }
+        if (error.message?.includes('Rate limit')) {
+          toast.error('Limite de IA atingido. Aguarde alguns minutos.');
+        } else if (error.message?.includes('Network')) {
+          toast.error('Erro de conexão. Verifique sua internet.');
+        } else {
+          toast.error('Erro ao gerar análise');
+        }
+        console.error(error);
+      } finally {
+        setGenerating(false);
+      }
   };
 
   const downloadReport = (content, filename) => {

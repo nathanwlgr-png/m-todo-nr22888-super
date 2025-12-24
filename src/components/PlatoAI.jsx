@@ -54,6 +54,9 @@ O que te perturba a alma nesta jornada?`
     setLoading(true);
 
     try {
+      // Aguardar 2s antes de chamar (evitar rate limit)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const conversationHistory = [...messages, userMessage]
         .slice(-6)
         .map(m => `${m.role === 'user' ? 'Usuário' : 'Platão'}: ${m.content}`)
@@ -82,10 +85,22 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error('Erro:', error);
-      toast.error('Erro ao consultar Platão');
+      
+      let errorMessage = '⚠️ *As Musas me abandonaram momentaneamente.* Tenta novamente, jovem aprendiz.';
+      
+      if (error.message?.includes('Rate limit')) {
+        errorMessage = '⏳ *Paciência, jovem aprendiz.* As estrelas nos pedem que aguardemos alguns instantes antes de continuar nossa conversa filosófica. Tenta novamente em 1 minuto.';
+        toast.error('Limite de IA atingido. Aguarde 1 minuto.');
+      } else if (error.message?.includes('Network')) {
+        errorMessage = '🌐 *Os ventos de Éolo impedem nossa comunicação.* Verifica tua conexão com a rede e tenta novamente.';
+        toast.error('Erro de conexão. Verifique sua internet.');
+      } else {
+        toast.error('Erro ao consultar Platão');
+      }
+      
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: '⚠️ *As Musas me abandonaram momentaneamente.* Tenta novamente, jovem aprendiz.' 
+        content: errorMessage
       }]);
     } finally {
       setLoading(false);
