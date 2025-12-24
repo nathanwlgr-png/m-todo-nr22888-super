@@ -92,6 +92,10 @@ import TeamChat from '@/components/TeamChat';
 import CollaborationIndicator from '@/components/CollaborationIndicator';
 import ProposalContractGenerator from '@/components/ProposalContractGenerator';
 import WhatsAppPackageSender from '@/components/WhatsAppPackageSender';
+import InstagramProfileFinder from '@/components/InstagramProfileFinder';
+import MultiProposalGeneratorAI from '@/components/MultiProposalGeneratorAI';
+import WhatsAppProposalPackage from '@/components/WhatsAppProposalPackage';
+import { toast } from 'sonner';
 
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
@@ -138,6 +142,8 @@ export default function ClientProfile() {
   const [closingProbability, setClosingProbability] = React.useState(null);
   const [postVisitOpen, setPostVisitOpen] = React.useState(false);
   const [selectedVisitId, setSelectedVisitId] = React.useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+  const [autoSaveTimeout, setAutoSaveTimeout] = React.useState(null);
 
   const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
@@ -322,6 +328,45 @@ export default function ClientProfile() {
 
   const handleSaveEdit = () => {
     updateMutation.mutate(editData);
+  };
+
+  // Auto-save ao sair da página
+  React.useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+        // Salvar automaticamente
+        if (editData && Object.keys(editData).length > 0) {
+          updateMutation.mutate(editData);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, editData]);
+
+  // Auto-save com debounce ao editar
+  const handleEditDataChange = (field, value) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+    
+    // Clear timeout anterior
+    if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+    
+    // Salvar após 2 segundos de inatividade
+    const timeout = setTimeout(async () => {
+      try {
+        await base44.entities.Client.update(clientId, { [field]: value });
+        setHasUnsavedChanges(false);
+        toast.success('Salvo automaticamente', { duration: 1000 });
+      } catch (error) {
+        console.error('Erro auto-save:', error);
+      }
+    }, 2000);
+    
+    setAutoSaveTimeout(timeout);
   };
 
   const handleFileUpload = async (e) => {
@@ -619,6 +664,123 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Collaboration Indicator */}
         <CollaborationIndicator contextType="client" contextId={clientId} />
 
+        {/* 1. NÚMERO, ESTILO DE DECISÃO E DICAS DE ABORDAGEM */}
+        <Card className="p-5 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+              <span className="text-3xl font-bold text-white">{client.numerology_number || '?'}</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800">Perfil Numerológico</h3>
+              <p className="text-sm text-purple-700">{client.behavioral_profile || 'Não analisado'}</p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {client.life_path_number && (
+              <div className="p-3 bg-white rounded-lg">
+                <p className="text-xs text-purple-600 font-semibold mb-1">Caminho de Vida</p>
+                <p className="text-2xl font-bold text-purple-800">{client.life_path_number}</p>
+              </div>
+            )}
+
+            {client.decision_style && (
+              <div className="p-3 bg-white rounded-lg">
+                <p className="text-xs text-purple-600 font-semibold mb-1">Estilo de Decisão</p>
+                <p className="text-sm text-slate-800">{client.decision_style}</p>
+              </div>
+            )}
+
+            {client.approach_tips && (
+              <div className="p-3 bg-purple-100 border border-purple-300 rounded-lg">
+                <p className="text-xs text-purple-700 font-semibold mb-1">💡 Dicas de Abordagem</p>
+                <p className="text-sm text-purple-900">{client.approach_tips}</p>
+              </div>
+            )}
+
+            <Button
+              onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
+              variant="outline"
+              className="w-full border-purple-300 text-purple-700"
+            >
+              Ver Análise Completa
+            </Button>
+          </div>
+        </Card>
+
+        {/* 2. INFORMAÇÕES DO CLIENTE - BOTÃO DE EDIÇÃO */}
+        <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300">
+          <h3 className="font-bold text-slate-800 mb-3">📋 Informações do Cliente</h3>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <Button
+              onClick={handleEdit}
+              className="w-full bg-orange-600 hover:bg-orange-700"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar Dados Completos
+            </Button>
+            <Button
+              onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+              variant="outline"
+              className="w-full border-orange-300"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Ver Tudo
+            </Button>
+          </div>
+
+          {/* Quick Info */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2 bg-white rounded">
+              <p className="text-slate-500">Clínica</p>
+              <p className="font-semibold text-slate-800">{client.clinic_name || '-'}</p>
+            </div>
+            <div className="p-2 bg-white rounded">
+              <p className="text-slate-500">Cidade</p>
+              <p className="font-semibold text-slate-800">{client.city || '-'}</p>
+            </div>
+            <div className="p-2 bg-white rounded">
+              <p className="text-slate-500">Email</p>
+              <p className="font-semibold text-slate-800 truncate">{client.email || '-'}</p>
+            </div>
+            <div className="p-2 bg-white rounded">
+              <p className="text-slate-500">WhatsApp</p>
+              <p className="font-semibold text-slate-800">{client.phone || '-'}</p>
+            </div>
+            {client.instagram_handle && (
+              <div className="p-2 bg-pink-50 rounded col-span-2">
+                <p className="text-slate-500">Instagram</p>
+                <p className="font-semibold text-pink-700">@{client.instagram_handle}</p>
+              </div>
+            )}
+            {client.cnpj && (
+              <div className="p-2 bg-blue-50 rounded col-span-2">
+                <p className="text-slate-500">CNPJ</p>
+                <p className="font-semibold text-slate-800">{client.cnpj}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* 3. BUSCAR INSTAGRAM E CNPJ AUTOMATICAMENTE */}
+        <InstagramProfileFinder 
+          client={client} 
+          onDataFound={(updates) => {
+            queryClient.invalidateQueries(['client', clientId]);
+          }} 
+        />
+
+        {/* 4. NECESSIDADES DO LABORATÓRIO E INFORMAÇÕES RELACIONADAS */}
+        <LabNeedsEditor 
+          clientId={client.id} 
+          currentNeeds={client.lab_needs || []} 
+        />
+
+        <CommunicationPreferencesEditor 
+          clientId={client.id} 
+          currentPreferences={client.communication_preferences || {}} 
+        />
+
         {/* AI Summary */}
         {!aiSummary && !loadingSummary && (
           <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
@@ -691,6 +853,42 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             Agendar Visita
           </Button>
         </div>
+
+        {/* 5. EQUIPAMENTO DE INTERESSE */}
+        <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300">
+          <h3 className="font-semibold text-slate-800 mb-3">🎯 Equipamento de Interesse</h3>
+          <Input
+            placeholder="Ex: VG2, Hematologia, Bioquímico..."
+            defaultValue={client.equipment_interest || ''}
+            onBlur={(e) => {
+              if (e.target.value !== client.equipment_interest) {
+                base44.entities.Client.update(clientId, { equipment_interest: e.target.value });
+                toast.success('Interesse salvo!', { duration: 1000 });
+              }
+            }}
+            className="h-12"
+          />
+        </Card>
+
+        {/* 6. EQUIPAMENTO VENDIDO (se houver) */}
+        {client.equipment_sold && (
+          <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-green-700 font-semibold">✅ Equipamento Vendido</p>
+                <p className="font-bold text-green-900">{client.equipment_sold}</p>
+                {client.contract_signature_date && (
+                  <p className="text-xs text-green-600">
+                    Assinatura: {new Date(client.contract_signature_date).toLocaleDateString('pt-BR')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* AI Message Generator */}
         <Card className="p-5 bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 border-2 border-purple-300 shadow-lg">
@@ -870,6 +1068,41 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           )}
         </Card>
 
+        {/* 7. SUGESTÃO DE EQUIPAMENTO IA - Logo após mensagem contextual */}
+        {client.equipment_suggestion && (
+          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-purple-700 mb-1">Sugestão de Equipamento IA</p>
+                <p className="font-semibold text-slate-800 mb-1">{client.equipment_suggestion}</p>
+                <p className="text-sm text-slate-600 mb-2">{client.equipment_suggestion_reason}</p>
+                {client.equipment_suggestion_alternative && (
+                  <p className="text-xs text-slate-500">
+                    Alternativa: {client.equipment_suggestion_alternative}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* 8. GERADOR DE 3 PROPOSTAS COM IA */}
+        <MultiProposalGeneratorAI client={client} />
+
+        {/* 9. PACOTE WHATSAPP COM PROPOSTA + VÍDEOS + IMAGENS */}
+        <WhatsAppProposalPackage client={client} />
+
+        {/* 10. PIPELINE ASSISTANT - movido para cima */}
+        <PipelineAIAssistant 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
         {/* Análise de Capitalização IA */}
         <CapitalAnalysisAI 
           client={client}
@@ -890,22 +1123,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Client Health Score */}
         <ClientHealthScore client={client} />
 
+        {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
+        <FunnelPersuasionTriggers client={client} />
+
         {/* Controle de Objeções por Perfil */}
         <ObjectionHandlingByProfile client={client} />
-
-        {/* Gerador de Propostas */}
-        <ProposalGenerator 
-          client={client}
-          onProposalGenerated={() => {
-            queryClient.invalidateQueries(['client-documents']);
-          }}
-        />
-
-        {/* Gerador Proposta/Contrato com Templates */}
-        <ProposalContractGenerator client={client} campaignId={null} />
-
-        {/* WhatsApp Package Sender */}
-        <WhatsAppPackageSender client={client} equipment={null} />
 
         {/* Kit de Vendas de Equipamento */}
         <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
@@ -928,39 +1150,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             Abrir Central de Equipamentos
           </Button>
         </Card>
-
-        {/* Seletor de Proposta Inteligente com IA */}
-        <AIProposalSelector client={client} />
-
-        {/* Botão Pós-Visita */}
-        <Button
-          onClick={() => setPostVisitOpen(true)}
-          className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-        >
-          <CheckSquare className="w-5 h-5 mr-2" />
-          Registrar Pós-Visita
-        </Button>
-
-        {/* Sugestão de Equipamento IA */}
-        {client.equipment_suggestion && (
-          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-purple-700 mb-1">Sugestão de Equipamento IA</p>
-                <p className="font-semibold text-slate-800 mb-1">{client.equipment_suggestion}</p>
-                <p className="text-sm text-slate-600 mb-2">{client.equipment_suggestion_reason}</p>
-                {client.equipment_suggestion_alternative && (
-                  <p className="text-xs text-slate-500">
-                    Alternativa: {client.equipment_suggestion_alternative}
-                  </p>
-                )}
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Info Cards */}
         <div className="grid grid-cols-2 gap-4">
@@ -1061,29 +1250,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           <ScoreBar score={client.purchase_score || 50} />
         </Card>
 
-        {/* Numerology Profile */}
-        <div onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}>
-          <NumerologyCard number={client.numerology_number || 1} />
-        </div>
-        {client.life_path_number && (
-          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-indigo-600 font-medium mb-1">Caminho de Vida</p>
-                <p className="text-2xl font-bold text-indigo-700">{client.life_path_number}</p>
-              </div>
-              <Button
-                onClick={() => navigate(createPageUrl(`NumerologyAnalysis?id=${client.id}`))}
-                variant="outline"
-                size="sm"
-                className="border-indigo-300 text-indigo-600"
-              >
-                Ver Análise Completa
-              </Button>
-            </div>
-          </Card>
-        )}
-
         {/* Equipment Manager */}
         <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
 
@@ -1092,14 +1258,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Análise de Vendas de Insumos */}
         <ConsumableSalesAnalytics clientId={client.id} />
-
-        {/* Pipeline AI Assistant */}
-        <PipelineAIAssistant 
-          client={client}
-          interactions={interactions}
-          visits={visits}
-          sales={sales}
-        />
 
         {/* Pipeline Visual */}
         <PipelineVisual 
@@ -1115,14 +1273,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Botão Registrar Interação */}
         <AddInteractionDialog client={client} />
 
-        {/* Botão Editar Cliente - Fixo acima das abas */}
-        <Button
-          onClick={handleEdit}
-          className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 mb-3"
-        >
-          <Edit2 className="w-4 h-4 mr-2" />
-          Editar Informações Completas do Cliente
-        </Button>
+
 
         {/* Tabs: Interações, Tarefas, Documentos, Timeline, Possível Venda */}
         <Tabs defaultValue="possible-sale" className="w-full">
@@ -1152,18 +1303,10 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                   <DollarSign className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">Informações do Cliente</h3>
-                  <p className="text-xs text-slate-600">Dados completos para análise e vendas</p>
+                  <h3 className="font-semibold text-slate-800">Status da Venda</h3>
+                  <p className="text-xs text-slate-600">Situação atual do cliente</p>
                 </div>
               </div>
-
-              <Button
-                onClick={handleEdit}
-                className="w-full bg-orange-600 hover:bg-orange-700 mb-3"
-              >
-                <Edit2 className="w-4 h-4 mr-2" />
-                Editar Dados Completos do Cliente
-              </Button>
 
               <div className="space-y-2 text-sm">
                 <div className="p-3 bg-white rounded-lg">
@@ -1197,24 +1340,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
             {/* Dados do Cliente Editáveis */}
             <ClientDataEditor clientId={client.id} client={client} />
-
-            {/* Necessidades do Laboratório */}
-            <LabNeedsEditor 
-              clientId={client.id} 
-              currentNeeds={client.lab_needs || []} 
-            />
-
-            {/* Preferências de Comunicação */}
-            <CommunicationPreferencesEditor 
-              clientId={client.id} 
-              currentPreferences={client.communication_preferences || {}} 
-            />
-
-            {/* Histórico de Equipamentos */}
-            <Card className="p-4 bg-white border-slate-200">
-              <h3 className="font-semibold text-slate-800 mb-3">Equipamentos</h3>
-              <ClientEquipmentManager clientId={client.id} clientName={client.first_name} />
-            </Card>
 
             {/* Relatório PDF de Visitas */}
             <VisitReportPDF client={client} visitHistory={client.visit_history || []} />
@@ -1317,11 +1442,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </TabsContent>
         </Tabs>
 
-        {/* Funnel Persuasion Triggers */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🎯 Gatilhos por Etapa do Funil</h3>
-          <FunnelPersuasionTriggers client={client} />
-        </div>
+
 
         {/* Next Action */}
         {client.next_action && (
@@ -1419,7 +1540,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <Label>Primeiro Nome *</Label>
               <Input
                 value={editData.first_name}
-                onChange={(e) => setEditData({...editData, first_name: e.target.value})}
+                onChange={(e) => handleEditDataChange('first_name', e.target.value)}
               />
             </div>
 
@@ -1446,7 +1567,25 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <Input
                 type="email"
                 value={editData.email}
-                onChange={(e) => setEditData({...editData, email: e.target.value})}
+                onChange={(e) => handleEditDataChange('email', e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Instagram</Label>
+              <Input
+                placeholder="@usuario"
+                value={editData.instagram_handle || ''}
+                onChange={(e) => handleEditDataChange('instagram_handle', e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Equipamento de Interesse</Label>
+              <Input
+                placeholder="Ex: VG2, Hematologia, Bioquímico..."
+                value={editData.equipment_interest || ''}
+                onChange={(e) => handleEditDataChange('equipment_interest', e.target.value)}
               />
             </div>
 
@@ -1471,7 +1610,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <Label>Cidade</Label>
               <Input
                 value={editData.city}
-                onChange={(e) => setEditData({...editData, city: e.target.value})}
+                onChange={(e) => handleEditDataChange('city', e.target.value)}
               />
             </div>
 
@@ -1479,7 +1618,43 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               <Label>Nome da Clínica/Hospital</Label>
               <Input
                 value={editData.clinic_name}
-                onChange={(e) => setEditData({...editData, clinic_name: e.target.value})}
+                onChange={(e) => handleEditDataChange('clinic_name', e.target.value)}
+                onBlur={async (e) => {
+                  // Buscar CNPJ automaticamente quando sair do campo
+                  if (e.target.value && !editData.cnpj) {
+                    try {
+                      const result = await base44.integrations.Core.InvokeLLM({
+                        prompt: `Busque o CNPJ desta empresa: ${e.target.value} em ${editData.city || 'Brasil'}. Retorne apenas o CNPJ (14 dígitos).`,
+                        add_context_from_internet: true,
+                        response_json_schema: {
+                          type: "object",
+                          properties: {
+                            cnpj: { type: "string" },
+                            razao_social: { type: "string" }
+                          }
+                        }
+                      });
+                      if (result.cnpj) {
+                        handleEditDataChange('cnpj', result.cnpj);
+                        if (result.razao_social) {
+                          handleEditDataChange('razao_social', result.razao_social);
+                        }
+                        toast.success('CNPJ encontrado e salvo!');
+                      }
+                    } catch (error) {
+                      console.log('CNPJ não encontrado');
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>CNPJ</Label>
+              <Input
+                value={editData.cnpj || ''}
+                onChange={(e) => handleEditDataChange('cnpj', e.target.value)}
+                placeholder="Busca automática ao preencher clínica"
               />
             </div>
 
