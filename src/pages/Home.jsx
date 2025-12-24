@@ -140,9 +140,12 @@ export default function Home() {
     staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
     gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
     meta: {
-      errorHandler: () => {} // Suprimir todos os erros
+      errorHandler: () => {}
     }
   });
+
+  // IDs de clientes válidos para filtrar vendas e visitas
+  const validClientIds = useMemo(() => new Set(clients.map(c => c.id)), [clients]);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],

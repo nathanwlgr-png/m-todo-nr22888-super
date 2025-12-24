@@ -32,9 +32,10 @@ export default function SalesOverview() {
   });
 
   const { data: sales = [] } = useQuery({
-    queryKey: ['sales'],
+    queryKey: ['sales', clients.length],
     queryFn: async () => {
       try {
+        if (clients.length === 0) return [];
         const allSales = await base44.entities.Sale.list();
         const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
         return allSales.filter(s => {
@@ -79,12 +80,16 @@ export default function SalesOverview() {
   });
 
   const { data: visits = [] } = useQuery({
-    queryKey: ['all-visits'],
+    queryKey: ['all-visits', clients.length],
     queryFn: async () => {
       try {
+        if (clients.length === 0) return [];
         const allVisits = await base44.entities.Visit.list('-scheduled_date', 100);
-        const validClientIds = new Set(clients.map(c => c.id));
-        return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
+        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
+        return allVisits.filter(v => {
+          if (!v || !v.id) return false;
+          return !v.client_id || validClientIds.has(v.client_id);
+        });
       } catch (error) {
         console.warn('Erro ao carregar visitas (ignorando):', error);
         return [];
