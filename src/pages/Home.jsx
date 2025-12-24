@@ -97,6 +97,7 @@ import EquinePurchaseExam from '@/components/EquinePurchaseExam';
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
 import NatashaProfile from '@/components/NatashaProfile';
+import ClientDataValidator from '@/components/ClientDataValidator';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -550,7 +551,12 @@ export default function Home() {
         <OfflinePackGenerator />
       </div>
 
-      {/* Perfil Específico: Natasha Rosa - PRIMEIRO NA HOME */}
+      {/* Validação de Dados dos Clientes */}
+      <div className="px-6 mt-6">
+        <ClientDataValidator />
+      </div>
+
+      {/* Perfil Específico: Natasha Rosa */}
       <div className="px-6 mt-6">
         <NatashaProfile />
       </div>
@@ -643,14 +649,6 @@ export default function Home() {
 
       {/* Level Score System */}
       <div className="px-6 mt-6">
-        <div className="grid grid-cols-2 gap-3">
-          <LevelScoreSystem />
-          <PowerBooster />
-        </div>
-      </div>
-
-      {/* Segunda linha */}
-      <div className="px-6 mt-3">
         <div className="grid grid-cols-2 gap-3">
           <LevelScoreSystem />
           <PowerBooster />
