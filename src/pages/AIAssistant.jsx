@@ -786,6 +786,20 @@ Seja prático e direto ao ponto.`
                   WhatsApp
                 </Button>
               )}
+              <a 
+                href={base44.agents.getWhatsAppConnectURL('sales_assistant')} 
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                >
+                  <MessageCircle className="w-4 h-4 mr-1" />
+                  💬 Agente WhatsApp
+                </Button>
+              </a>
               <Button
                 size="sm"
                 variant="outline"
