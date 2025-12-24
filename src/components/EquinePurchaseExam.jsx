@@ -4,13 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, FileText, Download, Copy, Mic, MicOff } from 'lucide-react';
+import { Loader2, FileText, Download, Copy, Mic, MicOff, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EquinePurchaseExam() {
   const [generating, setGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [currentField, setCurrentField] = useState('nome');
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [analyzingImages, setAnalyzingImages] = useState(false);
+  const [imageAnalyses, setImageAnalyses] = useState([]);
+  const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
   const [horseData, setHorseData] = useState({
     nome: '',
@@ -76,6 +80,100 @@ export default function EquinePurchaseExam() {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    
+    if (uploadedImages.length + files.length > 100) {
+      toast.error('Máximo de 100 imagens permitido');
+      return;
+    }
+
+    const validFiles = files.filter(f => 
+      f.type === 'image/jpeg' || f.type === 'image/png' || f.type === 'image/jpg'
+    );
+
+    if (validFiles.length !== files.length) {
+      toast.warning('Apenas arquivos JPEG e PNG são aceitos');
+    }
+
+    setUploadedImages(prev => [...prev, ...validFiles]);
+    toast.success(`${validFiles.length} imagens adicionadas`);
+  };
+
+  const removeImage = (index) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    toast.info('Imagem removida');
+  };
+
+  const analyzeImages = async () => {
+    if (uploadedImages.length === 0) {
+      toast.error('Adicione imagens primeiro');
+      return;
+    }
+
+    setAnalyzingImages(true);
+    const analyses = [];
+
+    try {
+      toast.info(`Analisando ${uploadedImages.length} imagens com IA...`, { duration: 5000 });
+
+      for (let i = 0; i < uploadedImages.length; i++) {
+        const file = uploadedImages[i];
+        
+        // Upload da imagem
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+
+        // Análise com IA
+        const analysis = await base44.integrations.Core.InvokeLLM({
+          prompt: `Você é um veterinário radiologista especialista em equinos. Analise esta imagem radiográfica e forneça:
+
+1. IDENTIFICAÇÃO: Qual região anatômica (casco, carpo, tarso, coluna, etc)?
+2. PROJEÇÃO: Qual a projeção radiográfica (Latero-Medial, Dorso-Palmar, etc)?
+3. QUALIDADE: A imagem está adequada para diagnóstico?
+4. ESTRUTURAS VISÍVEIS: Liste as estruturas ósseas e articulações visíveis
+5. ACHADOS RADIOGRÁFICOS: Descreva alterações encontradas (fraturas, osteófitos, esclerose, radiolucências, etc) OU "Sem alterações significativas"
+6. INTERPRETAÇÃO CLÍNICA: Significado clínico dos achados
+7. GRAU DE SIGNIFICÂNCIA: Classifique como "Sem alteração", "Leve", "Moderado" ou "Severo"
+8. RECOMENDAÇÕES: Sugestões de acompanhamento ou tratamento
+
+Seja técnico, preciso e objetivo. Use terminologia veterinária apropriada.`,
+          file_urls: [file_url],
+          response_json_schema: {
+            type: "object",
+            properties: {
+              regiao_anatomica: { type: "string" },
+              projecao: { type: "string" },
+              qualidade_imagem: { type: "string" },
+              estruturas_visiveis: { type: "array", items: { type: "string" } },
+              achados_radiograficos: { type: "string" },
+              interpretacao_clinica: { type: "string" },
+              significancia: { type: "string" },
+              recomendacoes: { type: "string" },
+              codigo_sugerido: { type: "string" }
+            }
+          }
+        });
+
+        analyses.push({
+          fileName: file.name,
+          imageUrl: file_url,
+          analysis
+        });
+
+        toast.info(`${i + 1}/${uploadedImages.length} imagens analisadas`);
+      }
+
+      setImageAnalyses(analyses);
+      toast.success(`✅ ${analyses.length} imagens analisadas com sucesso!`);
+
+    } catch (error) {
+      console.error('Erro na análise:', error);
+      toast.error('Erro ao analisar imagens');
+    } finally {
+      setAnalyzingImages(false);
+    }
+  };
+
   const generateCompleteExam = async () => {
     if (!horseData.nome) {
       toast.error('Preencha pelo menos o nome do cavalo');
@@ -86,9 +184,48 @@ export default function EquinePurchaseExam() {
     try {
       toast.info('Gerando exame completo de compra com 80+ imagens...', { duration: 5000 });
 
+      // Preparar seção de imagens analisadas
+      const imageReportsSection = imageAnalyses.length > 0 ? `
+
+═══════════════════════════════════════════════════════════════
+                  IMAGENS RADIOGRÁFICAS ANALISADAS
+═══════════════════════════════════════════════════════════════
+
+Total de Imagens: ${imageAnalyses.length}
+
+${imageAnalyses.map((img, idx) => `
+IMAGEM ${idx + 1}: ${img.analysis.regiao_anatomica || 'Região não identificada'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Arquivo: ${img.fileName}
+URL: ${img.imageUrl}
+Código: [${img.analysis.codigo_sugerido || `IMG-${idx + 1}`}]
+
+Projeção: ${img.analysis.projecao}
+Qualidade: ${img.analysis.qualidade_imagem}
+
+Estruturas Visíveis:
+${img.analysis.estruturas_visiveis?.map(e => `  • ${e}`).join('\n')}
+
+Achados Radiográficos:
+${img.analysis.achados_radiograficos}
+
+Interpretação Clínica:
+${img.analysis.interpretacao_clinica}
+
+Significância: ${img.analysis.significancia}
+
+Recomendações:
+${img.analysis.recomendacoes}
+
+`).join('\n')}
+═══════════════════════════════════════════════════════════════
+` : '';
+
       // Gerar relatório completo com IA
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um veterinário especialista em exames de compra de equinos. Crie um RELATÓRIO COMPLETO DE EXAME DE COMPRA com base nos dados:
+
+${imageAnalyses.length > 0 ? `\n*** IMPORTANTE: ${imageAnalyses.length} IMAGENS REAIS FORAM ANALISADAS. Use as análises fornecidas abaixo para preencher o relatório. ***\n` : ''}
 
 DADOS DO EQUINO:
 - Nome: ${horseData.nome}
@@ -251,9 +388,16 @@ Assinatura: _________________________
 Data: ${horseData.data_exame}
 
 
-SEJA EXTREMAMENTE DETALHADO. Descreva TODAS as 80+ imagens com análise técnica completa.`,
+SEJA EXTREMAMENTE DETALHADO. Descreva TODAS as 80+ imagens com análise técnica completa.
+
+${imageAnalyses.length > 0 ? `\n\nANÁLISES DAS IMAGENS REAIS ENVIADAS:\n${imageReportsSection}\n\nINCLUA ESTAS ANÁLISES NO RELATÓRIO FINAL, mantendo os códigos, URLs e descrições técnicas.` : ''}`,
         add_context_from_internet: true
       });
+
+      // Adicionar seção de imagens ao relatório
+      const finalReport = imageAnalyses.length > 0 
+        ? response + '\n\n' + imageReportsSection 
+        : response;
 
       // Criar guia de campos (bloco de notas)
       const fieldsGuide = `
@@ -386,7 +530,7 @@ Sistema: Método NR22 - Exames Veterinários
 ═══════════════════════════════════════════════════════════════
 `;
 
-      setGeneratedReport(response);
+      setGeneratedReport(finalReport);
       setFieldGuide(fieldsGuide);
 
       // Salvar automaticamente no repositório
@@ -394,9 +538,9 @@ Sistema: Método NR22 - Exames Veterinários
         await base44.entities.GeneratedDocument.create({
           title: `Exame de Compra - ${horseData.nome} - ${horseData.data_exame}`,
           type: 'relatorio',
-          content: response,
-          summary: `Exame completo de compra com 80+ imagens radiográficas - ${horseData.nome} (${horseData.raca || 'raça não informada'})`,
-          tags: ['exame de compra', 'equinos', horseData.nome, 'radiografia', '80 imagens']
+          content: finalReport,
+          summary: `Exame completo de compra com ${imageAnalyses.length || '80+'} imagens radiográficas analisadas por IA - ${horseData.nome} (${horseData.raca || 'raça não informada'})`,
+          tags: ['exame de compra', 'equinos', horseData.nome, 'radiografia', 'analise ia', `${imageAnalyses.length} imagens`]
         });
 
         await base44.entities.GeneratedDocument.create({
@@ -572,6 +716,95 @@ Sistema: Método NR22 - Exames Veterinários
               <Mic className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Upload de Imagens */}
+        <div className="p-3 bg-white rounded-lg border border-indigo-200 space-y-2">
+          <p className="text-sm font-semibold text-indigo-800 mb-2">📸 Imagens Radiográficas:</p>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/jpg"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+
+          <div className="flex gap-2">
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              className="flex-1 border-indigo-300"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Adicionar Imagens (até 100)
+            </Button>
+            
+            {uploadedImages.length > 0 && (
+              <Button
+                onClick={analyzeImages}
+                disabled={analyzingImages}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+              >
+                {analyzingImages ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Analisando...
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Analisar com IA
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {uploadedImages.length > 0 && (
+            <div className="mt-2 p-2 bg-indigo-50 rounded border border-indigo-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-indigo-800">
+                  {uploadedImages.length} imagens adicionadas
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setUploadedImages([])}
+                  className="h-6 px-2 text-xs text-red-600"
+                >
+                  Limpar Todas
+                </Button>
+              </div>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {uploadedImages.map((file, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs bg-white p-1.5 rounded border border-indigo-100">
+                    <span className="truncate flex-1">{file.name}</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeImage(idx)}
+                      className="h-5 w-5 p-0 ml-2"
+                    >
+                      <X className="w-3 h-3 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {imageAnalyses.length > 0 && (
+            <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+              <p className="text-xs font-semibold text-green-800">
+                ✅ {imageAnalyses.length} imagens analisadas pela IA
+              </p>
+              <p className="text-xs text-green-700 mt-1">
+                Análises serão incluídas no relatório final
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Botão de gerar */}
