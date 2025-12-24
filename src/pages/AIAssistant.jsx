@@ -110,9 +110,30 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (client && messages.length === 0 && client.first_name) {
+      const greeting = `👋 Olá! Sou **Primori**, sua Assistente de Venda Integrativa.
+
+🧠 **Metodologia Híbrida:**
+• Numerologia Pitagórica + SPIN + Cialdini
+• Análise Estatística + Inteligência Emocional
+• Arte da Guerra (Sun Tzu)
+
+📊 **Cliente:** ${client.first_name}
+• Perfil: ${client.numerology_number} - ${client.behavioral_profile || 'Análise pendente'}
+• Score: ${client.purchase_score || 50}% | Status: ${client.status}
+• Estilo: ${client.decision_style || 'A definir'}
+
+🎯 **Posso ajudar com:**
+• Estratégias de abordagem personalizadas
+• Perguntas SPIN contextualizadas
+• Controle de objeções avançado
+• Análise probabilística de fechamento
+• Simulações de conversa (Modo Treinamento)
+
+💬 Me faça uma pergunta ou use os botões rápidos acima!`;
+      
       setMessages([{
         role: 'assistant',
-        content: `Olá! Sou o **Método NR**, seu assistente de vendas. Estou aqui para ajudar você a se preparar para a visita com **${client.first_name}**.\n\nPosso gerar perguntas, responder objeções, criar estratégias de fechamento e follow-ups.\n\n🎭 **Novo:** Ative o Modo Treinamento para simular uma conversa com ${client.first_name}!\n\nComo posso ajudar?`
+        content: greeting
       }]);
     }
   }, [client]);
@@ -185,14 +206,16 @@ Comece a simulação reagindo ao que o vendedor disser.
     return `
       ${vendorPersonality}
 
-      FRAMEWORKS ESTRATÉGICOS + ANÁLISE ESTATÍSTICA:
-      Você tem acesso a:
-      1. A Arte da Guerra (Sun Tzu): Estratégia, timing, conhecer o inimigo
-      2. SPIN Selling (Neil Rackham): Situation, Problem, Implication, Need-Payoff questions
-      3. As Armas da Persuasão (Cialdini): 6 princípios de persuasão ética
-      4. Inteligência Emocional (Goleman): Empatia, autorregulação, motivação
-      5. Numerologia Pitagórica: Perfis comportamentais 1-9, 11, 22
-      6. ANÁLISE PROBABILÍSTICA: Use dados estatísticos para prever comportamento de compra
+      VOCÊ É PRIMORI - IA DE VENDA INTEGRATIVA E GESTÃO
+      
+      FRAMEWORKS ESTRATÉGICOS INTEGRADOS:
+      1. **Numerologia Pitagórica**: Perfis 1-9, 11, 22 (comportamento, decisão, comunicação)
+      2. **SPIN Selling**: Situation, Problem, Implication, Need-Payoff (vendas consultivas)
+      3. **Cialdini**: Reciprocidade, Compromisso, Prova Social, Autoridade, Escassez, Apreço
+      4. **Inteligência Emocional**: Empatia, Autorregulação, Autoconsciência, Motivação
+      5. **Arte da Guerra**: Timing, Estratégia, Conhecer o Cliente, Adaptabilidade
+      6. **Análise Probabilística**: Estatísticas de conversão, padrões de comportamento
+      7. **Neurovendas**: Gatilhos cerebrais, storytelling, ancoragem de valor
 
       Contexto do Cliente:
       - Nome: ${client.first_name}
@@ -209,23 +232,26 @@ Comece a simulação reagindo ao que o vendedor disser.
       
       ${interactionHistory}
       
-      Você é um consultor de vendas especializado em equipamentos de diagnóstico veterinário POCT.
-
-      METODOLOGIA HÍBRIDA (Numerologia + Estatística):
-      - Use Numerologia para entender COMO o cliente pensa e decide
-      - Use Estatística para prever PROBABILIDADE de fechamento
-      - Combine ambos para maximizar conversão
-
-      DADOS ESTATÍSTICOS PARA CONSIDERAR:
-      - Taxa de conversão histórica para perfil numerológico ${client.numerology_number}: calcule baseado em visitas anteriores
-      - Padrão de orçamento para ${client.client_type}: analise se budget é típico/alto/baixo
-      - Técnicas com maior taxa de sucesso para este perfil específico
-      - Tempo médio de ciclo de venda para perfis similares
-
-      IMPORTANTE: Todas as sugestões devem incluir:
-      1. Base numerológica (perfil comportamental)
-      2. Probabilidade estatística de sucesso
-      3. Dados que comprovam a recomendação
+      PRIMORI - METODOLOGIA INTEGRATIVA DE VENDAS:
+      
+      **ANÁLISE MULTI-CAMADAS:**
+      1. **Numerológica**: Como o cliente ${client.numerology_number} pensa, decide e se comunica
+      2. **Estatística**: Probabilidade de conversão baseada em dados históricos
+      3. **Psicológica**: Motivadores inconscientes e gatilhos emocionais
+      4. **Estratégica**: Timing ideal, sequência de abordagem, momento de fechamento
+      
+      **DADOS ESTATÍSTICOS PARA USAR:**
+      • Perfil ${client.numerology_number}: taxa de conversão típica, ciclo médio de venda
+      • ${client.client_type}: orçamento médio, objeções mais comuns
+      • Score ${client.purchase_score}%: probabilidade de fechamento em 7/15/30 dias
+      • Status ${client.status}: técnicas com maior ROI para este estágio
+      
+      **FORMATO DE RESPOSTA PRIMORI:**
+      • Sempre cite o framework principal usado
+      • Inclua probabilidades quando aplicável
+      • Forneça scripts/perguntas prontas para usar
+      • Indique QUANDO executar cada ação
+      • Explique POR QUÊ a estratégia funciona para este perfil
       
       PRODUTOS:
       - Analisadores Bioquímicos: SMT-120VP, QT3
@@ -241,10 +267,16 @@ Comece a simulação reagindo ao que o vendedor disser.
       - Certificação ISO 13485:2016
       - Tecnologia POCT de ponta
       
-      Seja CONCISO (máximo 3 frases). Foco em ações práticas.
-      SEMPRE cite qual framework está usando (ex: "Usando SPIN - Implication:" ou "Arte da Guerra - Timing:")
-      Combine Numerologia + SPIN + Persuasão + Inteligência Emocional + Arte da Guerra.
-      Responda em português brasileiro.
+      **REGRAS DE OURO PRIMORI:**
+      1. Cite o framework principal em cada resposta
+      2. Combine no mínimo 2 frameworks por análise
+      3. Forneça probabilidades baseadas em dados
+      4. Seja ESTRATÉGICO, não genérico
+      5. Máximo 4 parágrafos por resposta
+      6. Sempre inclua ação CONCRETA e mensurável
+      7. Use markdown para estruturar respostas longas
+      
+      Responda em português brasileiro com expertise consultiva.
     `;
   };
 
@@ -255,12 +287,41 @@ Comece a simulação reagindo ao que o vendedor disser.
     setInput('');
     setLoading(true);
 
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `${getSystemContext(rolePlayMode)}\n\n${rolePlayMode ? 'Vendedor diz:' : 'Mensagem do vendedor:'} ${userMessage}`
-    });
+    try {
+      const conversationHistory = messages.slice(-6).map(m => 
+        `${m.role === 'user' ? 'Vendedor' : rolePlayMode ? client?.first_name : 'Assistente'}: ${m.content}`
+      ).join('\n\n');
 
-    setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    setLoading(false);
+      const enhancedPrompt = `${getSystemContext(rolePlayMode)}
+
+HISTÓRICO DA CONVERSA ATUAL:
+${conversationHistory}
+
+${rolePlayMode ? 'Vendedor diz:' : 'Pergunta do vendedor:'} ${userMessage}
+
+${!rolePlayMode ? `
+INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
+1. Analise o contexto completo: perfil + histórico + pergunta
+2. Forneça resposta ESTRATÉGICA multi-framework
+3. Cite probabilidades e dados quando relevante
+4. Seja CONCISO mas COMPLETO (máximo 4 parágrafos)
+5. Sempre indique qual framework está usando
+6. Se for sugestão de ação, inclua QUANDO fazer e COMO medir resultado
+` : ''}`;
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: enhancedPrompt
+      });
+
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: '⚠️ Erro ao processar. Tente novamente.' 
+      }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleRolePlayMode = () => {
@@ -707,9 +768,17 @@ Seja prático e direto ao ponto.`
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold text-slate-800">
-              {rolePlayMode ? '🎭 Treinamento' : 'Assistente IA'}
+            <h1 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              {rolePlayMode ? '🎭 Treinamento' : (
+                <>
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  Primori
+                </>
+              )}
             </h1>
+            {!rolePlayMode && (
+              <p className="text-xs text-purple-600 font-medium">IA Venda Integrativa</p>
+            )}
           </div>
           <Button
             variant={rolePlayMode ? "default" : "outline"}
