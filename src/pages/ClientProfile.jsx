@@ -95,6 +95,7 @@ import WhatsAppPackageSender from '@/components/WhatsAppPackageSender';
 import InstagramProfileFinder from '@/components/InstagramProfileFinder';
 import MultiProposalGeneratorAI from '@/components/MultiProposalGeneratorAI';
 import WhatsAppProposalPackage from '@/components/WhatsAppProposalPackage';
+import AdvancedClientAnalytics from '@/components/AdvancedClientAnalytics';
 import { toast } from 'sonner';
 
 const clientTypeLabels = {
@@ -1163,6 +1164,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Client Health Score */}
         <ClientHealthScore client={client} />
+
+        {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
+        <AdvancedClientAnalytics 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
 
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
         <FunnelPersuasionTriggers client={client} />
