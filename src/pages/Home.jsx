@@ -52,6 +52,7 @@ import AIDocumentsHub from '@/components/AIDocumentsHub';
 import SalesAutomation from '@/components/SalesAutomation';
 import SmartProductSuggestions from '@/components/SmartProductSuggestions';
 import CalendarIntegration from '@/components/CalendarIntegration';
+import CompleteSystemReport from '@/components/CompleteSystemReport';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -1264,6 +1265,11 @@ export default function Home() {
           {/* Integração Calendário */}
           <div className="mt-6">
             <CalendarIntegration />
+          </div>
+
+          {/* Relatório Completo do Sistema */}
+          <div className="mt-6">
+            <CompleteSystemReport />
           </div>
 
           {/* Importação em Massa */}
