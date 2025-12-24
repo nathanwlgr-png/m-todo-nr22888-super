@@ -54,18 +54,18 @@ export default function AIReportingHub() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Sale.list();
-        const validClientIds = new Set(clients.filter(c => c && c.id).map(c => c.id));
-        return data.filter(s => s && s.id && (!s.client_id || validClientIds.has(s.client_id)));
+        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
+        return data.filter(s => {
+          if (!s || !s.id) return false;
+          if (!s.client_id) return true;
+          return validClientIds.has(s.client_id);
+        });
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado em venda, ignorando');
-          return [];
-        }
-        console.warn('Erro ao carregar vendas:', error);
+        console.warn('Erro ao carregar vendas (ignorando):', error);
         return [];
       }
     },
-    retry: 1,
+    retry: 0,
     enabled: clients.length > 0,
   });
 
@@ -74,18 +74,18 @@ export default function AIReportingHub() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Visit.list();
-        const validClientIds = new Set(clients.filter(c => c && c.id).map(c => c.id));
-        return data.filter(v => v && v.id && (!v.client_id || validClientIds.has(v.client_id)));
+        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
+        return data.filter(v => {
+          if (!v || !v.id) return false;
+          if (!v.client_id) return true;
+          return validClientIds.has(v.client_id);
+        });
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado em visita, ignorando');
-          return [];
-        }
-        console.warn('Erro ao carregar visitas:', error);
+        console.warn('Erro ao carregar visitas (ignorando):', error);
         return [];
       }
     },
-    retry: 1,
+    retry: 0,
     enabled: clients.length > 0,
   });
 

@@ -39,7 +39,11 @@ export default function SalesOverview() {
       try {
         const allSales = await base44.entities.Sale.list();
         const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
-        return allSales.filter(s => s && s.client_id && validClientIds.has(s.client_id));
+        return allSales.filter(s => {
+          if (!s || !s.id) return false;
+          if (!s.client_id) return true; // Venda sem cliente associado
+          return validClientIds.has(s.client_id);
+        });
       } catch (error) {
         if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
           console.warn('Cliente deletado em venda, ignorando');
