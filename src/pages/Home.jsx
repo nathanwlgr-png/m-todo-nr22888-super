@@ -550,6 +550,11 @@ export default function Home() {
         <OfflinePackGenerator />
       </div>
 
+      {/* Perfil Específico: Natasha Rosa - PRIMEIRO NA HOME */}
+      <div className="px-6 mt-6">
+        <NatashaProfile />
+      </div>
+
       {/* Pesquisa Científica Veterinária */}
       <div className="px-6 mt-6">
         <ScientificResearchAI />
@@ -578,11 +583,6 @@ export default function Home() {
       {/* Geração em Massa de Perfis Completos */}
       <div className="px-6 mt-6">
         <BulkClientProfileGenerator />
-      </div>
-
-      {/* Perfil Específico: Natasha Rosa */}
-      <div className="px-6 mt-6">
-        <NatashaProfile />
       </div>
 
       {/* AI Reporting Hub */}
