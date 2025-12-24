@@ -93,7 +93,7 @@ import AIReportingHub from '@/components/AIReportingHub';
 import ScientificResearchAI from '@/components/ScientificResearchAI';
 import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
-import EquinePurchaseExam from '@/components/EquinePurchaseExam';
+
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
 import NatashaProfile from '@/components/NatashaProfile';
@@ -589,11 +589,6 @@ export default function Home() {
       {/* Pesquisa 8 Artigos Potros */}
       <div className="px-6 mt-6">
         <FoalSynovialFluidResearch />
-      </div>
-
-      {/* Exame de Compra de Equinos */}
-      <div className="px-6 mt-6">
-        <EquinePurchaseExam />
       </div>
 
       {/* Descobrir Clínicas Novas na Região */}
