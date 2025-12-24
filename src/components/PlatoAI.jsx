@@ -26,7 +26,8 @@ Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala 
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+  const [voiceMode, setVoiceMode] = useState('idle'); // idle, listening, ready
+  const [pendingCommand, setPendingCommand] = useState('');
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -63,9 +64,35 @@ Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala 
     recognition.lang = 'pt-BR';
 
     recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript;
-      if (transcript.trim()) {
-        sendMessage(transcript);
+      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+      
+      if (voiceMode === 'idle') {
+        // Aguardando palavra-chave "Platão"
+        if (transcript.includes('platão')) {
+          setVoiceMode('listening');
+          toast.success('🏛️ Platão está te ouvindo. Fale seu comando.', { duration: 3000 });
+        }
+      } else if (voiceMode === 'listening') {
+        // Capturando comando
+        if (transcript) {
+          setPendingCommand(transcript);
+          setVoiceMode('ready');
+          toast.info(`📝 Comando capturado: "${transcript}". Diga "executar" para enviar.`, { duration: 5000 });
+        }
+      } else if (voiceMode === 'ready') {
+        // Aguardando confirmação "executar"
+        if (transcript.includes('executar')) {
+          if (pendingCommand) {
+            sendMessage(pendingCommand);
+            setPendingCommand('');
+            setVoiceMode('idle');
+            toast.success('✅ Executando comando...', { duration: 2000 });
+          }
+        } else if (transcript.includes('cancelar')) {
+          setPendingCommand('');
+          setVoiceMode('idle');
+          toast.error('❌ Comando cancelado', { duration: 2000 });
+        }
       }
     };
 
@@ -80,7 +107,7 @@ Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala 
 
     recognition.onend = () => {
       // Reiniciar automaticamente
-      if (open && isListening) {
+      if (open) {
         try {
           recognition.start();
         } catch (error) {
@@ -95,8 +122,7 @@ Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala 
     const timeout = setTimeout(() => {
       try {
         recognition.start();
-        setIsListening(true);
-        toast.success('🎤 Platão está te ouvindo', { duration: 2000 });
+        toast.success('🎤 Diga "Platão" para ativar', { duration: 3000 });
       } catch (error) {
         console.warn('Não foi possível iniciar reconhecimento de voz');
       }
@@ -188,8 +214,14 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
             <div>
               <h2 className="font-bold text-white">Platão</h2>
               <p className="text-xs text-amber-100 flex items-center gap-1">
-                {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
-                {isListening ? 'Ouvindo...' : 'Filósofo'}
+                <span className={`w-2 h-2 rounded-full ${
+                  voiceMode === 'idle' ? 'bg-gray-400' :
+                  voiceMode === 'listening' ? 'bg-yellow-400 animate-pulse' :
+                  'bg-green-400 animate-pulse'
+                }`}></span>
+                {voiceMode === 'idle' ? 'Aguardando "Platão"' :
+                 voiceMode === 'listening' ? 'Ouvindo comando...' :
+                 'Diga "executar"'}
               </p>
             </div>
           </div>
@@ -258,6 +290,15 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
           </div>
         )}
 
+        {/* Pending Command Display */}
+        {pendingCommand && voiceMode === 'ready' && (
+          <div className="px-3 pb-2 bg-green-50 border-b-2 border-green-300">
+            <p className="text-xs font-semibold text-green-800 mb-1">📝 Comando capturado:</p>
+            <p className="text-sm text-green-900 italic">"{pendingCommand}"</p>
+            <p className="text-xs text-green-700 mt-1">Diga "executar" ou "cancelar"</p>
+          </div>
+        )}
+
         {/* Input */}
         <div className="p-3 bg-amber-100 border-t-4 border-amber-300">
           <div className="flex gap-2">
@@ -270,7 +311,7 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
                   sendMessage(input);
                 }
               }}
-              placeholder={isListening ? "🎤 Fale ou digite..." : "Digite sua pergunta..."}
+              placeholder="🎤 Ou digite aqui..."
               className="resize-none border-2 border-amber-300 focus:border-amber-500 bg-white text-sm"
               rows={2}
             />
@@ -282,9 +323,15 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs text-amber-700 mt-1 italic text-center flex items-center justify-center gap-1">
-            {isListening && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>}
-            {isListening ? 'Ouvindo continuamente' : '"Conhece-te a ti mesmo"'}
+          <p className="text-xs text-amber-700 mt-1 text-center flex items-center justify-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              voiceMode === 'idle' ? 'bg-gray-400' :
+              voiceMode === 'listening' ? 'bg-yellow-400 animate-pulse' :
+              'bg-green-400 animate-pulse'
+            }`}></span>
+            {voiceMode === 'idle' ? 'Diga "Platão" para ativar' :
+             voiceMode === 'listening' ? 'Fale seu comando' :
+             'Diga "executar" para enviar'}
           </p>
         </div>
       </Card>
