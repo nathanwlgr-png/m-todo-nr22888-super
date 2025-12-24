@@ -93,6 +93,7 @@ import AIReportingHub from '@/components/AIReportingHub';
 import ScientificResearchAI from '@/components/ScientificResearchAI';
 import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
+import EquinePurchaseExam from '@/components/EquinePurchaseExam';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -559,6 +560,11 @@ export default function Home() {
       {/* Pesquisa 8 Artigos Potros */}
       <div className="px-6 mt-6">
         <FoalSynovialFluidResearch />
+      </div>
+
+      {/* Exame de Compra de Equinos */}
+      <div className="px-6 mt-6">
+        <EquinePurchaseExam />
       </div>
 
       {/* AI Reporting Hub */}

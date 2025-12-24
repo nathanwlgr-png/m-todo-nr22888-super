@@ -1,0 +1,556 @@
+import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, FileText, Download, Copy } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function EquinePurchaseExam() {
+  const [generating, setGenerating] = useState(false);
+  const [horseData, setHorseData] = useState({
+    nome: '',
+    raca: '',
+    idade: '',
+    sexo: '',
+    pelagem: '',
+    proprietario: '',
+    veterinario: '',
+    data_exame: new Date().toLocaleDateString('pt-BR')
+  });
+  const [generatedReport, setGeneratedReport] = useState(null);
+  const [fieldGuide, setFieldGuide] = useState(null);
+
+  const generateCompleteExam = async () => {
+    if (!horseData.nome) {
+      toast.error('Preencha pelo menos o nome do cavalo');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      toast.info('Gerando exame completo de compra com 80+ imagens...', { duration: 5000 });
+
+      // Gerar relatório completo com IA
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é um veterinário especialista em exames de compra de equinos. Crie um RELATÓRIO COMPLETO DE EXAME DE COMPRA com base nos dados:
+
+DADOS DO EQUINO:
+- Nome: ${horseData.nome}
+- Raça: ${horseData.raca || 'Não informado'}
+- Idade: ${horseData.idade || 'Não informado'}
+- Sexo: ${horseData.sexo || 'Não informado'}
+- Pelagem: ${horseData.pelagem || 'Não informado'}
+- Proprietário: ${horseData.proprietario || 'Não informado'}
+- Veterinário Responsável: ${horseData.veterinario || 'Dr. Veterinário'}
+- Data do Exame: ${horseData.data_exame}
+
+INSTRUÇÕES PARA O RELATÓRIO:
+
+1. ESTRUTURA COMPLETA COM 80+ IMAGENS RADIOGRÁFICAS:
+
+A) MEMBROS ANTERIORES (40 imagens):
+   - Membro Anterior Direito (MAD):
+     * Casco: 4 projeções (Latero-Medial, Médio-Lateral, Dorso-Palmar, Palmar-Dorsal)
+     * Articulação Metacarpofalangeana (boleto): 4 projeções
+     * Metacarpo: 4 projeções (Latero-Medial, Médio-Lateral, Dorso-Palmar, oblíquas)
+     * Carpo: 6 projeções (Latero-Medial, Dorso-Palmar, 4 oblíquas)
+     * Rádio/Ulna: 2 projeções
+   
+   - Membro Anterior Esquerdo (MAE): MESMAS 20 projeções
+
+B) MEMBROS POSTERIORES (40 imagens):
+   - Membro Posterior Direito (MPD):
+     * Casco: 4 projeções
+     * Articulação Metatarsofalangeana (boleto): 4 projeções
+     * Metatarso: 4 projeções
+     * Tarso (Jarretes): 6 projeções (Latero-Medial, Dorso-Plantar, 4 oblíquas)
+     * Tíbia/Fíbula: 2 projeções
+   
+   - Membro Posterior Esquerdo (MPE): MESMAS 20 projeções
+
+C) COLUNA VERTEBRAL (15 imagens):
+   - Coluna cervical: 5 imagens
+   - Coluna torácica: 5 imagens
+   - Coluna lombar: 5 imagens
+
+D) OUTRAS ESTRUTURAS (5+ imagens):
+   - Articulação coxofemoral bilateral
+   - Joelhos (articulação femorotibiopatelar)
+   - Crânio/Seios paranasais (se indicado)
+
+2. PARA CADA IMAGEM, FORNEÇA:
+   - Código da imagem (ex: MAD-C-LM = Membro Anterior Direito, Casco, Latero-Medial)
+   - Nome completo da projeção
+   - Descrição técnica detalhada (estruturas visíveis, qualidade da imagem)
+   - Achados radiográficos (normal ou alterações encontradas)
+   - Interpretação clínica
+   - Grau de significância (sem alteração, leve, moderado, severo)
+
+3. CAMPOS ANATÔMICOS CORRELACIONADOS (para o diagrama):
+   C = Cernelha
+   G = Garrote (dorso)
+   L = Lombar
+   S = Sacro
+   A = Anca
+   MAD = Membro Anterior Direito
+   MAE = Membro Anterior Esquerdo
+   MPD = Membro Posterior Direito
+   MPE = Membro Posterior Esquerdo
+   CP = Carpo Direito
+   CE = Carpo Esquerdo
+   TD = Tarso Direito
+   TE = Tarso Esquerdo
+   CA = Cabeça
+   PC = Pescoço
+
+4. ESTRUTURA DO RELATÓRIO:
+
+═══════════════════════════════════════════════════════════════
+                RELATÓRIO DE EXAME DE COMPRA DE EQUINOS
+═══════════════════════════════════════════════════════════════
+
+IDENTIFICAÇÃO DO ANIMAL:
+Nome: [NOME]
+Raça: [RAÇA]
+Idade: [IDADE]
+Sexo: [SEXO]
+Pelagem: [PELAGEM]
+Proprietário: [PROPRIETÁRIO]
+
+DADOS DO EXAME:
+Data: [DATA]
+Veterinário Responsável: [VETERINÁRIO]
+Local: [LOCAL]
+
+═══════════════════════════════════════════════════════════════
+                    EXAME RADIOGRÁFICO COMPLETO
+═══════════════════════════════════════════════════════════════
+
+I. MEMBROS ANTERIORES
+
+A) MEMBRO ANTERIOR DIREITO (MAD)
+
+1. CASCO (4 projeções)
+
+[MAD-C-LM] LATERO-MEDIAL
+Descrição: Projeção lateral do casco direito anterior mostrando...
+[descreva estruturas ósseas, espaços articulares, contornos]
+Achados: [Normal / Alterações encontradas]
+Interpretação: [Análise clínica]
+Significância: [Sem alteração / Leve / Moderado / Severo]
+
+[MAD-C-ML] MÉDIO-LATERAL
+[similar para cada projeção]
+
+[MAD-C-DP] DORSO-PALMAR
+[...]
+
+[MAD-C-PD] PALMAR-DORSAL
+[...]
+
+2. ARTICULAÇÃO METACARPOFALANGEANA (Boleto) - 4 projeções
+[similar, com códigos MAD-B-LM, MAD-B-ML, etc]
+
+3. METACARPO - 4 projeções
+[...]
+
+4. CARPO - 6 projeções
+[...]
+
+B) MEMBRO ANTERIOR ESQUERDO (MAE)
+[Repetir toda estrutura com códigos MAE]
+
+II. MEMBROS POSTERIORES
+[Similar aos anteriores, com códigos MPD e MPE]
+
+III. COLUNA VERTEBRAL
+[15 imagens da coluna]
+
+IV. OUTRAS ESTRUTURAS
+[Articulações adicionais]
+
+═══════════════════════════════════════════════════════════════
+                    RESUMO E CONCLUSÃO
+═══════════════════════════════════════════════════════════════
+
+ACHADOS PRINCIPAIS:
+[Liste todos os achados relevantes]
+
+CLASSIFICAÇÃO GERAL DO ANIMAL:
+[ ] Aprovado sem restrições
+[ ] Aprovado com restrições
+[ ] Reprovado
+
+RECOMENDAÇÕES:
+[Recomendações baseadas nos achados]
+
+OBSERVAÇÕES FINAIS:
+[Comentários adicionais]
+
+═══════════════════════════════════════════════════════════════
+
+Veterinário Responsável: ${horseData.veterinario || 'Dr. Veterinário'}
+CRMV: __________
+Assinatura: _________________________
+Data: ${horseData.data_exame}
+
+
+SEJA EXTREMAMENTE DETALHADO. Descreva TODAS as 80+ imagens com análise técnica completa.`,
+        add_context_from_internet: true
+      });
+
+      // Criar guia de campos (bloco de notas)
+      const fieldsGuide = `
+═══════════════════════════════════════════════════════════════
+          GUIA DE CAMPOS - EXAME DE COMPRA DE EQUINOS
+              (Bloco de Notas - Correlação de Códigos)
+═══════════════════════════════════════════════════════════════
+
+INSTRUÇÕES DE USO:
+Copie os códigos abaixo e cole no Word/documento. Os códigos serão
+substituídos automaticamente pelas informações correspondentes no
+diagrama anatômico do equino.
+
+═══════════════════════════════════════════════════════════════
+                    CAMPOS ANATÔMICOS PRINCIPAIS
+═══════════════════════════════════════════════════════════════
+
+C = Cernelha (ponto mais alto entre as escápulas)
+G = Garrote (região dorsal/lombar)
+L = Lombar (região lombar)
+S = Sacro (região sacral)
+A = Anca (tuberosidade coxal)
+CA = Cabeça
+PC = Pescoço
+PT = Peito
+CO = Costelas
+AB = Abdômen
+GA = Garupa
+
+═══════════════════════════════════════════════════════════════
+                    MEMBROS ANTERIORES
+═══════════════════════════════════════════════════════════════
+
+MAD = Membro Anterior Direito (completo)
+MAE = Membro Anterior Esquerdo (completo)
+
+SUBDIVISÕES MEMBROS ANTERIORES:
+MAD-CP = Carpo Direito
+MAE-CE = Carpo Esquerdo
+MAD-MC = Metacarpo Direito
+MAE-MC = Metacarpo Esquerdo
+MAD-B = Boleto Direito Anterior
+MAE-B = Boleto Esquerdo Anterior
+MAD-C = Casco Direito Anterior
+MAE-C = Casco Esquerdo Anterior
+
+═══════════════════════════════════════════════════════════════
+                    MEMBROS POSTERIORES
+═══════════════════════════════════════════════════════════════
+
+MPD = Membro Posterior Direito (completo)
+MPE = Membro Posterior Esquerdo (completo)
+
+SUBDIVISÕES MEMBROS POSTERIORES:
+MPD-TD = Tarso Direito (Jarrete)
+MPE-TE = Tarso Esquerdo (Jarrete)
+MPD-MT = Metatarso Direito
+MPE-MT = Metatarso Esquerdo
+MPD-B = Boleto Direito Posterior
+MPE-B = Boleto Esquerdo Posterior
+MPD-C = Casco Direito Posterior
+MPE-C = Casco Esquerdo Posterior
+
+═══════════════════════════════════════════════════════════════
+                    CÓDIGOS DE PROJEÇÕES RADIOGRÁFICAS
+═══════════════════════════════════════════════════════════════
+
+LM = Latero-Medial
+ML = Médio-Lateral
+DP = Dorso-Palmar (membros anteriores) / Dorso-Plantar (posteriores)
+PD = Palmar-Dorsal / Plantar-Dorsal
+O45 = Oblíqua 45° (4 variações)
+
+EXEMPLOS DE USO:
+MAD-C-LM = Casco Anterior Direito, projeção Latero-Medial
+MPE-TD-DP = Tarso Esquerdo, projeção Dorso-Plantar
+MAE-B-O45 = Boleto Anterior Esquerdo, oblíqua 45°
+
+═══════════════════════════════════════════════════════════════
+                    ARTICULAÇÕES ESPECÍFICAS
+═══════════════════════════════════════════════════════════════
+
+CFD = Coxofemoral Direita
+CFE = Coxofemoral Esquerda
+JD = Joelho Direito
+JE = Joelho Esquerdo
+ED = Escápula Direita
+EE = Escápula Esquerda
+
+═══════════════════════════════════════════════════════════════
+                    COLUNA VERTEBRAL
+═══════════════════════════════════════════════════════════════
+
+CV1-CV7 = Vértebras Cervicais (1 a 7)
+CT1-CT18 = Vértebras Torácicas (1 a 18)
+CL1-CL6 = Vértebras Lombares (1 a 6)
+CS1-CS5 = Vértebras Sacrais (1 a 5)
+CC1-CC18 = Vértebras Coccígeas (1 a 18)
+
+═══════════════════════════════════════════════════════════════
+                    SISTEMA DE CLASSIFICAÇÃO
+═══════════════════════════════════════════════════════════════
+
+0 = Sem alterações (Normal)
+1 = Alteração leve (Significância mínima)
+2 = Alteração moderada (Observar evolução)
+3 = Alteração severa (Restrição de uso)
+4 = Alteração grave (Reprovação)
+
+═══════════════════════════════════════════════════════════════
+                    COMO USAR NO WORD
+═══════════════════════════════════════════════════════════════
+
+1. Abra o template do Word com diagrama do cavalo
+2. Copie os códigos acima (ex: C, MAD, MPE-TD)
+3. Cole nos campos correspondentes do diagrama
+4. Os códigos serão substituídos automaticamente
+5. Cole o relatório completo abaixo do diagrama
+
+EXEMPLO DE PREENCHIMENTO:
+Região da Cernelha: [Cole "C" aqui]
+Membro Anterior Direito: [Cole "MAD" aqui]
+Carpo Esquerdo: [Cole "MAE-CE" aqui]
+
+═══════════════════════════════════════════════════════════════
+
+Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}
+Sistema: Método NR22 - Exames Veterinários
+
+═══════════════════════════════════════════════════════════════
+`;
+
+      setGeneratedReport(response);
+      setFieldGuide(fieldsGuide);
+
+      // Salvar automaticamente no repositório
+      try {
+        await base44.entities.GeneratedDocument.create({
+          title: `Exame de Compra - ${horseData.nome} - ${horseData.data_exame}`,
+          type: 'relatorio',
+          content: response,
+          summary: `Exame completo de compra com 80+ imagens radiográficas - ${horseData.nome} (${horseData.raca || 'raça não informada'})`,
+          tags: ['exame de compra', 'equinos', horseData.nome, 'radiografia', '80 imagens']
+        });
+
+        await base44.entities.GeneratedDocument.create({
+          title: `Guia de Campos - ${horseData.nome}`,
+          type: 'manual',
+          content: fieldsGuide,
+          summary: 'Bloco de notas com códigos de correlação para diagrama anatômico',
+          tags: ['guia', 'campos', 'códigos', horseData.nome]
+        });
+      } catch (error) {
+        console.error('Erro ao salvar no repositório:', error);
+      }
+
+      toast.success('✅ Exame completo gerado e salvo automaticamente!');
+
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao gerar exame');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const downloadFile = (content, filename) => {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Arquivo baixado!');
+  };
+
+  const copyContent = async (content) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success('Copiado para área de transferência!');
+    } catch (error) {
+      toast.error('Erro ao copiar');
+    }
+  };
+
+  return (
+    <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-lg">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-xl bg-amber-600 flex items-center justify-center shadow-lg">
+          <FileText className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h3 className="font-bold text-slate-800">Exame de Compra de Equinos</h3>
+          <p className="text-xs text-slate-600">Relatório completo com 80+ imagens radiográficas</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {/* Formulário de dados do cavalo */}
+        <div className="p-3 bg-white rounded-lg border border-amber-200 space-y-2">
+          <p className="text-sm font-semibold text-amber-800 mb-2">📋 Dados do Equino:</p>
+          
+          <Input
+            placeholder="Nome do Cavalo *"
+            value={horseData.nome}
+            onChange={(e) => setHorseData({...horseData, nome: e.target.value})}
+            className="text-sm"
+          />
+          
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              placeholder="Raça"
+              value={horseData.raca}
+              onChange={(e) => setHorseData({...horseData, raca: e.target.value})}
+              className="text-sm"
+            />
+            <Input
+              placeholder="Idade"
+              value={horseData.idade}
+              onChange={(e) => setHorseData({...horseData, idade: e.target.value})}
+              className="text-sm"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              placeholder="Sexo"
+              value={horseData.sexo}
+              onChange={(e) => setHorseData({...horseData, sexo: e.target.value})}
+              className="text-sm"
+            />
+            <Input
+              placeholder="Pelagem"
+              value={horseData.pelagem}
+              onChange={(e) => setHorseData({...horseData, pelagem: e.target.value})}
+              className="text-sm"
+            />
+          </div>
+          
+          <Input
+            placeholder="Proprietário"
+            value={horseData.proprietario}
+            onChange={(e) => setHorseData({...horseData, proprietario: e.target.value})}
+            className="text-sm"
+          />
+          
+          <Input
+            placeholder="Veterinário Responsável"
+            value={horseData.veterinario}
+            onChange={(e) => setHorseData({...horseData, veterinario: e.target.value})}
+            className="text-sm"
+          />
+        </div>
+
+        {/* Botão de gerar */}
+        <Button
+          onClick={generateCompleteExam}
+          disabled={generating || !horseData.nome}
+          className="w-full bg-amber-600 hover:bg-amber-700 h-12"
+        >
+          {generating ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Gerando exame completo (80+ imagens)...
+            </>
+          ) : (
+            <>
+              <FileText className="w-5 h-5 mr-2" />
+              Gerar Exame Completo de Compra
+            </>
+          )}
+        </Button>
+
+        {/* Resultados gerados */}
+        {generatedReport && fieldGuide && (
+          <div className="space-y-3">
+            {/* Guia de Campos (Bloco de Notas) */}
+            <div className="p-3 bg-green-50 rounded-lg border-2 border-green-300">
+              <p className="text-xs font-semibold text-green-800 mb-2">
+                📝 Guia de Campos (Bloco de Notas)
+              </p>
+              <p className="text-xs text-green-700 mb-2">
+                Códigos para correlacionar com diagrama do cavalo
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyContent(fieldGuide)}
+                  className="border-green-300"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copiar Guia
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => downloadFile(fieldGuide, `Guia_Campos_${horseData.nome.replace(/\s/g, '_')}`)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Baixar .txt
+                </Button>
+              </div>
+            </div>
+
+            {/* Relatório Completo (Word) */}
+            <div className="p-3 bg-blue-50 rounded-lg border-2 border-blue-300">
+              <p className="text-xs font-semibold text-blue-800 mb-2">
+                📄 Relatório Completo (80+ imagens)
+              </p>
+              <p className="text-xs text-blue-700 mb-2">
+                Documento pronto para colar no Word
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyContent(generatedReport)}
+                  className="border-blue-300"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copiar Relatório
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => downloadFile(generatedReport, `Exame_Compra_${horseData.nome.replace(/\s/g, '_')}`)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Baixar .txt
+                </Button>
+              </div>
+            </div>
+
+            {/* Instruções de uso */}
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <p className="text-xs text-amber-800 font-semibold mb-1">
+                📌 Como usar:
+              </p>
+              <ul className="text-xs text-amber-700 space-y-1">
+                <li>1. Baixe o Guia de Campos (bloco de notas)</li>
+                <li>2. Abra seu template Word com diagrama do cavalo</li>
+                <li>3. Cole os códigos nos campos do diagrama (C, MAD, MPE, etc)</li>
+                <li>4. Cole o Relatório Completo abaixo do diagrama</li>
+                <li>5. Documentos salvos automaticamente em "Documentos Gerados"</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
