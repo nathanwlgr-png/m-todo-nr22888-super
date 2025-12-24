@@ -125,7 +125,6 @@ export default function ClientProfile() {
   const clientId = urlParams.get('id');
 
   const queryClient = useQueryClient();
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [editData, setEditData] = React.useState({});
   const [aiSummary, setAiSummary] = React.useState(null);
   const [loadingSummary, setLoadingSummary] = React.useState(false);
@@ -142,8 +141,6 @@ export default function ClientProfile() {
   const [closingProbability, setClosingProbability] = React.useState(null);
   const [postVisitOpen, setPostVisitOpen] = React.useState(false);
   const [selectedVisitId, setSelectedVisitId] = React.useState(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
-  const [autoSaveTimeout, setAutoSaveTimeout] = React.useState(null);
 
   const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
@@ -299,7 +296,8 @@ export default function ClientProfile() {
     mutationFn: (data) => base44.entities.Client.update(clientId, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['client', clientId]);
-      setEditDialogOpen(false);
+      queryClient.invalidateQueries(['clients']);
+      toast.success('Salvo!', { duration: 1000 });
     }
   });
 
@@ -309,68 +307,16 @@ export default function ClientProfile() {
     }
   };
 
-  const handleEdit = () => {
-    setEditData({
-      first_name: client.first_name || '',
-      full_name: client.full_name || '',
-      birthdate: client.birthdate || '',
-      email: client.email || '',
-      phone: client.phone || '',
-      address: client.address || '',
-      city: client.city || '',
-      clinic_name: client.clinic_name || '',
-      current_equipment: client.current_equipment || '',
-      client_type: client.client_type || '',
-      decision_role: client.decision_role || '',
-      client_tone: client.client_tone || '',
-      available_budget: client.available_budget || '',
-      decision_deadline: client.decision_deadline || '',
-      notes: client.notes || ''
-    });
-    setEditDialogOpen(true);
-  };
-
-  const handleSaveEdit = () => {
-    updateMutation.mutate(editData);
-  };
-
-  // Auto-save ao sair da página
-  React.useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-        // Salvar automaticamente
-        if (editData && Object.keys(editData).length > 0) {
-          updateMutation.mutate(editData);
-        }
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges, editData]);
-
-  // Auto-save com debounce ao editar
-  const handleEditDataChange = (field, value) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
-    
-    // Clear timeout anterior
-    if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-    
-    // Salvar após 2 segundos de inatividade
-    const timeout = setTimeout(async () => {
-      try {
-        await base44.entities.Client.update(clientId, { [field]: value });
-        setHasUnsavedChanges(false);
-        toast.success('Salvo automaticamente', { duration: 1000 });
-      } catch (error) {
-        console.error('Erro auto-save:', error);
-      }
-    }, 2000);
-    
-    setAutoSaveTimeout(timeout);
+  // Auto-save imediato
+  const handleQuickUpdate = async (field, value) => {
+    try {
+      await base44.entities.Client.update(clientId, { [field]: value });
+      queryClient.invalidateQueries(['client', clientId]);
+      toast.success('✓ Salvo', { duration: 800 });
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      toast.error('Erro ao salvar');
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -624,9 +570,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="text-lg font-semibold text-white">{clientLabel}</h1>
-          <button onClick={handleEdit} className="ml-auto p-2 rounded-full glass hover:bg-white/10">
-            <Edit2 className="w-5 h-5 text-white" />
-          </button>
+
         </div>
 
         <div className="relative flex items-center gap-4">
@@ -716,13 +660,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300">
           <h3 className="font-bold text-slate-800 mb-3">📋 Informações do Cliente</h3>
           <div className="grid grid-cols-2 gap-2 mb-3">
-            <Button
-              onClick={handleEdit}
-              className="w-full bg-orange-600 hover:bg-orange-700"
-            >
-              <Edit2 className="w-4 h-4 mr-2" />
-              Editar Dados Completos
-            </Button>
+
             <Button
               onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
               variant="outline"
@@ -1631,251 +1569,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           compact={true}
           />
 
-          {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Cliente</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Primeiro Nome *</Label>
-              <Input
-                value={editData.first_name}
-                onChange={(e) => handleEditDataChange('first_name', e.target.value)}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label>Nome Completo</Label>
-              <Input
-                value={editData.full_name}
-                onChange={(e) => setEditData({...editData, full_name: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Data de Nascimento</Label>
-              <Input
-                type="text"
-                value={editData.birthdate}
-                onChange={(e) => setEditData({...editData, birthdate: e.target.value})}
-                placeholder="DD/MM/AAAA ou AAAA-MM-DD"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={editData.email}
-                onChange={(e) => handleEditDataChange('email', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Instagram</Label>
-              <Input
-                placeholder="@usuario"
-                value={editData.instagram_handle || ''}
-                onChange={(e) => handleEditDataChange('instagram_handle', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Equipamento de Interesse</Label>
-              <Input
-                placeholder="Ex: VG2, Hematologia, Bioquímico..."
-                value={editData.equipment_interest || ''}
-                onChange={(e) => handleEditDataChange('equipment_interest', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>WhatsApp</Label>
-              <Input
-                value={editData.phone}
-                onChange={(e) => setEditData({...editData, phone: e.target.value})}
-                placeholder="5511999999999"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Endereço</Label>
-              <Input
-                value={editData.address}
-                onChange={(e) => setEditData({...editData, address: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Cidade</Label>
-              <Input
-                value={editData.city}
-                onChange={(e) => handleEditDataChange('city', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Nome da Clínica/Hospital</Label>
-              <Input
-                value={editData.clinic_name}
-                onChange={(e) => handleEditDataChange('clinic_name', e.target.value)}
-                onBlur={async (e) => {
-                  // Buscar CNPJ automaticamente quando sair do campo
-                  if (e.target.value && !editData.cnpj) {
-                    try {
-                      const result = await base44.integrations.Core.InvokeLLM({
-                        prompt: `Busque o CNPJ desta empresa: ${e.target.value} em ${editData.city || 'Brasil'}. Retorne apenas o CNPJ (14 dígitos).`,
-                        add_context_from_internet: true,
-                        response_json_schema: {
-                          type: "object",
-                          properties: {
-                            cnpj: { type: "string" },
-                            razao_social: { type: "string" }
-                          }
-                        }
-                      });
-                      if (result.cnpj) {
-                        handleEditDataChange('cnpj', result.cnpj);
-                        if (result.razao_social) {
-                          handleEditDataChange('razao_social', result.razao_social);
-                        }
-                        toast.success('CNPJ encontrado e salvo!');
-                      }
-                    } catch (error) {
-                      console.log('CNPJ não encontrado');
-                    }
-                  }
-                }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>CNPJ</Label>
-              <Input
-                value={editData.cnpj || ''}
-                onChange={(e) => handleEditDataChange('cnpj', e.target.value)}
-                placeholder="Busca automática ao preencher clínica"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Equipamento Atual</Label>
-              <Input
-                value={editData.current_equipment}
-                onChange={(e) => setEditData({...editData, current_equipment: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tipo de Cliente</Label>
-              <Select
-                value={editData.client_type}
-                onValueChange={(value) => setEditData({...editData, client_type: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="clinica_pequena">Clínica Pequena</SelectItem>
-                  <SelectItem value="clinica_media">Clínica Média</SelectItem>
-                  <SelectItem value="hospital_veterinario">Hospital Veterinário</SelectItem>
-                  <SelectItem value="laboratorio_terceirizado">Lab. Terceirizado</SelectItem>
-                  <SelectItem value="clinica_especializada">Clínica Especializada</SelectItem>
-                  <SelectItem value="sem_equipamento">Sem Equipamento</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Papel do Decisor *</Label>
-              <Select
-                value={editData.decision_role}
-                onValueChange={(value) => setEditData({...editData, decision_role: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="proprietario">Proprietário</SelectItem>
-                  <SelectItem value="veterinario_responsavel">Veterinário Responsável</SelectItem>
-                  <SelectItem value="gestor_laboratorio">Gestor de Laboratório</SelectItem>
-                  <SelectItem value="coordenador_tecnico">Coordenador Técnico</SelectItem>
-                  <SelectItem value="socio">Sócio</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tom de Voz Observado</Label>
-              <Select
-                value={editData.client_tone}
-                onValueChange={(value) => setEditData({...editData, client_tone: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="assertivo">Assertivo</SelectItem>
-                  <SelectItem value="analitico">Analítico</SelectItem>
-                  <SelectItem value="receptivo">Receptivo</SelectItem>
-                  <SelectItem value="entusiasmado">Entusiasmado</SelectItem>
-                  <SelectItem value="cauteloso">Cauteloso</SelectItem>
-                  <SelectItem value="direto">Direto</SelectItem>
-                  <SelectItem value="emocional">Emocional</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Orçamento Disponível (R$)</Label>
-              <Input
-                type="number"
-                value={editData.available_budget}
-                onChange={(e) => setEditData({...editData, available_budget: e.target.value})}
-                placeholder="0 a 150.000"
-                min="0"
-                max="150000"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Prazo para Decisão</Label>
-              <Input
-                type="date"
-                value={editData.decision_deadline}
-                onChange={(e) => setEditData({...editData, decision_deadline: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notas</Label>
-              <Textarea
-                value={editData.notes}
-                onChange={(e) => setEditData({...editData, notes: e.target.value})}
-                rows={4}
-              />
-            </div>
-
-            <Button
-              onClick={handleSaveEdit}
-              disabled={updateMutation.isPending}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-            >
-              {updateMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </>
-              )}
-            </Button>
-            </div>
-          </DialogContent>
-          </Dialog>
 
           {/* Upload Document Dialog */}
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>

@@ -8,8 +8,8 @@ import { X, Send, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 
-export default function PlatoAI() {
-  const [open, setOpen] = useState(true);
+export default function PlatoAI({ enabledOnPage = false }) {
+  const [open, setOpen] = useState(enabledOnPage);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',

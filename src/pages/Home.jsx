@@ -712,7 +712,7 @@ export default function Home() {
       {/* Floating Buttons */}
       <FloatingPerformanceMonitor />
       <FloatingWhatsAppButton />
-      <PlatoAI />
+      <PlatoAI enabledOnPage={true} />
 
 
 

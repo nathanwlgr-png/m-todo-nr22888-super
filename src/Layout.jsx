@@ -10,7 +10,7 @@ import FollowUpAutomation from './components/FollowUpAutomation';
 import WhatsAppNotificationService from './components/WhatsAppNotificationService';
 import DocumentAIAnalyzer from './components/DocumentAIAnalyzer';
 
-export default function Layout({ children }) {
+export default function Layout({ children, currentPageName }) {
   return (
     <ErrorRecoverySystem>
       <SystemHealthChecker />
