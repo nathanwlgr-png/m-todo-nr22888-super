@@ -41,8 +41,7 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
     setShowDetailsModal(true);
   };
   
-  const handleCardClick = (e) => {
-    e.preventDefault();
+  const handleCardClick = () => {
     if (!client || !client.id || client.is_deleted) {
       toast.error('Cliente não encontrado ou foi removido');
       return;
