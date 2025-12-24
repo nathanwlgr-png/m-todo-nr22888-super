@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, FileText, Download, Copy } from 'lucide-react';
+import { Loader2, FileText, Download, Copy, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EquinePurchaseExam() {
   const [generating, setGenerating] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [currentField, setCurrentField] = useState('nome');
+  const recognitionRef = useRef(null);
   const [horseData, setHorseData] = useState({
     nome: '',
     raca: '',
@@ -21,6 +24,57 @@ export default function EquinePurchaseExam() {
   });
   const [generatedReport, setGeneratedReport] = useState(null);
   const [fieldGuide, setFieldGuide] = useState(null);
+
+  // Inicializar reconhecimento de voz
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'pt-BR';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+
+        setHorseData(prev => ({
+          ...prev,
+          [currentField]: transcript
+        }));
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Erro no reconhecimento:', event.error);
+        setIsListening(false);
+        toast.error('Erro ao reconhecer voz');
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [currentField]);
+
+  const toggleVoiceRecognition = (fieldName) => {
+    if (!recognitionRef.current) {
+      toast.error('Reconhecimento de voz não suportado neste navegador');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      toast.success('Reconhecimento de voz pausado');
+    } else {
+      setCurrentField(fieldName);
+      recognitionRef.current.start();
+      setIsListening(true);
+      toast.info(`🎤 Fale agora para preencher: ${fieldName}`);
+    }
+  };
 
   const generateCompleteExam = async () => {
     if (!horseData.nome) {
@@ -399,60 +453,125 @@ Sistema: Método NR22 - Exames Veterinários
       </div>
 
       <div className="space-y-3">
+        {/* Botão de reconhecimento de voz global */}
+        <Button
+          onClick={() => toggleVoiceRecognition(currentField)}
+          className={`w-full h-12 ${isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'}`}
+        >
+          {isListening ? (
+            <>
+              <MicOff className="w-5 h-5 mr-2" />
+              🔴 Gravando... (Clique para parar)
+            </>
+          ) : (
+            <>
+              <Mic className="w-5 h-5 mr-2" />
+              🎤 Ativar Reconhecimento de Voz
+            </>
+          )}
+        </Button>
+
         {/* Formulário de dados do cavalo */}
         <div className="p-3 bg-white rounded-lg border border-amber-200 space-y-2">
           <p className="text-sm font-semibold text-amber-800 mb-2">📋 Dados do Equino:</p>
           
-          <Input
-            placeholder="Nome do Cavalo *"
-            value={horseData.nome}
-            onChange={(e) => setHorseData({...horseData, nome: e.target.value})}
-            className="text-sm"
-          />
-          
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex gap-2">
             <Input
-              placeholder="Raça"
-              value={horseData.raca}
-              onChange={(e) => setHorseData({...horseData, raca: e.target.value})}
-              className="text-sm"
+              placeholder="Nome do Cavalo *"
+              value={horseData.nome}
+              onChange={(e) => setHorseData({...horseData, nome: e.target.value})}
+              onFocus={() => setCurrentField('nome')}
+              className="text-sm flex-1"
             />
-            <Input
-              placeholder="Idade"
-              value={horseData.idade}
-              onChange={(e) => setHorseData({...horseData, idade: e.target.value})}
-              className="text-sm"
-            />
+            <Button
+              size="sm"
+              variant={isListening && currentField === 'nome' ? 'destructive' : 'outline'}
+              onClick={() => toggleVoiceRecognition('nome')}
+              className="px-2"
+            >
+              <Mic className="w-4 h-4" />
+            </Button>
           </div>
           
           <div className="grid grid-cols-2 gap-2">
-            <Input
-              placeholder="Sexo"
-              value={horseData.sexo}
-              onChange={(e) => setHorseData({...horseData, sexo: e.target.value})}
-              className="text-sm"
-            />
-            <Input
-              placeholder="Pelagem"
-              value={horseData.pelagem}
-              onChange={(e) => setHorseData({...horseData, pelagem: e.target.value})}
-              className="text-sm"
-            />
+            <div className="flex gap-1">
+              <Input
+                placeholder="Raça"
+                value={horseData.raca}
+                onChange={(e) => setHorseData({...horseData, raca: e.target.value})}
+                onFocus={() => setCurrentField('raca')}
+                className="text-sm flex-1"
+              />
+              <Button size="sm" variant={isListening && currentField === 'raca' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('raca')} className="px-2">
+                <Mic className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="flex gap-1">
+              <Input
+                placeholder="Idade"
+                value={horseData.idade}
+                onChange={(e) => setHorseData({...horseData, idade: e.target.value})}
+                onFocus={() => setCurrentField('idade')}
+                className="text-sm flex-1"
+              />
+              <Button size="sm" variant={isListening && currentField === 'idade' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('idade')} className="px-2">
+                <Mic className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
           
-          <Input
-            placeholder="Proprietário"
-            value={horseData.proprietario}
-            onChange={(e) => setHorseData({...horseData, proprietario: e.target.value})}
-            className="text-sm"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex gap-1">
+              <Input
+                placeholder="Sexo"
+                value={horseData.sexo}
+                onChange={(e) => setHorseData({...horseData, sexo: e.target.value})}
+                onFocus={() => setCurrentField('sexo')}
+                className="text-sm flex-1"
+              />
+              <Button size="sm" variant={isListening && currentField === 'sexo' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('sexo')} className="px-2">
+                <Mic className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="flex gap-1">
+              <Input
+                placeholder="Pelagem"
+                value={horseData.pelagem}
+                onChange={(e) => setHorseData({...horseData, pelagem: e.target.value})}
+                onFocus={() => setCurrentField('pelagem')}
+                className="text-sm flex-1"
+              />
+              <Button size="sm" variant={isListening && currentField === 'pelagem' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('pelagem')} className="px-2">
+                <Mic className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
           
-          <Input
-            placeholder="Veterinário Responsável"
-            value={horseData.veterinario}
-            onChange={(e) => setHorseData({...horseData, veterinario: e.target.value})}
-            className="text-sm"
-          />
+          <div className="flex gap-2">
+            <Input
+              placeholder="Proprietário"
+              value={horseData.proprietario}
+              onChange={(e) => setHorseData({...horseData, proprietario: e.target.value})}
+              onFocus={() => setCurrentField('proprietario')}
+              className="text-sm flex-1"
+            />
+            <Button size="sm" variant={isListening && currentField === 'proprietario' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('proprietario')} className="px-2">
+              <Mic className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <Input
+              placeholder="Veterinário Responsável"
+              value={horseData.veterinario}
+              onChange={(e) => setHorseData({...horseData, veterinario: e.target.value})}
+              onFocus={() => setCurrentField('veterinario')}
+              className="text-sm flex-1"
+            />
+            <Button size="sm" variant={isListening && currentField === 'veterinario' ? 'destructive' : 'outline'} onClick={() => toggleVoiceRecognition('veterinario')} className="px-2">
+              <Mic className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Botão de gerar */}
