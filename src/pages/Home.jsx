@@ -55,6 +55,8 @@ import CalendarIntegration from '@/components/CalendarIntegration';
 import CompleteSystemReport from '@/components/CompleteSystemReport';
 import RegionalClinicSearch from '@/components/RegionalClinicSearch';
 import BulkClientDataUpdater from '@/components/BulkClientDataUpdater';
+import GPSClinicTracker from '@/components/GPSClinicTracker';
+import GPSTrackerButton from '@/components/GPSTrackerButton';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -313,6 +315,9 @@ export default function Home() {
           
           {/* Botões em formato de 8 */}
           <FloatingButtonsGroup />
+
+          {/* GPS TRACKER - NUNCA REMOVER */}
+          <GPSTrackerButton />
 
           <Link to={createPageUrl('ContactSettings')}>
             <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
@@ -828,6 +833,11 @@ export default function Home() {
           </Button>
         </Link>
 
+        {/* ═══════════════════════════════════════ */}
+        {/* RASTREADOR GPS - NUNCA REMOVER */}
+        {/* ═══════════════════════════════════════ */}
+        <GPSClinicTracker />
+
         {/* Busca Rápida de Cliente */}
         <QuickClientSearch
           onClientSelect={(client) => {
@@ -1341,6 +1351,12 @@ export default function Home() {
       )}
 
 
+      {/* ═══════════════════════════════════════ */}
+      {/* GPS TRACKER FIXO FINAL - NUNCA REMOVER */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-6 mt-6">
+        <GPSClinicTracker />
+      </div>
       
       <div className="h-24" />
 
