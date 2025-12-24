@@ -65,6 +65,11 @@ export default function AIReportingHub() {
     },
     retry: 0,
     enabled: clients.length > 0,
+    staleTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: visits = [] } = useQuery({
@@ -85,6 +90,11 @@ export default function AIReportingHub() {
     },
     retry: 0,
     enabled: clients.length > 0,
+    staleTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   // Gerar relatório customizado via linguagem natural

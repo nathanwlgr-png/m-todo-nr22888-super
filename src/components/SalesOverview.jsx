@@ -39,15 +39,11 @@ export default function SalesOverview() {
         const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
         return allSales.filter(s => {
           if (!s || !s.id) return false;
-          if (!s.client_id) return true; // Venda sem cliente associado
+          if (!s.client_id) return true;
           return validClientIds.has(s.client_id);
         });
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado em venda, ignorando');
-          return [];
-        }
-        console.error('Erro ao carregar vendas:', error);
+        console.warn('Erro ao carregar vendas (ignorando):', error);
         return [];
       }
     },
@@ -56,9 +52,11 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 1,
-    retryDelay: 2000,
-    enabled: clients.length > 0
+    retry: 0,
+    enabled: clients.length > 0,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: consumableOrders = [] } = useQuery({
@@ -88,11 +86,7 @@ export default function SalesOverview() {
         const validClientIds = new Set(clients.map(c => c.id));
         return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado em visita, ignorando');
-          return [];
-        }
-        console.error('Erro ao carregar visitas:', error);
+        console.warn('Erro ao carregar visitas (ignorando):', error);
         return [];
       }
     },
@@ -101,9 +95,11 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 1,
-    retryDelay: 2000,
-    enabled: clients.length > 0
+    retry: 0,
+    enabled: clients.length > 0,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   // Análise expandida de vendas
