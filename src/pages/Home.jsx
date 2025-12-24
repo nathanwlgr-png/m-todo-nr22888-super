@@ -124,14 +124,18 @@ export default function Home() {
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
-        // Não mostrar toast para erros de clientes deletados
-        if (!error.message?.includes('not found')) {
+        // Silenciar erros de clientes não encontrados
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado referenciado, ignorando');
+          return [];
+        }
+        if (!error.message?.includes('Network')) {
           toast.error('Erro de conexão ao carregar dados');
         }
-        return []; // Retorna array vazio em vez de throw
+        return [];
       }
     },
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,

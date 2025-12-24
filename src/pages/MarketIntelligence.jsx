@@ -585,23 +585,23 @@ Priorize clínicas SEM equipamento, hospitais grandes, e regiões com gap de mer
                  )}
 
                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="p-3 bg-white/20 rounded-lg">
-                      <p className="text-xs opacity-90">População Total</p>
-                      <p className="text-2xl font-bold">{results.demographicData.region_summary.total_population?.toLocaleString()}</p>
-                    </div>
-                    <div className="p-3 bg-white/20 rounded-lg">
-                      <p className="text-xs opacity-90">Estabelecimentos IBGE</p>
-                      <p className="text-2xl font-bold">{results.demographicData.region_summary.total_establishments_ibge}</p>
-                    </div>
-                    <div className="p-3 bg-white/20 rounded-lg">
-                      <p className="text-xs opacity-90">Clínicas Esperadas (5k hab)</p>
-                      <p className="text-2xl font-bold">{results.demographicData.region_summary.expected_clinics_total}</p>
-                    </div>
-                    <div className="p-3 bg-white/20 rounded-lg">
-                      <p className="text-xs opacity-90">Gap de Mercado</p>
-                      <p className="text-2xl font-bold">{results.demographicData.region_summary.market_gap}</p>
-                    </div>
-                  </div>
+                   <div className="p-3 bg-white/20 rounded-lg">
+                     <p className="text-xs opacity-90">População Total</p>
+                     <p className="text-2xl font-bold">{results.demographicData.region_summary?.total_population?.toLocaleString() || 0}</p>
+                   </div>
+                   <div className="p-3 bg-white/20 rounded-lg">
+                     <p className="text-xs opacity-90">Estabelecimentos IBGE</p>
+                     <p className="text-2xl font-bold">{results.demographicData.region_summary?.total_establishments_ibge || 0}</p>
+                   </div>
+                   <div className="p-3 bg-white/20 rounded-lg">
+                     <p className="text-xs opacity-90">Clínicas Esperadas (5k hab)</p>
+                     <p className="text-2xl font-bold">{results.demographicData.region_summary?.expected_clinics_total || 0}</p>
+                   </div>
+                   <div className="p-3 bg-white/20 rounded-lg">
+                     <p className="text-xs opacity-90">Gap de Mercado</p>
+                     <p className="text-2xl font-bold">{results.demographicData.region_summary?.market_gap || 0}</p>
+                   </div>
+                 </div>
 
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {results.demographicData.cities_complete_data?.map((city, idx) => (
