@@ -50,6 +50,7 @@ import MassClientImporter from '@/components/MassClientImporter';
 import KPIDashboard from '@/components/KPIDashboard';
 import AIDocumentsHub from '@/components/AIDocumentsHub';
 import SalesAutomation from '@/components/SalesAutomation';
+import SmartProductSuggestions from '@/components/SmartProductSuggestions';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -1246,6 +1247,11 @@ export default function Home() {
           {/* Automação de Vendas */}
           <div className="mt-6">
             <SalesAutomation />
+          </div>
+
+          {/* Sugestões Inteligentes de Produtos */}
+          <div className="mt-6">
+            <SmartProductSuggestions />
           </div>
 
           {/* Importação em Massa */}
