@@ -46,6 +46,10 @@ import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
 import HotClientsDialog from '@/components/HotClientsDialog';
 import VeterinaryEventsCalendar from '@/components/VeterinaryEventsCalendar';
+import MassClientImporter from '@/components/MassClientImporter';
+import KPIDashboard from '@/components/KPIDashboard';
+import AIDocumentsHub from '@/components/AIDocumentsHub';
+import SalesAutomation from '@/components/SalesAutomation';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -343,6 +347,22 @@ export default function Home() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 h-12 rounded-xl border-2"
             />
+
+            {/* Autocomplete ao digitar */}
+            {searchTerm.length >= 1 && filteredClients.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border-2 border-indigo-200 z-50 max-h-64 overflow-y-auto">
+                {filteredClients.slice(0, 5).map((client) => (
+                  <Link 
+                    key={client.id} 
+                    to={createPageUrl(`ClientProfile?id=${client.id}`)}
+                    className="block p-3 hover:bg-indigo-50 border-b last:border-b-0"
+                  >
+                    <p className="font-semibold text-slate-800">{client.first_name}</p>
+                    <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -1189,6 +1209,48 @@ export default function Home() {
                 </Link>
               </div>
             </Card>
+          </div>
+
+          {/* Pós-Visita - Fixo */}
+          <div className="mt-4">
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-800">Registro Pós-Visita</h3>
+                  <p className="text-xs text-slate-600">Registre resultados da visita</p>
+                </div>
+                <Link to={createPageUrl('PostVisitAnalysis')}>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    Registrar
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+
+          {/* KPIs Otimizados */}
+          <div className="mt-6">
+            <KPIDashboard />
+          </div>
+
+          {/* Central de Documentos IA */}
+          <div className="mt-6">
+            <AIDocumentsHub />
+          </div>
+
+          {/* Automação de Vendas */}
+          <div className="mt-6">
+            <SalesAutomation />
+          </div>
+
+          {/* Importação em Massa */}
+          <div className="mt-6">
+            <MassClientImporter />
           </div>
 
           {/* Eventos Veterinários 2025-2026 */}
