@@ -61,6 +61,9 @@ import PossibleSalesSearch from '@/components/PossibleSalesSearch';
 import RecentClientsWidget from '@/components/RecentClientsWidget';
 import SmartGoalsAI from '@/components/SmartGoalsAI';
 import EnhancedMarketIntelligence from '@/components/EnhancedMarketIntelligence';
+import UniversalAISearch from '@/components/UniversalAISearch';
+import ClipboardManager from '@/components/ClipboardManager';
+import UniversalDocumentIO from '@/components/UniversalDocumentIO';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -680,19 +683,19 @@ export default function Home() {
         <NatashaDietPlan />
       </div>
 
-      {/* Pesquisa Científica Veterinária */}
+      {/* Pesquisa Universal com IA */}
       <div className="px-6 mt-6">
-        <ScientificResearchAI />
+        <UniversalAISearch />
       </div>
 
-      {/* Pesquisa Hemogasometria Equina */}
+      {/* Área de Transferência Fixa */}
       <div className="px-6 mt-6">
-        <EquineBloodGasResearch />
+        <ClipboardManager />
       </div>
 
-      {/* Pesquisa 8 Artigos Potros */}
+      {/* Import/Export Universal */}
       <div className="px-6 mt-6">
-        <FoalSynovialFluidResearch />
+        <UniversalDocumentIO />
       </div>
 
       {/* Descoberta Automática Completa - CRMV + Google */}

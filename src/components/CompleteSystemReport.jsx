@@ -47,6 +47,10 @@ export default function CompleteSystemReport() {
   const generateReport = async () => {
     setGenerating(true);
     try {
+      // Auto-atualizar dados antes de gerar
+      await queryClient.invalidateQueries(['clients']);
+      await queryClient.invalidateQueries(['all-sales']);
+      await queryClient.invalidateQueries(['all-visits']);
       // Estatísticas gerais
       const stats = {
         totalClients: clients.length,
