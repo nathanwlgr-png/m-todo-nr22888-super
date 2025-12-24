@@ -94,6 +94,7 @@ import ScientificResearchAI from '@/components/ScientificResearchAI';
 import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
 import QuickClientSearch from '@/components/QuickClientSearch';
+import DataSaverMode from '@/components/DataSaverMode';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
@@ -117,15 +118,17 @@ export default function Home() {
   const [scoreFilter, setScoreFilter] = React.useState('all');
   const [showFilters, setShowFilters] = React.useState(false);
 
+  const dataSaverEnabled = typeof localStorage !== 'undefined' && localStorage.getItem('data_saver_mode') === 'true';
+
   const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
       try {
-        const data = await base44.entities.Client.list('-updated_date', 100);
+        const limit = dataSaverEnabled ? 50 : 100; // Reduzir limite em modo economia
+        const data = await base44.entities.Client.list('-updated_date', limit);
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
-        // Silenciar erros de clientes não encontrados
         if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
           console.warn('Cliente deletado referenciado, ignorando');
           return [];
@@ -136,13 +139,13 @@ export default function Home() {
         return [];
       }
     },
-    retry: 1,
+    retry: dataSaverEnabled ? 0 : 1,
     retryDelay: 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    staleTime: 60 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
+    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000, // 2h em economia, 1h normal
+    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000
   });
 
   const { data: user } = useQuery({
@@ -246,6 +249,11 @@ export default function Home() {
       {/* Rate Limit Warning */}
       <div className="px-6 mt-4">
         <AIRateLimitManager />
+      </div>
+
+      {/* Data Saver Mode */}
+      <div className="px-6 mt-4">
+        <DataSaverMode />
       </div>
       
       {/* Header Fixo */}
