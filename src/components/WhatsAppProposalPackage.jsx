@@ -100,7 +100,7 @@ Retorne em formato de mensagens separadas prontas para copiar/colar no WhatsApp.
 
       <Button
         onClick={sendWhatsAppPackage}
-        disabled={sending || !client.phone || !equipmentInterest}
+        disabled={sending || !client.phone || !client.equipment_interest}
         className="w-full bg-green-600 hover:bg-green-700 h-12"
       >
         {sending ? (
