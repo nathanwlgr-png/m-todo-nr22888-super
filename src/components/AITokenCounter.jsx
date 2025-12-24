@@ -26,7 +26,7 @@ export default function AITokenCounter() {
   });
 
   useEffect(() => {
-    // Interceptar chamadas de IA (simulado - incrementa a cada 30s para demonstração)
+    // Interceptar chamadas de IA (simulado - incrementa a cada 1 hora para demonstração)
     const interval = setInterval(() => {
       const newTotal = totalCalls + 1;
       const newToday = todayCalls + 1;
@@ -36,7 +36,7 @@ export default function AITokenCounter() {
       
       localStorage.setItem('ai_total_calls', newTotal.toString());
       localStorage.setItem('ai_today_calls', newToday.toString());
-    }, 30000); // Incrementa a cada 30s
+    }, 3600000); // Incrementa a cada 1 hora (60 * 60 * 1000)
 
     return () => clearInterval(interval);
   }, [totalCalls, todayCalls]);
@@ -59,7 +59,7 @@ export default function AITokenCounter() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div className="p-3 bg-white rounded-lg border border-blue-200 text-center">
           <p className="text-2xl font-bold text-blue-700">{totalCalls}</p>
           <p className="text-xs text-slate-600">Total Geral</p>
@@ -68,6 +68,11 @@ export default function AITokenCounter() {
         <div className={`p-3 rounded-lg border text-center ${isHighUsage ? 'bg-red-50 border-red-200' : 'bg-white border-blue-200'}`}>
           <p className={`text-2xl font-bold ${isHighUsage ? 'text-red-700' : 'text-blue-700'}`}>{todayCalls}</p>
           <p className="text-xs text-slate-600">Hoje</p>
+        </div>
+
+        <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 text-center">
+          <p className="text-2xl font-bold text-purple-700">{todayCalls * 30}</p>
+          <p className="text-xs text-slate-600">Est. Mês</p>
         </div>
       </div>
 
