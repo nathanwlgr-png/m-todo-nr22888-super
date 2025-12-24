@@ -795,7 +795,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                 <div className="bg-green-50 rounded-lg p-3 border border-green-200">
                   <p className="text-xs font-semibold text-green-700 mb-1">✓ Positivos</p>
                   <ul className="text-xs text-green-600 space-y-0.5">
-                    {generatedMessage.probability_factors.positivos.map((f, i) => (
+                    {(generatedMessage.probability_factors?.positivos || []).map((f, i) => (
                       <li key={i}>• {f}</li>
                     ))}
                   </ul>
@@ -803,7 +803,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
                 <div className="bg-red-50 rounded-lg p-3 border border-red-200">
                   <p className="text-xs font-semibold text-red-700 mb-1">⚠ Negativos</p>
                   <ul className="text-xs text-red-600 space-y-0.5">
-                    {generatedMessage.probability_factors.negativos.map((f, i) => (
+                    {(generatedMessage.probability_factors?.negativos || []).map((f, i) => (
                       <li key={i}>• {f}</li>
                     ))}
                   </ul>
