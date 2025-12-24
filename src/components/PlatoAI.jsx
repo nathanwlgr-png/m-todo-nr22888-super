@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 
 export default function PlatoAI() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -21,12 +21,14 @@ Sou Platão, filho de Atenas, discípulo de Sócrates e mestre de Aristóteles. 
 
 Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala comigo sobre tua jornada, teus clientes, tuas estratégias de vendas - e aplicaremos a filosofia à praxis comercial.
 
-O que te perturba a alma nesta jornada?`
+**Agora estou sempre à escuta.** Fala, e responderei.`
     }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const suggestedTopics = [
     "💭 Como convencer um cliente difícil?",
@@ -44,6 +46,69 @@ O que te perturba a alma nesta jornada?`
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Reconhecimento de voz contínuo
+  useEffect(() => {
+    if (!open) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn('Reconhecimento de voz não suportado');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'pt-BR';
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript;
+      if (transcript.trim()) {
+        sendMessage(transcript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'no-speech') {
+        // Ignorar silêncio
+        return;
+      }
+      console.error('Erro reconhecimento de voz:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      // Reiniciar automaticamente
+      if (open && isListening) {
+        try {
+          recognition.start();
+        } catch (error) {
+          console.warn('Não foi possível reiniciar reconhecimento');
+        }
+      }
+    };
+
+    recognitionRef.current = recognition;
+
+    // Iniciar reconhecimento após 1s
+    const timeout = setTimeout(() => {
+      try {
+        recognition.start();
+        setIsListening(true);
+        toast.success('🎤 Platão está te ouvindo', { duration: 2000 });
+      } catch (error) {
+        console.warn('Não foi possível iniciar reconhecimento de voz');
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [open]);
 
   const sendMessage = async (messageText) => {
     if (!messageText.trim() || loading) return;
@@ -108,45 +173,43 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
   };
 
   if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 via-yellow-600 to-orange-600 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border-4 border-amber-200"
-        style={{ boxShadow: '0 8px 32px rgba(217, 119, 6, 0.5)' }}
-      >
-        <div className="text-center">
-          <span className="text-2xl">🏛️</span>
-        </div>
-      </button>
-    );
+    return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end justify-center sm:items-center sm:p-4">
-      <Card className="w-full max-w-2xl h-[90vh] sm:h-[600px] bg-gradient-to-b from-amber-50 to-orange-50 border-4 border-amber-400 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-3xl overflow-hidden">
+    <div className="fixed bottom-4 right-4 z-50 w-96 max-w-[calc(100vw-2rem)]">
+      <Card className="bg-gradient-to-b from-amber-50 to-orange-50 border-4 border-amber-400 shadow-2xl flex flex-col rounded-3xl overflow-hidden max-h-[500px]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-700 via-yellow-700 to-orange-700 p-4 flex items-center justify-between border-b-4 border-amber-900">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-amber-200 flex items-center justify-center text-2xl border-2 border-amber-900">
+        <div className="bg-gradient-to-r from-amber-700 via-yellow-700 to-orange-700 p-3 flex items-center justify-between border-b-4 border-amber-900">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xl border-2 border-amber-900">
               🏛️
             </div>
             <div>
-              <h2 className="font-bold text-white text-lg">Platão</h2>
-              <p className="text-xs text-amber-100">Filósofo da Academia de Atenas</p>
+              <h2 className="font-bold text-white">Platão</h2>
+              <p className="text-xs text-amber-100 flex items-center gap-1">
+                {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                {isListening ? 'Ouvindo...' : 'Filósofo'}
+              </p>
             </div>
           </div>
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              if (recognitionRef.current) {
+                recognitionRef.current.stop();
+              }
+            }}
             className="text-white hover:bg-white/20"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[300px]">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[85%] rounded-2xl p-3 ${
@@ -179,13 +242,13 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
 
         {/* Suggested Topics */}
         {messages.length === 1 && (
-          <div className="px-4 pb-2">
-            <p className="text-xs font-semibold text-amber-800 mb-2">💡 Temas para reflexão:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedTopics.map((topic, idx) => (
+          <div className="px-3 pb-2">
+            <p className="text-xs font-semibold text-amber-800 mb-2">💡 Ou digite/fale:</p>
+            <div className="flex flex-wrap gap-1">
+              {suggestedTopics.slice(0, 4).map((topic, idx) => (
                 <Badge
                   key={idx}
-                  className="cursor-pointer bg-amber-200 text-amber-900 hover:bg-amber-300 border border-amber-400"
+                  className="cursor-pointer bg-amber-200 text-amber-900 hover:bg-amber-300 border border-amber-400 text-xs"
                   onClick={() => sendMessage(topic.replace(/^[^\s]+ /, ''))}
                 >
                   {topic}
@@ -196,7 +259,7 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
         )}
 
         {/* Input */}
-        <div className="p-4 bg-amber-100 border-t-4 border-amber-300">
+        <div className="p-3 bg-amber-100 border-t-4 border-amber-300">
           <div className="flex gap-2">
             <Textarea
               value={input}
@@ -207,20 +270,21 @@ Responda como Platão responderia, aplicando filosofia clássica aos desafios mo
                   sendMessage(input);
                 }
               }}
-              placeholder="Compartilha teus pensamentos, jovem aprendiz..."
-              className="resize-none border-2 border-amber-300 focus:border-amber-500 bg-white"
+              placeholder={isListening ? "🎤 Fale ou digite..." : "Digite sua pergunta..."}
+              className="resize-none border-2 border-amber-300 focus:border-amber-500 bg-white text-sm"
               rows={2}
             />
             <Button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
-              className="bg-amber-600 hover:bg-amber-700 h-auto"
+              className="bg-amber-600 hover:bg-amber-700 h-auto px-3"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs text-amber-700 mt-2 italic text-center">
-            "Conhece-te a ti mesmo" - Inscrito no Templo de Apolo
+          <p className="text-xs text-amber-700 mt-1 italic text-center flex items-center justify-center gap-1">
+            {isListening && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>}
+            {isListening ? 'Ouvindo continuamente' : '"Conhece-te a ti mesmo"'}
           </p>
         </div>
       </Card>

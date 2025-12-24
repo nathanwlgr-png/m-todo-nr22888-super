@@ -44,6 +44,10 @@ export default function QuickClientSearch({ onClientSelect, triggerButton }) {
   });
 
   const handleSelectClient = (client) => {
+    if (!client || !client.id || client.is_deleted) {
+      toast.error('Cliente não encontrado ou foi removido');
+      return;
+    }
     if (onClientSelect) {
       onClientSelect(client);
     }
