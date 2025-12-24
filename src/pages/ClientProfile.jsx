@@ -153,15 +153,16 @@ export default function ClientProfile() {
         const clients = await base44.entities.Client.list();
         const foundClient = clients.find(c => c.id === clientId && !c.is_deleted);
         if (!foundClient) {
-          toast.error('Cliente não encontrado');
+          toast.error('Cliente não encontrado ou foi removido');
           setTimeout(() => navigate(createPageUrl('Home')), 1500);
           return null;
         }
         return foundClient;
       } catch (error) {
         console.error('Erro ao carregar cliente:', error);
-        toast.error('Erro ao carregar dados do cliente');
-        throw error;
+        toast.error('Cliente não encontrado ou foi removido');
+        setTimeout(() => navigate(createPageUrl('Home')), 1500);
+        return null;
       }
     },
     enabled: !!clientId,
@@ -169,7 +170,10 @@ export default function ClientProfile() {
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 1
+    retry: 0,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: visits = [] } = useQuery({
