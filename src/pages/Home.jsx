@@ -98,6 +98,10 @@ import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
 import NatashaProfile from '@/components/NatashaProfile';
 import ClientDataValidator from '@/components/ClientDataValidator';
+import DeepClientAnalytics from '@/components/DeepClientAnalytics';
+import ClientSegmentation from '@/components/ClientSegmentation';
+import ClientJourneyMap from '@/components/ClientJourneyMap';
+import RiskScoringSystem from '@/components/RiskScoringSystem';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -554,6 +558,17 @@ export default function Home() {
       {/* Validação de Dados dos Clientes */}
       <div className="px-6 mt-6">
         <ClientDataValidator />
+      </div>
+
+      {/* Sistema de Análise Profunda de Clientes */}
+      <div className="px-6 mt-6">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🎯 Análise Avançada de Clientes</h3>
+        <div className="grid grid-cols-1 gap-3">
+          <DeepClientAnalytics />
+          <ClientSegmentation />
+          <ClientJourneyMap />
+          <RiskScoringSystem />
+        </div>
       </div>
 
       {/* Perfil Específico: Natasha Rosa */}
