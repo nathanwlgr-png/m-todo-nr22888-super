@@ -854,20 +854,119 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Button>
         </div>
 
-        {/* 5. EQUIPAMENTO DE INTERESSE */}
+        {/* 5. EQUIPAMENTO DE INTERESSE - SELETOR */}
         <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300">
           <h3 className="font-semibold text-slate-800 mb-3">🎯 Equipamento de Interesse</h3>
-          <Input
-            placeholder="Ex: VG2, Hematologia, Bioquímico..."
-            defaultValue={client.equipment_interest || ''}
-            onBlur={(e) => {
-              if (e.target.value !== client.equipment_interest) {
-                base44.entities.Client.update(clientId, { equipment_interest: e.target.value });
-                toast.success('Interesse salvo!', { duration: 1000 });
-              }
+          <Select
+            value={client.equipment_interest || ''}
+            onValueChange={(value) => {
+              base44.entities.Client.update(clientId, { equipment_interest: value });
+              toast.success('Interesse salvo!', { duration: 1000 });
             }}
-            className="h-12"
-          />
+          >
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Selecione o equipamento..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="VG2">VG2 - Hemogasometria + Imunofluorescência</SelectItem>
+              <SelectItem value="VG1">VG1 - Hemogasometria Básica</SelectItem>
+              <SelectItem value="VQ1">VQ1 - PCR Veterinário (Nucleic Acid)</SelectItem>
+              <SelectItem value="QT3">QT3 - Bioquímico + Coagulação + Gases</SelectItem>
+              <SelectItem value="3DX">Lab 3DX - Bioquímico + Imuno + Gases (5 amostras)</SelectItem>
+              <SelectItem value="SMT-120VP">SMT-120VP - Bioquímico Veterinário</SelectItem>
+              <SelectItem value="VI1">VI1 - Imunofluorescência</SelectItem>
+              <SelectItem value="Hematologia">Hematologia Veterinária</SelectItem>
+              <SelectItem value="Hemogasometria">Hemogasometria Geral</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Artigos Científicos e Casos por Equipamento */}
+          {client.equipment_interest && (
+            <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
+              <p className="text-xs font-semibold text-blue-700 mb-2">📚 Material Científico</p>
+              
+              {(client.equipment_interest === 'VG2' || client.equipment_interest === 'VG1' || client.equipment_interest === 'Hemogasometria') && (
+                <div className="space-y-2 text-xs">
+                  <div className="p-2 bg-blue-50 rounded">
+                    <p className="font-medium text-slate-800">🏥 Casos Reais:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• SPCA Singapore - Salvamento de animais</li>
+                      <li>• Hospital Veterinário Vietnã - Eficiência 40%</li>
+                      <li>• Aquapredict (Noruega) - Piscicultura</li>
+                    </ul>
+                  </div>
+                  <div className="p-2 bg-purple-50 rounded">
+                    <p className="font-medium text-slate-800">📄 Artigos:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• "Blood Gas Results in 10 Minutes" - Seamaty</li>
+                      <li>• "VG1 vs VG2 Comparison Study"</li>
+                      <li>• Distúrbio Ácido-Básico em Equinos</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+              
+              {client.equipment_interest === 'VQ1' && (
+                <div className="space-y-2 text-xs">
+                  <div className="p-2 bg-blue-50 rounded">
+                    <p className="font-medium text-slate-800">🏥 Casos Reais:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• Laboratórios Clínicos - Vigilância de Doenças</li>
+                      <li>• Indústria de Criação Animal</li>
+                    </ul>
+                  </div>
+                  <div className="p-2 bg-purple-50 rounded">
+                    <p className="font-medium text-slate-800">📄 Artigos:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• "Fully Automated Nucleic Acid Detection"</li>
+                      <li>• "Real-time PCR Technology - VQ1"</li>
+                      <li>• "Molecular Diagnostic in Veterinary"</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+              
+              {(client.equipment_interest === 'QT3' || client.equipment_interest === '3DX') && (
+                <div className="space-y-2 text-xs">
+                  <div className="p-2 bg-blue-50 rounded">
+                    <p className="font-medium text-slate-800">🏥 Casos Reais:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• Zoocenter (Colômbia) - Dr. Diana Rojas</li>
+                      <li>• Clínicas Especializadas - Pet Healthcare</li>
+                    </ul>
+                  </div>
+                  <div className="p-2 bg-purple-50 rounded">
+                    <p className="font-medium text-slate-800">📄 Artigos:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• "Dual-Rotor System Innovation - Qt3"</li>
+                      <li>• "All-in-One Diagnostic Solution"</li>
+                      <li>• "Lab 3Dx: 5 Samples Simultaneously"</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+              
+              {client.equipment_interest === 'SMT-120VP' && (
+                <div className="space-y-2 text-xs">
+                  <div className="p-2 bg-blue-50 rounded">
+                    <p className="font-medium text-slate-800">🏥 Casos Reais:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• 6 Customer Success Stories</li>
+                      <li>• Hospital Vietnã - Melhoria Eficiência</li>
+                      <li>• Laboratórios América Latina</li>
+                    </ul>
+                  </div>
+                  <div className="p-2 bg-purple-50 rounded">
+                    <p className="font-medium text-slate-800">📄 Artigos:</p>
+                    <ul className="text-slate-600 mt-1 space-y-1">
+                      <li>• "24 Comprehensive Test Plus"</li>
+                      <li>• "Biochemistry Clinical Significance"</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
 
         {/* 6. EQUIPAMENTO VENDIDO (se houver) */}
