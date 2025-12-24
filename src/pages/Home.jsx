@@ -95,6 +95,7 @@ import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
 import EquinePurchaseExam from '@/components/EquinePurchaseExam';
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
+import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -571,6 +572,11 @@ export default function Home() {
       {/* Descobrir Clínicas Novas na Região */}
       <div className="px-6 mt-6">
         <RegionalClinicDiscovery />
+      </div>
+
+      {/* Geração em Massa de Perfis Completos */}
+      <div className="px-6 mt-6">
+        <BulkClientProfileGenerator />
       </div>
 
       {/* AI Reporting Hub */}
