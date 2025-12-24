@@ -99,6 +99,7 @@ import AdvancedClientAnalytics from '@/components/AdvancedClientAnalytics';
 import NextStepAI from '@/components/NextStepAI';
 import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
 import SmartScheduler from '@/components/SmartScheduler';
+import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
 import { toast } from 'sonner';
 
 const clientTypeLabels = {
@@ -1194,6 +1195,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           visits={visits}
         />
 
+        {/* Clínicas Próximas - Google Maps + Redes Sociais + Eventos */}
+        <NearbyClinicsFinder client={client} />
+
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
         <FunnelPersuasionTriggers client={client} />
 
@@ -1368,40 +1372,29 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
           {/* Possível Venda */}
           <TabsContent value="possible-sale" className="space-y-4 mt-4">
-            <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">Status da Venda</h3>
-                  <p className="text-xs text-slate-600">Situação atual do cliente</p>
-                </div>
-              </div>
-
+            <Card className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
               <div className="space-y-2 text-sm">
-                <div className="p-3 bg-white rounded-lg">
-                  <p className="text-xs text-slate-500 mb-1">Status Atual</p>
-                  <p className="font-semibold text-slate-800">
-                    {isClient ? '✓ Cliente (comprou equipamento)' : '🎯 Potencial (sem compra ainda)'}
+                <div className="p-2 bg-white rounded-lg">
+                  <p className="text-xs text-slate-500">Status</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {isClient ? '✓ Cliente' : '🎯 Potencial'}
                   </p>
                 </div>
 
                 {!isClient && (
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-xs text-blue-700 font-medium mb-1">⚠️ Importante</p>
+                  <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-xs text-blue-600">
-                      Status muda para "Cliente" após primeira venda de equipamento fechada.
+                      Status muda após primeira venda fechada
                     </p>
                   </div>
                 )}
 
                 {isClient && sales.filter(s => s.status === 'fechada').length > 0 && (
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-xs text-green-700 font-medium mb-1">✓ Vendas Fechadas</p>
+                  <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-xs text-green-700 font-medium">✓ Vendas</p>
                     {sales.filter(s => s.status === 'fechada').map((sale, idx) => (
                       <p key={idx} className="text-xs text-green-600">
-                        • {sale.equipment_name} - R$ {sale.sale_value?.toLocaleString('pt-BR')}
+                        {sale.equipment_name} - R$ {sale.sale_value?.toLocaleString('pt-BR')}
                       </p>
                     ))}
                   </div>
