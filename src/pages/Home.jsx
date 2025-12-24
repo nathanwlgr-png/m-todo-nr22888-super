@@ -53,6 +53,7 @@ import SalesAutomation from '@/components/SalesAutomation';
 import SmartProductSuggestions from '@/components/SmartProductSuggestions';
 import CalendarIntegration from '@/components/CalendarIntegration';
 import CompleteSystemReport from '@/components/CompleteSystemReport';
+import RegionalClinicSearch from '@/components/RegionalClinicSearch';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -275,7 +276,14 @@ export default function Home() {
       {/* Data Saver Mode */}
       <div className="px-6 mt-4">
         <DataSaverMode />
-      </div>
+        </div>
+
+        {/* ═══════════════════════════════════════ */}
+        {/* BUSCA REGIONAL - NUNCA REMOVER */}
+        {/* ═══════════════════════════════════════ */}
+        <div className="px-6 mt-4">
+        <RegionalClinicSearch />
+        </div>
       
       {/* Header Fixo */}
       <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-3 py-1.5 shadow-lg border-b border-orange-500">
