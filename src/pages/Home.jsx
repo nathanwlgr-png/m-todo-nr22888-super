@@ -98,6 +98,7 @@ import QuickClientSearch from '@/components/QuickClientSearch';
 import DataSaverMode from '@/components/DataSaverMode';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
+import AutoClinicDiscovery from '@/components/AutoClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
 import NatashaProfile from '@/components/NatashaProfile';
 import ClientDataValidator from '@/components/ClientDataValidator';
@@ -636,9 +637,9 @@ export default function Home() {
         <FoalSynovialFluidResearch />
       </div>
 
-      {/* Descobrir Clínicas Novas na Região */}
+      {/* Descoberta Automática Completa - CRMV + Google */}
       <div className="px-6 mt-6">
-        <RegionalClinicDiscovery />
+        <AutoClinicDiscovery />
       </div>
 
       {/* Geração em Massa de Perfis Completos */}
