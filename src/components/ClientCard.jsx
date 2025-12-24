@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Building2, ThermometerSun, ChevronRight, MessageCircle, MoreVertical, Tag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ClientDetailsModal from './ClientDetailsModal';
+import { toast } from 'sonner';
 
 const statusColors = {
   quente: 'bg-red-500 text-white',
@@ -27,12 +28,26 @@ const clientTypeLabels = {
 };
 
 export default function ClientCard({ client, hasPurchase = false, scheduledVisit = null, lastVisit = null }) {
+  const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  
+  if (!client || !client.id || client.is_deleted) {
+    return null;
+  }
   
   const handleMoreClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setShowDetailsModal(true);
+  };
+  
+  const handleCardClick = (e) => {
+    e.preventDefault();
+    if (!client || !client.id || client.is_deleted) {
+      toast.error('Cliente não encontrado ou foi removido');
+      return;
+    }
+    navigate(createPageUrl(`ClientProfile?id=${client.id}`));
   };
 
   const pipelineStages = {
@@ -47,7 +62,7 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
 
   return (
     <>
-      <Link to={createPageUrl(`ClientProfile?id=${client.id}`)}>
+      <div onClick={handleCardClick} className="cursor-pointer">
         <Card className={`p-4 hover:shadow-lg transition-all duration-200 border-l-4 ${hasPurchase ? 'border-l-green-600 bg-green-50/50' : 'border-l-slate-800'} active:scale-[0.98]`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -127,7 +142,7 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
             </div>
           </div>
         </Card>
-      </Link>
+      </div>
       
       <ClientDetailsModal 
         client={client}
