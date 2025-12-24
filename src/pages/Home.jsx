@@ -46,7 +46,6 @@ import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
 import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
 import HotClientsDialog from '@/components/HotClientsDialog';
 import VeterinaryEventsCalendar from '@/components/VeterinaryEventsCalendar';
-import { Link } from 'react-router-dom';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
