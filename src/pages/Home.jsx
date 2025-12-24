@@ -782,6 +782,10 @@ export default function Home() {
         {/* Busca Rápida de Cliente */}
         <QuickClientSearch
           onClientSelect={(client) => {
+            if (!client || !client.id || client.is_deleted) {
+              toast.error('Cliente não encontrado ou foi removido');
+              return;
+            }
             window.location.href = createPageUrl(`ClientProfile?id=${client.id}`);
           }}
           triggerButton={
