@@ -41,25 +41,58 @@ export default function ClientDataImporter() {
 
       // Extrair dados com IA
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Extraia TODOS os clientes dessas planilhas Excel. 
+        prompt: `Extraia TODOS os clientes dessas planilhas Excel com MÁXIMO CUIDADO E DETALHE.
 
-Para CADA linha visível, extraia:
-- COD: código do cliente (ex: 4798, 1054, etc) - MANTENHA EXATO
-- CLIENTE: nome do cliente/empresa
-- NOME FANTASIA: nome fantasia
-- MUNICÍPIO: cidade
-- ENDEREÇO: endereço completo
+Para CADA linha visível, extraia TODOS OS CAMPOS:
+- COD: código do cliente (ex: 4798, 1054) - MANTENHA EXATO
+- CLIENTE: nome COMPLETO do cliente/razão social
+- NOME FANTASIA: nome fantasia/empresa
+- CNPJ: CNPJ se disponível
+- EMAIL: email do cliente
+- TELEFONE: telefone/WhatsApp
+- MUNICÍPIO: cidade completa
+- ENDEREÇO: endereço completo com número
+- CEP: CEP se disponível
+- RESPONSÁVEL: nome do responsável/contato
+- CARGO: cargo do responsável
+
+INSTRUÇÕES CRÍTICAS:
+✓ Extraia o NOME COMPLETO real, NUNCA use "teste" ou placeholders
+✓ Se o nome tem múltiplas palavras, inclua TODAS
+✓ Mantenha acentuação e capitalização corretas
+✓ Se faltar algum campo, deixe string vazia "", não invente
+✓ NÃO pule nenhuma linha
+✓ Processe TODAS as linhas visíveis
 
 Retorne JSON com array 'clients'. Cada objeto:
 {
-  "cod": "string (código exato)",
-  "cliente": "string",
-  "nome_fantasia": "string", 
+  "cod": "string",
+  "cliente": "string (NOME COMPLETO REAL)",
+  "nome_fantasia": "string",
+  "cnpj": "string",
+  "email": "string",
+  "telefone": "string",
   "municipio": "string",
-  "endereco": "string"
+  "endereco": "string",
+  "cep": "string",
+  "responsavel": "string",
+  "cargo": "string"
 }
 
-NÃO pule nenhum cliente. Processe TODAS as linhas.`,
+EXEMPLO CORRETO:
+{
+  "cod": "4798",
+  "cliente": "João Carlos da Silva Veterinária LTDA",
+  "nome_fantasia": "Clínica São Francisco",
+  "cnpj": "12.345.678/0001-90",
+  "email": "contato@clinicasf.com.br",
+  "telefone": "14999887766",
+  "municipio": "Marília",
+  "endereco": "Rua das Flores, 123",
+  "cep": "17500-000",
+  "responsavel": "Dr. João Carlos da Silva",
+  "cargo": "Veterinário Responsável"
+}`,
         file_urls: fileUrls,
         response_json_schema: {
           type: "object",
@@ -72,8 +105,14 @@ NÃO pule nenhum cliente. Processe TODAS as linhas.`,
                   cod: { type: "string" },
                   cliente: { type: "string" },
                   nome_fantasia: { type: "string" },
+                  cnpj: { type: "string" },
+                  email: { type: "string" },
+                  telefone: { type: "string" },
                   municipio: { type: "string" },
-                  endereco: { type: "string" }
+                  endereco: { type: "string" },
+                  cep: { type: "string" },
+                  responsavel: { type: "string" },
+                  cargo: { type: "string" }
                 }
               }
             }
@@ -100,15 +139,22 @@ NÃO pule nenhum cliente. Processe TODAS as linhas.`,
 
     setProcessing(true);
     try {
-      // Preparar dados para cadastro
+      // Preparar dados para cadastro com TODOS os campos
       const clientsToCreate = extractedData.map(c => ({
-        first_name: c.cliente,
-        clinic_name: c.nome_fantasia,
-        city: c.municipio,
-        address: c.endereco,
-        status: 'frio',
+        external_code: c.cod || '',
+        first_name: c.cliente || c.nome_fantasia || 'Cliente Sem Nome',
+        full_name: c.cliente || '',
+        clinic_name: c.nome_fantasia || '',
+        cnpj: c.cnpj || '',
+        razao_social: c.cliente || '',
+        email: c.email || '',
+        phone: c.telefone ? c.telefone.replace(/\D/g, '') : '',
+        city: c.municipio || '',
+        address: c.endereco || '',
+        cep: c.cep || '',
+        status: 'morno',
         lead_source: 'importacao_planilha',
-        notes: `Código externo: ${c.cod}\nImportado em ${new Date().toLocaleDateString('pt-BR')}`
+        notes: `Código: ${c.cod || 'N/A'}\nResponsável: ${c.responsavel || 'N/A'}\nCargo: ${c.cargo || 'N/A'}\nImportado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`
       }));
 
       // Criar em lotes de 50
