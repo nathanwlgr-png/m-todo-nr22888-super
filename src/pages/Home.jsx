@@ -93,6 +93,7 @@ import AIReportingHub from '@/components/AIReportingHub';
 import ScientificResearchAI from '@/components/ScientificResearchAI';
 import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
+import QuickClientSearch from '@/components/QuickClientSearch';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
@@ -318,13 +319,31 @@ export default function Home() {
       {/* Busca e Filtros */}
       <div className="px-6 mt-4">
         <div className="space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Buscar clientes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-12 rounded-xl border-2"
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-12 rounded-xl border-2"
+              />
+            </div>
+            <QuickClientSearch
+              onClientSelect={(client) => {
+                // Scroll para o cliente na lista ou abrir perfil
+                const clientElement = document.getElementById(`client-${client.id}`);
+                if (clientElement) {
+                  clientElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                  window.location.href = createPageUrl(`ClientProfile?id=${client.id}`);
+                }
+              }}
+              triggerButton={
+                <Button className="h-12 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl">
+                  <Search className="w-5 h-5" />
+                </Button>
+              }
             />
           </div>
           
@@ -756,6 +775,19 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* Busca Rápida de Cliente */}
+        <QuickClientSearch
+          onClientSelect={(client) => {
+            window.location.href = createPageUrl(`ClientProfile?id=${client.id}`);
+          }}
+          triggerButton={
+            <Button variant="outline" className="w-full h-14 border-2 border-indigo-200 hover:bg-indigo-50 rounded-xl">
+              <Search className="w-5 h-5 mr-2" />
+              🔍 Busca Rápida de Cliente
+            </Button>
+          }
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <Link to={createPageUrl('ImportClientsTable')}>
             <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
@@ -1181,7 +1213,9 @@ export default function Home() {
 
           <div className="space-y-3">
             {filteredClients.slice(0, 10).map((client) => (
-              <ClientCard key={client.id} client={client} />
+              <div key={client.id} id={`client-${client.id}`}>
+                <ClientCard client={client} />
+              </div>
             ))}
           </div>
         </div>
