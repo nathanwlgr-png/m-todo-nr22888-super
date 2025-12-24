@@ -26,7 +26,11 @@ import {
   Upload,
   ArrowUpDown,
   Table,
-  FileDown
+  FileDown,
+  Edit2,
+  FileText,
+  Eye,
+  Download
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
@@ -63,6 +67,8 @@ export default function Clients() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
   const [results, setResults] = useState(null);
+  const [editingClientId, setEditingClientId] = useState(null);
+  const [editingName, setEditingName] = useState('');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -202,6 +208,56 @@ export default function Clients() {
   };
 
   const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter].filter(f => f !== 'all').length;
+
+  const handleQuickEdit = (client) => {
+    setEditingClientId(client.id);
+    setEditingName(client.first_name || '');
+  };
+
+  const saveQuickEdit = async () => {
+    if (!editingName.trim()) {
+      toast.error('Nome não pode estar vazio');
+      return;
+    }
+    try {
+      await base44.entities.Client.update(editingClientId, {
+        first_name: editingName.trim()
+      });
+      toast.success('Nome atualizado!');
+      setEditingClientId(null);
+      setEditingName('');
+    } catch (error) {
+      toast.error('Erro ao atualizar');
+    }
+  };
+
+  const exportClientDocument = async (client) => {
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text(`Perfil do Cliente - ${client.first_name}`, 14, 15);
+    
+    doc.setFontSize(10);
+    let y = 30;
+    
+    const addLine = (label, value) => {
+      doc.text(`${label}: ${value || '-'}`, 14, y);
+      y += 6;
+    };
+    
+    addLine('Nome', client.first_name);
+    addLine('Clínica', client.clinic_name);
+    addLine('Cidade', client.city);
+    addLine('Telefone', client.phone);
+    addLine('Email', client.email);
+    addLine('Endereço', client.address);
+    addLine('Status', client.status);
+    addLine('Score', `${client.purchase_score || 0}%`);
+    addLine('Equipamento Atual', client.current_equipment);
+    addLine('Pipeline', client.pipeline_stage);
+    
+    doc.save(`cliente-${client.first_name}-${Date.now()}.pdf`);
+    toast.success('Documento exportado!');
+  };
 
   const generatePDF = () => {
     const doc = new jsPDF('portrait');
@@ -481,26 +537,70 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
               </button>
             )}
             
-            {/* Autocomplete Suggestions */}
+            {/* Autocomplete Suggestions com ações */}
             {suggestions.length > 0 && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-2 border-slate-200 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto">
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.id}
-                    onClick={() => {
-                      navigate(createPageUrl(`ClientProfile?id=${suggestion.id}`));
-                    }}
-                    className="w-full px-4 py-3 text-left hover:bg-slate-50 flex items-center justify-between border-b last:border-b-0"
-                  >
-                    <div>
-                      <p className="font-medium text-slate-800">{suggestion.label}</p>
-                      {suggestion.sublabel && (
-                        <p className="text-xs text-slate-500">{suggestion.sublabel}</p>
-                      )}
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-2 border-indigo-300 rounded-xl shadow-xl z-20 max-h-96 overflow-y-auto">
+                {suggestions.map((suggestion) => {
+                  const client = clients.find(c => c.id === suggestion.id);
+                  return (
+                    <div
+                      key={suggestion.id}
+                      className="px-4 py-3 hover:bg-indigo-50 border-b last:border-b-0"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-800">{suggestion.label}</p>
+                          {suggestion.sublabel && (
+                            <p className="text-xs text-slate-500">{suggestion.sublabel}</p>
+                          )}
+                          <div className="flex gap-2 mt-1">
+                            {client?.status && (
+                              <span className={`text-xs px-2 py-0.5 rounded ${
+                                client.status === 'quente' ? 'bg-red-100 text-red-700' :
+                                client.status === 'morno' ? 'bg-orange-100 text-orange-700' :
+                                'bg-blue-100 text-blue-700'
+                              }`}>
+                                {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
+                              </span>
+                            )}
+                            {client?.purchase_score !== undefined && (
+                              <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded">
+                                {client.purchase_score}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(createPageUrl(`ClientProfile?id=${suggestion.id}`))}
+                          className="flex-1 h-8 text-xs"
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Ver Perfil
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleQuickEdit(client)}
+                          className="h-8 text-xs"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => exportClientDocument(client)}
+                          className="h-8 text-xs"
+                        >
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
-                    <Search className="w-4 h-4 text-slate-400" />
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -753,13 +853,58 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                       v.status === 'realizada'
                     );
                     return (
-                      <ClientCard 
-                        key={client.id} 
-                        client={client} 
-                        hasPurchase={hasPurchase} 
-                        scheduledVisit={scheduledVisit}
-                        lastVisit={lastVisit}
-                      />
+                      <div key={client.id} className="relative">
+                        {editingClientId === client.id ? (
+                          <div className="p-4 bg-white rounded-lg border-2 border-indigo-300 shadow-sm">
+                            <div className="flex gap-2 mb-3">
+                              <Input
+                                value={editingName}
+                                onChange={(e) => setEditingName(e.target.value)}
+                                placeholder="Nome do cliente"
+                                className="flex-1"
+                                autoFocus
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">
+                                Salvar
+                              </Button>
+                              <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <ClientCard 
+                              client={client} 
+                              hasPurchase={hasPurchase} 
+                              scheduledVisit={scheduledVisit}
+                              lastVisit={lastVisit}
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleQuickEdit(client)}
+                                className="flex-1 h-9"
+                              >
+                                <Edit2 className="w-3 h-3 mr-1" />
+                                Editar Nome
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => exportClientDocument(client)}
+                                className="flex-1 h-9"
+                              >
+                                <FileText className="w-3 h-3 mr-1" />
+                                Exportar
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -780,13 +925,58 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                 v.status === 'realizada'
               );
               return (
-                <ClientCard 
-                  key={client.id} 
-                  client={client} 
-                  hasPurchase={hasPurchase} 
-                  scheduledVisit={scheduledVisit}
-                  lastVisit={lastVisit}
-                />
+                <div key={client.id} className="relative">
+                  {editingClientId === client.id ? (
+                    <div className="p-4 bg-white rounded-lg border-2 border-indigo-300 shadow-sm">
+                      <div className="flex gap-2 mb-3">
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          placeholder="Nome do cliente"
+                          className="flex-1"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">
+                          Salvar
+                        </Button>
+                        <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ClientCard 
+                        client={client} 
+                        hasPurchase={hasPurchase} 
+                        scheduledVisit={scheduledVisit}
+                        lastVisit={lastVisit}
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleQuickEdit(client)}
+                          className="flex-1 h-9"
+                        >
+                          <Edit2 className="w-3 h-3 mr-1" />
+                          Editar Nome
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => exportClientDocument(client)}
+                          className="flex-1 h-9"
+                        >
+                          <FileText className="w-3 h-3 mr-1" />
+                          Exportar
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
               );
             })}
           </>
