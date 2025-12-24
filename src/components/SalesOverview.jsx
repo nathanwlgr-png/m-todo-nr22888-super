@@ -16,11 +16,7 @@ export default function SalesOverview() {
         const data = await base44.entities.Client.list();
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado, ignorando');
-          return [];
-        }
-        console.error('Erro ao carregar clientes:', error);
+        console.warn('Erro ao carregar clientes (ignorando):', error);
         return [];
       }
     },
@@ -29,8 +25,10 @@ export default function SalesOverview() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: 1,
-    retryDelay: 2000
+    retry: 0,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: sales = [] } = useQuery({

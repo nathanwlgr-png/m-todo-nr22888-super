@@ -35,18 +35,16 @@ export default function AIReportingHub() {
         const data = await base44.entities.Client.list('-updated_date', 100);
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado referenciado, ignorando');
-          return [];
-        }
-        console.error('Erro ao carregar clientes:', error);
+        console.warn('Erro ao carregar clientes (ignorando):', error);
         return [];
       }
     },
-    retry: 1,
-    retryDelay: 500,
+    retry: 0,
     staleTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: sales = [] } = useQuery({

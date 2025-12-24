@@ -124,28 +124,24 @@ export default function Home() {
     queryKey: ['clients'],
     queryFn: async () => {
       try {
-        const limit = dataSaverEnabled ? 50 : 100; // Reduzir limite em modo economia
+        const limit = dataSaverEnabled ? 50 : 100;
         const data = await base44.entities.Client.list('-updated_date', limit);
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
-          console.warn('Cliente deletado referenciado, ignorando');
-          return [];
-        }
-        if (!error.message?.includes('Network')) {
-          toast.error('Erro de conexão ao carregar dados');
-        }
+        console.warn('Erro ao carregar clientes (ignorando):', error);
         return [];
       }
     },
-    retry: dataSaverEnabled ? 0 : 1,
+    retry: 0,
     retryDelay: 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000, // 2h em economia, 1h normal
-    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000
+    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
+    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
+    meta: {
+      errorHandler: () => {} // Suprimir todos os erros
+    }
   });
 
   const { data: user } = useQuery({
