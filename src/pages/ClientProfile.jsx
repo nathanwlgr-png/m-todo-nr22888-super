@@ -84,6 +84,7 @@ import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import ScoreExplanation from '@/components/ScoreExplanation';
 import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
 import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
+import PrimoriAdvancedAnalytics from '@/components/PrimoriAdvancedAnalytics';
 import NumerologyBestDayAI from '@/components/NumerologyBestDayAI';
 import CompetitorAnalysisAI from '@/components/CompetitorAnalysisAI';
 import ClientHealthScore from '@/components/ClientHealthScore';
@@ -150,19 +151,25 @@ export default function ClientProfile() {
   const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
-      if (!clientId) return null;
+      if (!clientId || typeof clientId !== 'string' || clientId.length < 10) {
+        toast.error('ID inválido');
+        navigate(createPageUrl('Home'));
+        return null;
+      }
       try {
         const clients = await base44.entities.Client.list();
-        const foundClient = clients.find(c => c.id === clientId && !c.is_deleted);
+        const foundClient = clients.find(c => 
+          c && c.id === clientId && !c.is_deleted && c.first_name
+        );
         if (!foundClient) {
-          toast.error('Cliente não encontrado ou foi removido');
+          toast.error('Cliente não encontrado');
           setTimeout(() => navigate(createPageUrl('Home')), 1500);
           return null;
         }
         return foundClient;
       } catch (error) {
-        console.error('Erro ao carregar cliente:', error);
-        toast.error('Cliente não encontrado ou foi removido');
+        console.error('Erro crítico:', error);
+        toast.error('Erro ao carregar');
         setTimeout(() => navigate(createPageUrl('Home')), 1500);
         return null;
       }
@@ -1155,6 +1162,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           onAnalysisComplete={(updates) => {
             updateMutation.mutate(updates);
           }}
+        />
+
+        {/* Primori - Análise Preditiva Avançada */}
+        <PrimoriAdvancedAnalytics 
+          client={client}
+          visits={visits}
+          interactions={interactions}
+          sales={sales}
         />
 
         {/* Análise Probabilística com Dados */}

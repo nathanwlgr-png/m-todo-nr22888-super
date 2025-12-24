@@ -51,6 +51,7 @@ import KPIDashboard from '@/components/KPIDashboard';
 import AIDocumentsHub from '@/components/AIDocumentsHub';
 import SalesAutomation from '@/components/SalesAutomation';
 import SmartProductSuggestions from '@/components/SmartProductSuggestions';
+import CalendarIntegration from '@/components/CalendarIntegration';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -134,20 +135,26 @@ export default function Home() {
       try {
         const limit = dataSaverEnabled ? 50 : 100;
         const data = await base44.entities.Client.list('-updated_date', limit);
-        return data.filter(c => {
-          if (!c || !c.id || !c.first_name) return false;
-          if (c.is_deleted) return false;
-          // Validar ID para evitar IDs inválidos
-          if (typeof c.id !== 'string' || c.id.length < 10) return false;
+        
+        // Validação robusta
+        const validClients = data.filter(c => {
+          if (!c || typeof c !== 'object') return false;
+          if (!c.id || typeof c.id !== 'string' || c.id.length < 10) return false;
+          if (!c.first_name || c.first_name.trim().length === 0) return false;
+          if (c.is_deleted === true) return false;
           return true;
         });
+        
+        console.log(`✓ ${validClients.length} clientes válidos carregados`);
+        return validClients;
       } catch (error) {
-        console.warn('Erro ao carregar clientes (ignorando):', error);
+        console.error('Erro ao carregar clientes:', error);
+        toast.error('Erro ao carregar dados');
         return [];
       }
     },
-    retry: 0,
-    retryDelay: 1000,
+    retry: 1,
+    retryDelay: 2000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
@@ -1252,6 +1259,11 @@ export default function Home() {
           {/* Sugestões Inteligentes de Produtos */}
           <div className="mt-6">
             <SmartProductSuggestions />
+          </div>
+
+          {/* Integração Calendário */}
+          <div className="mt-6">
+            <CalendarIntegration />
           </div>
 
           {/* Importação em Massa */}

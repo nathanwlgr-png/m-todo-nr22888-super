@@ -11,7 +11,12 @@ export default function SalesAutomation() {
   const [result, setResult] = useState(null);
 
   const runAutomation = async () => {
+    if (!confirm('⚠️ Executar automação?\n\nIsso criará tarefas, visitas e sugestões automaticamente.\n\nNENHUMA mensagem será enviada sem sua aprovação.')) {
+      return;
+    }
+    
     setRunning(true);
+    const logEntries = [];
     try {
       const clients = await base44.entities.Client.list();
       const allVisits = await base44.entities.Visit.list();
@@ -46,6 +51,7 @@ export default function SalesAutomation() {
               auto_created: true
             });
             automated.push({ type: 'task', client: client.first_name, reason: 'follow_up_quente' });
+          logEntries.push(`✓ Tarefa criada: ${client.first_name} (quente, ${daysSinceInteraction}d sem contato)`);
           }
         } else if (client.status === 'morno' && daysSinceInteraction >= 10) {
           const existingTasks = await base44.entities.Task.filter({ 
@@ -148,7 +154,10 @@ Sugira 1 equipamento Seamaty ideal (VG2, VG1, SMT-120VP, QT3, VI1, VQ1) e motivo
         suggestions: automated.filter(a => a.type === 'suggestion').length
       });
 
-      toast.success(`${automated.length} ações automatizadas!`);
+      console.log('📊 LOG DE AUTOMAÇÃO:', logEntries.join('\n'));
+      toast.success(`${automated.length} ações automatizadas!`, {
+        description: `Tarefas: ${automated.filter(a => a.type === 'task').length} | Sugestões: ${automated.filter(a => a.type === 'suggestion').length}`
+      });
     } catch (error) {
       console.error(error);
       toast.error('Erro na automação');
