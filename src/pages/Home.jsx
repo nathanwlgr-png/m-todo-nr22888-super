@@ -54,6 +54,7 @@ import SmartProductSuggestions from '@/components/SmartProductSuggestions';
 import CalendarIntegration from '@/components/CalendarIntegration';
 import CompleteSystemReport from '@/components/CompleteSystemReport';
 import RegionalClinicSearch from '@/components/RegionalClinicSearch';
+import BulkClientDataUpdater from '@/components/BulkClientDataUpdater';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -283,6 +284,13 @@ export default function Home() {
         {/* ═══════════════════════════════════════ */}
         <div className="px-6 mt-4">
         <RegionalClinicSearch />
+        </div>
+
+        {/* ═══════════════════════════════════════ */}
+        {/* ATUALIZAÇÃO EM MASSA - NUNCA REMOVER */}
+        {/* ═══════════════════════════════════════ */}
+        <div className="px-6 mt-4">
+        <BulkClientDataUpdater />
         </div>
       
       {/* Header Fixo */}
