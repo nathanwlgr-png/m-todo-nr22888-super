@@ -102,6 +102,7 @@ import DeepClientAnalytics from '@/components/DeepClientAnalytics';
 import ClientSegmentation from '@/components/ClientSegmentation';
 import ClientJourneyMap from '@/components/ClientJourneyMap';
 import RiskScoringSystem from '@/components/RiskScoringSystem';
+import PlatoAI from '@/components/PlatoAI';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -668,6 +669,7 @@ export default function Home() {
       {/* Floating Buttons */}
       <FloatingPerformanceMonitor />
       <FloatingWhatsAppButton />
+      <PlatoAI />
 
 
 
