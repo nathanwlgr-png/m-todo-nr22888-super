@@ -73,18 +73,21 @@ export default function WhatsAppNotificationService() {
 
         message += `_Próxima atualização em ${intervalMinutes} minutos_`;
 
-        // Copiar mensagem e mostrar toast discreto
+        // Copiar mensagem e mostrar toast - AGUARDA CONFIRMAÇÃO
         await navigator.clipboard.writeText(message);
         
-        toast.info('📱 Atualização disponível!', {
-          description: 'Mensagem copiada. Clique para abrir WhatsApp.',
+        toast.info('📱 Resumo copiado!', {
+          description: '⚠️ Revisar antes de enviar ao WhatsApp',
           action: {
-            label: 'Abrir WhatsApp',
+            label: 'Revisar e Enviar',
             onClick: () => {
-              window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(message)}`, '_blank');
+              if (confirm(`⚠️ Tem certeza que deseja enviar este resumo?\n\n${message.substring(0, 200)}...`)) {
+                window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(message)}`, '_blank');
+                toast.success('Enviado!');
+              }
             }
           },
-          duration: 10000
+          duration: 15000
         });
         
         console.log(`📱 Notificação preparada: ${new Date().toLocaleTimeString()}`);

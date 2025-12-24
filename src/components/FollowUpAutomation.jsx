@@ -170,19 +170,21 @@ A mensagem deve ser:
         }
       });
 
-      // Criar tarefa com a mensagem estruturada
+      // Criar tarefa com a mensagem estruturada (SEM ENVIAR)
       await createTaskMutation.mutateAsync({
         client_id: client.id,
         client_name: client.first_name,
-        title: `📱 Mensagem Estruturada - ${client.first_name}`,
-        description: `ANÁLISE PROFUNDA REALIZADA
+        title: `📱 Mensagem Estruturada - ${client.first_name} [REVISAR ANTES DE ENVIAR]`,
+        description: `⚠️ ATENÇÃO: REVISAR E APROVAR ANTES DE ENVIAR AO CLIENTE
+
+ANÁLISE PROFUNDA REALIZADA
 
 ✅ Score do Perfil: ${analysis.perfil_score}/100
 📊 Probabilidade de Resposta: ${analysis.probabilidade_resposta}%
 ⏰ Melhor Momento: ${analysis.melhor_momento_envio}
 🎯 Prioridade: ${analysis.prioridade_envio.toUpperCase()}
 
-📝 MENSAGEM PRONTA PARA ENVIAR:
+📝 MENSAGEM PRONTA (AGUARDANDO APROVAÇÃO):
 ${analysis.mensagem_whatsapp}
 
 🔍 GAPS CRÍTICOS:
@@ -192,7 +194,9 @@ ${analysis.gaps_criticos.map((g, i) => `${i + 1}. ${g}`).join('\n')}
 ${analysis.estrategia_fechamento}
 
 📌 PONTOS-CHAVE:
-${analysis.pontos_chave.map((p, i) => `• ${p}`).join('\n')}`,
+${analysis.pontos_chave.map((p, i) => `• ${p}`).join('\n')}
+
+⚠️ LEMBRE-SE: Revisar e personalizar antes de enviar!`,
         type: 'follow_up',
         priority: analysis.prioridade_envio === 'urgente' ? 'alta' : analysis.prioridade_envio === 'alta' ? 'alta' : 'media',
         due_date: format(new Date(), 'yyyy-MM-dd'),
@@ -202,12 +206,12 @@ ${analysis.pontos_chave.map((p, i) => `• ${p}`).join('\n')}`,
         assigned_to_name: user.full_name,
       });
 
-      // Alerta de alta prioridade
+      // Alerta de alta prioridade - PEDE APROVAÇÃO
       if (analysis.prioridade_envio === 'urgente' || analysis.prioridade_envio === 'alta') {
         await createAlertMutation.mutateAsync({
           user_email: user.email,
-          title: `🚀 Mensagem Estruturada Pronta`,
-          message: `${client.first_name}: ${analysis.probabilidade_resposta}% chance de resposta. Mensagem criada!`,
+          title: `🚀 Mensagem Pronta - REVISAR`,
+          message: `${client.first_name}: ${analysis.probabilidade_resposta}% chance de resposta. ⚠️ Revisar antes de enviar!`,
           type: 'high_score_lead',
           priority: 'alta',
           link_to: `ClientProfile?id=${client.id}`,
