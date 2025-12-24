@@ -1180,7 +1180,7 @@ export default function Home() {
         </div>
 
       {/* Filtered Clients */}
-      {(searchTerm || statusFilter !== 'all' || cityFilter !== 'all' || scoreFilter !== 'all') && (
+      {searchTerm && (
         <div className="px-6 mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-slate-800">
@@ -1232,23 +1232,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Recent Clients */}
-      {!searchTerm && statusFilter === 'all' && clients.length > 0 && (
-        <div className="px-6 mt-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-800">Clientes Recentes</h2>
-            <Link to={createPageUrl('Clients')} className="text-sm text-indigo-600 font-medium">
-              Ver todos
-            </Link>
-          </div>
 
-          <div className="space-y-3">
-            {clients.slice(0, 3).map((client) => (
-              <ClientCard key={client.id} client={client} />
-            ))}
-          </div>
-        </div>
-      )}
       
       <div className="h-24" />
 
