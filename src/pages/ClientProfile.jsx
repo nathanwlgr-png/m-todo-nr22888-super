@@ -96,6 +96,9 @@ import InstagramProfileFinder from '@/components/InstagramProfileFinder';
 import MultiProposalGeneratorAI from '@/components/MultiProposalGeneratorAI';
 import WhatsAppProposalPackage from '@/components/WhatsAppProposalPackage';
 import AdvancedClientAnalytics from '@/components/AdvancedClientAnalytics';
+import NextStepAI from '@/components/NextStepAI';
+import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
+import SmartScheduler from '@/components/SmartScheduler';
 import { toast } from 'sonner';
 
 const clientTypeLabels = {
@@ -1171,6 +1174,24 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           interactions={interactions}
           visits={visits}
           sales={sales}
+        />
+
+        {/* Automação IA - Próximo Passo, Follow-up, Agendamento */}
+        <NextStepAI 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
+        <AutoFollowUpGenerator 
+          client={client}
+          lastInteraction={interactions[0]}
+        />
+
+        <SmartScheduler 
+          client={client}
+          visits={visits}
         />
 
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}

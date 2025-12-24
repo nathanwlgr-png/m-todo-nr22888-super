@@ -328,31 +328,13 @@ export default function Home() {
       {/* Busca e Filtros */}
       <div className="px-6 mt-4">
         <div className="space-y-3">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                placeholder="Buscar clientes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 rounded-xl border-2"
-              />
-            </div>
-            <QuickClientSearch
-              onClientSelect={(client) => {
-                // Scroll para o cliente na lista ou abrir perfil
-                const clientElement = document.getElementById(`client-${client.id}`);
-                if (clientElement) {
-                  clientElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                  window.location.href = createPageUrl(`ClientProfile?id=${client.id}`);
-                }
-              }}
-              triggerButton={
-                <Button className="h-12 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl">
-                  <Search className="w-5 h-5" />
-                </Button>
-              }
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+            <Input
+              placeholder="Buscar clientes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-12 rounded-xl border-2"
             />
           </div>
           

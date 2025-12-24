@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 
 export default function PlatoAI({ enabledOnPage = false }) {
-  const [open, setOpen] = useState(enabledOnPage);
+  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
