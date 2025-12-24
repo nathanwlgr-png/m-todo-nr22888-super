@@ -50,6 +50,7 @@ import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
 import OfflineMode from './pages/OfflineMode';
 import PerformanceDashboard from './pages/PerformanceDashboard';
+import PossibleSales from './pages/PossibleSales';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import ProposalGenerator from './pages/ProposalGenerator';
@@ -72,7 +73,6 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import PossibleSales from './pages/PossibleSales';
 import __Layout from './Layout.jsx';
 
 
@@ -129,6 +129,7 @@ export const PAGES = {
     "ObjectionAnalyzer": ObjectionAnalyzer,
     "OfflineMode": OfflineMode,
     "PerformanceDashboard": PerformanceDashboard,
+    "PossibleSales": PossibleSales,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
     "ProposalGenerator": ProposalGenerator,
@@ -151,7 +152,6 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "PossibleSales": PossibleSales,
 }
 
 export const pagesConfig = {

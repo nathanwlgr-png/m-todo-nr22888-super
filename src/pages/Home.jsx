@@ -57,6 +57,10 @@ import RegionalClinicSearch from '@/components/RegionalClinicSearch';
 import BulkClientDataUpdater from '@/components/BulkClientDataUpdater';
 import GPSClinicTracker from '@/components/GPSClinicTracker';
 import GPSTrackerButton from '@/components/GPSTrackerButton';
+import PossibleSalesSearch from '@/components/PossibleSalesSearch';
+import RecentClientsWidget from '@/components/RecentClientsWidget';
+import SmartGoalsAI from '@/components/SmartGoalsAI';
+import EnhancedMarketIntelligence from '@/components/EnhancedMarketIntelligence';
 import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
 import AutoReportGenerator from '@/components/AutoReportGenerator';
 import AITaskManager from '@/components/AITaskManager';
@@ -366,6 +370,16 @@ export default function Home() {
         </div>
       )}
 
+      {/* Últimos Clientes */}
+      <div className="px-6 mt-4">
+        <RecentClientsWidget />
+      </div>
+
+      {/* Busca Possíveis Vendas */}
+      <div className="px-6 mt-4">
+        <PossibleSalesSearch />
+      </div>
+
       {/* Busca e Filtros */}
       <div className="px-6 mt-4">
         <div className="space-y-3">
@@ -612,6 +626,11 @@ export default function Home() {
       {/* Personal Goals Widget */}
       <div className="px-6 mt-6">
         <PersonalGoalsWidget />
+      </div>
+
+      {/* Metas Inteligentes com IA */}
+      <div className="px-6 mt-6">
+        <SmartGoalsAI />
       </div>
 
       {/* Performance Feedback */}
@@ -1052,14 +1071,9 @@ export default function Home() {
               <CompleteCaseStudyReport />
             </div>
 
-            {/* Análise de Mercado - Marília */}
-            <div className="mt-6">
-              <MariliaMarketAnalysis />
-            </div>
-
-            {/* Análise de Mercado com GPS + IBGE */}
-            <div className="mt-6">
-              <MarketAnalysisAI />
+            {/* Inteligência de Mercado com Dupla IA */}
+            <div className="px-6 mt-6">
+              <EnhancedMarketIntelligence />
             </div>
 
           <div className="grid grid-cols-2 gap-4">
