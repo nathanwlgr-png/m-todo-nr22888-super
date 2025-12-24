@@ -810,6 +810,16 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* ═══════════════════════════════════════ */}
+        {/* POSSÍVEIS VENDAS - NUNCA REMOVER */}
+        {/* ═══════════════════════════════════════ */}
+        <Link to={createPageUrl('PossibleSales')}>
+          <Button className="w-full h-16 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-2xl shadow-lg text-base font-semibold">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            📊 Possíveis Vendas (Busca Regional)
+          </Button>
+        </Link>
+
         {/* Busca Rápida de Cliente */}
         <QuickClientSearch
           onClientSelect={(client) => {
