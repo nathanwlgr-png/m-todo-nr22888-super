@@ -102,7 +102,6 @@ Posso guiar-te através das sombras da caverna até a luz do conhecimento. Fala 
         return;
       }
       console.error('Erro reconhecimento de voz:', event.error);
-      setIsListening(false);
     };
 
     recognition.onend = () => {
