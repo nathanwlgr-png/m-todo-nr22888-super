@@ -103,6 +103,7 @@ import ClientSegmentation from '@/components/ClientSegmentation';
 import ClientJourneyMap from '@/components/ClientJourneyMap';
 import RiskScoringSystem from '@/components/RiskScoringSystem';
 import PlatoAI from '@/components/PlatoAI';
+import NatashaDietPlan from '@/components/NatashaDietPlan';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -575,6 +576,11 @@ export default function Home() {
       {/* Perfil Específico: Natasha Rosa */}
       <div className="px-6 mt-6">
         <NatashaProfile />
+      </div>
+
+      {/* Plano de Dieta e Treino - Natasha */}
+      <div className="px-6 mt-6">
+        <NatashaDietPlan />
       </div>
 
       {/* Pesquisa Científica Veterinária */}
