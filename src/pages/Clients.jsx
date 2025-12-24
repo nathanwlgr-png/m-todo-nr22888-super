@@ -75,23 +75,63 @@ export default function Clients() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Client.list('-updated_date');
-        return data.filter(c => c && c.id && c.first_name);
+        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
         return [];
       }
     },
-    retry: 1
+    retry: 0,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
-    queryFn: () => base44.entities.Sale.list(),
+    queryFn: async () => {
+      try {
+        const allSales = await base44.entities.Sale.list();
+        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
+        return allSales.filter(s => {
+          if (!s || !s.id) return false;
+          if (!s.client_id) return true;
+          return validClientIds.has(s.client_id);
+        });
+      } catch (error) {
+        console.warn('Erro ao carregar vendas (ignorando):', error);
+        return [];
+      }
+    },
+    enabled: clients.length > 0,
+    retry: 0,
+    staleTime: 60 * 60 * 1000,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   const { data: allVisits = [] } = useQuery({
     queryKey: ['all-visits'],
-    queryFn: () => base44.entities.Visit.list('-scheduled_date', 500),
+    queryFn: async () => {
+      try {
+        const allVisits = await base44.entities.Visit.list('-scheduled_date', 500);
+        const validClientIds = new Set(clients.map(c => c.id));
+        return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
+      } catch (error) {
+        console.warn('Erro ao carregar visitas (ignorando):', error);
+        return [];
+      }
+    },
+    enabled: clients.length > 0,
+    retry: 0,
+    staleTime: 60 * 60 * 1000,
+    meta: {
+      errorHandler: () => {}
+    }
   });
 
   // Lista única de cidades
