@@ -94,6 +94,7 @@ import ScientificResearchAI from '@/components/ScientificResearchAI';
 import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
 import EquinePurchaseExam from '@/components/EquinePurchaseExam';
+import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 
 export default function Home() {
   const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
@@ -565,6 +566,11 @@ export default function Home() {
       {/* Exame de Compra de Equinos */}
       <div className="px-6 mt-6">
         <EquinePurchaseExam />
+      </div>
+
+      {/* Descobrir Clínicas Novas na Região */}
+      <div className="px-6 mt-6">
+        <RegionalClinicDiscovery />
       </div>
 
       {/* AI Reporting Hub */}
