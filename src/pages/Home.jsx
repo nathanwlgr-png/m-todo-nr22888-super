@@ -30,6 +30,7 @@ import {
   Download
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
+import ExpandedClientCard from '@/components/ExpandedClientCard';
 import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
 import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
 import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
@@ -1179,7 +1180,7 @@ export default function Home() {
           </div>
         </div>
 
-      {/* Filtered Clients */}
+      {/* Filtered Clients - Expandido com Análise Completa */}
       {searchTerm && (
         <div className="px-6 mt-6">
           <div className="flex items-center justify-between mb-4">
@@ -1196,36 +1197,14 @@ export default function Home() {
                 setScoreFilter('all');
               }}
             >
-              Limpar Todos
+              Limpar
             </Button>
           </div>
 
-          {/* Active Filters Summary */}
-          {(cityFilter !== 'all' || scoreFilter !== 'all') && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {cityFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
-                  📍 {cityFilter}
-                  <button onClick={() => setCityFilter('all')} className="hover:bg-indigo-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {scoreFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                  {scoreFilter === 'high' ? '⭐ Alto' : scoreFilter === 'medium' ? '📊 Médio' : '📉 Baixo'}
-                  <button onClick={() => setScoreFilter('all')} className="hover:bg-purple-200 rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {filteredClients.slice(0, 10).map((client) => (
+          <div className="space-y-4">
+            {filteredClients.slice(0, 5).map((client) => (
               <div key={client.id} id={`client-${client.id}`}>
-                <ClientCard client={client} />
+                <ExpandedClientCard client={client} />
               </div>
             ))}
           </div>
