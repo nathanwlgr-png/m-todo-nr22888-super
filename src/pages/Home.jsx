@@ -144,7 +144,7 @@ export default function Home() {
         // Validação robusta
         const validClients = data.filter(c => {
           if (!c || typeof c !== 'object') return false;
-          if (!c.id || typeof c.id !== 'string' || c.id.length < 10) return false;
+          if (!c.id || typeof c.id !== 'string' || c.id.length < 20) return false;
           if (!c.first_name || c.first_name.trim().length === 0) return false;
           if (c.is_deleted === true) return false;
           return true;

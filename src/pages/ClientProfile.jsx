@@ -151,30 +151,36 @@ export default function ClientProfile() {
   const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
-      if (!clientId || typeof clientId !== 'string' || clientId.length < 10) {
-        toast.error('ID inválido');
+      if (!clientId || typeof clientId !== 'string' || clientId.length < 20) {
+        toast.error('ID inválido ou corrompido');
         navigate(createPageUrl('Home'));
         return null;
       }
       try {
         const clients = await base44.entities.Client.list();
         const foundClient = clients.find(c => 
-          c && c.id === clientId && !c.is_deleted && c.first_name
+          c && 
+          c.id === clientId && 
+          !c.is_deleted && 
+          c.first_name &&
+          typeof c.id === 'string' &&
+          c.id.length >= 20
         );
         if (!foundClient) {
-          toast.error('Cliente não encontrado');
-          setTimeout(() => navigate(createPageUrl('Home')), 1500);
+          console.warn(`Cliente ${clientId} não encontrado ou foi removido`);
+          toast.error('Cliente não encontrado ou foi removido');
+          setTimeout(() => navigate(createPageUrl('Home')), 1000);
           return null;
         }
         return foundClient;
       } catch (error) {
-        console.error('Erro crítico:', error);
-        toast.error('Erro ao carregar');
-        setTimeout(() => navigate(createPageUrl('Home')), 1500);
+        console.error('Erro ao buscar cliente:', error);
+        toast.error('Erro ao carregar dados');
+        setTimeout(() => navigate(createPageUrl('Home')), 1000);
         return null;
       }
     },
-    enabled: !!clientId,
+    enabled: !!clientId && typeof clientId === 'string' && clientId.length >= 20,
     staleTime: 30 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
