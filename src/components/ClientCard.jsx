@@ -31,7 +31,13 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   
+  // Validação rigorosa
   if (!client || !client.id || client.is_deleted) {
+    return null;
+  }
+  
+  // Validar ID
+  if (typeof client.id !== 'string' || client.id.length < 10) {
     return null;
   }
   

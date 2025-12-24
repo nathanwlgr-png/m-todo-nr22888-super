@@ -129,7 +129,13 @@ export default function Home() {
       try {
         const limit = dataSaverEnabled ? 50 : 100;
         const data = await base44.entities.Client.list('-updated_date', limit);
-        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
+        return data.filter(c => {
+          if (!c || !c.id || !c.first_name) return false;
+          if (c.is_deleted) return false;
+          // Validar ID para evitar IDs inválidos
+          if (typeof c.id !== 'string' || c.id.length < 10) return false;
+          return true;
+        });
       } catch (error) {
         console.warn('Erro ao carregar clientes (ignorando):', error);
         return [];
@@ -139,9 +145,9 @@ export default function Home() {
     retryDelay: 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
-    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 60 * 60 * 1000,
+    refetchOnMount: true,
+    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 30 * 60 * 1000,
+    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 30 * 60 * 1000,
     meta: {
       errorHandler: () => {}
     }
