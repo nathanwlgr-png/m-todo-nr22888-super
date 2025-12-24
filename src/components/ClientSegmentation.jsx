@@ -14,9 +14,18 @@ export default function ClientSegmentation() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      const data = await base44.entities.Client.list();
-      return data.filter(c => c && c.id && c.first_name);
-    }
+      try {
+        const data = await base44.entities.Client.list();
+        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
+      } catch (error) {
+        if (error.message?.includes('not found')) {
+          console.warn('Cliente deletado referenciado, ignorando');
+          return [];
+        }
+        throw error;
+      }
+    },
+    retry: 1
   });
 
   const generateSegmentedReport = async () => {
