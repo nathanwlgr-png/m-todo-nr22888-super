@@ -14,8 +14,12 @@ export default function SalesOverview() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Client.list();
-        return data.filter(c => c && c.id && c.first_name);
+        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado, ignorando');
+          return [];
+        }
         console.error('Erro ao carregar clientes:', error);
         return [];
       }
@@ -37,6 +41,10 @@ export default function SalesOverview() {
         const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
         return allSales.filter(s => s && s.client_id && validClientIds.has(s.client_id));
       } catch (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado em venda, ignorando');
+          return [];
+        }
         console.error('Erro ao carregar vendas:', error);
         return [];
       }
@@ -78,6 +86,10 @@ export default function SalesOverview() {
         const validClientIds = new Set(clients.map(c => c.id));
         return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
       } catch (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado em visita, ignorando');
+          return [];
+        }
         console.error('Erro ao carregar visitas:', error);
         return [];
       }
