@@ -35,17 +35,18 @@ export default function AIReportingHub() {
         const data = await base44.entities.Client.list('-updated_date', 100);
         return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
       } catch (error) {
-        // Silenciar erros de clientes não encontrados
-        if (error.message?.includes('not found')) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
           console.warn('Cliente deletado referenciado, ignorando');
-        } else {
-          console.error('Erro ao carregar clientes:', error);
+          return [];
         }
+        console.error('Erro ao carregar clientes:', error);
         return [];
       }
     },
     retry: 1,
     retryDelay: 500,
+    staleTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: sales = [] } = useQuery({
@@ -53,13 +54,19 @@ export default function AIReportingHub() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Sale.list();
-        return data.filter(s => s && s.id);
+        const validClientIds = new Set(clients.filter(c => c && c.id).map(c => c.id));
+        return data.filter(s => s && s.id && (!s.client_id || validClientIds.has(s.client_id)));
       } catch (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado em venda, ignorando');
+          return [];
+        }
         console.warn('Erro ao carregar vendas:', error);
         return [];
       }
     },
     retry: 1,
+    enabled: clients.length > 0,
   });
 
   const { data: visits = [] } = useQuery({
@@ -67,13 +74,19 @@ export default function AIReportingHub() {
     queryFn: async () => {
       try {
         const data = await base44.entities.Visit.list();
-        return data.filter(v => v && v.id);
+        const validClientIds = new Set(clients.filter(c => c && c.id).map(c => c.id));
+        return data.filter(v => v && v.id && (!v.client_id || validClientIds.has(v.client_id)));
       } catch (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Entity Client')) {
+          console.warn('Cliente deletado em visita, ignorando');
+          return [];
+        }
         console.warn('Erro ao carregar visitas:', error);
         return [];
       }
     },
     retry: 1,
+    enabled: clients.length > 0,
   });
 
   // Gerar relatório customizado via linguagem natural
