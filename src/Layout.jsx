@@ -1,6 +1,7 @@
 import React from 'react';
 import ErrorRecoverySystem from './components/ErrorRecoverySystem';
 import EntityNotFoundHandler from './components/EntityNotFoundHandler';
+import NetworkErrorBoundary from './components/NetworkErrorBoundary';
 import SystemHealthMonitor from './components/SystemHealthMonitor';
 import SecurityLayerSystem from './components/SecurityLayerSystem';
 import VoiceCommandAI from './components/VoiceCommandAI';
@@ -15,18 +16,20 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorRecoverySystem>
       <EntityNotFoundHandler>
-        <SystemHealthChecker />
-        <TestFlowSimulator />
-        <SystemHealthMonitor />
-        <SecurityLayerSystem />
-        <VoiceCommandAI />
-        <GoogleSheetsIntegration />
-        <FollowUpAutomation />
-        <WhatsAppNotificationService />
-        <div className="pb-20">
-          {children}
-        </div>
-        <DocumentAIAnalyzer />
+        <NetworkErrorBoundary>
+          <SystemHealthChecker />
+          <TestFlowSimulator />
+          <SystemHealthMonitor />
+          <SecurityLayerSystem />
+          <VoiceCommandAI />
+          <GoogleSheetsIntegration />
+          <FollowUpAutomation />
+          <WhatsAppNotificationService />
+          <div className="pb-20">
+            {children}
+          </div>
+          <DocumentAIAnalyzer />
+        </NetworkErrorBoundary>
       </EntityNotFoundHandler>
     </ErrorRecoverySystem>
   );

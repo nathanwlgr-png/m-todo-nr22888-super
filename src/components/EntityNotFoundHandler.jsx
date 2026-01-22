@@ -14,9 +14,10 @@ class EntityNotFoundHandler extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Verifica se é erro de entidade não encontrada
+    // Verifica se é erro de entidade não encontrada ou rede
     if (error?.message?.includes('not found') || 
         error?.message?.includes('Entity') ||
+        error?.message?.includes('Network Error') ||
         error?.response?.data?.error?.includes('not found')) {
       return { hasError: true };
     }
