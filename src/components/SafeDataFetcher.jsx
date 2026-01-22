@@ -56,22 +56,22 @@ export function useSafeEntity(entityName, entityId, options = {}) {
     queryKey: ['safe-entity', entityName, entityId],
     queryFn: async () => {
       if (!entityId || entityId === 'undefined' || entityId.length < 15) {
-        throw new Error('ID inválido');
+        return null;
       }
       
       try {
         const data = await base44.entities[entityName].get(entityId);
         if (!validateEntity(data)) {
-          throw new Error('Entidade inválida ou deletada');
+          return null;
         }
         return data;
       } catch (error) {
-        console.warn(`Erro ao buscar ${entityName}:`, error);
-        throw error;
+        console.warn(`Entidade ${entityName} não encontrada:`, entityId);
+        return null;
       }
     },
     enabled: !!entityId && entityId !== 'undefined' && entityId.length > 15,
-    retry: 1,
+    retry: 0,
     ...options
   });
 }

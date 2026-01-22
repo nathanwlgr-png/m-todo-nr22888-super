@@ -69,12 +69,12 @@ import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
+import VisitManager from './pages/VisitManager';
 import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
+import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import VisitManager from './pages/VisitManager';
-import VisitWorkflow from './pages/VisitWorkflow';
 import __Layout from './Layout.jsx';
 
 
@@ -150,12 +150,12 @@ export const PAGES = {
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
+    "VisitManager": VisitManager,
     "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
+    "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "VisitManager": VisitManager,
-    "VisitWorkflow": VisitWorkflow,
 }
 
 export const pagesConfig = {
