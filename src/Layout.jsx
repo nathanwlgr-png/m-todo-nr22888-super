@@ -14,18 +14,19 @@ import DocumentAIAnalyzer from './components/DocumentAIAnalyzer';
 export default function Layout({ children, currentPageName }) {
   return (
     <ErrorRecoverySystem>
-      <SystemHealthChecker />
-      <TestFlowSimulator />
-      <SystemHealthMonitor />
-      <SecurityLayerSystem />
-      <VoiceCommandAI />
-      <GoogleSheetsIntegration />
-      <FollowUpAutomation />
-      <WhatsAppNotificationService />
-      <div className="pb-20">
-        {children}
-      </div>
-      <DocumentAIAnalyzer />
+      <EntityNotFoundHandler>
+        <SystemHealthChecker />
+        <TestFlowSimulator />
+        <SystemHealthMonitor />
+        <SecurityLayerSystem />
+        <VoiceCommandAI />
+        <GoogleSheetsIntegration />
+        <FollowUpAutomation />
+        <WhatsAppNotificationService />
+        <div className="pb-20">
+          {children}
+        </div>
+        <DocumentAIAnalyzer />
       </EntityNotFoundHandler>
     </ErrorRecoverySystem>
   );
