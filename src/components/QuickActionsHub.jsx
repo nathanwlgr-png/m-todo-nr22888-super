@@ -14,7 +14,9 @@ import {
   BarChart3,
   Search,
   Zap,
-  Brain
+  Brain,
+  MapPin,
+  GraduationCap
 } from 'lucide-react';
 
 export default function QuickActionsHub() {
@@ -106,6 +108,20 @@ export default function QuickActionsHub() {
       descricao: 'Acompanhar',
       cor: 'from-red-500 to-red-600',
       pagina: 'Goals'
+    },
+    {
+      icon: MapPin,
+      titulo: 'Pesquisa de Mercado',
+      descricao: 'Encontrar clínicas',
+      cor: 'from-cyan-500 to-blue-600',
+      pagina: 'MarketResearch'
+    },
+    {
+      icon: GraduationCap,
+      titulo: 'Sales Coaching',
+      descricao: 'Feedback de vendas',
+      cor: 'from-purple-500 to-indigo-600',
+      pagina: 'SalesCoaching'
     }
   ];
 
