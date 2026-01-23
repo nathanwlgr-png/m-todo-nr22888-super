@@ -69,6 +69,7 @@ export default function Clients() {
   const [results, setResults] = useState(null);
   const [editingClientId, setEditingClientId] = useState(null);
   const [editingName, setEditingName] = useState('');
+  const [segmentFilter, setSegmentFilter] = useState('all');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -196,7 +197,10 @@ export default function Clients() {
         client.visit_objective === pipelineFilter || 
         client.pipeline_stage === pipelineFilter;
       
-      return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline;
+      // Filtro de segmento IA
+      const matchesSegment = segmentFilter === 'all' || client.ai_segment === segmentFilter;
+      
+      return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline && matchesSegment;
     });
 
     // Ordenação
@@ -247,7 +251,7 @@ export default function Clients() {
     }
   };
 
-  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter].filter(f => f !== 'all').length;
+  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, segmentFilter].filter(f => f !== 'all').length;
 
   const handleQuickEdit = (client) => {
     setEditingClientId(client.id);
@@ -821,6 +825,25 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                 </Select>
               </div>
 
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Segmento IA</label>
+                <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Segmentos</SelectItem>
+                    <SelectItem value="VIP">👑 VIP</SelectItem>
+                    <SelectItem value="Champions">🏆 Champions</SelectItem>
+                    <SelectItem value="Potential">⭐ Potenciais</SelectItem>
+                    <SelectItem value="Nurture">🌱 Desenvolver</SelectItem>
+                    <SelectItem value="At Risk">⚠️ Em Risco</SelectItem>
+                    <SelectItem value="Cold">❄️ Frios</SelectItem>
+                    <SelectItem value="Dormant">💤 Inativos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -829,6 +852,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                   setCityFilter('all');
                   setVisitFilter('all');
                   setPipelineFilter('all');
+                  setSegmentFilter('all');
                 }}
                 className="w-full text-sm"
               >
