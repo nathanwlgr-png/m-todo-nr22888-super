@@ -51,8 +51,11 @@ const ORANGE_REGION_CITIES = [
 
 export default function Clients() {
   const navigate = useNavigate();
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlFilter = urlParams.get('filter');
+  
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(urlFilter || 'all');
   const [scoreFilter, setScoreFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);

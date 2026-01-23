@@ -558,28 +558,58 @@ export default function Home() {
           </div>
         </div>
 
-        {/* MÉTRICAS RÁPIDAS */}
+        {/* MÉTRICAS RÁPIDAS - CLICÁVEIS */}
         <div className="pt-4 border-t">
           <div className="grid grid-cols-2 gap-3">
-            <Card className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-600" />
-                <div>
-                  <p className="text-2xl font-bold text-indigo-900">{metrics.total}</p>
-                  <p className="text-xs text-indigo-600">Total Clientes</p>
+            <Link to={createPageUrl('Clients')}>
+              <Card className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50 cursor-pointer hover:shadow-lg transition-all">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-indigo-600" />
+                  <div>
+                    <p className="text-2xl font-bold text-indigo-900">{metrics.total}</p>
+                    <p className="text-xs text-indigo-600">Total Clientes</p>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
             
-            <Card className="p-3 bg-gradient-to-br from-red-50 to-orange-50">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-red-600" />
-                <div>
-                  <p className="text-2xl font-bold text-red-900">{metrics.hot}</p>
-                  <p className="text-xs text-red-600">Quentes 🔥</p>
+            <Link to={createPageUrl('Clients?filter=quente')}>
+              <Card className="p-3 bg-gradient-to-br from-red-50 to-orange-50 cursor-pointer hover:shadow-lg transition-all">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-red-600" />
+                  <div>
+                    <p className="text-2xl font-bold text-red-900">{metrics.hot}</p>
+                    <p className="text-xs text-red-600">Quentes 🔥</p>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <Link to={createPageUrl('Clients?filter=morno')}>
+              <Card className="p-3 bg-gradient-to-br from-yellow-50 to-amber-50 cursor-pointer hover:shadow-lg transition-all">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-900">{metrics.warm}</p>
+                    <p className="text-xs text-yellow-600">Mornos 🌡️</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+            
+            <Link to={createPageUrl('Clients?filter=frio')}>
+              <Card className="p-3 bg-gradient-to-br from-blue-50 to-cyan-50 cursor-pointer hover:shadow-lg transition-all">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-2xl font-bold text-blue-900">{metrics.cold}</p>
+                    <p className="text-xs text-blue-600">Frios ❄️</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
           </div>
         </div>
       </div>
