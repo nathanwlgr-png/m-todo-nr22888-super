@@ -122,6 +122,7 @@ import DynamicFollowUpOrchestrator from '@/components/DynamicFollowUpOrchestrato
 import MarketNewsAnalyzer from '@/components/MarketNewsAnalyzer';
 import CompetitorIntelligenceAI from '@/components/CompetitorIntelligenceAI';
 import PersonalizedMarketApproach from '@/components/PersonalizedMarketApproach';
+import UltraDeepMarketIntelligence from '@/components/UltraDeepMarketIntelligence';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1185,16 +1186,24 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* 12. INTELIGÊNCIA COMPETITIVA */}
         <CompetitorIntelligenceAI client={client} />
 
-        {/* 13. ESTRATÉGIA DE VENDA PERSONALIZADA */}
+        {/* 13. ANÁLISE REGIONAL ULTRA-PROFUNDA */}
+        <UltraDeepMarketIntelligence 
+          client={client}
+          onUpdate={(updates) => {
+            queryClient.invalidateQueries(['client', clientId]);
+          }}
+        />
+
+        {/* 14. ESTRATÉGIA DE VENDA PERSONALIZADA */}
         <PersonalizedMarketApproach client={client} interactions={interactions} />
 
-        {/* 14. GERADOR DE 3 PROPOSTAS COM IA */}
+        {/* 15. GERADOR DE 3 PROPOSTAS COM IA */}
         <MultiProposalGeneratorAI client={client} />
 
-        {/* 15. PACOTE WHATSAPP COM PROPOSTA + VÍDEOS + IMAGENS */}
+        {/* 16. PACOTE WHATSAPP COM PROPOSTA + VÍDEOS + IMAGENS */}
         <WhatsAppProposalPackage client={client} />
 
-        {/* 16. PIPELINE ASSISTANT - movido para cima */}
+        {/* 17. PIPELINE ASSISTANT - movido para cima */}
         <PipelineAIAssistant 
           client={client}
           interactions={interactions}
