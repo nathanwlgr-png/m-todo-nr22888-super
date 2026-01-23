@@ -10,6 +10,18 @@ export default function GlobalErrorInterceptor() {
       const error = event.error || event.reason;
       const message = error?.message || '';
 
+      // Erro de rate limit - aguardar e notificar
+      if (message.includes('Rate limit exceeded') || message.includes('Too many requests')) {
+        event.preventDefault();
+        console.warn('Rate limit atingido, aguardando...');
+        
+        toast.warning('Muitas requisições', {
+          description: 'Aguarde alguns segundos e tente novamente',
+          duration: 5000
+        });
+        return;
+      }
+
       // Erro de entidade não encontrada - redireciona silenciosamente
       if (message.includes('not found') && message.includes('Entity')) {
         event.preventDefault();
@@ -21,6 +33,7 @@ export default function GlobalErrorInterceptor() {
             window.location.href = '/';
           }
         }, 500);
+        return;
       }
 
       // Erro de rede - mostrar toast
