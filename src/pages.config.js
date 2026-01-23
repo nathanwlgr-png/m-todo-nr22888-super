@@ -86,6 +86,7 @@ import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import ClientDashboard from './pages/ClientDashboard';
 import MobVendedorBackup from './pages/MobVendedorBackup';
 import MobiMigration from './pages/MobiMigration';
+import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import __Layout from './Layout.jsx';
 
 
@@ -178,6 +179,7 @@ export const PAGES = {
     "ClientDashboard": ClientDashboard,
     "MobVendedorBackup": MobVendedorBackup,
     "MobiMigration": MobiMigration,
+    "AdvancedFunnelManager": AdvancedFunnelManager,
 }
 
 export const pagesConfig = {
