@@ -26,6 +26,7 @@ import {
   Zap
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
+import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -232,7 +233,10 @@ export default function Home() {
             <p className="text-xs text-slate-600">Siga na ordem para máximo resultado</p>
           </div>
 
-          {/* ETAPA 1: BUSCA GPS */}
+          {/* ETAPA 1A: ANÁLISE REGIONAL POR CIDADE */}
+          <RegionalClinicAnalyzer />
+
+          {/* ETAPA 1B: BUSCA GPS */}
           <CompleteProfileSearch />
 
           {/* ETAPA 2: CADASTRO MANUAL */}
