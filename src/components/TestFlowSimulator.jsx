@@ -98,48 +98,11 @@ export default function TestFlowSimulator() {
       return results;
     };
 
-    const runAllTests = async () => {
-      console.log('🧪 Iniciando testes de fluxo (3x)...');
-      
-      const allResults = [];
-      
-      for (let i = 1; i <= 3; i++) {
-        console.log(`\n🔬 Teste ${i}/3 iniciando...`);
-        const result = await runFlowTest(i);
-        allResults.push(result);
-        
-        console.log(`✅ Teste ${i} concluído:`, result.success ? 'SUCESSO' : 'FALHA');
-        result.steps.forEach(step => {
-          console.log(`  ${step.success ? '✓' : '✗'} ${step.name}: ${step.message}`);
-        });
-        
-        // Aguarda 3 segundos entre testes
-        if (i < 3) await new Promise(resolve => setTimeout(resolve, 3000));
-      }
+    // Testes desabilitados - causavam rate limit
+    // Apenas log passivo
+    console.log('✅ Sistema pronto - Testes desabilitados');
 
-      setTestResults(allResults);
-
-      // Resumo final
-      const allSuccess = allResults.every(r => r.success);
-      const totalSteps = allResults.reduce((sum, r) => sum + r.steps.length, 0);
-      const successSteps = allResults.reduce((sum, r) => sum + r.steps.filter(s => s.success).length, 0);
-
-      console.log('\n📊 RESUMO DOS TESTES:');
-      console.log(`Total de testes: 3`);
-      console.log(`Testes bem-sucedidos: ${allResults.filter(r => r.success).length}`);
-      console.log(`Taxa de sucesso: ${successSteps}/${totalSteps} (${Math.round(successSteps/totalSteps*100)}%)`);
-
-      if (allSuccess) {
-        toast.success('✅ Todos os testes passaram!');
-      } else {
-        toast.error('⚠️ Alguns testes falharam. Verifique o console.');
-      }
-    };
-
-    // Inicia testes após 2 segundos
-    const timeout = setTimeout(runAllTests, 2000);
-
-    return () => clearTimeout(timeout);
+    return () => {};
   }, []);
 
   return null;
