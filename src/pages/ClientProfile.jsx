@@ -195,18 +195,23 @@ export default function ClientProfile() {
         const foundClient = allClients.find(c => c?.id === clientId);
         
         if (!foundClient) {
+          toast.error('Cliente não encontrado ou foi deletado');
           navigate(createPageUrl('Clients'));
           return null;
         }
         return foundClient;
       } catch (error) {
+        if (error.message?.includes('not found')) {
+          toast.error('Cliente não encontrado ou foi deletado');
+        }
         navigate(createPageUrl('Clients'));
         return null;
       }
     },
     enabled: !!clientId && typeof clientId === 'string' && clientId.length >= 20,
-    retry: false,
-    refetchOnWindowFocus: false
+    retry: 0,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000
   });
 
   const { data: visits = [] } = useQuery({
