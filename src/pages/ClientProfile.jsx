@@ -110,6 +110,9 @@ import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
 import PredictiveAnalyticsEngine from '@/components/PredictiveAnalyticsEngine';
+import AINextBestAction from '@/components/AINextBestAction';
+import SmartClientSummary from '@/components/SmartClientSummary';
+import AutoTaskCreator from '@/components/AutoTaskCreator';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1240,6 +1243,30 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Predictive Analytics - LTV + Churn Risk */}
         <PredictiveAnalyticsEngine 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* AI Next Best Action */}
+        <AINextBestAction 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* Smart Client Summary */}
+        <SmartClientSummary 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* Auto Task Creator */}
+        <AutoTaskCreator 
           client={client}
           interactions={interactions}
           sales={sales}

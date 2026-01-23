@@ -33,6 +33,7 @@ import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
 import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
 import GamificationSystem from '@/components/GamificationSystem';
 import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
+import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -234,6 +235,9 @@ export default function Home() {
       <div className="px-4 py-6 space-y-4">
         {/* GAMIFICAÇÃO */}
         <GamificationSystem compact={true} />
+
+        {/* ALERTAS PROATIVOS */}
+        <ProactiveAlertsSystem />
 
         {/* 🎯 FLUXO CRONOLÓGICO COMPLETO */}
         <div className="space-y-3">
