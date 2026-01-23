@@ -466,7 +466,34 @@ INSTRUÇÕES CRÍTICAS:
       });
 
       setStrategy(result);
-      toast.success('Estratégia gerada com sucesso!');
+      
+      // Criar tarefa automática com melhor dia/horário
+      if (result.timing_strategy?.best_day_week && result.timing_strategy?.best_time_day) {
+        try {
+          const nextDate = new Date();
+          // Encontrar próximo dia da semana recomendado
+          const dayMap = { 'segunda': 1, 'terça': 2, 'quarta': 3, 'quinta': 4, 'sexta': 5, 'sábado': 6, 'domingo': 0 };
+          const targetDay = dayMap[result.timing_strategy.best_day_week.toLowerCase()];
+          const currentDay = nextDate.getDay();
+          const daysUntilTarget = (targetDay - currentDay + 7) % 7 || 7;
+          nextDate.setDate(nextDate.getDate() + daysUntilTarget);
+          
+          await base44.entities.Task.create({
+            client_id: client.id,
+            client_name: client.first_name,
+            title: `🎯 Contato Estratégico - ${client.first_name}`,
+            description: `Melhor momento para contato baseado em análise científica:\n\n⏰ ${result.timing_strategy.best_time_day}\n📅 ${result.timing_strategy.best_day_week}\n🔮 ${result.timing_strategy.numerology_lucky_dates}\n\n💡 ${result.personalized_recommendations.secret_weapon}`,
+            due_date: nextDate.toISOString().split('T')[0],
+            priority: 'alta',
+            type: 'ligacao',
+            auto_created: true
+          });
+        } catch (error) {
+          console.error('Erro ao criar tarefa:', error);
+        }
+      }
+      
+      toast.success('Estratégia gerada + tarefa criada!');
     } catch (error) {
       console.error('Erro ao gerar estratégia:', error);
       toast.error('Erro ao gerar estratégia');
