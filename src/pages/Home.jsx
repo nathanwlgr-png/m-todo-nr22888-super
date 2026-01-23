@@ -598,6 +598,21 @@ export default function Home() {
               </div>
             </Card>
           </Link>
+
+          {/* Client Dashboard */}
+          <Link to={createPageUrl('ClientDashboard')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-cyan-600 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-cyan-900">Dashboard Clientes</p>
+                  <p className="text-xs text-cyan-600">Score + Busca Avançada</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
           </div>
 
         {/* SEGMENTAÇÃO INTELIGENTE */}

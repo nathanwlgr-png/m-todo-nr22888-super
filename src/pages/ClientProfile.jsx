@@ -83,6 +83,7 @@ import VisitReportPDF from '@/components/VisitReportPDF';
       import VoiceRecorderButton from '@/components/VoiceRecorderButton';
       import ScoreExplanation from '@/components/ScoreExplanation';
       import InventoryStockDisplay from '@/components/InventoryStockDisplay';
+      import ClientScoreCard from '@/components/ClientScoreCard';
 import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
 import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
 import PrimoriAdvancedAnalytics from '@/components/PrimoriAdvancedAnalytics';
@@ -661,6 +662,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
       <div className="px-6 -mt-16 space-y-4">
         {/* Collaboration Indicator */}
         <CollaborationIndicator contextType="client" contextId={clientId} />
+
+        {/* Score do Cliente */}
+        <ClientScoreCard clientId={clientId} />
 
         {/* 1. NÚMERO, ESTILO DE DECISÃO E DICAS DE ABORDAGEM */}
         <Card className="p-5 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300">
