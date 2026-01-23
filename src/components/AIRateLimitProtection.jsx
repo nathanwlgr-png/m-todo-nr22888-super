@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { rateLimitManager } from '@/utils/rateLimitManager';
+import { rateLimitManager } from '@/components/rateLimitManager';
 
 export default function AIRateLimitProtection() {
   const [stats, setStats] = useState({

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, BookOpen, Brain, Zap, Users } from 'lucide-react';
 import { toast } from 'sonner';
-import { executeWithRateLimit } from '@/utils/rateLimitManager';
+import { executeWithRateLimit } from '@/components/rateLimitManager';
 
 const SALES_BIBLE = {
   frameworks: {

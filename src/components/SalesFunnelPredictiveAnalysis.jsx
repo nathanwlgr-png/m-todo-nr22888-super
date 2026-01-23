@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
-import { executeWithRateLimit } from '@/utils/rateLimitManager';
+import { executeWithRateLimit } from '@/components/rateLimitManager';
 
 export default function SalesFunnelPredictiveAnalysis({ client, interactions = [], sales = [], visits = [] }) {
   const [prediction, setPrediction] = useState(null);
