@@ -34,6 +34,7 @@ import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashbo
 import GamificationSystem from '@/components/GamificationSystem';
 import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
 import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
+import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -238,6 +239,9 @@ export default function Home() {
 
         {/* ALERTAS PROATIVOS */}
         <ProactiveAlertsSystem />
+
+        {/* GERADOR DE CAMPANHAS AUTOMÁTICAS */}
+        <AutoCampaignGenerator />
 
         {/* 🎯 FLUXO CRONOLÓGICO COMPLETO */}
         <div className="space-y-3">

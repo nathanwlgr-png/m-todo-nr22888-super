@@ -113,6 +113,8 @@ import PredictiveAnalyticsEngine from '@/components/PredictiveAnalyticsEngine';
 import AINextBestAction from '@/components/AINextBestAction';
 import SmartClientSummary from '@/components/SmartClientSummary';
 import AutoTaskCreator from '@/components/AutoTaskCreator';
+import SalesFunnelPredictiveAnalysis from '@/components/SalesFunnelPredictiveAnalysis';
+import PersonalizedUpsellEngine from '@/components/PersonalizedUpsellEngine';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1271,6 +1273,20 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           interactions={interactions}
           sales={sales}
           visits={visits}
+        />
+
+        {/* Sales Funnel Predictive Analysis */}
+        <SalesFunnelPredictiveAnalysis 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* Personalized Upsell Engine */}
+        <PersonalizedUpsellEngine 
+          client={client}
+          sales={sales}
         />
 
         {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
