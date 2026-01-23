@@ -101,6 +101,7 @@ import NextStepAI from '@/components/NextStepAI';
 import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
 import SmartScheduler from '@/components/SmartScheduler';
 import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
+import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import { toast } from 'sonner';
 
 const clientTypeLabels = {
@@ -1218,6 +1219,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Clínicas Próximas - Google Maps + Redes Sociais + Eventos */}
         <NearbyClinicsFinder client={client} />
+
+        {/* AI Interaction Insights - Análise de Sentimento + Auto-Categorização */}
+        <InteractionInsightsAI clientId={clientId} interactions={interactions} />
 
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
         <FunnelPersuasionTriggers client={client} />
