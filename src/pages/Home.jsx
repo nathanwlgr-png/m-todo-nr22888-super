@@ -1,616 +1,301 @@
-import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { 
   UserPlus, 
   Users, 
-  Sparkles,
-  TrendingUp,
-  ThermometerSun,
   MapPin,
-  DollarSign,
-  Target,
-  Calendar,
   Search,
+  Calendar,
+  Target,
+  TrendingUp,
+  Loader2,
+  CheckCircle2,
+  Sparkles,
+  MessageSquare,
   FileText,
-  Mic,
   Settings,
-  Play,
-  Database,
-  Send,
-  WifiOff,
-  Package,
-  AlertCircle,
-  RotateCcw,
-  Download,
-  MessageSquare
+  Play
 } from 'lucide-react';
-import ClientCard from '@/components/ClientCard';
-import ExpandedClientCard from '@/components/ExpandedClientCard';
-import StatusPieChart from '@/components/dashboard/StatusPieChart.jsx';
-import RevenueChart from '@/components/dashboard/RevenueChart.jsx';
-import ClientsMap from '@/components/dashboard/ClientsMap.jsx';
-import InteractiveSalesMap from '@/components/InteractiveSalesMap';
-import GamificationWidget from '@/components/GamificationWidget';
-import AutoTaskGenerator from '@/components/AutoTaskGenerator';
-import PersonalGoalsWidget from '@/components/PersonalGoalsWidget';
-import QuickTips from '@/components/onboarding/QuickTips';
-import LabBrandCompetitorAnalysis from '@/components/LabBrandCompetitorAnalysis';
-import FeatureTooltip from '@/components/onboarding/FeatureTooltip';
-import SalesOverview from '@/components/SalesOverview';
-import MonthlyInsightsReport from '@/components/MonthlyInsightsReport';
-import VendedorPerformanceFeedback from '@/components/VendedorPerformanceFeedback';
-import HotClientsDialog from '@/components/HotClientsDialog';
-import VeterinaryEventsCalendar from '@/components/VeterinaryEventsCalendar';
-import MassClientImporter from '@/components/MassClientImporter';
-import KPIDashboard from '@/components/KPIDashboard';
-import AIDocumentsHub from '@/components/AIDocumentsHub';
-import SalesAutomation from '@/components/SalesAutomation';
-import SmartProductSuggestions from '@/components/SmartProductSuggestions';
-import CalendarIntegration from '@/components/CalendarIntegration';
-import CompleteSystemReport from '@/components/CompleteSystemReport';
-import RegionalClinicSearch from '@/components/RegionalClinicSearch';
-import BulkClientDataUpdater from '@/components/BulkClientDataUpdater';
-import GPSClinicTracker from '@/components/GPSClinicTracker';
-import GPSTrackerButton from '@/components/GPSTrackerButton';
-import PossibleSalesSearch from '@/components/PossibleSalesSearch';
-import RecentClientsWidget from '@/components/RecentClientsWidget';
-import SmartGoalsAI from '@/components/SmartGoalsAI';
-import EnhancedMarketIntelligence from '@/components/EnhancedMarketIntelligence';
-import UniversalAISearch from '@/components/UniversalAISearch';
-import ClipboardManager from '@/components/ClipboardManager';
-import UniversalDocumentIO from '@/components/UniversalDocumentIO';
-import ScheduledMessagesWidget from '@/components/ScheduledMessagesWidget';
-import AutoReportGenerator from '@/components/AutoReportGenerator';
-import AITaskManager from '@/components/AITaskManager';
-import CRMExternalSync from '@/components/CRMExternalSync';
-import VoiceCommandSystem from '@/components/VoiceCommandSystem';
-import UniversalFileUploader from '@/components/UniversalFileUploader';
-import AIConfigCenter from '@/components/AIConfigCenter';
-import AdvancedAIHub from '@/components/AdvancedAIHub';
-import AIRateLimitManager from '@/components/AIRateLimitManager';
-import FloatingPerformanceMonitor from '@/components/FloatingPerformanceMonitor';
-import WorkflowAutomationAI from '@/components/WorkflowAutomationAI';
-import FloatingWhatsAppButton from '@/components/FloatingWhatsAppButton';
-import LevelScoreSystem from '@/components/LevelScoreSystem';
-import PowerBooster from '@/components/PowerBooster';
-import HemogasReportGenerator from '@/components/HemogasReportGenerator';
-import PredictiveAnalyticsAI from '@/components/PredictiveAnalyticsAI';
-import ProcessingSpeedMonitor from '@/components/ProcessingSpeedMonitor';
-import DataExportButton from '@/components/DataExportButton';
-import ThreeDXSalesMaterial from '@/components/3DXSalesMaterial';
-import PersonalizedContentGenerator from '@/components/PersonalizedContentGenerator';
-import AdvancedSalesIntelligence from '@/components/AdvancedSalesIntelligence';
-import OfflinePackGenerator from '@/components/OfflinePackGenerator';
-import CompanionAnimalLabGuide from '@/components/CompanionAnimalLabGuide';
-import AIErrorCorrectionSystem from '@/components/AIErrorCorrectionSystem';
-import FloatingTechnicalMaterial from '@/components/FloatingTechnicalMaterial';
-import PipelineOptimizationAI from '@/components/PipelineOptimizationAI';
-import DashboardPerformanceAI from '@/components/DashboardPerformanceAI';
-import CompletePDFManual from '@/components/CompletePDFManual';
-import ExportAllReports from '@/components/ExportAllReports';
-import QuickToolsPanel from '@/components/QuickToolsPanel';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, X } from 'lucide-react';
-import DocumentMonitorAI from '@/components/DocumentMonitorAI';
-import SystemManualPDF from '@/components/SystemManualPDF';
-import MarketAnalysisAI from '@/components/MarketAnalysisAI';
-import ClientDataImporter from '@/components/ClientDataImporter';
-import ProfessionalContractGenerator from '@/components/ProfessionalContractGenerator';
-import SystemDocumentation from '@/components/SystemDocumentation';
-import ClientProfileGenerator from '@/components/ClientProfileGenerator';
-import AITokenCounter from '@/components/AITokenCounter';
-import MariliaMarketAnalysis from '@/components/MariliaMarketAnalysis';
-import FloatingButtonsGroup from '@/components/FloatingButtonsGroup';
-import CompleteCaseStudyReport from '@/components/CompleteCaseStudyReport';
-import SmartSalesFlowOptimizer from '@/components/SmartSalesFlowOptimizer';
-import AIReportingHub from '@/components/AIReportingHub';
-import ScientificResearchAI from '@/components/ScientificResearchAI';
-import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
-import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
-import QuickClientSearch from '@/components/QuickClientSearch';
-import DataSaverMode from '@/components/DataSaverMode';
-import UniversalSearchBar from '@/components/UniversalSearchBar';
-import QuickActionsHub from '@/components/QuickActionsHub';
-import WhatsAppCommandHub from '@/components/WhatsAppCommandHub';
-import SmartDashboardMetrics from '@/components/SmartDashboardMetrics';
-import PredictiveSalesAI from '@/components/PredictiveSalesAI';
-import SalesForecastAI from '@/components/SalesForecastAI';
-import AIClientSegmentation from '@/components/AIClientSegmentation';
-import ProactiveInterventionAI from '@/components/ProactiveInterventionAI';
-
-import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
-import AutoClinicDiscovery from '@/components/AutoClinicDiscovery';
-import BulkClientProfileGenerator from '@/components/BulkClientProfileGenerator';
-import NatashaProfile from '@/components/NatashaProfile';
-import ClientDataValidator from '@/components/ClientDataValidator';
-import DeepClientAnalytics from '@/components/DeepClientAnalytics';
-import ClientSegmentation from '@/components/ClientSegmentation';
-import ClientJourneyMap from '@/components/ClientJourneyMap';
-import RiskScoringSystem from '@/components/RiskScoringSystem';
-import PlatoAI from '@/components/PlatoAI';
-import NatashaDietPlan from '@/components/NatashaDietPlan';
-import SaoPauloClientShowcase from '@/components/SaoPauloClientShowcase';
 
 export default function Home() {
-  const [hotClientsOpen, setHotClientsOpen] = React.useState(false);
-  const [selectedStatus, setSelectedStatus] = React.useState('quente');
-  const [syncingOffline, setSyncingOffline] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [cityFilter, setCityFilter] = React.useState('all');
-  const [scoreFilter, setScoreFilter] = React.useState('all');
-  const [showFilters, setShowFilters] = React.useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchingClinics, setSearchingClinics] = useState(false);
+  const [autoSaveProgress, setAutoSaveProgress] = useState(null);
 
-  const dataSaverEnabled = typeof localStorage !== 'undefined' && localStorage.getItem('data_saver_mode') === 'true';
-
-  const { data: clients = [], isLoading, isError, refetch } = useQuery({
+  const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      try {
-        const limit = dataSaverEnabled ? 50 : 100;
-        const data = await base44.entities.Client.list('-updated_date', limit);
-        
-        // Validação robusta
-        const validClients = data.filter(c => {
-          if (!c || typeof c !== 'object') return false;
-          if (!c.id || typeof c.id !== 'string' || c.id.length < 20) return false;
-          if (!c.first_name || c.first_name.trim().length === 0) return false;
-          if (c.is_deleted === true) return false;
-          return true;
-        });
-        
-        console.log(`✓ ${validClients.length} clientes válidos carregados`);
-        return validClients;
-      } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-        toast.error('Erro ao carregar dados');
-        return [];
-      }
+      const data = await base44.entities.Client.list('-updated_date', 100);
+      return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
     },
-    retry: 1,
-    retryDelay: 2000,
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 30 * 60 * 1000,
-    gcTime: dataSaverEnabled ? 2 * 60 * 60 * 1000 : 30 * 60 * 1000,
-    meta: {
-      errorHandler: () => {}
-    }
   });
-
-  // IDs de clientes válidos para filtrar vendas e visitas
-  const validClientIds = useMemo(() => new Set(clients.map(c => c.id)), [clients]);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
     queryFn: () => base44.auth.me(),
   });
 
-  const handleSyncOfflineData = async () => {
-    setSyncingOffline(true);
-    try {
-      // Envia resumo dos dados atualizados para o WhatsApp configurado
-      const summary = `📊 *Sync Manual - ${new Date().toLocaleString('pt-BR')}*\n\n` +
-        `✅ Total de clientes: ${clients.length}\n` +
-        `🔥 Quentes: ${clients.filter(c => c.status === 'quente').length}\n` +
-        `🌡️ Mornos: ${clients.filter(c => c.status === 'morno').length}\n` +
-        `❄️ Frios: ${clients.filter(c => c.status === 'frio').length}\n\n` +
-        `✓ Dados sincronizados com sucesso!`;
-
-      if (user?.whatsapp_number) {
-        // Copia mensagem para área de transferência e abre WhatsApp
-        await navigator.clipboard.writeText(summary);
-        window.open(`https://wa.me/${user.whatsapp_number}?text=${encodeURIComponent(summary)}`, '_blank');
-        toast.success('Mensagem copiada! Encaminhe para seu WhatsApp');
-      } else {
-        toast.error('Configure seu WhatsApp em Configurações primeiro');
-      }
-    } catch (error) {
-      toast.error('Erro ao sincronizar dados');
-    } finally {
-      setSyncingOffline(false);
+  const createClientMutation = useMutation({
+    mutationFn: (clientData) => base44.entities.Client.create(clientData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['clients']);
     }
-  };
+  });
 
   const metrics = useMemo(() => {
     const hotClients = clients.filter(c => c.status === 'quente').length;
     const warmClients = clients.filter(c => c.status === 'morno').length;
     const coldClients = clients.filter(c => c.status === 'frio').length;
-    
-    const totalRevenue = clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
-    const avgScore = clients.length > 0 
-      ? Math.round(clients.reduce((sum, c) => sum + (c.purchase_score || 0), 0) / clients.length)
-      : 0;
-
     return {
       total: clients.length,
       hot: hotClients,
       warm: warmClients,
       cold: coldClients,
-      totalRevenue,
-      avgScore
     };
-    }, [clients]);
+  }, [clients]);
 
-    // Lista única de cidades
-    const cities = useMemo(() => {
-      const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
-      return unique.sort();
-    }, [clients]);
+  const filteredClients = useMemo(() => {
+    if (!searchTerm) return clients.slice(0, 10);
+    return clients.filter(c =>
+      c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.city?.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 10);
+  }, [clients, searchTerm]);
 
-    const filteredClients = useMemo(() => {
-      return clients
-        .filter(c => {
-          const matchesSearch = !searchTerm || 
-            c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.city?.toLowerCase().includes(searchTerm.toLowerCase());
+  const handleAutoSearchAndSave = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não disponível');
+      return;
+    }
 
-          const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
-          
-          const matchesCity = cityFilter === 'all' || c.city === cityFilter;
-          
-          let matchesScore = true;
-          if (scoreFilter !== 'all') {
-            const score = c.purchase_score || 0;
-            if (scoreFilter === 'high') matchesScore = score >= 70;
-            else if (scoreFilter === 'medium') matchesScore = score >= 40 && score < 70;
-            else if (scoreFilter === 'low') matchesScore = score < 40;
+    setSearchingClinics(true);
+    setAutoSaveProgress({ total: 0, saved: 0, skipped: 0 });
+
+    try {
+      // Pegar localização
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+      toast.info('Buscando clínicas próximas...');
+
+      // Buscar clínicas via API do Google
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Busque clínicas veterinárias próximas a esta localização: ${latitude}, ${longitude} (raio de 50km).
+        
+        Use Google Maps/Places para encontrar:
+        - Nome da clínica
+        - Endereço completo
+        - Cidade
+        - Telefone (se disponível)
+        - Classificação (rating)
+        
+        Retorne uma lista de clínicas encontradas.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            clinics: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  address: { type: "string" },
+                  city: { type: "string" },
+                  phone: { type: "string" },
+                  rating: { type: "number" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const clinicsFound = result.clinics || [];
+      setAutoSaveProgress({ total: clinicsFound.length, saved: 0, skipped: 0 });
+
+      if (clinicsFound.length === 0) {
+        toast.warning('Nenhuma clínica encontrada');
+        return;
+      }
+
+      toast.success(`${clinicsFound.length} clínicas encontradas! Salvando automaticamente...`);
+
+      let saved = 0;
+      let skipped = 0;
+
+      // Salvar automaticamente cada clínica
+      for (const clinic of clinicsFound) {
+        try {
+          // Verificar se já existe
+          const exists = clients.some(c => 
+            c.clinic_name?.toLowerCase() === clinic.name?.toLowerCase() ||
+            c.address?.toLowerCase() === clinic.address?.toLowerCase()
+          );
+
+          if (exists) {
+            skipped++;
+            setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
+            continue;
           }
 
-          return matchesSearch && matchesStatus && matchesCity && matchesScore;
-        })
-        .sort((a, b) => {
-          // Ordenar por cidade primeiro, depois por nome
-          const cityCompare = (a.city || '').localeCompare(b.city || '', 'pt-BR');
-          if (cityCompare !== 0) return cityCompare;
-          return (a.first_name || '').localeCompare(b.first_name || '', 'pt-BR');
-        });
-    }, [clients, searchTerm, statusFilter, cityFilter, scoreFilter]);
+          // Criar novo cliente
+          await createClientMutation.mutateAsync({
+            first_name: clinic.name.split(' ')[0] || clinic.name,
+            clinic_name: clinic.name,
+            address: clinic.address,
+            city: clinic.city,
+            phone: clinic.phone,
+            status: 'morno',
+            purchase_score: 50,
+            lead_source: 'analise_mercado_ia'
+          });
+
+          saved++;
+          setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
+          
+          // Pequeno delay para não sobrecarregar
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          console.error('Erro ao salvar clínica:', error);
+          skipped++;
+          setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
+        }
+      }
+
+      toast.success(`✅ Processo concluído! ${saved} clínicas salvas, ${skipped} ignoradas (duplicadas/erros)`);
+      
+    } catch (error) {
+      console.error('Erro na busca:', error);
+      toast.error('Erro ao buscar clínicas: ' + error.message);
+    } finally {
+      setSearchingClinics(false);
+      setAutoSaveProgress(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Auto Task Generator - Background Process */}
-      <AutoTaskGenerator />
-
-      {/* Voice Command System */}
-      <div className="px-6 mt-4">
-        <VoiceCommandSystem />
-      </div>
-
-      {/* Rate Limit Warning */}
-      <div className="px-6 mt-4">
-        <AIRateLimitManager />
-      </div>
-
-      {/* Data Saver Mode */}
-      <div className="px-6 mt-4">
-        <DataSaverMode />
-        </div>
-      
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
       {/* Header Fixo */}
-      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-3 py-1.5 shadow-lg border-b border-orange-500">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 flex items-center justify-center shadow-xl relative">
-            <span className="text-white font-black text-xs z-10">NR</span>
-            <span className="absolute -bottom-0.5 -right-0.5 bg-orange-500 text-white text-[7px] font-bold px-0.5 rounded">22</span>
-          </div>
-          <div className="flex-1">
-            <h1 className="text-xs font-black text-white tracking-tight">Método NR22</h1>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[7px] text-orange-400 font-semibold">CRM Automático</span>
-              <span className="text-[7px] text-slate-400">•</span>
-              <span className="text-[7px] text-blue-400 font-semibold">IA Adversary</span>
-              <span className="text-[7px] text-slate-400">•</span>
-              <span className="text-[7px] text-purple-400 font-semibold">Magnétic Tools</span>
+      <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-3 shadow-lg border-b border-orange-500">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+              <span className="text-white font-black text-sm">NR22</span>
+            </div>
+            <div>
+              <h1 className="text-sm font-black text-white">Método NR22</h1>
+              <p className="text-xs text-orange-400">CRM Inteligente</p>
             </div>
           </div>
-          
-          {/* Botões em formato de 8 */}
-          <FloatingButtonsGroup />
-
-          {/* GPS TRACKER - NUNCA REMOVER */}
-          <GPSTrackerButton />
-
-          <Link to={createPageUrl('ContactSettings')}>
-            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
-              <Settings className="w-3.5 h-3.5 text-orange-400 mx-auto" />
-            </button>
-          </Link>
-          <Link to={createPageUrl('MyProfile')}>
-            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
-              <svg className="w-3.5 h-3.5 text-orange-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </button>
-          </Link>
-          <Link to={createPageUrl('RegionalSearch')}>
-            <button className="w-7 h-7 rounded-lg glass hover:bg-white/10 transition-all">
-              <Search className="w-3.5 h-3.5 text-orange-400 mx-auto" />
-            </button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to={createPageUrl('ContactSettings')}>
+              <Button size="sm" variant="ghost" className="text-white">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('MyProfile')}>
+              <Button size="sm" variant="ghost" className="text-white">
+                <Users className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════ */}
-      {/* BUSCA UNIVERSAL PRINCIPAL - TOPO */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-4 mt-4">
-        <UniversalSearchBar />
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* MÉTRICAS INTELIGENTES */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-4 mt-4">
-        <SmartDashboardMetrics />
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* CENTRAL DE COMANDOS WHATSAPP */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-4 mt-4">
-        <WhatsAppCommandHub />
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* AÇÕES RÁPIDAS - HUB PRINCIPAL */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-4 mt-4">
-        <QuickActionsHub />
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* IA PREDITIVA DE VENDAS */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-4 mt-4">
-        <PredictiveSalesAI />
-      </div>
-
-      {/* Previsão de Vendas 30/60/90 dias */}
-      <div className="px-4 mt-4">
-        <SalesForecastAI />
-      </div>
-
-      {/* Segmentação Automática de Clientes */}
-      <div className="px-4 mt-4">
-        <AIClientSegmentation />
-      </div>
-
-      {/* Sistema de Intervenção Proativa */}
-      <div className="px-4 mt-4">
-        <ProactiveInterventionAI />
-      </div>
-
-      {/* Network Error Alert */}
-      {isError && (
-        <div className="px-6 mt-4">
-          <Card className="p-4 bg-red-50 border-red-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
+      <div className="px-4 py-6 space-y-6">
+        {/* 1. BUSCA AUTOMÁTICA DE CLÍNICAS - DESTAQUE */}
+        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-300">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">
+                🎯 Buscar Clínicas Próximas
+              </h2>
+              <p className="text-sm text-slate-700 mb-4">
+                Encontra e salva automaticamente clínicas veterinárias próximas a você
+              </p>
+            </div>
+            
+            {autoSaveProgress && (
+              <div className="p-4 bg-white rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-slate-700">Progresso:</span>
+                  <span className="text-sm text-slate-600">
+                    {autoSaveProgress.saved + autoSaveProgress.skipped} / {autoSaveProgress.total}
+                  </span>
                 </div>
-                <div>
-                  <p className="font-semibold text-red-800">Erro de Conexão</p>
-                  <p className="text-sm text-red-600">Não foi possível carregar os dados</p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-orange-600 h-2 rounded-full transition-all"
+                    style={{ 
+                      width: `${((autoSaveProgress.saved + autoSaveProgress.skipped) / autoSaveProgress.total) * 100}%` 
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>✅ Salvos: {autoSaveProgress.saved}</span>
+                  <span>⏭️ Ignorados: {autoSaveProgress.skipped}</span>
                 </div>
               </div>
-              <Button
-                onClick={() => refetch()}
-                size="sm"
-                className="bg-red-600 hover:bg-red-700"
-              >
-                <RotateCcw className="w-4 h-4 mr-1" />
-                Tentar Novamente
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════ */}
-      {/* BUSCA REGIONAL - NUNCA REMOVER */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-6 mt-4">
-        <RegionalClinicSearch />
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* ATUALIZAÇÃO EM MASSA - NUNCA REMOVER */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-6 mt-4">
-        <BulkClientDataUpdater />
-      </div>
-
-      {/* Últimos Clientes */}
-      <div className="px-6 mt-4">
-        <RecentClientsWidget />
-      </div>
-
-      {/* Busca Possíveis Vendas */}
-      <div className="px-6 mt-4">
-        <PossibleSalesSearch />
-      </div>
-
-      {/* Busca e Filtros */}
-      <div className="px-6 mt-4">
-        <div className="space-y-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
-            <Input
-              placeholder="Buscar clientes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-12 rounded-xl border-2"
-            />
-
-            {/* Autocomplete ao digitar */}
-            {searchTerm.length >= 1 && filteredClients.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border-2 border-indigo-200 z-50 max-h-64 overflow-y-auto">
-                {filteredClients.slice(0, 5).map((client) => (
-                  <Link 
-                    key={client.id} 
-                    to={createPageUrl(`ClientProfile?id=${client.id}`)}
-                    className="block p-3 hover:bg-indigo-50 border-b last:border-b-0"
-                  >
-                    <p className="font-semibold text-slate-800">{client.first_name}</p>
-                    <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
-                  </Link>
-                ))}
-              </div>
             )}
+
+            <Button
+              onClick={handleAutoSearchAndSave}
+              disabled={searchingClinics}
+              className="w-full h-14 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-lg font-bold"
+            >
+              {searchingClinics ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Buscando e Salvando...
+                </>
+              ) : (
+                <>
+                  <Search className="w-5 h-5 mr-2" />
+                  Buscar e Salvar Automaticamente
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-slate-600">
+              Usa sua localização GPS para encontrar clínicas próximas e adiciona automaticamente ao CRM
+            </p>
           </div>
-          
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <Button
-              size="sm"
-              variant={statusFilter === 'all' ? 'default' : 'outline'}
-              onClick={() => setStatusFilter('all')}
-              className="rounded-full whitespace-nowrap"
-            >
-              Todos ({clients.length})
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilter === 'quente' ? 'default' : 'outline'}
-              onClick={() => setStatusFilter('quente')}
-              className="rounded-full whitespace-nowrap bg-red-500 hover:bg-red-600 text-white"
-            >
-              🔥 Quentes ({metrics.hot})
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilter === 'morno' ? 'default' : 'outline'}
-              onClick={() => setStatusFilter('morno')}
-              className="rounded-full whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              🌡️ Mornos ({metrics.warm})
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilter === 'frio' ? 'default' : 'outline'}
-              onClick={() => setStatusFilter('frio')}
-              className="rounded-full whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              ❄️ Frios ({metrics.cold})
-            </Button>
-          </div>
+        </Card>
 
-          {/* Advanced Filters Toggle */}
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full border-2 border-slate-200 hover:bg-slate-50 h-11 rounded-xl"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Filtros Avançados
-            {(cityFilter !== 'all' || scoreFilter !== 'all') && (
-              <span className="ml-2 bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full">
-                {[cityFilter !== 'all', scoreFilter !== 'all'].filter(Boolean).length}
-              </span>
-            )}
-          </Button>
-
-          {showFilters && (
-            <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 to-indigo-50 rounded-xl border-2 border-indigo-200 shadow-sm">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-2 block">Cidade</label>
-                <Select value={cityFilter} onValueChange={setCityFilter}>
-                  <SelectTrigger className="h-11 border-2 rounded-lg">
-                    <SelectValue placeholder="Todas as cidades" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as cidades</SelectItem>
-                    {cities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        📍 {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-2 block">Score de Compra</label>
-                <Select value={scoreFilter} onValueChange={setScoreFilter}>
-                  <SelectTrigger className="h-11 border-2 rounded-lg">
-                    <SelectValue placeholder="Todos os scores" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os scores</SelectItem>
-                    <SelectItem value="high">⭐ Alto (70-100)</SelectItem>
-                    <SelectItem value="medium">📊 Médio (40-69)</SelectItem>
-                    <SelectItem value="low">📉 Baixo (0-39)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setCityFilter('all');
-                  setScoreFilter('all');
-                }}
-                className="w-full text-sm hover:bg-white/50"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Limpar Filtros
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Contador de Tokens IA */}
-      <div className="px-6 mt-4">
-        <AITokenCounter />
-      </div>
-
-      {/* Quick Stats */}
-      <div className="px-6 mt-4">
-        {/* Sales Overview */}
-        <div className="mb-6">
-          <SalesOverview />
-        </div>
-
-        {/* Smart Sales Flow Optimizer */}
-        <div className="mb-6">
-          <SmartSalesFlowOptimizer />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 dashboard-metrics">
-          <Card className="p-4 bg-white shadow-lg border-none">
+        {/* 2. MÉTRICAS RÁPIDAS */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-4 bg-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
                 <Users className="w-5 h-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-800">{metrics.total}</p>
-                <p className="text-xs text-slate-500">Clientes Cadastrados</p>
+                <p className="text-xs text-slate-500">Clientes</p>
               </div>
             </div>
           </Card>
           
-          <Card 
-            className="p-4 bg-white shadow-lg border-none cursor-pointer hover:bg-red-50 transition-all"
-            onClick={() => {
-              setSelectedStatus('quente');
-              setHotClientsOpen(true);
-            }}
-          >
+          <Card className="p-4 bg-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                <ThermometerSun className="w-5 h-5 text-red-500" />
+                <Target className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-800">{metrics.hot}</p>
@@ -618,836 +303,223 @@ export default function Home() {
               </div>
             </div>
           </Card>
-          
-          <Card className="p-4 bg-white shadow-lg border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-slate-800">
-                  R$ {(metrics.totalRevenue / 1000).toFixed(0)}k
-                </p>
-                <p className="text-xs text-slate-500">Pipeline</p>
-              </div>
-            </div>
-          </Card>
-          
-          <Card className="p-4 bg-white shadow-lg border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Target className="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{metrics.avgScore}%</p>
-                <p className="text-xs text-slate-500">Score Médio</p>
-              </div>
-            </div>
-          </Card>
         </div>
-      </div>
 
-
-
-      {/* Dashboard Charts */}
-      <div className="px-6 mt-6 space-y-4">
-        {/* Status Distribution */}
-        <Card className="p-4 bg-white shadow-md border-none">
-          <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-            <ThermometerSun className="w-4 h-4" />
-            Distribuição por Status
-          </h3>
-          <StatusPieChart 
-            hot={metrics.hot} 
-            warm={metrics.warm} 
-            cold={metrics.cold} 
-          />
+        {/* 3. BUSCA DE CLIENTES */}
+        <Card className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar clientes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </Card>
 
-        {/* Revenue by Status */}
-        <Card className="p-4 bg-white shadow-md border-none">
-          <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            Receita por Status
-          </h3>
-          <RevenueChart clients={clients} />
-        </Card>
-
-        {/* Map */}
-        <Card className="p-4 bg-white shadow-md border-none">
-          <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            Distribuição Geográfica
-          </h3>
-          <ClientsMap clients={clients} />
-        </Card>
-      </div>
-
-
-
-      {/* Personal Goals Widget */}
-      <div className="px-6 mt-6">
-        <PersonalGoalsWidget />
-      </div>
-
-      {/* Metas Inteligentes com IA */}
-      <div className="px-6 mt-6">
-        <SmartGoalsAI />
-      </div>
-
-      {/* Performance Feedback */}
-      <div className="px-6 mt-6">
-        <VendedorPerformanceFeedback />
-      </div>
-
-      {/* Mensagens Estruturadas */}
-      <div className="px-6 mt-6">
-        <ScheduledMessagesWidget />
-      </div>
-
-      {/* Modo Offline N */}
-      <div className="px-6 mt-6">
-        <OfflinePackGenerator />
-      </div>
-
-      {/* Validação de Dados dos Clientes */}
-      <div className="px-6 mt-6">
-        <ClientDataValidator />
-      </div>
-
-      {/* Sistema de Análise Profunda de Clientes */}
-      <div className="px-6 mt-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🎯 Análise Avançada de Clientes</h3>
-        <div className="grid grid-cols-1 gap-3">
-          <DeepClientAnalytics />
-          <ClientSegmentation />
-          <ClientJourneyMap />
-          <RiskScoringSystem />
-        </div>
-      </div>
-
-      {/* Perfil Específico: Natasha Rosa */}
-      <div className="px-6 mt-6">
-        <NatashaProfile />
-      </div>
-
-      {/* Cliente Real São Paulo - Demonstração Completa */}
-      <div className="px-6 mt-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🏢 Demonstração Cliente Real - São Paulo</h3>
-        <SaoPauloClientShowcase />
-      </div>
-
-      {/* Plano de Dieta e Treino - Natasha */}
-      <div className="px-6 mt-6">
-        <NatashaDietPlan />
-      </div>
-
-      {/* Pesquisa Universal com IA */}
-      <div className="px-6 mt-6">
-        <UniversalAISearch />
-      </div>
-
-      {/* Área de Transferência Fixa */}
-      <div className="px-6 mt-6">
-        <ClipboardManager />
-      </div>
-
-      {/* Import/Export Universal */}
-      <div className="px-6 mt-6">
-        <UniversalDocumentIO />
-      </div>
-
-      {/* Descoberta Automática Completa - CRMV + Google */}
-      <div className="px-6 mt-6">
-        <AutoClinicDiscovery />
-      </div>
-
-      {/* Geração em Massa de Perfis Completos */}
-      <div className="px-6 mt-6">
-        <BulkClientProfileGenerator />
-      </div>
-
-      {/* AI Reporting Hub */}
-      <div className="px-6 mt-6">
-        <AIReportingHub />
-      </div>
-
-      {/* CRM + Gestão IA Unificado */}
-      <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 gap-3">
-          <ExportAllReports />
-          <CompletePDFManual />
-          <CRMExternalSync />
-          <AITaskManager />
-          <AutoReportGenerator />
-          <PersonalizedContentGenerator />
-          <AdvancedSalesIntelligence />
-        </div>
-      </div>
-
-      {/* Hub de IAs Unificado */}
-      <div className="px-6 mt-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">🤖 Central de IAs</h3>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <HemogasReportGenerator />
-          <ProcessingSpeedMonitor />
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <PredictiveAnalyticsAI />
-          <DataExportButton />
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          <CompanionAnimalLabGuide />
-        </div>
-      </div>
-
-      {/* IAs de Otimização */}
-      <div className="px-6 mt-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3 px-1">⚡ Otimização Avançada</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <PipelineOptimizationAI />
-          <DashboardPerformanceAI />
-        </div>
-      </div>
-
-      {/* Botão Flutuante Material Técnico */}
-      <FloatingTechnicalMaterial />
-
-      {/* Material de Vendas 3DX */}
-      <div className="px-6 mt-6">
-        <ThreeDXSalesMaterial />
-      </div>
-
-      {/* Workflow Automation AI */}
-      <div className="px-6 mt-6">
-        <WorkflowAutomationAI />
-      </div>
-
-      {/* Level Score System */}
-      <div className="px-6 mt-6">
-        <div className="grid grid-cols-2 gap-3">
-          <LevelScoreSystem />
-          <PowerBooster />
-        </div>
-      </div>
-
-      {/* Floating Buttons */}
-      <FloatingPerformanceMonitor />
-      <FloatingWhatsAppButton />
-      <PlatoAI enabledOnPage={true} />
-
-
-
-
-
-      {/* Main Actions */}
-      <div className="px-6 mt-6 space-y-4">
-        {/* Export Data Button */}
-        <Button
-          onClick={async () => {
-            const citiesCount = clients.reduce((acc, c) => {
-              const city = c.city || 'Sem cidade';
-              acc[city] = (acc[city] || 0) + 1;
-              return acc;
-            }, {});
-            
-            const citiesList = Object.entries(citiesCount)
-              .map(([city, count]) => `• ${city}: ${count}`)
-              .join('\n');
-            
-            const summary = `📊 Exportação CRM - ${new Date().toLocaleString('pt-BR')}\n\n` +
-              `✅ Total de clientes: ${clients.length}\n` +
-              `🔥 Quentes: ${metrics.hot}\n` +
-              `🌡️ Mornos: ${metrics.warm}\n` +
-              `❄️ Frios: ${metrics.cold}\n\n` +
-              `💰 Pipeline Total: R$ ${(metrics.totalRevenue / 1000).toFixed(0)}k\n` +
-              `📈 Score Médio: ${metrics.avgScore}%\n\n` +
-              `Clientes por Cidade:\n${citiesList}`;
-            
-            await navigator.clipboard.writeText(summary);
-            toast.success('Dados copiados! Cole no WhatsApp Web');
-          }}
-          className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-base font-semibold shadow-lg"
-        >
-          <Download className="w-5 h-5 mr-2" />
-          Exportar Dados (Copiar)
-        </Button>
-
-        {/* Sync Offline Button */}
-        <Button
-          onClick={handleSyncOfflineData}
-          disabled={syncingOffline}
-          className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl text-base font-semibold shadow-lg"
-        >
-          {syncingOffline ? (
-            <>Enviando...</>
-          ) : (
-            <>
-              <Send className="w-5 h-5 mr-2" />
-              Enviar Dados Atualizados (WhatsApp)
-            </>
-          )}
-        </Button>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Link to={createPageUrl('VoiceClientScanner')}>
-            <Button className="w-full h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl text-base font-semibold shadow-lg shadow-purple-500/30">
-              <Mic className="w-5 h-5 mr-2" />
-              Scanner IA Voz
-            </Button>
-          </Link>
-          <Link to={createPageUrl('NewClient')}>
-            <Button className="w-full h-16 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-2xl text-base font-semibold shadow-lg shadow-orange-500/30">
-              <UserPlus className="w-5 h-5 mr-2" />
-              Novo Cliente
-            </Button>
-          </Link>
-        </div>
-
-        {/* ═══════════════════════════════════════ */}
-        {/* POSSÍVEIS VENDAS - NUNCA REMOVER */}
-        {/* ═══════════════════════════════════════ */}
-        <Link to={createPageUrl('PossibleSales')}>
-          <Button className="w-full h-16 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-2xl shadow-lg text-base font-semibold">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            📊 Possíveis Vendas (Busca Regional)
-          </Button>
-        </Link>
-
-        {/* ═══════════════════════════════════════ */}
-        {/* RASTREADOR GPS - NUNCA REMOVER */}
-        {/* ═══════════════════════════════════════ */}
-        <GPSClinicTracker />
-
-        {/* Busca Rápida de Cliente */}
-        <QuickClientSearch
-          onClientSelect={(client) => {
-            if (!client || !client.id || client.is_deleted) {
-              toast.error('Cliente não encontrado ou foi removido');
-              return;
-            }
-            window.location.href = createPageUrl(`ClientProfile?id=${client.id}`);
-          }}
-          triggerButton={
-            <Button variant="outline" className="w-full h-14 border-2 border-indigo-200 hover:bg-indigo-50 rounded-xl">
-              <Search className="w-5 h-5 mr-2" />
-              🔍 Busca Rápida de Cliente
-            </Button>
-          }
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ImportClientsTable')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Importar Tabela
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('Clients')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <Users className="w-4 h-4 mr-2" />
-              Todos os Clientes
-            </Button>
-          </Link>
-          
-          <Link to={createPageUrl('ClientsByCity')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <MapPin className="w-4 h-4 mr-2" />
-              Por Cidade
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ClientsMap')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-              <MapPin className="w-4 h-4 mr-2" />
-              Mapa de Clientes
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('ScheduledAgenda')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <Calendar className="w-4 h-4 mr-2" />
-              Agenda Programada
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('TaskCalendar')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <Calendar className="w-4 h-4 mr-2" />
-              Calendário
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('Tasks')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50">
-              <Target className="w-4 h-4 mr-2" />
-              Tarefas
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('VisitPlanner')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              Rotas
-            </Button>
-          </Link>
-          <Link to={createPageUrl('MonthlyVisitPlanner')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-              <Calendar className="w-4 h-4 mr-2" />
-              Janeiro 2026
-            </Button>
-          </Link>
-        </div>
-
-        <Link to={createPageUrl('SalesAnalytics')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Dashboard de Vendas
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('TaskAutomation')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Automação de Tarefas
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('CampaignDemo')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
-            <Play className="w-4 h-4 mr-2" />
-            Ver Demo Campanha
-          </Button>
-        </Link>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('PerformanceDashboard')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Performance
-            </Button>
-          </Link>
-          <Link to={createPageUrl('MarketIntelligence')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
-              <Search className="w-4 h-4 mr-2" />
-              Análise Mercado
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('SalesFunnel')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-              <Target className="w-4 h-4 mr-2" />
-              Funil
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('AdvancedReports')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Relatórios IA
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('SystemAudit')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-red-200 text-red-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-              Auditoria Sistema
-            </Button>
-          </Link>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Link to={createPageUrl('AdvancedSalesReports')}>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Análise Avançada
+        {/* 4. LISTA DE CLIENTES */}
+        {searchTerm && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-700">
+                Resultados ({filteredClients.length})
+              </h3>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSearchTerm('')}
+              >
+                Limpar
               </Button>
-            </Link>
-
-            <Link to={createPageUrl('Campaigns')}>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-                <Target className="w-4 h-4 mr-2" />
-                Campanhas
-              </Button>
-            </Link>
-
-            <Link to={createPageUrl('OfflineMode')}>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
-                <Database className="w-4 h-4 mr-2" />
-                Modo Offline
-              </Button>
-            </Link>
-
-            <Link to={createPageUrl('WhatsAppDataAccess')}>
-              <Button className="w-full h-16 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg">
-                <MessageSquare className="w-5 h-5 mr-2" />
-                📱 Acesso Total WhatsApp
-              </Button>
-            </Link>
-              </div>
-
-            {/* Ferramentas Rápidas */}
-            <QuickToolsPanel />
-
-            {/* IA Monitor de Documentos */}
-            <DocumentMonitorAI />
-
-            {/* Manual do Sistema PDF */}
-            <SystemManualPDF />
-
-            {/* Documentação Técnica Completa */}
-            <div className="mt-6">
-              <SystemDocumentation />
             </div>
-
-            {/* Importador de Planilha com IA */}
-            <div className="mt-6">
-              <ClientDataImporter />
-            </div>
-
-            {/* Gerador de Perfil Completo (Rodrigo Sávio Mavetto) */}
-            <div className="mt-6">
-              <ClientProfileGenerator />
-            </div>
-
-            {/* Gerador de Contrato Oficial COMPET */}
-            <div className="mt-6">
-              <ProfessionalContractGenerator />
-            </div>
-
-            {/* Relatórios Completos de Caso com Jornada */}
-            <div className="mt-6">
-              <CompleteCaseStudyReport />
-            </div>
-
-            {/* Inteligência de Mercado com Dupla IA */}
-            <div className="px-6 mt-6">
-              <EnhancedMarketIntelligence />
-            </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Link to={createPageUrl('RevenueForecastPage')}>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
-                <DollarSign className="w-4 h-4 mr-2" />
-                Previsão de Receita
-              </Button>
-            </Link>
-
-            <Link to={createPageUrl('ClosingForecast')}>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Previsão IA
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('Leaderboard')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-yellow-200 text-yellow-700">
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              Ranking
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('Goals')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-              <Target className="w-4 h-4 mr-2" />
-              Metas
-            </Button>
-          </Link>
-        </div>
-
-        {/* Botão Documentos Gerados - ÚLTIMO BOTÃO */}
-        <Link to={createPageUrl('DocumentRepository')}>
-          <Button className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-2xl shadow-lg">
-            <FileText className="w-5 h-5 mr-2" />
-            📄 Documentos Gerados pela IA
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('FollowUpSequences')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Follow-Up Automático
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('Leads')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Gestão de Leads
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('AutomationRules')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-yellow-200 text-yellow-700">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Automações
-          </Button>
-        </Link>
-
-        <Link to={createPageUrl('WhatsAppInbox')}>
-          <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
-            WhatsApp Inbox
-          </Button>
-        </Link>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ProposalGenerator')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-orange-200 text-orange-700">
-              <FileText className="w-4 h-4 mr-2" />
-              Gerar Proposta
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('SignedContracts')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-green-200 text-green-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Contratos
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ImportPriceList')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-emerald-200 text-emerald-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Importar Preços
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('EquipmentPriceList')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-blue-200 text-blue-700">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Tabela de Preços
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('Equipment')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <Package className="w-4 h-4 mr-2" />
-              Equipamentos
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('EquipmentConsumables')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-indigo-200 text-indigo-700">
-              <Package className="w-4 h-4 mr-2" />
-              Insumos
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('LoadPremiumDifferentials')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Diferenciais
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('EquipmentSalesCenter')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-orange-200 text-orange-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              Kit Vendas
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link to={createPageUrl('ConsumableOrderHistory')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Análise de Insumos
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('AutomationManager')}>
-            <Button variant="outline" className="w-full h-14 rounded-xl border-2 hover:bg-slate-50 border-purple-200 text-purple-700">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Automações
-            </Button>
-          </Link>
-          </div>
-
-          {/* Relatório Mensal de Insights */}
-          <div className="mt-6">
-            <MonthlyInsightsReport />
-          </div>
-
-          {/* Checklist Pré-Visita - Fixo */}
-          <div className="mt-6">
-            <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
+            {filteredClients.map((client) => (
+              <Card
+                key={client.id}
+                className="p-4 cursor-pointer hover:bg-slate-50"
+                onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-slate-800">{client.first_name}</p>
+                    <p className="text-xs text-slate-600">
+                      {client.clinic_name} • {client.city}
+                    </p>
+                  </div>
+                  <Badge className={
+                    client.status === 'quente' ? 'bg-red-500' :
+                    client.status === 'morno' ? 'bg-orange-500' :
+                    'bg-blue-500'
+                  }>
+                    {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
+                  </Badge>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">Checklist Pré-Visita</h3>
-                  <p className="text-xs text-slate-600">Prepare-se antes de cada visita</p>
-                </div>
-                <Link to={createPageUrl('PreVisitChecklist')}>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Acessar
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          </div>
-
-          {/* Pós-Visita - Fixo */}
-          <div className="mt-4">
-            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">Registro Pós-Visita</h3>
-                  <p className="text-xs text-slate-600">Registre resultados da visita</p>
-                </div>
-                <Link to={createPageUrl('PostVisitAnalysis')}>
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    Registrar
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          </div>
-
-          {/* KPIs Otimizados */}
-          <div className="mt-6">
-            <KPIDashboard />
-          </div>
-
-          {/* Central de Documentos IA */}
-          <div className="mt-6">
-            <AIDocumentsHub />
-          </div>
-
-          {/* Automação de Vendas */}
-          <div className="mt-6">
-            <SalesAutomation />
-          </div>
-
-          {/* Sugestões Inteligentes de Produtos */}
-          <div className="mt-6">
-            <SmartProductSuggestions />
-          </div>
-
-          {/* Integração Calendário */}
-          <div className="mt-6">
-            <CalendarIntegration />
-          </div>
-
-          {/* Relatório Completo do Sistema */}
-          <div className="mt-6">
-            <CompleteSystemReport />
-          </div>
-
-          {/* Importação em Massa */}
-          <div className="mt-6">
-            <MassClientImporter />
-          </div>
-
-          {/* Eventos Veterinários 2025-2026 */}
-          <div className="mt-6">
-            <VeterinaryEventsCalendar />
-          </div>
-          </div>
-
-      {/* Filtered Clients - Expandido com Análise Completa */}
-      {searchTerm && (
-        <div className="px-6 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-800">
-              Resultados ({filteredClients.length})
-            </h2>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
-                setCityFilter('all');
-                setScoreFilter('all');
-              }}
-            >
-              Limpar
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            {filteredClients.slice(0, 5).map((client) => (
-              <div key={client.id} id={`client-${client.id}`}>
-                <ExpandedClientCard client={client} />
-              </div>
+              </Card>
             ))}
           </div>
+        )}
+
+        {/* 5. AÇÕES PRINCIPAIS - ORDEM CRONOLÓGICA */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-slate-700 px-1">📋 Fluxo de Trabalho</h3>
+          
+          {/* Passo 1: Adicionar Cliente */}
+          <Link to={createPageUrl('NewClient')}>
+            <Button className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="text-white font-bold">1</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">Novo Cliente</p>
+                  <p className="text-xs opacity-90">Cadastrar manualmente</p>
+                </div>
+                <UserPlus className="w-5 h-5" />
+              </div>
+            </Button>
+          </Link>
+
+          {/* Passo 2: Ver Todos os Clientes */}
+          <Link to={createPageUrl('Clients')}>
+            <Button variant="outline" className="w-full h-14 border-2 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                  <span className="font-bold text-slate-700">2</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">Ver Todos os Clientes</p>
+                  <p className="text-xs text-slate-600">Lista completa</p>
+                </div>
+                <Users className="w-5 h-5" />
+              </div>
+            </Button>
+          </Link>
+
+          {/* Passo 3: Agendar Visita */}
+          <Link to={createPageUrl('ScheduledAgenda')}>
+            <Button variant="outline" className="w-full h-14 border-2 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                  <span className="font-bold text-slate-700">3</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">Agendar Visitas</p>
+                  <p className="text-xs text-slate-600">Programar agenda</p>
+                </div>
+                <Calendar className="w-5 h-5" />
+              </div>
+            </Button>
+          </Link>
+
+          {/* Passo 4: Checklist Pré-Visita */}
+          <Link to={createPageUrl('PreVisitChecklist')}>
+            <Button variant="outline" className="w-full h-14 border-2 border-blue-200 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="font-bold text-blue-700">4</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-blue-700">Checklist Pré-Visita</p>
+                  <p className="text-xs text-blue-600">Preparação</p>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-blue-600" />
+              </div>
+            </Button>
+          </Link>
+
+          {/* Passo 5: Registrar Pós-Visita */}
+          <Link to={createPageUrl('PostVisitAnalysis')}>
+            <Button variant="outline" className="w-full h-14 border-2 border-green-200 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <span className="font-bold text-green-700">5</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-green-700">Registrar Pós-Visita</p>
+                  <p className="text-xs text-green-600">Resultado da visita</p>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              </div>
+            </Button>
+          </Link>
+
+          {/* Passo 6: Análise e Relatórios */}
+          <Link to={createPageUrl('SalesAnalytics')}>
+            <Button variant="outline" className="w-full h-14 border-2 justify-start">
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                  <span className="font-bold text-slate-700">6</span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">Dashboard de Vendas</p>
+                  <p className="text-xs text-slate-600">Análise e métricas</p>
+                </div>
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </Button>
+          </Link>
         </div>
-      )}
 
+        {/* 6. FERRAMENTAS EXTRAS */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-slate-700 px-1">🛠️ Ferramentas</h3>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={createPageUrl('WhatsAppDataAccess')}>
+              <Button className="w-full h-16 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+                <div className="text-left w-full">
+                  <MessageSquare className="w-5 h-5 mb-1" />
+                  <p className="text-xs font-semibold">WhatsApp</p>
+                </div>
+              </Button>
+            </Link>
 
-      {/* ═══════════════════════════════════════ */}
-      {/* GPS TRACKER FIXO FINAL - NUNCA REMOVER */}
-      {/* ═══════════════════════════════════════ */}
-      <div className="px-6 mt-6">
-        <GPSClinicTracker />
+            <Link to={createPageUrl('Tasks')}>
+              <Button variant="outline" className="w-full h-16 border-2">
+                <div className="text-left w-full">
+                  <Target className="w-5 h-5 mb-1" />
+                  <p className="text-xs font-semibold">Tarefas</p>
+                </div>
+              </Button>
+            </Link>
+
+            <Link to={createPageUrl('ClientsByCity')}>
+              <Button variant="outline" className="w-full h-16 border-2">
+                <div className="text-left w-full">
+                  <MapPin className="w-5 h-5 mb-1" />
+                  <p className="text-xs font-semibold">Por Cidade</p>
+                </div>
+              </Button>
+            </Link>
+
+            <Link to={createPageUrl('AdvancedReports')}>
+              <Button variant="outline" className="w-full h-16 border-2">
+                <div className="text-left w-full">
+                  <FileText className="w-5 h-5 mb-1" />
+                  <p className="text-xs font-semibold">Relatórios</p>
+                </div>
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* 7. DEMO E CONFIGURAÇÕES */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link to={createPageUrl('CampaignDemo')}>
+            <Button variant="outline" className="w-full h-12 border-2">
+              <Play className="w-4 h-4 mr-2" />
+              Ver Demo
+            </Button>
+          </Link>
+
+          <Link to={createPageUrl('AIAssistant')}>
+            <Button className="w-full h-12 bg-purple-600 hover:bg-purple-700">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Assistente IA
+            </Button>
+          </Link>
+        </div>
       </div>
-      
-      <div className="h-24" />
-
-      <HotClientsDialog 
-        open={hotClientsOpen}
-        onOpenChange={setHotClientsOpen}
-        status={selectedStatus}
-      />
-      </div>
-      );
-      }
+    </div>
+  );
+}
