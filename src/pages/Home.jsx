@@ -22,8 +22,10 @@ import {
   MessageSquare,
   FileText,
   Settings,
-  Play
+  Play,
+  Zap
 } from 'lucide-react';
+import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -217,6 +219,9 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-6">
+        {/* 0. BUSCA COMPLETA IA - MÁXIMA PRIORIDADE */}
+        <CompleteProfileSearch />
+
         {/* 1. BUSCA AUTOMÁTICA DE CLÍNICAS - DESTAQUE */}
         <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-300">
           <div className="text-center space-y-4">
