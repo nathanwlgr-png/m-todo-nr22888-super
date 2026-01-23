@@ -49,13 +49,31 @@ export default function CompleteProfileSearch() {
             setCurrentStep('🔍 Buscando clínicas na região...');
             
             const nearbySearch = await base44.integrations.Core.InvokeLLM({
-                prompt: `Busque clínicas veterinárias próximas a: ${latitude}, ${longitude} (raio 20km).
-                
-Use Google Maps e retorne até 10 clínicas com TODOS os dados possíveis.`,
+                prompt: `Você está em LATITUDE: ${latitude}, LONGITUDE: ${longitude}
+
+MISSÃO: Encontre clínicas veterinárias em um raio de 20 QUILÔMETROS desta localização exata.
+
+Use Google Maps Places API para buscar:
+- Veterinary clinics
+- Hospitais veterinários
+- Pet clinics
+
+Para CADA clínica encontrada, retorne:
+- Nome completo
+- Endereço completo com CEP
+- Cidade/estado
+- Telefone (formato: 5511999999999)
+- Website (se disponível)
+- Instagram (se disponível)
+- Avaliação Google
+
+IMPORTANTE: Use a localização GPS (${latitude}, ${longitude}) para buscar PRÓXIMO à posição atual do usuário.
+Retorne até 10 clínicas mais próximas.`,
                 add_context_from_internet: true,
                 response_json_schema: {
                     type: "object",
                     properties: {
+                        user_location: { type: "string" },
                         clinicas: {
                             type: "array",
                             items: {
@@ -64,10 +82,12 @@ Use Google Maps e retorne até 10 clínicas com TODOS os dados possíveis.`,
                                     nome: { type: "string" },
                                     endereco: { type: "string" },
                                     cidade: { type: "string" },
+                                    cep: { type: "string" },
                                     telefone: { type: "string" },
                                     website: { type: "string" },
                                     instagram: { type: "string" },
-                                    rating: { type: "number" }
+                                    rating: { type: "number" },
+                                    distancia_km: { type: "number" }
                                 }
                             }
                         }
@@ -77,10 +97,18 @@ Use Google Maps e retorne até 10 clínicas com TODOS os dados possíveis.`,
 
             setProgress(30);
 
+            if (!nearbySearch.clinicas || nearbySearch.clinicas.length === 0) {
+                toast.error('Nenhuma clínica encontrada próxima a você');
+                setAnalyzing(false);
+                return;
+            }
+
+            toast.info(`${nearbySearch.clinicas.length} clínicas encontradas! Cadastrando...`);
+
             // Processar cada clínica encontrada
             const allResults = [];
             
-            for (let i = 0; i < Math.min(nearbySearch.clinicas.length, 5); i++) {
+            for (let i = 0; i < Math.min(nearbySearch.clinicas.length, 8); i++) {
                 const clinica = nearbySearch.clinicas[i];
                 setProgress(30 + (i * 10));
                 setCurrentStep(`🔍 Analisando ${clinica.nome}...`);
@@ -135,6 +163,7 @@ Procure CNPJ, responsável, serviços, equipamentos.`,
                     clinic_name: clinica.nome,
                     address: clinica.endereco,
                     city: clinica.cidade,
+                    cep: clinica.cep,
                     phone: clinica.telefone,
                     website: clinica.website,
                     instagram_handle: clinica.instagram?.replace('@', ''),
@@ -147,15 +176,16 @@ Procure CNPJ, responsável, serviços, equipamentos.`,
                     equipment_suggestion: equipmentRecommendation.equipamento_principal,
                     equipment_suggestion_reason: equipmentRecommendation.razao,
                     
-                    triggers_used: numerologyAnalysis.gatilhos_efetivos,
-                    purchase_motivators: equipmentRecommendation.beneficios,
+                    triggers_used: JSON.stringify(numerologyAnalysis.gatilhos_efetivos),
+                    purchase_motivators: JSON.stringify(equipmentRecommendation.beneficios),
                     approach_tips: salesScript.abertura,
                     
                     status: 'morno',
                     purchase_score: 60,
                     lead_source: 'analise_mercado_ia',
                     client_type: socialAnalysis.tipo_clinica,
-                    valor_real_poder_compra: poder_compra
+                    valor_real_poder_compra: poder_compra,
+                    notes: `[GPS AUTO-CADASTRO ${new Date().toLocaleDateString('pt-BR')}]\n📍 Distância: ${clinica.distancia_km || '?'}km\n⭐ Rating: ${clinica.rating || '?'}\n🌐 ${nearbySearch.user_location || 'Região próxima'}`
                 });
                 
                 allResults.push(newClient);
@@ -260,11 +290,17 @@ Procure CNPJ, responsável, serviços, equipamentos.`,
                         <p className="font-semibold text-green-900 mb-2">
                             ✅ {result.total} Clínicas Cadastradas!
                         </p>
-                        <div className="space-y-1 text-sm text-green-800">
-                            {result.clinicas.slice(0, 3).map((c, i) => (
-                                <p key={i}>• {c.clinic_name}</p>
+                        <div className="space-y-1 text-xs text-green-800 mb-3">
+                            {result.clinicas.slice(0, 5).map((c, i) => (
+                                <p key={i}>• {c.clinic_name} ({c.city})</p>
                             ))}
                         </div>
+                        <Button
+                            onClick={() => navigate(createPageUrl('Clients'))}
+                            className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                            Ver Todos os Clientes
+                        </Button>
                     </div>
                 )}
 
