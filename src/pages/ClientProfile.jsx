@@ -80,8 +80,9 @@ import PostVisitDialog from '@/components/PostVisitDialog';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
 import VisitReportPDF from '@/components/VisitReportPDF';
-import VoiceRecorderButton from '@/components/VoiceRecorderButton';
-import ScoreExplanation from '@/components/ScoreExplanation';
+      import VoiceRecorderButton from '@/components/VoiceRecorderButton';
+      import ScoreExplanation from '@/components/ScoreExplanation';
+      import InventoryStockDisplay from '@/components/InventoryStockDisplay';
 import CapitalAnalysisAI from '@/components/CapitalAnalysisAI';
 import ProbabilityAnalysisAI from '@/components/ProbabilityAnalysisAI';
 import PrimoriAdvancedAnalytics from '@/components/PrimoriAdvancedAnalytics';
@@ -771,6 +772,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           clientId={client.id} 
           currentPreferences={client.communication_preferences || {}} 
         />
+
+        {/* Estoque mobVendedor */}
+        <InventoryStockDisplay clientId={clientId} />
 
         {/* AI Summary */}
         {!aiSummary && !loadingSummary && (
