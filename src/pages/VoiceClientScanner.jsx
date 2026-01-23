@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Mic, MicOff, Loader2, Sparkles, UserPlus, UserCheck, Search } from 'lucide-react';
+import { ArrowLeft, Mic, MicOff, Loader2, Sparkles, UserPlus, UserCheck, Search, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function VoiceClientScanner() {
