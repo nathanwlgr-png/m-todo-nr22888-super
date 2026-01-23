@@ -3,7 +3,7 @@ import ErrorRecoverySystem from './components/ErrorRecoverySystem';
 import EntityNotFoundHandler from './components/EntityNotFoundHandler';
 import NetworkErrorBoundary from './components/NetworkErrorBoundary';
 import GlobalErrorInterceptor from './components/GlobalErrorInterceptor';
-import AIRateLimitProtection from './components/AIRateLimitProtection';
+
 import SystemHealthMonitor from './components/SystemHealthMonitor';
 import SecurityLayerSystem from './components/SecurityLayerSystem';
 import VoiceCommandAI from './components/VoiceCommandAI';
@@ -18,7 +18,6 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ErrorRecoverySystem>
       <GlobalErrorInterceptor />
-      <AIRateLimitProtection />
       <EntityNotFoundHandler>
         <NetworkErrorBoundary>
           <SystemHealthChecker />
