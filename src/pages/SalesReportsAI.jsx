@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { toast } from 'sonner';
+import PredictiveSalesAI from '@/components/PredictiveSalesAI';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
 
@@ -602,6 +603,11 @@ Crie um RESUMO EXECUTIVO completo e profissional com:
             </div>
           </CardContent>
         </Card>
+
+        {/* IA Preditiva */}
+        <div className="mt-4">
+          <PredictiveSalesAI />
+        </div>
       </div>
     </div>
   );

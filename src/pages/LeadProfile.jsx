@@ -34,6 +34,7 @@ import { getLeadQuality } from '@/components/LeadScoringEngine';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
+import AILeadMessenger from '@/components/AILeadMessenger';
 
 export default function LeadProfile() {
   const navigate = useNavigate();
@@ -191,6 +192,9 @@ export default function LeadProfile() {
                 contactPhone={lead.phone}
               />
             )}
+
+            {/* AI Lead Messenger */}
+            <AILeadMessenger lead={lead} />
           </>
         )}
 

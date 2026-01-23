@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Send, Copy, Sparkles } from 'lucide-react';
+import { MessageSquare, Send, Copy, Sparkles, Mail, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AILeadMessenger({ lead }) {
@@ -33,6 +33,9 @@ ${type === 'prospeccao' ? 'Primeira abordagem, desperte interesse sem ser vended
 ${type === 'followup' ? 'Follow-up após primeiro contato, agregue valor.' : ''}
 ${type === 'qualificacao' ? 'Qualifique o lead fazendo perguntas estratégicas.' : ''}
 ${type === 'agendamento' ? 'Agende uma reunião/demonstração de forma natural.' : ''}
+
+IMPORTANTE: Sugira o melhor canal (whatsapp, email ou phone) e horário para contato.
+Forneça 2-3 opções de follow-up automático com condição, ação e mensagem sugerida.
 `;
 
       const result = await base44.integrations.Core.InvokeLLM({
@@ -43,10 +46,22 @@ ${type === 'agendamento' ? 'Agende uma reunião/demonstração de forma natural.
             subject: { type: "string" },
             message: { type: "string" },
             tone: { type: "string" },
-            best_channel: { type: "string" },
+            best_channel_type: { type: "string", enum: ["whatsapp", "email", "phone"] },
+            best_channel_details: { type: "string" },
             best_time: { type: "string" },
             expected_response_rate: { type: "number" },
-            key_points: { type: "array", items: { type: "string" } }
+            key_points: { type: "array", items: { type: "string" } },
+            follow_up_suggestions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  condition: { type: "string" },
+                  action: { type: "string" },
+                  message_content: { type: "string" }
+                }
+              }
+            }
           }
         }
       });
@@ -65,12 +80,50 @@ ${type === 'agendamento' ? 'Agende uma reunião/demonstração de forma natural.
     toast.success('Mensagem copiada!');
   };
 
-  const sendWhatsApp = () => {
-    if (!lead.phone) {
-      toast.error('Lead sem WhatsApp');
+  const sendMessageDirectly = () => {
+    if (!message?.best_channel_type) {
+      toast.error('Nenhum canal sugerido');
       return;
     }
-    window.open(`https://wa.me/${lead.phone}?text=${encodeURIComponent(message.message)}`, '_blank');
+
+    const encoded = encodeURIComponent(message.message);
+
+    switch (message.best_channel_type) {
+      case 'whatsapp':
+        if (!lead.phone) {
+          toast.error('Lead sem WhatsApp');
+          return;
+        }
+        window.open(`https://wa.me/${lead.phone}?text=${encoded}`, '_blank');
+        break;
+      case 'email':
+        if (!lead.email) {
+          toast.error('Lead sem email');
+          return;
+        }
+        window.open(`mailto:${lead.email}?subject=${encodeURIComponent(message.subject || 'Contato')}&body=${encoded}`, '_blank');
+        break;
+      case 'phone':
+        if (!lead.phone) {
+          toast.error('Lead sem telefone');
+          return;
+        }
+        window.open(`tel:${lead.phone}`);
+        break;
+    }
+  };
+
+  const getChannelIcon = (type) => {
+    switch (type) {
+      case 'whatsapp':
+        return <MessageSquare className="w-4 h-4 mr-1" />;
+      case 'email':
+        return <Mail className="w-4 h-4 mr-1" />;
+      case 'phone':
+        return <Phone className="w-4 h-4 mr-1" />;
+      default:
+        return <Send className="w-4 h-4 mr-1" />;
+    }
   };
 
   return (
@@ -150,6 +203,22 @@ ${type === 'agendamento' ? 'Agende uma reunião/demonstração de forma natural.
               </div>
             </div>
 
+            {/* Canal Sugerido */}
+            {message.best_channel_type && (
+              <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                <p className="text-xs text-purple-700 mb-1">📱 Canal Recomendado</p>
+                <div className="flex items-center gap-2">
+                  {getChannelIcon(message.best_channel_type)}
+                  <p className="font-semibold text-sm text-purple-800">
+                    {message.best_channel_type.charAt(0).toUpperCase() + message.best_channel_type.slice(1)}
+                  </p>
+                </div>
+                {message.best_channel_details && (
+                  <p className="text-xs text-purple-600 mt-1">{message.best_channel_details}</p>
+                )}
+              </div>
+            )}
+
             {message.key_points?.length > 0 && (
               <div className="bg-green-50 p-2 rounded border border-green-200">
                 <p className="text-xs font-semibold text-green-700 mb-1">💡 Pontos-chave</p>
@@ -161,15 +230,32 @@ ${type === 'agendamento' ? 'Agende uma reunião/demonstração de forma natural.
               </div>
             )}
 
+            {/* Follow-up Automático */}
+            {message.follow_up_suggestions?.length > 0 && (
+              <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <p className="text-xs font-semibold text-yellow-700 mb-2">🔄 Follow-ups Sugeridos</p>
+                <div className="space-y-2">
+                  {message.follow_up_suggestions.map((followUp, i) => (
+                    <div key={i} className="p-2 bg-white rounded border border-yellow-100">
+                      <p className="text-xs font-medium text-slate-700">
+                        {followUp.condition}: <span className="font-normal">{followUp.action}</span>
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1 italic">"{followUp.message_content}"</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={copyMessage} size="sm" variant="outline">
                 <Copy className="w-4 h-4 mr-1" />
                 Copiar
               </Button>
-              {lead.phone && (
-                <Button onClick={sendWhatsApp} size="sm" className="bg-green-600">
-                  <Send className="w-4 h-4 mr-1" />
-                  WhatsApp
+              {message.best_channel_type && (
+                <Button onClick={sendMessageDirectly} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  {getChannelIcon(message.best_channel_type)}
+                  Enviar
                 </Button>
               )}
             </div>
