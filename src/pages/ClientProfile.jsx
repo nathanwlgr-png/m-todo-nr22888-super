@@ -168,7 +168,6 @@ export default function ClientProfile() {
     queryKey: ['client', clientId],
     queryFn: async () => {
       if (!clientId || typeof clientId !== 'string' || clientId.length < 20) {
-        toast.error('ID inválido');
         navigate(createPageUrl('Clients'));
         return null;
       }
@@ -177,14 +176,11 @@ export default function ClientProfile() {
         const foundClient = allClients.find(c => c?.id === clientId);
         
         if (!foundClient) {
-          toast.error('Cliente não encontrado');
           navigate(createPageUrl('Clients'));
           return null;
         }
         return foundClient;
       } catch (error) {
-        console.error('Erro ao buscar cliente:', error);
-        toast.error('Erro ao carregar cliente');
         navigate(createPageUrl('Clients'));
         return null;
       }
