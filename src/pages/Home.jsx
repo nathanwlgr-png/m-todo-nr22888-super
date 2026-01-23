@@ -120,6 +120,7 @@ import QuickActionsHub from '@/components/QuickActionsHub';
 import WhatsAppCommandHub from '@/components/WhatsAppCommandHub';
 import SmartDashboardMetrics from '@/components/SmartDashboardMetrics';
 import PredictiveSalesAI from '@/components/PredictiveSalesAI';
+import SalesForecastAI from '@/components/SalesForecastAI';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import AutoClinicDiscovery from '@/components/AutoClinicDiscovery';
@@ -370,6 +371,11 @@ export default function Home() {
       {/* ═══════════════════════════════════════ */}
       <div className="px-4 mt-4">
         <PredictiveSalesAI />
+      </div>
+
+      {/* Previsão de Vendas 30/60/90 dias */}
+      <div className="px-4 mt-4">
+        <SalesForecastAI />
       </div>
 
       {/* Network Error Alert */}
