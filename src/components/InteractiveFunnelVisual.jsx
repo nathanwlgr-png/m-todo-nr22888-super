@@ -4,12 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GripVertical, Plus, Settings, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
+import { GripVertical, Plus, Settings, TrendingUp, Users, DollarSign, Clock, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 const DEFAULT_STAGES = [
   { name: 'Lead Qualificado', order: 1, color: '#6366f1', icon: '🎯', probability: 10 },
@@ -19,23 +15,8 @@ const DEFAULT_STAGES = [
   { name: 'Fechado', order: 5, color: '#10b981', icon: '✅', probability: 100 }
 ];
 
-function DraggableStageCard({ stage, clients, onDrop, isSelected, onSelect }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: stage.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1
-  };
-
-  const stageClients = clients.filter(c => c.current_stage_id === stage.id);
+function StageCard({ stage, clients }) {
+  const stageClients = clients.filter(c => c.pipeline_stage === stage.name);
   const totalRevenue = stageClients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
   const avgDaysInStage = stageClients.length > 0 
     ? Math.round(stageClients.reduce((sum, c) => {
@@ -46,32 +27,22 @@ function DraggableStageCard({ stage, clients, onDrop, isSelected, onSelect }) {
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      className={`rounded-xl p-4 mb-3 transition-all ${
-        isDragging ? 'shadow-2xl scale-105' : 'shadow-md'
-      }`}
+      className="rounded-xl p-4 mb-3 transition-all shadow-md hover:shadow-lg"
       style={{ backgroundColor: stage.color + '15', borderLeft: `4px solid ${stage.color}` }}
     >
       <div className="flex items-start gap-3 mb-3">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing flex-shrink-0"
-        >
-          <GripVertical className="w-5 h-5 text-slate-400" />
+        <div className="flex-shrink-0">
+          <span className="text-2xl">{stage.icon}</span>
         </div>
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">{stage.icon}</span>
             <div>
               <h4 className="font-bold text-slate-900 text-sm">{stage.name}</h4>
               <p className="text-xs text-slate-600">{stage.description}</p>
             </div>
           </div>
 
-          {/* Métricas */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-white/60 rounded p-2">
               <p className="text-slate-600">Clientes</p>
@@ -82,21 +53,20 @@ function DraggableStageCard({ stage, clients, onDrop, isSelected, onSelect }) {
               <p className="font-bold text-slate-900">R$ {(totalRevenue / 1000).toFixed(0)}k</p>
             </div>
             <div className="bg-white/60 rounded p-2">
-              <p className="text-slate-600">Dias Médios</p>
+              <p className="text-slate-600">Dias</p>
               <p className="font-bold text-slate-900">{avgDaysInStage}d</p>
             </div>
             <div className="bg-white/60 rounded p-2">
-              <p className="text-slate-600">Taxa Conversão</p>
+              <p className="text-slate-600">Taxa</p>
               <p className="font-bold text-slate-900">{stage.probability}%</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Clientes Droppable Area */}
       <div className="bg-white rounded-lg p-2 min-h-20 border-2 border-dashed border-slate-300">
         {stageClients.length === 0 ? (
-          <p className="text-xs text-slate-400 text-center py-3">Arraste clientes aqui</p>
+          <p className="text-xs text-slate-400 text-center py-3">Nenhum cliente</p>
         ) : (
           <div className="space-y-1">
             {stageClients.slice(0, 3).map(client => (
@@ -110,26 +80,14 @@ function DraggableStageCard({ stage, clients, onDrop, isSelected, onSelect }) {
           </div>
         )}
       </div>
-
-      {stage.is_custom && (
-        <Button size="sm" variant="ghost" className="w-full mt-2 h-7 text-xs">
-          <Settings className="w-3 h-3 mr-1" /> Editar Etapa
-        </Button>
-      )}
     </div>
   );
 }
 
 export default function InteractiveFunnelVisual() {
   const queryClient = useQueryClient();
-  const [stages, setStages] = useState(DEFAULT_STAGES);
+  const [draggedClient, setDraggedClient] = useState(null);
   const [addingStage, setAddingStage] = useState(false);
-
-  // Sensors para drag and drop
-  const sensors = useSensors(
-    useSensor(PointerSensor, { distance: 8 }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   // Buscar clientes
   const { data: clients = [] } = useQuery({
@@ -156,7 +114,7 @@ export default function InteractiveFunnelVisual() {
 
   // Mutation para atualizar cliente
   const updateClientMutation = useMutation({
-    mutationFn: async ({ clientId, stageId, stageName }) => {
+    mutationFn: async ({ clientId, stageName }) => {
       const client = clients.find(c => c.id === clientId);
       
       // Atualizar cliente
@@ -177,18 +135,14 @@ export default function InteractiveFunnelVisual() {
         created_by_name: 'Sistema'
       }).catch(() => {});
 
-      // Disparar automação se configurada
-      const stage = allStages.find(s => s.id === stageId);
-      if (stage?.automation_trigger) {
-        await base44.functions.invoke('processAutomationRules', {
-          trigger_type: 'pipeline_stage_change',
-          event_data: {
-            client_id: clientId,
-            stage_id: stageId,
-            stage_name: stageName
-          }
-        }).catch(() => {});
-      }
+      // Disparar automação
+      await base44.functions.invoke('processAutomationRules', {
+        trigger_type: 'pipeline_stage_change',
+        event_data: {
+          client_id: clientId,
+          stage_name: stageName
+        }
+      }).catch(() => {});
 
       return true;
     },
@@ -199,20 +153,19 @@ export default function InteractiveFunnelVisual() {
     onError: (error) => toast.error('Erro: ' + error.message)
   });
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over) return;
+  const handleDragStart = (e, clientId) => {
+    setDraggedClient(clientId);
+  };
 
-    const clientId = active.id;
-    const stageId = over.id;
-    const stage = allStages.find(s => s.id === stageId);
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
 
-    if (stage) {
-      updateClientMutation.mutate({
-        clientId,
-        stageId,
-        stageName: stage.name
-      });
+  const handleDrop = (e, stageName) => {
+    e.preventDefault();
+    if (draggedClient) {
+      updateClientMutation.mutate({ clientId: draggedClient, stageName });
+      setDraggedClient(null);
     }
   };
 
@@ -287,22 +240,17 @@ export default function InteractiveFunnelVisual() {
 
         <p className="text-xs text-slate-600 mb-4">Arraste clientes entre as etapas para atualizar automaticamente</p>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={allStages.map(s => s.id)} strategy={verticalListSortingStrategy}>
-            {allStages.map(stage => (
-              <DraggableStageCard
-                key={stage.id}
-                stage={stage}
-                clients={clients}
-                onDrop={(clientId) => updateClientMutation.mutate({ clientId, stageId: stage.id })}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+        <div>
+          {allStages.map(stage => (
+            <div
+              key={stage.id}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, stage.name)}
+            >
+              <StageCard stage={stage} clients={clients} />
+            </div>
+          ))}
+        </div>
       </Card>
 
       {/* Análise de Gargalos */}
