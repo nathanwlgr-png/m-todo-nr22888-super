@@ -314,7 +314,7 @@ INSTRUÇÕES CRÍTICAS:
         equipment_suggestion_alternative: clinic.sales_opportunity.alternative_products?.join(', '),
         available_budget: clinic.sales_opportunity.estimated_deal_size,
         valor_real_poder_compra: clinic.financial_indicators.cnpj_capital_social,
-        main_pains: clinic.sales_opportunity.key_pain_points,
+        main_pains: JSON.stringify(clinic.sales_opportunity.key_pain_points || []),
         purchase_score: clinic.sales_opportunity.priority_score,
         status: clinic.sales_opportunity.urgency_level === 'alta' ? 'quente' : 'morno',
         projected_revenue: clinic.sales_opportunity.estimated_deal_size,
