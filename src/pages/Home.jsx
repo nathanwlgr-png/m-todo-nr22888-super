@@ -121,6 +121,8 @@ import WhatsAppCommandHub from '@/components/WhatsAppCommandHub';
 import SmartDashboardMetrics from '@/components/SmartDashboardMetrics';
 import PredictiveSalesAI from '@/components/PredictiveSalesAI';
 import SalesForecastAI from '@/components/SalesForecastAI';
+import AIClientSegmentation from '@/components/AIClientSegmentation';
+import ProactiveInterventionAI from '@/components/ProactiveInterventionAI';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import AutoClinicDiscovery from '@/components/AutoClinicDiscovery';
@@ -376,6 +378,16 @@ export default function Home() {
       {/* Previsão de Vendas 30/60/90 dias */}
       <div className="px-4 mt-4">
         <SalesForecastAI />
+      </div>
+
+      {/* Segmentação Automática de Clientes */}
+      <div className="px-4 mt-4">
+        <AIClientSegmentation />
+      </div>
+
+      {/* Sistema de Intervenção Proativa */}
+      <div className="px-4 mt-4">
+        <ProactiveInterventionAI />
       </div>
 
       {/* Network Error Alert */}

@@ -106,6 +106,19 @@ import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
 import { toast } from 'sonner';
 
+const getSegmentBadge = (segment) => {
+  const config = {
+    'VIP': { color: 'bg-purple-500 text-white', icon: '👑' },
+    'Champions': { color: 'bg-green-500 text-white', icon: '🏆' },
+    'Potential': { color: 'bg-blue-500 text-white', icon: '⭐' },
+    'Nurture': { color: 'bg-yellow-500 text-white', icon: '🌱' },
+    'At Risk': { color: 'bg-red-500 text-white', icon: '⚠️' },
+    'Cold': { color: 'bg-gray-500 text-white', icon: '❄️' },
+    'Dormant': { color: 'bg-orange-500 text-white', icon: '💤' }
+  };
+  return config[segment] || { color: 'bg-gray-400 text-white', icon: '📊' };
+};
+
 const clientTypeLabels = {
   clinica_pequena: 'Clínica Pequena',
   clinica_media: 'Clínica Média',
@@ -621,6 +634,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
               {client.total_visits_count > 0 && (
                 <Badge className="bg-purple-100 text-purple-700 text-xs">
                   {client.total_visits_count}x visitado
+                </Badge>
+              )}
+              {client.ai_segment && (
+                <Badge className={`${getSegmentBadge(client.ai_segment).color} text-xs`}>
+                  {getSegmentBadge(client.ai_segment).icon} {client.ai_segment}
                 </Badge>
               )}
             </div>
