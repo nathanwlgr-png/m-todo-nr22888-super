@@ -116,6 +116,9 @@ import AutoTaskCreator from '@/components/AutoTaskCreator';
 import SalesFunnelPredictiveAnalysis from '@/components/SalesFunnelPredictiveAnalysis';
 import PersonalizedUpsellEngine from '@/components/PersonalizedUpsellEngine';
 import SalesKnowledgeBase from '@/components/SalesKnowledgeBase';
+import ProposalGeneratorAI from '@/components/ProposalGeneratorAI';
+import ChurnPredictionAnalyzer from '@/components/ChurnPredictionAnalyzer';
+import DynamicFollowUpOrchestrator from '@/components/DynamicFollowUpOrchestrator';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1164,13 +1167,22 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
-        {/* 8. GERADOR DE 3 PROPOSTAS COM IA */}
+        {/* 8. GERADOR DE PROPOSTAS PERSONALIZADAS COM IA */}
+        <ProposalGeneratorAI client={client} sales={sales} />
+
+        {/* 9. ANÁLISE PREDITIVA DE CHURN */}
+        <ChurnPredictionAnalyzer client={client} interactions={interactions} visits={visits} />
+
+        {/* 10. ORQUESTRADOR DE FOLLOW-UPS DINÂMICOS */}
+        <DynamicFollowUpOrchestrator client={client} interactions={interactions} sales={sales} />
+
+        {/* 11. GERADOR DE 3 PROPOSTAS COM IA */}
         <MultiProposalGeneratorAI client={client} />
 
-        {/* 9. PACOTE WHATSAPP COM PROPOSTA + VÍDEOS + IMAGENS */}
+        {/* 12. PACOTE WHATSAPP COM PROPOSTA + VÍDEOS + IMAGENS */}
         <WhatsAppProposalPackage client={client} />
 
-        {/* 10. PIPELINE ASSISTANT - movido para cima */}
+        {/* 13. PIPELINE ASSISTANT - movido para cima */}
         <PipelineAIAssistant 
           client={client}
           interactions={interactions}
