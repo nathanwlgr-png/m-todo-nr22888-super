@@ -102,6 +102,8 @@ import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
 import SmartScheduler from '@/components/SmartScheduler';
 import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
 import InteractionInsightsAI from '@/components/InteractionInsightsAI';
+import AutoDataEnrichment from '@/components/AutoDataEnrichment';
+import AutoProductRecommender from '@/components/AutoProductRecommender';
 import { toast } from 'sonner';
 
 const clientTypeLabels = {
@@ -1222,6 +1224,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* AI Interaction Insights - Análise de Sentimento + Auto-Categorização */}
         <InteractionInsightsAI clientId={clientId} interactions={interactions} />
+
+        {/* Auto Data Enrichment - Redes Sociais, CNPJ, Website */}
+        <AutoDataEnrichment client={client} />
+
+        {/* Auto Product Recommender - Recomendação Inteligente */}
+        <AutoProductRecommender client={client} />
 
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
         <FunnelPersuasionTriggers client={client} />
