@@ -84,6 +84,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import MobVendedorDashboard from './pages/MobVendedorDashboard';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import ClientDashboard from './pages/ClientDashboard';
+import MobVendedorBackup from './pages/MobVendedorBackup';
 import __Layout from './Layout.jsx';
 
 
@@ -174,6 +175,7 @@ export const PAGES = {
     "MobVendedorDashboard": MobVendedorDashboard,
     "MobVendedorAnalytics": MobVendedorAnalytics,
     "ClientDashboard": ClientDashboard,
+    "MobVendedorBackup": MobVendedorBackup,
 }
 
 export const pagesConfig = {
