@@ -29,14 +29,17 @@ export default function ClientsByCity() {
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-purchase_score'),
+    queryFn: async () => {
+      const data = await base44.entities.Client.list('-purchase_score');
+      return data.filter(c => c && c.id && typeof c.id === 'string' && c.id.length >= 20 && c.first_name);
+    },
     initialData: [],
   });
 
   const clientsByCity = useMemo(() => {
     const grouped = {};
     
-    clients.forEach(client => {
+    clients.filter(c => c && c.id && typeof c.id === 'string' && c.id.length >= 20).forEach(client => {
       const city = client.city || 'Sem Cidade';
       if (!grouped[city]) {
         grouped[city] = [];
