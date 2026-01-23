@@ -43,6 +43,7 @@ import LeadsDashboard from './pages/LeadsDashboard';
 import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
+import MarketResearch from './pages/MarketResearch';
 import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
 import NewCampaign from './pages/NewCampaign';
@@ -64,6 +65,7 @@ import ReportsAdvanced from './pages/ReportsAdvanced';
 import RevenueForecastPage from './pages/RevenueForecastPage';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
+import SalesCoaching from './pages/SalesCoaching';
 import SalesFunnel from './pages/SalesFunnel';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
@@ -78,8 +80,6 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import SalesCoaching from './pages/SalesCoaching';
-import MarketResearch from './pages/MarketResearch';
 import __Layout from './Layout.jsx';
 
 
@@ -129,6 +129,7 @@ export const PAGES = {
     "LoadEquipmentCatalog": LoadEquipmentCatalog,
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
+    "MarketResearch": MarketResearch,
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
     "NewCampaign": NewCampaign,
@@ -150,6 +151,7 @@ export const PAGES = {
     "RevenueForecastPage": RevenueForecastPage,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
+    "SalesCoaching": SalesCoaching,
     "SalesFunnel": SalesFunnel,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
@@ -164,8 +166,6 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "SalesCoaching": SalesCoaching,
-    "MarketResearch": MarketResearch,
 }
 
 export const pagesConfig = {
