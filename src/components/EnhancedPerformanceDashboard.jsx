@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Users, Target, Award, Zap, Calendar } from 'lucide-react';
+import GamificationSystem from '@/components/GamificationSystem';
+import GoalsManager from '@/components/GoalsManager';
 
 export default function EnhancedPerformanceDashboard() {
   const { data: clients = [] } = useQuery({
@@ -161,44 +163,11 @@ export default function EnhancedPerformanceDashboard() {
         </div>
       </Card>
 
-      {/* Goals */}
-      <Card className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-300">
-        <h4 className="font-bold text-yellow-900 mb-2 flex items-center gap-2">
-          <Award className="w-5 h-5" />
-          Meta do Mês
-        </h4>
-        <div className="space-y-2">
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-yellow-800">Receita</span>
-              <span className="font-bold text-yellow-900">
-                R$ {(revenueThisMonth / 1000).toFixed(0)}k / R$ 200k
-              </span>
-            </div>
-            <div className="h-2 bg-yellow-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-yellow-600 transition-all"
-                style={{ width: `${Math.min((revenueThisMonth / 200000) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
+      {/* Gamification */}
+      <GamificationSystem />
 
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-yellow-800">Vendas</span>
-              <span className="font-bold text-yellow-900">
-                {salesThisMonth.length} / 15
-              </span>
-            </div>
-            <div className="h-2 bg-yellow-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-yellow-600 transition-all"
-                style={{ width: `${Math.min((salesThisMonth.length / 15) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
+      {/* Goals Manager */}
+      <GoalsManager />
     </div>
   );
 }

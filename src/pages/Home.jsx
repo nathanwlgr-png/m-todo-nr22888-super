@@ -31,6 +31,7 @@ import BulkClientImporter from '@/components/BulkClientImporter';
 import StockManagement from '@/components/StockManagement';
 import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
 import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
+import GamificationSystem from '@/components/GamificationSystem';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -230,6 +231,9 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* GAMIFICAÇÃO */}
+        <GamificationSystem compact={true} />
+
         {/* 🎯 FLUXO CRONOLÓGICO COMPLETO */}
         <div className="space-y-3">
           <div className="text-center mb-4">
