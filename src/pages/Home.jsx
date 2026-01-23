@@ -38,7 +38,13 @@ export default function Home() {
     queryKey: ['clients'],
     queryFn: async () => {
       const data = await base44.entities.Client.list('-updated_date', 100);
-      return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
+      return data.filter(c => 
+        c && 
+        c.id && 
+        typeof c.id === 'string' && 
+        c.id.length >= 20 && 
+        c.first_name
+      );
     },
   });
 
