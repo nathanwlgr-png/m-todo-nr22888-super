@@ -233,45 +233,53 @@ export default function SalesAnalytics() {
           </div>
         </div>
 
-        {/* KPI Cards */}
+        {/* KPI Cards - CLICÁVEIS */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3 bg-white/10 border-white/20 backdrop-blur">
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="w-4 h-4 text-white/80" />
-              <p className="text-xs text-white/80">Pipeline Total</p>
-            </div>
-            <p className="text-xl font-bold text-white">
-              R$ {(kpis.totalRevenue / 1000).toFixed(0)}k
-            </p>
-          </Card>
+          <button onClick={() => navigate(createPageUrl('Clients'))} className="text-left">
+            <Card className="p-3 bg-white/10 border-white/20 backdrop-blur cursor-pointer hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-1">
+                <DollarSign className="w-4 h-4 text-white/80" />
+                <p className="text-xs text-white/80">Pipeline Total</p>
+              </div>
+              <p className="text-xl font-bold text-white">
+                R$ {(kpis.totalRevenue / 1000).toFixed(0)}k
+              </p>
+            </Card>
+          </button>
 
-          <Card className="p-3 bg-white/10 border-white/20 backdrop-blur">
-            <div className="flex items-center gap-2 mb-1">
-              <Target className="w-4 h-4 text-white/80" />
-              <p className="text-xs text-white/80">Vendas Fechadas</p>
-            </div>
-            <p className="text-xl font-bold text-white">
-              R$ {(kpis.closedRevenue / 1000).toFixed(0)}k
-            </p>
-          </Card>
+          <button onClick={() => navigate(createPageUrl('Clients'))} className="text-left">
+            <Card className="p-3 bg-white/10 border-white/20 backdrop-blur cursor-pointer hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-1">
+                <Target className="w-4 h-4 text-white/80" />
+                <p className="text-xs text-white/80">Vendas Fechadas</p>
+              </div>
+              <p className="text-xl font-bold text-white">
+                R$ {(kpis.closedRevenue / 1000).toFixed(0)}k
+              </p>
+            </Card>
+          </button>
 
-          <Card className="p-3 bg-white/10 border-white/20 backdrop-blur">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4 text-white/80" />
-              <p className="text-xs text-white/80">Taxa Conversão</p>
-            </div>
-            <p className="text-xl font-bold text-white">{kpis.conversionRate}%</p>
-          </Card>
+          <button onClick={() => navigate(createPageUrl('Clients'))} className="text-left">
+            <Card className="p-3 bg-white/10 border-white/20 backdrop-blur cursor-pointer hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-white/80" />
+                <p className="text-xs text-white/80">Taxa Conversão</p>
+              </div>
+              <p className="text-xl font-bold text-white">{kpis.conversionRate}%</p>
+            </Card>
+          </button>
 
-          <Card className="p-3 bg-white/10 border-white/20 backdrop-blur">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="w-4 h-4 text-white/80" />
-              <p className="text-xs text-white/80">Ticket Médio</p>
-            </div>
-            <p className="text-xl font-bold text-white">
-              R$ {(kpis.avgDealSize / 1000).toFixed(0)}k
-            </p>
-          </Card>
+          <button onClick={() => navigate(createPageUrl('Clients'))} className="text-left">
+            <Card className="p-3 bg-white/10 border-white/20 backdrop-blur cursor-pointer hover:bg-white/20 transition-all">
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="w-4 h-4 text-white/80" />
+                <p className="text-xs text-white/80">Ticket Médio</p>
+              </div>
+              <p className="text-xl font-bold text-white">
+                R$ {(kpis.avgDealSize / 1000).toFixed(0)}k
+              </p>
+            </Card>
+          </button>
         </div>
       </div>
 
@@ -398,31 +406,35 @@ export default function SalesAnalytics() {
           </ResponsiveContainer>
         </Card>
 
-        {/* Activity Summary */}
+        {/* Activity Summary - CLICÁVEIS */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-white" />
+          <button onClick={() => navigate(createPageUrl('ScheduledAgenda'))} className="text-left">
+            <Card className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 cursor-pointer hover:shadow-lg transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{kpis.activeVisits}</p>
+                  <p className="text-xs text-slate-600">Visitas Agendadas</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{kpis.activeVisits}</p>
-                <p className="text-xs text-slate-600">Visitas Agendadas</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </button>
 
-          <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center">
-                <CheckSquare className="w-5 h-5 text-white" />
+          <button onClick={() => navigate(createPageUrl('Tasks'))} className="text-left">
+            <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 cursor-pointer hover:shadow-lg transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center">
+                  <CheckSquare className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{kpis.pendingTasks}</p>
+                  <p className="text-xs text-slate-600">Tarefas Pendentes</p>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{kpis.pendingTasks}</p>
-                <p className="text-xs text-slate-600">Tarefas Pendentes</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </button>
         </div>
       </div>
     </div>

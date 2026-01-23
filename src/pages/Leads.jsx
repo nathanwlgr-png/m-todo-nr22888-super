@@ -145,24 +145,32 @@ export default function Leads() {
           </Button>
         </div>
 
-        {/* Metrics */}
+        {/* Metrics - CLICÁVEIS */}
         <div className="grid grid-cols-4 gap-2">
-          <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20">
-            <p className="text-xs text-purple-100 mb-1">Novos</p>
-            <p className="text-xl font-bold text-white">{metrics.novo}</p>
-          </Card>
-          <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20">
-            <p className="text-xs text-purple-100 mb-1">Qualif.</p>
-            <p className="text-xl font-bold text-white">{metrics.qualificado}</p>
-          </Card>
-          <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20">
-            <p className="text-xs text-purple-100 mb-1">Convert.</p>
-            <p className="text-xl font-bold text-white">{metrics.convertido}</p>
-          </Card>
-          <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20">
-            <p className="text-xs text-purple-100 mb-1">Score</p>
-            <p className="text-xl font-bold text-white">{metrics.avgScore}</p>
-          </Card>
+          <button onClick={() => setFilters({...filters, status: 'novo'})} className="text-left">
+            <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/20 transition-all">
+              <p className="text-xs text-purple-100 mb-1">Novos</p>
+              <p className="text-xl font-bold text-white">{metrics.novo}</p>
+            </Card>
+          </button>
+          <button onClick={() => setFilters({...filters, status: 'qualificado'})} className="text-left">
+            <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/20 transition-all">
+              <p className="text-xs text-purple-100 mb-1">Qualif.</p>
+              <p className="text-xl font-bold text-white">{metrics.qualificado}</p>
+            </Card>
+          </button>
+          <button onClick={() => setFilters({...filters, status: 'convertido'})} className="text-left">
+            <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/20 transition-all">
+              <p className="text-xs text-purple-100 mb-1">Convert.</p>
+              <p className="text-xl font-bold text-white">{metrics.convertido}</p>
+            </Card>
+          </button>
+          <button onClick={() => {}} className="text-left">
+            <Card className="p-3 bg-white/10 backdrop-blur-sm border-white/20 cursor-default">
+              <p className="text-xs text-purple-100 mb-1">Score</p>
+              <p className="text-xl font-bold text-white">{metrics.avgScore}</p>
+            </Card>
+          </button>
         </div>
       </div>
 
