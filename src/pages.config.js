@@ -85,6 +85,7 @@ import MobVendedorDashboard from './pages/MobVendedorDashboard';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import ClientDashboard from './pages/ClientDashboard';
 import MobVendedorBackup from './pages/MobVendedorBackup';
+import MobiMigration from './pages/MobiMigration';
 import __Layout from './Layout.jsx';
 
 
@@ -176,6 +177,7 @@ export const PAGES = {
     "MobVendedorAnalytics": MobVendedorAnalytics,
     "ClientDashboard": ClientDashboard,
     "MobVendedorBackup": MobVendedorBackup,
+    "MobiMigration": MobiMigration,
 }
 
 export const pagesConfig = {
