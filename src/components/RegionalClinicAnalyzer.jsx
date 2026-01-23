@@ -135,14 +135,22 @@ Para CADA clínica encontrada, retorne JSON estruturado:
   }
 }
 
-🎯 PRODUTOS SEAMATY DISPONÍVEIS (priorize baseado no perfil):
-- **SMT-120VP**: Bioquímico veterinário (clínicas médias/grandes)
-- **QT3**: Bioquímico + Coagulação + Gases (clínicas completas)
-- **BP-C50**: Hematológico (essencial para qualquer clínica)
-- **VQ1**: PCR veterinário (clínicas especializadas/hospitais)
-- **VG1**: Hemogasometria básica (emergências)
-- **VG2**: Hemogasometria + Imunofluorescência (premium, hospitais)
-- **VI1**: Imunofluorescência standalone (clínicas que já têm gasometria)
+🎯 CATÁLOGO SEAMATY/CIAMAT BRASIL - USE APENAS ESTES PRODUTOS:
+
+**EQUIPAMENTOS DISPONÍVEIS:**
+- **SMT-120VP** (R$ 23.500) - Analisador químico multifuncional automático veterinário
+- **QT3** (R$ 31.000) - Analisador químico multifuncional automático veterinário QT3
+- **VG1** (R$ 28.000) - Analisador de gases e eletrólitos veterinário
+- **VG2** (R$ 33.000) - Analisador de imunoensaio fluorescente e gases sanguíneos veterinário
+- **3DX** (R$ 55.000) - Analisador multifuncional veterinário minilab 3DX
+- **VBC50A** (R$ 70.000) - Analisador hematológico 5 partes veterinária 50A
+- **Vi1** (R$ 8.500) - Analisador de imunoensaio fluorescente
+- **VQ1** (R$ 45.000) - Analisador PCR
+
+IMPORTANTE: Sugira SOMENTE equipamentos desta lista. Considere:
+- Clínicas pequenas → SMT-120VP, Vi1, VG1
+- Clínicas médias → QT3, VG2, 3DX
+- Hospitais/grandes → VBC50A, VQ1, 3DX
 
 INSTRUÇÕES CRÍTICAS:
 - Pesquise PROFUNDAMENTE em Google Maps, Google Search, Instagram, Facebook

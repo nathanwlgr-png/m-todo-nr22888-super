@@ -100,6 +100,16 @@ export default function UltimateSalesStrategyAI({ client }) {
 - Prazo Decisão: ${client.decision_deadline || 'Não definido'}
 - Volume Exames: ${client.current_volume || 'N/A'}
 
+**CATÁLOGO SEAMATY/CIAMAT BRASIL (USE APENAS ESTES):**
+- SMT-120VP (R$ 23.500) - Bioquímico veterinário
+- QT3 (R$ 31.000) - Bioquímico multifuncional
+- VG1 (R$ 28.000) - Gases e eletrólitos
+- VG2 (R$ 33.000) - Gases + Imunofluorescência
+- 3DX (R$ 55.000) - Minilab multifuncional
+- VBC50A (R$ 70.000) - Hematológico 5 partes
+- Vi1 (R$ 8.500) - Imunofluorescência
+- VQ1 (R$ 45.000) - PCR veterinário
+
 **DORES E MOTIVADORES:**
 - Dores Identificadas: ${client.main_pains?.join(', ') || 'Não identificadas'}
 - Motivadores de Compra: ${client.purchase_motivators?.join(', ') || 'Não identificados'}

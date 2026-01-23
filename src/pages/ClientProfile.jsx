@@ -102,6 +102,7 @@ import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
 import SmartScheduler from '@/components/SmartScheduler';
 import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
 import UltimateSalesStrategyAI from '@/components/UltimateSalesStrategyAI';
+import SeamatyProductMatcher from '@/components/SeamatyProductMatcher';
 import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
@@ -1232,6 +1233,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Auto Product Recommender - Recomendação Inteligente */}
         <AutoProductRecommender client={client} />
+
+        {/* 🎯 MATCH PERFEITO DE PRODUTO SEAMATY */}
+        <SeamatyProductMatcher client={client} />
 
         {/* 🧠 ESTRATÉGIA DEFINITIVA - 30+ LIVROS + ESTUDOS CIENTÍFICOS */}
         <UltimateSalesStrategyAI client={client} />
