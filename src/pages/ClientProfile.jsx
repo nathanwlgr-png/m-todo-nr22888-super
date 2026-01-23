@@ -109,6 +109,7 @@ import IntegratedAISalesAssistant from '@/components/IntegratedAISalesAssistant'
 import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
+import PredictiveAnalyticsEngine from '@/components/PredictiveAnalyticsEngine';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1236,6 +1237,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Auto Product Recommender - Recomendação Inteligente */}
         <AutoProductRecommender client={client} />
+
+        {/* Predictive Analytics - LTV + Churn Risk */}
+        <PredictiveAnalyticsEngine 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
 
         {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
         <NumerologyDeepAnalysis client={client} />
