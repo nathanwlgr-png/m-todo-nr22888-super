@@ -27,7 +27,8 @@ import {
   Package,
   AlertCircle,
   RotateCcw,
-  Download
+  Download,
+  MessageSquare
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import ExpandedClientCard from '@/components/ExpandedClientCard';
