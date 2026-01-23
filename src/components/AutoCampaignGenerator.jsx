@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Mail, Users, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { executeWithRateLimit } from '@/utils/rateLimitManager';
 
 export default function AutoCampaignGenerator() {
   const [campaigns, setCampaigns] = useState(null);
@@ -69,31 +70,33 @@ Use técnicas de:
 
 Seja ESTRATÉGICO e focado em CONVERSÃO.`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            campaigns: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  target_segment: { type: "string" },
-                  objective: { type: "string" },
-                  subject_line: { type: "string" },
-                  email_body: { type: "string" },
-                  cta: { type: "string" },
-                  optimal_send_time: { type: "string" },
-                  expected_conversion: { type: "number" },
-                  target_count: { type: "number" }
+      const result = await executeWithRateLimit(async () => {
+        return await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              campaigns: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    target_segment: { type: "string" },
+                    objective: { type: "string" },
+                    subject_line: { type: "string" },
+                    email_body: { type: "string" },
+                    cta: { type: "string" },
+                    optimal_send_time: { type: "string" },
+                    expected_conversion: { type: "number" },
+                    target_count: { type: "number" }
+                  }
                 }
               }
             }
           }
-        }
-      });
+        });
+      }, 'low');
 
       setCampaigns(result.campaigns);
     } catch (error) {

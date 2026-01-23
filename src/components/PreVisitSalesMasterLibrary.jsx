@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, BookOpen, Brain, Zap, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { executeWithRateLimit } from '@/utils/rateLimitManager';
 
 const SALES_BIBLE = {
   frameworks: {
@@ -190,24 +191,26 @@ GERE UM PLANO PERSONALIZADO:
 5. Qual técnica de fechamento usar?
 6. Como fazer espelhamento com este cliente?`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            main_framework: { type: "string" },
-            framework_tactics: { type: "array", items: { type: "string" } },
-            cialdini_trigger: { type: "string" },
-            emotional_approach: { type: "string" },
-            anticipated_objection: { type: "string" },
-            objection_response: { type: "string" },
-            closing_technique: { type: "string" },
-            mirroring_strategy: { type: "string" },
-            visit_script_opening: { type: "string" },
-            key_phrases: { type: "array", items: { type: "string" } }
+      const result = await executeWithRateLimit(async () => {
+        return await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              main_framework: { type: "string" },
+              framework_tactics: { type: "array", items: { type: "string" } },
+              cialdini_trigger: { type: "string" },
+              emotional_approach: { type: "string" },
+              anticipated_objection: { type: "string" },
+              objection_response: { type: "string" },
+              closing_technique: { type: "string" },
+              mirroring_strategy: { type: "string" },
+              visit_script_opening: { type: "string" },
+              key_phrases: { type: "array", items: { type: "string" } }
+            }
           }
-        }
-      });
+        });
+      }, 'high');
 
       // Salvar no cliente
       await base44.entities.Client.update(client.id, {

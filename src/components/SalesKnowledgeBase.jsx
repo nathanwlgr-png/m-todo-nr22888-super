@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, BookOpen, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { executeWithRateLimit } from '@/utils/rateLimitManager';
 
 const SALES_KNOWLEDGE = {
   frameworks: {
@@ -167,27 +168,29 @@ Baseado em:
 
 Retorne um plano de ação aplicado ao cliente específico:`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: knowledgePrompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            spin_questions: {
-              type: "array",
-              items: { type: "string" }
-            },
-            challenging_insight: { type: "string" },
-            cialdini_trigger: { type: "string" },
-            emotional_approach: { type: "string" },
-            anticipated_objections: {
-              type: "array",
-              items: { type: "string" }
-            },
-            recommended_close: { type: "string" },
-            communication_style: { type: "string" }
+      const result = await executeWithRateLimit(async () => {
+        return await base44.integrations.Core.InvokeLLM({
+          prompt: knowledgePrompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              spin_questions: {
+                type: "array",
+                items: { type: "string" }
+              },
+              challenging_insight: { type: "string" },
+              cialdini_trigger: { type: "string" },
+              emotional_approach: { type: "string" },
+              anticipated_objections: {
+                type: "array",
+                items: { type: "string" }
+              },
+              recommended_close: { type: "string" },
+              communication_style: { type: "string" }
+            }
           }
-        }
-      });
+        });
+      }, 'high');
 
       // Salvar insights no cliente
       await base44.entities.Client.update(client.id, {

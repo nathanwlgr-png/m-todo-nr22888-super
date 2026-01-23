@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, Calendar, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+import { executeWithRateLimit } from '@/utils/rateLimitManager';
 
 export default function SalesFunnelPredictiveAnalysis({ client, interactions = [], sales = [], visits = [] }) {
   const [prediction, setPrediction] = useState(null);
@@ -43,23 +44,25 @@ Analise:
 
 Retorne previsão completa:`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            closing_probability: { type: "number" },
-            estimated_days_to_close: { type: "number" },
-            expected_value: { type: "number" },
-            confidence_level: { type: "string" },
-            key_signals: { type: "array", items: { type: "string" } },
-            barriers: { type: "array", items: { type: "string" } },
-            recommended_actions: { type: "array", items: { type: "string" } },
-            next_milestone: { type: "string" },
-            risk_factors: { type: "array", items: { type: "string" } }
+      const result = await executeWithRateLimit(async () => {
+        return await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              closing_probability: { type: "number" },
+              estimated_days_to_close: { type: "number" },
+              expected_value: { type: "number" },
+              confidence_level: { type: "string" },
+              key_signals: { type: "array", items: { type: "string" } },
+              barriers: { type: "array", items: { type: "string" } },
+              recommended_actions: { type: "array", items: { type: "string" } },
+              next_milestone: { type: "string" },
+              risk_factors: { type: "array", items: { type: "string" } }
+            }
           }
-        }
-      });
+        });
+      }, 'high');
 
       setPrediction(result);
     } catch (error) {

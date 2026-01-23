@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, DollarSign, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { executeWithRateLimit } from '@/utils/rateLimitManager';
 
 export default function PersonalizedUpsellEngine({ client, sales = [] }) {
   const [recommendations, setRecommendations] = useState(null);
@@ -49,32 +50,34 @@ Para cada recomendação:
 
 Seja ESTRATÉGICO e baseado em DADOS.`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            recommendations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  product_name: { type: "string" },
-                  type: { type: "string", enum: ["upsell", "cross_sell", "consumable", "upgrade"] },
-                  estimated_value: { type: "number" },
-                  reasoning: { type: "string" },
-                  benefit: { type: "string" },
-                  acceptance_probability: { type: "number" },
-                  ltv_impact: { type: "number" },
-                  optimal_timing: { type: "string" },
-                  pitch_script: { type: "string" }
+      const result = await executeWithRateLimit(async () => {
+        return await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              recommendations: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    product_name: { type: "string" },
+                    type: { type: "string", enum: ["upsell", "cross_sell", "consumable", "upgrade"] },
+                    estimated_value: { type: "number" },
+                    reasoning: { type: "string" },
+                    benefit: { type: "string" },
+                    acceptance_probability: { type: "number" },
+                    ltv_impact: { type: "number" },
+                    optimal_timing: { type: "string" },
+                    pitch_script: { type: "string" }
+                  }
                 }
-              }
-            },
-            total_potential_ltv: { type: "number" }
+              },
+              total_potential_ltv: { type: "number" }
+            }
           }
-        }
-      });
+        });
+      }, 'normal');
 
       setRecommendations(result);
     } catch (error) {

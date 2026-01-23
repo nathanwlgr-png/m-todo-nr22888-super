@@ -3,6 +3,7 @@ import ErrorRecoverySystem from './components/ErrorRecoverySystem';
 import EntityNotFoundHandler from './components/EntityNotFoundHandler';
 import NetworkErrorBoundary from './components/NetworkErrorBoundary';
 import GlobalErrorInterceptor from './components/GlobalErrorInterceptor';
+import AIRateLimitProtection from './components/AIRateLimitProtection';
 
 import SystemHealthMonitor from './components/SystemHealthMonitor';
 import SecurityLayerSystem from './components/SecurityLayerSystem';
@@ -27,11 +28,12 @@ export default function Layout({ children, currentPageName }) {
           <VoiceCommandAI />
           <GoogleSheetsIntegration />
           <FollowUpAutomation />
-          <WhatsAppNotificationService />
-          <div className="pb-20">
-            {children}
-          </div>
-          <DocumentAIAnalyzer />
+                  <WhatsAppNotificationService />
+                  <AIRateLimitProtection />
+                  <div className="pb-20">
+                    {children}
+                  </div>
+                  <DocumentAIAnalyzer />
         </NetworkErrorBoundary>
       </EntityNotFoundHandler>
     </ErrorRecoverySystem>
