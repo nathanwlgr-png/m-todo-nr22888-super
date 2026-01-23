@@ -75,6 +75,7 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -156,6 +157,7 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
+    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
