@@ -34,6 +34,7 @@ import InvestigationQuestions from '@/components/InvestigationQuestions';
 import CommitmentStrategy from '@/components/CommitmentStrategy';
 import StrategicFrameworks from '@/components/StrategicFrameworks';
 import ClientSelector from '@/components/ClientSelector';
+import PreVisitSalesMasterLibrary from '@/components/PreVisitSalesMasterLibrary';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -413,6 +414,9 @@ export default function PreVisitChecklist() {
             numerologyNumber={client?.numerology_number}
           />
         </Card>
+
+        {/* BÍBLIA DA VENDA INTEGRADA - PRÉ-VISITA */}
+        {client && <PreVisitSalesMasterLibrary client={client} />}
 
         {/* Strategic Frameworks */}
         <Card className="p-4 bg-gradient-to-br from-slate-900 to-indigo-900 border-none">
