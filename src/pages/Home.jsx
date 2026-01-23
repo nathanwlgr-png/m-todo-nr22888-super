@@ -46,15 +46,22 @@ export default function Home() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      const data = await base44.entities.Client.list('-updated_date', 100);
-      return data.filter(c => 
-        c && 
-        c.id && 
-        typeof c.id === 'string' && 
-        c.id.length >= 20 && 
-        c.first_name
-      );
+      try {
+        const data = await base44.entities.Client.list('-updated_date', 100);
+        return data.filter(c => 
+          c && 
+          c.id && 
+          typeof c.id === 'string' && 
+          c.id.length >= 20 && 
+          c.first_name
+        );
+      } catch (error) {
+        console.warn('Erro ao carregar clientes:', error);
+        return [];
+      }
     },
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: user } = useQuery({
@@ -382,26 +389,29 @@ export default function Home() {
           
           {searchTerm && filteredClients.length > 0 && (
             <div className="mt-3 space-y-2">
-              {filteredClients.map((client) => (
-                <Card
-                  key={client.id}
-                  className="p-3 cursor-pointer hover:bg-slate-50"
-                  onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-sm text-slate-800">{client.first_name}</p>
-                      <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
+              {filteredClients.map((client) => {
+                if (!client?.id || !client?.first_name) return null;
+                return (
+                  <Card
+                    key={client.id}
+                    className="p-3 cursor-pointer hover:bg-slate-50"
+                    onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-sm text-slate-800">{client.first_name}</p>
+                        <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
+                      </div>
+                      <Badge className={
+                        client.status === 'quente' ? 'bg-red-500' :
+                        client.status === 'morno' ? 'bg-orange-500' : 'bg-blue-500'
+                      }>
+                        {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
+                      </Badge>
                     </div>
-                    <Badge className={
-                      client.status === 'quente' ? 'bg-red-500' :
-                      client.status === 'morno' ? 'bg-orange-500' : 'bg-blue-500'
-                    }>
-                      {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
