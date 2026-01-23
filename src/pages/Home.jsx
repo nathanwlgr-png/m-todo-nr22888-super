@@ -27,6 +27,9 @@ import {
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
+import BulkClientImporter from '@/components/BulkClientImporter';
+import StockManagement from '@/components/StockManagement';
+import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -239,12 +242,26 @@ export default function Home() {
           {/* ETAPA 1B: BUSCA GPS */}
           <CompleteProfileSearch />
 
-          {/* ETAPA 2: CADASTRO MANUAL */}
+          {/* ETAPA 2A: IMPORTAÇÃO EM MASSA */}
+          <Card className="p-4 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl font-bold text-white">2</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-slate-900">📊 Importação em Massa</p>
+                <p className="text-xs text-slate-600">Excel, Google Sheets, PDF, Word</p>
+              </div>
+            </div>
+            <BulkClientImporter />
+          </Card>
+
+          {/* ETAPA 2B: CADASTRO MANUAL */}
           <Link to={createPageUrl('NewClient')}>
             <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">2</span>
+                  <span className="text-2xl font-bold text-white">2B</span>
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-slate-900">➕ Novo Cliente Manual</p>
@@ -540,7 +557,7 @@ export default function Home() {
         {/* FERRAMENTAS EXTRAS */}
         <div className="pt-4 border-t">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Ferramentas</h3>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             <Link to={createPageUrl('WhatsAppDataAccess')}>
               <Button size="sm" className="w-full h-12 bg-green-600 hover:bg-green-700 flex-col">
                 <MessageSquare className="w-4 h-4 mb-1" />
@@ -559,6 +576,12 @@ export default function Home() {
                 <span className="text-xs">IA</span>
               </Button>
             </Link>
+          </div>
+
+          {/* Stock & Forecast */}
+          <div className="space-y-3">
+            <StockManagement />
+            <AdvancedSalesForecast />
           </div>
         </div>
 
