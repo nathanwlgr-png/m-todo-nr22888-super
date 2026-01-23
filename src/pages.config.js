@@ -79,6 +79,7 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import SalesCoaching from './pages/SalesCoaching';
+import MarketResearch from './pages/MarketResearch';
 import __Layout from './Layout.jsx';
 
 
@@ -164,6 +165,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
     "SalesCoaching": SalesCoaching,
+    "MarketResearch": MarketResearch,
 }
 
 export const pagesConfig = {

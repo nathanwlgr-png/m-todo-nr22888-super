@@ -1,256 +1,233 @@
 import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { base44 } from '@/api/base44Client';
-import { Loader2, MapPin, Search, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+    MapPin, 
+    Loader2, 
+    Phone, 
+    Globe, 
+    Star, 
+    Navigation,
+    Clock,
+    ExternalLink,
+    Plus
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-export default function NearbyClinicsFinder({ client }) {
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+export default function NearbyClinicsFinder() {
+    const navigate = useNavigate();
+    const [isSearching, setIsSearching] = useState(false);
+    const [clinics, setClinics] = useState([]);
+    const [searchRadius, setSearchRadius] = useState(5);
+    const [userLocation, setUserLocation] = useState(null);
 
-  const findNearbyClinics = async () => {
-    setLoading(true);
-    try {
-      const prompt = `Você é um especialista em análise de mercado veterinário. Encontre clínicas próximas ao cliente.
-
-**CLIENTE:** ${client.first_name}
-**CIDADE:** ${client.city}
-**ENDEREÇO:** ${client.address || 'Não informado'}
-
-**TAREFA:**
-Use seu conhecimento para identificar:
-
-1. **CLÍNICAS PRÓXIMAS:**
-   - Nome da clínica
-   - Endereço aproximado
-   - Distância estimada (km)
-   - Porte estimado (pequena/média/grande)
-   - Especialidades conhecidas
-
-2. **REDES SOCIAIS:**
-   - Instagram (se conhecido)
-   - Facebook (se conhecido)
-   - Website (se conhecido)
-
-3. **EVENTOS PRÓXIMOS:**
-   - Eventos veterinários na região
-   - Congressos, feiras, workshops
-   - Datas e locais
-
-4. **ANÁLISE COMPETITIVA:**
-   - Principais concorrentes diretos
-   - Diferenciais de mercado
-   - Oportunidades identificadas
-
-Retorne dados estruturados e práticos.`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            nearby_clinics: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  address: { type: "string" },
-                  distance_km: { type: "number" },
-                  size: { type: "string" },
-                  specialties: { type: "array", items: { type: "string" } },
-                  instagram: { type: "string" },
-                  facebook: { type: "string" },
-                  website: { type: "string" }
-                }
-              }
-            },
-            nearby_events: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  date: { type: "string" },
-                  location: { type: "string" },
-                  type: { type: "string" }
-                }
-              }
-            },
-            competitive_analysis: {
-              type: "object",
-              properties: {
-                main_competitors: { type: "array", items: { type: "string" } },
-                market_opportunities: { type: "array", items: { type: "string" } }
-              }
-            }
-          }
+    const handleFindClinics = async () => {
+        if (!navigator.geolocation) {
+            toast.error('Geolocalização não suportada pelo navegador');
+            return;
         }
-      });
 
-      setResults(result);
-      toast.success('Análise concluída!');
-    } catch (error) {
-      console.error(error);
-      toast.error('Erro ao buscar clínicas');
-    } finally {
-      setLoading(false);
-    }
-  };
+        setIsSearching(true);
+        
+        try {
+            // Obter localização do usuário
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            });
 
-  return (
-    <Card className="p-5 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-300">
-      <div className="flex items-start gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center">
-          <MapPin className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h3 className="font-bold text-slate-800">Clínicas Próximas</h3>
-          <p className="text-xs text-slate-600">Google Maps + Redes Sociais + Eventos</p>
-        </div>
-      </div>
+            const { latitude, longitude } = position.coords;
+            setUserLocation({ latitude, longitude });
 
-      {!results && (
-        <Button
-          onClick={findNearbyClinics}
-          disabled={loading}
-          className="w-full bg-teal-600 hover:bg-teal-700"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              Pesquisando...
-            </>
-          ) : (
-            <>
-              <Search className="w-4 h-4 mr-2" />
-              Buscar Clínicas e Eventos Próximos
-            </>
-          )}
-        </Button>
-      )}
+            toast.info('Buscando clínicas próximas...');
 
-      {results && (
-        <div className="space-y-4">
-          {/* Clínicas Próximas */}
-          {results.nearby_clinics?.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-2">🏥 Clínicas Próximas</h4>
-              <div className="space-y-2">
-                {results.nearby_clinics.map((clinic, idx) => (
-                  <div key={idx} className="p-3 bg-white rounded-lg border border-teal-200">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-slate-800">{clinic.name}</p>
-                        <p className="text-xs text-slate-600">{clinic.address}</p>
-                      </div>
-                      <Badge className="bg-teal-100 text-teal-700">
-                        {clinic.distance_km} km
-                      </Badge>
-                    </div>
+            // Buscar clínicas próximas
+            const { data } = await base44.functions.invoke('getNearbyVeterinaryClinics', {
+                latitude,
+                longitude,
+                radius_km: searchRadius
+            });
 
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs">{clinic.size}</Badge>
-                      {clinic.specialties?.map((spec, i) => (
-                        <Badge key={i} className="bg-blue-100 text-blue-700 text-xs">
-                          {spec}
-                        </Badge>
-                      ))}
-                    </div>
+            if (data.success) {
+                setClinics(data.clinics);
+                toast.success(`${data.total_found} clínicas encontradas!`);
+            } else {
+                toast.error('Erro ao buscar clínicas');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (error.code === 1) {
+                toast.error('Permissão de localização negada');
+            } else {
+                toast.error('Erro ao obter localização');
+            }
+        } finally {
+            setIsSearching(false);
+        }
+    };
 
-                    <div className="flex gap-2">
-                      {clinic.instagram && (
-                        <a 
-                          href={`https://instagram.com/${clinic.instagram}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-pink-600 hover:underline"
+    const handleCreateClient = (clinic) => {
+        // Navegar para criar cliente com dados pré-preenchidos
+        const params = new URLSearchParams({
+            clinic_name: clinic.name,
+            address: clinic.address,
+            phone: clinic.phone || '',
+            website: clinic.website || ''
+        });
+        navigate(`/NewClient?${params.toString()}`);
+    };
+
+    return (
+        <div className="space-y-6">
+            <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <CardHeader>
+                    <CardTitle className="text-2xl flex items-center gap-2">
+                        <MapPin className="h-6 w-6" />
+                        Buscar Clínicas Próximas
+                    </CardTitle>
+                    <CardDescription className="text-blue-100">
+                        Use sua localização para encontrar clínicas veterinárias na região
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                            <label className="text-sm text-blue-100 mb-2 block">
+                                Raio de busca (km)
+                            </label>
+                            <Input
+                                type="number"
+                                value={searchRadius}
+                                onChange={(e) => setSearchRadius(Number(e.target.value))}
+                                min={1}
+                                max={50}
+                                className="bg-white/20 border-white/30 text-white placeholder:text-blue-200"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleFindClinics}
+                            disabled={isSearching}
+                            className="bg-white text-blue-600 hover:bg-blue-50 mt-6"
+                            size="lg"
                         >
-                          📷 Instagram
-                        </a>
-                      )}
-                      {clinic.website && (
-                        <a 
-                          href={clinic.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Site
-                        </a>
-                      )}
+                            {isSearching ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                    Buscando...
+                                </>
+                            ) : (
+                                <>
+                                    <Navigation className="h-5 w-5 mr-2" />
+                                    Buscar Agora
+                                </>
+                            )}
+                        </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </CardContent>
+            </Card>
 
-          {/* Eventos Próximos */}
-          {results.nearby_events?.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-2">📅 Eventos Próximos</h4>
-              <div className="space-y-2">
-                {results.nearby_events.map((event, idx) => (
-                  <div key={idx} className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <p className="font-semibold text-slate-800">{event.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-slate-600">{event.date}</span>
-                      <span className="text-xs text-slate-400">•</span>
-                      <span className="text-xs text-slate-600">{event.location}</span>
-                    </div>
-                    <Badge className="bg-purple-100 text-purple-700 text-xs mt-2">
-                      {event.type}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            {userLocation && (
+                <Card className="bg-green-50 border-green-200">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 text-green-800">
+                            <MapPin className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                                Sua localização: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)}
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
-          {/* Análise Competitiva */}
-          {results.competitive_analysis && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-2">🎯 Análise Competitiva</h4>
-              
-              {results.competitive_analysis.main_competitors?.length > 0 && (
-                <div className="p-3 bg-red-50 rounded-lg border border-red-200 mb-2">
-                  <p className="text-xs font-semibold text-red-700 mb-1">Concorrentes Principais</p>
-                  <ul className="space-y-1">
-                    {results.competitive_analysis.main_competitors.map((comp, idx) => (
-                      <li key={idx} className="text-sm text-slate-700">• {comp}</li>
+            {clinics.length > 0 && (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-gray-900">
+                        {clinics.length} clínicas encontradas
+                    </h3>
+
+                    {clinics.map((clinic, index) => (
+                        <Card key={index} className="hover:shadow-lg transition-shadow">
+                            <CardContent className="pt-6">
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="flex-1 space-y-3">
+                                        <div>
+                                            <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                                {clinic.name}
+                                                {clinic.rating && (
+                                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                                        <Star className="h-3 w-3 mr-1 fill-yellow-500 text-yellow-500" />
+                                                        {clinic.rating.toFixed(1)} ({clinic.total_ratings})
+                                                    </Badge>
+                                                )}
+                                            </h4>
+                                            <p className="text-sm text-gray-600 mt-1 flex items-start gap-1">
+                                                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                {clinic.address}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-3">
+                                            {clinic.phone && (
+                                                <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                    <Phone className="h-4 w-4" />
+                                                    <a href={`tel:${clinic.phone}`} className="hover:underline">
+                                                        {clinic.phone}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {clinic.website && (
+                                                <div className="flex items-center gap-1 text-sm text-blue-600">
+                                                    <Globe className="h-4 w-4" />
+                                                    <a 
+                                                        href={clinic.website} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="hover:underline"
+                                                    >
+                                                        Website
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {clinic.is_open !== null && (
+                                                <Badge className={clinic.is_open ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                                                    <Clock className="h-3 w-3 mr-1" />
+                                                    {clinic.is_open ? 'Aberto agora' : 'Fechado'}
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => window.open(clinic.google_maps_url, '_blank')}
+                                            >
+                                                <ExternalLink className="h-4 w-4 mr-1" />
+                                                Ver no Maps
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleCreateClient(clinic)}
+                                                className="bg-green-600 hover:bg-green-700"
+                                            >
+                                                <Plus className="h-4 w-4 mr-1" />
+                                                Criar Cliente
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
-                  </ul>
                 </div>
-              )}
-
-              {results.competitive_analysis.market_opportunities?.length > 0 && (
-                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                  <p className="text-xs font-semibold text-green-700 mb-1">Oportunidades de Mercado</p>
-                  <ul className="space-y-1">
-                    {results.competitive_analysis.market_opportunities.map((opp, idx) => (
-                      <li key={idx} className="text-sm text-slate-700">• {opp}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          <Button
-            onClick={findNearbyClinics}
-            disabled={loading}
-            variant="outline"
-            className="w-full"
-          >
-            Atualizar Análise
-          </Button>
+            )}
         </div>
-      )}
-    </Card>
-  );
+    );
 }
