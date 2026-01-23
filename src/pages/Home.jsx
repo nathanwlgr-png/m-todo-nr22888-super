@@ -643,6 +643,21 @@ export default function Home() {
               </div>
             </Card>
           </Link>
+
+          {/* Automation Manager */}
+          <Link to={createPageUrl('AutomationManager')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-600 flex items-center justify-center">
+                  <Cog className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-amber-900">⚙️ Automações</p>
+                  <p className="text-xs text-amber-600">Tarefas e alertas inteligentes</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
           </div>
 
         {/* SEGMENTAÇÃO INTELIGENTE */}
