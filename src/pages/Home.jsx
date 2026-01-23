@@ -30,6 +30,7 @@ import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
 import BulkClientImporter from '@/components/BulkClientImporter';
 import StockManagement from '@/components/StockManagement';
 import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
+import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -524,34 +525,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* PAINEL DE DESEMPENHO */}
+        {/* PAINEL DE DESEMPENHO APRIMORADO */}
         <div className="pt-4 border-t">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">📈 Desempenho</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={createPageUrl('PerformanceDashboard')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto rounded-lg bg-green-600 flex items-center justify-center mb-2">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-xs font-bold text-green-900">Dashboard</p>
-                  <p className="text-xs text-green-600">KPIs</p>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('Goals')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto rounded-lg bg-blue-600 flex items-center justify-center mb-2">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-xs font-bold text-blue-900">Metas</p>
-                  <p className="text-xs text-blue-600">Objetivos</p>
-                </div>
-              </Card>
-            </Link>
-          </div>
+          <EnhancedPerformanceDashboard />
         </div>
 
         {/* FERRAMENTAS EXTRAS */}

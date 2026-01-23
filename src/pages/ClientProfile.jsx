@@ -103,6 +103,9 @@ import SmartScheduler from '@/components/SmartScheduler';
 import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
 import UltimateSalesStrategyAI from '@/components/UltimateSalesStrategyAI';
 import SeamatyProductMatcher from '@/components/SeamatyProductMatcher';
+import NumerologyDeepAnalysis from '@/components/NumerologyDeepAnalysis';
+import ClientJourneyMapper from '@/components/ClientJourneyMapper';
+import IntegratedAISalesAssistant from '@/components/IntegratedAISalesAssistant';
 import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
@@ -1233,6 +1236,15 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Auto Product Recommender - Recomendação Inteligente */}
         <AutoProductRecommender client={client} />
+
+        {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
+        <NumerologyDeepAnalysis client={client} />
+
+        {/* 🗺️ MAPEAMENTO DA JORNADA DO CLIENTE */}
+        <ClientJourneyMapper client={client} />
+
+        {/* 🤖 ASSISTENTE IA INTEGRADO */}
+        <IntegratedAISalesAssistant client={client} />
 
         {/* 🎯 MATCH PERFEITO DE PRODUTO SEAMATY */}
         <SeamatyProductMatcher client={client} />

@@ -79,8 +79,8 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
-import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
+import WhatsAppInbox from './pages/WhatsAppInbox';
 import __Layout from './Layout.jsx';
 
 
@@ -166,8 +166,8 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
-    "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppDataAccess": WhatsAppDataAccess,
+    "WhatsAppInbox": WhatsAppInbox,
 }
 
 export const pagesConfig = {
