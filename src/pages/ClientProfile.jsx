@@ -101,6 +101,7 @@ import NextStepAI from '@/components/NextStepAI';
 import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
 import SmartScheduler from '@/components/SmartScheduler';
 import NearbyClinicsFinder from '@/components/NearbyClinicsFinder';
+import UltimateSalesStrategyAI from '@/components/UltimateSalesStrategyAI';
 import InteractionInsightsAI from '@/components/InteractionInsightsAI';
 import AutoDataEnrichment from '@/components/AutoDataEnrichment';
 import AutoProductRecommender from '@/components/AutoProductRecommender';
@@ -1231,6 +1232,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Auto Product Recommender - Recomendação Inteligente */}
         <AutoProductRecommender client={client} />
+
+        {/* 🧠 ESTRATÉGIA DEFINITIVA - 30+ LIVROS + ESTUDOS CIENTÍFICOS */}
+        <UltimateSalesStrategyAI client={client} />
 
         {/* 11. GATILHOS E QUALIFICAÇÃO - Logo após numerologia */}
         <FunnelPersuasionTriggers client={client} />
