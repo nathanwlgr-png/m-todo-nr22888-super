@@ -371,25 +371,215 @@ export default function Home() {
           )}
         </div>
 
+        {/* FUNIL DE VENDAS */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">📊 Funil & Análises</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={createPageUrl('SalesFunnel')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-blue-900">Funil de Vendas</p>
+                    <p className="text-xs text-blue-600">Pipeline visual</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('SalesAnalytics')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-purple-900">Analytics</p>
+                    <p className="text-xs text-purple-600">Métricas</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('ClientsByCity')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-green-900">Por Região</p>
+                    <p className="text-xs text-green-600">Cidades</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('AdvancedReports')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-orange-900">Relatórios</p>
+                    <p className="text-xs text-orange-600">Completos</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* GESTÃO DE LEADS IA */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">🎯 Gestão de Leads IA</h3>
+          <div className="space-y-2">
+            <Link to={createPageUrl('Leads')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-indigo-900">Leads Qualificados</p>
+                    <p className="text-xs text-indigo-600">Scoring automático IA</p>
+                  </div>
+                  <Badge className="bg-indigo-600 text-white">IA</Badge>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('CaptureLeads')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-slate-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-900">Capturar Leads</p>
+                    <p className="text-xs text-slate-600">Formulário rápido</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* AUTOMAÇÕES IA */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">🤖 Automações IA</h3>
+          <div className="space-y-2">
+            <Link to={createPageUrl('AutomationManager')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-purple-50 to-fuchsia-50 border-2 border-purple-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-purple-900">Central de Automação</p>
+                    <p className="text-xs text-purple-600">Follow-ups, tarefas, alertas</p>
+                  </div>
+                  <Badge className="bg-purple-600 text-white">AUTO</Badge>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('FollowUpSequences')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-slate-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-900">Sequências Follow-Up</p>
+                    <p className="text-xs text-slate-600">Automáticas</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* PAINEL DE DESEMPENHO */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">📈 Desempenho</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={createPageUrl('PerformanceDashboard')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto rounded-lg bg-green-600 flex items-center justify-center mb-2">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-xs font-bold text-green-900">Dashboard</p>
+                  <p className="text-xs text-green-600">KPIs</p>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('Goals')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto rounded-lg bg-blue-600 flex items-center justify-center mb-2">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-xs font-bold text-blue-900">Metas</p>
+                  <p className="text-xs text-blue-600">Objetivos</p>
+                </div>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
         {/* FERRAMENTAS EXTRAS */}
         <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Acesso Rápido</h3>
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Ferramentas</h3>
           <div className="grid grid-cols-3 gap-2">
             <Link to={createPageUrl('WhatsAppDataAccess')}>
-              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
-                <MessageSquare className="w-4 h-4" />
+              <Button size="sm" className="w-full h-12 bg-green-600 hover:bg-green-700 flex-col">
+                <MessageSquare className="w-4 h-4 mb-1" />
+                <span className="text-xs">WhatsApp</span>
               </Button>
             </Link>
             <Link to={createPageUrl('Tasks')}>
-              <Button size="sm" variant="outline" className="w-full">
-                <Target className="w-4 h-4" />
+              <Button size="sm" variant="outline" className="w-full h-12 flex-col">
+                <CheckCircle2 className="w-4 h-4 mb-1" />
+                <span className="text-xs">Tarefas</span>
               </Button>
             </Link>
             <Link to={createPageUrl('AIAssistant')}>
-              <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700">
-                <Sparkles className="w-4 h-4" />
+              <Button size="sm" className="w-full h-12 bg-purple-600 hover:bg-purple-700 flex-col">
+                <Sparkles className="w-4 h-4 mb-1" />
+                <span className="text-xs">IA</span>
               </Button>
             </Link>
+          </div>
+        </div>
+
+        {/* MÉTRICAS RÁPIDAS */}
+        <div className="pt-4 border-t">
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-indigo-600" />
+                <div>
+                  <p className="text-2xl font-bold text-indigo-900">{metrics.total}</p>
+                  <p className="text-xs text-indigo-600">Total Clientes</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3 bg-gradient-to-br from-red-50 to-orange-50">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-2xl font-bold text-red-900">{metrics.hot}</p>
+                  <p className="text-xs text-red-600">Quentes 🔥</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
