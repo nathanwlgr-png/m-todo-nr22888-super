@@ -123,6 +123,9 @@ import MarketNewsAnalyzer from '@/components/MarketNewsAnalyzer';
 import CompetitorIntelligenceAI from '@/components/CompetitorIntelligenceAI';
 import PersonalizedMarketApproach from '@/components/PersonalizedMarketApproach';
 import UltraDeepMarketIntelligence from '@/components/UltraDeepMarketIntelligence';
+import AutoFollowUpEmailGenerator from '@/components/AutoFollowUpEmailGenerator';
+import DynamicPurchasePropensityScore from '@/components/DynamicPurchasePropensityScore';
+import ProactiveAISalesAssistant from '@/components/ProactiveAISalesAssistant';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1331,6 +1334,21 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Sales Knowledge Base */}
         <SalesKnowledgeBase client={client} />
 
+        {/* Email de Acompanhamento Automático */}
+        <AutoFollowUpEmailGenerator 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+        />
+
+        {/* Assistente de Vendas Proativo */}
+        <ProactiveAISalesAssistant 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
         {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
         <NumerologyDeepAnalysis client={client} />
 
@@ -1468,7 +1486,15 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </Card>
         )}
 
-        {/* Score */}
+        {/* Score Dinâmico */}
+        <DynamicPurchasePropensityScore 
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
+        {/* Score Original */}
         <Card className="p-5 bg-white shadow-md border-none">
           <ScoreBar score={client.purchase_score || 50} />
         </Card>
