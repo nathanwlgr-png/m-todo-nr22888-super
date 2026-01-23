@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GripVertical, Plus, Settings, TrendingUp, Users, DollarSign, Clock, X } from 'lucide-react';
+import { GripVertical, Plus, Settings, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DEFAULT_STAGES = [
@@ -15,7 +15,9 @@ const DEFAULT_STAGES = [
   { name: 'Fechado', order: 5, color: '#10b981', icon: '✅', probability: 100 }
 ];
 
-function StageCard({ stage, clients }) {
+function StageCard({ stage, clients, onClientDrop }) {
+  const [dragOverStage, setDragOverStage] = useState(false);
+
   const stageClients = clients.filter(c => c.pipeline_stage === stage.name);
   const totalRevenue = stageClients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
   const avgDaysInStage = stageClients.length > 0 
@@ -25,24 +27,48 @@ function StageCard({ stage, clients }) {
       }, 0) / stageClients.length)
     : 0;
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverStage(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverStage(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverStage(false);
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      onClientDrop(data.clientId, stage.name);
+    } catch (err) {
+      toast.error('Erro ao soltar cliente');
+    }
+  };
+
   return (
     <div
-      className="rounded-xl p-4 mb-3 transition-all shadow-md hover:shadow-lg"
-      style={{ backgroundColor: stage.color + '15', borderLeft: `4px solid ${stage.color}` }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`rounded-xl p-4 mb-3 transition-all ${
+        dragOverStage ? 'shadow-2xl scale-105 bg-green-50' : 'shadow-md'
+      }`}
+      style={{ backgroundColor: dragOverStage ? '#dcfce7' : stage.color + '15', borderLeft: `4px solid ${stage.color}` }}
     >
       <div className="flex items-start gap-3 mb-3">
-        <div className="flex-shrink-0">
-          <span className="text-2xl">{stage.icon}</span>
-        </div>
+        <span className="text-2xl">{stage.icon}</span>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">{stage.name}</h4>
-              <p className="text-xs text-slate-600">{stage.description}</p>
-            </div>
+          <div className="mb-2">
+            <h4 className="font-bold text-slate-900 text-sm">{stage.name}</h4>
           </div>
 
+          {/* Métricas */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-white/60 rounded p-2">
               <p className="text-slate-600">Clientes</p>
@@ -53,25 +79,26 @@ function StageCard({ stage, clients }) {
               <p className="font-bold text-slate-900">R$ {(totalRevenue / 1000).toFixed(0)}k</p>
             </div>
             <div className="bg-white/60 rounded p-2">
-              <p className="text-slate-600">Dias</p>
+              <p className="text-slate-600">Dias Médios</p>
               <p className="font-bold text-slate-900">{avgDaysInStage}d</p>
             </div>
             <div className="bg-white/60 rounded p-2">
-              <p className="text-slate-600">Taxa</p>
+              <p className="text-slate-600">Taxa Conversão</p>
               <p className="font-bold text-slate-900">{stage.probability}%</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-2 min-h-20 border-2 border-dashed border-slate-300">
+      {/* Clientes Droppable Area */}
+      <div className="bg-white rounded-lg p-2 min-h-20 border-2 border-dashed" style={{ borderColor: dragOverStage ? '#10b981' : '#cbd5e1' }}>
         {stageClients.length === 0 ? (
-          <p className="text-xs text-slate-400 text-center py-3">Nenhum cliente</p>
+          <p className="text-xs text-slate-400 text-center py-3">Arraste clientes aqui</p>
         ) : (
           <div className="space-y-1">
             {stageClients.slice(0, 3).map(client => (
-              <div key={client.id} className="bg-slate-50 rounded p-1.5 text-xs truncate">
-                <span className="font-semibold">{client.clinic_name}</span>
+              <div key={client.id} className="bg-slate-50 rounded p-1.5 text-xs truncate cursor-move hover:bg-slate-100" draggable>
+                <span className="font-semibold">{client.clinic_name || client.full_name}</span>
               </div>
             ))}
             {stageClients.length > 3 && (
@@ -80,13 +107,18 @@ function StageCard({ stage, clients }) {
           </div>
         )}
       </div>
+
+      {stage.is_custom && (
+        <Button size="sm" variant="ghost" className="w-full mt-2 h-7 text-xs">
+          <Settings className="w-3 h-3 mr-1" /> Editar Etapa
+        </Button>
+      )}
     </div>
   );
 }
 
 export default function InteractiveFunnelVisual() {
   const queryClient = useQueryClient();
-  const [draggedClient, setDraggedClient] = useState(null);
   const [addingStage, setAddingStage] = useState(false);
 
   // Buscar clientes
@@ -135,14 +167,17 @@ export default function InteractiveFunnelVisual() {
         created_by_name: 'Sistema'
       }).catch(() => {});
 
-      // Disparar automação
-      await base44.functions.invoke('processAutomationRules', {
-        trigger_type: 'pipeline_stage_change',
-        event_data: {
-          client_id: clientId,
-          stage_name: stageName
-        }
-      }).catch(() => {});
+      // Disparar automação se configurada
+      const stage = allStages.find(s => s.name === stageName);
+      if (stage?.automation_trigger) {
+        await base44.functions.invoke('processAutomationRules', {
+          trigger_type: 'pipeline_stage_change',
+          event_data: {
+            client_id: clientId,
+            stage_name: stageName
+          }
+        }).catch(() => {});
+      }
 
       return true;
     },
@@ -153,20 +188,8 @@ export default function InteractiveFunnelVisual() {
     onError: (error) => toast.error('Erro: ' + error.message)
   });
 
-  const handleDragStart = (e, clientId) => {
-    setDraggedClient(clientId);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e, stageName) => {
-    e.preventDefault();
-    if (draggedClient) {
-      updateClientMutation.mutate({ clientId: draggedClient, stageName });
-      setDraggedClient(null);
-    }
+  const handleClientDrop = (clientId, stageName) => {
+    updateClientMutation.mutate({ clientId, stageName });
   };
 
   // Estatísticas gerais
@@ -183,104 +206,104 @@ export default function InteractiveFunnelVisual() {
   }, [clients, allStages]);
 
   return (
-    <div className="space-y-6">
-      {/* Header com Estatísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-600" />
-            <div>
-              <p className="text-xs text-slate-600">Total Clientes</p>
-              <p className="font-bold text-blue-900">{stats.totalClients}</p>
+    return (
+      <div className="space-y-6">
+        {/* Header com Estatísticas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="text-xs text-slate-600">Total Clientes</p>
+                <p className="font-bold text-blue-900">{stats.totalClients}</p>
+              </div>
             </div>
+          </Card>
+
+          <Card className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="text-xs text-slate-600">Receita Total</p>
+                <p className="font-bold text-green-900">R$ {(stats.totalRevenue / 1000).toFixed(0)}k</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <div>
+                <p className="text-xs text-slate-600">Conversão Média</p>
+                <p className="font-bold text-purple-900">{stats.avgConversionRate.toFixed(0)}%</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-orange-600" />
+              <div>
+                <p className="text-xs text-slate-600">Etapas</p>
+                <p className="font-bold text-orange-900">{allStages.length}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Funil Interativo */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" /> Funil de Vendas Interativo
+            </h3>
+            <Button size="sm" onClick={() => setAddingStage(!addingStage)}>
+              <Plus className="w-4 h-4 mr-1" /> Nova Etapa
+            </Button>
           </div>
+
+          <p className="text-xs text-slate-600 mb-4">Arraste clientes entre as etapas para atualizar automaticamente</p>
+
+          {allStages.map(stage => (
+            <StageCard
+              key={stage.id}
+              stage={stage}
+              clients={clients}
+              onClientDrop={handleClientDrop}
+            />
+          ))}
         </Card>
 
-        <Card className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-green-600" />
-            <div>
-              <p className="text-xs text-slate-600">Receita Total</p>
-              <p className="font-bold text-green-900">R$ {(stats.totalRevenue / 1000).toFixed(0)}k</p>
-            </div>
-          </div>
-        </Card>
+        {/* Análise de Gargalos */}
+        <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+          <h4 className="font-bold text-slate-900 mb-3">⚠️ Oportunidades de Otimização</h4>
+          <div className="space-y-2">
+            {stats.clientsByStage.map((stage, i) => {
+              const nextStage = stats.clientsByStage[i + 1];
+              const conversionRate = nextStage ? ((nextStage.count / stage.count) * 100).toFixed(0) : 'N/A';
+              const isBottleneck = stage.count > 5 && conversionRate < 50;
 
-        <Card className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-purple-600" />
-            <div>
-              <p className="text-xs text-slate-600">Conversão Média</p>
-              <p className="font-bold text-purple-900">{stats.avgConversionRate.toFixed(0)}%</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-600" />
-            <div>
-              <p className="text-xs text-slate-600">Etapas</p>
-              <p className="font-bold text-orange-900">{allStages.length}</p>
-            </div>
+              return (
+                <div key={stage.id} className="text-sm bg-white/60 rounded p-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">{stage.name}</span>
+                    <div className="flex gap-2">
+                      <Badge>{stage.count} clientes</Badge>
+                      {nextStage && <Badge variant="outline">{conversionRate}% conversão</Badge>}
+                    </div>
+                  </div>
+                  {isBottleneck && (
+                    <p className="text-xs text-orange-600 mt-1">
+                      🔴 Gargalo detectado: muitos clientes sem avançar
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Card>
       </div>
-
-      {/* Funil Interativo */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" /> Funil de Vendas Interativo
-          </h3>
-          <Button size="sm" onClick={() => setAddingStage(!addingStage)}>
-            <Plus className="w-4 h-4 mr-1" /> Nova Etapa
-          </Button>
-        </div>
-
-        <p className="text-xs text-slate-600 mb-4">Arraste clientes entre as etapas para atualizar automaticamente</p>
-
-        <div>
-          {allStages.map(stage => (
-            <div
-              key={stage.id}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, stage.name)}
-            >
-              <StageCard stage={stage} clients={clients} />
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Análise de Gargalos */}
-      <Card className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
-        <h4 className="font-bold text-slate-900 mb-3">⚠️ Oportunidades de Otimização</h4>
-        <div className="space-y-2">
-          {stats.clientsByStage.map((stage, i) => {
-            const nextStage = stats.clientsByStage[i + 1];
-            const conversionRate = nextStage ? ((nextStage.count / stage.count) * 100).toFixed(0) : 'N/A';
-            const isBottleneck = stage.count > 5 && conversionRate < 50;
-
-            return (
-              <div key={stage.id} className="text-sm bg-white/60 rounded p-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold">{stage.name}</span>
-                  <div className="flex gap-2">
-                    <Badge>{stage.count} clientes</Badge>
-                    {nextStage && <Badge variant="outline">{conversionRate}% conversão</Badge>}
-                  </div>
-                </div>
-                {isBottleneck && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    🔴 Gargalo detectado: muitos clientes sem avançar
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-    </div>
+    );
+    }
   );
 }
