@@ -115,6 +115,10 @@ import EquineBloodGasResearch from '@/components/EquineBloodGasResearch';
 import FoalSynovialFluidResearch from '@/components/FoalSynovialFluidResearch';
 import QuickClientSearch from '@/components/QuickClientSearch';
 import DataSaverMode from '@/components/DataSaverMode';
+import UniversalSearchBar from '@/components/UniversalSearchBar';
+import QuickActionsHub from '@/components/QuickActionsHub';
+import WhatsAppCommandHub from '@/components/WhatsAppCommandHub';
+import SmartDashboardMetrics from '@/components/SmartDashboardMetrics';
 
 import RegionalClinicDiscovery from '@/components/RegionalClinicDiscovery';
 import AutoClinicDiscovery from '@/components/AutoClinicDiscovery';
@@ -287,20 +291,6 @@ export default function Home() {
       <div className="px-6 mt-4">
         <DataSaverMode />
         </div>
-
-        {/* ═══════════════════════════════════════ */}
-        {/* BUSCA REGIONAL - NUNCA REMOVER */}
-        {/* ═══════════════════════════════════════ */}
-        <div className="px-6 mt-4">
-        <RegionalClinicSearch />
-        </div>
-
-        {/* ═══════════════════════════════════════ */}
-        {/* ATUALIZAÇÃO EM MASSA - NUNCA REMOVER */}
-        {/* ═══════════════════════════════════════ */}
-        <div className="px-6 mt-4">
-        <BulkClientDataUpdater />
-        </div>
       
       {/* Header Fixo */}
       <div className="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-3 py-1.5 shadow-lg border-b border-orange-500">
@@ -346,6 +336,34 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════ */}
+      {/* BUSCA UNIVERSAL PRINCIPAL - TOPO */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-4 mt-4">
+        <UniversalSearchBar />
+      </div>
+
+      {/* ═══════════════════════════════════════ */}
+      {/* MÉTRICAS INTELIGENTES */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-4 mt-4">
+        <SmartDashboardMetrics />
+      </div>
+
+      {/* ═══════════════════════════════════════ */}
+      {/* CENTRAL DE COMANDOS WHATSAPP */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-4 mt-4">
+        <WhatsAppCommandHub />
+      </div>
+
+      {/* ═══════════════════════════════════════ */}
+      {/* AÇÕES RÁPIDAS - HUB PRINCIPAL */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-4 mt-4">
+        <QuickActionsHub />
+      </div>
+
       {/* Network Error Alert */}
       {isError && (
         <div className="px-6 mt-4">
@@ -372,6 +390,20 @@ export default function Home() {
           </Card>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════ */}
+      {/* BUSCA REGIONAL - NUNCA REMOVER */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-6 mt-4">
+        <RegionalClinicSearch />
+      </div>
+
+      {/* ═══════════════════════════════════════ */}
+      {/* ATUALIZAÇÃO EM MASSA - NUNCA REMOVER */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="px-6 mt-4">
+        <BulkClientDataUpdater />
+      </div>
 
       {/* Últimos Clientes */}
       <div className="px-6 mt-4">

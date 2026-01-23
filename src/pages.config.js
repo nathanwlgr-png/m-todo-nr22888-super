@@ -18,6 +18,7 @@ import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
+import Dashboard from './pages/Dashboard';
 import DocumentRepository from './pages/DocumentRepository';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
@@ -62,7 +63,9 @@ import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import RevenueForecastPage from './pages/RevenueForecastPage';
 import SalesAnalytics from './pages/SalesAnalytics';
+import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
 import SalesFunnel from './pages/SalesFunnel';
+import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
 import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
@@ -75,9 +78,6 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import Dashboard from './pages/Dashboard';
-import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
-import SalesReportsAI from './pages/SalesReportsAI';
 import __Layout from './Layout.jsx';
 
 
@@ -102,6 +102,7 @@ export const PAGES = {
     "ConsumablePriceList": ConsumablePriceList,
     "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
+    "Dashboard": Dashboard,
     "DocumentRepository": DocumentRepository,
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
@@ -146,7 +147,9 @@ export const PAGES = {
     "ReportsAdvanced": ReportsAdvanced,
     "RevenueForecastPage": RevenueForecastPage,
     "SalesAnalytics": SalesAnalytics,
+    "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
     "SalesFunnel": SalesFunnel,
+    "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
     "SignedContracts": SignedContracts,
     "SystemAudit": SystemAudit,
@@ -159,9 +162,6 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppInbox": WhatsAppInbox,
-    "Dashboard": Dashboard,
-    "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
-    "SalesReportsAI": SalesReportsAI,
 }
 
 export const pagesConfig = {
