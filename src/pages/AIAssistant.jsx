@@ -65,10 +65,22 @@ export default function AIAssistant() {
     queryKey: ['client', selectedClientId],
     queryFn: async () => {
       if (!selectedClientId) return null;
-      const clients = await base44.entities.Client.list();
-      return clients.find(c => c.id === selectedClientId);
+      try {
+        const clients = await base44.entities.Client.list();
+        const found = clients.find(c => c && c.id === selectedClientId);
+        if (!found) {
+          setSelectedClientId(null);
+          return null;
+        }
+        return found;
+      } catch (error) {
+        console.error('Erro ao buscar cliente:', error);
+        setSelectedClientId(null);
+        return null;
+      }
     },
-    enabled: !!selectedClientId
+    enabled: !!selectedClientId,
+    retry: 0
   });
 
   const { data: visits = [] } = useQuery({
