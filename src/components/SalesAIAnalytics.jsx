@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 export default function SalesAIAnalytics() {
   const [analytics, setAnalytics] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [lastAnalysis, setLastAnalysis] = useState(null);
+  const [cooldown, setCooldown] = useState(false);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -32,6 +34,22 @@ export default function SalesAIAnalytics() {
   });
 
   const analyzePerformance = async () => {
+    // Verificar cooldown (mínimo 2 minutos entre análises)
+    if (cooldown) {
+      toast.error('Aguarde 2 minutos antes de gerar nova análise');
+      return;
+    }
+
+    if (lastAnalysis) {
+      const timeSinceLastAnalysis = Date.now() - lastAnalysis;
+      const twoMinutes = 2 * 60 * 1000;
+      if (timeSinceLastAnalysis < twoMinutes) {
+        const remainingSeconds = Math.ceil((twoMinutes - timeSinceLastAnalysis) / 1000);
+        toast.error(`Aguarde ${remainingSeconds}s antes de gerar nova análise`);
+        return;
+      }
+    }
+
     setIsAnalyzing(true);
     try {
       const completedTasks = tasks.filter(t => t.status === 'concluida');
@@ -184,9 +202,23 @@ Retorne JSON:
       });
 
       setAnalytics(result);
+      setLastAnalysis(Date.now());
+      setCooldown(true);
+      
+      // Liberar cooldown após 2 minutos
+      setTimeout(() => setCooldown(false), 2 * 60 * 1000);
+      
       toast.success('Análise concluída!');
     } catch (error) {
-      toast.error('Erro na análise');
+      console.error('Erro na análise:', error);
+      
+      if (error.message?.includes('rate limit') || error.message?.includes('Rate limit')) {
+        toast.error('Limite de uso atingido. Tente novamente em alguns minutos.');
+        setCooldown(true);
+        setTimeout(() => setCooldown(false), 3 * 60 * 1000); // 3 minutos em caso de rate limit
+      } else {
+        toast.error('Erro na análise. Tente novamente.');
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -221,11 +253,16 @@ Retorne JSON:
             </p>
             <Button
               onClick={analyzePerformance}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || cooldown}
               className="bg-purple-600"
             >
-              {isAnalyzing ? 'Analisando...' : 'Analisar Performance'}
+              {isAnalyzing ? 'Analisando...' : cooldown ? 'Aguarde (cooldown)' : 'Analisar Performance'}
             </Button>
+            {cooldown && (
+              <p className="text-xs text-slate-500 mt-2">
+                Aguarde 2 minutos entre análises para evitar limite de uso
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -404,9 +441,15 @@ Retorne JSON:
         onClick={analyzePerformance}
         variant="outline"
         className="w-full"
+        disabled={cooldown || isAnalyzing}
       >
-        Atualizar Análise
+        {isAnalyzing ? 'Atualizando...' : cooldown ? 'Aguarde (cooldown)' : 'Atualizar Análise'}
       </Button>
+      {cooldown && (
+        <p className="text-xs text-center text-slate-500 mt-2">
+          Aguarde 2 minutos para evitar limite de uso da IA
+        </p>
+      )}
     </div>
   );
 }
