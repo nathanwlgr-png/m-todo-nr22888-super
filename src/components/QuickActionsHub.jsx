@@ -72,7 +72,7 @@ export default function QuickActionsHub() {
       titulo: 'Relatórios',
       descricao: 'Performance',
       cor: 'from-pink-500 to-pink-600',
-      pagina: 'SalesReportsAI'
+      pagina: 'AdvancedReports'
     },
     {
       icon: Sparkles,
