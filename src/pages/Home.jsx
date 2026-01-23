@@ -224,100 +224,117 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
-        {/* 1. BUSCA GPS - PRINCIPAL */}
-        <CompleteProfileSearch />
-
-        {/* 2. BUSCA MANUAL ALTERNATIVA */}
-        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-300">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-2">
-                🎯 Buscar Clínicas Próximas
-              </h2>
-              <p className="text-sm text-slate-700 mb-4">
-                Encontra e salva automaticamente clínicas veterinárias próximas a você
-              </p>
-            </div>
-            
-            {autoSaveProgress && (
-              <div className="p-4 bg-white rounded-lg border border-orange-200">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-slate-700">Progresso:</span>
-                  <span className="text-sm text-slate-600">
-                    {autoSaveProgress.saved + autoSaveProgress.skipped} / {autoSaveProgress.total}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-orange-600 h-2 rounded-full transition-all"
-                    style={{ 
-                      width: `${((autoSaveProgress.saved + autoSaveProgress.skipped) / autoSaveProgress.total) * 100}%` 
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-slate-600">
-                  <span>✅ Salvos: {autoSaveProgress.saved}</span>
-                  <span>⏭️ Ignorados: {autoSaveProgress.skipped}</span>
-                </div>
-              </div>
-            )}
-
-            <Button
-              onClick={handleAutoSearchAndSave}
-              disabled={searchingClinics}
-              className="w-full h-14 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-lg font-bold"
-            >
-              {searchingClinics ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Buscando e Salvando...
-                </>
-              ) : (
-                <>
-                  <Search className="w-5 h-5 mr-2" />
-                  Buscar e Salvar Automaticamente
-                </>
-              )}
-            </Button>
-            <p className="text-xs text-slate-600">
-              Usa sua localização GPS para encontrar clínicas próximas e adiciona automaticamente ao CRM
-            </p>
+      <div className="px-4 py-6 space-y-4">
+        {/* 🎯 FLUXO CRONOLÓGICO COMPLETO */}
+        <div className="space-y-3">
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold text-slate-900">📋 Fluxo de Trabalho</h2>
+            <p className="text-xs text-slate-600">Siga na ordem para máximo resultado</p>
           </div>
-        </Card>
 
-        {/* 3. MÉTRICAS RÁPIDAS */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-4 bg-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                <Users className="w-5 h-5 text-indigo-600" />
+          {/* ETAPA 1: BUSCA GPS */}
+          <CompleteProfileSearch />
+
+          {/* ETAPA 2: CADASTRO MANUAL */}
+          <Link to={createPageUrl('NewClient')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">2</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-slate-900">➕ Novo Cliente Manual</p>
+                  <p className="text-xs text-slate-600">Cadastrar cliente manualmente</p>
+                </div>
+                <UserPlus className="w-6 h-6 text-orange-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{metrics.total}</p>
-                <p className="text-xs text-slate-500">Clientes</p>
+            </Card>
+          </Link>
+
+          {/* ETAPA 3: VER TODOS */}
+          <Link to={createPageUrl('Clients')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">3</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-slate-900">👥 Ver Todos os Clientes</p>
+                  <p className="text-xs text-slate-600">{metrics.total} clientes cadastrados</p>
+                </div>
+                <Users className="w-6 h-6 text-slate-700" />
               </div>
-            </div>
-          </Card>
-          
-          <Card className="p-4 bg-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                <Target className="w-5 h-5 text-red-500" />
+            </Card>
+          </Link>
+
+          {/* ETAPA 4: PRÉ-VISITA */}
+          <Link to={createPageUrl('PreVisitChecklist')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">4</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-blue-900">✅ Checklist Pré-Visita</p>
+                  <p className="text-xs text-blue-700">Preparação antes de visitar</p>
+                </div>
+                <CheckCircle2 className="w-6 h-6 text-blue-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{metrics.hot}</p>
-                <p className="text-xs text-slate-500">Quentes</p>
+            </Card>
+          </Link>
+
+          {/* ETAPA 5: AGENDAR */}
+          <Link to={createPageUrl('ScheduledAgenda')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">5</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-purple-900">📅 Agendar Visita</p>
+                  <p className="text-xs text-purple-700">Programar visitas</p>
+                </div>
+                <Calendar className="w-6 h-6 text-purple-600" />
               </div>
-            </div>
-          </Card>
+            </Card>
+          </Link>
+
+          {/* ETAPA 6: PÓS-VISITA */}
+          <Link to={createPageUrl('PostVisitAnalysis')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">6</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-green-900">📝 Pós-Visita</p>
+                  <p className="text-xs text-green-700">Registrar resultado da visita</p>
+                </div>
+                <CheckCircle2 className="w-6 h-6 text-green-600" />
+              </div>
+            </Card>
+          </Link>
+
+          {/* ETAPA 7: ANÁLISES */}
+          <Link to={createPageUrl('SalesAnalytics')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-r from-indigo-50 to-blue-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">7</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-indigo-900">📊 Dashboard & Relatórios</p>
+                  <p className="text-xs text-indigo-700">Análises e métricas</p>
+                </div>
+                <TrendingUp className="w-6 h-6 text-indigo-600" />
+              </div>
+            </Card>
+          </Link>
         </div>
 
-        {/* 4. BUSCA DE CLIENTES */}
-        <Card className="p-4">
+        {/* BUSCA RÁPIDA */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">🔍 Busca Rápida</h3>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -327,208 +344,53 @@ export default function Home() {
               className="pl-10"
             />
           </div>
-        </Card>
-
-        {/* 5. LISTA DE CLIENTES */}
-        {searchTerm && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-700">
-                Resultados ({filteredClients.length})
-              </h3>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setSearchTerm('')}
-              >
-                Limpar
-              </Button>
-            </div>
-            {filteredClients.map((client) => (
-              <Card
-                key={client.id}
-                className="p-4 cursor-pointer hover:bg-slate-50"
-                onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-slate-800">{client.first_name}</p>
-                    <p className="text-xs text-slate-600">
-                      {client.clinic_name} • {client.city}
-                    </p>
+          
+          {searchTerm && filteredClients.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {filteredClients.map((client) => (
+                <Card
+                  key={client.id}
+                  className="p-3 cursor-pointer hover:bg-slate-50"
+                  onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-sm text-slate-800">{client.first_name}</p>
+                      <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
+                    </div>
+                    <Badge className={
+                      client.status === 'quente' ? 'bg-red-500' :
+                      client.status === 'morno' ? 'bg-orange-500' : 'bg-blue-500'
+                    }>
+                      {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
+                    </Badge>
                   </div>
-                  <Badge className={
-                    client.status === 'quente' ? 'bg-red-500' :
-                    client.status === 'morno' ? 'bg-orange-500' :
-                    'bg-blue-500'
-                  }>
-                    {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* 6. FLUXO CRONOLÓGICO COMPLETO */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-700 px-1">📋 Fluxo Completo (Ordem Cronológica)</h3>
-          
-          {/* Passo 1: Adicionar Cliente */}
-          <Link to={createPageUrl('NewClient')}>
-            <Button className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <span className="text-white font-bold">1</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold">Novo Cliente</p>
-                  <p className="text-xs opacity-90">Cadastrar manualmente</p>
-                </div>
-                <UserPlus className="w-5 h-5" />
-              </div>
-            </Button>
-          </Link>
-
-          {/* Passo 2: Ver Todos os Clientes */}
-          <Link to={createPageUrl('Clients')}>
-            <Button variant="outline" className="w-full h-14 border-2 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                  <span className="font-bold text-slate-700">2</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold">Ver Todos os Clientes</p>
-                  <p className="text-xs text-slate-600">Lista completa</p>
-                </div>
-                <Users className="w-5 h-5" />
-              </div>
-            </Button>
-          </Link>
-
-          {/* Passo 3: Agendar Visita */}
-          <Link to={createPageUrl('ScheduledAgenda')}>
-            <Button variant="outline" className="w-full h-14 border-2 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                  <span className="font-bold text-slate-700">3</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold">Agendar Visitas</p>
-                  <p className="text-xs text-slate-600">Programar agenda</p>
-                </div>
-                <Calendar className="w-5 h-5" />
-              </div>
-            </Button>
-          </Link>
-
-          {/* Passo 4: Checklist Pré-Visita */}
-          <Link to={createPageUrl('PreVisitChecklist')}>
-            <Button variant="outline" className="w-full h-14 border-2 border-blue-200 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="font-bold text-blue-700">4</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold text-blue-700">Checklist Pré-Visita</p>
-                  <p className="text-xs text-blue-600">Preparação</p>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-blue-600" />
-              </div>
-            </Button>
-          </Link>
-
-          {/* Passo 5: Registrar Pós-Visita */}
-          <Link to={createPageUrl('PostVisitAnalysis')}>
-            <Button variant="outline" className="w-full h-14 border-2 border-green-200 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <span className="font-bold text-green-700">5</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold text-green-700">Registrar Pós-Visita</p>
-                  <p className="text-xs text-green-600">Resultado da visita</p>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-              </div>
-            </Button>
-          </Link>
-
-          {/* Passo 6: Análise e Relatórios */}
-          <Link to={createPageUrl('SalesAnalytics')}>
-            <Button variant="outline" className="w-full h-14 border-2 justify-start">
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                  <span className="font-bold text-slate-700">6</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold">Dashboard de Vendas</p>
-                  <p className="text-xs text-slate-600">Análise e métricas</p>
-                </div>
-                <TrendingUp className="w-5 h-5" />
-              </div>
-            </Button>
-          </Link>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* 7. FERRAMENTAS EXTRAS */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-700 px-1">🛠️ Ferramentas</h3>
-          
-          <div className="grid grid-cols-2 gap-3">
+        {/* FERRAMENTAS EXTRAS */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Acesso Rápido</h3>
+          <div className="grid grid-cols-3 gap-2">
             <Link to={createPageUrl('WhatsAppDataAccess')}>
-              <Button className="w-full h-16 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
-                <div className="text-left w-full">
-                  <MessageSquare className="w-5 h-5 mb-1" />
-                  <p className="text-xs font-semibold">WhatsApp</p>
-                </div>
+              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                <MessageSquare className="w-4 h-4" />
               </Button>
             </Link>
-
             <Link to={createPageUrl('Tasks')}>
-              <Button variant="outline" className="w-full h-16 border-2">
-                <div className="text-left w-full">
-                  <Target className="w-5 h-5 mb-1" />
-                  <p className="text-xs font-semibold">Tarefas</p>
-                </div>
+              <Button size="sm" variant="outline" className="w-full">
+                <Target className="w-4 h-4" />
               </Button>
             </Link>
-
-            <Link to={createPageUrl('ClientsByCity')}>
-              <Button variant="outline" className="w-full h-16 border-2">
-                <div className="text-left w-full">
-                  <MapPin className="w-5 h-5 mb-1" />
-                  <p className="text-xs font-semibold">Por Cidade</p>
-                </div>
-              </Button>
-            </Link>
-
-            <Link to={createPageUrl('AdvancedReports')}>
-              <Button variant="outline" className="w-full h-16 border-2">
-                <div className="text-left w-full">
-                  <FileText className="w-5 h-5 mb-1" />
-                  <p className="text-xs font-semibold">Relatórios</p>
-                </div>
+            <Link to={createPageUrl('AIAssistant')}>
+              <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700">
+                <Sparkles className="w-4 h-4" />
               </Button>
             </Link>
           </div>
-        </div>
-
-        {/* 8. DEMO E CONFIGURAÇÕES */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link to={createPageUrl('CampaignDemo')}>
-            <Button variant="outline" className="w-full h-12 border-2">
-              <Play className="w-4 h-4 mr-2" />
-              Ver Demo
-            </Button>
-          </Link>
-
-          <Link to={createPageUrl('AIAssistant')}>
-            <Button className="w-full h-12 bg-purple-600 hover:bg-purple-700">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Assistente IA
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
