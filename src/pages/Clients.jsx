@@ -119,7 +119,7 @@ export default function Clients() {
     queryKey: ['all-visits'],
     queryFn: async () => {
       try {
-        const allVisits = await base44.entities.Visit.list('-scheduled_date', 500);
+        const allVisits = await base44.entities.Visit.list('-scheduled_date');
         const validClientIds = new Set(clients.map(c => c.id));
         return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
       } catch (error) {
@@ -423,7 +423,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
       });
 
       // Buscar clientes existentes
-      const existingClients = await base44.entities.Client.list('-updated_date', 500);
+      const existingClients = await base44.entities.Client.list('-updated_date');
       
       const createdClients = [];
       const updatedClients = [];
