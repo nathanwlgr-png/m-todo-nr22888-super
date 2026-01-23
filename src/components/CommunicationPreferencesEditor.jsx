@@ -33,7 +33,7 @@ export default function CommunicationPreferencesEditor({ clientId, currentPrefer
     
     // Salvamento automático
     updateMutation.mutate({ 
-      communication_preferences: newPrefs
+      communication_preferences: JSON.stringify(newPrefs)
     });
   };
 
