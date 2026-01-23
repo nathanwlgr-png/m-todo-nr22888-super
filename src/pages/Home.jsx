@@ -225,10 +225,10 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-6">
-        {/* 0. BUSCA COMPLETA IA - MÁXIMA PRIORIDADE */}
+        {/* 1. BUSCA GPS - PRINCIPAL */}
         <CompleteProfileSearch />
 
-        {/* 1. BUSCA AUTOMÁTICA DE CLÍNICAS - DESTAQUE */}
+        {/* 2. BUSCA MANUAL ALTERNATIVA */}
         <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-300">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
@@ -289,7 +289,7 @@ export default function Home() {
           </div>
         </Card>
 
-        {/* 2. MÉTRICAS RÁPIDAS */}
+        {/* 3. MÉTRICAS RÁPIDAS */}
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4 bg-white">
             <div className="flex items-center gap-3">
@@ -316,7 +316,7 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* 3. BUSCA DE CLIENTES */}
+        {/* 4. BUSCA DE CLIENTES */}
         <Card className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -329,7 +329,7 @@ export default function Home() {
           </div>
         </Card>
 
-        {/* 4. LISTA DE CLIENTES */}
+        {/* 5. LISTA DE CLIENTES */}
         {searchTerm && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -370,9 +370,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* 5. AÇÕES PRINCIPAIS - ORDEM CRONOLÓGICA */}
+        {/* 6. FLUXO CRONOLÓGICO COMPLETO */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-700 px-1">📋 Fluxo de Trabalho</h3>
+          <h3 className="text-sm font-semibold text-slate-700 px-1">📋 Fluxo Completo (Ordem Cronológica)</h3>
           
           {/* Passo 1: Adicionar Cliente */}
           <Link to={createPageUrl('NewClient')}>
@@ -471,7 +471,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* 6. FERRAMENTAS EXTRAS */}
+        {/* 7. FERRAMENTAS EXTRAS */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-slate-700 px-1">🛠️ Ferramentas</h3>
           
@@ -514,7 +514,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 7. DEMO E CONFIGURAÇÕES */}
+        {/* 8. DEMO E CONFIGURAÇÕES */}
         <div className="grid grid-cols-2 gap-3">
           <Link to={createPageUrl('CampaignDemo')}>
             <Button variant="outline" className="w-full h-12 border-2">
