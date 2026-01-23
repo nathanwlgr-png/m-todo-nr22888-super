@@ -32,6 +32,7 @@ import StockManagement from '@/components/StockManagement';
 import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
 import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
 import GamificationSystem from '@/components/GamificationSystem';
+import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -564,6 +565,12 @@ export default function Home() {
             <StockManagement />
             <AdvancedSalesForecast />
           </div>
+        </div>
+
+        {/* SEGMENTAÇÃO INTELIGENTE */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">🎯 Segmentação Inteligente</h3>
+          <SmartSegmentationEngine />
         </div>
 
         {/* MÉTRICAS RÁPIDAS - CLICÁVEIS */}
