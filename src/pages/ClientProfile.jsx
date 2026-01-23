@@ -115,6 +115,7 @@ import SmartClientSummary from '@/components/SmartClientSummary';
 import AutoTaskCreator from '@/components/AutoTaskCreator';
 import SalesFunnelPredictiveAnalysis from '@/components/SalesFunnelPredictiveAnalysis';
 import PersonalizedUpsellEngine from '@/components/PersonalizedUpsellEngine';
+import SalesKnowledgeBase from '@/components/SalesKnowledgeBase';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1288,6 +1289,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           client={client}
           sales={sales}
         />
+
+        {/* Sales Knowledge Base */}
+        <SalesKnowledgeBase client={client} />
 
         {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
         <NumerologyDeepAnalysis client={client} />
