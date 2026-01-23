@@ -1096,6 +1096,13 @@ export default function Home() {
                 Modo Offline
               </Button>
             </Link>
+
+            <Link to={createPageUrl('WhatsAppDataAccess')}>
+              <Button className="w-full h-16 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg">
+                <MessageSquare className="w-5 h-5 mr-2" />
+                📱 Acesso Total WhatsApp
+              </Button>
+            </Link>
               </div>
 
             {/* Ferramentas Rápidas */}

@@ -130,6 +130,22 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
                       {pipelineStages[currentStage].label}
                     </Badge>
                   )}
+                  
+                  {/* Segmento IA */}
+                  {client.ai_segment && (
+                    <Badge className={
+                      client.ai_segment === 'VIP' ? 'bg-purple-500 text-white' :
+                      client.ai_segment === 'Champions' ? 'bg-green-500 text-white' :
+                      client.ai_segment === 'Potential' ? 'bg-blue-500 text-white' :
+                      client.ai_segment === 'At Risk' ? 'bg-red-500 text-white' :
+                      'bg-gray-500 text-white'
+                    } className="text-xs px-2 py-0.5">
+                      {client.ai_segment === 'VIP' ? '👑' : 
+                       client.ai_segment === 'Champions' ? '🏆' :
+                       client.ai_segment === 'Potential' ? '⭐' :
+                       client.ai_segment === 'At Risk' ? '⚠️' : '📊'} {client.ai_segment}
+                    </Badge>
+                  )}
                 </div>
                 {client.purchase_score && (
                   <div className="text-xs text-slate-400">
