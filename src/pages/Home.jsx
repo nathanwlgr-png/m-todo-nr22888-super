@@ -24,7 +24,8 @@ import {
   Settings,
   Play,
   Zap,
-  Cog
+  Cog,
+  BookOpen
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
@@ -669,6 +670,21 @@ export default function Home() {
                 <div className="flex-1">
                   <p className="text-sm font-bold text-amber-900">⚙️ Automações</p>
                   <p className="text-xs text-amber-600">Tarefas e alertas inteligentes</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* Technical Materials Hub */}
+          <Link to={createPageUrl('TechnicalMaterialsHub')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-indigo-900">📚 Materiais Técnicos</p>
+                  <p className="text-xs text-indigo-600">PDFs hemogasometria + hematologia</p>
                 </div>
               </div>
             </Card>
