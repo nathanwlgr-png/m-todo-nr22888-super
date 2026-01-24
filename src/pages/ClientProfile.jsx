@@ -134,6 +134,8 @@ import AIMetricsBadges from '@/components/AIMetricsBadges';
 import AIFollowUpGenerator from '@/components/AIFollowUpGenerator';
 import PipelineActionRecommender from '@/components/PipelineActionRecommender';
 import SalesCoachingAnalyzer from '@/components/SalesCoachingAnalyzer';
+import GoogleSlidesCompetitorAnalysis from '@/components/GoogleSlidesCompetitorAnalysis';
+import NotionStrategyDocumentation from '@/components/NotionStrategyDocumentation';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1278,6 +1280,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Sales Coaching Analyzer - Análise de conversas */}
         <SalesCoachingAnalyzer client={client} />
+
+        {/* Google Slides - Análise de Concorrentes */}
+        <GoogleSlidesCompetitorAnalysis client={client} />
+
+        {/* Notion - Documentação de Estratégias */}
+        <NotionStrategyDocumentation client={client} />
 
         {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
         <AdvancedClientAnalytics 
