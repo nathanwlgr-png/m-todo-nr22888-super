@@ -1178,7 +1178,31 @@ export default function TechnicalMaterialsHub() {
     }
   };
 
+  const sendToNatan = async () => {
+    try {
+      setGenerating('sending');
+      toast.info('Enviando análise científica para Natan...');
+      
+      await base44.functions.invoke('sendSeamtyAnalysisToPlanetaBichos', {});
+      
+      toast.success('✅ PDF enviado para Natan (14 991 676 428) via WhatsApp!');
+    } catch (error) {
+      toast.error('Erro ao enviar: ' + error.message);
+    } finally {
+      setGenerating(null);
+    }
+  };
+
   const materials = [
+    {
+      id: 'sendNatan',
+      title: '🔬 Enviar Análise Científica Seamaty',
+      description: 'Envia PDF completo com análise dos rotores Seamaty, enzimas e casos clínicos para Natan (Planeta Bichos) via WhatsApp',
+      icon: FileText,
+      color: 'from-green-500 to-emerald-500',
+      action: sendToNatan,
+      isSpecial: true
+    },
     {
       id: 'acidbase',
       title: 'Equilíbrio Ácido-Base Completo',
