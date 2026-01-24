@@ -41,6 +41,7 @@ import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
 import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
 import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
 import CoachingDashboard from '@/components/CoachingDashboard';
+import WhatsAppMasterAssistant from '@/components/WhatsAppMasterAssistant';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -247,6 +248,9 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* ASSISTENTE IA WHATSAPP MASTER */}
+        <WhatsAppMasterAssistant />
+
         {/* GAMIFICAÇÃO */}
         <GamificationSystem compact={true} />
 
@@ -762,6 +766,23 @@ export default function Home() {
                 <div className="flex-1">
                   <p className="text-sm font-bold text-indigo-900">📚 Documentos Clientes</p>
                   <p className="text-xs text-indigo-600">Upload + Busca IA + Envio</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* Data Hub - Central de Dados */}
+          <Link to={createPageUrl('DataHub')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-green-900">🗄️ Central de Dados</p>
+                  <p className="text-xs text-green-600">Importar + Documentos + Exportar</p>
                 </div>
               </div>
             </Card>

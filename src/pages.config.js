@@ -13,6 +13,7 @@ import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
 import Campaigns from './pages/Campaigns';
 import CaptureLeads from './pages/CaptureLeads';
 import ClientDashboard from './pages/ClientDashboard';
+import ClientDocumentCenter from './pages/ClientDocumentCenter';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
@@ -94,7 +95,7 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import ClientDocumentCenter from './pages/ClientDocumentCenter';
+import DataHub from './pages/DataHub';
 import __Layout from './Layout.jsx';
 
 
@@ -114,6 +115,7 @@ export const PAGES = {
     "Campaigns": Campaigns,
     "CaptureLeads": CaptureLeads,
     "ClientDashboard": ClientDashboard,
+    "ClientDocumentCenter": ClientDocumentCenter,
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
@@ -195,7 +197,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "ClientDocumentCenter": ClientDocumentCenter,
+    "DataHub": DataHub,
 }
 
 export const pagesConfig = {
