@@ -787,6 +787,21 @@ export default function Home() {
               </div>
             </Card>
           </Link>
+
+          {/* AI Content Generator */}
+          <Link to={createPageUrl('AIContentGenerator')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-400">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-purple-900">✨ Gerador Conteúdo IA</p>
+                  <p className="text-xs text-purple-600">Emails, posts, descrições, follow-ups</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
           </div>
 
         {/* SEGMENTAÇÃO INTELIGENTE */}
