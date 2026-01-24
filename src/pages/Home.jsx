@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
+import UniversalClientSearch from '@/components/UniversalClientSearch';
 import BulkClientImporter from '@/components/BulkClientImporter';
 import StockManagement from '@/components/StockManagement';
 import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
@@ -267,6 +268,9 @@ export default function Home() {
 
           {/* ETAPA 1B: BUSCA GPS */}
           <CompleteProfileSearch />
+
+          {/* PESQUISA PARA CLIENTE */}
+          <UniversalClientSearch />
 
           {/* ETAPA 2A: IMPORTAÇÃO EM MASSA */}
           <Card className="p-4 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
