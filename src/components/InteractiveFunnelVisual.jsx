@@ -206,8 +206,7 @@ export default function InteractiveFunnelVisual() {
   }, [clients, allStages]);
 
   return (
-    return (
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header com Estatísticas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
@@ -303,7 +302,5 @@ export default function InteractiveFunnelVisual() {
           </div>
         </Card>
       </div>
-    );
-    }
   );
 }
