@@ -132,6 +132,7 @@ import ProactiveCommunicationEngine from '@/components/ProactiveCommunicationEng
 import QuickCommunicationActions from '@/components/QuickCommunicationActions';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
 import AIFollowUpGenerator from '@/components/AIFollowUpGenerator';
+import PipelineActionRecommender from '@/components/PipelineActionRecommender';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1270,6 +1271,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* AI Follow-Up Sequence Generator */}
         <AIFollowUpGenerator client={client} />
+
+        {/* Pipeline Action Recommender - IA que sugere ações específicas */}
+        <PipelineActionRecommender client={client} />
 
         {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
         <AdvancedClientAnalytics 
