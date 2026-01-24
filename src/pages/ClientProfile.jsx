@@ -1318,12 +1318,7 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         />
 
         {/* Auto Task Creator */}
-        <AutoTaskCreator 
-          client={client}
-          interactions={interactions}
-          sales={sales}
-          visits={visits}
-        />
+        <AutoTaskCreator clientId={clientId} />
 
         {/* Sales Funnel Predictive Analysis */}
         <SalesFunnelPredictiveAnalysis 
