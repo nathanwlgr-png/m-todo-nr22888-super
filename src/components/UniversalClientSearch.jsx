@@ -49,18 +49,38 @@ export default function UniversalClientSearch() {
 
     setSearching(true);
     try {
+      toast.info('🔍 Pesquisando no Google com IA...');
+      
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Pesquisa sobre: "${searchQuery}"
+        prompt: `Faça uma pesquisa COMPLETA no Google sobre: "${searchQuery}"
 
-Forneça informações completas, práticas e organizadas sobre o tema. Inclua:
-- Definição/Conceito
-- Detalhes técnicos relevantes
-- Aplicações práticas
-- Benefícios/Vantagens
-- Dados importantes
-- Exemplos ou casos de uso
+Use os resultados mais recentes e relevantes do Google para fornecer:
 
-Seja DETALHADO, PROFISSIONAL e ESTRUTURADO.`,
+📌 RESUMO EXECUTIVO
+- Definição clara e atualizada
+- Informações mais recentes (2024-2026)
+
+🔬 DETALHES TÉCNICOS
+- Especificações técnicas atualizadas
+- Dados científicos e estatísticas recentes
+
+💼 APLICAÇÕES PRÁTICAS
+- Casos de uso reais e atuais
+- Exemplos de implementação
+
+✅ BENEFÍCIOS E VANTAGENS
+- Principais benefícios comprovados
+- Diferenciais competitivos
+
+📊 DADOS E NÚMEROS
+- Estatísticas atualizadas
+- Preços de mercado (se relevante)
+- Tendências atuais
+
+🔗 FONTES
+- Mencione as principais fontes encontradas
+
+Seja EXTREMAMENTE DETALHADO, ATUALIZADO e PROFISSIONAL. Use informações reais do Google.`,
         add_context_from_internet: true
       });
 
@@ -70,9 +90,9 @@ Seja DETALHADO, PROFISSIONAL e ESTRUTURADO.`,
         timestamp: new Date().toISOString()
       });
 
-      toast.success('Pesquisa concluída!');
+      toast.success('✅ Pesquisa Google concluída!');
     } catch (error) {
-      toast.error('Erro na pesquisa');
+      toast.error('Erro na pesquisa: ' + error.message);
     } finally {
       setSearching(false);
     }
@@ -190,32 +210,46 @@ Seja DETALHADO, PROFISSIONAL e ESTRUTURADO.`,
           <Search className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-emerald-900">Pesquisa para Cliente</h3>
-          <p className="text-xs text-emerald-700">Pesquise qualquer coisa com IA</p>
+          <h3 className="font-bold text-emerald-900 flex items-center gap-2">
+            Pesquisa para Cliente
+            <Badge className="bg-blue-600 text-white text-xs">Google + IA</Badge>
+          </h3>
+          <p className="text-xs text-emerald-700">Busca em tempo real no Google com IA</p>
         </div>
       </div>
 
       {/* Barra de Pesquisa */}
-      <div className="flex gap-2 mb-3">
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && performSearch()}
-          placeholder="Ex: benefícios do VG2, hemogasometria em equinos..."
-          className="flex-1"
-          disabled={searching}
-        />
-        <Button
-          onClick={performSearch}
-          disabled={!searchQuery.trim() || searching}
-          className="bg-emerald-600 hover:bg-emerald-700"
-        >
-          {searching ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Search className="w-4 h-4" />
-          )}
-        </Button>
+      <div className="space-y-2 mb-3">
+        <div className="flex gap-2">
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && performSearch()}
+            placeholder="Ex: benefícios do VG2, preços hematologia veterinária..."
+            className="flex-1"
+            disabled={searching}
+          />
+          <Button
+            onClick={performSearch}
+            disabled={!searchQuery.trim() || searching}
+            className="bg-emerald-600 hover:bg-emerald-700 px-6"
+          >
+            {searching ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <Search className="w-4 h-4 mr-2" />
+                Buscar
+              </>
+            )}
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 px-1">
+          <div className="flex items-center gap-1 text-xs text-emerald-700">
+            <Sparkles className="w-3 h-3" />
+            <span>Busca inteligente no Google em tempo real</span>
+          </div>
+        </div>
       </div>
 
       {/* Resultado da Pesquisa */}
