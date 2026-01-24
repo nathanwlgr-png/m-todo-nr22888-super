@@ -23,7 +23,9 @@ import {
   Search,
   Brain,
   CheckSquare,
-  Handshake
+  Handshake,
+  Globe,
+  Zap
 } from 'lucide-react';
 import { Label } from "@/components/ui/label";
 import {
