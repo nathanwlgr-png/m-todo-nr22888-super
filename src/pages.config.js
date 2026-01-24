@@ -6,6 +6,7 @@ import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
 import Calendar from './pages/Calendar';
+import CampaignCenter from './pages/CampaignCenter';
 import CampaignDemo from './pages/CampaignDemo';
 import CampaignDetails from './pages/CampaignDetails';
 import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
@@ -74,6 +75,7 @@ import RevenueForecastPage from './pages/RevenueForecastPage';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
 import SalesCoaching from './pages/SalesCoaching';
+import SalesForecastPage from './pages/SalesForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
@@ -91,8 +93,7 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import SalesForecastPage from './pages/SalesForecastPage';
-import CampaignCenter from './pages/CampaignCenter';
+import RouteOptimizer from './pages/RouteOptimizer';
 import __Layout from './Layout.jsx';
 
 
@@ -105,6 +106,7 @@ export const PAGES = {
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
     "Calendar": Calendar,
+    "CampaignCenter": CampaignCenter,
     "CampaignDemo": CampaignDemo,
     "CampaignDetails": CampaignDetails,
     "CampaignTemplatesDemo": CampaignTemplatesDemo,
@@ -173,6 +175,7 @@ export const PAGES = {
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
     "SalesCoaching": SalesCoaching,
+    "SalesForecastPage": SalesForecastPage,
     "SalesFunnel": SalesFunnel,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
@@ -190,8 +193,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "SalesForecastPage": SalesForecastPage,
-    "CampaignCenter": CampaignCenter,
+    "RouteOptimizer": RouteOptimizer,
 }
 
 export const pagesConfig = {
