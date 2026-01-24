@@ -369,14 +369,14 @@ Seja direto e informativo.`,
         </Card>
       )}
 
-      {/* Botão Principal */}
+      {/* Botão Principal - Fininho */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full h-16 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-bold text-lg shadow-2xl flex items-center justify-center gap-3 transition-all"
+        className="w-full h-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs shadow-lg flex items-center justify-center gap-2 transition-all"
       >
-        <Sparkles className="w-6 h-6" />
-        {expanded ? 'Fechar Análise IA' : 'Abrir Análise IA de Documentos'}
-        {!expanded && <ChevronUp className="w-6 h-6" />}
+        <Sparkles className="w-3 h-3" />
+        {expanded ? 'Fechar' : 'IA Docs'}
+        {!expanded && <ChevronUp className="w-3 h-3" />}
       </button>
     </div>
   );
