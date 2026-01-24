@@ -1,4 +1,5 @@
 import AIAssistant from './pages/AIAssistant';
+import AIContentGenerator from './pages/AIContentGenerator';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
@@ -24,6 +25,7 @@ import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import Dashboard from './pages/Dashboard';
+import DataHub from './pages/DataHub';
 import DocumentCenter from './pages/DocumentCenter';
 import DocumentRepository from './pages/DocumentRepository';
 import Equipment from './pages/Equipment';
@@ -95,13 +97,12 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import DataHub from './pages/DataHub';
-import AIContentGenerator from './pages/AIContentGenerator';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AIContentGenerator": AIContentGenerator,
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
@@ -127,6 +128,7 @@ export const PAGES = {
     "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
     "Dashboard": Dashboard,
+    "DataHub": DataHub,
     "DocumentCenter": DocumentCenter,
     "DocumentRepository": DocumentRepository,
     "Equipment": Equipment,
@@ -198,8 +200,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "DataHub": DataHub,
-    "AIContentGenerator": AIContentGenerator,
 }
 
 export const pagesConfig = {
