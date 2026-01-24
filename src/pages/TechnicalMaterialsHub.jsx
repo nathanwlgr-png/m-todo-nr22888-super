@@ -1247,8 +1247,46 @@ export default function TechnicalMaterialsHub() {
         </div>
 
         {/* Cards de Materiais */}
+        {materials[0].isSpecial && (
+          <Card className="md:col-span-2 hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-green-400 bg-gradient-to-r from-green-50 to-emerald-50">
+            <div className="h-3 bg-gradient-to-r from-green-500 to-emerald-500" />
+            <CardHeader>
+              <div className="flex items-start gap-4 justify-between">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500">
+                    <Send className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl mb-2">{materials[0].title}</CardTitle>
+                    <p className="text-sm text-slate-700">{materials[0].description}</p>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={materials[0].action}
+                disabled={generating === materials[0].id}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:opacity-90 text-lg py-6"
+              >
+                {generating === materials[0].id ? (
+                  <>
+                    <TrendingUp className="w-5 h-5 mr-2 animate-spin" />
+                    Gerando e enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-2" />
+                    Enviar PDF para Natan no WhatsApp
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid md:grid-cols-2 gap-6">
-          {materials.map(material => {
+          {materials.slice(1).map(material => {
             const Icon = material.icon;
             const isGenerating = generating === material.id;
 
