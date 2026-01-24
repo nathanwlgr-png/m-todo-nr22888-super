@@ -53,6 +53,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchingClinics, setSearchingClinics] = useState(false);
   const [autoSaveProgress, setAutoSaveProgress] = useState(null);
+  const [selectedClientForAnalysis, setSelectedClientForAnalysis] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
