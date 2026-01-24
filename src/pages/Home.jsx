@@ -33,6 +33,7 @@ import BulkClientImporter from '@/components/BulkClientImporter';
 import StockManagement from '@/components/StockManagement';
 import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
 import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
+import SalesForecastDashboard from '@/components/SalesForecastDashboard';
 import GamificationSystem from '@/components/GamificationSystem';
 import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
 import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
@@ -597,6 +598,7 @@ export default function Home() {
           {/* Stock & Forecast */}
           <div className="space-y-3">
             <StockManagement />
+            <SalesForecastDashboard compact={true} />
             <AdvancedSalesForecast />
           </div>
 
