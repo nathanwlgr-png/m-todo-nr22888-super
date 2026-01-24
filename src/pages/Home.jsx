@@ -260,16 +260,16 @@ export default function Home() {
           selectedClient={selectedClientForAnalysis}
         />
 
-        {/* ANÁLISE COMPLETA DO CLIENTE - PRIMEIRO BOTÃO PRINCIPAL */}
+        {/* ASSISTENTE IA WHATSAPP MASTER (PRIMORI) - PRIMEIRO */}
+        <WhatsAppMasterAssistant />
+
+        {/* ANÁLISE COMPLETA DO CLIENTE */}
         {selectedClientForAnalysis && (
           <CompleteClientAnalysis client={selectedClientForAnalysis} />
         )}
 
         {/* TREINADOR DE DICÇÃO */}
         <DictionTrainer />
-
-        {/* ASSISTENTE IA WHATSAPP MASTER */}
-        <WhatsAppMasterAssistant />
 
         {/* MAPA DO BRASIL - PLANEJADOR DE ROTAS */}
         <BrazilCitiesMap selectedClients={clients} />
