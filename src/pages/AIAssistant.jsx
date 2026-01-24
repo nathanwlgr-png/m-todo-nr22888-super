@@ -36,6 +36,9 @@ import {
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
+import MasterAIAssistant from '@/components/MasterAIAssistant';
+import jsPDF from 'jspdf';
+import { toast } from 'sonner';
 
 export default function AIAssistant() {
   const navigate = useNavigate();
@@ -55,6 +58,7 @@ export default function AIAssistant() {
   const [rolePlayMode, setRolePlayMode] = useState(false);
   const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
   const fileInputRef = useRef(null);
+  const [showMasterAI, setShowMasterAI] = useState(false);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -847,9 +851,51 @@ Tarefas devem:
     }
   };
 
+  const exportChatToPDF = () => {
+    if (messages.length === 0) {
+      toast.error('Nenhuma mensagem para exportar');
+      return;
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const maxWidth = pageWidth - (margin * 2);
+    let y = margin;
+
+    const addText = (text, fontSize = 10, isBold = false) => {
+      doc.setFontSize(fontSize);
+      doc.setFont(undefined, isBold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      
+      lines.forEach(line => {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, margin, y);
+        y += fontSize * 0.5;
+      });
+      y += 2;
+    };
+
+    addText(`CONVERSA PRIMORI - ${client?.first_name || 'Assistente IA'}`, 14, true);
+    addText(`Data: ${new Date().toLocaleString('pt-BR')}`, 9);
+    y += 5;
+
+    messages.forEach((msg) => {
+      addText(msg.role === 'user' ? 'VOCÊ:' : 'PRIMORI:', 11, true);
+      addText(msg.content, 10);
+      y += 3;
+    });
+
+    doc.save(`Conversa_PRIMORI_${client?.first_name || 'IA'}_${Date.now()}.pdf`);
+    toast.success('Chat exportado em PDF!');
+  };
+
   const handleSaveAndContinue = () => {
     if (messages.length > 2) {
-      // Extract insights from conversation
       const lastMessages = messages.slice(-4).map(m => m.content).join(' ');
       updateMutation.mutate({
         notes: lastMessages.substring(0, 500),
@@ -902,6 +948,24 @@ Tarefas devem:
             className={rolePlayMode ? "bg-purple-600 hover:bg-purple-700" : ""}
           >
             {rolePlayMode ? '🎭 Treinar' : '🎭 Treinar'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMasterAI(!showMasterAI)}
+            className={showMasterAI ? 'bg-orange-100 border-orange-300' : ''}
+          >
+            <Globe className="w-4 h-4 mr-1" />
+            Web
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportChatToPDF}
+            disabled={messages.length === 0}
+          >
+            <FileText className="w-4 h-4 mr-1" />
+            PDF
           </Button>
           {selectedClientId && (
             <Button
@@ -1161,8 +1225,23 @@ Tarefas devem:
         </div>
       )}
 
+      {/* Master AI Assistant */}
+      {showMasterAI && (
+        <div className="px-4 pt-4">
+          <MasterAIAssistant client={client} />
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && !showMasterAI && (
+          <div className="text-center py-8 text-slate-400">
+            <Sparkles className="w-12 h-12 mx-auto mb-3 text-orange-500" />
+            <p className="font-medium">PRIMORI - Assistente Master Autônomo</p>
+            <p className="text-sm mt-1">🌐 Pesquise qualquer coisa • 📄 Gere PDFs instantâneos • 💬 Chat IA Total</p>
+            <p className="text-xs mt-2 text-orange-600">Clique em "Web" para começar pesquisas</p>
+          </div>
+        )}
         {messages.map((msg, i) => (
           <ChatMessage key={i} message={msg.content} isUser={msg.role === 'user'} />
         ))}
