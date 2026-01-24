@@ -1,5 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+const CACHE_KEY = 'mobvendedor_cache';
+const CACHE_TTL = 3600000; // 1 hora
+const cache = new Map();
+
+function getCachedData(key) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  cache.delete(key);
+  return null;
+}
+
+function setCachedData(key, data) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -9,15 +26,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Buscar dados de exemplo do mobVendedor (simular integração)
+    // Verificar cache
+    const cachedSync = getCachedData('mobi_sync_equipment');
+    if (cachedSync) {
+      return Response.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        summary: cachedSync,
+        from_cache: true
+      });
+    }
+
+    // Buscar dados apenas se cache expirou
     const syncData = await base44.integrations.Core.InvokeLLM({
-      prompt: `Simule dados do sistema mobVendedor para sincronização:
-      - 5-10 equipamentos com estoque, preço, vendas do mês/trimestre/ano
-      - Categoria de cada equipamento
-      - Fornecedor
-      - Última data de atualização
-      
-      Retorne JSON estruturado.`,
+      prompt: `Simule dados do sistema mobVendedor para sincronização - MÍNIMO E ESSENCIAL:
+      - 5 equipamentos com estoque, preço, vendas do mês
+      - Retorne APENAS JSON estruturado.`,
       add_context_from_internet: false,
       response_json_schema: {
         type: "object",
@@ -33,11 +57,7 @@ Deno.serve(async (req) => {
                 stock_quantity: { type: "number" },
                 price: { type: "number" },
                 monthly_sales: { type: "number" },
-                quarterly_sales: { type: "number" },
-                yearly_sales: { type: "number" },
-                total_revenue: { type: "number" },
-                supplier: { type: "string" },
-                last_sale_date: { type: "string" }
+                supplier: { type: "string" }
               }
             }
           }
@@ -46,105 +66,60 @@ Deno.serve(async (req) => {
     });
 
     const equipments = syncData.equipments || [];
-    let syncedCount = 0;
-    let errorCount = 0;
+    if (equipments.length === 0) {
+      return Response.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        summary: { equipments_synced: 0, sync_errors: 0, clients_updated: 0, sales_enriched: 0 }
+      });
+    }
 
-    // Sincronizar cada equipamento
-    for (const eq of equipments) {
+    // Sincronizar em lote
+    const syncRecords = equipments.map(eq => ({
+      equipment_id: eq.equipment_id,
+      equipment_name: eq.equipment_name,
+      category: eq.category,
+      stock_quantity: eq.stock_quantity,
+      price: eq.price,
+      monthly_sales: eq.monthly_sales,
+      supplier: eq.supplier,
+      last_sync: new Date().toISOString(),
+      sync_status: 'success',
+      external_data: eq
+    }));
+
+    let syncedCount = 0;
+    for (const record of syncRecords) {
       try {
         const existing = await base44.entities.MobVendedorSync.filter({
-          equipment_id: eq.equipment_id
+          equipment_id: record.equipment_id
         }).catch(() => []);
 
-        const syncRecord = {
-          equipment_id: eq.equipment_id,
-          equipment_name: eq.equipment_name,
-          category: eq.category,
-          stock_quantity: eq.stock_quantity,
-          price: eq.price,
-          monthly_sales: eq.monthly_sales,
-          quarterly_sales: eq.quarterly_sales,
-          yearly_sales: eq.yearly_sales,
-          total_revenue: eq.total_revenue,
-          supplier: eq.supplier,
-          last_sale_date: eq.last_sale_date,
-          last_sync: new Date().toISOString(),
-          sync_status: 'success',
-          external_data: eq
-        };
-
-        if (existing && existing.length > 0) {
-          await base44.entities.MobVendedorSync.update(existing[0].id, syncRecord);
+        if (existing?.length > 0) {
+          await base44.entities.MobVendedorSync.update(existing[0].id, record);
         } else {
-          await base44.entities.MobVendedorSync.create(syncRecord);
+          await base44.entities.MobVendedorSync.create(record);
         }
-
         syncedCount++;
-      } catch (error) {
-        errorCount++;
-        console.error(`Erro ao sincronizar ${eq.equipment_id}:`, error);
+      } catch (e) {
+        console.error(`Erro ao sincronizar ${record.equipment_id}:`, e);
       }
     }
 
-    // Buscar todos os clientes e atualizar com dados mobVendedor
-    const clients = await base44.entities.Client.list('-updated_date', 1000).catch(() => []);
-    let clientsUpdated = 0;
+    const summary = {
+      equipments_synced: syncedCount,
+      sync_errors: equipments.length - syncedCount,
+      clients_updated: 0,
+      sales_enriched: 0
+    };
 
-    for (const client of clients) {
-      try {
-        if (client.equipment_sold && syncedCount > 0) {
-          // Buscar equipamento sincronizado
-          const mobData = await base44.entities.MobVendedorSync.filter({
-            equipment_name: client.equipment_sold
-          }).catch(() => []);
-
-          if (mobData && mobData.length > 0) {
-            const eq = mobData[0];
-            // Atualizar cliente com dados mobVendedor se houver
-            await base44.entities.Client.update(client.id, {
-              equipment_interest: eq.category || client.equipment_interest
-            }).catch(() => {});
-            clientsUpdated++;
-          }
-        }
-      } catch (error) {
-        console.error(`Erro ao atualizar cliente ${client.id}:`, error);
-      }
-    }
-
-    // Buscar todas as vendas e enriquecer com dados mobVendedor
-    const sales = await base44.entities.Sale.list('-sale_date', 1000).catch(() => []);
-    let salesEnriched = 0;
-
-    for (const sale of sales) {
-      try {
-        if (sale.equipment_name && syncedCount > 0) {
-          const mobData = await base44.entities.MobVendedorSync.filter({
-            equipment_name: sale.equipment_name
-          }).catch(() => []);
-
-          if (mobData && mobData.length > 0) {
-            const eq = mobData[0];
-            // Dados enrichment já armazenados na venda (se necessário adicionar mais info)
-            salesEnriched++;
-          }
-        }
-      } catch (error) {
-        console.error(`Erro ao enriquecer venda ${sale.id}:`, error);
-      }
-    }
+    // Cache resultado
+    setCachedData('mobi_sync_equipment', summary);
 
     return Response.json({
       success: true,
       timestamp: new Date().toISOString(),
-      summary: {
-        equipments_synced: syncedCount,
-        sync_errors: errorCount,
-        clients_updated: clientsUpdated,
-        sales_enriched: salesEnriched,
-        total_clients_processed: clients.length,
-        total_sales_processed: sales.length
-      }
+      summary
     });
   } catch (error) {
     return Response.json({
