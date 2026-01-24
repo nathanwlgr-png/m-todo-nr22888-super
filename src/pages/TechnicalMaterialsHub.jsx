@@ -641,6 +641,543 @@ export default function TechnicalMaterialsHub() {
     }
   };
 
+  const generateBiochemistryRotorsPDF = () => {
+    setGenerating('biochem');
+    try {
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Título
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BIOQUÍMICA VETERINÁRIA SEAMATY', 105, yPos, { align: 'center' });
+      yPos += 10;
+      doc.setFontSize(12);
+      doc.text('Rotores, Enzimas e Aplicações Clínicas Completas', 105, yPos, { align: 'center' });
+      yPos += 20;
+
+      // CAPÍTULO 1: ENZIMAS INDIVIDUAIS
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1. ENZIMAS E PARÂMETROS - ANÁLISE INDIVIDUAL', 20, yPos);
+      yPos += 12;
+
+      // ALT
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.1 ALT (Alanina Aminotransferase)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Enzima citoplasmática hepática - marcador primário de lesão hepatocelular',
+        'VALORES: Cães: 10-100 U/L | Gatos: 6-83 U/L',
+        'ESPECIFICIDADE: Alta para fígado (cães) | Moderada (gatos)',
+        '',
+        'ELEVAÇÃO INDICA:',
+        '• Hepatite aguda (viral, tóxica, medicamentosa)',
+        '• Lipidose hepática (gatos)',
+        '• Necrose hepatocelular',
+        '• Trauma hepático',
+        '',
+        'QUANDO SOLICITAR:',
+        '→ Icterícia, vômitos, anorexia',
+        '→ Suspeita de toxicidade medicamentosa',
+        '→ Triagem pré-anestésica',
+        '→ Monitoramento de hepatopatias crônicas',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // AST
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.2 AST (Aspartato Aminotransferase)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Enzima mitocondrial - fígado, músculo, hemácias',
+        'VALORES: Cães: 23-66 U/L | Gatos: 26-43 U/L',
+        'ESPECIFICIDADE: Baixa (múltiplos órgãos)',
+        '',
+        'ELEVAÇÃO INDICA:',
+        '• Necrose hepatocelular grave (com ALT)',
+        '• Miosite, rabdomiólise',
+        '• Hemólise intravascular',
+        '',
+        'INTERPRETAÇÃO COMBINADA:',
+        '→ ALT/AST > 2: Lesão hepática aguda',
+        '→ AST > ALT: Lesão muscular ou crônica',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // ALP
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.3 ALP (Fosfatase Alcalina)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Enzima de membrana - fígado, osso, córtex, intestino',
+        'VALORES: Cães: 23-212 U/L | Gatos: 0-62 U/L',
+        'ESPECIFICIDADE: Baixa (induzida por corticoides em cães)',
+        '',
+        'ELEVAÇÃO INDICA:',
+        'EM CÃES:',
+        '• Colestase (↑↑↑ junto com GGT)',
+        '• Hiperadrenocorticismo (↑↑↑↑ isoenzima esteróide)',
+        '• Crescimento ósseo (filhotes - até 3x normal)',
+        '• Hepatopatia vacuolar',
+        '• Medicamentos (fenobarbital, glicocorticoides)',
+        '',
+        'EM GATOS:',
+        '⚠️ Qualquer aumento é SIGNIFICATIVO (não é induzida por esteroides)',
+        '• Lipidose hepática',
+        '• Colangiohepatite',
+        '• Hipertireoidismo',
+        '• Neoplasia (linfoma)',
+        '',
+        'QUANDO SOLICITAR:',
+        '→ Icterícia, vômitos, poliúria',
+        '→ Suspeita de Cushing',
+        '→ Screening geriátrico',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // GGT
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.4 GGT (Gama-Glutamil Transferase)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Enzima de membrana canalicular biliar',
+        'VALORES: Cães: 0-7 U/L | Gatos: 0-2 U/L',
+        'ESPECIFICIDADE: Alta para colestase',
+        '',
+        'ELEVAÇÃO INDICA:',
+        '• Colestase extra-hepática (obstrução biliar)',
+        '• Colestase intra-hepática',
+        '• Neoplasia hepática/biliar',
+        '• Colangite',
+        '',
+        'INTERPRETAÇÃO COMBINADA COM ALP:',
+        '→ GGT↑ + ALP↑↑↑ = Colestase confirmada',
+        '→ GGT normal + ALP↑ = Indução esteróide (cães)',
+        '→ GGT↑↑ isolada = Lesão ductos biliares',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // CREATININA
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.5 CREATININA (Crea)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Produto do metabolismo muscular - marcador de TFG',
+        'VALORES: Cães: 0.5-1.8 mg/dL | Gatos: 0.8-2.4 mg/dL',
+        'ESPECIFICIDADE: Alta para função renal',
+        '',
+        'ELEVAÇÃO INDICA:',
+        '• Doença renal aguda (IRA)',
+        '• Doença renal crônica (DRC)',
+        '• Desidratação (pré-renal - reversível)',
+        '• Obstrução urinária (pós-renal)',
+        '',
+        'ESTADIAMENTO DRC (IRIS):',
+        '→ Estágio I: < 1.4 mg/dL',
+        '→ Estágio II: 1.4-2.8 mg/dL',
+        '→ Estágio III: 2.9-5.0 mg/dL',
+        '→ Estágio IV: > 5.0 mg/dL',
+        '',
+        '⚠️ IMPORTANTE: Crea só aumenta com perda de 75% da TFG',
+        '→ Use SDMA para detecção precoce (sensível com 40% perda)',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // UREIA/BUN
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.6 UREIA (BUN - Blood Urea Nitrogen)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Produto do metabolismo proteico - sintetizada no fígado',
+        'VALORES: Cães: 7-27 mg/dL | Gatos: 16-36 mg/dL',
+        'ESPECIFICIDADE: Moderada (influenciada por dieta, hidratação)',
+        '',
+        'ELEVAÇÃO INDICA:',
+        '• Azotemia pré-renal (desidratação, choque)',
+        '• Azotemia renal (lesão renal)',
+        '• Azotemia pós-renal (obstrução)',
+        '• Dieta hiperproteica',
+        '• Hemorragia GI (reabsorção)',
+        '',
+        'DIMINUIÇÃO INDICA:',
+        '• Insuficiência hepática grave',
+        '• Dieta hipoproteica',
+        '• Shunt portossistêmico',
+        '',
+        'RELAÇÃO BUN/CREA:',
+        '→ Normal: 10-20:1',
+        '→ > 20:1 = Azotemia pré-renal ou hemorragia GI',
+        '→ < 10:1 = Doença hepática',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // GLICOSE
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('1.7 GLICOSE (GLU)', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'FUNÇÃO: Principal fonte de energia celular',
+        'VALORES: Cães: 75-128 mg/dL | Gatos: 71-159 mg/dL',
+        '',
+        'HIPERGLICEMIA (> 200 mg/dL):',
+        '• Diabetes mellitus (cetoacidose se > 300)',
+        '• Estresse (gatos - pode chegar 400 mg/dL)',
+        '• Hiperadrenocorticismo',
+        '• Pancreatite aguda',
+        '• Medicamentos (corticoides, dextrose)',
+        '',
+        'HIPOGLICEMIA (< 60 mg/dL):',
+        '• Insulinoma (tumor pancreático)',
+        '• Sepse grave',
+        '• Insuficiência hepática',
+        '• Overdose insulina',
+        '• Raças toy em filhotes (jejum)',
+        '',
+        '⚠️ EMERGÊNCIA: GLU < 40 mg/dL',
+        '→ Dextrose 50% IV 0.5-1 mL/kg diluído',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // CAPÍTULO 2: ROTORES SEAMATY
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('2. ROTORES SEAMATY - COMPOSIÇÃO E APLICAÇÕES', 20, yPos);
+      yPos += 12;
+
+      // Rotor Hepático
+      doc.setFontSize(14);
+      doc.text('2.1 ROTOR HEPÁTICO (LIVER)', 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'COMPOSIÇÃO DO ROTOR:',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '✓ ALT (Alanina Aminotransferase)',
+        '✓ AST (Aspartato Aminotransferase)',
+        '✓ ALP (Fosfatase Alcalina)',
+        '✓ GGT (Gama-Glutamil Transferase)',
+        '✓ TBIL (Bilirrubina Total)',
+        '✓ TP (Proteína Total)',
+        '✓ ALB (Albumina)',
+        '',
+        'INDICAÇÕES CLÍNICAS:',
+        '• Icterícia ou mucosas amareladas',
+        '• Vômitos persistentes + anorexia',
+        '• Suspeita de hepatopatia (ascite, encefalopatia)',
+        '• Triagem pré-anestésica',
+        '• Monitoramento de medicações hepatotóxicas',
+        '• Investigação de hipoalbuminemia',
+        '',
+        'DOENÇAS DETECTADAS:',
+        '→ Hepatite aguda (↑↑ALT, ↑AST)',
+        '→ Colestase (↑↑ALP, ↑↑GGT, ↑TBIL)',
+        '→ Lipidose hepática felina (↑↑ALP, ↑↑TBIL)',
+        '→ Cirrose (↓ALB, ↑TBIL)',
+        '→ Shunt portossistêmico (↓BUN, ↓ALB)',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // Rotor Renal
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('2.2 ROTOR RENAL (KIDNEY)', 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'COMPOSIÇÃO DO ROTOR:',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '✓ CREA (Creatinina)',
+        '✓ BUN (Ureia)',
+        '✓ PHOS (Fósforo)',
+        '✓ Ca (Cálcio)',
+        '✓ K (Potássio)',
+        '✓ Na (Sódio)',
+        '✓ Cl (Cloreto)',
+        '',
+        'INDICAÇÕES CLÍNICAS:',
+        '• Poliúria/polidipsia (PU/PD)',
+        '• Vômitos + desidratação',
+        '• Suspeita de DRC ou IRA',
+        '• Anúria ou oligúria',
+        '• Convulsões (uremia)',
+        '• Monitoramento de fluidoterapia',
+        '',
+        'DOENÇAS DETECTADAS:',
+        '→ IRA (↑↑CREA, ↑BUN, ↑PHOS, ↑K)',
+        '→ DRC (↑CREA, ↑BUN, ↑PHOS, ↓Ca)',
+        '→ Obstrução uretral (↑↑K, ↑CREA)',
+        '→ Desidratação (↑BUN/CREA > 20:1)',
+        '→ Addison (↑K, ↓Na, razão Na/K < 27)',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // Rotor Pancreático
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('2.3 ROTOR PANCREÁTICO (PANCREAS)', 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'COMPOSIÇÃO DO ROTOR:',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '✓ AMYL (Amilase)',
+        '✓ LIPA (Lipase)',
+        '✓ GLU (Glicose)',
+        '✓ Ca (Cálcio)',
+        '✓ TP (Proteína Total)',
+        '✓ ALB (Albumina)',
+        '',
+        'INDICAÇÕES CLÍNICAS:',
+        '• Vômitos agudos + dor abdominal cranial',
+        '• Anorexia súbita + prostração',
+        '• Diarreia + icterícia',
+        '• Suspeita de pancreatite',
+        '• Abdome agudo',
+        '',
+        'DOENÇAS DETECTADAS:',
+        '→ Pancreatite aguda (↑↑LIPA, ↑AMYL)',
+        '→ Diabetes mellitus (↑GLU)',
+        '→ Insuficiência pancreática exócrina (↓LIPA)',
+        '→ Hipocalcemia (pancreatite grave)',
+        '',
+        '⚠️ NOTA: Em gatos, cPLI é mais sensível que lipase',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // CAPÍTULO 3: EQUIPAMENTOS SEAMATY
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('3. EQUIPAMENTOS SEAMATY - CONFIGURAÇÕES', 20, yPos);
+      yPos += 12;
+
+      // SMT-120VP
+      doc.setFontSize(14);
+      doc.text('3.1 SMT-120VP - Analisador Automático', 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'CAPACIDADE: 24+ parâmetros bioquímicos',
+        'TECNOLOGIA: Totalmente automático',
+        'AMOSTRA: 100 μL soro/plasma',
+        'TEMPO: 12 minutos',
+        '',
+        'PAINÉIS DISPONÍVEIS:',
+        '• Painel Hepático Completo (7 parâmetros)',
+        '• Painel Renal Completo (7 parâmetros)',
+        '• Painel Lipídico (CHOL, TG, HDL)',
+        '• Painel Eletrolítico (Na, K, Cl, Ca, P)',
+        '• Painel Proteico (TP, ALB, GLOB)',
+        '',
+        'MELHOR PARA:',
+        '→ Clínicas médias a grandes',
+        '→ Hospitais veterinários',
+        '→ Alto volume de exames (> 10/dia)',
+        '→ Perfis completos de check-up',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // QT3
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('3.2 QT3 - Sistema Modular', 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'CAPACIDADE: Parâmetros individuais ou combinados',
+        'TECNOLOGIA: Dual-Rotor System',
+        'FLEXIBILIDADE: Escolha os parâmetros necessários',
+        '',
+        'ROTORES MODULARES QT3:',
+        '• Liver (7 enzimas hepáticas)',
+        '• Kidney (7 marcadores renais)',
+        '• Pancreas (6 parâmetros pancreáticos)',
+        '• Lipid (perfil lipídico)',
+        '• Electrolytes (eletrólitos completos)',
+        '',
+        'VANTAGENS:',
+        '✓ Custo-efetivo (pague só o que usar)',
+        '✓ Ideal para emergências (testes rápidos)',
+        '✓ Perfeito para clínicas pequenas/médias',
+        '✓ Portabilidade',
+        '',
+        'CASOS DE USO:',
+        '→ Emergências: rotor Kidney + Electrolytes',
+        '→ Pré-cirúrgico: rotor Liver + Kidney',
+        '→ Diabetes: GLU + Pancreas + Kidney',
+        '→ Oncologia: Liver + Calcium + TP',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // CAPÍTULO 4: CASOS CLÍNICOS
+      doc.addPage();
+      yPos = 20;
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('4. CASOS CLÍNICOS PRÁTICOS', 20, yPos);
+      yPos += 12;
+
+      doc.setFontSize(12);
+      doc.text('CASO 1: Labrador 8 anos - Icterícia', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'ROTOR RECOMENDADO: Liver (QT3 ou SMT-120VP)',
+        '',
+        'RESULTADOS:',
+        '→ ALT: 850 U/L (↑↑↑)',
+        '→ ALP: 1200 U/L (↑↑↑)',
+        '→ GGT: 45 U/L (↑↑)',
+        '→ TBIL: 8.5 mg/dL (↑↑)',
+        '',
+        'INTERPRETAÇÃO:',
+        'Hepatite aguda com componente colestático',
+        '',
+        'PRÓXIMOS PASSOS:',
+        '• Ultrassom abdominal',
+        '• Painel coagulação',
+        '• Cultura/PCR (leptospirose)',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CASO 2: Gato 10 anos - Azotemia', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      [
+        'ROTOR RECOMENDADO: Kidney (QT3)',
+        '',
+        'RESULTADOS:',
+        '→ CREA: 4.2 mg/dL (↑↑)',
+        '→ BUN: 85 mg/dL (↑↑)',
+        '→ PHOS: 7.8 mg/dL (↑↑)',
+        '→ K: 5.8 mEq/L (↑)',
+        '',
+        'INTERPRETAÇÃO:',
+        'DRC Estágio III (IRIS) com hiperfosfatemia',
+        '',
+        'CONDUTA:',
+        '• Dieta renal',
+        '• Quelante de fósforo',
+        '• Anti-hipertensivo',
+        '• Reavaliação em 15 dias',
+        ''
+      ].forEach(line => {
+        if (yPos > 270) { doc.addPage(); yPos = 20; }
+        doc.text(line, 20, yPos);
+        yPos += 5;
+      });
+
+      // Rodapé
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+        doc.text('Seamaty Brasil - Material Técnico Veterinário', 105, 290, { align: 'center' });
+      }
+
+      doc.save('Bioquimica_Rotores_Enzimas_Seamaty.pdf');
+      toast.success('PDF de Bioquímica gerado!');
+    } catch (error) {
+      toast.error('Erro: ' + error.message);
+    } finally {
+      setGenerating(null);
+    }
+  };
+
   const materials = [
     {
       id: 'acidbase',
@@ -657,6 +1194,14 @@ export default function TechnicalMaterialsHub() {
       icon: Microscope,
       color: 'from-red-500 to-pink-500',
       action: generateHematologyPDF
+    },
+    {
+      id: 'biochem',
+      title: 'Bioquímica Seamaty - Rotores e Enzimas',
+      description: 'Análise completa de cada enzima (ALT, AST, ALP, GGT, Crea, BUN, GLU) + composição de rotores Liver, Kidney, Pancreas + casos clínicos',
+      icon: TrendingUp,
+      color: 'from-purple-500 to-fuchsia-500',
+      action: generateBiochemistryRotorsPDF
     }
   ];
 
