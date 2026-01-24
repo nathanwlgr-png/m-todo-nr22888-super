@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 export default function SystemAuditReport() {
   const [auditing, setAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState(null);
+  const [fixingIssue, setFixingIssue] = useState(null);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -279,6 +280,30 @@ export default function SystemAuditReport() {
     }
   };
 
+  const autoFixIssue = async (issueType, issueName) => {
+    setFixingIssue(issueType);
+    try {
+      const result = await base44.functions.invoke('autoFixSystemIssues', {
+        issue_type: issueType
+      });
+
+      if (result.success) {
+        toast.success(`${issueName} corrigido!`, {
+          description: `${result.results.fixed} registros atualizados`
+        });
+        
+        // Re-executar auditoria
+        await runAudit();
+      } else {
+        toast.error('Erro ao corrigir');
+      }
+    } catch (error) {
+      toast.error('Erro: ' + error.message);
+    } finally {
+      setFixingIssue(null);
+    }
+  };
+
   const sendToWhatsApp = async () => {
     if (!auditReport || !user?.phone) {
       toast.error('Configure seu WhatsApp em Configurações');
@@ -387,9 +412,155 @@ export default function SystemAuditReport() {
             </div>
           </div>
 
+          {/* TOP 5 PROBLEMAS COM BOTÕES DE CORREÇÃO */}
+          <div className="space-y-2">
+            <p className="text-sm font-bold text-red-800 mb-2">🔴 TOP 5 PROBLEMAS DETECTADOS</p>
+            
+            {/* Problema 1: Clientes sem numerologia */}
+            {auditReport.entities_audit.clients.incomplete_records > 0 && (
+              <div className="p-3 bg-red-50 rounded-lg border border-red-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-red-900">
+                      1. Clientes sem Numerologia
+                    </p>
+                    <p className="text-xs text-red-700">
+                      {auditReport.entities_audit.clients.incomplete_records} clientes sem perfil numerológico
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => autoFixIssue('missing_numerology', 'Numerologia')}
+                    disabled={fixingIssue === 'missing_numerology'}
+                    className="bg-red-600 hover:bg-red-700 text-xs"
+                  >
+                    {fixingIssue === 'missing_numerology' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Corrigir'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Problema 2: Clientes sem health score */}
+            {auditReport.incomplete_features.find(f => f.feature === 'Health Score') && (
+              <div className="p-3 bg-orange-50 rounded-lg border border-orange-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-orange-900">
+                      2. Health Score Faltando
+                    </p>
+                    <p className="text-xs text-orange-700">
+                      {auditReport.incomplete_features.find(f => f.feature === 'Health Score')?.issue}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => autoFixIssue('missing_health_score', 'Health Score')}
+                    disabled={fixingIssue === 'missing_health_score'}
+                    className="bg-orange-600 hover:bg-orange-700 text-xs"
+                  >
+                    {fixingIssue === 'missing_health_score' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Corrigir'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Problema 3: Clientes sem lab_needs */}
+            {clients.filter(c => !c.lab_needs || c.lab_needs.length === 0).length > 0 && (
+              <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-yellow-900">
+                      3. Necessidades de Lab Faltando
+                    </p>
+                    <p className="text-xs text-yellow-700">
+                      {clients.filter(c => !c.lab_needs || c.lab_needs.length === 0).length} clientes sem lab_needs
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => autoFixIssue('missing_lab_needs', 'Lab Needs')}
+                    disabled={fixingIssue === 'missing_lab_needs'}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-xs"
+                  >
+                    {fixingIssue === 'missing_lab_needs' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Corrigir'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Problema 4: Clientes sem Sales Intelligence */}
+            {auditReport.incomplete_features.find(f => f.feature === 'Sales Intelligence IA') && (
+              <div className="p-3 bg-purple-50 rounded-lg border border-purple-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-purple-900">
+                      4. Sales Intelligence IA Faltando
+                    </p>
+                    <p className="text-xs text-purple-700">
+                      Mais de 50% dos clientes sem análise de IA
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => autoFixIssue('missing_sales_intelligence', 'Sales Intelligence')}
+                    disabled={fixingIssue === 'missing_sales_intelligence'}
+                    className="bg-purple-600 hover:bg-purple-700 text-xs"
+                  >
+                    {fixingIssue === 'missing_sales_intelligence' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Corrigir'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Problema 5: Equipamentos sem dados completos */}
+            {auditReport.entities_audit.equipment.no_persuasion > 0 && (
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-blue-900">
+                      5. Equipamentos Incompletos
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      {auditReport.entities_audit.equipment.no_persuasion} equipamentos sem gatilhos de persuasão
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => autoFixIssue('missing_equipment_data', 'Dados de Equipamento')}
+                    disabled={fixingIssue === 'missing_equipment_data'}
+                    className="bg-blue-600 hover:bg-blue-700 text-xs"
+                  >
+                    {fixingIssue === 'missing_equipment_data' ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      'Corrigir'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <Button
             onClick={sendToWhatsApp}
-            className="w-full bg-green-600 hover:bg-green-700"
+            variant="outline"
+            className="w-full"
           >
             <Send className="w-4 h-4 mr-2" />
             Enviar Relatório (WhatsApp)
