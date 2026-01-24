@@ -137,6 +137,9 @@ import SalesCoachingAnalyzer from '@/components/SalesCoachingAnalyzer';
 import GoogleSlidesCompetitorAnalysis from '@/components/GoogleSlidesCompetitorAnalysis';
 import NotionStrategyDocumentation from '@/components/NotionStrategyDocumentation';
 import SalesforceOpportunitySync from '@/components/SalesforceOpportunitySync';
+import MarketIntelligenceAnalyzer from '@/components/MarketIntelligenceAnalyzer';
+import CompetitorAnalysisModule from '@/components/CompetitorAnalysisModule';
+import MarketReportGenerator from '@/components/MarketReportGenerator';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1217,8 +1220,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* 11. ANÁLISE DE MERCADO E NOTÍCIAS DO SETOR */}
         <MarketNewsAnalyzer client={client} />
 
-        {/* 12. INTELIGÊNCIA COMPETITIVA */}
-        <CompetitorIntelligenceAI client={client} />
+        {/* 12. INTELIGÊNCIA COMPETITIVA - VERSÃO NOVA */}
+        <MarketIntelligenceAnalyzer client={client} />
+
+        {/* 12.5 ANÁLISE DE CONCORRENTES - MÓDULO NOVO */}
+        <CompetitorAnalysisModule client={client} />
+
+        {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
+        <MarketReportGenerator client={client} marketData={null} competitorData={null} />
 
         {/* 13. ANÁLISE REGIONAL ULTRA-PROFUNDA */}
         <UltraDeepMarketIntelligence 
