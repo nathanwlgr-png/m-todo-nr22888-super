@@ -131,6 +131,7 @@ import ProactiveAISalesAssistant from '@/components/ProactiveAISalesAssistant';
 import ProactiveCommunicationEngine from '@/components/ProactiveCommunicationEngine';
 import QuickCommunicationActions from '@/components/QuickCommunicationActions';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
+import AIFollowUpGenerator from '@/components/AIFollowUpGenerator';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1266,6 +1267,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Client Health Score */}
         <ClientHealthScore client={client} />
+
+        {/* AI Follow-Up Sequence Generator */}
+        <AIFollowUpGenerator client={client} />
 
         {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
         <AdvancedClientAnalytics 
