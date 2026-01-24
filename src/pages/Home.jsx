@@ -43,6 +43,9 @@ import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
 import CoachingDashboard from '@/components/CoachingDashboard';
 import WhatsAppMasterAssistant from '@/components/WhatsAppMasterAssistant';
 import BrazilCitiesMap from '@/components/BrazilCitiesMap';
+import ClientSearchBar from '@/components/ClientSearchBar';
+import CompleteClientAnalysis from '@/components/CompleteClientAnalysis';
+import DictionTrainer from '@/components/DictionTrainer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -249,6 +252,21 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* BARRA DE BUSCA DE CLIENTE */}
+        <ClientSearchBar 
+          clients={clients} 
+          onSelectClient={setSelectedClientForAnalysis}
+          selectedClient={selectedClientForAnalysis}
+        />
+
+        {/* ANÁLISE COMPLETA DO CLIENTE - PRIMEIRO BOTÃO PRINCIPAL */}
+        {selectedClientForAnalysis && (
+          <CompleteClientAnalysis client={selectedClientForAnalysis} />
+        )}
+
+        {/* TREINADOR DE DICÇÃO */}
+        <DictionTrainer />
+
         {/* ASSISTENTE IA WHATSAPP MASTER */}
         <WhatsAppMasterAssistant />
 
