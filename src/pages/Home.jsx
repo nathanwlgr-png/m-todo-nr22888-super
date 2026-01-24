@@ -42,7 +42,7 @@ import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
 import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
 import CoachingDashboard from '@/components/CoachingDashboard';
 import WhatsAppMasterAssistant from '@/components/WhatsAppMasterAssistant';
-import ResetSystemData from '@/components/ResetSystemData';
+import BrazilCitiesMap from '@/components/BrazilCitiesMap';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -249,11 +249,11 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
-        {/* LIMPAR DADOS DE TESTE - PRODUÇÃO */}
-        {user?.role === 'admin' && <ResetSystemData />}
-
         {/* ASSISTENTE IA WHATSAPP MASTER */}
         <WhatsAppMasterAssistant />
+
+        {/* MAPA DO BRASIL - PLANEJADOR DE ROTAS */}
+        <BrazilCitiesMap selectedClients={clients} />
 
         {/* GAMIFICAÇÃO */}
         <GamificationSystem compact={true} />
