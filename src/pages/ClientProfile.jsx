@@ -136,6 +136,7 @@ import PipelineActionRecommender from '@/components/PipelineActionRecommender';
 import SalesCoachingAnalyzer from '@/components/SalesCoachingAnalyzer';
 import GoogleSlidesCompetitorAnalysis from '@/components/GoogleSlidesCompetitorAnalysis';
 import NotionStrategyDocumentation from '@/components/NotionStrategyDocumentation';
+import SalesforceOpportunitySync from '@/components/SalesforceOpportunitySync';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1286,6 +1287,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Notion - Documentação de Estratégias */}
         <NotionStrategyDocumentation client={client} />
+
+        {/* Salesforce - Criar Oportunidade */}
+        <SalesforceOpportunitySync client={client} />
 
         {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
         <AdvancedClientAnalytics 
