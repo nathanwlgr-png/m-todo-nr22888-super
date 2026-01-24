@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, BookOpen, Microscope, Activity, TrendingUp } from 'lucide-react';
+import { FileText, Download, BookOpen, Microscope, Activity, TrendingUp, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { base44 } from '@/api/base44Client';
 
 export default function TechnicalMaterialsHub() {
   const [generating, setGenerating] = useState(null);
