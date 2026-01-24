@@ -5,6 +5,7 @@ import { User, Building2, ThermometerSun, ChevronRight, MessageCircle, MoreVerti
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ClientDetailsModal from './ClientDetailsModal';
+import AIMetricsBadges from './AIMetricsBadges';
 import { toast } from 'sonner';
 
 const statusColors = {
@@ -146,6 +147,9 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
                        client.ai_segment === 'At Risk' ? '⚠️' : '📊'} {client.ai_segment}
                     </Badge>
                   )}
+                  
+                  {/* AI Metrics - Compact */}
+                  <AIMetricsBadges client={client} variant="compact" />
                 </div>
                 {client.purchase_score && (
                   <div className="text-xs text-slate-400">
