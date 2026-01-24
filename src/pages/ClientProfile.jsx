@@ -128,6 +128,9 @@ import UltraDeepMarketIntelligence from '@/components/UltraDeepMarketIntelligenc
 import AutoFollowUpEmailGenerator from '@/components/AutoFollowUpEmailGenerator';
 import DynamicPurchasePropensityScore from '@/components/DynamicPurchasePropensityScore';
 import ProactiveAISalesAssistant from '@/components/ProactiveAISalesAssistant';
+import ProactiveCommunicationEngine from '@/components/ProactiveCommunicationEngine';
+import QuickCommunicationActions from '@/components/QuickCommunicationActions';
+import AIMetricsBadges from '@/components/AIMetricsBadges';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -662,6 +665,15 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
       <div className="px-6 -mt-16 space-y-4">
         {/* Collaboration Indicator */}
         <CollaborationIndicator contextType="client" contextId={clientId} />
+
+        {/* AI Metrics Badges - Destaque */}
+        <AIMetricsBadges client={client} variant="full" />
+
+        {/* Quick Communication Actions */}
+        <QuickCommunicationActions client={client} />
+
+        {/* Proactive Communication Engine */}
+        <ProactiveCommunicationEngine clientId={clientId} />
 
         {/* Score do Cliente */}
         <ClientScoreCard clientId={clientId} />
