@@ -592,6 +592,9 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         
         Tom: ${client?.client_tone || 'profissional equilibrado'}
         Foco em conversão imediata.`,
+      autoTasks: async () => {
+        await handleAutoCreateTasks();
+      },
       insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
 
 ANÁLISE PROFUNDA DO CLIENTE: ${client?.first_name}
@@ -746,6 +749,104 @@ Seja prático e direto ao ponto.`
     }
   };
 
+  const createTasksMutation = useMutation({
+    mutationFn: (tasks) => Promise.all(
+      tasks.map(task => base44.entities.Task.create(task))
+    ),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['client-tasks']);
+      toast.success('Tarefas criadas com sucesso!');
+    }
+  });
+
+  const handleAutoCreateTasks = async () => {
+    if (!selectedClientId || !client) {
+      toast.error('Selecione um cliente primeiro');
+      return;
+    }
+
+    setQuickLoading(prev => ({ ...prev, autoTasks: true }));
+
+    try {
+      const prompt = `Você é um assistente de automação de tarefas. Analise o cliente e crie 3-5 tarefas CONCRETAS e ACIONÁVEIS.
+
+CLIENTE: ${client.first_name}
+Status: ${client.status} | Score: ${client.purchase_score}%
+Tipo: ${client.client_type}
+Visitas: ${visits.length}
+Última visita: ${client.last_visit_date || 'Nenhuma'}
+Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
+Equipamento: ${client.current_equipment || 'Nenhum'}
+
+Crie tarefas no formato JSON:
+{
+  "tasks": [
+    {
+      "title": "Título curto e claro",
+      "description": "Descrição detalhada do que fazer",
+      "type": "follow_up" | "ligacao" | "email" | "visita",
+      "priority": "baixa" | "media" | "alta",
+      "due_days": 1-30 (dias a partir de hoje)
+    }
+  ]
+}
+
+Tarefas devem:
+- Ser específicas para este cliente
+- Ter objetivo claro (agendar, enviar, fechar)
+- Incluir timing estratégico
+- Estar alinhadas com perfil numerológico ${client.numerology_number}`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            tasks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  description: { type: "string" },
+                  type: { type: "string" },
+                  priority: { type: "string" },
+                  due_days: { type: "number" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const tasksToCreate = result.tasks.map(task => ({
+        client_id: selectedClientId,
+        client_name: client.first_name,
+        title: task.title,
+        description: task.description,
+        type: task.type,
+        priority: task.priority,
+        due_date: new Date(Date.now() + task.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: 'pendente',
+        auto_created: true
+      }));
+
+      await createTasksMutation.mutateAsync(tasksToCreate);
+      
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `✅ **${tasksToCreate.length} Tarefas Criadas Automaticamente**\n\n${tasksToCreate.map((t, i) => 
+          `${i + 1}. **${t.title}** (${t.type})\n   ⏰ ${t.due_date} | Prioridade: ${t.priority}\n   📝 ${t.description}`
+        ).join('\n\n')}`
+      }]);
+
+    } catch (error) {
+      toast.error('Erro ao criar tarefas: ' + error.message);
+    } finally {
+      setQuickLoading(prev => ({ ...prev, autoTasks: false }));
+    }
+  };
+
   const handleSaveAndContinue = () => {
     if (messages.length > 2) {
       // Extract insights from conversation
@@ -755,7 +856,7 @@ Seja prático e direto ao ponto.`
         last_visit_date: new Date().toISOString().split('T')[0]
       });
     }
-    alert('Conversa salva com sucesso!');
+    toast.success('Conversa salva com sucesso!');
   };
 
   const scriptLabels = {
@@ -768,7 +869,8 @@ Seja prático e direto ao ponto.`
     closing: 'Fechamento',
     needs: 'Previsão de Necessidades',
     followup: 'Follow-up',
-    suggestTasks: 'Sugestão de Tarefas'
+    suggestTasks: 'Sugestão de Tarefas',
+    autoTasks: 'Tarefas Criadas'
   };
 
   return (
@@ -983,6 +1085,13 @@ Seja prático e direto ao ponto.`
             onClick={() => generateQuickAction('suggestTasks')}
             loading={quickLoading.suggestTasks}
             className="shrink-0 bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100"
+          />
+          <QuickActionButton
+            icon={Zap}
+            label="🤖 Criar Tarefas Auto"
+            onClick={handleAutoCreateTasks}
+            loading={quickLoading.autoTasks}
+            className="shrink-0 bg-gradient-to-r from-fuchsia-50 to-purple-50 border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-100 font-bold"
           />
         </div>
       </div>

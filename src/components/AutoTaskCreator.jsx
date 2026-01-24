@@ -1,49 +1,109 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card } from "@/components/ui/card";
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckSquare, Zap } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle2, Calendar, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function AutoTaskCreator({ client, interactions = [], sales = [], visits = [] }) {
-  const [tasks, setTasks] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
+export default function AutoTaskCreator({ clientId }) {
+  const queryClient = useQueryClient();
+  const [generating, setGenerating] = useState(false);
+  const [generatedTasks, setGeneratedTasks] = useState(null);
 
-  const generateTasks = async () => {
-    setLoading(true);
+  const { data: client } = useQuery({
+    queryKey: ['client', clientId],
+    queryFn: async () => {
+      const clients = await base44.entities.Client.list();
+      return clients.find(c => c.id === clientId);
+    },
+    enabled: !!clientId
+  });
+
+  const { data: visits = [] } = useQuery({
+    queryKey: ['client-visits', clientId],
+    queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['client-tasks', clientId],
+    queryFn: () => base44.entities.Task.filter({ client_id: clientId }),
+    enabled: !!clientId
+  });
+
+  const createTasksMutation = useMutation({
+    mutationFn: (tasksData) => Promise.all(
+      tasksData.map(task => base44.entities.Task.create(task))
+    ),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['client-tasks']);
+      toast.success('Tarefas criadas com sucesso!');
+      setGeneratedTasks(null);
+    }
+  });
+
+  const handleGenerateTasks = async () => {
+    if (!client) return;
+
+    setGenerating(true);
+
     try {
-      const daysSinceLastInteraction = interactions.length > 0 ?
-        Math.floor((Date.now() - new Date(interactions[0].created_date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+      const prompt = `Analise o cliente e crie 3-5 tarefas CONCRETAS e ESTRATÉGICAS.
 
-      const prompt = `Crie tarefas e lembretes INTELIGENTES baseados nas previsões da IA para este cliente.
+═══════════════════════════════════════
+📊 DADOS DO CLIENTE
+═══════════════════════════════════════
+Nome: ${client.first_name}
+Clínica: ${client.clinic_name || 'N/A'}
+Status: ${client.status} | Score: ${client.purchase_score}%
+Tipo: ${client.client_type}
+Decisor: ${client.decision_role}
 
-CLIENTE: ${client.first_name}
-Status: ${client.status} | Pipeline: ${client.pipeline_stage || 'lead'}
-Health: ${client.health_score || 50}% | Churn Risk: ${client.ai_sales_intelligence?.churn_risk || 0}%
-LTV: R$ ${(client.ltv_estimate || 0).toLocaleString('pt-BR')}
-Última interação: ${daysSinceLastInteraction} dias
+═══════════════════════════════════════
+🧠 PERFIL COMPORTAMENTAL
+═══════════════════════════════════════
+Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
+Estilo Decisão: ${client.decision_style}
+Tom: ${client.client_tone || 'Não observado'}
 
-HISTÓRICO:
-- Vendas: ${sales.length}
-- Visitas: ${visits.length}
-- Interações: ${interactions.length}
+═══════════════════════════════════════
+📈 HISTÓRICO
+═══════════════════════════════════════
+Visitas: ${visits.length} realizadas
+Última visita: ${client.last_visit_date || 'Nenhuma'}
+Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
+Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
+Equipamento atual: ${client.current_equipment || 'Nenhum'}
+Interesse: ${client.equipment_interest || 'Não definido'}
 
-Com base em:
-1. Churn risk e health score
-2. LTV e potencial
-3. Pipeline stage
-4. Tempo desde última interação
+═══════════════════════════════════════
+🎯 CRIE TAREFAS NO FORMATO JSON
+═══════════════════════════════════════
 
-CRIE 3-5 TAREFAS ACIONÁVEIS:
-- Título claro
-- Descrição com contexto
-- Prioridade (alta/media/baixa)
-- Tipo (ligacao/email/visita/follow_up)
-- Prazo sugerido (dias a partir de hoje)
+{
+  "tasks": [
+    {
+      "title": "Título curto e acionável",
+      "description": "Descrição detalhada incluindo EXATAMENTE o que fazer, quando fazer e como fazer",
+      "type": "follow_up" | "ligacao" | "email" | "visita",
+      "priority": "baixa" | "media" | "alta",
+      "due_days": 1-30,
+      "reasoning": "Por que esta tarefa é importante agora"
+    }
+  ]
+}
 
-Seja ESPECÍFICO e ACIONÁVEL.`;
+REGRAS:
+1. Tarefas devem ser ESPECÍFICAS para este cliente
+2. Adaptar ao perfil numerológico ${client.numerology_number}
+3. Timing estratégico baseado no status ${client.status}
+4. Próximo passo lógico na jornada de vendas
+5. Incluir detalhes acionáveis (o que enviar, quando ligar, etc)
+6. Priorizar baseado em score ${client.purchase_score}%
+
+Retorne apenas JSON válido.`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -57,10 +117,10 @@ Seja ESPECÍFICO e ACIONÁVEL.`;
                 properties: {
                   title: { type: "string" },
                   description: { type: "string" },
-                  priority: { type: "string", enum: ["alta", "media", "baixa"] },
-                  type: { type: "string", enum: ["ligacao", "email", "visita", "follow_up", "outro"] },
+                  type: { type: "string" },
+                  priority: { type: "string" },
                   due_days: { type: "number" },
-                  reason: { type: "string" }
+                  reasoning: { type: "string" }
                 }
               }
             }
@@ -68,124 +128,141 @@ Seja ESPECÍFICO e ACIONÁVEL.`;
         }
       });
 
-      setTasks(result.tasks);
+      setGeneratedTasks(result.tasks || []);
     } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro ao gerar tarefas');
+      toast.error('Erro ao gerar tarefas: ' + error.message);
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
-  const createAllTasks = async () => {
-    setCreating(true);
-    try {
-      for (const task of tasks) {
-        const dueDate = new Date(Date.now() + task.due_days * 24 * 60 * 60 * 1000);
-        
-        await base44.entities.Task.create({
-          client_id: client.id,
-          client_name: client.first_name,
-          title: task.title,
-          description: `${task.description}\n\n💡 Motivo: ${task.reason}`,
-          priority: task.priority,
-          type: task.type,
-          due_date: dueDate.toISOString().split('T')[0],
-          auto_created: true
-        });
+  const handleCreateTasks = async () => {
+    const tasksToCreate = generatedTasks.map(task => ({
+      client_id: clientId,
+      client_name: client.first_name,
+      title: task.title,
+      description: task.description,
+      type: task.type,
+      priority: task.priority,
+      due_date: new Date(Date.now() + task.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'pendente',
+      auto_created: true
+    }));
 
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-
-      toast.success(`${tasks.length} tarefas criadas automaticamente!`);
-      setTasks(null);
-    } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro ao criar tarefas');
-    } finally {
-      setCreating(false);
-    }
+    await createTasksMutation.mutateAsync(tasksToCreate);
   };
 
-  if (!tasks) {
-    return (
-      <Card className="p-4 bg-gradient-to-r from-green-600 to-emerald-600 border-none text-white shadow-lg">
-        <div className="flex items-start gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-            <CheckSquare className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold mb-1">✅ Tarefas Automáticas IA</h3>
-            <p className="text-xs text-white/80">Baseado em previsões e health score</p>
-          </div>
-        </div>
-        <Button
-          onClick={generateTasks}
-          disabled={loading}
-          className="w-full h-10 bg-white text-green-700 hover:bg-white/90 font-bold"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Gerar Tarefas IA'}
-        </Button>
-      </Card>
-    );
-  }
+  const priorityColors = {
+    alta: 'bg-red-100 text-red-700 border-red-300',
+    media: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+    baixa: 'bg-blue-100 text-blue-700 border-blue-300'
+  };
+
+  const typeIcons = {
+    follow_up: '🔄',
+    ligacao: '📞',
+    email: '📧',
+    visita: '🚗',
+    outro: '📋'
+  };
+
+  if (!client) return null;
 
   return (
-    <Card className="p-4 bg-white shadow-lg border-2 border-green-200">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-          <CheckSquare className="w-5 h-5 text-green-600" />
-          Tarefas Sugeridas pela IA
-        </h3>
-        <Badge className="bg-green-600 text-white">{tasks.length} tarefas</Badge>
-      </div>
-
-      <div className="space-y-2 mb-3">
-        {tasks.map((task, i) => (
-          <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-            <div className="flex items-start justify-between mb-1">
-              <p className="font-semibold text-sm text-slate-800">{task.title}</p>
-              <Badge className={
-                task.priority === 'alta' ? 'bg-red-500 text-white' :
-                task.priority === 'media' ? 'bg-orange-500 text-white' :
-                'bg-blue-500 text-white'
-              }>
-                {task.priority}
-              </Badge>
-            </div>
-            <p className="text-xs text-slate-600 mb-2">{task.description}</p>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <span className="bg-slate-200 px-2 py-1 rounded">{task.type}</span>
-              <span>•</span>
-              <span>📅 {task.due_days} dia{task.due_days !== 1 ? 's' : ''}</span>
-            </div>
-            <p className="text-xs text-green-700 mt-1">💡 {task.reason}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
+    <Card className="p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 border-2 border-purple-300">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-bold text-purple-900 flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
+            Automação de Tarefas IA
+          </h3>
+          <p className="text-xs text-purple-600">Tarefas personalizadas para {client.first_name}</p>
+        </div>
         <Button
-          onClick={createAllTasks}
-          disabled={creating}
-          className="bg-green-600 hover:bg-green-700 text-white"
+          onClick={handleGenerateTasks}
+          disabled={generating || generatedTasks}
+          size="sm"
+          className="bg-purple-600 hover:bg-purple-700"
         >
-          {creating ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+          {generating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+              Analisando...
+            </>
           ) : (
             <>
-              <Zap className="w-4 h-4 mr-1" />
-              Criar Todas
+              <Sparkles className="w-4 h-4 mr-1" />
+              Gerar Tarefas
             </>
           )}
         </Button>
-        <Button
-          onClick={() => setTasks(null)}
-          variant="outline"
-        >
-          Cancelar
-        </Button>
       </div>
+
+      {generatedTasks && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg p-3 border-2 border-purple-200">
+            <p className="text-xs font-semibold text-purple-900 mb-3">
+              {generatedTasks.length} tarefas geradas automaticamente
+            </p>
+            
+            <div className="space-y-2">
+              {generatedTasks.map((task, index) => (
+                <div key={index} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                  <div className="flex items-start gap-2 mb-2">
+                    <span className="text-lg">{typeIcons[task.type]}</span>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-slate-900">{task.title}</p>
+                      <p className="text-xs text-slate-600 mt-1">{task.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className={priorityColors[task.priority]}>
+                      {task.priority}
+                    </Badge>
+                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      Em {task.due_days} dias
+                    </span>
+                  </div>
+                  
+                  {task.reasoning && (
+                    <p className="text-xs text-purple-700 mt-2 italic">
+                      💡 {task.reasoning}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={handleCreateTasks}
+              disabled={createTasksMutation.isPending}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            >
+              {createTasksMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                  Criar Todas as Tarefas
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={() => setGeneratedTasks(null)}
+              variant="outline"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
