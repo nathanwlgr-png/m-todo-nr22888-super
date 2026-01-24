@@ -232,18 +232,36 @@ export default function Clients() {
     return filtered;
   }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits, sortBy]);
 
-  // Autocomplete suggestions
+  // Autocomplete suggestions - busca desde a primeira letra
   const handleSearchChange = (value) => {
     setSearch(value);
     
-    if (value.length >= 2) {
+    if (value.length >= 1) {
+      const searchLower = value.toLowerCase();
       const matches = clients
-        .filter(c => 
-          c.first_name?.toLowerCase().includes(value.toLowerCase()) ||
-          c.clinic_name?.toLowerCase().includes(value.toLowerCase()) ||
-          c.city?.toLowerCase().includes(value.toLowerCase())
-        )
-        .slice(0, 5)
+        .filter(c => {
+          // Busca em qualquer parte do nome, clínica ou cidade
+          const nameMatch = c.first_name?.toLowerCase().includes(searchLower);
+          const fullNameMatch = c.full_name?.toLowerCase().includes(searchLower);
+          const clinicMatch = c.clinic_name?.toLowerCase().includes(searchLower);
+          const cityMatch = c.city?.toLowerCase().includes(searchLower);
+          const cnpjMatch = c.cnpj?.includes(value);
+          const phoneMatch = c.phone?.includes(value);
+          
+          return nameMatch || fullNameMatch || clinicMatch || cityMatch || cnpjMatch || phoneMatch;
+        })
+        .sort((a, b) => {
+          // Priorizar matches que começam com a busca
+          const aStartsWith = a.first_name?.toLowerCase().startsWith(searchLower);
+          const bStartsWith = b.first_name?.toLowerCase().startsWith(searchLower);
+          if (aStartsWith && !bStartsWith) return -1;
+          if (!aStartsWith && bStartsWith) return 1;
+          
+          // Depois ordenar por status (quente primeiro)
+          const statusPriority = { quente: 3, morno: 2, frio: 1 };
+          return (statusPriority[b.status] || 0) - (statusPriority[a.status] || 0);
+        })
+        .slice(0, 8)
         .map(c => ({
           id: c.id,
           label: c.first_name,
@@ -568,10 +586,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input
-              placeholder="Buscar por nome do cliente ou clínica..."
+              placeholder="Buscar por nome, clínica, cidade, telefone..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 pr-10 h-12 rounded-xl border-2"
+              autoComplete="off"
             />
             {search && (
               <button

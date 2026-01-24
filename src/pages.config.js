@@ -2,6 +2,7 @@ import AIAssistant from './pages/AIAssistant';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
+import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
 import Calendar from './pages/Calendar';
@@ -74,6 +75,7 @@ import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
 import SalesCoaching from './pages/SalesCoaching';
 import SalesFunnel from './pages/SalesFunnel';
+import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
 import SignedContracts from './pages/SignedContracts';
@@ -89,8 +91,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
-import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -99,6 +99,7 @@ export const PAGES = {
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
+    "AutoFollowUpDashboard": AutoFollowUpDashboard,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
     "Calendar": Calendar,
@@ -171,6 +172,7 @@ export const PAGES = {
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
     "SalesCoaching": SalesCoaching,
     "SalesFunnel": SalesFunnel,
+    "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
     "SignedContracts": SignedContracts,
@@ -186,8 +188,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "SalesPerformanceDashboard": SalesPerformanceDashboard,
-    "AutoFollowUpDashboard": AutoFollowUpDashboard,
 }
 
 export const pagesConfig = {
