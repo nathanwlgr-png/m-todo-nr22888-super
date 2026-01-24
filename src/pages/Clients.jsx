@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
+import AIMetricsBadges from '@/components/AIMetricsBadges';
 import {
   Dialog,
   DialogContent,
