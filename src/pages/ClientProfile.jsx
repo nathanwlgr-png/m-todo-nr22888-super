@@ -133,6 +133,7 @@ import QuickCommunicationActions from '@/components/QuickCommunicationActions';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
 import AIFollowUpGenerator from '@/components/AIFollowUpGenerator';
 import PipelineActionRecommender from '@/components/PipelineActionRecommender';
+import SalesCoachingAnalyzer from '@/components/SalesCoachingAnalyzer';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1274,6 +1275,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* Pipeline Action Recommender - IA que sugere ações específicas */}
         <PipelineActionRecommender client={client} />
+
+        {/* Sales Coaching Analyzer - Análise de conversas */}
+        <SalesCoachingAnalyzer client={client} />
 
         {/* Análise Avançada IA - Resumo, Sentimento, Churn, Retenção */}
         <AdvancedClientAnalytics 

@@ -38,6 +38,7 @@ import GamificationSystem from '@/components/GamificationSystem';
 import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
 import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
 import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
+import CoachingDashboard from '@/components/CoachingDashboard';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -587,29 +588,52 @@ export default function Home() {
           <EnhancedPerformanceDashboard />
         </div>
 
+        {/* COACHING IA */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">🏆 Coaching IA</h3>
+          <CoachingDashboard compact={true} />
+        </div>
+
         {/* FERRAMENTAS EXTRAS */}
         <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Ferramentas</h3>
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            <Link to={createPageUrl('WhatsAppDataAccess')}>
-              <Button size="sm" className="w-full h-12 bg-green-600 hover:bg-green-700 flex-col">
-                <MessageSquare className="w-4 h-4 mb-1" />
-                <span className="text-xs">WhatsApp</span>
-              </Button>
-            </Link>
-            <Link to={createPageUrl('Tasks')}>
-              <Button size="sm" variant="outline" className="w-full h-12 flex-col">
-                <CheckCircle2 className="w-4 h-4 mb-1" />
-                <span className="text-xs">Tarefas</span>
-              </Button>
-            </Link>
-            <Link to={createPageUrl('AIAssistant')}>
-              <Button size="sm" className="w-full h-12 bg-purple-600 hover:bg-purple-700 flex-col">
-                <Sparkles className="w-4 h-4 mb-1" />
-                <span className="text-xs">IA</span>
-              </Button>
-            </Link>
-          </div>
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Ferramentas</h3>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <Link to={createPageUrl('WhatsAppDataAccess')}>
+            <Button size="sm" className="w-full h-12 bg-green-600 hover:bg-green-700 flex-col">
+              <MessageSquare className="w-4 h-4 mb-1" />
+              <span className="text-xs">WhatsApp</span>
+            </Button>
+          </Link>
+          <Link to={createPageUrl('Tasks')}>
+            <Button size="sm" variant="outline" className="w-full h-12 flex-col">
+              <CheckCircle2 className="w-4 h-4 mb-1" />
+              <span className="text-xs">Tarefas</span>
+            </Button>
+          </Link>
+          <Link to={createPageUrl('AIAssistant')}>
+            <Button size="sm" className="w-full h-12 bg-purple-600 hover:bg-purple-700 flex-col">
+              <Sparkles className="w-4 h-4 mb-1" />
+              <span className="text-xs">IA</span>
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <Link to={createPageUrl('RouteOptimizer')}>
+            <Button size="sm" variant="outline" className="w-full h-12 flex-col border-blue-300">
+              <svg className="w-4 h-4 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <span className="text-xs">Rotas IA</span>
+            </Button>
+          </Link>
+          <Link to={createPageUrl('SalesCoaching')}>
+            <Button size="sm" variant="outline" className="w-full h-12 flex-col border-purple-300">
+              <Award className="w-4 h-4 mb-1" />
+              <span className="text-xs">Coaching</span>
+            </Button>
+          </Link>
+        </div>
 
           {/* Stock & Forecast */}
           <div className="space-y-3">
