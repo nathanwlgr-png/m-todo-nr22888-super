@@ -751,6 +751,21 @@ export default function Home() {
               </div>
             </Card>
           </Link>
+
+          {/* Client Document Center */}
+          <Link to={createPageUrl('ClientDocumentCenter')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-300">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-indigo-900">📚 Documentos Clientes</p>
+                  <p className="text-xs text-indigo-600">Upload + Busca IA + Envio</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
           </div>
 
         {/* SEGMENTAÇÃO INTELIGENTE */}
