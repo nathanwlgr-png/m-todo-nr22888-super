@@ -1,4 +1,5 @@
 import AIAssistant from './pages/AIAssistant';
+import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutomationManager from './pages/AutomationManager';
@@ -9,6 +10,7 @@ import CampaignDetails from './pages/CampaignDetails';
 import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
 import Campaigns from './pages/Campaigns';
 import CaptureLeads from './pages/CaptureLeads';
+import ClientDashboard from './pages/ClientDashboard';
 import ClientProfile from './pages/ClientProfile';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
@@ -44,6 +46,10 @@ import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
+import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
+import MobVendedorBackup from './pages/MobVendedorBackup';
+import MobVendedorDashboard from './pages/MobVendedorDashboard';
+import MobiMigration from './pages/MobiMigration';
 import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
 import NewCampaign from './pages/NewCampaign';
@@ -81,17 +87,13 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import MobVendedorDashboard from './pages/MobVendedorDashboard';
-import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
-import ClientDashboard from './pages/ClientDashboard';
-import MobVendedorBackup from './pages/MobVendedorBackup';
-import MobiMigration from './pages/MobiMigration';
-import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
+import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
     "AutomationManager": AutomationManager,
@@ -102,6 +104,7 @@ export const PAGES = {
     "CampaignTemplatesDemo": CampaignTemplatesDemo,
     "Campaigns": Campaigns,
     "CaptureLeads": CaptureLeads,
+    "ClientDashboard": ClientDashboard,
     "ClientProfile": ClientProfile,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
@@ -137,6 +140,10 @@ export const PAGES = {
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
     "MarketResearch": MarketResearch,
+    "MobVendedorAnalytics": MobVendedorAnalytics,
+    "MobVendedorBackup": MobVendedorBackup,
+    "MobVendedorDashboard": MobVendedorDashboard,
+    "MobiMigration": MobiMigration,
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
     "NewCampaign": NewCampaign,
@@ -174,12 +181,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "MobVendedorDashboard": MobVendedorDashboard,
-    "MobVendedorAnalytics": MobVendedorAnalytics,
-    "ClientDashboard": ClientDashboard,
-    "MobVendedorBackup": MobVendedorBackup,
-    "MobiMigration": MobiMigration,
-    "AdvancedFunnelManager": AdvancedFunnelManager,
+    "TechnicalMaterialsHub": TechnicalMaterialsHub,
 }
 
 export const pagesConfig = {
