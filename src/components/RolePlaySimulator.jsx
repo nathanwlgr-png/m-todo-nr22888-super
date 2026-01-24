@@ -192,8 +192,27 @@ Responda em 1-3 frases CURTAS.`
     }
   };
 
-  const endSession = () => {
+  const endSession = async () => {
     if (messages.length > 4) {
+      // Salvar sessão
+      try {
+        await base44.entities.RolePlaySession.create({
+          profile_id: selectedProfile.id,
+          profile_name: selectedProfile.name,
+          messages: messages.map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: new Date().toISOString()
+          })),
+          final_score: sessionScore,
+          duration_minutes: Math.round((messages.length * 2) / 60),
+          techniques_identified: [...new Set(realtimeFeedback.flatMap(f => f.techniques_used || []))],
+          feedback_summary: realtimeFeedback.length > 0 ? realtimeFeedback[realtimeFeedback.length - 1].improvement : '',
+          completed: true
+        });
+      } catch (error) {
+        console.error('Erro ao salvar sessão:', error);
+      }
       toast.success(`Sessão finalizada! Score: ${sessionScore}/100`);
     }
     setSelectedProfile(null);

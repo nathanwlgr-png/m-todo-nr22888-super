@@ -24,12 +24,9 @@ export default function WeeklyChallengesSystem() {
     queryKey: ['weekly-challenges'],
     queryFn: async () => {
       try {
-        const allChallenges = await base44.entities.CoachingSession.filter({
-          is_challenge: true
-        });
-        return allChallenges;
+        return await base44.entities.WeeklyChallenge.list('-created_date', 50);
       } catch (error) {
-        // Caso a entidade não tenha esse campo ainda, retorna array vazio
+        console.error('Erro ao carregar desafios:', error);
         return [];
       }
     }
@@ -92,14 +89,10 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
 
       // Salvar desafios
       for (const challenge of result.challenges) {
-        await base44.entities.CoachingSession.create({
-          client_name: 'Sistema de Desafios',
-          conversation_type: 'challenge',
-          is_challenge: true,
-          challenge_data: JSON.stringify(challenge),
-          overall_score: 0,
-          completed: false,
-          week_number: getWeekNumber()
+        await base44.entities.WeeklyChallenge.create({
+          ...challenge,
+          week_number: getWeekNumber(),
+          completed: false
         });
       }
 
@@ -114,15 +107,15 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
     }
   };
 
-  const markChallengeComplete = async (challengeId, challengeData) => {
+  const markChallengeComplete = async (challengeId, points) => {
     try {
-      await base44.entities.CoachingSession.update(challengeId, {
+      await base44.entities.WeeklyChallenge.update(challengeId, {
         completed: true,
         completed_date: new Date().toISOString()
       });
 
       queryClient.invalidateQueries(['weekly-challenges']);
-      toast.success(`+${JSON.parse(challengeData).points} pontos! 🎉`);
+      toast.success(`+${points} pontos! 🎉`);
     } catch (error) {
       toast.error('Erro ao completar desafio');
     }
@@ -135,25 +128,13 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   };
 
-  const currentWeekChallenges = challenges.filter(c => {
-    try {
-      const data = JSON.parse(c.challenge_data || '{}');
-      return c.week_number === getWeekNumber() || !c.week_number;
-    } catch {
-      return true;
-    }
-  });
+  const currentWeekChallenges = challenges.filter(c => 
+    c.week_number === getWeekNumber() || !c.week_number
+  );
 
   const totalPointsThisWeek = currentWeekChallenges
     .filter(c => c.completed)
-    .reduce((acc, c) => {
-      try {
-        const data = JSON.parse(c.challenge_data || '{}');
-        return acc + (data.points || 0);
-      } catch {
-        return acc;
-      }
-    }, 0);
+    .reduce((acc, c) => acc + (c.points || 0), 0);
 
   if (isLoading) {
     return null;
@@ -234,13 +215,6 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
           <>
             <div className="space-y-3">
               {currentWeekChallenges.map((challenge) => {
-                let challengeData;
-                try {
-                  challengeData = JSON.parse(challenge.challenge_data || '{}');
-                } catch {
-                  return null;
-                }
-
                 const difficultyColors = {
                   'Fácil': 'bg-green-100 text-green-700 border-green-300',
                   'Médio': 'bg-yellow-100 text-yellow-700 border-yellow-300',
@@ -264,32 +238,32 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
                           ) : (
                             <Target className="w-5 h-5 text-orange-600" />
                           )}
-                          <h3 className="font-bold text-gray-900">{challengeData.title}</h3>
+                          <h3 className="font-bold text-gray-900">{challenge.title}</h3>
                         </div>
-                        <p className="text-sm text-gray-700 mb-2">{challengeData.description}</p>
+                        <p className="text-sm text-gray-700 mb-2">{challenge.description}</p>
                       </div>
-                      <Badge className={difficultyColors[challengeData.difficulty]}>
-                        {challengeData.difficulty}
+                      <Badge className={difficultyColors[challenge.difficulty]}>
+                        {challenge.difficulty}
                       </Badge>
                     </div>
 
                     <div className="space-y-2 text-xs mb-3">
                       <div className="p-2 bg-blue-50 rounded border border-blue-200">
                         <p className="text-blue-800">
-                          <strong>Meta:</strong> {challengeData.target_metric}
+                          <strong>Meta:</strong> {challenge.target_metric}
                         </p>
                       </div>
                       <div className="p-2 bg-purple-50 rounded border border-purple-200">
                         <p className="text-purple-800">
-                          <strong>Sucesso:</strong> {challengeData.success_criteria}
+                          <strong>Sucesso:</strong> {challenge.success_criteria}
                         </p>
                       </div>
                     </div>
 
-                    {challengeData.tips?.length > 0 && !challenge.completed && (
+                    {challenge.tips?.length > 0 && !challenge.completed && (
                       <div className="mb-3 space-y-1">
                         <p className="text-xs font-semibold text-gray-600">💡 Dicas:</p>
-                        {challengeData.tips.map((tip, idx) => (
+                        {challenge.tips.map((tip, idx) => (
                           <p key={idx} className="text-xs text-gray-600">• {tip}</p>
                         ))}
                       </div>
@@ -299,12 +273,12 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
                       <div className="flex items-center gap-2">
                         <Trophy className="w-4 h-4 text-orange-600" />
                         <span className="text-sm font-bold text-orange-600">
-                          {challengeData.points} pontos
+                          {challenge.points} pontos
                         </span>
                       </div>
                       {!challenge.completed && (
                         <Button
-                          onClick={() => markChallengeComplete(challenge.id, challenge.challenge_data)}
+                          onClick={() => markChallengeComplete(challenge.id, challenge.points)}
                           size="sm"
                           className="bg-orange-600 hover:bg-orange-700"
                         >
