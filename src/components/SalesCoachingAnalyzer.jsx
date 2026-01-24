@@ -20,6 +20,7 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [expandedMoments, setExpandedMoments] = useState(false);
+  const [highlightedTranscript, setHighlightedTranscript] = useState('');
 
   const analyzeConversation = async (text = transcript) => {
     if (!text.trim()) {
@@ -36,6 +37,10 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
       });
 
       setAnalysis(result.analysis);
+      
+      // Destacar técnicas na transcrição
+      await highlightTechniques(text);
+      
       queryClient.invalidateQueries(['coaching-sessions']);
       toast.success('Análise completa!');
     } catch (error) {
@@ -43,6 +48,33 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
       toast.error('Erro ao analisar: ' + error.message);
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const highlightTechniques = async (text) => {
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise esta transcrição de vendas e identifique TÉCNICAS DE VENDAS usadas.
+
+TRANSCRIÇÃO:
+${text}
+
+Retorne o texto original COM MARCAÇÕES das técnicas:
+- [SPIN-S] para perguntas de Situação
+- [SPIN-P] para perguntas de Problema
+- [SPIN-I] para perguntas de Implicação
+- [SPIN-N] para perguntas de Necessidade
+- [SOCIAL-PROOF] para prova social
+- [SCARCITY] para escassez
+- [RECIPROCITY] para reciprocidade
+- [OBJECTION] para controle de objeção
+
+Retorne o texto EXATO com as marcações inseridas.`,
+      });
+
+      setHighlightedTranscript(result);
+    } catch (error) {
+      console.error('Erro ao destacar:', error);
     }
   };
 
@@ -108,6 +140,20 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
                 rows={8}
                 className="text-sm"
               />
+              <div className="flex gap-2 text-xs text-gray-600 flex-wrap">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-blue-200"></div>
+                  <span>SPIN</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-purple-200"></div>
+                  <span>Prova Social</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-orange-200"></div>
+                  <span>Objeção</span>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -143,6 +189,27 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
           </>
         ) : (
           <div className="space-y-4">
+            {/* Transcrição Destacada */}
+            {highlightedTranscript && (
+              <div className="p-3 bg-white rounded-lg border-2 border-purple-200">
+                <p className="text-xs font-semibold text-purple-700 mb-2">
+                  🎯 TRANSCRIÇÃO COM TÉCNICAS DESTACADAS
+                </p>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto leading-relaxed">
+                  {highlightedTranscript.split(/(\[.*?\])/g).map((part, idx) => {
+                    if (part.startsWith('[SPIN-')) {
+                      return <span key={idx} className="bg-blue-200 px-1 rounded font-semibold">{part}</span>;
+                    } else if (part.includes('SOCIAL-PROOF') || part.includes('SCARCITY') || part.includes('RECIPROCITY')) {
+                      return <span key={idx} className="bg-purple-200 px-1 rounded font-semibold">{part}</span>;
+                    } else if (part.includes('OBJECTION')) {
+                      return <span key={idx} className="bg-orange-200 px-1 rounded font-semibold">{part}</span>;
+                    }
+                    return <span key={idx}>{part}</span>;
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Score Geral */}
             <div className="p-4 bg-white rounded-xl border-2 border-purple-200">
               <div className="flex items-center justify-between mb-2">
