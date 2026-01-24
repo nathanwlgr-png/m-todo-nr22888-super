@@ -90,6 +90,7 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
+import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -186,6 +187,7 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
+    "AutoFollowUpDashboard": AutoFollowUpDashboard,
 }
 
 export const pagesConfig = {
