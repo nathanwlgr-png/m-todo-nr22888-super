@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, TrendingUp, DollarSign, Target, Users, Sparkles } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, TrendingUp, DollarSign, Target, Users, Sparkles, Trophy, Award, Zap, Crown, Medal, Star, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -20,6 +21,16 @@ export default function SalesPerformanceDashboard() {
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
     queryFn: () => base44.entities.Sale.list()
+  });
+
+  const { data: salesPoints = [] } = useQuery({
+    queryKey: ['salesPoints'],
+    queryFn: () => base44.entities.SalesPoints.list()
+  });
+
+  const { data: salesGoals = [] } = useQuery({
+    queryKey: ['salesGoals'],
+    queryFn: () => base44.entities.SalesGoal.filter({ status: 'active' })
   });
 
   // Calcular métricas agregadas
@@ -83,6 +94,31 @@ export default function SalesPerformanceDashboard() {
     .sort((a, b) => (b.expected_value * b.probability) - (a.expected_value * a.probability))
     .slice(0, 10);
 
+  // Gamification: Leaderboard
+  const leaderboard = [...salesPoints]
+    .sort((a, b) => b.total_points - a.total_points)
+    .slice(0, 10);
+
+  // Badge definitions
+  const badgeIcons = {
+    'Novato': { icon: Star, color: 'text-gray-400' },
+    'Explorador': { icon: Target, color: 'text-blue-500' },
+    'Conquistador': { icon: Award, color: 'text-green-500' },
+    'Mestre': { icon: Medal, color: 'text-purple-500' },
+    'Lenda': { icon: Crown, color: 'text-yellow-500' },
+    'Sequência 7 dias': { icon: Flame, color: 'text-orange-500' },
+    'Primeira Venda': { icon: DollarSign, color: 'text-green-600' },
+    'Vendedor do Mês': { icon: Trophy, color: 'text-yellow-600' },
+    '10 Vendas': { icon: Zap, color: 'text-blue-600' },
+    '50 Vendas': { icon: Sparkles, color: 'text-purple-600' }
+  };
+
+  // Active goals progress
+  const goalsWithProgress = salesGoals.map(goal => ({
+    ...goal,
+    progress: (goal.current_value / goal.target_value) * 100
+  }));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -101,6 +137,120 @@ export default function SalesPerformanceDashboard() {
           </div>
           <Sparkles className="w-8 h-8 text-purple-600" />
         </div>
+
+        {/* Gamification: Leaderboard */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                🏆 Ranking de Vendedores
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {leaderboard.map((seller, idx) => (
+                  <div key={seller.id} className={`flex items-center gap-4 p-3 rounded-lg ${
+                    idx === 0 ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-2 border-yellow-400' :
+                    idx === 1 ? 'bg-gradient-to-r from-gray-100 to-gray-50 border-2 border-gray-400' :
+                    idx === 2 ? 'bg-gradient-to-r from-orange-100 to-orange-50 border-2 border-orange-400' :
+                    'bg-gray-50 border border-gray-200'
+                  }`}>
+                    <div className="flex items-center justify-center w-8 h-8">
+                      {idx === 0 && <Crown className="w-6 h-6 text-yellow-500" />}
+                      {idx === 1 && <Medal className="w-6 h-6 text-gray-500" />}
+                      {idx === 2 && <Medal className="w-6 h-6 text-orange-500" />}
+                      {idx > 2 && <span className="font-bold text-gray-600">#{idx + 1}</span>}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-800">{seller.user_name || seller.user_email}</p>
+                      <div className="flex gap-4 text-xs text-gray-600">
+                        <span>📊 {seller.sales_closed || 0} vendas</span>
+                        <span>✅ {seller.tasks_completed || 0} tarefas</span>
+                        <span>👥 {seller.visits_completed || 0} visitas</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-purple-600">{seller.total_points || 0}</p>
+                      <p className="text-xs text-gray-500">pontos</p>
+                      <Badge className="mt-1">Nível {seller.level || 1}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Badges Achievements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-purple-500" />
+                Conquistas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Object.entries(badgeIcons).map(([name, { icon: Icon, color }]) => {
+                  const earned = leaderboard.some(s => s.badges?.includes(name));
+                  return (
+                    <div key={name} className={`flex items-center gap-3 p-2 rounded-lg ${
+                      earned ? 'bg-purple-50 border border-purple-200' : 'bg-gray-50 border border-gray-200 opacity-50'
+                    }`}>
+                      <Icon className={`w-5 h-5 ${earned ? color : 'text-gray-400'}`} />
+                      <span className={`text-sm ${earned ? 'font-semibold text-gray-800' : 'text-gray-500'}`}>
+                        {name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Goals Progress */}
+        {goalsWithProgress.length > 0 && (
+          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                Metas Ativas - Progresso do Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {goalsWithProgress.map(goal => (
+                  <div key={goal.id} className="bg-white p-4 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-800">{goal.title}</p>
+                        <p className="text-xs text-gray-600">{goal.description}</p>
+                      </div>
+                      <Badge className={
+                        goal.progress >= 100 ? 'bg-green-600' :
+                        goal.progress >= 70 ? 'bg-blue-600' :
+                        goal.progress >= 40 ? 'bg-yellow-600' : 'bg-gray-600'
+                      }>
+                        {goal.progress.toFixed(0)}%
+                      </Badge>
+                    </div>
+                    <Progress value={goal.progress} className="h-3" />
+                    <div className="flex justify-between text-xs text-gray-600 mt-2">
+                      <span>Atual: {goal.current_value.toLocaleString('pt-BR')}</span>
+                      <span>Meta: {goal.target_value.toLocaleString('pt-BR')}</span>
+                    </div>
+                    {goal.reward_points > 0 && (
+                      <p className="text-xs text-purple-600 mt-1 font-semibold">
+                        🎁 Recompensa: {goal.reward_points} pontos
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Métricas Principais */}
         <div className="grid md:grid-cols-4 gap-4">
