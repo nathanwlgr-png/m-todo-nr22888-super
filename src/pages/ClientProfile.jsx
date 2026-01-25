@@ -140,6 +140,8 @@ import SalesforceOpportunitySync from '@/components/SalesforceOpportunitySync';
 import MarketIntelligenceAnalyzer from '@/components/MarketIntelligenceAnalyzer';
 import CompetitorAnalysisModule from '@/components/CompetitorAnalysisModule';
 import MarketReportGenerator from '@/components/MarketReportGenerator';
+import HolisticClientScore from '@/components/HolisticClientScore';
+import AINextBestActionsCard from '@/components/AINextBestActionsCard';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -677,6 +679,22 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* AI Metrics Badges - Destaque */}
         <AIMetricsBadges client={client} variant="full" />
+
+        {/* Score Holístico 360° - NOVO */}
+        <HolisticClientScore 
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* Next Best Actions IA - NOVO */}
+        <AINextBestActionsCard
+          client={client}
+          interactions={interactions}
+          sales={sales}
+          visits={visits}
+        />
 
         {/* Quick Communication Actions */}
         <QuickCommunicationActions client={client} />
