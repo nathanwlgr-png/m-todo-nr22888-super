@@ -133,26 +133,37 @@ export default function Home() {
 
       // Buscar clínicas via API do Google
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `BUSCA DE CLÍNICAS VETERINÁRIAS POR GPS
+        prompt: `BUSCA GPS DE CLÍNICAS VETERINÁRIAS - COORDENADA EXATA
 
-LOCALIZAÇÃO ATUAL (DO USUÁRIO):
-- Latitude: ${latitude}
-- Longitude: ${longitude}
-- Raio de busca: 50 km
+═══════════════════════════════════════
+📍 LOCALIZAÇÃO ATUAL DO USUÁRIO
+═══════════════════════════════════════
+LATITUDE: ${latitude}
+LONGITUDE: ${longitude}
+RAIO: 50 QUILÔMETROS
 
-IMPORTANTE: Use esta localização EXATA para buscar no Google Maps/Places.
+═══════════════════════════════════════
+🎯 IMPORTANTE - LEIA COM ATENÇÃO
+═══════════════════════════════════════
+Use Google Maps/Places API com esta coordenada EXATA como ponto central.
 
-Busque APENAS clínicas veterinárias dentro de 50km desta coordenada específica.
+Busque SOMENTE clínicas veterinárias dentro de 50km desta localização GPS específica.
+
+NÃO busque em outras cidades ou regiões.
+Use a coordenada (${latitude}, ${longitude}) como referência.
 
 Para cada clínica encontrada, retorne:
 - Nome da clínica
 - Endereço completo
 - Cidade
-- Telefone (com DDD)
-- Distância aproximada da localização atual
-- Classificação (rating) se disponível
+- CEP
+- Telefone (formato 5511999999999)
+- Distância em KM da localização atual
+- Rating do Google
+- Website (se disponível)
 
-NÃO busque em outras regiões ou cidades. APENAS no raio de 50km da coordenada fornecida.`,
+Ordene por distância (mais próximas primeiro).
+Retorne até 15 clínicas.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",

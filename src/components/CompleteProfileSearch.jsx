@@ -49,26 +49,42 @@ export default function CompleteProfileSearch() {
             setCurrentStep('🔍 Buscando clínicas na região...');
             
             const nearbySearch = await base44.integrations.Core.InvokeLLM({
-                prompt: `Você está em LATITUDE: ${latitude}, LONGITUDE: ${longitude}
+                prompt: `BUSCA GPS DE CLÍNICAS VETERINÁRIAS - PRIMORI
 
-MISSÃO: Encontre clínicas veterinárias em um raio de 20 QUILÔMETROS desta localização exata.
+═══════════════════════════════════════
+📍 LOCALIZAÇÃO ATUAL (USUÁRIO)
+═══════════════════════════════════════
+LATITUDE: ${latitude}
+LONGITUDE: ${longitude}
+RAIO DE BUSCA: 50 QUILÔMETROS
 
-Use Google Maps Places API para buscar:
+═══════════════════════════════════════
+🎯 MISSÃO CRÍTICA
+═══════════════════════════════════════
+Use Google Maps/Places API para buscar clínicas veterinárias APENAS dentro de 50km desta coordenada EXATA.
+
+IMPORTANTE: 
+- Use a coordenada (${latitude}, ${longitude}) como ponto central
+- Busque SOMENTE no raio de 50km
+- NÃO busque em outras regiões
+
+Procure por:
 - Veterinary clinics
-- Hospitais veterinários
-- Pet clinics
+- Hospitais veterinários  
+- Pet hospitals
+- Clínicas veterinárias
 
 Para CADA clínica encontrada, retorne:
-- Nome completo
+- Nome completo da clínica
 - Endereço completo com CEP
-- Cidade/estado
+- Cidade/Estado
 - Telefone (formato: 5511999999999)
 - Website (se disponível)
-- Instagram (se disponível)
-- Avaliação Google
+- Instagram handle (se disponível)
+- Avaliação Google (rating)
+- Distância em KM da localização atual
 
-IMPORTANTE: Use a localização GPS (${latitude}, ${longitude}) para buscar PRÓXIMO à posição atual do usuário.
-Retorne até 10 clínicas mais próximas.`,
+Retorne até 10 clínicas mais próximas, ordenadas por distância.`,
                 add_context_from_internet: true,
                 response_json_schema: {
                     type: "object",
@@ -268,10 +284,10 @@ Procure CNPJ, responsável, serviços, equipamentos.`,
 
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-center">
                     <p className="text-sm text-blue-900 font-semibold mb-1">
-                        📍 Usa sua localização GPS
+                        📍 Usa sua localização GPS ATUAL
                     </p>
                     <p className="text-xs text-blue-700">
-                        Busca clínicas em 20km e cadastra automaticamente
+                        Busca clínicas em 50km da sua posição e cadastra automaticamente
                     </p>
                 </div>
 
