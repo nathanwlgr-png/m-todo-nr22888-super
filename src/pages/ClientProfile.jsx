@@ -142,6 +142,7 @@ import CompetitorAnalysisModule from '@/components/CompetitorAnalysisModule';
 import MarketReportGenerator from '@/components/MarketReportGenerator';
 import HolisticClientScore from '@/components/HolisticClientScore';
 import AINextBestActionsCard from '@/components/AINextBestActionsCard';
+import MarketContextualIntelligence from '@/components/MarketContextualIntelligence';
 import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
 import EditableClientFields from '@/components/EditableClientFields';
 import AIContentGenerator from '@/components/AIContentGenerator';
