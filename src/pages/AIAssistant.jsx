@@ -11,6 +11,7 @@ import {
   Send, 
   HelpCircle,
   MessageCircle,
+  MessageSquare,
   Target,
   RotateCcw,
   Loader2,
