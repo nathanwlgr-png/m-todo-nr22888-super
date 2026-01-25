@@ -599,16 +599,17 @@ export default function Home() {
               </Card>
             </Link>
 
-            <Link to={createPageUrl('FollowUpSequences')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-slate-300">
+            <Link to={createPageUrl('AIFollowUpSequences')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 to-purple-50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-900">Sequências Follow-Up</p>
-                    <p className="text-xs text-slate-600">Automáticas</p>
+                    <p className="text-sm font-bold text-indigo-900">Sequências IA</p>
+                    <p className="text-xs text-indigo-600">Follow-up personalizado</p>
                   </div>
+                  <Badge className="bg-indigo-600 text-white text-xs">IA</Badge>
                 </div>
               </Card>
             </Link>
