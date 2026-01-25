@@ -146,6 +146,7 @@ import MarketContextualIntelligence from '@/components/MarketContextualIntellige
 import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
 import EditableClientFields from '@/components/EditableClientFields';
 import AIContentGenerator from '@/components/AIContentGenerator';
+import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashboard';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1210,6 +1211,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
         <MarketReportGenerator client={client} marketData={null} competitorData={null} />
+
+        {/* ANÁLISE PREDITIVA COMPLETA - LTV, CHURN, OPORTUNIDADES - NOVO */}
+        <PredictiveAnalyticsDashboard client={client} />
 
         {/* INTELIGÊNCIA DE MERCADO CONTEXTUAL - NOVO */}
         <MarketContextualIntelligence client={client} />
