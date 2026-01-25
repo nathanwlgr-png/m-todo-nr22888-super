@@ -144,6 +144,7 @@ import HolisticClientScore from '@/components/HolisticClientScore';
 import AINextBestActionsCard from '@/components/AINextBestActionsCard';
 import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
 import EditableClientFields from '@/components/EditableClientFields';
+import AIContentGenerator from '@/components/AIContentGenerator';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1213,6 +1214,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         <MarketTrendsAlerts 
           clientSegment={client.ai_segment}
           equipmentInterest={client.equipment_interest}
+        />
+
+        {/* GERADOR DE CONTEÚDO IA - NOVO */}
+        <AIContentGenerator 
+          client={client}
+          context={`Interações: ${interactions.length}, Vendas: ${sales.length}, Visitas: ${visits.length}`}
         />
 
         {/* 13. ANÁLISE REGIONAL ULTRA-PROFUNDA */}
