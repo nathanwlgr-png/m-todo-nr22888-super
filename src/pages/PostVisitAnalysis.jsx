@@ -31,6 +31,7 @@ import LabNeedsEditor from '@/components/LabNeedsEditor';
 import CommunicationPreferencesEditor from '@/components/CommunicationPreferencesEditor';
 import ClientDataEditor from '@/components/ClientDataEditor';
 import EquipmentReviewsGenerator from '@/components/EquipmentReviewsGenerator';
+import { toast } from 'sonner';
 
 export default function PostVisitAnalysis() {
   const navigate = useNavigate();
@@ -565,14 +566,6 @@ Retorne JSON:
                 ))}
               </div>
             </Card>
-
-            {/* Material de Equipamentos */}
-            <EquipmentReviewsGenerator 
-              client={client}
-              onMaterialGenerated={(material) => {
-                toast.success('Material enviado ao cliente!');
-              }}
-            />
 
             {/* Follow-up Suggestions */}
             {followupSuggestions && (

@@ -8,6 +8,7 @@ import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
+import CRMAnalyticsDashboard from './pages/CRMAnalyticsDashboard';
 import Calendar from './pages/Calendar';
 import CampaignCenter from './pages/CampaignCenter';
 import CampaignDemo from './pages/CampaignDemo';
@@ -102,7 +103,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import CRMAnalyticsDashboard from './pages/CRMAnalyticsDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -117,6 +117,7 @@ export const PAGES = {
     "AutoFollowUpDashboard": AutoFollowUpDashboard,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
+    "CRMAnalyticsDashboard": CRMAnalyticsDashboard,
     "Calendar": Calendar,
     "CampaignCenter": CampaignCenter,
     "CampaignDemo": CampaignDemo,
@@ -211,7 +212,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "CRMAnalyticsDashboard": CRMAnalyticsDashboard,
 }
 
 export const pagesConfig = {
