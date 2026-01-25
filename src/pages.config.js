@@ -89,6 +89,7 @@ import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
+import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
 import VisitManager from './pages/VisitManager';
 import VisitPlanner from './pages/VisitPlanner';
@@ -97,7 +98,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -193,6 +193,7 @@ export const PAGES = {
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
+    "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
     "VisitManager": VisitManager,
     "VisitPlanner": VisitPlanner,
@@ -201,7 +202,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
 }
 
 export const pagesConfig = {
