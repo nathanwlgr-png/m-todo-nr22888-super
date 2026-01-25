@@ -1206,7 +1206,9 @@ Tarefas devem:
                 )}
               </Button>
             </div>
-            <p className="text-slate-700 leading-relaxed">{generatedScript.content}</p>
+            <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {generatedScript.content}
+            </div>
             <div className="flex gap-2 mt-3">
               {client?.phone && (
                 <Button
