@@ -148,6 +148,7 @@ import EditableClientFields from '@/components/EditableClientFields';
 import AIContentGenerator from '@/components/AIContentGenerator';
 import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashboard';
 import AIAutomationEngine from '@/components/AIAutomationEngine';
+import SmartInteractionProcessor from '@/components/SmartInteractionProcessor';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1212,6 +1213,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
         <MarketReportGenerator client={client} marketData={null} competitorData={null} />
+
+        {/* PROCESSADOR INTELIGENTE - Email/WhatsApp/Ligação Auto - NOVO */}
+        <SmartInteractionProcessor 
+          client={client}
+          onTasksCreated={() => queryClient.invalidateQueries(['client-tasks', clientId])}
+        />
 
         {/* MOTOR DE AUTOMAÇÃO IA - Follow-ups + Material + Churn - NOVO */}
         <AIAutomationEngine 
