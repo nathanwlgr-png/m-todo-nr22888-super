@@ -129,7 +129,9 @@ export default function Home() {
       });
 
       const { latitude, longitude } = position.coords;
-      toast.info('Buscando clínicas próximas...');
+      
+      toast.success(`📍 GPS obtido: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+      toast.info('Buscando clínicas em 50km da sua localização...');
 
       // Buscar clínicas via API do Google
       const result = await base44.integrations.Core.InvokeLLM({

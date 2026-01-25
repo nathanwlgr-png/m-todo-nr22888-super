@@ -68,35 +68,48 @@ Use Google, Instagram, Facebook, LinkedIn, Site da Clínica para encontrar:
 - Website
 - CNPJ (se encontrar)
 
-**4. ANÁLISE DE EQUIPAMENTOS (CRÍTICO)**
-Procure nas fotos do Instagram/Facebook por:
-- Máquinas de BIOQUÍMICA (Seamaty, Idexx, etc)
-- HEMOGASÔMETRO (Blood Gas, i-STAT)
-- HEMOGRAMA (contador de células)
-- IMUNOFLUORESCÊNCIA
-- PCR (equipamento molecular)
-- EXAMES HORMONAIS
+**4. ANÁLISE DE EQUIPAMENTOS VIA FOTOS (MUITO CRÍTICO)**
+Analise TODAS as fotos do Instagram/Facebook/Site procurando por:
 
-Para cada equipamento encontrado:
-- Marca e modelo (se identificável)
-- Estado aparente (novo/usado)
-- Frequência de uso nas fotos
+EQUIPAMENTOS DE DIAGNÓSTICO:
+- BIOQUÍMICA: Seamaty SMT-120, Idexx Catalyst, outros
+- HEMOGASÔMETRO: i-STAT, VG1, VG2, Blood Gas
+- HEMOGRAMA: Contador células, analisador hematológico
+- IMUNOFLUORESCÊNCIA: VI1, sistemas imuno
+- PCR: VQ1, equipamento molecular
+- EXAMES HORMONAIS: Quimioluminescência
+- COAGULAÇÃO: Analisadores de coagulação
 
-**5. VOLUME DE EXAMES**
-- Estimativa de exames/mês baseado em:
-  - Tamanho da clínica (pequena/média/grande)
-  - Fotos de atendimentos
-  - Equipamentos que possui
-  - Posts sobre casos clínicos
+Para CADA equipamento encontrado nas fotos:
+- Marca e modelo EXATO (zoom nas fotos)
+- Estado (novo/usado/idade aparente)
+- Frequência de aparição nas fotos
+- Se está em uso ativo ou parado
+- Nível de confiança da identificação (Alta/Média/Baixa)
 
-**6. ESPECIALIZAÇÃO**
-- Especialidades (dermatologia, cardiologia, etc)
-- Animais atendidos (cães/gatos/exóticos/equinos)
-- Serviços laboratoriais oferecidos
+**5. VOLUME DE EXAMES (ESTIMATIVA DETALHADA)**
+Estime exames/mês analisando:
+- Tamanho físico da clínica (fotos externas/internas)
+- Número de consultórios visíveis
+- Equipe (quantos veterinários mencionados)
+- Equipamentos identificados
+- Posts sobre casos clínicos
+- Movimento nas redes sociais
+- Classificação: <40/mês, 40-120/mês, 120-230/mês, >230/mês
 
-**7. NÍVEL DE SOFISTICAÇÃO**
-- Básico/Intermediário/Avançado
-- Baseado em equipamentos e casos
+**6. ESPECIALIZAÇÃO E SERVIÇOS**
+- Especialidades médicas (dermatologia, cardiologia, oncologia, etc)
+- Animais atendidos (cães/gatos/exóticos/equinos/silvestres)
+- Serviços laboratoriais PRÓPRIOS oferecidos
+- Exames terceirizados (identifique quais)
+- Cirurgias realizadas
+- Atendimento 24h (sim/não)
+
+**7. NÍVEL DE SOFISTICAÇÃO TÉCNICA**
+- Básico: Clínica sem laboratório próprio
+- Intermediário: Laboratório básico (hemograma/bioquímico simples)
+- Avançado: Laboratório completo (gases, imuno, PCR)
+- Baseado em: equipamentos identificados + casos publicados + especialidades
 
 **8. SCORE DE COMPRA INICIAL (0-100)**
 - Baseado em: equipamentos, volume, especialização

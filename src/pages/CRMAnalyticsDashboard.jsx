@@ -176,6 +176,14 @@ export default function CRMAnalyticsDashboard() {
     return Object.values(productMap).sort((a, b) => b.value - a.value);
   }, [filteredData.sales]);
 
+  // Customer Lifetime Value Analysis
+  const ltvAnalysis = useMemo(() => {
+    const clientsWithLTV = filteredData.clients.filter(c => c.ai_sales_intelligence?.ltv_12_months);
+    const avgLTV12 = clientsWithLTV.reduce((sum, c) => sum + (c.ai_sales_intelligence.ltv_12_months || 0), 0) / (clientsWithLTV.length || 1);
+    const avgLTV24 = clientsWithLTV.reduce((sum, c) => sum + (c.ai_sales_intelligence.ltv_24_months || 0), 0) / (clientsWithLTV.length || 1);
+    return { avgLTV12, avgLTV24, count: clientsWithLTV.length };
+  }, [filteredData.clients]);
+
   // Distribuição de segmentos
   const segmentDistribution = useMemo(() => {
     const segments = {};
@@ -404,6 +412,30 @@ export default function CRMAnalyticsDashboard() {
               <Area type="monotone" dataKey="revenue" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
+        </Card>
+
+        {/* LTV Analysis */}
+        <Card className="p-4 bg-white shadow-lg">
+          <CardHeader className="p-0 mb-3">
+            <CardTitle className="text-base">Customer Lifetime Value</CardTitle>
+          </CardHeader>
+          <div className="space-y-3">
+            <div className="p-3 bg-green-50 rounded-lg">
+              <p className="text-xs text-green-700 mb-1">LTV Médio 12 meses</p>
+              <p className="text-2xl font-bold text-green-800">
+                R$ {(ltvAnalysis.avgLTV12 / 1000).toFixed(1)}k
+              </p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-700 mb-1">LTV Médio 24 meses</p>
+              <p className="text-2xl font-bold text-blue-800">
+                R$ {(ltvAnalysis.avgLTV24 / 1000).toFixed(1)}k
+              </p>
+            </div>
+            <p className="text-xs text-slate-500 text-center">
+              Baseado em {ltvAnalysis.count} clientes com LTV calculado
+            </p>
+          </div>
         </Card>
 
         {/* Distribuição de Segmentos */}
