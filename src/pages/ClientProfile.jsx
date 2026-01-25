@@ -1211,6 +1211,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
         <MarketReportGenerator client={client} marketData={null} competitorData={null} />
 
+        {/* INTELIGÊNCIA DE MERCADO CONTEXTUAL - NOVO */}
+        <MarketContextualIntelligence client={client} />
+
         {/* ALERTAS DE TENDÊNCIAS DE MERCADO - NOVO */}
         <MarketTrendsAlerts 
           clientSegment={client.ai_segment}
