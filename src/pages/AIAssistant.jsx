@@ -40,6 +40,7 @@ import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
 import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
+import WhatsAppBotIntegration from '@/components/WhatsAppBotIntegration';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
@@ -63,6 +64,7 @@ export default function AIAssistant() {
   const fileInputRef = useRef(null);
   const [showMasterAI, setShowMasterAI] = useState(false);
   const [showLiveCoaching, setShowLiveCoaching] = useState(false);
+  const [showWhatsAppBot, setShowWhatsAppBot] = useState(false);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -974,6 +976,15 @@ Tarefas devem:
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowWhatsAppBot(!showWhatsAppBot)}
+            className={showWhatsAppBot ? 'bg-green-100 border-green-300' : ''}
+          >
+            <MessageSquare className="w-4 h-4 mr-1" />
+            Bot WhatsApp
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={exportChatToPDF}
             disabled={messages.length === 0}
           >
@@ -1253,6 +1264,13 @@ Tarefas devem:
             visits={visits}
             interactions={followupLogs}
           />
+        </div>
+      )}
+
+      {/* WhatsApp Bot Integration */}
+      {showWhatsAppBot && (
+        <div className="px-4 pt-4">
+          <WhatsAppBotIntegration />
         </div>
       )}
 
