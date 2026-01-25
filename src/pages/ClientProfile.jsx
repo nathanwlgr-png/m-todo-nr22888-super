@@ -147,6 +147,7 @@ import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
 import EditableClientFields from '@/components/EditableClientFields';
 import AIContentGenerator from '@/components/AIContentGenerator';
 import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashboard';
+import AIAutomationEngine from '@/components/AIAutomationEngine';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -1211,6 +1212,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
         <MarketReportGenerator client={client} marketData={null} competitorData={null} />
+
+        {/* MOTOR DE AUTOMAÇÃO IA - Follow-ups + Material + Churn - NOVO */}
+        <AIAutomationEngine 
+          client={client} 
+          onTaskCreated={() => queryClient.invalidateQueries(['client-tasks', clientId])}
+        />
 
         {/* ANÁLISE PREDITIVA COMPLETA - LTV, CHURN, OPORTUNIDADES - NOVO */}
         <PredictiveAnalyticsDashboard client={client} />
