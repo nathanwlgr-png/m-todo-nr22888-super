@@ -17,7 +17,8 @@ import {
   Zap,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -233,6 +234,38 @@ Forneça análise concisa:
     }
   };
 
+  const shareViaWhatsApp = () => {
+    if (!teamAnalysis) {
+      toast.error('Execute a análise primeiro');
+      return;
+    }
+
+    const message = `📊 *RELATÓRIO DE PERFORMANCE DA EQUIPE*
+_Período: ${selectedPeriod} dias_
+
+🎯 *FRAMEWORKS PRIMORI*
+• SPIN Selling: ${teamAnalysis.aderencia_frameworks.spin}%
+• Numerologia: ${teamAnalysis.aderencia_frameworks.numerologia}%
+• Cialdini: ${teamAnalysis.aderencia_frameworks.cialdini}%
+• Int. Emocional: ${teamAnalysis.aderencia_frameworks.inteligencia_emocional}%
+
+✅ *PONTOS FORTES*
+${teamAnalysis.pontos_fortes.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+
+🔧 *ÁREAS DE MELHORIA*
+${teamAnalysis.areas_melhoria.map((a, i) => `${i + 1}. ${a}`).join('\n')}
+
+💡 *TOP 3 RECOMENDAÇÕES*
+${teamAnalysis.recomendacoes.slice(0, 3).map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+🎯 *META: ${teamAnalysis.meta_crescimento}*
+
+_Gerado por Primori AI_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  };
+
   return (
     <div className="space-y-4">
       {/* Header & Controls */}
@@ -277,10 +310,20 @@ Forneça análise concisa:
             ) : (
               <>
                 <Brain className="w-4 h-4 mr-2" />
-                Analisar Performance
+                Analisar
               </>
             )}
           </Button>
+          {teamAnalysis && (
+            <Button
+              onClick={shareViaWhatsApp}
+              variant="outline"
+              className="border-green-500 text-green-700"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              WhatsApp
+            </Button>
+          )}
         </div>
       </Card>
 
