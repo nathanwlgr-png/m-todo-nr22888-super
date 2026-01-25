@@ -20,7 +20,6 @@ import { toast } from 'sonner';
 export default function MarketContextualIntelligence({ client }) {
   const [intelligence, setIntelligence] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
 
   const generateIntelligence = async () => {
     if (!client) return;
@@ -211,11 +210,7 @@ Seja ULTRA ESPECÍFICO e ACIONÁVEL. Use dados reais de mercado.`,
     }
   };
 
-  useEffect(() => {
-    if (client && autoRefresh) {
-      generateIntelligence();
-    }
-  }, [client?.id]);
+  // Removido auto-refresh para evitar limite de integrações
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -238,30 +233,61 @@ Seja ULTRA ESPECÍFICO e ACIONÁVEL. Use dados reais de mercado.`,
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                <Brain className="w-6 h-6" />
-              </div>
-              <div>
-                <CardTitle className="text-white">🧠 Inteligência Contextual</CardTitle>
-                <p className="text-xs text-indigo-100">Sugestões baseadas em IA + Mercado</p>
+      {!intelligence ? (
+        <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">🧠 Inteligência Contextual</CardTitle>
+                  <p className="text-xs text-indigo-100">Análise completa de mercado</p>
+                </div>
               </div>
             </div>
             <Button
               onClick={generateIntelligence}
               disabled={loading}
-              size="sm"
-              className="bg-white text-indigo-600 hover:bg-indigo-50"
+              className="w-full mt-4 bg-white text-indigo-600 hover:bg-indigo-50 h-12"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Gerar Inteligência de Mercado
+                </>
+              )}
             </Button>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+        </Card>
+      ) : (
+        <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">🧠 Inteligência Contextual</CardTitle>
+                  <p className="text-xs text-indigo-100">Sugestões baseadas em IA + Mercado</p>
+                </div>
+              </div>
+              <Button
+                onClick={generateIntelligence}
+                disabled={loading}
+                size="sm"
+                className="bg-white text-indigo-600 hover:bg-indigo-50"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
 
       {loading && (
         <Card className="p-8 text-center">
