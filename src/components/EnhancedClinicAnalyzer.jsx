@@ -36,19 +36,21 @@ export default function EnhancedClinicAnalyzer({ onClientCreated }) {
 ═══════════════════════════════════════
 🏥 CLÍNICA A PESQUISAR
 ═══════════════════════════════════════
-Nome: ${clinicName}
+Nome da Clínica: ${clinicName}
 
 ═══════════════════════════════════════
-🔍 PESQUISA SOLICITADA
+🔍 PESQUISA SOLICITADA - MUITO IMPORTANTE
 ═══════════════════════════════════════
 
-Use Google, Instagram, Facebook, LinkedIn para encontrar:
+Use Google, Instagram, Facebook, LinkedIn, Site da Clínica para encontrar:
 
-**1. IDENTIFICAÇÃO DO PROPRIETÁRIO/VETERINÁRIO**
-- Nome COMPLETO do proprietário ou veterinário responsável
-- Se encontrar só primeiro nome, use ele
-- IMPORTANTE: Não retorne o nome da clínica como nome do cliente
-- Cargo/função (proprietário, médico vet, gestor)
+**1. IDENTIFICAÇÃO DO PROPRIETÁRIO/VETERINÁRIO (CRÍTICO)**
+- Procure pelo NOME DA PESSOA (proprietário, médico veterinário, sócio)
+- NÃO use o nome da clínica como nome da pessoa
+- Se encontrar apenas primeiro nome (ex: Dr. João), use ele
+- SEMPRE tente encontrar o nome completo do responsável
+- Procure em: "Sobre nós", "Equipe", "Proprietário", posts Instagram
+- Cargo/função (proprietário, médico vet, gestor, sócio)
 
 **2. PERFIL NUMEROLÓGICO (mesmo só primeiro nome)**
 - Calcular número numerológico do nome
