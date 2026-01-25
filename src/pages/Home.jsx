@@ -529,15 +529,15 @@ export default function Home() {
               </Card>
             </Link>
 
-            <Link to={createPageUrl('AdvancedReports')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300">
+            <Link to={createPageUrl('AdvancedAIReports')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300">
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-orange-900">Relatórios</p>
-                    <p className="text-xs text-orange-600">Completos</p>
+                    <p className="text-xs font-bold text-purple-900">Relatórios IA</p>
+                    <p className="text-xs text-purple-600">Customizados</p>
                   </div>
                 </div>
               </Card>

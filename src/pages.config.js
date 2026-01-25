@@ -100,6 +100,7 @@ import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import ChurnAnalysis from './pages/ChurnAnalysis';
 import AIFollowUpSequences from './pages/AIFollowUpSequences';
+import AdvancedAIReports from './pages/AdvancedAIReports';
 import __Layout from './Layout.jsx';
 
 
@@ -206,6 +207,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "ChurnAnalysis": ChurnAnalysis,
     "AIFollowUpSequences": AIFollowUpSequences,
+    "AdvancedAIReports": AdvancedAIReports,
 }
 
 export const pagesConfig = {
