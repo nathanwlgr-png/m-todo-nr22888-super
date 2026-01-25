@@ -47,6 +47,7 @@ import BrazilCitiesMap from '@/components/BrazilCitiesMap';
 import ClientSearchBar from '@/components/ClientSearchBar';
 import CompleteClientAnalysis from '@/components/CompleteClientAnalysis';
 import DictionTrainer from '@/components/DictionTrainer';
+import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -291,10 +292,18 @@ export default function Home() {
             <p className="text-xs text-slate-600">Siga na ordem para máximo resultado</p>
           </div>
 
-          {/* ETAPA 1A: ANÁLISE REGIONAL POR CIDADE */}
+          {/* ETAPA 1A: ANÁLISE COMPLETA DE CLÍNICA (NOVA - COM EQUIPAMENTOS) */}
+          <EnhancedClinicAnalyzer 
+            onClientCreated={(newClient) => {
+              queryClient.invalidateQueries(['clients']);
+              toast.success('Cliente criado!');
+            }}
+          />
+
+          {/* ETAPA 1B: ANÁLISE REGIONAL POR CIDADE */}
           <RegionalClinicAnalyzer />
 
-          {/* ETAPA 1B: BUSCA GPS */}
+          {/* ETAPA 1C: BUSCA GPS */}
           <CompleteProfileSearch />
 
           {/* PESQUISA PARA CLIENTE */}

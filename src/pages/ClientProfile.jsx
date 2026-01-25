@@ -142,6 +142,8 @@ import CompetitorAnalysisModule from '@/components/CompetitorAnalysisModule';
 import MarketReportGenerator from '@/components/MarketReportGenerator';
 import HolisticClientScore from '@/components/HolisticClientScore';
 import AINextBestActionsCard from '@/components/AINextBestActionsCard';
+import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
+import EditableClientFields from '@/components/EditableClientFields';
 import { toast } from 'sonner';
 
 const getSegmentBadge = (segment) => {
@@ -749,53 +751,13 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </div>
         </Card>
 
-        {/* 2. INFORMAÇÕES DO CLIENTE - BOTÃO DE EDIÇÃO */}
-        <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300">
-          <h3 className="font-bold text-slate-800 mb-3">📋 Informações do Cliente</h3>
-          <div className="grid grid-cols-2 gap-2 mb-3">
-
-            <Button
-              onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
-              variant="outline"
-              className="w-full border-orange-300"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Ver Tudo
-            </Button>
-          </div>
-
-          {/* Quick Info */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2 bg-white rounded">
-              <p className="text-slate-500">Clínica</p>
-              <p className="font-semibold text-slate-800">{client.clinic_name || '-'}</p>
-            </div>
-            <div className="p-2 bg-white rounded">
-              <p className="text-slate-500">Cidade</p>
-              <p className="font-semibold text-slate-800">{client.city || '-'}</p>
-            </div>
-            <div className="p-2 bg-white rounded">
-              <p className="text-slate-500">Email</p>
-              <p className="font-semibold text-slate-800 truncate">{client.email || '-'}</p>
-            </div>
-            <div className="p-2 bg-white rounded">
-              <p className="text-slate-500">WhatsApp</p>
-              <p className="font-semibold text-slate-800">{client.phone || '-'}</p>
-            </div>
-            {client.instagram_handle && (
-              <div className="p-2 bg-pink-50 rounded col-span-2">
-                <p className="text-slate-500">Instagram</p>
-                <p className="font-semibold text-pink-700">@{client.instagram_handle}</p>
-              </div>
-            )}
-            {client.cnpj && (
-              <div className="p-2 bg-blue-50 rounded col-span-2">
-                <p className="text-slate-500">CNPJ</p>
-                <p className="font-semibold text-slate-800">{client.cnpj}</p>
-              </div>
-            )}
-          </div>
-        </Card>
+        {/* 2. CAMPOS EDITÁVEIS DO CLIENTE - NOVO */}
+        <EditableClientFields 
+          client={client}
+          onUpdate={(updates) => {
+            queryClient.invalidateQueries(['client', clientId]);
+          }}
+        />
 
         {/* 3. BUSCAR INSTAGRAM E CNPJ AUTOMATICAMENTE */}
         <InstagramProfileFinder 
@@ -1246,6 +1208,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         {/* 12.7 GERADOR DE RELATÓRIOS - MÓDULO NOVO */}
         <MarketReportGenerator client={client} marketData={null} competitorData={null} />
+
+        {/* ALERTAS DE TENDÊNCIAS DE MERCADO - NOVO */}
+        <MarketTrendsAlerts 
+          clientSegment={client.ai_segment}
+          equipmentInterest={client.equipment_interest}
+        />
 
         {/* 13. ANÁLISE REGIONAL ULTRA-PROFUNDA */}
         <UltraDeepMarketIntelligence 

@@ -1,5 +1,7 @@
 import AIAssistant from './pages/AIAssistant';
 import AIContentGenerator from './pages/AIContentGenerator';
+import AIFollowUpSequences from './pages/AIFollowUpSequences';
+import AdvancedAIReports from './pages/AdvancedAIReports';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
@@ -13,6 +15,7 @@ import CampaignDetails from './pages/CampaignDetails';
 import CampaignTemplatesDemo from './pages/CampaignTemplatesDemo';
 import Campaigns from './pages/Campaigns';
 import CaptureLeads from './pages/CaptureLeads';
+import ChurnAnalysis from './pages/ChurnAnalysis';
 import ClientDashboard from './pages/ClientDashboard';
 import ClientDocumentCenter from './pages/ClientDocumentCenter';
 import ClientProfile from './pages/ClientProfile';
@@ -36,6 +39,7 @@ import EquipmentPriceList from './pages/EquipmentPriceList';
 import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
+import FunnelOptimization from './pages/FunnelOptimization';
 import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
@@ -98,16 +102,14 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import ChurnAnalysis from './pages/ChurnAnalysis';
-import AIFollowUpSequences from './pages/AIFollowUpSequences';
-import AdvancedAIReports from './pages/AdvancedAIReports';
-import FunnelOptimization from './pages/FunnelOptimization';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
     "AIContentGenerator": AIContentGenerator,
+    "AIFollowUpSequences": AIFollowUpSequences,
+    "AdvancedAIReports": AdvancedAIReports,
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
@@ -121,6 +123,7 @@ export const PAGES = {
     "CampaignTemplatesDemo": CampaignTemplatesDemo,
     "Campaigns": Campaigns,
     "CaptureLeads": CaptureLeads,
+    "ChurnAnalysis": ChurnAnalysis,
     "ClientDashboard": ClientDashboard,
     "ClientDocumentCenter": ClientDocumentCenter,
     "ClientProfile": ClientProfile,
@@ -144,6 +147,7 @@ export const PAGES = {
     "EquipmentSalesCenter": EquipmentSalesCenter,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
+    "FunnelOptimization": FunnelOptimization,
     "GlobalSearch": GlobalSearch,
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
@@ -206,10 +210,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "ChurnAnalysis": ChurnAnalysis,
-    "AIFollowUpSequences": AIFollowUpSequences,
-    "AdvancedAIReports": AdvancedAIReports,
-    "FunnelOptimization": FunnelOptimization,
 }
 
 export const pagesConfig = {
