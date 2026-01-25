@@ -39,6 +39,7 @@ import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
+import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
@@ -61,6 +62,7 @@ export default function AIAssistant() {
   const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
   const fileInputRef = useRef(null);
   const [showMasterAI, setShowMasterAI] = useState(false);
+  const [showLiveCoaching, setShowLiveCoaching] = useState(false);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -963,6 +965,15 @@ Tarefas devem:
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowLiveCoaching(!showLiveCoaching)}
+            className={showLiveCoaching ? 'bg-purple-100 border-purple-300' : ''}
+          >
+            <Sparkles className="w-4 h-4 mr-1" />
+            Live Coaching
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={exportChatToPDF}
             disabled={messages.length === 0}
           >
@@ -1231,6 +1242,17 @@ Tarefas devem:
       {showMasterAI && (
         <div className="px-4 pt-4">
           <MasterAIAssistant client={client} />
+        </div>
+      )}
+
+      {/* Live Sales Coaching */}
+      {showLiveCoaching && (
+        <div className="px-4 pt-4">
+          <LiveSalesCoachingModule 
+            client={client} 
+            visits={visits}
+            interactions={followupLogs}
+          />
         </div>
       )}
 
