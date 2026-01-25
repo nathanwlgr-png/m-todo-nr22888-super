@@ -101,6 +101,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import ChurnAnalysis from './pages/ChurnAnalysis';
 import AIFollowUpSequences from './pages/AIFollowUpSequences';
 import AdvancedAIReports from './pages/AdvancedAIReports';
+import FunnelOptimization from './pages/FunnelOptimization';
 import __Layout from './Layout.jsx';
 
 
@@ -208,6 +209,7 @@ export const PAGES = {
     "ChurnAnalysis": ChurnAnalysis,
     "AIFollowUpSequences": AIFollowUpSequences,
     "AdvancedAIReports": AdvancedAIReports,
+    "FunnelOptimization": FunnelOptimization,
 }
 
 export const pagesConfig = {

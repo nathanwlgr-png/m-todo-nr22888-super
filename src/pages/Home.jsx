@@ -457,15 +457,15 @@ export default function Home() {
         <div className="pt-4 border-t">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">📊 Funil & Análises</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Link to={createPageUrl('AdvancedFunnelManager')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
+            <Link to={createPageUrl('FunnelOptimization')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300">
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-blue-900">Funil Avançado</p>
-                    <p className="text-xs text-blue-600">Drag-drop + análise</p>
+                    <p className="text-xs font-bold text-indigo-900">Funil IA</p>
+                    <p className="text-xs text-indigo-600">Otimização + A/B</p>
                   </div>
                 </div>
               </Card>
