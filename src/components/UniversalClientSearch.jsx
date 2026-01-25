@@ -22,7 +22,14 @@ export default function UniversalClientSearch() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-list'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 500)
+    queryFn: async () => {
+      try {
+        return await base44.entities.Client.list('-updated_date', 500);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        return [];
+      }
+    }
   });
 
   const { data: savedSearches = [] } = useQuery({

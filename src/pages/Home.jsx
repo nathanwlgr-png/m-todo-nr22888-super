@@ -48,6 +48,7 @@ import ClientSearchBar from '@/components/ClientSearchBar';
 import CompleteClientAnalysis from '@/components/CompleteClientAnalysis';
 import DictionTrainer from '@/components/DictionTrainer';
 import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
+import AIContentGenerator from '@/components/AIContentGenerator';
 
 export default function Home() {
   const navigate = useNavigate();
