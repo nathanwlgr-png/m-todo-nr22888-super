@@ -49,6 +49,7 @@ import CompleteClientAnalysis from '@/components/CompleteClientAnalysis';
 import DictionTrainer from '@/components/DictionTrainer';
 import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
 import AIContentGenerator from '@/components/AIContentGenerator';
+import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -132,16 +133,26 @@ export default function Home() {
 
       // Buscar clínicas via API do Google
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Busque clínicas veterinárias próximas a esta localização: ${latitude}, ${longitude} (raio de 50km).
-        
-        Use Google Maps/Places para encontrar:
-        - Nome da clínica
-        - Endereço completo
-        - Cidade
-        - Telefone (se disponível)
-        - Classificação (rating)
-        
-        Retorne uma lista de clínicas encontradas.`,
+        prompt: `BUSCA DE CLÍNICAS VETERINÁRIAS POR GPS
+
+LOCALIZAÇÃO ATUAL (DO USUÁRIO):
+- Latitude: ${latitude}
+- Longitude: ${longitude}
+- Raio de busca: 50 km
+
+IMPORTANTE: Use esta localização EXATA para buscar no Google Maps/Places.
+
+Busque APENAS clínicas veterinárias dentro de 50km desta coordenada específica.
+
+Para cada clínica encontrada, retorne:
+- Nome da clínica
+- Endereço completo
+- Cidade
+- Telefone (com DDD)
+- Distância aproximada da localização atual
+- Classificação (rating) se disponível
+
+NÃO busque em outras regiões ou cidades. APENAS no raio de 50km da coordenada fornecida.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -438,6 +449,9 @@ export default function Home() {
 
         {/* GERADOR DE CONTEÚDO IA */}
         <AIContentGenerator client={null} context="" />
+
+        {/* DOCUMENTAÇÃO DO SISTEMA */}
+        <SystemDocumentationPDF />
 
         {/* BUSCA RÁPIDA */}
         <div className="pt-4 border-t">
