@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     }
     
     // 2. ANÁLISE DE PERFORMANCE DA EQUIPE
-    else if (messageText.includes('performance') || messageText.includes('equipe') || messageText.includes('analise')) {
+    else if (messageText.includes('performance') && !messageText.includes('detalhada')) {
       const sales = await base44.asServiceRole.entities.Sale.list('-sale_date', 50);
       const coachingSessions = await base44.asServiceRole.entities.CoachingSession.list('-created_date', 50);
       const interactions = await base44.asServiceRole.entities.Interaction.list('-created_date', 50);
@@ -63,6 +63,46 @@ Deno.serve(async (req) => {
       responseText += `🎯 *Coaching:* ${recentCoaching.length} sessões (Score: ${avgScore}/100)\n`;
       responseText += `💬 *Interações:* ${recentInteractions.length}\n\n`;
       responseText += `_Digite "performance detalhada" para análise completa com IA_`;
+    }
+    
+    // 2B. PERFORMANCE DETALHADA COM IA
+    else if (messageText.includes('performance detalhada') || messageText.includes('análise detalhada')) {
+      const sales = await base44.asServiceRole.entities.Sale.list('-sale_date', 50);
+      const coachingSessions = await base44.asServiceRole.entities.CoachingSession.list('-created_date', 30);
+      const interactions = await base44.asServiceRole.entities.Interaction.list('-created_date', 50);
+      
+      responseText = `⏳ Gerando análise detalhada com IA...\n\n`;
+      
+      const aiAnalysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `Analise a performance da equipe de vendas (últimos 30 dias):
+
+VENDAS: ${sales.length} vendas, ${sales.reduce((sum, s) => sum + (s.sale_value || 0), 0).toLocaleString('pt-BR')} em receita
+
+COACHING: ${coachingSessions.length} sessões
+Scores médios: ${coachingSessions.map(c => c.technique_scores).filter(Boolean).length} análises
+
+INTERAÇÕES: ${interactions.length} interações registradas
+
+Forneça análise SUPER CONCISA (máximo 400 caracteres) para WhatsApp:
+1. Principal força da equipe
+2. Maior oportunidade de melhoria
+3. Recomendação #1 acionável HOJE
+
+Seja direto e prático!`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            forca: { type: "string" },
+            oportunidade: { type: "string" },
+            acao_imediata: { type: "string" }
+          }
+        }
+      });
+      
+      responseText = `🤖 *ANÁLISE IA - PERFORMANCE*\n\n`;
+      responseText += `💪 *Força:* ${aiAnalysis.forca}\n\n`;
+      responseText += `📈 *Oportunidade:* ${aiAnalysis.oportunidade}\n\n`;
+      responseText += `⚡ *Ação Hoje:* ${aiAnalysis.acao_imediata}`;
     }
     
     // 3. PLAYBOOK PARA CLIENTE
@@ -168,18 +208,97 @@ SEJA ULTRA-CONCISO para WhatsApp!`,
       responseText += `👥 Total Clientes: ${clients.length}\n`;
     }
     
-    // 7. AJUDA
+    // 7. CRIAR TAREFA RÁPIDA
+    else if (messageText.startsWith('criar tarefa') || messageText.startsWith('nova tarefa')) {
+      const taskText = messageText.replace('criar tarefa', '').replace('nova tarefa', '').trim();
+      
+      if (!taskText) {
+        responseText = `❌ Use: *criar tarefa [descrição]*\n\nEx: criar tarefa Ligar para João da Clínica Vida`;
+      } else {
+        // Criar tarefa com IA para extrair cliente
+        const taskData = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `Extraia informações desta tarefa: "${taskText}"\n\nRetorne: título curto, descrição, prioridade (alta/media/baixa), se há menção a cliente (nome)`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              description: { type: "string" },
+              priority: { type: "string" },
+              client_mention: { type: "string" }
+            }
+          }
+        });
+        
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 1);
+        
+        await base44.asServiceRole.entities.Task.create({
+          title: taskData.title,
+          description: taskData.description || taskText,
+          priority: taskData.priority || 'media',
+          status: 'pendente',
+          due_date: dueDate.toISOString().split('T')[0],
+          type: 'outro'
+        });
+        
+        responseText = `✅ *Tarefa Criada!*\n\n`;
+        responseText += `📋 ${taskData.title}\n`;
+        responseText += `⚡ Prioridade: ${taskData.priority}\n`;
+        responseText += `📅 Vence amanhã`;
+      }
+    }
+    
+    // 8. ANÁLISE RÁPIDA CLIENTE
+    else if (messageText.startsWith('analisar ') || messageText.startsWith('análise ')) {
+      const clientName = messageText.replace('analisar ', '').replace('análise ', '').trim();
+      const client = clients.find(c => 
+        c.first_name?.toLowerCase().includes(clientName) ||
+        c.clinic_name?.toLowerCase().includes(clientName)
+      );
+      
+      if (!client) {
+        responseText = `❌ Cliente não encontrado.\n\nTente: *analisar [nome]*`;
+      } else {
+        const analysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `Análise ultra-rápida para WhatsApp (300 chars):
+
+Cliente: ${client.first_name} - ${client.clinic_name}
+Status: ${client.status} (Score: ${client.purchase_score}%)
+Numerologia: ${client.numerology_number}
+Pipeline: ${client.pipeline_stage}
+Dores: ${client.main_pains?.join(', ')}
+
+Dê: 1 insight principal + 1 ação imediata`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              insight: { type: "string" },
+              acao: { type: "string" }
+            }
+          }
+        });
+        
+        responseText = `🎯 *${client.first_name}*\n\n`;
+        responseText += `💡 ${analysis.insight}\n\n`;
+        responseText += `⚡ *AÇÃO:* ${analysis.acao}`;
+      }
+    }
+    
+    // 9. AJUDA
     else if (messageText.includes('ajuda') || messageText.includes('help') || messageText.includes('comando')) {
       responseText = `🤖 *ASSISTENTE MASTER PRIMORI*\n\n`;
-      responseText += `📱 *Comandos disponíveis:*\n\n`;
-      responseText += `🔍 *buscar [nome]* - Buscar cliente\n`;
-      responseText += `🎯 *playbook [nome]* - Gerar playbook\n`;
-      responseText += `📊 *performance* - Performance da equipe\n`;
-      responseText += `🔥 *quentes* - Ver clientes quentes\n`;
-      responseText += `✅ *tarefas* - Tarefas pendentes\n`;
-      responseText += `📅 *resumo* - Resumo do dia\n`;
-      responseText += `💬 *ajuda* - Ver comandos\n\n`;
-      responseText += `_Digite qualquer comando para começar!_`;
+      responseText += `📱 *Comandos:*\n\n`;
+      responseText += `🔍 buscar [nome]\n`;
+      responseText += `🎯 playbook [nome]\n`;
+      responseText += `📊 performance\n`;
+      responseText += `🤖 performance detalhada\n`;
+      responseText += `🔥 quentes\n`;
+      responseText += `✅ tarefas\n`;
+      responseText += `➕ criar tarefa [texto]\n`;
+      responseText += `🔬 analisar [nome]\n`;
+      responseText += `📅 resumo\n`;
+      responseText += `💬 ajuda\n\n`;
+      responseText += `_Conectado aos módulos de IA!_`;
     }
     
     // COMANDO PADRÃO

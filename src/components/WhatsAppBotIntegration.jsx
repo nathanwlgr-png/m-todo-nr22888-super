@@ -61,12 +61,15 @@ export default function WhatsAppBotIntegration() {
 
   const commands = [
     { cmd: 'buscar [nome]', desc: 'Buscar cliente no CRM', icon: '🔍' },
-    { cmd: 'playbook [nome]', desc: 'Gerar playbook de vendas', icon: '🎯' },
-    { cmd: 'performance', desc: 'Ver performance da equipe', icon: '📊' },
-    { cmd: 'quentes', desc: 'Listar clientes quentes', icon: '🔥' },
-    { cmd: 'tarefas', desc: 'Ver tarefas pendentes', icon: '✅' },
+    { cmd: 'playbook [nome]', desc: 'Gerar playbook de vendas IA', icon: '🎯' },
+    { cmd: 'analisar [nome]', desc: 'Análise rápida IA de cliente', icon: '🔬' },
+    { cmd: 'performance', desc: 'Métricas da equipe', icon: '📊' },
+    { cmd: 'performance detalhada', desc: 'Análise profunda com IA', icon: '🤖' },
+    { cmd: 'criar tarefa [texto]', desc: 'Nova tarefa com IA', icon: '➕' },
+    { cmd: 'quentes', desc: 'Clientes quentes', icon: '🔥' },
+    { cmd: 'tarefas', desc: 'Tarefas pendentes', icon: '✅' },
     { cmd: 'resumo', desc: 'Resumo do dia', icon: '📅' },
-    { cmd: 'ajuda', desc: 'Ver todos os comandos', icon: '💬' }
+    { cmd: 'ajuda', desc: 'Ver comandos', icon: '💬' }
   ];
 
   return (
@@ -206,13 +209,13 @@ export default function WhatsAppBotIntegration() {
         <h4 className="font-bold text-indigo-900 mb-3">✨ Recursos Integrados</h4>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: 'Busca de Clientes', icon: '🔍' },
+            { label: 'Busca Clientes', icon: '🔍' },
             { label: 'Playbook IA', icon: '🎯' },
-            { label: 'Performance Equipe', icon: '📊' },
-            { label: 'Tarefas', icon: '✅' },
+            { label: 'Análise IA', icon: '🔬' },
+            { label: 'Performance', icon: '📊' },
+            { label: 'Criar Tarefas', icon: '➕' },
             { label: 'Clientes Quentes', icon: '🔥' },
-            { label: 'Resumos', icon: '📅' },
-            { label: 'Análise SPIN', icon: '🎪' },
+            { label: 'Resumos Diários', icon: '📅' },
             { label: 'Coaching', icon: '🏆' }
           ].map((feature, i) => (
             <div key={i} className="p-2 bg-white rounded border border-indigo-200 text-center">
@@ -220,6 +223,40 @@ export default function WhatsAppBotIntegration() {
               <p className="text-xs text-slate-700 font-medium">{feature.label}</p>
             </div>
           ))}
+        </div>
+      </Card>
+      
+      {/* Agent Info */}
+      <Card className="p-4 bg-gradient-to-r from-green-50 to-teal-50 border-green-300">
+        <h4 className="font-bold text-green-900 mb-2">🤖 Agente IA Dedicado</h4>
+        <p className="text-xs text-slate-700 mb-2">
+          Este bot usa um <span className="font-bold">agente IA dedicado</span> com acesso total a:
+        </p>
+        <div className="grid grid-cols-2 gap-1 text-xs">
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Clientes (CRUD)</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Tarefas (CRUD)</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Vendas</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Coaching</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Interações</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-green-600">✓</span>
+            <span>Web Search</span>
+          </div>
         </div>
       </Card>
     </div>
