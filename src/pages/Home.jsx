@@ -26,7 +26,8 @@ import {
   Zap,
   Cog,
   BookOpen,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
@@ -622,8 +623,34 @@ export default function Home() {
 
         {/* COACHING IA */}
         <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">🏆 Coaching IA</h3>
-          <CoachingDashboard compact={true} />
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">🏆 Coaching IA</h3>
+        <CoachingDashboard compact={true} />
+        </div>
+
+        {/* ANÁLISE DE CHURN E PERFORMANCE */}
+        <div className="pt-4 border-t">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">📊 Análises IA Avançadas</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <Link to={createPageUrl('TeamPerformanceAnalytics')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="w-5 h-5 text-purple-600" />
+                <h3 className="font-bold text-purple-900 text-sm">Performance</h3>
+              </div>
+              <p className="text-xs text-purple-700">Análise equipe IA</p>
+            </Card>
+          </Link>
+
+          <Link to={createPageUrl('ChurnAnalysis')}>
+            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <h3 className="font-bold text-red-900 text-sm">Churn</h3>
+              </div>
+              <p className="text-xs text-red-700">Previsão perda IA</p>
+            </Card>
+          </Link>
+        </div>
         </div>
 
         {/* FERRAMENTAS EXTRAS */}
