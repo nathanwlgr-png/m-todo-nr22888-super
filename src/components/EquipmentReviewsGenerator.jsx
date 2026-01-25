@@ -9,7 +9,8 @@ import {
   Send,
   FileText,
   Download,
-  Copy
+  Copy,
+  MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
