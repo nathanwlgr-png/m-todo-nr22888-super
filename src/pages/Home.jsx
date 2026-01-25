@@ -404,22 +404,40 @@ export default function Home() {
             </Card>
           </Link>
 
-          {/* ETAPA 7: ANÁLISES */}
-          <Link to={createPageUrl('SalesAnalytics')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-r from-indigo-50 to-blue-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">7</span>
+          {/* ETAPA 7: ANÁLISES E DASHBOARD */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={createPageUrl('SalesAnalytics')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-r from-indigo-50 to-blue-50">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
+                    <span className="text-xl font-bold text-white">7A</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-indigo-900">Analytics</p>
+                    <p className="text-xs text-indigo-700">Métricas</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold text-indigo-900">📊 Dashboard & Relatórios</p>
-                  <p className="text-xs text-indigo-700">Análises e métricas</p>
+              </Card>
+            </Link>
+            
+            <Link to={createPageUrl('CRMAnalyticsDashboard')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+                    <span className="text-xl font-bold text-white">7B</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-blue-900">Dashboard</p>
+                    <p className="text-xs text-blue-700">Visão 360°</p>
+                  </div>
                 </div>
-                <TrendingUp className="w-6 h-6 text-indigo-600" />
-              </div>
-            </Card>
-          </Link>
+              </Card>
+            </Link>
+          </div>
         </div>
+
+        {/* GERADOR DE CONTEÚDO IA */}
+        <AIContentGenerator client={null} context="" />
 
         {/* BUSCA RÁPIDA */}
         <div className="pt-4 border-t">
