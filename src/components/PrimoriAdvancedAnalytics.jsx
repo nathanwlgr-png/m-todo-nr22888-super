@@ -72,19 +72,51 @@ Racional: [dados/ROI a apresentar]
 Social: [prova social específica]
 Temporal: [urgência/escassez]
 
-**4. ANÁLISE DE RISCO**
+**4. ANÁLISE DE RISCO PROFUNDA**
 Risco de perda: [baixo/médio/alto]
-Fatores de risco:
-- [Fator 1]
-- [Fator 2]
-Mitigação: [como reduzir riscos]
+Fatores de risco detalhados:
+- [Fator 1]: Impacto [%] - Ação mitigadora específica
+- [Fator 2]: Impacto [%] - Ação mitigadora específica
+- [Fator 3]: Impacto [%] - Ação mitigadora específica
+Plano de mitigação 7 dias:
+Dia 1-2: [ação específica]
+Dia 3-4: [ação específica]
+Dia 5-7: [ação específica]
 
-**5. MENSAGEM ESTRATÉGICA**
+**5. SCORE DE LEALDADE PREDITIVO**
+Score atual: [0-100]
+Baseado em: ${visits?.length || 0} visitas, ${interactions?.length || 0} interações, padrão de resposta
+Tendência: [crescente/estável/decrescente]
+Probabilidade de recompra 6 meses: [%]
+Lifetime Value estimado: R$ [valor]
+Ações para aumentar lealdade:
+- [Ação 1 específica para este perfil numerológico]
+- [Ação 2 com timing]
+- [Ação 3 com métrica]
+
+**6. NUTRIÇÃO DE LEADS PERSONALIZADA**
+Baseado em perfil ${client.numerology_number} e score ${client.purchase_score}%:
+
+Sequência de nutrição (próximos 30 dias):
+Semana 1: [Conteúdo específico + canal + horário ideal]
+Semana 2: [Conteúdo específico + canal + horário ideal]
+Semana 3: [Conteúdo específico + canal + horário ideal]
+Semana 4: [Conteúdo específico + canal + horário ideal]
+
+Conteúdos prioritários para este perfil:
+- [Tipo de conteúdo 1]: Por que funciona para perfil ${client.numerology_number}
+- [Tipo de conteúdo 2]: Melhor formato (vídeo/texto/infográfico)
+- [Tipo de conteúdo 3]: Call-to-action ideal
+
+Temperatura do lead: [frio/morno/quente]
+Próximo marco de aquecimento: [ação que muda temperatura]
+
+**7. MENSAGEM ESTRATÉGICA**
 Escreva UMA mensagem pronta para enviar AGORA que maximize probabilidade de resposta positiva.
 Tom adaptado ao perfil ${client.numerology_number}.
 Inclua call-to-action específico.
 
-**6. PRÓXIMA MELHOR AÇÃO**
+**8. PRÓXIMA MELHOR AÇÃO**
 O que fazer: [ação específica]
 Quando fazer: [data/horário ideal]
 Como fazer: [canal + abordagem]
@@ -120,8 +152,56 @@ Probabilidade sucesso: [%]`,
               }
             },
             risco_perda: { type: "string" },
-            fatores_risco: { type: "array", items: { type: "string" } },
-            mitigacao_risco: { type: "string" },
+            fatores_risco: { 
+              type: "array", 
+              items: { 
+                type: "object",
+                properties: {
+                  fator: { type: "string" },
+                  impacto_percentual: { type: "number" },
+                  acao_mitigadora: { type: "string" }
+                }
+              }
+            },
+            plano_mitigacao_7dias: {
+              type: "object",
+              properties: {
+                dia_1_2: { type: "string" },
+                dia_3_4: { type: "string" },
+                dia_5_7: { type: "string" }
+              }
+            },
+            score_lealdade: { type: "number" },
+            tendencia_lealdade: { type: "string" },
+            probabilidade_recompra_6m: { type: "number" },
+            lifetime_value_estimado: { type: "number" },
+            acoes_aumentar_lealdade: { type: "array", items: { type: "string" } },
+            nutricao_leads: {
+              type: "object",
+              properties: {
+                temperatura_lead: { type: "string" },
+                sequencia_30_dias: {
+                  type: "object",
+                  properties: {
+                    semana_1: { type: "string" },
+                    semana_2: { type: "string" },
+                    semana_3: { type: "string" },
+                    semana_4: { type: "string" }
+                  }
+                },
+                conteudos_prioritarios: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      tipo: { type: "string" },
+                      razao: { type: "string" }
+                    }
+                  }
+                },
+                proximo_marco: { type: "string" }
+              }
+            },
             mensagem_estrategica: { type: "string" },
             proxima_acao: {
               type: "object",
@@ -146,9 +226,11 @@ Probabilidade sucesso: [%]`,
           best_approach: analysis.framework_primario,
           optimal_contact_time: analysis.proxima_acao.quando,
           key_triggers: Object.values(analysis.gatilhos),
-          predicted_objections: analysis.fatores_risco,
+          predicted_objections: analysis.fatores_risco.map(f => f.fator),
           recommended_content: [analysis.mensagem_estrategica],
-          last_ai_analysis: new Date().toISOString()
+          last_ai_analysis: new Date().toISOString(),
+          ltv_12_months: analysis.lifetime_value_estimado,
+          product_adoption_rate: analysis.score_lealdade
         }
       });
 
@@ -271,25 +353,117 @@ Probabilidade sucesso: [%]`,
             </div>
           </div>
 
-          {/* Análise de Risco */}
+          {/* Análise de Risco Profunda */}
           <div className="p-3 bg-red-50 rounded-lg border border-red-200">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-red-700">⚠️ Análise de Risco</p>
+              <p className="text-xs font-semibold text-red-700">⚠️ Análise de Risco Profunda</p>
               <Badge className={`${riskColors[prediction.risco_perda.toLowerCase()]} bg-white`}>
                 {prediction.risco_perda}
               </Badge>
             </div>
-            <ul className="text-sm text-slate-700 space-y-1">
+            <div className="space-y-2">
               {prediction.fatores_risco.map((fator, i) => (
-                <li key={i} className="flex items-start gap-1">
-                  <span>•</span>
-                  <span>{fator}</span>
-                </li>
+                <div key={i} className="p-2 bg-white rounded border border-red-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-slate-800">{fator.fator}</span>
+                    <Badge variant="outline" className="text-red-600">
+                      {fator.impacto_percentual}%
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-600">
+                    ✓ {fator.acao_mitigadora}
+                  </p>
+                </div>
               ))}
-            </ul>
-            <p className="text-xs text-green-700 mt-2 font-medium">
-              ✓ {prediction.mitigacao_risco}
-            </p>
+            </div>
+            {prediction.plano_mitigacao_7dias && (
+              <div className="mt-3 p-2 bg-green-50 rounded border border-green-200">
+                <p className="text-xs font-semibold text-green-700 mb-2">📅 Plano 7 Dias</p>
+                <div className="space-y-1 text-xs text-slate-700">
+                  <p><strong>Dia 1-2:</strong> {prediction.plano_mitigacao_7dias.dia_1_2}</p>
+                  <p><strong>Dia 3-4:</strong> {prediction.plano_mitigacao_7dias.dia_3_4}</p>
+                  <p><strong>Dia 5-7:</strong> {prediction.plano_mitigacao_7dias.dia_5_7}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Score de Lealdade */}
+          <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+            <p className="text-xs font-semibold text-indigo-700 mb-2">💎 Score de Lealdade Preditivo</p>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="text-3xl font-bold text-indigo-700">
+                  {prediction.score_lealdade}
+                </div>
+                <div className="text-xs text-slate-600">
+                  <div>Tendência: {prediction.tendencia_lealdade}</div>
+                  <div>Recompra 6m: {prediction.probabilidade_recompra_6m}%</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500">LTV Estimado</p>
+                <p className="text-lg font-bold text-green-600">
+                  R$ {prediction.lifetime_value_estimado?.toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-1 mt-2">
+              <p className="text-xs font-semibold text-indigo-600">Ações para ↑ Lealdade:</p>
+              {prediction.acoes_aumentar_lealdade.map((acao, i) => (
+                <div key={i} className="p-2 bg-white rounded text-xs text-slate-700">
+                  {i + 1}. {acao}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Nutrição de Leads */}
+          <div className="p-3 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border border-teal-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-teal-700">🌱 Nutrição de Leads</p>
+              <Badge className={
+                prediction.nutricao_leads.temperatura_lead === 'quente' ? 'bg-red-100 text-red-700' :
+                prediction.nutricao_leads.temperatura_lead === 'morno' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-blue-100 text-blue-700'
+              }>
+                {prediction.nutricao_leads.temperatura_lead}
+              </Badge>
+            </div>
+            
+            <div className="space-y-2 mb-3">
+              <p className="text-xs font-semibold text-teal-600">📅 Sequência 30 Dias:</p>
+              <div className="space-y-1 text-xs">
+                <div className="p-2 bg-white rounded border border-teal-200">
+                  <strong>Semana 1:</strong> {prediction.nutricao_leads.sequencia_30_dias.semana_1}
+                </div>
+                <div className="p-2 bg-white rounded border border-teal-200">
+                  <strong>Semana 2:</strong> {prediction.nutricao_leads.sequencia_30_dias.semana_2}
+                </div>
+                <div className="p-2 bg-white rounded border border-teal-200">
+                  <strong>Semana 3:</strong> {prediction.nutricao_leads.sequencia_30_dias.semana_3}
+                </div>
+                <div className="p-2 bg-white rounded border border-teal-200">
+                  <strong>Semana 4:</strong> {prediction.nutricao_leads.sequencia_30_dias.semana_4}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-teal-600">📚 Conteúdos Prioritários:</p>
+              {prediction.nutricao_leads.conteudos_prioritarios.map((conteudo, i) => (
+                <div key={i} className="p-2 bg-white rounded text-xs">
+                  <p className="font-medium text-slate-800">{conteudo.tipo}</p>
+                  <p className="text-slate-600">{conteudo.razao}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-2 p-2 bg-teal-100 rounded border border-teal-300">
+              <p className="text-xs text-teal-800">
+                <strong>🎯 Próximo Marco:</strong> {prediction.nutricao_leads.proximo_marco}
+              </p>
+            </div>
           </div>
 
           {/* Mensagem Estratégica */}
