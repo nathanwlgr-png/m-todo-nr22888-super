@@ -25,7 +25,9 @@ import {
   RotateCcw,
   Loader2,
   Check,
-  Sparkles
+  Sparkles,
+  Edit2,
+  Building2
 } from 'lucide-react';
 import ChecklistItem from '@/components/ChecklistItem';
 import PersuasionPhrases from '@/components/PersuasionPhrases';
@@ -35,6 +37,8 @@ import CommitmentStrategy from '@/components/CommitmentStrategy';
 import StrategicFrameworks from '@/components/StrategicFrameworks';
 import ClientSelector from '@/components/ClientSelector';
 import PreVisitSalesMasterLibrary from '@/components/PreVisitSalesMasterLibrary';
+import { Input } from "@/components/ui/input";
+import { toast } from 'sonner';
 
 const visitObjectives = [
   { value: 'diagnosticar', label: 'Diagnosticar necessidades' },
@@ -72,6 +76,11 @@ export default function PreVisitChecklist() {
   });
   
   const [loadingContent, setLoadingContent] = useState({});
+  const [editingName, setEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const [editingClinic, setEditingClinic] = useState(false);
+  const [tempClinic, setTempClinic] = useState('');
+  const [analyzingName, setAnalyzingName] = useState(false);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -92,6 +101,54 @@ export default function PreVisitChecklist() {
     mutationFn: (data) => base44.entities.Client.update(selectedClientId, data),
     onSuccess: () => queryClient.invalidateQueries(['client', selectedClientId])
   });
+
+  const analyzeNumerology = async (firstName) => {
+    setAnalyzingName(true);
+    try {
+      const analysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise numerologia Pitagórica COMPLETA do nome: ${firstName}
+
+Calcule:
+1. Número do Nome (soma de todas as letras convertidas)
+2. Perfil Comportamental completo
+3. Estilo de Decisão detalhado
+4. Dicas de Abordagem personalizadas
+5. Tom de Comunicação ideal
+
+Forneça análise profunda e estratégica para vendas.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            numerology_number: { type: "number" },
+            behavioral_profile: { type: "string" },
+            decision_style: { type: "string" },
+            approach_tips: { type: "string" },
+            recommended_communication: { type: "string" }
+          }
+        }
+      });
+
+      await updateMutation.mutateAsync(analysis);
+      toast.success('Análise numerológica completa!');
+    } catch (error) {
+      toast.error('Erro ao analisar');
+    } finally {
+      setAnalyzingName(false);
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!tempName.trim()) return;
+    await updateMutation.mutateAsync({ first_name: tempName });
+    await analyzeNumerology(tempName);
+    setEditingName(false);
+  };
+
+  const handleSaveClinic = async () => {
+    if (!tempClinic.trim()) return;
+    await updateMutation.mutateAsync({ clinic_name: tempClinic });
+    setEditingClinic(false);
+  };
 
   const generateAIContent = async (type, prompt) => {
     setLoadingContent(prev => ({ ...prev, [type]: true }));
@@ -242,10 +299,68 @@ export default function PreVisitChecklist() {
                 <h3 className="font-semibold text-slate-800">Clareza do Cliente</h3>
                 <Check className="w-4 h-4 text-emerald-600" />
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-slate-500">Nome:</span>
-                  <span className="font-medium text-slate-800">{client?.first_name || '-'}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 text-sm">Nome Decisor:</span>
+                  {editingName ? (
+                    <div className="flex gap-1 flex-1">
+                      <input
+                        type="text"
+                        value={tempName}
+                        onChange={(e) => setTempName(e.target.value)}
+                        className="flex-1 px-2 py-1 text-sm border rounded"
+                        placeholder="Primeiro nome"
+                        autoFocus
+                      />
+                      <Button size="sm" onClick={handleSaveName} disabled={analyzingName}>
+                        {analyzingName ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-bold text-slate-800">{client?.first_name || '-'}</span>
+                      <button
+                        onClick={() => {
+                          setTempName(client?.first_name || '');
+                          setEditingName(true);
+                        }}
+                        className="ml-auto p-1 hover:bg-white rounded"
+                      >
+                        <Edit2 className="w-3 h-3 text-emerald-600" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 text-sm">Clínica:</span>
+                  {editingClinic ? (
+                    <div className="flex gap-1 flex-1">
+                      <input
+                        type="text"
+                        value={tempClinic}
+                        onChange={(e) => setTempClinic(e.target.value)}
+                        className="flex-1 px-2 py-1 text-sm border rounded"
+                        placeholder="Nome da clínica"
+                        autoFocus
+                      />
+                      <Button size="sm" onClick={handleSaveClinic}>
+                        <Check className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-medium text-slate-800">{client?.clinic_name || '-'}</span>
+                      <button
+                        onClick={() => {
+                          setTempClinic(client?.clinic_name || '');
+                          setEditingClinic(true);
+                        }}
+                        className="ml-auto p-1 hover:bg-white rounded"
+                      >
+                        <Edit2 className="w-3 h-3 text-emerald-600" />
+                      </button>
+                    </>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-slate-500">Tipo:</span>
@@ -271,12 +386,7 @@ export default function PreVisitChecklist() {
                     </SelectContent>
                   </Select>
                 </div>
-                {client?.clinic_name && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-slate-500">Clínica:</span>
-                    <span className="font-medium text-slate-800">{client.clinic_name}</span>
-                  </div>
-                )}
+
                 {client?.city && (
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-slate-500">Cidade:</span>
