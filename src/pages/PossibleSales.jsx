@@ -169,7 +169,11 @@ export default function PossibleSales() {
         {/* Leads List */}
         <div className="space-y-3">
           {filteredLeads.map(lead => (
-            <Card key={lead.id} className="p-4">
+            <Card 
+              key={lead.id} 
+              className="p-4 cursor-pointer hover:shadow-lg transition-all"
+              onClick={() => navigate(createPageUrl(`LeadProfile?id=${lead.id}`))}
+            >
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-bold text-lg">
@@ -193,7 +197,8 @@ export default function PossibleSales() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (confirm('Remover este lead?')) {
                       deleteLead.mutate(lead.id);
                     }
@@ -240,20 +245,16 @@ export default function PossibleSales() {
 
               <div className="flex gap-2">
                 <Button
-                  onClick={() => convertToClient.mutate(lead)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    convertToClient.mutate(lead);
+                  }}
                   disabled={convertToClient.isPending}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                   size="sm"
                 >
                   <UserPlus className="w-4 h-4 mr-1" />
                   Converter para Cliente
-                </Button>
-                <Button
-                  onClick={() => navigate(createPageUrl(`LeadProfile?id=${lead.id}`))}
-                  variant="outline"
-                  size="sm"
-                >
-                  <ExternalLink className="w-4 h-4" />
                 </Button>
               </div>
             </Card>
