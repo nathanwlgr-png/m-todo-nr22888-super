@@ -1,9 +1,12 @@
 import React from 'react';
+import { AILimitProtection } from '@/components/AILimitProtection';
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <div className="pb-20">
-      {children}
-    </div>
+    <AILimitProtection>
+      <div className="pb-20">
+        {children}
+      </div>
+    </AILimitProtection>
   );
 }
