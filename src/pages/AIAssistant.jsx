@@ -465,7 +465,7 @@ Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
 
     try {
       const prompts = {
-      presentation: `Você é um especialista em comunicação e vendas consultivas.
+        presentation: `Você é um especialista em comunicação e vendas consultivas.
 
 Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato com ${client?.first_name}.
 
@@ -567,13 +567,13 @@ Fique atento a estes sinais no primeiro contato:
 - 🟢 Sinal de engajamento: ...
 
 Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil numerológico.`,
-      question: `Gere UMA pergunta SPIN Selling para abrir a conversa com ${client?.first_name}. 
+        question: `Gere UMA pergunta SPIN Selling para abrir a conversa com ${client?.first_name}. 
         Numerologia: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
         
         Use SPIN (Situation/Problem/Implication/Need-Payoff) adaptado ao perfil numerológico.
         Indique qual tipo SPIN você usou.`,
-      objection: `Controle de objeção estratégico para ${client?.first_name}.
+        objection: `Controle de objeção estratégico para ${client?.first_name}.
         
         PERFIL: Numerologia ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Tom: ${client?.client_tone || 'padrão'}
@@ -590,11 +590,11 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         - Tom emocional ideal (Int. Emocional)
         
         Seja estratégico e multi-framework.`,
-      closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
+        closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
         Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
-      followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.
+        followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.
         Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.`,
-      prospecting: `Crie técnicas de prospecção personalizadas para ${client?.first_name}.
+        prospecting: `Crie técnicas de prospecção personalizadas para ${client?.first_name}.
         
         PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
@@ -607,7 +607,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         4) Primeira frase de impacto personalizada
         
         Seja prático e acionável.`,
-      needs: `Analise o histórico e preveja necessidades futuras de ${client?.first_name}.
+        needs: `Analise o histórico e preveja necessidades futuras de ${client?.first_name}.
         
         HISTÓRICO:
         - Visitas: ${visits.length}
@@ -622,7 +622,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         4) Gatilho emocional/prático a explorar na próxima interação
         
         Seja estratégico e preditivo.`,
-      proposal: `Crie uma proposta comercial personalizada para ${client?.first_name}.
+        proposal: `Crie uma proposta comercial personalizada para ${client?.first_name}.
         
         PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tom de voz: ${client?.client_tone || 'padrão'}
@@ -638,8 +638,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         
         Tom: ${client?.client_tone || 'profissional equilibrado'}
         Foco em conversão imediata.`,
-
-      insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
+        insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
 
 ANÁLISE PROFUNDA DO CLIENTE: ${client?.first_name}
 
@@ -733,7 +732,7 @@ Com base em TODOS os dados acima, forneça uma análise ESTRATÉGICA e PROFUNDA 
    - Como recuperar se esfriar
 
 Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`,
-      suggestTasks: `Você é um assistente de produtividade em vendas. 
+        suggestTasks: `Você é um assistente de produtividade em vendas. 
 
 Analise o cliente ${client?.first_name} e sugira 3-5 tarefas CONCRETAS e ACIONÁVEIS para avançar na venda.
 
@@ -766,14 +765,34 @@ As tarefas devem:
 - Incluir timing estratégico
 
 Seja prático e direto ao ponto.`
-    };
+      };
 
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: prompts[type]
-    });
+      if (!prompts[type]) {
+        toast.error('Ação não encontrada');
+        setQuickLoading(prev => ({ ...prev, [type]: false }));
+        return;
+      }
 
-    setGeneratedScript({ type, content: response });
-    setQuickLoading(prev => ({ ...prev, [type]: false }));
+      // Rastrear uso
+      if (window.trackAIUsage) window.trackAIUsage();
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: prompts[type]
+      });
+
+      setGeneratedScript({ type, content: response });
+      toast.success('✅ Conteúdo gerado!');
+
+    } catch (error) {
+      console.error('Erro ao gerar:', error);
+      if (error.message?.includes('limit')) {
+        toast.error('⚠️ Limite de IA atingido. Aguarde ou use cache.');
+      } else {
+        toast.error('Erro ao gerar conteúdo');
+      }
+    } finally {
+      setQuickLoading(prev => ({ ...prev, [type]: false }));
+    }
   };
 
   const handleCopyScript = () => {
