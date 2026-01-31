@@ -44,8 +44,11 @@ import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
 import WhatsAppBotIntegration from '@/components/WhatsAppBotIntegration';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
+import { useAILimit } from '@/components/AILimitProtection';
+import { getFallbackResponse } from '@/components/LocalAIFallbacks';
 
 export default function AIAssistant() {
+  const { limitReached, getCachedResponse, setCachedResponse, handleLimitError } = useAILimit();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
@@ -316,8 +319,19 @@ Comece a simulação reagindo ao que o vendedor disser.
     setLoading(true);
 
     try {
+      // Verificar limite
+      if (limitReached) {
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: '⚠️ Limite de IA atingido. Use os botões rápidos com templates locais ou aguarde reset do limite mensal.' 
+        }]);
+        setLoading(false);
+        return;
+      }
+
       // Rastrear uso
       if (window.trackAIUsage) window.trackAIUsage();
+      
       const conversationHistory = messages.slice(-6).map(m => 
         `${m.role === 'user' ? 'Vendedor' : rolePlayMode ? client?.first_name : 'Assistente'}: ${m.content}`
       ).join('\n\n');
@@ -346,18 +360,17 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error('Erro ao enviar:', error);
-      const errorMsg = error.message?.includes('limit') 
-        ? '⚠️ Limite de IA atingido. Aguarde ou use o cache.' 
+      
+      const isLimit = handleLimitError(error);
+      
+      const errorMsg = isLimit
+        ? '⚠️ Limite de IA atingido. Use os botões rápidos (templates locais disponíveis).' 
         : '⚠️ Erro ao processar. Tente novamente.';
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: errorMsg
       }]);
-      
-      if (error.message?.includes('limit')) {
-        toast.error('Limite de IA atingido. Use mensagens em cache.');
-      }
     } finally {
       setLoading(false);
     }
@@ -388,8 +401,15 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
 
     setAnalyzingTranscript(true);
     try {
+      if (limitReached) {
+        toast.error('Limite IA atingido. Análise temporariamente indisponível.');
+        setAnalyzingTranscript(false);
+        return;
+      }
+
       // Rastrear uso
       if (window.trackAIUsage) window.trackAIUsage();
+      
       const analysis = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um coach de vendas especializado. Analise esta transcrição de conversa com o cliente.
 
@@ -432,11 +452,8 @@ Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
       toast.success('Análise concluída!');
     } catch (error) {
       console.error('Erro análise:', error);
-      if (error.message?.includes('limit')) {
-        toast.error('Limite de IA atingido');
-      } else {
-        toast.error('Erro ao analisar transcrição');
-      }
+      handleLimitError(error);
+      toast.error(error.message?.includes('limit') ? 'Limite de IA atingido' : 'Erro ao analisar');
     } finally {
       setAnalyzingTranscript(false);
     }
@@ -773,6 +790,26 @@ Seja prático e direto ao ponto.`
         return;
       }
 
+      // Verificar cache primeiro
+      const cacheKey = `${type}_${client?.id || 'general'}_${client?.numerology_number}`;
+      const cachedResponse = getCachedResponse(cacheKey);
+      
+      if (cachedResponse) {
+        setGeneratedScript({ type, content: cachedResponse });
+        toast.success('📦 Usando resposta em cache');
+        setQuickLoading(prev => ({ ...prev, [type]: false }));
+        return;
+      }
+
+      // Se limite atingido, usar fallback local
+      if (limitReached) {
+        const fallback = getFallbackResponse(type, client);
+        setGeneratedScript({ type, content: fallback });
+        toast.info('📋 Usando template local (limite IA)');
+        setQuickLoading(prev => ({ ...prev, [type]: false }));
+        return;
+      }
+
       // Rastrear uso
       if (window.trackAIUsage) window.trackAIUsage();
 
@@ -780,13 +817,22 @@ Seja prático e direto ao ponto.`
         prompt: prompts[type]
       });
 
+      // Salvar no cache
+      setCachedResponse(cacheKey, response);
+
       setGeneratedScript({ type, content: response });
       toast.success('✅ Conteúdo gerado!');
 
     } catch (error) {
       console.error('Erro ao gerar:', error);
-      if (error.message?.includes('limit')) {
-        toast.error('⚠️ Limite de IA atingido. Aguarde ou use cache.');
+      
+      const isLimit = handleLimitError(error);
+      
+      if (isLimit) {
+        // Usar fallback local
+        const fallback = getFallbackResponse(type, client);
+        setGeneratedScript({ type, content: fallback });
+        toast.warning('📋 Usando template local');
       } else {
         toast.error('Erro ao gerar conteúdo');
       }
@@ -831,6 +877,12 @@ Seja prático e direto ao ponto.`
     setQuickLoading(prev => ({ ...prev, autoTasks: true }));
 
     try {
+      if (limitReached) {
+        toast.error('Limite IA atingido. Use criação manual de tarefas.');
+        setQuickLoading(prev => ({ ...prev, autoTasks: false }));
+        return;
+      }
+
       const prompt = `Você é um assistente de automação de tarefas. Analise o cliente e crie 3-5 tarefas CONCRETAS e ACIONÁVEIS.
 
 CLIENTE: ${client.first_name}
@@ -908,11 +960,8 @@ Tarefas devem:
 
     } catch (error) {
       console.error('Erro criar tarefas:', error);
-      if (error.message?.includes('limit')) {
-        toast.error('⚠️ Limite de IA atingido');
-      } else {
-        toast.error('Erro ao criar tarefas: ' + error.message);
-      }
+      handleLimitError(error);
+      toast.error(error.message?.includes('limit') ? '⚠️ Limite de IA atingido' : 'Erro ao criar tarefas');
     } finally {
       setQuickLoading(prev => ({ ...prev, autoTasks: false }));
     }
