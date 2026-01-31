@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, FileText, Loader2, Download, Sparkles, Globe, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { useAILimit } from '@/components/AILimitProtection';
 
 export default function MasterAIAssistant({ client }) {
+  const { limitReached, handleLimitError } = useAILimit();
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
@@ -24,6 +26,12 @@ export default function MasterAIAssistant({ client }) {
     setSearching(true);
     
     try {
+      if (limitReached) {
+        toast.error('⚠️ Limite de IA atingido. Pesquisa temporariamente indisponível.');
+        setSearching(false);
+        return;
+      }
+
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `PESQUISA MASTER - Forneça informações COMPLETAS sobre: "${searchQuery}"
 
@@ -65,7 +73,8 @@ Seja EXTREMAMENTE DETALHADO e PRÁTICO. Use dados reais e atualizados.`,
       toast.success('Pesquisa concluída!');
     } catch (error) {
       console.error('Erro na pesquisa:', error);
-      toast.error('Erro: ' + error.message);
+      handleLimitError(error);
+      toast.error(error.message?.includes('limit') ? '⚠️ Limite atingido' : 'Erro na pesquisa');
     } finally {
       setSearching(false);
     }

@@ -22,12 +22,14 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAILimit } from '@/components/AILimitProtection';
 
 /**
  * Live Sales Coaching Module
  * Fornece coaching em tempo real durante chamadas/role-play
  */
 export default function LiveSalesCoachingModule({ client, visits = [], interactions = [] }) {
+  const { limitReached, handleLimitError } = useAILimit();
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [realtimeFeedback, setRealtimeFeedback] = useState(null);
@@ -55,6 +57,12 @@ export default function LiveSalesCoachingModule({ client, visits = [], interacti
     
     setAnalyzing(true);
     try {
+      if (limitReached) {
+        toast.error('Limite IA atingido. Análise ao vivo indisponível.');
+        setAnalyzing(false);
+        return;
+      }
+
       const analysis = await base44.integrations.Core.InvokeLLM({
         prompt: `PRIMORI LIVE COACHING - ANÁLISE INSTANTÂNEA
 
@@ -153,6 +161,8 @@ Seja INSTANTÂNEO, DIRETO e ACIONÁVEL. Foco em micro-mudanças imediatas.`,
       }
     } catch (error) {
       console.error('Erro na análise:', error);
+      handleLimitError(error);
+      toast.error(error.message?.includes('limit') ? 'Limite atingido' : 'Erro na análise');
     } finally {
       setAnalyzing(false);
     }
@@ -163,6 +173,12 @@ Seja INSTANTÂNEO, DIRETO e ACIONÁVEL. Foco em micro-mudanças imediatas.`,
     
     setAnalyzing(true);
     try {
+      if (limitReached) {
+        toast.error('Limite IA atingido. Playbook temporariamente indisponível.');
+        setAnalyzing(false);
+        return;
+      }
+
       const playbookData = await base44.integrations.Core.InvokeLLM({
         prompt: `GERAÇÃO DE PLAYBOOK DINÂMICO
 
@@ -292,7 +308,8 @@ Seja ULTRA-ESPECÍFICO. Cada frase deve ser COPIÁVEL e USÁVEL imediatamente.`,
       setPlaybook(playbookData);
       toast.success('Playbook gerado com sucesso!');
     } catch (error) {
-      toast.error('Erro ao gerar playbook');
+      handleLimitError(error);
+      toast.error(error.message?.includes('limit') ? 'Limite atingido' : 'Erro ao gerar playbook');
     } finally {
       setAnalyzing(false);
     }
