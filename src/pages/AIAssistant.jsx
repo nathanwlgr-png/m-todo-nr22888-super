@@ -306,11 +306,18 @@ Comece a simulação reagindo ao que o vendedor disser.
   const sendMessage = async (userMessage) => {
     if (!userMessage.trim()) return;
     
+    if (!client && !rolePlayMode) {
+      toast.error('Selecione um cliente primeiro');
+      return;
+    }
+
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setLoading(true);
 
     try {
+      // Rastrear uso
+      if (window.trackAIUsage) window.trackAIUsage();
       const conversationHistory = messages.slice(-6).map(m => 
         `${m.role === 'user' ? 'Vendedor' : rolePlayMode ? client?.first_name : 'Assistente'}: ${m.content}`
       ).join('\n\n');
@@ -338,10 +345,19 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
 
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
+      console.error('Erro ao enviar:', error);
+      const errorMsg = error.message?.includes('limit') 
+        ? '⚠️ Limite de IA atingido. Aguarde ou use o cache.' 
+        : '⚠️ Erro ao processar. Tente novamente.';
+      
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: '⚠️ Erro ao processar. Tente novamente.' 
+        content: errorMsg
       }]);
+      
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido. Use mensagens em cache.');
+      }
     } finally {
       setLoading(false);
     }
@@ -365,8 +381,15 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
   };
 
   const analyzeTranscript = async (transcriptText) => {
+    if (!client) {
+      toast.error('Selecione um cliente primeiro');
+      return;
+    }
+
     setAnalyzingTranscript(true);
     try {
+      // Rastrear uso
+      if (window.trackAIUsage) window.trackAIUsage();
       const analysis = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um coach de vendas especializado. Analise esta transcrição de conversa com o cliente.
 
@@ -406,8 +429,14 @@ Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
         role: 'assistant',
         content: `📊 **ANÁLISE DA CONVERSA**\n\n${analysis}`
       }]);
+      toast.success('Análise concluída!');
     } catch (error) {
-      alert('Erro ao analisar transcrição');
+      console.error('Erro análise:', error);
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido');
+      } else {
+        toast.error('Erro ao analisar transcrição');
+      }
     } finally {
       setAnalyzingTranscript(false);
     }
@@ -426,10 +455,16 @@ Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
   };
 
   const generateQuickAction = async (type) => {
+    if (!client && type !== 'autoTasks') {
+      toast.error('Selecione um cliente primeiro');
+      return;
+    }
+
     setQuickLoading(prev => ({ ...prev, [type]: true }));
     setGeneratedScript(null);
 
-    const prompts = {
+    try {
+      const prompts = {
       presentation: `Você é um especialista em comunicação e vendas consultivas.
 
 Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato com ${client?.first_name}.
@@ -603,9 +638,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         
         Tom: ${client?.client_tone || 'profissional equilibrado'}
         Foco em conversão imediata.`,
-      autoTasks: async () => {
-        await handleAutoCreateTasks();
-      },
+
       insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
 
 ANÁLISE PROFUNDA DO CLIENTE: ${client?.first_name}
@@ -842,6 +875,9 @@ Tarefas devem:
         auto_created: true
       }));
 
+      // Rastrear uso
+      if (window.trackAIUsage) window.trackAIUsage();
+
       await createTasksMutation.mutateAsync(tasksToCreate);
       
       setMessages(prev => [...prev, {
@@ -852,7 +888,12 @@ Tarefas devem:
       }]);
 
     } catch (error) {
-      toast.error('Erro ao criar tarefas: ' + error.message);
+      console.error('Erro criar tarefas:', error);
+      if (error.message?.includes('limit')) {
+        toast.error('⚠️ Limite de IA atingido');
+      } else {
+        toast.error('Erro ao criar tarefas: ' + error.message);
+      }
     } finally {
       setQuickLoading(prev => ({ ...prev, autoTasks: false }));
     }
