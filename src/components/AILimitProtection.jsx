@@ -35,9 +35,14 @@ export function AILimitProtection({ children }) {
   };
 
   const handleLimitError = (error) => {
-    if (error.message?.includes('limit') || error.message?.includes('reached')) {
+    const isLimitError = 
+      error.message?.includes('limit') || 
+      error.message?.includes('reached') ||
+      error.message?.toLowerCase().includes('upgrade your plan');
+    
+    if (isLimitError) {
       setLimitReached(true);
-      toast.error('⚠️ Limite de IA atingido. Usando respostas em cache.');
+      toast.error('⚠️ Limite de IA atingido. Usando cache e templates locais.', { duration: 5000 });
       return true;
     }
     return false;

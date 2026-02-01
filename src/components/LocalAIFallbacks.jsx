@@ -171,3 +171,25 @@ export const getFallbackResponse = (type, client) => {
   const fn = localFallbacks[type];
   return fn ? fn(client) : 'Conteúdo não disponível no momento. Tente novamente mais tarde.';
 };
+
+// Fallback genérico para qualquer prompt
+export const getGenericFallback = (context = '') => {
+  return `⚠️ **MODO OFFLINE - RESPOSTA LOCAL**
+
+O limite mensal de IA foi atingido. Esta é uma resposta genérica baseada em templates locais.
+
+**Contexto:** ${context}
+
+**Ações Disponíveis:**
+1. Use os botões rápidos com templates pré-programados
+2. Consulte o cache de respostas anteriores
+3. Aguarde reset mensal do limite
+
+**Recursos Offline:**
+- Templates de apresentação
+- Guias de objeções
+- Scripts de follow-up
+- Playbooks estáticos
+
+Entre em contato com suporte para upgrade do plano.`;
+};
