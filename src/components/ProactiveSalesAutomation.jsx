@@ -31,6 +31,8 @@ export default function ProactiveSalesAutomation({ client, visits = [], interact
         `ANÁLISE PROATIVA DE VENDAS - ${client.first_name}
 
 DADOS DO CLIENTE:
+- Nome Decisor: ${client.first_name || '[Nome não definido - NÃO preencher]'}
+- Clínica: ${client.clinic_name || 'Não informada'}
 - Status: ${client.status} | Score: ${client.purchase_score}%
 - Pipeline: ${client.pipeline_stage || 'lead'}
 - Última interação: há ${daysSinceContact} dias
@@ -38,6 +40,8 @@ DADOS DO CLIENTE:
 - Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
 - Objeções: ${client.real_objections?.join(', ') || 'Nenhuma'}
 - Equipamento interesse: ${client.equipment_interest || 'Não definido'}
+
+IMPORTANTE: Se o nome do decisor não estiver disponível, use APENAS "contato" ou "você" nas mensagens. NUNCA invente nomes ou use placeholders genéricos.
 
 HISTÓRICO COMPORTAMENTAL:
 - Melhor canal: ${client.communication_preferences?.preferred_channel || 'WhatsApp'}
