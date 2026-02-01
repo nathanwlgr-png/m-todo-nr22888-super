@@ -43,6 +43,7 @@ import MasterAIAssistant from '@/components/MasterAIAssistant';
 import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
 import WhatsAppBotIntegration from '@/components/WhatsAppBotIntegration';
 import ProactiveSalesAutomation from '@/components/ProactiveSalesAutomation';
+import EditableClientName from '@/components/EditableClientName';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
@@ -486,7 +487,9 @@ Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
       const prompts = {
         presentation: `Você é um especialista em comunicação e vendas consultivas.
 
-Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato com ${client?.first_name}.
+Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato${client?.first_name ? ' com ' + client.first_name : ''}.
+
+IMPORTANTE: Se o nome do decisor não estiver disponível, use "você" ou "contato" nas sugestões. NUNCA use placeholders como [nome] ou invente nomes.
 
 ═══════════════════════════════════════
 📊 PERFIL NUMEROLÓGICO COMPLETO
@@ -586,16 +589,20 @@ Fique atento a estes sinais no primeiro contato:
 - 🟢 Sinal de engajamento: ...
 
 Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil numerológico.`,
-        question: `Gere UMA pergunta SPIN Selling para abrir a conversa com ${client?.first_name}. 
+        question: `Gere UMA pergunta SPIN Selling para abrir a conversa${client?.first_name ? ' com ' + client.first_name : ''}. 
         Numerologia: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
         
+        IMPORTANTE: Se o nome não estiver disponível, formule a pergunta de forma neutra sem usar nome.
+        
         Use SPIN (Situation/Problem/Implication/Need-Payoff) adaptado ao perfil numerológico.
         Indique qual tipo SPIN você usou.`,
-        objection: `Controle de objeção estratégico para ${client?.first_name}.
+        objection: `Controle de objeção estratégico${client?.first_name ? ' para ' + client.first_name : ''}.
         
         PERFIL: Numerologia ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Tom: ${client?.client_tone || 'padrão'}
+        
+        IMPORTANTE: Se nome não disponível, use forma neutra ("Entendo sua preocupação..." ao invés de "Entendo, [nome]...")
         
         Combine:
         1. SPIN Selling: Transforme objeção em pergunta de Implication
@@ -609,11 +616,13 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         - Tom emocional ideal (Int. Emocional)
         
         Seja estratégico e multi-framework.`,
-        closing: `Sugira UMA frase de fechamento adequada para ${client?.first_name}.
-        Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.`,
-        followup: `Crie UMA mensagem de follow-up curta e profissional para ${client?.first_name}.
-        Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.`,
-        prospecting: `Crie técnicas de prospecção personalizadas para ${client?.first_name}.
+        closing: `Sugira UMA frase de fechamento adequada${client?.first_name ? ' para ' + client.first_name : ''}.
+        Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.
+        Se nome não disponível, use abordagem direta sem personalização.`,
+        followup: `Crie UMA mensagem de follow-up curta e profissional${client?.first_name ? ' para ' + client.first_name : ''}.
+        Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.
+        Se nome não disponível, inicie com "Olá!" apenas.`,
+        prospecting: `Crie técnicas de prospecção personalizadas${client?.first_name ? ' para ' + client.first_name : ''}.
         
         PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
@@ -626,7 +635,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         4) Primeira frase de impacto personalizada
         
         Seja prático e acionável.`,
-        needs: `Analise o histórico e preveja necessidades futuras de ${client?.first_name}.
+        needs: `Analise o histórico e preveja necessidades futuras${client?.first_name ? ' de ' + client.first_name : ''}.
         
         HISTÓRICO:
         - Visitas: ${visits.length}
@@ -641,7 +650,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         4) Gatilho emocional/prático a explorar na próxima interação
         
         Seja estratégico e preditivo.`,
-        proposal: `Crie uma proposta comercial personalizada para ${client?.first_name}.
+        proposal: `Crie uma proposta comercial personalizada${client?.first_name ? ' para ' + client.first_name : ''}.
         
         PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
         Tom de voz: ${client?.client_tone || 'padrão'}
@@ -659,7 +668,7 @@ Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil 
         Foco em conversão imediata.`,
         insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
 
-ANÁLISE PROFUNDA DO CLIENTE: ${client?.first_name}
+ANÁLISE PROFUNDA DO CLIENTE${client?.first_name ? ': ' + client.first_name : ''}
 
 ═══════════════════════════════════════
 📊 DADOS NUMEROLÓGICOS
@@ -753,7 +762,7 @@ Com base em TODOS os dados acima, forneça uma análise ESTRATÉGICA e PROFUNDA 
 Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`,
         suggestTasks: `Você é um assistente de produtividade em vendas. 
 
-Analise o cliente ${client?.first_name} e sugira 3-5 tarefas CONCRETAS e ACIONÁVEIS para avançar na venda.
+Analise o cliente${client?.first_name ? ' ' + client.first_name : ''} e sugira 3-5 tarefas CONCRETAS e ACIONÁVEIS para avançar na venda.
 
 DADOS DO CLIENTE:
 - Perfil: ${client?.numerology_number} - ${client?.behavioral_profile}
@@ -1149,9 +1158,18 @@ Tarefas devem:
             </SelectContent>
           </Select>
           {client && (
-            <p className="text-xs text-slate-500">
-              {client.client_type ? `${client.client_type}` : 'Cliente'} • Score: {client.purchase_score}%
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-600">Decisor:</span>
+                <EditableClientName 
+                  client={client} 
+                  onUpdate={() => queryClient.invalidateQueries(['client', selectedClientId])}
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                {client.client_type ? `${client.client_type}` : 'Cliente'} • Score: {client.purchase_score}%
+              </p>
+            </div>
           )}
         </div>
       </div>

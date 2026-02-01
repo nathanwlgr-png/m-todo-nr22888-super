@@ -28,7 +28,7 @@ export default function ProactiveSalesAutomation({ client, visits = [], interact
         : 999;
 
       const analysis = await safeInvokeLLM(
-        `ANÁLISE PROATIVA DE VENDAS - ${client.first_name}
+        `ANÁLISE PROATIVA DE VENDAS${client.first_name ? ' - ' + client.first_name : ''}
 
 DADOS DO CLIENTE:
 - Nome Decisor: ${client.first_name || '[Nome não definido - NÃO preencher]'}
