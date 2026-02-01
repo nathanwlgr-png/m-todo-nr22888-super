@@ -29,7 +29,7 @@ import { useAILimit } from '@/components/AILimitProtection';
  * Fornece coaching em tempo real durante chamadas/role-play
  */
 export default function LiveSalesCoachingModule({ client, visits = [], interactions = [] }) {
-  const { limitReached, handleLimitError } = useAILimit();
+  const { limitReached, handleLimitError, quotaExceeded, checkQuotaBeforeCall, trackAICall } = useAILimit();
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [realtimeFeedback, setRealtimeFeedback] = useState(null);
@@ -55,13 +55,14 @@ export default function LiveSalesCoachingModule({ client, visits = [], interacti
   const analyzeRealtimeConversation = async () => {
     if (!client || analyzing) return;
     
+    if (limitReached || quotaExceeded || !checkQuotaBeforeCall()) {
+      toast.error('Limite IA atingido. Análise indisponível.');
+      return;
+    }
+    
     setAnalyzing(true);
     try {
-      if (limitReached) {
-        toast.error('Limite IA atingido. Análise ao vivo indisponível.');
-        setAnalyzing(false);
-        return;
-      }
+      trackAICall();
 
       const analysis = await base44.integrations.Core.InvokeLLM({
         prompt: `PRIMORI LIVE COACHING - ANÁLISE INSTANTÂNEA
@@ -171,13 +172,14 @@ Seja INSTANTÂNEO, DIRETO e ACIONÁVEL. Foco em micro-mudanças imediatas.`,
   const generateDynamicPlaybook = async () => {
     if (!client) return;
     
+    if (limitReached || quotaExceeded || !checkQuotaBeforeCall()) {
+      toast.error('Limite IA atingido. Playbook indisponível.');
+      return;
+    }
+    
     setAnalyzing(true);
     try {
-      if (limitReached) {
-        toast.error('Limite IA atingido. Playbook temporariamente indisponível.');
-        setAnalyzing(false);
-        return;
-      }
+      trackAICall();
 
       const playbookData = await base44.integrations.Core.InvokeLLM({
         prompt: `GERAÇÃO DE PLAYBOOK DINÂMICO
@@ -359,6 +361,7 @@ Seja ULTRA-ESPECÍFICO. Cada frase deve ser COPIÁVEL e USÁVEL imediatamente.`,
         <div className="flex gap-2">
           <Button
             onClick={toggleLiveMode}
+            disabled={limitReached || quotaExceeded}
             className={`flex-1 ${isLiveMode ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'}`}
           >
             {isLiveMode ? (
@@ -375,7 +378,7 @@ Seja ULTRA-ESPECÍFICO. Cada frase deve ser COPIÁVEL e USÁVEL imediatamente.`,
           </Button>
           <Button
             onClick={generateDynamicPlaybook}
-            disabled={analyzing}
+            disabled={analyzing || limitReached || quotaExceeded}
             variant="outline"
             className="flex-1 border-purple-300"
           >

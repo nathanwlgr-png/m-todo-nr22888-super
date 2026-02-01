@@ -11,7 +11,7 @@ import jsPDF from 'jspdf';
 import { useAILimit } from '@/components/AILimitProtection';
 
 export default function MasterAIAssistant({ client }) {
-  const { limitReached, handleLimitError } = useAILimit();
+  const { limitReached, handleLimitError, quotaExceeded, checkQuotaBeforeCall, trackAICall } = useAILimit();
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
@@ -23,15 +23,17 @@ export default function MasterAIAssistant({ client }) {
       return;
     }
 
+    if (limitReached || quotaExceeded || !checkQuotaBeforeCall()) {
+      toast.error('⚠️ Limite de IA atingido. Pesquisa indisponível.');
+      return;
+    }
+
     setSearching(true);
     
     try {
-      if (limitReached) {
-        toast.error('⚠️ Limite de IA atingido. Pesquisa temporariamente indisponível.');
-        setSearching(false);
-        return;
-      }
 
+      trackAICall();
+      
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `PESQUISA MASTER - Forneça informações COMPLETAS sobre: "${searchQuery}"
 
@@ -203,7 +205,7 @@ Seja EXTREMAMENTE DETALHADO e PRÁTICO. Use dados reais e atualizados.`,
               />
               <Button
                 onClick={() => instantSearch()}
-                disabled={searching}
+                disabled={searching || limitReached || quotaExceeded}
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 {searching ? (
@@ -224,7 +226,7 @@ Seja EXTREMAMENTE DETALHADO e PRÁTICO. Use dados reais e atualizados.`,
                       setQuery(item.query);
                       instantSearch(item.query);
                     }}
-                    disabled={searching}
+                    disabled={searching || limitReached || quotaExceeded}
                     variant="outline"
                     size="sm"
                     className="h-auto py-2 text-xs"
@@ -243,7 +245,7 @@ Seja EXTREMAMENTE DETALHADO e PRÁTICO. Use dados reais e atualizados.`,
                 <div className="flex flex-col gap-1">
                   <Button
                     onClick={() => instantSearch(`Clínicas veterinárias ${client.city} equipamentos diagnóstico mercado análise`)}
-                    disabled={searching}
+                    disabled={searching || limitReached || quotaExceeded}
                     variant="outline"
                     size="sm"
                     className="text-xs h-8"
@@ -253,7 +255,7 @@ Seja EXTREMAMENTE DETALHADO e PRÁTICO. Use dados reais e atualizados.`,
                   {client.equipment_interest && (
                     <Button
                       onClick={() => instantSearch(`${client.equipment_interest} especificações técnicas casos de sucesso preços`)}
-                      disabled={searching}
+                      disabled={searching || limitReached || quotaExceeded}
                       variant="outline"
                       size="sm"
                       className="text-xs h-8"
