@@ -42,6 +42,7 @@ import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
 import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
 import WhatsAppBotIntegration from '@/components/WhatsAppBotIntegration';
+import ProactiveSalesAutomation from '@/components/ProactiveSalesAutomation';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
@@ -69,6 +70,7 @@ export default function AIAssistant() {
   const [showMasterAI, setShowMasterAI] = useState(false);
   const [showLiveCoaching, setShowLiveCoaching] = useState(false);
   const [showWhatsAppBot, setShowWhatsAppBot] = useState(false);
+  const [showProactive, setShowProactive] = useState(true);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -1095,6 +1097,15 @@ Tarefas devem:
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowProactive(!showProactive)}
+            className={showProactive ? 'bg-indigo-100 border-indigo-300' : ''}
+          >
+            <Zap className="w-4 h-4 mr-1" />
+            Auto
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={exportChatToPDF}
             disabled={messages.length === 0}
           >
@@ -1383,6 +1394,17 @@ Tarefas devem:
       {showWhatsAppBot && (
         <div className="px-4 pt-4">
           <WhatsAppBotIntegration />
+        </div>
+      )}
+
+      {/* Proactive Sales Automation */}
+      {showProactive && client && (
+        <div className="px-4 pt-4">
+          <ProactiveSalesAutomation 
+            client={client} 
+            visits={visits}
+            interactions={[...followupLogs, ...tasks]}
+          />
         </div>
       )}
 
