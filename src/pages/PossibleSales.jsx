@@ -96,22 +96,40 @@ export default function PossibleSales() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
-      <div className="bg-gradient-to-br from-emerald-900 to-teal-700 px-4 pt-4 pb-12">
-        <div className="flex items-center gap-4 mb-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full glass">
+      {/* Header azul fino */}
+      <div className="bg-blue-600 px-4 py-3 sticky top-0 z-10 shadow-md">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-1.5 -ml-2 rounded-full hover:bg-blue-700 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold text-white">Possíveis Vendas</h1>
-            <p className="text-sm text-emerald-200">Leads de busca regional</p>
+            <h1 className="text-base font-bold text-white">Possíveis Vendas</h1>
           </div>
-          <Badge className="bg-white/20 text-white text-lg px-3 py-1">
+          <Badge className="bg-blue-900 text-white text-sm px-2.5 py-0.5">
             {filteredLeads.length}
           </Badge>
         </div>
       </div>
 
-      <div className="px-4 -mt-8 space-y-4">
+      {/* Stats azul escuro */}
+      <div className="bg-blue-900 px-4 py-4">
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">{leads.filter(l => l.status === 'novo').length}</p>
+            <p className="text-xs text-blue-200">Novos</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">{leads.filter(l => l.status === 'qualificado').length}</p>
+            <p className="text-xs text-blue-200">Qualificados</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">{leads.filter(l => l.status === 'contatado').length}</p>
+            <p className="text-xs text-blue-200">Contatados</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 pt-4 space-y-4">
         {/* Search & Filters */}
         <Card className="p-4">
           <div className="space-y-3">
@@ -149,22 +167,6 @@ export default function PossibleSales() {
             </div>
           </div>
         </Card>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-blue-700">{leads.filter(l => l.status === 'novo').length}</p>
-            <p className="text-xs text-slate-600">Novos</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-green-700">{leads.filter(l => l.status === 'qualificado').length}</p>
-            <p className="text-xs text-slate-600">Qualificados</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-purple-700">{leads.filter(l => l.status === 'contatado').length}</p>
-            <p className="text-xs text-slate-600">Contatados</p>
-          </Card>
-        </div>
 
         {/* Leads List */}
         <div className="space-y-3">
