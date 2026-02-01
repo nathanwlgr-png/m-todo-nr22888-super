@@ -50,7 +50,7 @@ import { useAILimit } from '@/components/AILimitProtection';
 import { getFallbackResponse } from '@/components/LocalAIFallbacks';
 
 export default function AIAssistant() {
-  const { limitReached, getCachedResponse, setCachedResponse, handleLimitError } = useAILimit();
+  const { limitReached, getCachedResponse, setCachedResponse, handleLimitError, checkQuotaBeforeCall, trackAICall, quotaExceeded } = useAILimit();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
@@ -322,17 +322,28 @@ Comece a simulação reagindo ao que o vendedor disser.
     setLoading(true);
 
     try {
-      // Verificar limite
+      // Verificar quota diária primeiro
+      if (quotaExceeded || !checkQuotaBeforeCall()) {
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: '⏱️ Quota diária atingida. Use botões rápidos (templates locais). Reset automático amanhã.' 
+        }]);
+        setLoading(false);
+        return;
+      }
+
+      // Verificar limite mensal
       if (limitReached) {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: '⚠️ Limite de IA atingido. Use os botões rápidos com templates locais ou aguarde reset do limite mensal.' 
+          content: '⚠️ Limite mensal atingido. Use os botões rápidos com templates locais.' 
         }]);
         setLoading(false);
         return;
       }
 
       // Rastrear uso
+      trackAICall();
       if (window.trackAIUsage) window.trackAIUsage();
       
       const conversationHistory = messages.slice(-6).map(m => 
@@ -812,16 +823,17 @@ Seja prático e direto ao ponto.`
         return;
       }
 
-      // Se limite atingido, usar fallback local
-      if (limitReached) {
+      // Se quota ou limite atingido, usar fallback local
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
         const fallback = getFallbackResponse(type, client);
         setGeneratedScript({ type, content: fallback });
-        toast.info('📋 Usando template local (limite IA)');
+        toast.info(quotaExceeded ? '⏱️ Quota diária - template local' : '📋 Template local (limite IA)');
         setQuickLoading(prev => ({ ...prev, [type]: false }));
         return;
       }
 
       // Rastrear uso
+      trackAICall();
       if (window.trackAIUsage) window.trackAIUsage();
 
       const response = await base44.integrations.Core.InvokeLLM({
