@@ -422,6 +422,7 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
       }
 
       // Rastrear uso
+      trackAICall();
       if (window.trackAIUsage) window.trackAIUsage();
       
       const analysis = await base44.integrations.Core.InvokeLLM({
@@ -900,8 +901,8 @@ Seja prático e direto ao ponto.`
     setQuickLoading(prev => ({ ...prev, autoTasks: true }));
 
     try {
-      if (limitReached) {
-        toast.error('Limite IA atingido. Use criação manual de tarefas.');
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
+        toast.error(quotaExceeded ? 'Quota diária atingida. Reset amanhã.' : 'Limite IA atingido.');
         setQuickLoading(prev => ({ ...prev, autoTasks: false }));
         return;
       }
@@ -970,6 +971,7 @@ Tarefas devem:
       }));
 
       // Rastrear uso
+      trackAICall();
       if (window.trackAIUsage) window.trackAIUsage();
 
       await createTasksMutation.mutateAsync(tasksToCreate);
