@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, BarChart3, TrendingUp, Calendar, Target } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ProbabilityAnalysisAI({ client }) {
   const [analyzing, setAnalyzing] = useState(false);
@@ -26,19 +27,25 @@ export default function ProbabilityAnalysisAI({ client }) {
   });
 
   const analyzeProbability = async () => {
+    if (!client?.purchase_score && !client?.status) {
+      toast.error('Cliente precisa ter dados básicos (status ou score)');
+      return;
+    }
+    
     setAnalyzing(true);
     try {
       // Dados estatísticos
       const clientsWithSameProfile = allClients.filter(c => 
-        c.numerology_number === client.numerology_number
+        c && c.numerology_number === client.numerology_number
       );
       
       const clientsWithSameType = allClients.filter(c => 
-        c.client_type === client.client_type
+        c && c.client_type === client.client_type
       );
 
       const salesBySimilarClients = allSales.filter(s => {
-        const saleClient = allClients.find(c => c.id === s.client_id);
+        if (!s?.client_id) return false;
+        const saleClient = allClients.find(c => c && c.id === s.client_id);
         return saleClient && (
           saleClient.numerology_number === client.numerology_number ||
           saleClient.client_type === client.client_type
@@ -46,7 +53,8 @@ export default function ProbabilityAnalysisAI({ client }) {
       });
 
       const visitsBySimilarClients = allVisits.filter(v => {
-        const visitClient = allClients.find(c => c.id === v.client_id);
+        if (!v?.client_id) return false;
+        const visitClient = allClients.find(c => c && c.id === v.client_id);
         return visitClient && visitClient.numerology_number === client.numerology_number;
       });
 
@@ -159,10 +167,15 @@ Retorne JSON:
         }
       });
 
-      setAnalysis(result);
+      if (result?.closing_probability) {
+        setAnalysis(result);
+        toast.success('Análise probabilística concluída!');
+      } else {
+        toast.error('Erro ao processar análise');
+      }
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao analisar probabilidade');
+      toast.error(error.message || 'Erro ao analisar probabilidade');
     } finally {
       setAnalyzing(false);
     }

@@ -24,6 +24,11 @@ export default function CompetitorAnalysisModule({ client }) {
   });
 
   const analyzeCompetitors = async () => {
+    if (!client?.city && !client?.clinic_name) {
+      toast.error('Cliente precisa ter cidade ou nome da clínica');
+      return;
+    }
+    
     setLoading(true);
     try {
       const prompt = `Você é um analista de inteligência competitiva para equipamentos veterinários.
@@ -120,11 +125,15 @@ Use dados públicos: Google Maps, redes sociais, websites, eventos do setor, ava
         }
       });
 
-      setCompetitors(result.competitors || []);
-      toast.success(`${result.competitors?.length || 0} competidores analisados!`);
+      if (result?.competitors && Array.isArray(result.competitors)) {
+        setCompetitors(result.competitors);
+        toast.success(`${result.competitors.length} competidores identificados!`);
+      } else {
+        toast.error('Nenhum competidor encontrado');
+      }
     } catch (error) {
-      toast.error('Erro ao analisar competidores');
-      console.error(error);
+      console.error('Erro:', error);
+      toast.error(error.message || 'Erro ao analisar competidores');
     } finally {
       setLoading(false);
     }

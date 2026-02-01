@@ -4,12 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, Calendar, Star, Moon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function NumerologyBestDayAI({ client }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
 
   const analyzeBestDay = async () => {
+    if (!client?.numerology_number && !client?.life_path_number) {
+      toast.error('Cliente precisa ter número numerológico calculado');
+      return;
+    }
+    
     setAnalyzing(true);
     try {
       const today = new Date();
@@ -144,20 +150,26 @@ Retorne JSON:
         }
       });
 
-      setAnalysis(result);
+      if (result?.best_day) {
+        setAnalysis(result);
 
-      // Salvar melhores dias no cliente
-      const bestDays = [
-        result.best_day,
-        ...result.alternative_days.map(d => d.date)
-      ];
+        // Salvar melhores dias no cliente
+        const bestDays = [
+          result.best_day,
+          ...(result.alternative_days || []).map(d => d.date)
+        ].filter(Boolean);
 
-      await base44.entities.Client.update(client.id, {
-        melhores_dias_venda: bestDays
-      });
+        await base44.entities.Client.update(client.id, {
+          melhores_dias_venda: bestDays
+        });
+        
+        toast.success('Melhores dias calculados!');
+      } else {
+        toast.error('Erro ao processar análise numerológica');
+      }
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao calcular melhor dia');
+      toast.error(error.message || 'Erro ao calcular melhor dia');
     } finally {
       setAnalyzing(false);
     }
