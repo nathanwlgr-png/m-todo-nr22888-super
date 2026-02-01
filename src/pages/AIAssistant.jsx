@@ -415,8 +415,8 @@ INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
 
     setAnalyzingTranscript(true);
     try {
-      if (limitReached) {
-        toast.error('Limite IA atingido. Análise temporariamente indisponível.');
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
+        toast.error(quotaExceeded ? 'Quota diária atingida. Reset amanhã.' : 'Limite IA atingido.');
         setAnalyzingTranscript(false);
         return;
       }
