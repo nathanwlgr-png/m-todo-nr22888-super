@@ -1211,17 +1211,16 @@ Tarefas devem:
                 </Button>
               )}
               <a 
-                href={base44.agents.getWhatsAppConnectURL('sales_assistant')} 
+                href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} 
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold"
                 >
                   <MessageCircle className="w-4 h-4 mr-1" />
-                  💬 Agente WhatsApp
+                  💬 Master WhatsApp
                 </Button>
               </a>
               <Button
