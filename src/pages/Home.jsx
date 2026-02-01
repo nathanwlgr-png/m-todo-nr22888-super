@@ -748,6 +748,12 @@ Retorne até 15 clínicas.`,
               <span className="text-xs">Coaching</span>
             </Button>
           </Link>
+          <Link to={createPageUrl('RolePlayTraining')}>
+            <Button size="sm" className="w-full h-12 flex-col bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+              <Play className="w-4 h-4 mb-1" />
+              <span className="text-xs font-semibold">Role-Play IA</span>
+            </Button>
+          </Link>
         </div>
 
           {/* Stock & Forecast */}
