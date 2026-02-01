@@ -1220,7 +1220,7 @@ Tarefas devem:
                   className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold"
                 >
                   <MessageCircle className="w-4 h-4 mr-1" />
-                  💬 Master WhatsApp
+                  💬 NR22888
                 </Button>
               </a>
               <Button
