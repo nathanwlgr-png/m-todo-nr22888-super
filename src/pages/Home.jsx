@@ -287,6 +287,31 @@ Retorne até 15 clínicas.`,
           selectedClient={selectedClientForAnalysis}
         />
 
+        {/* LINK WHATSAPP NR22888 */}
+        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888</h3>
+              <p className="text-xs text-green-700">IA Master com acesso total ao CRM</p>
+            </div>
+          </div>
+          <Button 
+            onClick={() => {
+              const url = base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant');
+              navigator.clipboard.writeText(url);
+              toast.success('Link copiado! Envie para o vendedor acessar a IA', { duration: 4000 });
+              window.open(url, '_blank');
+            }}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Abrir/Copiar Link WhatsApp
+          </Button>
+        </Card>
+
         {/* ASSISTENTE IA WHATSAPP MASTER (PRIMORI) - PRIMEIRO */}
         <WhatsAppMasterAssistant />
 

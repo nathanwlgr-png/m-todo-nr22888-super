@@ -130,6 +130,7 @@ import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import RevenueForecastPage from './pages/RevenueForecastPage';
+import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
@@ -153,7 +154,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import RolePlayTraining from './pages/RolePlayTraining';
 import __Layout from './Layout.jsx';
 
 
@@ -241,6 +241,7 @@ export const PAGES = {
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
     "RevenueForecastPage": RevenueForecastPage,
+    "RolePlayTraining": RolePlayTraining,
     "RouteOptimizer": RouteOptimizer,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
@@ -264,7 +265,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "RolePlayTraining": RolePlayTraining,
 }
 
 export const pagesConfig = {
