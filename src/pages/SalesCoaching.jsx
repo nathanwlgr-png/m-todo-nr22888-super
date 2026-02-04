@@ -11,6 +11,7 @@ import WeeklyChallengesSystem from '@/components/WeeklyChallengesSystem';
 import AutomatedSalesPlaybook from '@/components/AutomatedSalesPlaybook';
 import IndividualCoachingDashboard from '@/components/IndividualCoachingDashboard';
 import ProgressTracker from '@/components/ProgressTracker';
+import ActionPlanGenerator from '@/components/ActionPlanGenerator';
 
 export default function SalesCoaching() {
   const navigate = useNavigate();
@@ -30,13 +31,16 @@ export default function SalesCoaching() {
         </div>
 
         <Tabs defaultValue="analysis" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="analysis">
               <Award className="w-4 h-4 mr-2" />
               Análise
             </TabsTrigger>
             <TabsTrigger value="progress">
               Progresso
+            </TabsTrigger>
+            <TabsTrigger value="action">
+              Plano
             </TabsTrigger>
             <TabsTrigger value="playbook">
               Playbook
@@ -60,6 +64,10 @@ export default function SalesCoaching() {
 
           <TabsContent value="progress" className="space-y-4 mt-4">
             <ProgressTracker />
+          </TabsContent>
+
+          <TabsContent value="action" className="space-y-4 mt-4">
+            <ActionPlanGenerator />
           </TabsContent>
 
           <TabsContent value="playbook" className="space-y-4 mt-4">

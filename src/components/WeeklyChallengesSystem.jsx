@@ -32,11 +32,38 @@ export default function WeeklyChallengesSystem() {
     }
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me()
+  });
+
   const completedThisWeek = challenges.filter(c => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     return c.completed && new Date(c.created_date) > weekAgo;
   }).length;
+
+  const totalPoints = challenges.filter(c => c.completed).reduce((sum, c) => sum + (c.points || 0), 0);
+  const streak = calculateStreak(challenges);
+  
+  function calculateStreak(challenges) {
+    const sortedCompleted = challenges
+      .filter(c => c.completed && c.completed_date)
+      .sort((a, b) => new Date(b.completed_date) - new Date(a.completed_date));
+    
+    if (sortedCompleted.length === 0) return 0;
+    
+    let currentStreak = 1;
+    for (let i = 0; i < sortedCompleted.length - 1; i++) {
+      const current = new Date(sortedCompleted[i].completed_date);
+      const next = new Date(sortedCompleted[i + 1].completed_date);
+      const daysDiff = Math.floor((current - next) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff <= 7) currentStreak++;
+      else break;
+    }
+    return currentStreak;
+  }
 
   const generateWeeklyChallenges = async () => {
     setGeneratingChallenges(true);
@@ -161,6 +188,25 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Gamificação Stats */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-3 bg-white rounded-lg border-2 border-orange-200 text-center">
+            <Trophy className="w-5 h-5 text-orange-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-orange-900">{totalPoints}</p>
+            <p className="text-xs text-gray-600">Total Pontos</p>
+          </div>
+          <div className="p-3 bg-white rounded-lg border-2 border-red-200 text-center">
+            <Flame className="w-5 h-5 text-red-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-red-900">{streak}</p>
+            <p className="text-xs text-gray-600">Sequência</p>
+          </div>
+          <div className="p-3 bg-white rounded-lg border-2 border-green-200 text-center">
+            <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto mb-1" />
+            <p className="text-xl font-bold text-green-900">{completedThisWeek}</p>
+            <p className="text-xs text-gray-600">Esta Semana</p>
+          </div>
+        </div>
+
         {/* Progresso Semanal */}
         <div className="p-3 bg-white rounded-lg border-2 border-orange-200">
           <div className="flex items-center justify-between mb-2">
@@ -176,7 +222,7 @@ Crie 3 desafios ESPECÍFICOS, MENSURÁVEIS e ALCANÇÁVEIS para esta semana:`;
           {completedThisWeek === currentWeekChallenges.length && currentWeekChallenges.length > 0 && (
             <div className="mt-2 flex items-center gap-2 text-xs text-green-600">
               <Flame className="w-4 h-4" />
-              <span>Todos os desafios completados! 🔥</span>
+              <span>Todos completados! +50 pontos bônus! 🔥</span>
             </div>
           )}
         </div>

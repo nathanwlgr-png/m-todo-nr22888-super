@@ -20,38 +20,54 @@ export default function RolePlaySimulator() {
   const [realtimeFeedback, setRealtimeFeedback] = useState([]);
   const messagesEndRef = useRef(null);
 
+  const [objectionsMode, setObjectionsMode] = useState(false);
+  const [objectionsQueue, setObjectionsQueue] = useState([]);
+  
   const clientProfiles = [
     {
       id: 'cautious',
       name: 'Dr. Carlos Silva',
       type: 'Cauteloso/Analítico',
       difficulty: 'Difícil',
-      objections: ['Preço alto', 'Precisa de tempo', 'Comparar com concorrência'],
-      personality: 'Analítico, desconfiado, precisa de dados e tempo para decidir'
+      objections: ['Preço muito alto', 'Preciso comparar com concorrentes', 'Não tenho tempo agora', 'Quero ver estudos de caso'],
+      personality: 'Analítico, desconfiado, precisa de dados concretos e tempo para decidir',
+      objection_frequency: 'high'
     },
     {
       id: 'enthusiast',
       name: 'Dra. Ana Costa',
       type: 'Entusiasta/Rápido',
       difficulty: 'Médio',
-      objections: ['Compatibilidade', 'Suporte técnico'],
-      personality: 'Empolgada com tecnologia, decide rápido mas quer garantias'
+      objections: ['É compatível com meu sistema atual?', 'E o suporte técnico?', 'Quanto tempo de instalação?'],
+      personality: 'Empolgada com tecnologia, decide rápido mas quer garantias técnicas',
+      objection_frequency: 'medium'
     },
     {
       id: 'skeptical',
       name: 'Dr. Roberto Alves',
       type: 'Cético/Resistente',
       difficulty: 'Muito Difícil',
-      objections: ['Não confia em novos equipamentos', 'Já tem fornecedor há anos'],
-      personality: 'Extremamente resistente a mudanças, tradicional, precisa de muita persuasão'
+      objections: ['Já trabalho com meu fornecedor há 15 anos', 'Não confio em novidades', 'Sempre dá problema no começo', 'Minha equipe é resistente'],
+      personality: 'Extremamente resistente a mudanças, tradicional, leal ao fornecedor atual',
+      objection_frequency: 'very_high'
     },
     {
       id: 'budget',
       name: 'Dra. Juliana Santos',
       type: 'Focado em Orçamento',
       difficulty: 'Médio',
-      objections: ['Orçamento limitado', 'ROI não está claro'],
-      personality: 'Focada em custos e retorno, quer soluções econômicas'
+      objections: ['Muito caro', 'ROI não compensa', 'Orçamento apertado', 'Posso parcelar?'],
+      personality: 'Focada em custos e retorno financeiro, quer soluções econômicas',
+      objection_frequency: 'high'
+    },
+    {
+      id: 'aggressive',
+      name: 'Dr. Marcos Ferreira',
+      type: 'Agressivo/Dominador',
+      difficulty: 'Muito Difícil',
+      objections: ['Sua proposta é ridícula', 'Vocês não entendem minha clínica', 'Tenho 3 ofertas melhores', 'Não me convenceu'],
+      personality: 'Agressivo, dominador, gosta de negociar duramente e intimidar',
+      objection_frequency: 'very_high'
     }
   ];
 
@@ -63,22 +79,27 @@ export default function RolePlaySimulator() {
     scrollToBottom();
   }, [messages]);
 
-  const startSession = (profile) => {
+  const startSession = (profile, withObjections = false) => {
     setSelectedProfile(profile);
+    setObjectionsMode(withObjections);
+    setObjectionsQueue(withObjections ? [...profile.objections] : []);
+    
+    const greetings = {
+      cautious: "Olá. Recebi sua ligação. Confesso que tenho muitas dúvidas sobre esses equipamentos modernos... Sou mais tradicional.",
+      enthusiast: "Oi! Que legal você entrar em contato! Sempre adorei novas tecnologias. Mas me conte mais sobre esse equipamento.",
+      skeptical: "Bom dia. Vou ser direto: trabalho com meu fornecedor atual há 15 anos e nunca tive problemas. Por que mudaria agora?",
+      budget: "Olá. Meu orçamento está bem apertado esse ano. Preciso entender se isso realmente vale a pena financeiramente.",
+      aggressive: "Fala aí. Recebi várias propostas melhores que a sua essa semana. Me convença rápido porque não tenho tempo a perder."
+    };
+    
     setMessages([
       {
         role: 'system',
-        content: `Role-play iniciado: ${profile.name} (${profile.type})`
+        content: `Role-play iniciado: ${profile.name} (${profile.type})${withObjections ? ' - MODO OBJEÇÕES ATIVAS' : ''}`
       },
       {
         role: 'ai',
-        content: profile.id === 'cautious' 
-          ? "Olá. Recebi sua ligação. Confesso que tenho muitas dúvidas sobre esses equipamentos modernos... Sou mais tradicional."
-          : profile.id === 'enthusiast'
-          ? "Oi! Que legal você entrar em contato! Sempre adorei novas tecnologias. Mas me conte mais sobre esse equipamento."
-          : profile.id === 'skeptical'
-          ? "Bom dia. Vou ser direto: trabalho com meu fornecedor atual há 15 anos e nunca tive problemas. Por que mudaria agora?"
-          : "Olá. Meu orçamento está bem apertado esse ano. Preciso entender se isso realmente vale a pena financeiramente."
+        content: greetings[profile.id] || greetings.cautious
       }
     ]);
     setSessionScore(50);
@@ -137,11 +158,18 @@ Seja CONCISO e ESPECÍFICO.`,
 
     try {
       // IA responde como o cliente
+      const shouldInjectObjection = objectionsMode && 
+                                    objectionsQueue.length > 0 && 
+                                    messages.length % 3 === 0;
+      
+      const objectionToUse = shouldInjectObjection ? objectionsQueue[0] : null;
+      
       const aiResponse = await base44.integrations.Core.InvokeLLM({
         prompt: `Você está simulando o cliente "${selectedProfile.name}" em um role-play de vendas.
 
 PERFIL: ${selectedProfile.personality}
 OBJEÇÕES TÍPICAS: ${selectedProfile.objections.join(', ')}
+${objectionToUse ? `\n⚠️ OBJEÇÃO OBRIGATÓRIA NESTA RESPOSTA: "${objectionToUse}"` : ''}
 
 HISTÓRICO DA CONVERSA:
 ${messages.map(m => `${m.role === 'user' ? 'VENDEDOR' : 'CLIENTE'}: ${m.content}`).join('\n')}
@@ -150,13 +178,17 @@ ${messages.map(m => `${m.role === 'user' ? 'VENDEDOR' : 'CLIENTE'}: ${m.content}
 
 Responda como ${selectedProfile.name}:
 - Mantenha o perfil e personalidade consistentes
-- Use objeções realistas
+${objectionToUse ? `- IMPORTANTE: Use a objeção "${objectionToUse}" de forma natural e desafiadora` : '- Use objeções realistas quando apropriado'}
 - Se o vendedor usar boas técnicas, mostre interesse gradual
 - Se usar técnicas ruins, fique mais resistente
 - Seja realista e desafiador
 
 Responda em 1-3 frases CURTAS.`
       });
+      
+      if (shouldInjectObjection) {
+        setObjectionsQueue(prev => prev.slice(1));
+      }
 
       setMessages(prev => [...prev, { role: 'ai', content: aiResponse }]);
 
@@ -237,8 +269,7 @@ Responda em 1-3 frases CURTAS.`
           {clientProfiles.map((profile) => (
             <div
               key={profile.id}
-              className="p-4 bg-white rounded-lg border-2 border-blue-200 hover:border-blue-400 cursor-pointer transition-all"
-              onClick={() => startSession(profile)}
+              className="p-4 bg-white rounded-lg border-2 border-blue-200 hover:border-blue-400 transition-all"
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
@@ -254,8 +285,27 @@ Responda em 1-3 frases CURTAS.`
                   {profile.difficulty}
                 </Badge>
               </div>
-              <div className="space-y-1 text-xs text-gray-600">
-                <p><strong>Objeções:</strong> {profile.objections.join(', ')}</p>
+              <div className="space-y-2 text-xs text-gray-600 mb-3">
+                <p><strong>Personalidade:</strong> {profile.personality}</p>
+                <p><strong>Objeções ({profile.objections.length}):</strong> {profile.objections.slice(0, 2).join(', ')}...</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => startSession(profile, false)}
+                  className="border-blue-300"
+                >
+                  Treino Livre
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => startSession(profile, true)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  🔥 Modo Objeções
+                </Button>
               </div>
             </div>
           ))}
@@ -281,12 +331,23 @@ Responda em 1-3 frases CURTAS.`
         </div>
         
         {/* Score em Tempo Real */}
-        <div className="mt-3 p-3 bg-white rounded-lg">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-gray-600">PERFORMANCE</span>
-            <span className="text-lg font-bold text-blue-600">{sessionScore}/100</span>
+        <div className="mt-3 space-y-2">
+          <div className="p-3 bg-white rounded-lg">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-gray-600">PERFORMANCE</span>
+              <span className="text-lg font-bold text-blue-600">{sessionScore}/100</span>
+            </div>
+            <Progress value={sessionScore} className="h-2" />
           </div>
-          <Progress value={sessionScore} className="h-2" />
+          
+          {objectionsMode && (
+            <div className="p-2 bg-red-50 rounded-lg border border-red-300">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-red-800">🔥 OBJEÇÕES ATIVAS</span>
+                <Badge className="bg-red-600">{objectionsQueue.length} restantes</Badge>
+              </div>
+            </div>
+          )}
         </div>
       </CardHeader>
 
