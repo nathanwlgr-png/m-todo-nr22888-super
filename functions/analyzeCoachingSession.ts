@@ -16,9 +16,29 @@ Deno.serve(async (req) => {
     }
 
     let client = null;
+    let clientInteractions = [];
+    let clientSales = [];
+    let clientVisits = [];
+    let clientTasks = [];
+    
     if (client_id) {
       const clients = await base44.entities.Client.list();
       client = clients.find(c => c.id === client_id);
+      
+      // Buscar histórico completo do cliente
+      if (client) {
+        const [interactions, sales, visits, tasks] = await Promise.all([
+          base44.entities.Interaction.filter({ client_id }, '-created_date', 10),
+          base44.entities.Sale.filter({ client_id }),
+          base44.entities.Visit.filter({ client_id }, '-scheduled_date', 5),
+          base44.entities.Task.filter({ client_id, status: 'pendente' }, '-created_date', 5)
+        ]);
+        
+        clientInteractions = interactions;
+        clientSales = sales;
+        clientVisits = visits;
+        clientTasks = tasks;
+      }
     }
 
     // Buscar sessões anteriores do vendedor para benchmark
@@ -37,12 +57,48 @@ VENDEDOR: ${user.full_name}
 Score médio histórico: ${avgPreviousScore.toFixed(0)}/100
 
 ${client ? `
-CLIENTE DA CONVERSA: ${client.first_name}
-Perfil Numerológico: ${client.numerology_number} - ${client.behavioral_profile}
-Estilo de Decisão: ${client.decision_style}
-Tom Ideal: ${client.recommended_communication || client.client_tone || 'Profissional'}
-Status: ${client.status} | Score: ${client.purchase_score}%
-` : 'Cliente: Não identificado'}
+═══════════════════════════════════════
+📋 PERFIL COMPLETO DO CLIENTE
+═══════════════════════════════════════
+NOME: ${client.first_name} ${client.full_name || ''}
+CLÍNICA: ${client.clinic_name || 'N/A'}
+STATUS: ${client.status} | Score de Compra: ${client.purchase_score || 0}%
+Estágio Pipeline: ${client.pipeline_stage || 'lead'}
+
+🧠 PERFIL PSICOLÓGICO:
+- Número Numerológico: ${client.numerology_number || 'Não calculado'}
+- Perfil Comportamental: ${client.behavioral_profile || 'Não definido'}
+- Estilo de Decisão: ${client.decision_style || 'Não mapeado'}
+- Tom de Comunicação Ideal: ${client.recommended_communication || client.client_tone || 'Profissional'}
+
+💰 HISTÓRICO DE VENDAS (${clientSales.length} vendas):
+${clientSales.length > 0 ? clientSales.map(s => `- ${s.equipment_name || 'Equipamento'}: R$ ${s.sale_value} (${s.status})`).join('\n') : 'Nenhuma venda ainda'}
+
+📞 INTERAÇÕES RECENTES (Últimas ${clientInteractions.length}):
+${clientInteractions.length > 0 ? clientInteractions.map(i => `- [${i.type}] ${i.subject}: ${i.outcome || 'N/A'} - ${i.notes?.substring(0, 100) || ''}`).join('\n') : 'Sem interações registradas'}
+
+🏢 VISITAS REALIZADAS (${clientVisits.length} visitas):
+${clientVisits.length > 0 ? clientVisits.map(v => `- ${new Date(v.scheduled_date).toLocaleDateString()}: ${v.visit_type} - ${v.status}`).join('\n') : 'Nenhuma visita agendada'}
+
+✅ TAREFAS PENDENTES (${clientTasks.length}):
+${clientTasks.length > 0 ? clientTasks.map(t => `- ${t.title} (${t.priority}) - ${t.type}`).join('\n') : 'Nenhuma tarefa pendente'}
+
+🎯 MOTIVADORES DE COMPRA IDENTIFICADOS:
+${client.purchase_motivators?.length > 0 ? client.purchase_motivators.join(', ') : 'Não identificados'}
+
+⚠️ OBJEÇÕES REAIS LEVANTADAS:
+${client.real_objections?.length > 0 ? client.real_objections.join(', ') : 'Nenhuma objeção registrada'}
+
+💡 DORES PRINCIPAIS:
+${client.main_pains?.length > 0 ? client.main_pains.join(', ') : 'Não identificadas'}
+
+🔥 GATILHOS JÁ UTILIZADOS:
+${client.triggers_used?.length > 0 ? client.triggers_used.join(', ') : 'Nenhum gatilho usado ainda'}
+
+📊 EQUIPAMENTO ATUAL: ${client.current_equipment || 'Não informado'}
+🎯 INTERESSE: ${client.equipment_interest || 'Não definido'}
+💵 ORÇAMENTO: ${client.available_budget ? `R$ ${client.available_budget}` : 'Não informado'}
+` : 'Cliente: Não identificado - Análise genérica'}
 
 TRANSCRIÇÃO DA CONVERSA:
 ${transcript}
@@ -110,10 +166,11 @@ CRITÉRIOS DE AVALIAÇÃO:
 **Numerologia (0-10):**
 ${client ? `- Adaptou ao perfil ${client.numerology_number}?
 - Tom compatível com ${client.behavioral_profile}?
-- Usou linguagem apropriada ao estilo de decisão?` : '- Demonstrou flexibilidade?'}
+- Usou linguagem apropriada ao estilo de decisão (${client.decision_style})?` : '- Demonstrou flexibilidade?'}
 
 **Cialdini (0-10):**
 - Usou reciprocidade, prova social, autoridade, escassez, apreço, compromisso?
+${client?.triggers_used?.length > 0 ? `- Já usou antes: ${client.triggers_used.join(', ')}` : ''}
 
 **Inteligência Emocional (0-10):**
 - Demonstrou empatia?
@@ -121,11 +178,22 @@ ${client ? `- Adaptou ao perfil ${client.numerology_number}?
 - Leitura do estado emocional do cliente?
 
 **Objeções (0-10):**
+${client?.real_objections?.length > 0 ? `- Objeções conhecidas do cliente: ${client.real_objections.join(', ')}` : ''}
 - Validou antes de rebater?
 - Usou perguntas de aprofundamento?
 - Manteve controle emocional?
 
-Seja DIRETO, HONESTO e CONSTRUTIVO. Use exemplos da transcrição.`,
+**CONTEXTO HISTÓRICO DO CLIENTE:**
+${clientInteractions.length > 0 ? `- Baseado em ${clientInteractions.length} interações anteriores, como esta conversa se compara?` : ''}
+${clientSales.length > 0 ? `- Cliente já comprou ${clientSales.length}x - usou essa prova social?` : '- Cliente nunca comprou - explorou bem os benefícios?'}
+${clientVisits.length > 0 ? `- ${clientVisits.length} visitas realizadas - referenciou alguma?` : ''}
+
+**OPORTUNIDADES BASEADAS NO CRM:**
+${client?.purchase_motivators?.length > 0 ? `- Motivadores conhecidos (${client.purchase_motivators.join(', ')}) foram explorados?` : ''}
+${client?.main_pains?.length > 0 ? `- Dores identificadas (${client.main_pains.join(', ')}) foram abordadas?` : ''}
+${client?.available_budget ? `- Cliente tem orçamento de R$ ${client.available_budget} - mencionou investimento nessa faixa?` : ''}
+
+Seja DIRETO, HONESTO e CONSTRUTIVO. Use exemplos da transcrição E do histórico CRM.`,
       response_json_schema: {
         type: "object",
         properties: {
