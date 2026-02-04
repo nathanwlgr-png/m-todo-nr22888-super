@@ -622,6 +622,20 @@ Retorne até 15 clínicas.`,
                 </div>
               </Card>
             </Link>
+
+            <Link to={createPageUrl('PredictiveAnalyticsDashboard')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-green-900">Predictive AI</p>
+                    <p className="text-xs text-green-600">Churn + Forecast</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
           </div>
         </div>
 

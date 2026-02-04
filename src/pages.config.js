@@ -154,6 +154,7 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -265,6 +266,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
+    "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
 }
 
 export const pagesConfig = {
