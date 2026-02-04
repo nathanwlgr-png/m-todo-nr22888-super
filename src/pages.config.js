@@ -122,6 +122,7 @@ import PerformanceDashboard from './pages/PerformanceDashboard';
 import PossibleSales from './pages/PossibleSales';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
+import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
@@ -154,7 +155,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -234,6 +234,7 @@ export const PAGES = {
     "PossibleSales": PossibleSales,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
+    "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
     "ProposalGenerator": ProposalGenerator,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
@@ -266,7 +267,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
 }
 
 export const pagesConfig = {

@@ -59,6 +59,7 @@ export default function Home() {
   const [searchingClinics, setSearchingClinics] = useState(false);
   const [autoSaveProgress, setAutoSaveProgress] = useState(null);
   const [selectedClientForAnalysis, setSelectedClientForAnalysis] = useState(null);
+  const [newMasterPhone, setNewMasterPhone] = useState('');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -281,6 +282,83 @@ Retorne até 15 clínicas.`,
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* CADASTRO DE WHATSAPP MASTER */}
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 border-2">
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-green-900">WhatsApp Master Access</h3>
+                <p className="text-xs text-green-700">Cadastre números com acesso total ao NR22888</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="5511999999999"
+                value={newMasterPhone}
+                onChange={(e) => setNewMasterPhone(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={async () => {
+                  if (!newMasterPhone || newMasterPhone.length < 12) {
+                    toast.error('Digite um número válido (ex: 5511999999999)');
+                    return;
+                  }
+                  try {
+                    const currentNumbers = user?.master_whatsapp_numbers || [];
+                    if (currentNumbers.includes(newMasterPhone)) {
+                      toast.error('Número já cadastrado');
+                      return;
+                    }
+                    await base44.auth.updateMe({
+                      master_whatsapp_numbers: [...currentNumbers, newMasterPhone]
+                    });
+                    toast.success('✅ WhatsApp cadastrado com acesso Master!');
+                    setNewMasterPhone('');
+                    queryClient.invalidateQueries(['current-user']);
+                  } catch (error) {
+                    toast.error('Erro ao cadastrar: ' + error.message);
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <UserPlus className="w-4 h-4 mr-1" />
+                Adicionar
+              </Button>
+            </div>
+            {user?.master_whatsapp_numbers?.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {user.master_whatsapp_numbers.map((phone, idx) => (
+                  <Badge key={idx} variant="outline" className="bg-white flex items-center gap-2">
+                    <MessageSquare className="w-3 h-3" />
+                    {phone}
+                    <button
+                      onClick={async () => {
+                        try {
+                          await base44.auth.updateMe({
+                            master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
+                          });
+                          toast.success('WhatsApp removido');
+                          queryClient.invalidateQueries(['current-user']);
+                        } catch (error) {
+                          toast.error('Erro ao remover');
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 font-bold"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+
         {/* BARRA DE BUSCA DE CLIENTE */}
         <ClientSearchBar 
           clients={clients} 
