@@ -308,23 +308,39 @@ Retorne até 15 clínicas.`,
                     toast.error('Digite um número válido (ex: 5511999999999)');
                     return;
                   }
+                  
+                  const cleanPhone = newMasterPhone.replace(/\s/g, '');
+                  
                   try {
                     const currentNumbers = user?.master_whatsapp_numbers || [];
-                    if (currentNumbers.includes(newMasterPhone)) {
+                    if (currentNumbers.includes(cleanPhone)) {
                       toast.error('Número já cadastrado');
                       return;
                     }
+                    
+                    const loadingToast = toast.loading('Cadastrando...');
+                    
                     await base44.auth.updateMe({
-                      master_whatsapp_numbers: [...currentNumbers, newMasterPhone]
+                      master_whatsapp_numbers: [...currentNumbers, cleanPhone]
                     });
+                    
+                    toast.dismiss(loadingToast);
                     toast.success('✅ WhatsApp cadastrado com acesso Master!');
                     setNewMasterPhone('');
-                    queryClient.invalidateQueries(['current-user']);
+                    
+                    setTimeout(() => {
+                      queryClient.invalidateQueries(['current-user']);
+                    }, 500);
                   } catch (error) {
-                    toast.error('Erro ao cadastrar: ' + error.message);
+                    if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+                      toast.error('⏳ Aguarde alguns segundos e tente novamente');
+                    } else {
+                      toast.error('Erro: ' + error.message);
+                    }
                   }
                 }}
                 className="bg-green-600 hover:bg-green-700"
+                disabled={!newMasterPhone || newMasterPhone.replace(/\s/g, '').length < 12}
               >
                 <UserPlus className="w-4 h-4 mr-1" />
                 Adicionar
@@ -337,15 +353,24 @@ Retorne até 15 clínicas.`,
                     <MessageSquare className="w-3 h-3" />
                     {phone}
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         try {
+                          const loadingToast = toast.loading('Removendo...');
                           await base44.auth.updateMe({
                             master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
                           });
+                          toast.dismiss(loadingToast);
                           toast.success('WhatsApp removido');
-                          queryClient.invalidateQueries(['current-user']);
+                          setTimeout(() => {
+                            queryClient.invalidateQueries(['current-user']);
+                          }, 500);
                         } catch (error) {
-                          toast.error('Erro ao remover');
+                          if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+                            toast.error('⏳ Aguarde alguns segundos');
+                          } else {
+                            toast.error('Erro ao remover');
+                          }
                         }
                       }}
                       className="text-red-500 hover:text-red-700 font-bold"
