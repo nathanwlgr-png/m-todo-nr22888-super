@@ -10,6 +10,7 @@ import RolePlaySimulator from '@/components/RolePlaySimulator';
 import WeeklyChallengesSystem from '@/components/WeeklyChallengesSystem';
 import AutomatedSalesPlaybook from '@/components/AutomatedSalesPlaybook';
 import IndividualCoachingDashboard from '@/components/IndividualCoachingDashboard';
+import ProgressTracker from '@/components/ProgressTracker';
 
 export default function SalesCoaching() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function SalesCoaching() {
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-4 mt-4">
-            <IndividualCoachingDashboard />
+            <ProgressTracker />
           </TabsContent>
 
           <TabsContent value="playbook" className="space-y-4 mt-4">

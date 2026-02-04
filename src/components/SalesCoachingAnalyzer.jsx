@@ -12,6 +12,7 @@ import {
   ThumbsUp, ThumbsDown, Lightbulb, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 export default function SalesCoachingAnalyzer({ client, compact = false }) {
   const queryClient = useQueryClient();
@@ -21,6 +22,13 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
   const [analysis, setAnalysis] = useState(null);
   const [expandedMoments, setExpandedMoments] = useState(false);
   const [highlightedTranscript, setHighlightedTranscript] = useState('');
+  const [avgPreviousScore, setAvgPreviousScore] = useState(70);
+  
+  const { data: previousSessions = [] } = useQuery({
+    queryKey: ['my-coaching-sessions'],
+    queryFn: () => base44.entities.CoachingSession.list('-created_date', 20),
+    staleTime: 5 * 60 * 1000
+  });
 
   const analyzeConversation = async (text = transcript) => {
     if (!text.trim()) {
@@ -30,6 +38,12 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
 
     setAnalyzing(true);
     try {
+      // Calcular média das sessões anteriores
+      const avg = previousSessions.length > 0
+        ? previousSessions.reduce((sum, s) => sum + (s.overall_score || 0), 0) / previousSessions.length
+        : 70;
+      setAvgPreviousScore(avg);
+
       const result = await base44.functions.invoke('analyzeCoachingSession', {
         transcript: text,
         client_id: client?.id,
@@ -42,7 +56,8 @@ export default function SalesCoachingAnalyzer({ client, compact = false }) {
       await highlightTechniques(text);
       
       queryClient.invalidateQueries(['coaching-sessions']);
-      toast.success('Análise completa!');
+      queryClient.invalidateQueries(['my-coaching-sessions']);
+      toast.success('Análise completa! Sessão salva no seu histórico.');
     } catch (error) {
       console.error('Erro:', error);
       toast.error('Erro ao analisar: ' + error.message);
