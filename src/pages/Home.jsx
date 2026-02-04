@@ -50,6 +50,7 @@ import DictionTrainer from '@/components/DictionTrainer';
 import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
 import AIContentGenerator from '@/components/AIContentGenerator';
 import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
+import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWidget';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -325,6 +326,9 @@ Retorne até 15 clínicas.`,
 
         {/* MAPA DO BRASIL - PLANEJADOR DE ROTAS */}
         <BrazilCitiesMap selectedClients={clients} />
+
+        {/* NOTIFICAÇÕES PROATIVAS IA */}
+        <ProactiveNotificationsWidget />
 
         {/* GAMIFICAÇÃO */}
         <GamificationSystem compact={true} />
