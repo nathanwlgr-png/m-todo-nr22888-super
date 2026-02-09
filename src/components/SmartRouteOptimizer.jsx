@@ -28,6 +28,9 @@ export default function SmartRouteOptimizer() {
   const [generating, setGenerating] = useState(false);
   const [route, setRoute] = useState(null);
   const [autoSelectMode, setAutoSelectMode] = useState(true);
+  const [regionalMode, setRegionalMode] = useState(false);
+  const [startCity, setStartCity] = useState('Marília');
+  const [endCity, setEndCity] = useState('Lins');
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -47,7 +50,55 @@ export default function SmartRouteOptimizer() {
     [clientsWithAddress]
   );
 
+  const generateRegionalRoute = async () => {
+    setGenerating(true);
+    try {
+      const regionalClients = clients.filter(c => {
+        const city = c.city?.toLowerCase();
+        return city && (
+          city.includes(startCity.toLowerCase()) ||
+          city.includes(endCity.toLowerCase()) ||
+          city.includes('promissão') ||
+          city.includes('guaimbê') ||
+          city.includes('cafelândia') ||
+          city.includes('getulina')
+        );
+      });
+
+      if (regionalClients.length === 0) {
+        toast.error(`Nenhum cliente encontrado entre ${startCity} e ${endCity}`);
+        setGenerating(false);
+        return;
+      }
+
+      const sortedClients = regionalClients.sort((a, b) => 
+        (b.purchase_score || 0) - (a.purchase_score || 0)
+      );
+
+      const result = await base44.functions.invoke('generateOptimizedRoute', {
+        client_ids: sortedClients.map(c => c.id),
+        start_location: startCity,
+        max_visits_per_day: sortedClients.length,
+        date: selectedDate,
+        regional_route: true,
+        end_location: endCity
+      });
+
+      setRoute(result.route);
+      toast.success(`Rota ${startCity} → ${endCity} gerada!`);
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao gerar rota: ' + error.message);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const generateRoute = async () => {
+    if (regionalMode) {
+      return generateRegionalRoute();
+    }
+
     const clientsToRoute = autoSelectMode 
       ? priorityClients.slice(0, maxVisits).map(c => c.id)
       : selectedClientIds;
@@ -123,21 +174,71 @@ export default function SmartRouteOptimizer() {
         <CardContent className="space-y-4">
           {!route ? (
             <>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border-2 border-orange-300">
                 <Checkbox
-                  checked={autoSelectMode}
+                  checked={regionalMode}
                   onCheckedChange={(checked) => {
-                    setAutoSelectMode(checked);
-                    if (checked) setSelectedClientIds([]);
+                    setRegionalMode(checked);
+                    if (checked) {
+                      setAutoSelectMode(false);
+                      setSelectedClientIds([]);
+                    }
                   }}
-                  id="auto-select"
+                  id="regional-mode"
                 />
-                <Label htmlFor="auto-select" className="text-sm cursor-pointer">
-                  Seleção automática (clientes prioritários)
+                <Label htmlFor="regional-mode" className="text-sm cursor-pointer font-semibold text-orange-800">
+                  🗺️ Modo Regional (traçar rota entre cidades)
                 </Label>
               </div>
 
-              {!autoSelectMode && (
+              {regionalMode ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs font-semibold">Cidade Inicial</Label>
+                      <Input
+                        value={startCity}
+                        onChange={(e) => setStartCity(e.target.value)}
+                        placeholder="Ex: Marília"
+                        className="h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-semibold">Cidade Final</Label>
+                      <Input
+                        value={endCity}
+                        onChange={(e) => setEndCity(e.target.value)}
+                        placeholder="Ex: Lins"
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 bg-amber-50 rounded-lg border border-amber-300">
+                    <p className="text-xs text-amber-800">
+                      🎯 A IA irá buscar TODOS os clientes entre {startCity} e {endCity}, incluindo cidades no trajeto, e criar uma rota otimizada.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                    <Checkbox
+                      checked={autoSelectMode}
+                      onCheckedChange={(checked) => {
+                        setAutoSelectMode(checked);
+                        if (checked) setSelectedClientIds([]);
+                      }}
+                      id="auto-select"
+                    />
+                    <Label htmlFor="auto-select" className="text-sm cursor-pointer">
+                      Seleção automática (clientes prioritários)
+                    </Label>
+                  </div>
+                </>
+              )}
+
+              {!autoSelectMode && !regionalMode && (
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   <p className="text-xs font-semibold text-gray-700">
                     Selecione clientes ({selectedClientIds.length} selecionados):
@@ -171,28 +272,30 @@ export default function SmartRouteOptimizer() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Ponto de Partida</Label>
-                  <Input
-                    value={startLocation}
-                    onChange={(e) => setStartLocation(e.target.value)}
-                    placeholder="Ex: São Paulo, SP"
-                    className="h-9"
-                  />
+              {!regionalMode && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Ponto de Partida</Label>
+                    <Input
+                      value={startLocation}
+                      onChange={(e) => setStartLocation(e.target.value)}
+                      placeholder="Ex: São Paulo, SP"
+                      className="h-9"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Máx. Visitas/Dia</Label>
+                    <Input
+                      type="number"
+                      value={maxVisits}
+                      onChange={(e) => setMaxVisits(parseInt(e.target.value) || 6)}
+                      min="1"
+                      max="10"
+                      className="h-9"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs">Máx. Visitas/Dia</Label>
-                  <Input
-                    type="number"
-                    value={maxVisits}
-                    onChange={(e) => setMaxVisits(parseInt(e.target.value) || 6)}
-                    min="1"
-                    max="10"
-                    className="h-9"
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
                 <Label className="text-xs">Data</Label>
@@ -206,7 +309,7 @@ export default function SmartRouteOptimizer() {
 
               <Button
                 onClick={generateRoute}
-                disabled={generating || (!autoSelectMode && selectedClientIds.length === 0)}
+                disabled={generating || (!autoSelectMode && !regionalMode && selectedClientIds.length === 0)}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
                 {generating ? (
@@ -214,10 +317,10 @@ export default function SmartRouteOptimizer() {
                 ) : (
                   <Sparkles className="w-4 h-4 mr-2" />
                 )}
-                Gerar Rota Otimizada
+                {regionalMode ? `Gerar Rota ${startCity} → ${endCity}` : 'Gerar Rota Otimizada'}
               </Button>
 
-              {autoSelectMode && (
+              {autoSelectMode && !regionalMode && (
                 <div className="p-3 bg-blue-100 rounded-lg border border-blue-300">
                   <p className="text-xs text-blue-800">
                     ℹ️ Modo automático: IA selecionará os {maxVisits} clientes mais prioritários com endereço
