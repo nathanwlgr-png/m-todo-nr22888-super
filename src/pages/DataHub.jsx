@@ -22,6 +22,8 @@ export default function DataHub() {
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [tableData, setTableData] = useState('');
+  const [sheetUrl, setSheetUrl] = useState('');
+  const [importMethod, setImportMethod] = useState('paste');
   const [documentFile, setDocumentFile] = useState(null);
   const [documentTitle, setDocumentTitle] = useState('');
 
@@ -36,8 +38,9 @@ export default function DataHub() {
   });
 
   // Importar tabela com IA
-  const importTable = async () => {
-    if (!tableData.trim()) {
+  const importTable = async (dataToImport) => {
+    const data = dataToImport || tableData;
+    if (!data.trim()) {
       toast.error('Cole os dados da tabela');
       return;
     }
@@ -47,7 +50,7 @@ export default function DataHub() {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Analise esta tabela e converta para dados de clientes:
 
-${tableData}
+${data}
 
 REGRAS:
 1. Identifique as colunas (nome, clínica, cidade, telefone, email, etc)
@@ -262,39 +265,201 @@ Retorne array de objetos prontos para inserir.`,
             {/* Divisor */}
             <div className="border-t-2 border-slate-200 my-4"></div>
             
-            {/* Importação COM IA */}
+            {/* Importação UNIVERSAL - Colar, Google Sheets, Todos os Arquivos */}
             <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
               <div className="flex items-center gap-2 mb-3">
                 <Table className="w-5 h-5 text-green-700" />
-                <h3 className="font-bold text-green-900">Importar Tabela de Clientes</h3>
+                <h3 className="font-bold text-green-900">📊 Importação Universal de Clientes</h3>
               </div>
               <p className="text-sm text-green-700 mb-3">
-                Cole dados de Excel, Google Sheets, ou texto formatado. A IA vai identificar as colunas automaticamente.
+                Cole dados, use Google Sheets ou faça upload de qualquer arquivo. A IA identifica automaticamente.
               </p>
-              <Textarea
-                value={tableData}
-                onChange={(e) => setTableData(e.target.value)}
-                placeholder="Cole aqui os dados da tabela...&#10;&#10;Exemplo:&#10;Nome | Clínica | Cidade | Telefone&#10;João Silva | Clínica PetCare | São Paulo | 11999999999&#10;Maria Santos | Hospital Vet | Rio de Janeiro | 21988888888"
-                rows={10}
-                className="mb-3 font-mono text-sm"
-              />
-              <Button
-                onClick={importTable}
-                disabled={!tableData.trim() || importing}
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                {importing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processando com IA...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Importar com IA
-                  </>
-                )}
-              </Button>
+              
+              {/* Tabs de métodos */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <Button
+                  size="sm"
+                  variant={importMethod === 'paste' ? 'default' : 'outline'}
+                  onClick={() => setImportMethod('paste')}
+                  className="flex-col h-auto py-2"
+                >
+                  <Table className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Colar</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant={importMethod === 'sheets' ? 'default' : 'outline'}
+                  onClick={() => setImportMethod('sheets')}
+                  className="flex-col h-auto py-2"
+                >
+                  <FileSpreadsheet className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Sheets</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant={importMethod === 'file' ? 'default' : 'outline'}
+                  onClick={() => setImportMethod('file')}
+                  className="flex-col h-auto py-2"
+                >
+                  <FileText className="w-4 h-4 mb-1" />
+                  <span className="text-xs">Arquivo</span>
+                </Button>
+              </div>
+
+              {importMethod === 'paste' && (
+                <>
+                  <Textarea
+                    value={tableData}
+                    onChange={(e) => setTableData(e.target.value)}
+                    placeholder="Cole aqui os dados da tabela...&#10;&#10;Exemplo:&#10;Nome | Clínica | Cidade | Telefone&#10;João Silva | Clínica PetCare | São Paulo | 11999999999&#10;Maria Santos | Hospital Vet | Rio de Janeiro | 21988888888"
+                    rows={10}
+                    className="mb-3 font-mono text-sm"
+                  />
+                  <Button
+                    onClick={importTable}
+                    disabled={!tableData.trim() || importing}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    {importing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Importar Dados Colados
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+
+              {importMethod === 'sheets' && (
+                <>
+                  <Input
+                    value={sheetUrl}
+                    onChange={(e) => setSheetUrl(e.target.value)}
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                    className="mb-2"
+                  />
+                  <p className="text-xs text-green-700 mb-3">
+                    ⚠️ A planilha deve estar com acesso público
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      if (!sheetUrl.trim()) {
+                        toast.error('Cole a URL do Google Sheets');
+                        return;
+                      }
+                      setImporting(true);
+                      try {
+                        const sheetData = await base44.integrations.Core.InvokeLLM({
+                          prompt: `Acesse este Google Sheets: ${sheetUrl}
+                          
+                          Extraia TODOS os dados da primeira aba.
+                          Retorne em formato texto estruturado mantendo a organização da tabela.`,
+                          add_context_from_internet: true
+                        });
+                        await importTable(sheetData);
+                      } catch (error) {
+                        toast.error('Erro ao acessar Google Sheets');
+                        setImporting(false);
+                      }
+                    }}
+                    disabled={!sheetUrl.trim() || importing}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    {importing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Baixando do Sheets...
+                      </>
+                    ) : (
+                      <>
+                        <FileSpreadsheet className="w-4 h-4 mr-2" />
+                        Importar do Google Sheets
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+
+              {importMethod === 'file' && (
+                <>
+                  <p className="text-xs text-green-700 mb-2">
+                    Suporta: Excel, CSV, PDF, Word, TXT, Imagens com texto
+                  </p>
+                  <Input
+                    type="file"
+                    accept="*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      setImporting(true);
+                      try {
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        
+                        const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
+                          file_url,
+                          json_schema: {
+                            type: "object",
+                            properties: {
+                              clients: {
+                                type: "array",
+                                items: {
+                                  type: "object",
+                                  properties: {
+                                    first_name: { type: "string" },
+                                    full_name: { type: "string" },
+                                    clinic_name: { type: "string" },
+                                    city: { type: "string" },
+                                    phone: { type: "string" },
+                                    email: { type: "string" },
+                                    cnpj: { type: "string" },
+                                    address: { type: "string" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        });
+
+                        if (extracted.status === 'success') {
+                          let created = 0;
+                          for (const clientData of extracted.output.clients || []) {
+                            try {
+                              const exists = clients.some(c => 
+                                c.email === clientData.email || 
+                                c.phone === clientData.phone ||
+                                (c.clinic_name && clientData.clinic_name && 
+                                 c.clinic_name.toLowerCase() === clientData.clinic_name.toLowerCase())
+                              );
+
+                              if (!exists) {
+                                await base44.entities.Client.create({
+                                  ...clientData,
+                                  status: 'morno',
+                                  purchase_score: 50,
+                                  lead_source: 'importacao_planilha'
+                                });
+                                created++;
+                              }
+                            } catch {}
+                          }
+                          queryClient.invalidateQueries(['clients']);
+                          toast.success(`✅ ${created} clientes importados do arquivo!`);
+                        }
+                      } catch (error) {
+                        toast.error('Erro ao processar arquivo');
+                      } finally {
+                        setImporting(false);
+                      }
+                    }}
+                  />
+                </>
+              )}
             </Card>
 
             <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
