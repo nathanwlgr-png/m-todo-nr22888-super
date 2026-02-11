@@ -141,6 +141,15 @@ export default function RolePlayTraining() {
     setMessages([]);
     setRealtimeFeedback([]);
     setCurrentScore(50);
+    setShowReport(false);
+    setSessionReport(null);
+    
+    // Carregar scores anteriores
+    const prev = coachingSessions
+      .filter(s => s.client_id === persona.id)
+      .slice(0, 5)
+      .map(s => s.overall_score);
+    setPreviousScores(prev);
 
     try {
       trackAICall();
