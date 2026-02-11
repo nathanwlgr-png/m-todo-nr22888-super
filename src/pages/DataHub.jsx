@@ -14,6 +14,8 @@ import {
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import BulkImporterNoAI from '@/components/BulkImporterNoAI';
+import BulkExporterNoAI from '@/components/BulkExporterNoAI';
 
 export default function DataHub() {
   const queryClient = useQueryClient();
@@ -251,6 +253,16 @@ Retorne array de objetos prontos para inserir.`,
 
           {/* ABA IMPORTAÇÃO */}
           <TabsContent value="import" className="space-y-4">
+            {/* Importação SEM IA */}
+            <BulkImporterNoAI />
+
+            {/* Exportação SEM IA */}
+            <BulkExporterNoAI />
+            
+            {/* Divisor */}
+            <div className="border-t-2 border-slate-200 my-4"></div>
+            
+            {/* Importação COM IA */}
             <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
               <div className="flex items-center gap-2 mb-3">
                 <Table className="w-5 h-5 text-green-700" />
