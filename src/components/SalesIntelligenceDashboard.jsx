@@ -214,23 +214,28 @@ Seja específico, prático e acionável:`,
                 </div>
               </div>
 
-              <Button
-                onClick={runIntelligenceAnalysis}
-                disabled={analyzing || clients.length < 5}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-              >
-                {analyzing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analisando...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="w-4 h-4 mr-2" />
-                    Executar Análise Completa
-                  </>
-                )}
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={runIntelligenceAnalysis}
+                  disabled={analyzing || clients.length < 5}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  {analyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analisando...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-4 h-4 mr-2" />
+                      Executar Análise (COM IA)
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-center text-indigo-600">
+                  ℹ️ Se IA falhar, usa análise estatística local
+                </p>
+              </div>
             </div>
           ) : (
             <Button

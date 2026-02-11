@@ -294,8 +294,8 @@ Retorne até 15 clínicas.`,
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-green-900">WhatsApp Master Access</h3>
-                <p className="text-xs text-green-700">Cadastre números com acesso total ao NR22888</p>
+                <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888 Turbo - Nathan</h3>
+                <p className="text-xs text-green-700">Cadastre números com acesso total (inclui você, Nathan!)</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -402,22 +402,27 @@ Retorne até 15 clínicas.`,
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888</h3>
-              <p className="text-xs text-green-700">IA Master com acesso total ao CRM</p>
+              <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888 TURBO</h3>
+              <p className="text-xs text-green-700">Para Nathan - Todos os livros de vendas + PDFs automáticos</p>
             </div>
           </div>
-          <Button 
-            onClick={() => {
-              const url = base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant');
-              navigator.clipboard.writeText(url);
-              toast.success('Link copiado! Envie para o vendedor acessar a IA', { duration: 4000 });
-              window.open(url, '_blank');
-            }}
-            className="w-full bg-green-600 hover:bg-green-700"
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Abrir/Copiar Link WhatsApp
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              onClick={() => {
+                const url = base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo');
+                navigator.clipboard.writeText(url);
+                toast.success('Link NR22888 Turbo copiado, Nathan!', { duration: 4000 });
+                window.open(url, '_blank');
+              }}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              🚀 WhatsApp NR22888 TURBO
+            </Button>
+            <p className="text-xs text-center text-green-700 font-semibold">
+              Biblioteca completa de vendas + PDFs automáticos
+            </p>
+          </div>
         </Card>
 
         {/* ASSISTENTE IA WHATSAPP MASTER (PRIMORI) - PRIMEIRO */}
