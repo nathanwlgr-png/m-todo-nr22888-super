@@ -22,6 +22,8 @@ import {
   Save
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AdvancedSalesCoachingAnalyzer from '@/components/AdvancedSalesCoachingAnalyzer';
+import { addPhilosophicalEnding } from '@/components/PhilosophicalQuotes';
 import { useAILimit } from '@/components/AILimitProtection';
 import jsPDF from 'jspdf';
 import { saveExportedDocument } from '@/components/AutoSaveExportedDocument';

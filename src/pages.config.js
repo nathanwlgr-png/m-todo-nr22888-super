@@ -111,6 +111,7 @@ import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import MobVendedorBackup from './pages/MobVendedorBackup';
 import MobVendedorDashboard from './pages/MobVendedorDashboard';
 import MobiMigration from './pages/MobiMigration';
+import MonthlyReport from './pages/MonthlyReport';
 import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
 import NewCampaign from './pages/NewCampaign';
@@ -156,7 +157,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import MonthlyReport from './pages/MonthlyReport';
 import __Layout from './Layout.jsx';
 
 
@@ -225,6 +225,7 @@ export const PAGES = {
     "MobVendedorBackup": MobVendedorBackup,
     "MobVendedorDashboard": MobVendedorDashboard,
     "MobiMigration": MobiMigration,
+    "MonthlyReport": MonthlyReport,
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
     "NewCampaign": NewCampaign,
@@ -270,7 +271,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "MonthlyReport": MonthlyReport,
 }
 
 export const pagesConfig = {

@@ -8,6 +8,7 @@ import SalesCoachingAnalyzer from '@/components/SalesCoachingAnalyzer';
 import CoachingDashboard from '@/components/CoachingDashboard';
 import RolePlaySimulator from '@/components/RolePlaySimulator';
 import WeeklyChallengesSystem from '@/components/WeeklyChallengesSystem';
+import TechniqueProgressTracker from '@/components/TechniqueProgressTracker';
 import AutomatedSalesPlaybook from '@/components/AutomatedSalesPlaybook';
 import IndividualCoachingDashboard from '@/components/IndividualCoachingDashboard';
 import ProgressTracker from '@/components/ProgressTracker';
