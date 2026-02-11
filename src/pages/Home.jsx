@@ -54,6 +54,7 @@ import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWid
 import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
 import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
+import SalesIntelligenceDashboard from '@/components/SalesIntelligenceDashboard';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -594,6 +595,9 @@ Retorne até 15 clínicas.`,
             </Link>
           </div>
         </div>
+
+        {/* INTELIGÊNCIA DE VENDAS IA */}
+        <SalesIntelligenceDashboard />
 
         {/* FOLLOW-UP AUTOMÁTICO IA */}
         <AIFollowUpAutomation />

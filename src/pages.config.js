@@ -87,6 +87,7 @@ import EquipmentComparison from './pages/EquipmentComparison';
 import EquipmentConsumables from './pages/EquipmentConsumables';
 import EquipmentPriceList from './pages/EquipmentPriceList';
 import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
+import ExportedDocuments from './pages/ExportedDocuments';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
 import FunnelOptimization from './pages/FunnelOptimization';
@@ -155,7 +156,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import ExportedDocuments from './pages/ExportedDocuments';
 import __Layout from './Layout.jsx';
 
 
@@ -200,6 +200,7 @@ export const PAGES = {
     "EquipmentConsumables": EquipmentConsumables,
     "EquipmentPriceList": EquipmentPriceList,
     "EquipmentSalesCenter": EquipmentSalesCenter,
+    "ExportedDocuments": ExportedDocuments,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
     "FunnelOptimization": FunnelOptimization,
@@ -268,7 +269,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "ExportedDocuments": ExportedDocuments,
 }
 
 export const pagesConfig = {
