@@ -24,6 +24,7 @@ import {
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
 import jsPDF from 'jspdf';
+import { saveExportedDocument } from '@/components/AutoSaveExportedDocument';
 
 export default function RolePlayTraining() {
   const navigate = useNavigate();
@@ -303,7 +304,7 @@ Avalie rapidamente (formato JSON):`,
     setSessionActive(false);
   };
 
-  const exportSessionPDF = () => {
+  const exportSessionPDF = async () => {
     const doc = new jsPDF();
     let y = 15;
 
@@ -363,8 +364,31 @@ Avalie rapidamente (formato JSON):`,
       });
     }
 
-    doc.save(`RolePlay_${selectedPersona.name}_${Date.now()}.pdf`);
-    toast.success('PDF exportado!');
+    const pdfBlob = doc.output('blob');
+    const fileName = `RolePlay_${selectedPersona.name}_${Date.now()}.pdf`;
+    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+    try {
+      // Upload to storage
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
+      
+      // Save to ExportedDocument
+      await saveExportedDocument({
+        title: `Role-Play: ${selectedPersona.name}`,
+        documentType: 'pdf',
+        fileUrl: file_url,
+        fileSizeKB: Math.round(pdfBlob.size / 1024),
+        category: 'relatorio',
+        description: `Treinamento role-play - Score: ${currentScore}/100 - ${messages.length} mensagens`
+      });
+      
+      // Download locally
+      doc.save(fileName);
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao salvar no exportador');
+      doc.save(fileName);
+    }
   };
 
   return (

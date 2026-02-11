@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { saveExportedDocument } from '@/components/AutoSaveExportedDocument';
 
 export default function VisitReportPDF({ client, visitHistory = [] }) {
   const [generating, setGenerating] = React.useState(false);
@@ -164,9 +165,27 @@ export default function VisitReportPDF({ client, visitHistory = [] }) {
         );
       }
 
-      // Save
+      // Save locally
+      const pdfBlob = doc.output('blob');
+      const pdfFile = new File([pdfBlob], `Relatorio_${client.first_name}_${format(new Date(), 'yyyy-MM-dd')}.pdf`, { type: 'application/pdf' });
+      
+      // Upload to storage
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
+      
+      // Save to ExportedDocument
+      await saveExportedDocument({
+        title: `Relatório Visitas - ${client.first_name}`,
+        documentType: 'pdf',
+        fileUrl: file_url,
+        fileSizeKB: Math.round(pdfBlob.size / 1024),
+        clientId: client.id,
+        clientName: client.first_name,
+        category: 'relatorio',
+        description: `Histórico de ${visitHistory.length} visitas com análise numerológica`
+      });
+      
+      // Download locally
       doc.save(`Relatorio_${client.first_name}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
-      toast.success('Relatório PDF gerado!');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       toast.error('Erro ao gerar relatório');
