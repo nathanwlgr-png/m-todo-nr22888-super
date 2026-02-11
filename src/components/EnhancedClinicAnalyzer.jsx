@@ -236,20 +236,37 @@ Exames: ${analysisResult.exames_realizados?.join(', ') || 'N/A'}
 Recomendação: ${analysisResult.recomendacao_equipamento || 'A definir'}`
       });
 
-      toast.success('Cliente criado com sucesso!');
+      toast.success('✅ Cliente criado! Agora avalie a visita.');
+      setCurrentClient(newClient);
+      setShowEvaluation(true);
       if (onClientCreated) onClientCreated(newClient);
-      
-      // Resetar
-      setClinicName('');
-      setAnalysisResult(null);
     } catch (error) {
       toast.error('Erro ao criar cliente');
       console.error(error);
     }
   };
 
+  const handleSaveEvaluation = async (visitRecord) => {
+    try {
+      await base44.entities.MonthlyVisitRecord.create(visitRecord);
+      toast.success('✅ Avaliação salva no relatório mensal!');
+      setAnalysisResult(null);
+      setClinicName('');
+    } catch (error) {
+      toast.error('Erro ao salvar: ' + error.message);
+    }
+  };
+
   return (
-    <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300">
+    <>
+      <VisitEvaluationDialog
+        open={showEvaluation}
+        onClose={() => setShowEvaluation(false)}
+        clientData={currentClient}
+        onSave={handleSaveEvaluation}
+      />
+      
+      <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
           <Search className="w-5 h-5 text-white" />
@@ -412,5 +429,6 @@ Recomendação: ${analysisResult.recomendacao_equipamento || 'A definir'}`
         </div>
       )}
     </Card>
+    </>
   );
 }
