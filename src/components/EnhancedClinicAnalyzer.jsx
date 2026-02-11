@@ -114,11 +114,45 @@ Estime exames/mês analisando:
 - Avançado: Laboratório completo (gases, imuno, PCR)
 - Baseado em: equipamentos identificados + casos publicados + especialidades
 
-**8. SCORE DE COMPRA INICIAL (0-100)**
-- Baseado em: equipamentos, volume, especialização
+**8. OPORTUNIDADES UPSELL/CROSS-SELL SEAMATY (CRÍTICO)**
+Analise equipamentos atuais vs produtos Seamaty:
+
+PRODUTOS SEAMATY DISPONÍVEIS:
+• VG2 (Hemogasômetro): 15 parâmetros, gases + eletrólitos + imunofluor - R$ 45.000-60.000
+• VG1 (Portátil): 7 parâmetros básicos - R$ 25.000-35.000
+• SMT-120VP (Bioquímico): 120 testes/hora, 24 parâmetros - R$ 70.000-85.000
+• QT3 (Bioquímico semi-auto): parâmetros individuais - R$ 30.000-40.000
+• VI1 (Imunofluorescência): 21 marcadores simultâneos - R$ 55.000-70.000
+• VBC-50A (Hematologia): 5 partes WBC, 26 parâmetros - R$ 50.000-65.000
+• VQ1 (PCR): PCR quantitativo tempo real - R$ 80.000-100.000
+
+Para CADA equipamento atual identificado:
+- Se é concorrente: qual produto Seamaty substitui/supera
+- Se é antigo (>3 anos): sugira upgrade Seamaty
+- Se está quebrado/parado: oportunidade de substituição
+- Se terceirizam: calcule economia com equipamento próprio
+
+GAPS IDENTIFICADOS (oportunidades de VENDA NOVA):
+- Não tem hemogasômetro? → VG2 ou VG1
+- Não tem bioquímico próprio? → SMT-120VP ou QT3
+- Não tem imunofluorescência? → VI1
+- Não tem hematologia? → VBC-50A
+- Não tem PCR? → VQ1
+- Terceiriza tudo? → Pacote completo
+
+Para CADA oportunidade identificada, forneça:
+1. Produto Seamaty recomendado
+2. Preço estimado
+3. GAP específico que resolve
+4. ROI estimado (economia mensal se terceiriza, ou aumento receita)
+5. Urgência (Alta/Média/Baixa)
+6. Probabilidade de fechamento (%)
+
+**9. SCORE DE COMPRA INICIAL (0-100)**
+- Baseado em: equipamentos, volume, especialização, gaps identificados
 - Justificativa do score
 
-Seja ULTRA-DETALHADO na análise de equipamentos via fotos!`,
+Seja ULTRA-DETALHADO na análise de equipamentos e oportunidades!`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -179,6 +213,21 @@ Seja ULTRA-DETALHADO na análise de equipamentos via fotos!`,
                 especialidades: { type: "array", items: { type: "string" } },
                 animais: { type: "array", items: { type: "string" } },
                 nivel_sofisticacao: { type: "string" }
+              }
+            },
+            oportunidades_seamaty: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  produto: { type: "string" },
+                  preco_estimado: { type: "string" },
+                  gap_resolve: { type: "string" },
+                  roi_estimado: { type: "string" },
+                  urgencia: { type: "string" },
+                  probabilidade: { type: "number" },
+                  motivo: { type: "string" }
+                }
               }
             },
             score_inicial: { type: "number" },
@@ -411,6 +460,38 @@ Recomendação: ${analysisResult.recomendacao_equipamento || 'A definir'}`
               <p className="text-xs text-slate-700">{analysisResult.recomendacao_equipamento}</p>
             </div>
           </Card>
+
+          {/* Oportunidades Seamaty */}
+          {analysisResult.oportunidades_seamaty?.length > 0 && (
+            <Card className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500">
+              <p className="text-xs font-semibold text-green-800 mb-2">💰 OPORTUNIDADES SEAMATY:</p>
+              {analysisResult.oportunidades_seamaty.map((op, i) => (
+                <div key={i} className="mb-3 p-3 bg-white rounded-lg border-2 border-green-400">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <p className="font-bold text-green-900">{op.produto}</p>
+                      <p className="text-xs text-green-700">{op.preco_estimado}</p>
+                    </div>
+                    <Badge className={
+                      op.urgencia === 'Alta' ? 'bg-red-600' :
+                      op.urgencia === 'Média' ? 'bg-yellow-600' : 'bg-blue-600'
+                    }>
+                      {op.urgencia}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <p className="text-slate-700"><span className="font-semibold">Gap:</span> {op.gap_resolve}</p>
+                    <p className="text-slate-700"><span className="font-semibold">ROI:</span> {op.roi_estimado}</p>
+                    <p className="text-slate-700"><span className="font-semibold">Prob. Fechamento:</span> {op.probabilidade}%</p>
+                    <div className="p-2 bg-green-50 rounded mt-2">
+                      <p className="font-semibold text-green-800">Por quê?</p>
+                      <p className="text-slate-700">{op.motivo}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Card>
+          )}
 
           {/* Abordagem Sugerida */}
           <Card className="p-3 bg-indigo-50 border border-indigo-200">
