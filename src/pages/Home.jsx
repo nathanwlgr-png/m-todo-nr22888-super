@@ -27,7 +27,8 @@ import {
   Cog,
   BookOpen,
   Award,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import CompleteProfileSearch from '@/components/CompleteProfileSearch';
 import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
