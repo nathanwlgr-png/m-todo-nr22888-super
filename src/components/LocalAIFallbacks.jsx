@@ -219,4 +219,17 @@ export const LocalAIFallbacks = {
   }
 };
 
+// Função de resposta rápida para o Assistente
+export const getFallbackResponse = (prompt, clientData) => {
+  const responses = {
+    apresentacao: `Nathan, aqui está uma apresentação para ${clientData?.first_name || 'o cliente'}:\n\nBom dia! Meu nome é Nathan da SEAMATY. Somos especialistas em equipamentos veterinários de alta precisão com 25 MESES DE GARANTIA (o mercado oferece apenas 12). Gostaria de conhecer melhor suas necessidades de laboratório.`,
+    objecoes: `Respostas para objeções:\n\n"Muito caro" → Temos bonificação mensal em insumos e manutenção vitalícia inclusa\n"Preciso pensar" → Entendo. Que tal uma demonstração técnica?\n"Já tenho fornecedor" → Perfeito! Nossa proposta é complementar com 25 meses de garantia`,
+    fechamento: `Script de fechamento:\n\n"${clientData?.first_name || 'Cliente'}, baseado em nossa conversa, o VG2 atende perfeitamente suas necessidades. Com 25 meses de garantia + manutenção vitalícia + bonificação mensal, é o investimento mais seguro. Podemos fechar hoje?"`,
+    followup: `Follow-up recomendado:\n\n"Olá ${clientData?.first_name || 'Cliente'}! Como ficou sua análise sobre nossa proposta do equipamento? Estou à disposição para esclarecer qualquer dúvida."`
+  };
+  
+  const key = Object.keys(responses).find(k => prompt.toLowerCase().includes(k));
+  return responses[key] || `Nathan, análise indisponível no momento. Recomendo: ligar para ${clientData?.first_name || 'o cliente'} e aplicar SPIN Selling.`;
+};
+
 export default LocalAIFallbacks;
