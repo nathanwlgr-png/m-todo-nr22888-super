@@ -48,6 +48,16 @@ export default function RolePlayTraining() {
     queryFn: () => base44.entities.Client.list()
   });
 
+  const { data: coachingSessions = [] } = useQuery({
+    queryKey: ['coaching-sessions'],
+    queryFn: () => base44.entities.CoachingSession.list('-created_date', 20)
+  });
+
+  const [sessionComplete, setSessionComplete] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [previousScores, setPreviousScores] = useState([]);
+  const [sessionReport, setSessionReport] = useState(null);
+
   const personas = [
     {
       id: 'analitico',
@@ -284,6 +294,118 @@ Avalie rapidamente (formato JSON):`,
     const duration = Math.round((new Date() - sessionStart) / 60000);
     const techniques = [...new Set(realtimeFeedback.flatMap(f => f.techniques_identified || []))];
 
+    // Gerar análise avançada com frameworks
+    try {
+      const transcript = messages.map(m => 
+        `${m.role === 'user' ? 'VENDEDOR' : selectedPersona.name}: ${m.content}`
+      ).join('\n\n');
+
+      const analysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é um coach de vendas expert. Analise esta sessão de role-play.
+
+PERFIL DO CLIENTE: ${selectedPersona.name}
+Numerologia: ${selectedPersona.numerology} - ${selectedPersona.profile}
+Estilo: ${selectedPersona.decision_style}
+
+TRANSCRIPT COMPLETO:
+${transcript}
+
+SCORES HISTÓRICOS: ${previousScores.join(', ') || 'Primeira sessão'}
+
+ANÁLISE DETALHADA POR FRAMEWORK (0-10 cada):
+- SPIN Selling: Usou Situation, Problem, Implication, Need-Payoff?
+- Cialdini: Aplicou reciprocidade, prova social, autoridade, escassez?
+- Challenger: Ensinou algo novo, personalizou, controlou conversa?
+- Voss (FBI): Usou mirroring, labeling, calibrated questions?
+- Gap Selling: Identificou current state, future state, gap?
+- Fechamento (Ziglar): Tentou trial close, alternative, assumptive?
+
+Para CADA técnica forneça:
+- Score 0-10
+- Exemplo onde usou/deveria usar
+- Capítulo do livro para revisar
+- Exercício prático específico
+
+Retorne análise completa.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            overall_score: { type: "number" },
+            technique_scores: {
+              type: "object",
+              properties: {
+                spin_selling: { type: "number" },
+                cialdini: { type: "number" },
+                challenger: { type: "number" },
+                voss_negotiation: { type: "number" },
+                gap_selling: { type: "number" },
+                closing: { type: "number" }
+              }
+            },
+            strengths: { type: "array", items: { type: "string" } },
+            weaknesses: { type: "array", items: { type: "string" } },
+            missed_opportunities: { type: "array", items: { type: "string" } },
+            next_conversation_tips: { type: "array", items: { type: "string" } },
+            book_chapters_recommended: { type: "array", items: { type: "string" } },
+            practice_exercises: { type: "array", items: { type: "string" } },
+            ai_detailed_feedback: { type: "string" }
+          }
+        }
+      });
+
+      setSessionReport(analysis);
+      setShowReport(true);
+
+      // Salvar sessão de coaching
+      const coachingSession = await base44.entities.CoachingSession.create({
+        client_id: selectedPersona.id,
+        client_name: selectedPersona.name,
+        conversation_type: 'role_play',
+        transcript,
+        duration_minutes: duration,
+        overall_score: analysis.overall_score || currentScore,
+        technique_scores: analysis.technique_scores,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        missed_opportunities: analysis.missed_opportunities,
+        next_conversation_tips: analysis.next_conversation_tips,
+        outcome: analysis.overall_score >= 80 ? 'venda_fechada' : 
+                 analysis.overall_score >= 60 ? 'agendou_proxima' : 'neutro',
+        ai_detailed_feedback: analysis.ai_detailed_feedback
+      });
+
+      // Salvar progresso por técnica
+      const techniqueMapping = {
+        spin_selling: 'SPIN_Selling',
+        cialdini: 'Cialdini_Persuasao',
+        challenger: 'Challenger_Sale',
+        voss_negotiation: 'Never_Split_Difference',
+        gap_selling: 'Gap_Selling',
+        closing: 'Ziglar_Closing'
+      };
+
+      for (const [key, techniqueName] of Object.entries(techniqueMapping)) {
+        const score = analysis.technique_scores?.[key];
+        if (score !== undefined) {
+          await base44.entities.TechniqueProgress.create({
+            technique_name: techniqueName,
+            session_id: coachingSession.id,
+            score: (score / 10) * 100,
+            successes: analysis.strengths || [],
+            failures: analysis.weaknesses || [],
+            book_chapter_recommended: analysis.book_chapters_recommended?.find(ch => ch.includes(techniqueName)) || `Revisar ${techniqueName}`,
+            practice_exercise: analysis.practice_exercises?.find(ex => ex.toLowerCase().includes(key.split('_')[0])) || `Praticar ${techniqueName}`
+          });
+        }
+      }
+
+      toast.success(addPhilosophicalEnding('Análise completa de coaching concluída!'));
+
+    } catch (error) {
+      console.error('Erro análise:', error);
+      toast.warning('Análise salva, mas sem detalhamento IA');
+    }
+
     const sessionData = {
       profile_id: selectedPersona.id,
       profile_name: selectedPersona.name,
@@ -302,8 +424,8 @@ Avalie rapidamente (formato JSON):`,
     };
 
     await saveMutation.mutateAsync(sessionData);
-    
     setSessionActive(false);
+    setSessionComplete(true);
   };
 
   const exportSessionPDF = async () => {

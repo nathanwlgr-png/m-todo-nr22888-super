@@ -85,6 +85,9 @@ export default function SalesCoaching() {
 
           <TabsContent value="dashboard" className="space-y-4 mt-4">
             <CoachingDashboard />
+            <div className="mt-4">
+              <TechniqueProgressTracker compact={false} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
