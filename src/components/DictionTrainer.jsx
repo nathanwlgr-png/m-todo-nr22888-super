@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Mic, Play, RotateCcw, BookOpen } from 'lucide-react';
+import { Mic, Play, RotateCcw, BookOpen, Sparkles, TrendingUp, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
 
 const DICTION_EXERCISES = [
   {
@@ -57,8 +59,12 @@ export default function DictionTrainer() {
   const [selectedExercise, setSelectedExercise] = useState(0);
   const [currentPhraseIdx, setCurrentPhraseIdx] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioURL, setAudioURL] = useState(null);
+  const [evaluating, setEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
   const mediaRecorderRef = useRef(null);
-  const audioContextRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   const currentExercise = DICTION_EXERCISES[selectedExercise];
   const currentPhrase = currentExercise.phrases[currentPhraseIdx];
@@ -66,23 +72,105 @@ export default function DictionTrainer() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
-      mediaRecorder.onstart = () => setIsRecording(true);
-      mediaRecorder.onstop = () => setIsRecording(false);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setAudioURL(url);
+        setIsRecording(false);
+        
+        stream.getTracks().forEach(track => track.stop());
+        toast.success('Gravação salva!');
+      };
+
+      mediaRecorder.onstart = () => {
+        setIsRecording(true);
+        setEvaluation(null);
+      };
 
       mediaRecorder.start();
       toast.success('Gravação iniciada - leia a frase!');
     } catch (error) {
+      console.error('Erro:', error);
       toast.error('Permita acesso ao microfone');
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      toast.success('Gravação salva! Analise sua dicção.');
+    }
+  };
+
+  const evaluateRecording = async () => {
+    if (!audioBlob) {
+      toast.error('Grave primeiro!');
+      return;
+    }
+
+    setEvaluating(true);
+    try {
+      // Upload áudio
+      const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: audioFile });
+
+      // Avaliar com IA
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise esta gravação de voz e avalie a dicção, clareza e apresentação.
+
+EXERCÍCIO: ${currentExercise.title}
+FRASE ALVO: "${currentPhrase}"
+
+CRITÉRIOS DE AVALIAÇÃO:
+1. Clareza (0-25 pontos): Articulação, pronúncia correta
+2. Ritmo (0-25 pontos): Velocidade adequada, pausas
+3. Tom/Entonação (0-25 pontos): Variação, ênfase, confiança
+4. Profissionalismo (0-25 pontos): Postura vocal, credibilidade
+
+Avalie de forma construtiva mas honesta. Dê nota geral de 0-100 e feedback específico.`,
+        file_urls: [file_url],
+        response_json_schema: {
+          type: "object",
+          properties: {
+            nota_geral: { type: "number" },
+            clareza_pontos: { type: "number" },
+            ritmo_pontos: { type: "number" },
+            tom_pontos: { type: "number" },
+            profissionalismo_pontos: { type: "number" },
+            pontos_fortes: { type: "array", items: { type: "string" } },
+            pontos_melhorar: { type: "array", items: { type: "string" } },
+            dicas_especificas: { type: "array", items: { type: "string" } },
+            comparacao_ideal: { type: "string" },
+            proximos_passos: { type: "array", items: { type: "string" } }
+          }
+        }
+      });
+
+      setEvaluation(result);
+      toast.success('Avaliação completa!');
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao avaliar: ' + error.message);
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
+  const playRecording = () => {
+    if (audioURL) {
+      const audio = new Audio(audioURL);
+      audio.play();
     }
   };
 
@@ -94,6 +182,10 @@ export default function DictionTrainer() {
   };
 
   const nextPhrase = () => {
+    setAudioBlob(null);
+    setAudioURL(null);
+    setEvaluation(null);
+    
     if (currentPhraseIdx < currentExercise.phrases.length - 1) {
       setCurrentPhraseIdx(currentPhraseIdx + 1);
     } else {
@@ -161,17 +253,146 @@ export default function DictionTrainer() {
               className="border-violet-300"
             >
               <Play className="w-4 h-4 mr-1" />
-              Ouvir
+              Ouvir Frase
             </Button>
             <Button
               onClick={isRecording ? stopRecording : startRecording}
               size="sm"
-              className={isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-violet-600 hover:bg-violet-700'}
+              className={isRecording ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-violet-600 hover:bg-violet-700'}
+              disabled={evaluating}
             >
               <Mic className="w-4 h-4 mr-1" />
-              {isRecording ? 'Parar' : 'Gravar'}
+              {isRecording ? 'Parar' : 'Gravar Voz'}
             </Button>
+            {audioURL && (
+              <Button
+                onClick={playRecording}
+                size="sm"
+                variant="outline"
+                className="border-green-300 text-green-700"
+              >
+                <Play className="w-4 h-4 mr-1" />
+                Ouvir Gravação
+              </Button>
+            )}
           </div>
+
+          {/* Botão de Avaliação */}
+          {audioBlob && !evaluation && (
+            <div className="mb-4">
+              <Button
+                onClick={evaluateRecording}
+                disabled={evaluating}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                {evaluating ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                    Avaliando com IA...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Avaliar Minha Dicção
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Resultado da Avaliação */}
+          {evaluation && (
+            <div className="mb-4 space-y-3">
+              {/* Nota Geral */}
+              <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg border-2 border-yellow-300">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-bold text-amber-900">📊 Nota Geral</p>
+                  <Badge className={
+                    evaluation.nota_geral >= 80 ? 'bg-green-600' :
+                    evaluation.nota_geral >= 60 ? 'bg-yellow-600' :
+                    'bg-orange-600'
+                  }>
+                    {evaluation.nota_geral}/100
+                  </Badge>
+                </div>
+                <Progress value={evaluation.nota_geral} className="h-3" />
+              </div>
+
+              {/* Detalhamento */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                  <p className="font-semibold text-blue-900">Clareza</p>
+                  <p className="text-blue-700 text-lg font-bold">{evaluation.clareza_pontos}/25</p>
+                </div>
+                <div className="p-2 bg-purple-50 rounded border border-purple-200">
+                  <p className="font-semibold text-purple-900">Ritmo</p>
+                  <p className="text-purple-700 text-lg font-bold">{evaluation.ritmo_pontos}/25</p>
+                </div>
+                <div className="p-2 bg-pink-50 rounded border border-pink-200">
+                  <p className="font-semibold text-pink-900">Tom</p>
+                  <p className="text-pink-700 text-lg font-bold">{evaluation.tom_pontos}/25</p>
+                </div>
+                <div className="p-2 bg-green-50 rounded border border-green-200">
+                  <p className="font-semibold text-green-900">Profiss.</p>
+                  <p className="text-green-700 text-lg font-bold">{evaluation.profissionalismo_pontos}/25</p>
+                </div>
+              </div>
+
+              {/* Pontos Fortes */}
+              <div className="p-3 bg-green-50 rounded-lg border border-green-300">
+                <p className="text-xs font-bold text-green-900 mb-2 flex items-center gap-1">
+                  <Star className="w-3 h-3" />
+                  ✅ Pontos Fortes
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.pontos_fortes?.map((ponto, i) => (
+                    <li key={i} className="text-xs text-green-700">• {ponto}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Pontos a Melhorar */}
+              <div className="p-3 bg-orange-50 rounded-lg border border-orange-300">
+                <p className="text-xs font-bold text-orange-900 mb-2 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  🎯 Pontos a Melhorar
+                </p>
+                <ul className="space-y-1">
+                  {evaluation.pontos_melhorar?.map((ponto, i) => (
+                    <li key={i} className="text-xs text-orange-700">• {ponto}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Dicas Específicas */}
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-300">
+                <p className="text-xs font-bold text-blue-900 mb-2">💡 Dicas Específicas</p>
+                <ul className="space-y-1">
+                  {evaluation.dicas_especificas?.map((dica, i) => (
+                    <li key={i} className="text-xs text-blue-700">• {dica}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Próximos Passos */}
+              <div className="p-3 bg-purple-50 rounded-lg border border-purple-300">
+                <p className="text-xs font-bold text-purple-900 mb-2">🚀 Próximos Passos</p>
+                <ul className="space-y-1">
+                  {evaluation.proximos_passos?.map((passo, i) => (
+                    <li key={i} className="text-xs text-purple-700">• {passo}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Comparação com Ideal */}
+              {evaluation.comparacao_ideal && (
+                <div className="p-3 bg-amber-50 rounded-lg border border-amber-300">
+                  <p className="text-xs font-bold text-amber-900 mb-1">🎭 Comparação com Ideal</p>
+                  <p className="text-xs text-amber-700">{evaluation.comparacao_ideal}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Navegação */}
           <div className="flex gap-2 justify-center">
