@@ -48,6 +48,75 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (action === 'sync_clients') {
+      const cnpj = credentials?.cnpj || '13693877000157';
+      const mobvendedor_id = credentials?.mobvendedor_id || '53';
+
+      try {
+        // Busca clientes do MobVendedor
+        const clientsResponse = await fetch(`https://api.targetsis.com.br/mobvendedor/clientes?cnpj=${cnpj}&distribuidor=${mobvendedor_id}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        }).catch(() => null);
+
+        if (!clientsResponse?.ok) {
+          return Response.json({ success: false, error: 'Erro ao buscar clientes do MobVendedor', synced: 0 });
+        }
+
+        const clientsData = await clientsResponse.json();
+        const clients = clientsData.clientes || [];
+
+        let syncedCount = 0;
+        const batchSize = 5;
+
+        for (let i = 0; i < clients.length; i += batchSize) {
+          const batch = clients.slice(i, i + batchSize);
+          
+          for (const client of batch) {
+            try {
+              const existing = await base44.entities.Client.filter({
+                external_code: client.codigo_cliente
+              }).catch(() => []);
+
+              const clientData = {
+                external_code: client.codigo_cliente,
+                first_name: client.nome?.split(' ')[0] || client.razao_social?.split(' ')[0] || 'Cliente',
+                full_name: client.nome || client.razao_social,
+                cnpj: client.cnpj,
+                razao_social: client.razao_social,
+                email: client.email,
+                phone: client.telefone,
+                address: client.endereco,
+                cep: client.cep,
+                city: client.cidade,
+                clinic_name: client.razao_social || client.nome,
+                status: 'morno',
+                lead_source: 'importacao_planilha',
+                purchase_score: 50
+              };
+
+              if (existing?.length > 0) {
+                await base44.asServiceRole.entities.Client.update(existing[0].id, clientData);
+              } else {
+                await base44.asServiceRole.entities.Client.create(clientData);
+              }
+              syncedCount++;
+            } catch (e) {
+              console.error(`Erro ao sincronizar cliente ${client.codigo_cliente}:`, e);
+            }
+          }
+
+          if (i + batchSize < clients.length) {
+            await delay(RATE_LIMIT_DELAY);
+          }
+        }
+
+        return Response.json({ success: true, synced: syncedCount, total: clients.length });
+      } catch (error) {
+        return Response.json({ success: false, error: error.message }, { status: 500 });
+      }
+    }
+
     if (action === 'sync_equipment') {
       const token = credentials?.token;
       const distributor_id = credentials?.distributor_id;

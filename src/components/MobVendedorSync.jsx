@@ -82,6 +82,29 @@ export default function MobVendedorSync() {
     }
   };
 
+  const syncClients = async () => {
+    setSyncing('clients');
+    try {
+      const response = await base44.functions.invoke('mobVendedorIntegration', {
+        action: 'sync_clients',
+        credentials: {
+          cnpj: '13693877000157',
+          mobvendedor_id: '53'
+        }
+      });
+
+      if (response.data.success) {
+        toast.success(`✅ ${response.data.synced} clientes sincronizados do MobVendedor 53!`);
+      } else {
+        toast.error('❌ Erro: ' + response.data.error);
+      }
+    } catch (error) {
+      toast.error('Erro: ' + error.message);
+    } finally {
+      setSyncing(null);
+    }
+  };
+
   const syncSales = async () => {
     setSyncing('sales');
     try {
@@ -208,6 +231,33 @@ export default function MobVendedorSync() {
       )}
 
       {/* Sincronização */}
+      <Card className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-indigo-600 font-semibold">Clientes MobVendedor</p>
+            <p className="text-lg font-bold text-indigo-900">CNPJ: 13.693.877/0001-57</p>
+            <p className="text-xs text-indigo-600">Distribuidor ID: 53</p>
+          </div>
+          <Button
+            onClick={syncClients}
+            disabled={syncing === 'clients'}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            {syncing === 'clients' ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Baixando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Baixar Clientes
+              </>
+            )}
+          </Button>
+        </div>
+      </Card>
+
       {token && (
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">

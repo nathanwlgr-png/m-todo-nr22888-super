@@ -304,6 +304,48 @@ Retorne até 15 clínicas.`,
           </div>
         )}
 
+        {/* MOBVENDEDOR - BAIXAR CLIENTES */}
+        <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-indigo-900">📦 MobVendedor 53</h3>
+              <p className="text-xs text-indigo-700">CNPJ: 13.693.877/0001-57</p>
+            </div>
+          </div>
+          <Button
+            onClick={async () => {
+              const loading = toast.loading('Baixando clientes do MobVendedor...');
+              try {
+                const response = await base44.functions.invoke('mobVendedorIntegration', {
+                  action: 'sync_clients',
+                  credentials: {
+                    cnpj: '13693877000157',
+                    mobvendedor_id: '53'
+                  }
+                });
+
+                toast.dismiss(loading);
+                if (response.data.success) {
+                  toast.success(`✅ ${response.data.synced} clientes importados!`);
+                  queryClient.invalidateQueries(['clients']);
+                } else {
+                  toast.error('❌ ' + response.data.error);
+                }
+              } catch (error) {
+                toast.dismiss(loading);
+                toast.error('Erro: ' + error.message);
+              }
+            }}
+            className="w-full bg-indigo-600 hover:bg-indigo-700"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Baixar Todos os Clientes
+          </Button>
+        </Card>
+
         {/* CADASTRO DE WHATSAPP MASTER */}
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 border-2">
           <div className="p-4">
