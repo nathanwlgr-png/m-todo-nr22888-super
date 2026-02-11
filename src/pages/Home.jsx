@@ -52,6 +52,8 @@ import AIContentGenerator from '@/components/AIContentGenerator';
 import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
 import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWidget';
 import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
+import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
+import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -592,6 +594,12 @@ Retorne até 15 clínicas.`,
             </Link>
           </div>
         </div>
+
+        {/* FOLLOW-UP AUTOMÁTICO IA */}
+        <AIFollowUpAutomation />
+
+        {/* TIMING IDEAL DE CONTATO IA */}
+        <AIContactTimingOptimizer />
 
         {/* GERADOR PDF REGIONAL */}
         <QuickRegionalPDFGenerator />
