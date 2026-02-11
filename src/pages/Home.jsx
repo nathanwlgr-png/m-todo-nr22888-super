@@ -305,46 +305,125 @@ Retorne até 15 clínicas.`,
           </div>
         )}
 
-        {/* MOBVENDEDOR - BAIXAR CLIENTES */}
+        {/* MOBVENDEDOR - BAIXAR CLIENTES DE OUTRO TABLET */}
         <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+              <RefreshCw className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-indigo-900">📦 MobVendedor 53</h3>
-              <p className="text-xs text-indigo-700">CNPJ: 13.693.877/0001-57</p>
+              <h3 className="font-bold text-indigo-900">📱 Importar MobVendedor</h3>
+              <p className="text-xs text-indigo-700">Baixar clientes de qualquer tablet</p>
             </div>
           </div>
-          <Button
-            onClick={async () => {
-              const loading = toast.loading('Baixando clientes do MobVendedor...');
-              try {
-                const response = await base44.functions.invoke('mobVendedorIntegration', {
-                  action: 'sync_clients',
-                  credentials: {
-                    cnpj: '13693877000157',
-                    mobvendedor_id: '53'
-                  }
-                });
+          
+          <div className="space-y-3">
+            {/* Tablet 53 (Padrão) */}
+            <div className="p-3 bg-white rounded-lg border border-indigo-200">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm font-bold text-slate-800">Tablet 53 (Principal)</p>
+                  <p className="text-xs text-slate-600">CNPJ: 13.693.877/0001-57</p>
+                </div>
+                <Badge className="bg-indigo-600">Padrão</Badge>
+              </div>
+              <Button
+                onClick={async () => {
+                  const loading = toast.loading('Baixando clientes do Tablet 53...');
+                  try {
+                    const response = await base44.functions.invoke('mobVendedorIntegration', {
+                      action: 'sync_clients',
+                      credentials: {
+                        cnpj: '13693877000157',
+                        mobvendedor_id: '53'
+                      }
+                    });
 
-                toast.dismiss(loading);
-                if (response.data.success) {
-                  toast.success(`✅ ${response.data.synced} clientes importados!`);
-                  queryClient.invalidateQueries(['clients']);
-                } else {
-                  toast.error('❌ ' + response.data.error);
-                }
-              } catch (error) {
-                toast.dismiss(loading);
-                toast.error('Erro: ' + error.message);
-              }
-            }}
-            className="w-full bg-indigo-600 hover:bg-indigo-700"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Baixar Todos os Clientes
-          </Button>
+                    toast.dismiss(loading);
+                    if (response.data.success) {
+                      toast.success(`✅ ${response.data.synced} clientes importados!`);
+                      queryClient.invalidateQueries(['clients']);
+                    } else {
+                      toast.error('❌ ' + response.data.error);
+                    }
+                  } catch (error) {
+                    toast.dismiss(loading);
+                    toast.error('Erro: ' + error.message);
+                  }
+                }}
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                size="sm"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Baixar Clientes
+              </Button>
+            </div>
+
+            {/* Importação de Outro Tablet */}
+            <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-300">
+              <p className="text-sm font-bold text-purple-900 mb-2">🔄 Outro Tablet</p>
+              <div className="space-y-2">
+                <Input
+                  placeholder="CNPJ (ex: 12345678000199)"
+                  id="custom-cnpj"
+                  className="text-sm"
+                />
+                <Input
+                  placeholder="ID Distribuidor (ex: 1, 2, 3...)"
+                  id="custom-distributor-id"
+                  className="text-sm"
+                />
+                <Button
+                  onClick={async () => {
+                    const cnpjInput = document.getElementById('custom-cnpj');
+                    const distributorInput = document.getElementById('custom-distributor-id');
+                    
+                    const cnpj = cnpjInput?.value?.replace(/\D/g, '');
+                    const distributorId = distributorInput?.value;
+
+                    if (!cnpj || cnpj.length !== 14) {
+                      toast.error('CNPJ inválido (14 dígitos)');
+                      return;
+                    }
+
+                    if (!distributorId) {
+                      toast.error('Informe o ID do distribuidor');
+                      return;
+                    }
+
+                    const loading = toast.loading(`Baixando clientes do CNPJ ${cnpj}...`);
+                    try {
+                      const response = await base44.functions.invoke('mobVendedorIntegration', {
+                        action: 'sync_clients',
+                        credentials: {
+                          cnpj: cnpj,
+                          mobvendedor_id: distributorId
+                        }
+                      });
+
+                      toast.dismiss(loading);
+                      if (response.data.success) {
+                        toast.success(`✅ ${response.data.synced} clientes importados!`);
+                        queryClient.invalidateQueries(['clients']);
+                        cnpjInput.value = '';
+                        distributorInput.value = '';
+                      } else {
+                        toast.error('❌ ' + response.data.error);
+                      }
+                    } catch (error) {
+                      toast.dismiss(loading);
+                      toast.error('Erro: ' + error.message);
+                    }
+                  }}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  size="sm"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Importar de Outro Tablet
+                </Button>
+              </div>
+            </div>
+          </div>
         </Card>
 
         {/* CADASTRO DE WHATSAPP MASTER */}
