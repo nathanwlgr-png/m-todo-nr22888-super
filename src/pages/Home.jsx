@@ -51,6 +51,7 @@ import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
 import AIContentGenerator from '@/components/AIContentGenerator';
 import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
 import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWidget';
+import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -591,6 +592,9 @@ Retorne até 15 clínicas.`,
             </Link>
           </div>
         </div>
+
+        {/* GERADOR PDF REGIONAL */}
+        <QuickRegionalPDFGenerator />
 
         {/* GERADOR DE CONTEÚDO IA */}
         <AIContentGenerator client={null} context="" />
