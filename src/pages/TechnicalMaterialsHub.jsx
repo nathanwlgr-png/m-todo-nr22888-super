@@ -8,6 +8,7 @@ import { base44 } from '@/api/base44Client';
 
 export default function TechnicalMaterialsHub() {
   const [generating, setGenerating] = useState(null);
+  const [generatingVG2Scientific, setGeneratingVG2Scientific] = useState(false);
 
   const generateAcidBaseBalancePDF = () => {
     setGenerating('acidbase');
@@ -1194,7 +1195,36 @@ export default function TechnicalMaterialsHub() {
     }
   };
 
+  const generateVG2ScientificGuide = async () => {
+    try {
+      setGeneratingVG2Scientific(true);
+      toast.loading('Gerando guia científico VG2 com 13 artigos e 12 casos clínicos...');
+
+      const response = await base44.functions.invoke('generateVG2ScientificPDF', {});
+
+      if (response.data.success) {
+        toast.success('✅ Guia científico VG2 criado com sucesso!');
+        toast.info('📥 Disponível na Central de Documentos para download');
+      } else {
+        toast.error('Erro: ' + response.data.error);
+      }
+    } catch (error) {
+      toast.error('Erro ao gerar PDF: ' + error.message);
+    } finally {
+      setGeneratingVG2Scientific(false);
+    }
+  };
+
   const materials = [
+    {
+      id: 'vg2scientific',
+      title: '📚 VG2 - Guia Científico Completo (13 Artigos + 12 Casos Clínicos)',
+      description: '20 enzimas/parâmetros do VG2, importância da hemogasometria, 12 casos clínicos detalhados, 13 referências científicas atuais (2020-2025) em inglês',
+      icon: BookOpen,
+      color: 'from-indigo-500 to-purple-500',
+      action: generateVG2ScientificGuide,
+      isSpecial: true
+    },
     {
       id: 'sendNatan',
       title: '🔬 Enviar Análise Científica Seamaty',
@@ -1247,7 +1277,44 @@ export default function TechnicalMaterialsHub() {
         </div>
 
         {/* Cards de Materiais */}
-        {materials[0].isSpecial && (
+        {/* VG2 Scientific Guide - DESTAQUE */}
+        <Card className="hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-indigo-400 bg-gradient-to-r from-indigo-50 to-purple-50 mb-6">
+          <div className="h-3 bg-gradient-to-r from-indigo-500 to-purple-500" />
+          <CardHeader>
+            <div className="flex items-start gap-4 justify-between">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500">
+                  <BookOpen className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-2xl mb-2">{materials[0].title}</CardTitle>
+                  <p className="text-sm text-slate-700">{materials[0].description}</p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={materials[0].action}
+              disabled={generatingVG2Scientific}
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90 text-lg py-6"
+            >
+              {generatingVG2Scientific ? (
+                <>
+                  <TrendingUp className="w-5 h-5 mr-2 animate-spin" />
+                  Gerando guia científico completo...
+                </>
+              ) : (
+                <>
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Gerar Guia Científico VG2
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {materials[1].isSpecial && (
           <Card className="md:col-span-2 hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-green-400 bg-gradient-to-r from-green-50 to-emerald-50">
             <div className="h-3 bg-gradient-to-r from-green-500 to-emerald-500" />
             <CardHeader>
@@ -1265,11 +1332,11 @@ export default function TechnicalMaterialsHub() {
             </CardHeader>
             <CardContent>
               <Button
-                onClick={materials[0].action}
-                disabled={generating === materials[0].id}
+                onClick={materials[1].action}
+                disabled={generating === materials[1].id}
                 className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:opacity-90 text-lg py-6"
               >
-                {generating === materials[0].id ? (
+                {generating === materials[1].id ? (
                   <>
                     <TrendingUp className="w-5 h-5 mr-2 animate-spin" />
                     Gerando e enviando...
@@ -1286,7 +1353,7 @@ export default function TechnicalMaterialsHub() {
         )}
 
         <div className="grid md:grid-cols-2 gap-6">
-          {materials.slice(1).map(material => {
+          {materials.slice(2).map(material => {
             const Icon = material.icon;
             const isGenerating = generating === material.id;
 
