@@ -55,6 +55,7 @@ import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
 import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
 import SalesIntelligenceDashboard from '@/components/SalesIntelligenceDashboard';
+import CompetitorAnalysisNoAI from '@/components/CompetitorAnalysisNoAI';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -64,6 +65,7 @@ export default function Home() {
   const [autoSaveProgress, setAutoSaveProgress] = useState(null);
   const [selectedClientForAnalysis, setSelectedClientForAnalysis] = useState(null);
   const [newMasterPhone, setNewMasterPhone] = useState('');
+  const [showCompetitorAnalysis, setShowCompetitorAnalysis] = useState(false);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -271,6 +273,15 @@ Retorne até 15 clínicas.`,
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-white hover:bg-orange-600"
+              onClick={() => setShowCompetitorAnalysis(!showCompetitorAnalysis)}
+            >
+              <Target className="w-4 h-4 mr-1" />
+              <span className="text-xs font-semibold">Concorrência</span>
+            </Button>
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">
                 <Settings className="w-4 h-4" />
@@ -286,6 +297,13 @@ Retorne até 15 clínicas.`,
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
+        {showCompetitorAnalysis && (
+          <div className="mb-4">
+            <CompetitorAnalysisNoAI />
+          </div>
+        )}
+
         {/* CADASTRO DE WHATSAPP MASTER */}
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 border-2">
           <div className="p-4">
