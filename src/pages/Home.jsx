@@ -569,6 +569,21 @@ Retorne até 15 clínicas.`,
             </Card>
           </Link>
 
+          {/* RELATÓRIO MENSAL */}
+          <Link to={createPageUrl('MonthlyReport')}>
+            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-fuchsia-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-purple-900">📊 Relatório Mensal</p>
+                  <p className="text-xs text-purple-700">Visitas + avaliações + PDF automático</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
           {/* ETAPA 7: ANÁLISES E DASHBOARD */}
           <div className="grid grid-cols-2 gap-3">
             <Link to={createPageUrl('SalesAnalytics')}>

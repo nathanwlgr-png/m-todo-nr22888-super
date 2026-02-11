@@ -16,11 +16,14 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import VisitEvaluationDialog from './VisitEvaluationDialog';
 
 export default function EnhancedClinicAnalyzer({ onClientCreated }) {
   const [clinicName, setClinicName] = useState('');
   const [searching, setSearching] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [showEvaluation, setShowEvaluation] = useState(false);
+  const [currentClient, setCurrentClient] = useState(null);
 
   const analyzeClinic = async () => {
     if (!clinicName.trim()) {
