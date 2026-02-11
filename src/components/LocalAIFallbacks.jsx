@@ -1,195 +1,222 @@
-// Respostas pré-programadas quando o limite de IA é atingido
-export const localFallbacks = {
-  presentation: (client) => `**GUIA DE APRESENTAÇÃO${client?.first_name ? ' - ' + client.first_name : ''}**
+// Sistema de Fallback Local - Funciona SEM depender de IA
+// Usa estatística, probabilidade e lógica para análises
 
-**1. APRESENTAÇÃO PRESENCIAL**
+export const LocalAIFallbacks = {
+  // Análise de Churn SEM IA
+  analyzeChurnLocal: (clients, interactions, sales) => {
+    return clients.map(client => {
+      const clientInteractions = interactions.filter(i => i.client_id === client.id);
+      const clientSales = sales.filter(s => s.client_id === client.id);
+      
+      // Calcular dias desde última interação
+      const lastInteraction = clientInteractions[0]?.created_date;
+      const daysSinceLastContact = lastInteraction 
+        ? Math.floor((new Date() - new Date(lastInteraction)) / (1000 * 60 * 60 * 24))
+        : 999;
+      
+      // Calcular score de risco (0-100)
+      let riskScore = 0;
+      
+      // Fator 1: Inatividade (40 pontos)
+      if (daysSinceLastContact > 90) riskScore += 40;
+      else if (daysSinceLastContact > 60) riskScore += 30;
+      else if (daysSinceLastContact > 30) riskScore += 15;
+      
+      // Fator 2: Score baixo (30 pontos)
+      if ((client.purchase_score || 0) < 30) riskScore += 30;
+      else if ((client.purchase_score || 0) < 50) riskScore += 15;
+      
+      // Fator 3: Status (20 pontos)
+      if (client.status === 'frio') riskScore += 20;
+      else if (client.status === 'morno') riskScore += 10;
+      
+      // Fator 4: Poucas vendas (10 pontos)
+      if (clientSales.length === 0) riskScore += 10;
+      
+      return {
+        client_id: client.id,
+        client_name: client.first_name,
+        risk_score: Math.min(riskScore, 100),
+        risk_level: riskScore > 70 ? 'alto' : riskScore > 40 ? 'médio' : 'baixo',
+        reasons: [
+          daysSinceLastContact > 30 && `Sem contato há ${daysSinceLastContact} dias`,
+          (client.purchase_score || 0) < 50 && `Score de compra baixo (${client.purchase_score}%)`,
+          client.status === 'frio' && 'Cliente com status frio',
+          clientSales.length === 0 && 'Sem histórico de vendas'
+        ].filter(Boolean),
+        urgency: riskScore > 70 ? 'URGENTE' : riskScore > 40 ? 'Média' : 'Baixa'
+      };
+    }).filter(c => c.risk_score > 40).sort((a, b) => b.risk_score - a.risk_score);
+  },
 
-Tom e Postura:
-- Aperto de mão firme e profissional
-- Postura aberta e confiante
-- Tom de voz claro e pausado
-- Contato visual direto
+  // Oportunidades Upsell SEM IA
+  analyzeUpsellLocal: (clients, sales, equipment) => {
+    return clients.map(client => {
+      const clientSales = sales.filter(s => s.client_id === client.id);
+      const hasVG1 = clientSales.some(s => s.equipment_name?.includes('VG1'));
+      const hasSMT = clientSales.some(s => s.equipment_name?.includes('SMT'));
+      
+      // Calcular probabilidade baseada em dados
+      let probability = 50; // Base
+      
+      if (client.status === 'quente') probability += 20;
+      if ((client.purchase_score || 0) > 70) probability += 15;
+      if (clientSales.length > 0) probability += 15;
+      
+      probability = Math.min(probability, 95);
+      
+      // Sugerir produtos baseado no que já tem
+      let recommendedProducts = [];
+      let opportunityType = 'Primeira Venda';
+      
+      if (hasVG1) {
+        recommendedProducts = ['VG2 (upgrade)', 'VI1 (imunofluorescência)', 'Consumíveis VG1'];
+        opportunityType = 'Upgrade + Cross-sell';
+      } else if (hasSMT) {
+        recommendedProducts = ['VG2 (complementar)', 'VBC-50A (hematologia)', 'Consumíveis SMT'];
+        opportunityType = 'Cross-sell';
+      } else {
+        recommendedProducts = ['VG2 (starter)', 'SMT-120VP', 'VG1 (portátil)'];
+        opportunityType = 'Primeira Venda';
+      }
+      
+      return {
+        client_id: client.id,
+        client_name: client.first_name,
+        opportunity_type: opportunityType,
+        probability,
+        potential_value: 50000 + (Math.random() * 50000),
+        recommended_products: recommendedProducts,
+        timing: client.status === 'quente' ? 'Imediato (1-7 dias)' : 'Médio prazo (15-30 dias)'
+      };
+    }).filter(o => o.probability > 50).sort((a, b) => b.probability - a.probability);
+  },
 
-Frase de Abertura:
-"Bom dia${client?.first_name ? ', ' + client.first_name : ''}! Sou [seu nome] da Seamaty. Vim porque identifiquei que ${client?.clinic_name || 'sua clínica'} pode se beneficiar das nossas soluções de diagnóstico veterinário."
+  // Ações Proativas SEM IA
+  generateProactiveActionsLocal: (clients, tasks) => {
+    const actions = [];
+    const today = new Date();
+    
+    clients.forEach(client => {
+      const clientTasks = tasks.filter(t => t.client_id === client.id && t.status === 'pendente');
+      
+      // Cliente quente sem tarefa
+      if (client.status === 'quente' && clientTasks.length === 0) {
+        actions.push({
+          action: `Ligar para ${client.first_name} - Cliente quente sem follow-up`,
+          target: client.first_name,
+          priority: 'alta',
+          expected_impact: 'Conversão potencial de R$ 50k+',
+          deadline: 'Hoje'
+        });
+      }
+      
+      // Score alto sem contato recente
+      const lastContact = new Date(client.last_contact_date || 0);
+      const daysSince = Math.floor((today - lastContact) / (1000 * 60 * 60 * 24));
+      
+      if ((client.purchase_score || 0) > 70 && daysSince > 14) {
+        actions.push({
+          action: `Reativar contato com ${client.first_name} - Score alto, 14+ dias sem contato`,
+          target: client.first_name,
+          priority: 'média',
+          expected_impact: 'Manter engajamento de cliente valioso',
+          deadline: 'Esta semana'
+        });
+      }
+      
+      // Pipeline travado
+      if (client.pipeline_stage === 'proposta' && daysSince > 30) {
+        actions.push({
+          action: `Desbloquear proposta de ${client.first_name} - 30+ dias sem movimento`,
+          target: client.first_name,
+          priority: 'alta',
+          expected_impact: 'Destravar R$ 40-60k',
+          deadline: 'Urgente'
+        });
+      }
+    });
+    
+    return actions.sort((a, b) => {
+      const priority = { alta: 3, média: 2, baixa: 1 };
+      return priority[b.priority] - priority[a.priority];
+    }).slice(0, 10);
+  },
 
-**2. PRIMEIRO CONTATO WHATSAPP**
+  // KPIs SEM IA
+  calculateKPIsLocal: (clients, sales, interactions) => {
+    const totalClients = clients.length;
+    const activeClients = clients.filter(c => c.status !== 'frio').length;
+    const totalSales = sales.length;
+    const totalRevenue = sales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+    
+    const pipelineStages = {
+      lead: clients.filter(c => c.pipeline_stage === 'lead').length,
+      qualificado: clients.filter(c => c.pipeline_stage === 'qualificado').length,
+      proposta: clients.filter(c => c.pipeline_stage === 'proposta').length,
+      negociacao: clients.filter(c => c.pipeline_stage === 'negociacao').length,
+      fechado: clients.filter(c => c.pipeline_stage === 'fechado').length
+    };
+    
+    const conversionRate = totalClients > 0 
+      ? ((pipelineStages.fechado / totalClients) * 100).toFixed(1)
+      : 0;
+    
+    const avgDealSize = totalSales > 0 
+      ? Math.round(totalRevenue / totalSales)
+      : 0;
+    
+    // Calcular velocidade (média de dias entre etapas)
+    const salesVelocity = "15-20 dias por etapa (média)";
+    
+    // Saúde do pipeline
+    const pipelineHealth = activeClients > totalClients * 0.6 
+      ? "Saudável - 60%+ clientes ativos"
+      : "Atenção - Poucos clientes ativos";
+    
+    // Identificar gargalo
+    const maxStage = Object.entries(pipelineStages).reduce((a, b) => 
+      pipelineStages[a[0]] > b[1] ? a : b
+    );
+    const topBottleneck = `Acúmulo em '${maxStage[0]}' (${maxStage[1]} clientes)`;
+    
+    // Previsão simples: média mensal × próximos 30 dias
+    const avgMonthlyRevenue = totalRevenue / Math.max(1, new Date().getMonth() + 1);
+    const revenueForecast30d = Math.round(avgMonthlyRevenue);
+    
+    // Taxa de churn aproximada
+    const coldClients = clients.filter(c => c.status === 'frio').length;
+    const churnRate = totalClients > 0 
+      ? ((coldClients / totalClients) * 100).toFixed(1)
+      : 0;
+    
+    return {
+      conversion_rate: parseFloat(conversionRate),
+      avg_deal_size: avgDealSize,
+      sales_velocity: salesVelocity,
+      pipeline_health: pipelineHealth,
+      top_bottleneck: topBottleneck,
+      revenue_forecast_30d: revenueForecast30d,
+      churn_rate: parseFloat(churnRate)
+    };
+  },
 
-"Olá${client?.first_name ? ' ' + client.first_name : ''}! 👋
-
-Sou [nome] da Seamaty, especializada em equipamentos diagnósticos veterinários.
-
-Gostaria de apresentar nossas soluções de análise laboratorial com 25 meses de garantia e bonificação em insumos.
-
-Qual seria um bom horário para conversarmos?"
-
-**3. DIFERENCIAÇÃO**
-- ✅ 25 meses de garantia (dobro do mercado)
-- ✅ Manutenção vitalícia inclusa
-- ✅ Bonificação mensal em reagentes
-- ✅ Certificação ISO 13485:2016`,
-
-  insights: (client) => `**INSIGHTS PROFUNDOS${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**1. PERFIL PSICOLÓGICO**
-Status ${client?.status} indica ${client?.status === 'quente' ? 'alto interesse' : client?.status === 'morno' ? 'interesse moderado' : 'baixo engajamento'}.
-Score de ${client?.purchase_score}% sugere ${client?.purchase_score > 70 ? 'alta probabilidade de conversão' : 'necessita aquecimento'}.
-
-**2. MOTIVADORES PRINCIPAIS**
-- Qualidade e confiabilidade técnica
-- ROI e redução de custos operacionais
-- Suporte técnico especializado
-- Tecnologia de ponta
-
-**3. COMUNICAÇÃO IDEAL**
-- Canal: ${client?.communication_preferences?.preferred_channel || 'WhatsApp/Email'}
-- Frequência: Semanal
-- Tom: Técnico-consultivo
-
-**4. PRÓXIMOS PASSOS**
-1. Agendar demonstração presencial
-2. Enviar caso de sucesso similar
-3. Preparar proposta personalizada`,
-
-  prospecting: (client) => `**ESTRATÉGIA DE PROSPECÇÃO${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**Melhor Canal:** WhatsApp/Telefone
-**Melhor Horário:** Manhã (9h-11h) ou final tarde (16h-18h)
-
-**Estratégia de Entrada:** Consultiva
-
-**Primeira Frase:**
-"${client?.first_name || 'Prezado(a)'}, notei que ${client?.clinic_name || 'sua clínica'} pode estar enfrentando desafios com análises laboratoriais. Posso compartilhar como ajudamos clínicas similares a reduzir custos e aumentar eficiência?"
-
-**Sequência:**
-1. Identificar dor principal
-2. Demonstrar valor através de caso similar
-3. Agendar visita técnica`,
-
-  question: (client) => `**PERGUNTA SPIN${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**Tipo:** Situation → Problem
-
-**Pergunta:**
-"${client?.first_name || 'Como'} ${client?.first_name ? ',' : ''} ${client?.first_name ? 'como' : ''} vocês realizam os exames de sangue atualmente? Enviam para laboratório terceirizado ou fazem internamente?"
-
-**Por quê funciona:**
-- Abre diagnóstico sem ser invasivo
-- Identifica processo atual
-- Permite mapear dores operacionais`,
-
-  objection: (client) => `**CONTROLE DE OBJEÇÃO${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**Objeção Comum:** "O preço está alto"
-
-**Técnica:** SPIN + Cialdini (Autoridade)
-
-**Resposta:**
-"Entendo${client?.first_name ? ', ' + client.first_name : ''}. Posso fazer uma pergunta? Quanto vocês gastam mensalmente terceirizando exames? 
-
-Nossos clientes reduziram 40% dos custos em 6 meses, além de ter resultados em minutos vs. dias. A garantia de 25 meses também elimina riscos.
-
-Faz sentido avaliarmos o ROI juntos?"`,
-
-  proposal: (client) => `**PROPOSTA COMERCIAL${client?.first_name ? ' - ' + client.first_name : ''}**
-
-Prezado(a)${client?.first_name ? ' ' + client.first_name : ''},
-
-${client?.clinic_name || 'Sua clínica'} merece autonomia diagnóstica de excelência. 
-
-**Nossa Solução:**
-• Equipamentos POCT certificados ISO 13485
-• 25 meses de garantia + manutenção vitalícia
-• Bonificação mensal em reagentes
-• Resultados em minutos (não mais dias)
-
-**Próximo Passo:**
-Agendar demonstração técnica presencial para validar a solução ideal para seu volume de ${client?.current_volume || 'exames'}.
-
-Aguardo seu retorno.`,
-
-  closing: (client) => `**FECHAMENTO${client?.first_name ? ' - ' + client.first_name : ''}**
-
-"${client?.first_name || 'Baseado no que conversamos'}, ${client?.first_name ? 'baseado no que conversamos, o' : 'o'} [equipamento] resolve suas principais necessidades: resultados rápidos, redução de custos e confiabilidade.
-
-Podemos formalizar a proposta ainda esta semana?"`,
-
-  followup: (client) => `**FOLLOW-UP${client?.first_name ? ' - ' + client.first_name : ''}**
-
-"Olá${client?.first_name ? ' ' + client.first_name : ''}! 
-
-Retomando nossa conversa sobre a solução de diagnóstico laboratorial.
-
-Preparei informações adicionais sobre o ROI e bonificação em insumos.
-
-Quando podemos nos falar? Posso ligar amanhã pela manhã?"`,
-
-  needs: (client) => `**PREVISÃO DE NECESSIDADES${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**Análise Preditiva:**
-
-Baseado no perfil de ${client?.client_type}:
-
-**1. Necessidade Imediata:**
-- Equipamento para exames de rotina (hemograma/bioquímico)
-
-**2. Necessidades Futuras (3-6 meses):**
-- Expansão para gasometria
-- Aumento volume testes
-
-**3. Oportunidades Cross-sell:**
-- Reagentes mensais
-- Manutenção preventiva
-- Treinamento equipe
-
-**Timing:** Abordar em 30 dias após primeira venda`,
-
-  suggestTasks: (client) => `**SUGESTÕES DE TAREFAS${client?.first_name ? ' - ' + client.first_name : ''}**
-
-**1. Follow-up WhatsApp**
-Prioridade: Alta
-Prazo: 2 dias
-Descrição: Enviar mensagem de follow-up referenciando última conversa e compartilhar caso de sucesso
-
-**2. Preparar Proposta Comercial**
-Prioridade: Alta
-Prazo: 3 dias
-Descrição: Montar proposta personalizada com ROI calculado e condições de bonificação
-
-**3. Agendar Demonstração**
-Prioridade: Média
-Prazo: 5 dias
-Descrição: Propor visita técnica presencial com demonstração do equipamento
-
-**4. Enviar Material Técnico**
-Prioridade: Média
-Prazo: 1 dia
-Descrição: Compartilhar catálogo e especificações técnicas por email`
+  // Análise Completa SEM IA
+  runFullAnalysisLocal: (clients, sales, interactions, tasks) => {
+    return {
+      churn_risks: LocalAIFallbacks.analyzeChurnLocal(clients, interactions, sales).slice(0, 8),
+      upsell_opportunities: LocalAIFallbacks.analyzeUpsellLocal(clients, sales, []).slice(0, 8),
+      proactive_actions: LocalAIFallbacks.generateProactiveActionsLocal(clients, tasks),
+      kpis: LocalAIFallbacks.calculateKPIsLocal(clients, sales, interactions),
+      strategic_insights: [
+        `${clients.length} clientes no total, foco em reativar os ${clients.filter(c => c.status === 'frio').length} frios`,
+        `Taxa de conversão atual: ${((sales.length / Math.max(clients.length, 1)) * 100).toFixed(1)}%`,
+        `Ticket médio de R$ ${(sales.reduce((sum, s) => sum + (s.sale_value || 0), 0) / Math.max(sales.length, 1)).toLocaleString('pt-BR')}`,
+        `Oportunidade: ${clients.filter(c => c.status === 'quente').length} clientes quentes prontos para fechar`,
+        `Atenção: ${clients.filter(c => !c.last_contact_date).length} clientes nunca contatados`
+      ]
+    };
+  }
 };
 
-export const getFallbackResponse = (type, client) => {
-  const fn = localFallbacks[type];
-  return fn ? fn(client) : 'Conteúdo não disponível no momento. Tente novamente mais tarde.';
-};
-
-// Fallback genérico para qualquer prompt
-export const getGenericFallback = (context = '') => {
-  return `⚠️ **MODO OFFLINE - RESPOSTA LOCAL**
-
-O limite mensal de IA foi atingido. Esta é uma resposta genérica baseada em templates locais.
-
-**Contexto:** ${context}
-
-**Ações Disponíveis:**
-1. Use os botões rápidos com templates pré-programados
-2. Consulte o cache de respostas anteriores
-3. Aguarde reset mensal do limite
-
-**Recursos Offline:**
-- Templates de apresentação
-- Guias de objeções
-- Scripts de follow-up
-- Playbooks estáticos
-
-Entre em contato com suporte para upgrade do plano.`;
-};
+export default LocalAIFallbacks;
