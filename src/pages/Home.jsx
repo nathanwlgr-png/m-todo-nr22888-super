@@ -280,7 +280,7 @@ Retorne até 15 clínicas.`,
               onClick={() => setShowCompetitorAnalysis(!showCompetitorAnalysis)}
             >
               <Target className="w-4 h-4 mr-1" />
-              <span className="text-xs font-semibold">Concorrência</span>
+              <span className="text-xs font-semibold">IDEXX/ISOETES</span>
             </Button>
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">

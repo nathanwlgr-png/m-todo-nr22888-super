@@ -13,6 +13,92 @@ export default function CompetitorAnalysisNoAI() {
   const [competitors, setCompetitors] = useState([]);
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [analyzingEquipment, setAnalyzingEquipment] = useState(false);
+  const [autoSearched, setAutoSearched] = useState(false);
+
+  // Busca automática por GPS ao montar componente
+  React.useEffect(() => {
+    if (!autoSearched) {
+      searchByGPS();
+    }
+  }, []);
+
+  // Busca concorrentes por GPS
+  const searchByGPS = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não disponível');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      const searchResults = await base44.integrations.Core.InvokeLLM({
+        prompt: `BUSCA GPS DE CLÍNICAS VETERINÁRIAS COM EQUIPAMENTOS IDEXX ou ISOETES
+
+LOCALIZAÇÃO GPS: ${latitude}, ${longitude}
+RAIO: 50 km
+
+Busque clínicas veterinárias que possuem equipamentos IDEXX ou ISOETES (concorrentes Seamaty).
+
+Para cada clínica encontrada, retorne:
+- Nome da clínica
+- Cidade
+- Estado  
+- Endereço
+- Telefone (formato 5511999999999)
+- Website
+- Instagram (@usuario)
+- Facebook (URL)
+- Equipamentos IDEXX/ISOETES identificados (marca e modelo específico)
+- Distância em km
+
+Ordene por distância (mais próximas primeiro).
+Máximo 20 clínicas.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            clinics: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  city: { type: "string" },
+                  state: { type: "string" },
+                  address: { type: "string" },
+                  phone: { type: "string" },
+                  website: { type: "string" },
+                  instagram: { type: "string" },
+                  facebook: { type: "string" },
+                  equipment_mentioned: {
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  distance_km: { type: "number" }
+                }
+              }
+            },
+            total_found: { type: "number" }
+          }
+        }
+      });
+
+      setCompetitors(searchResults.clinics || []);
+      setAutoSearched(true);
+      toast.success(`${searchResults.total_found || 0} clínicas com IDEXX/ISOETES encontradas próximas a você`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao buscar por GPS");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Busca concorrentes via Google Search (sem IA)
   const searchCompetitors = async (competitor) => {
@@ -179,10 +265,16 @@ export default function CompetitorAnalysisNoAI() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
-            Análise de Concorrência - Sem IA
+            Clínicas com IDEXX/ISOETES próximas (GPS)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {loading && (
+            <div className="flex items-center gap-2 text-blue-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Buscando clínicas por GPS...</span>
+            </div>
+          )}
           <div className="flex gap-2">
             <Input
               placeholder="Digite concorrente (ex: Aidex, Isoetes)"
@@ -203,18 +295,12 @@ export default function CompetitorAnalysisNoAI() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => searchCompetitors('Aidex')}
+              onClick={searchByGPS}
               disabled={loading}
+              className="bg-blue-50"
             >
-              Aidex
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => searchCompetitors('Isoetes')}
-              disabled={loading}
-            >
-              Isoetes
+              <MapPin className="w-4 h-4 mr-1" />
+              Buscar por GPS
             </Button>
             <Button 
               variant="outline" 
@@ -223,6 +309,14 @@ export default function CompetitorAnalysisNoAI() {
               disabled={loading}
             >
               Idexx
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => searchCompetitors('Isoetes')}
+              disabled={loading}
+            >
+              Isoetes
             </Button>
             <Button 
               variant="outline" 
