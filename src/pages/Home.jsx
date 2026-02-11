@@ -67,6 +67,8 @@ export default function Home() {
   const [selectedClientForAnalysis, setSelectedClientForAnalysis] = useState(null);
   const [newMasterPhone, setNewMasterPhone] = useState('');
   const [showCompetitorAnalysis, setShowCompetitorAnalysis] = useState(false);
+  const [customCnpj, setCustomCnpj] = useState('');
+  const [customDistributorId, setCustomDistributorId] = useState('');
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -365,21 +367,20 @@ Retorne até 15 clínicas.`,
               <div className="space-y-2">
                 <Input
                   placeholder="CNPJ (ex: 12345678000199)"
-                  id="custom-cnpj"
+                  value={customCnpj}
+                  onChange={(e) => setCustomCnpj(e.target.value)}
                   className="text-sm"
                 />
                 <Input
                   placeholder="ID Distribuidor (ex: 1, 2, 3...)"
-                  id="custom-distributor-id"
+                  value={customDistributorId}
+                  onChange={(e) => setCustomDistributorId(e.target.value)}
                   className="text-sm"
                 />
                 <Button
                   onClick={async () => {
-                    const cnpjInput = document.getElementById('custom-cnpj');
-                    const distributorInput = document.getElementById('custom-distributor-id');
-                    
-                    const cnpj = cnpjInput?.value?.replace(/\D/g, '');
-                    const distributorId = distributorInput?.value;
+                    const cnpj = customCnpj.replace(/\D/g, '');
+                    const distributorId = customDistributorId.trim();
 
                     if (!cnpj || cnpj.length !== 14) {
                       toast.error('CNPJ inválido (14 dígitos)');
@@ -403,10 +404,10 @@ Retorne até 15 clínicas.`,
 
                       toast.dismiss(loading);
                       if (response.data.success) {
-                        toast.success(`✅ ${response.data.synced} clientes importados!`);
+                        toast.success(`✅ ${response.data.synced} de ${response.data.total} clientes importados!`);
                         queryClient.invalidateQueries(['clients']);
-                        cnpjInput.value = '';
-                        distributorInput.value = '';
+                        setCustomCnpj('');
+                        setCustomDistributorId('');
                       } else {
                         toast.error('❌ ' + response.data.error);
                       }
@@ -417,6 +418,7 @@ Retorne até 15 clínicas.`,
                   }}
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   size="sm"
+                  disabled={!customCnpj || !customDistributorId}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Importar de Outro Tablet
