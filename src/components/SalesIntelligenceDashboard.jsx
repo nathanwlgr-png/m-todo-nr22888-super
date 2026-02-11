@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import LocalAIFallbacks from './LocalAIFallbacks';
-import { getQuoteForNathan } from './PhilosophicalQuotes';
+import { addPhilosophicalEnding } from './PhilosophicalQuotes';
 
 export default function SalesIntelligenceDashboard() {
   const [analyzing, setAnalyzing] = useState(false);
@@ -54,7 +54,7 @@ export default function SalesIntelligenceDashboard() {
           clients, sales, interactions, []
         );
         setIntelligence(localResult);
-        toast.success(getQuoteForNathan());
+        toast.success(addPhilosophicalEnding('Análise completa!'));
         setAnalyzing(false);
         return;
       }
@@ -167,7 +167,7 @@ Seja específico, prático e acionável:`,
       });
 
       setIntelligence(result);
-      toast.success(getQuoteForNathan());
+      toast.success(addPhilosophicalEnding('Análise de inteligência completa!'));
     } catch (error) {
       console.error('Erro na IA, Nathan. Usando análise local:', error);
       toast.warning('IA indisponível. Usando análise local...');
@@ -177,7 +177,7 @@ Seja específico, prático e acionável:`,
         clients, sales, interactions, []
       );
       setIntelligence(localResult);
-      toast.success(getQuoteForNathan());
+      toast.success(addPhilosophicalEnding('IA indisponível. Análise local completa!'));
     } finally {
       setAnalyzing(false);
     }

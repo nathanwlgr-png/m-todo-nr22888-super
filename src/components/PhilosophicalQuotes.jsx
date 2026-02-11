@@ -95,5 +95,10 @@ export const getRandomQuote = () => {
 };
 
 export const getQuoteForNathan = () => {
-  return `${getRandomQuote()}\n\n🎯 Continue conquistando, Nathan!`;
+  return `\n\n${getRandomQuote()}\n🎯 Continue conquistando, Nathan!`;
+};
+
+// Função para adicionar frase em qualquer resposta
+export const addPhilosophicalEnding = (message) => {
+  return `${message}\n\n${getRandomQuote()}\n🎯 Continue conquistando, Nathan!`;
 };

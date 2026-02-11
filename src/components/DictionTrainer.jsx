@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Mic, Play, RotateCcw, BookOpen, Sparkles, TrendingUp, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { addPhilosophicalEnding } from './PhilosophicalQuotes';
 
 const DICTION_EXERCISES = [
   {
@@ -158,7 +159,7 @@ Avalie de forma construtiva mas honesta. Dê nota geral de 0-100 e feedback espe
       });
 
       setEvaluation(result);
-      toast.success('Avaliação completa!');
+      toast.success(addPhilosophicalEnding('Avaliação completa, Nathan!'));
     } catch (error) {
       console.error('Erro:', error);
       toast.error('Erro ao avaliar: ' + error.message);
