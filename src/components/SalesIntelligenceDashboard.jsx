@@ -18,6 +18,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import LocalAIFallbacks from './LocalAIFallbacks';
+import { getQuoteForNathan } from './PhilosophicalQuotes';
 
 export default function SalesIntelligenceDashboard() {
   const [analyzing, setAnalyzing] = useState(false);
@@ -40,7 +42,24 @@ export default function SalesIntelligenceDashboard() {
 
   const runIntelligenceAnalysis = async () => {
     setAnalyzing(true);
+    
+    // Tentar com IA, mas ter fallback local
+    const useAI = true; // Nathan pode mudar para false se quiser rodar sem IA
+    
     try {
+      if (!useAI) {
+        // Modo SEM IA - usar análise local
+        toast.info('Nathan, executando análise local (sem IA)...');
+        const localResult = LocalAIFallbacks.runFullAnalysisLocal(
+          clients, sales, interactions, []
+        );
+        setIntelligence(localResult);
+        toast.success(getQuoteForNathan());
+        setAnalyzing(false);
+        return;
+      }
+      
+      // Modo COM IA
       // Preparar dados agregados
       const activeClients = clients.filter(c => c.status !== 'frio' && !c.sale_closed);
       const hotClients = clients.filter(c => c.status === 'quente');
@@ -148,10 +167,17 @@ Seja específico, prático e acionável:`,
       });
 
       setIntelligence(result);
-      toast.success('Análise de inteligência completa!');
+      toast.success(getQuoteForNathan());
     } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro na análise: ' + error.message);
+      console.error('Erro na IA, Nathan. Usando análise local:', error);
+      toast.warning('IA indisponível. Usando análise local...');
+      
+      // FALLBACK: Se IA falhar, usar análise local
+      const localResult = LocalAIFallbacks.runFullAnalysisLocal(
+        clients, sales, interactions, []
+      );
+      setIntelligence(localResult);
+      toast.success(getQuoteForNathan());
     } finally {
       setAnalyzing(false);
     }
