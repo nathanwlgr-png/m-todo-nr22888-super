@@ -105,6 +105,14 @@ export default function PreVisitChecklist() {
   const analyzeNumerology = async (firstName) => {
     setAnalyzingName(true);
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.info('Modo AI desligado - numerologia não disponível');
+        setAnalyzingName(false);
+        return;
+      }
+
       const analysis = await base44.integrations.Core.InvokeLLM({
         prompt: `Analise numerologia Pitagórica COMPLETA do nome: ${firstName}
 
@@ -131,7 +139,11 @@ Forneça análise profunda e estratégica para vendas.`,
       await updateMutation.mutateAsync(analysis);
       toast.success('Análise numerológica completa!');
     } catch (error) {
-      toast.error('Erro ao analisar');
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido');
+      } else {
+        toast.error('Erro ao analisar');
+      }
     } finally {
       setAnalyzingName(false);
     }
@@ -153,19 +165,38 @@ Forneça análise profunda e estratégica para vendas.`,
   const generateAIContent = async (type, prompt) => {
     setLoadingContent(prev => ({ ...prev, [type]: true }));
     
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          items: { type: "array", items: { type: "string" } }
-        }
+    try {
+      // Verificar modo AI
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.info('Modo AI desligado - usando templates padrão');
+        setLoadingContent(prev => ({ ...prev, [type]: false }));
+        return;
       }
-    });
-    
-    setGeneratedContent(prev => ({ ...prev, [type]: response.items }));
-    setLoadingContent(prev => ({ ...prev, [type]: false }));
-    setChecklist(prev => ({ ...prev, [type]: true }));
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            items: { type: "array", items: { type: "string" } }
+          }
+        }
+      });
+      
+      setGeneratedContent(prev => ({ ...prev, [type]: response.items }));
+      setChecklist(prev => ({ ...prev, [type]: true }));
+    } catch (error) {
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido. Ative o modo econômico na Home.');
+      } else {
+        toast.error('Erro ao gerar conteúdo');
+      }
+      console.error('Erro:', error);
+    } finally {
+      setLoadingContent(prev => ({ ...prev, [type]: false }));
+    }
   };
 
   const handleGenerateQuestions = () => {
