@@ -285,7 +285,9 @@ Retorne até 15 clínicas.`,
         <AIControlCenter />
 
         {/* INDICADOR OFFLINE */}
-        <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
+        {(isOffline || isCached) && (
+          <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
+        )}
 
         {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
         {showCompetitorAnalysis && (

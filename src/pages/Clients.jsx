@@ -383,6 +383,8 @@ export default function Clients() {
         return;
       }
 
+      toast.info('Processando com IA...');
+
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Analise ${fileUrl ? 'este arquivo/imagem' : googleSheetsUrl ? 'esta planilha do Google Sheets' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
 
