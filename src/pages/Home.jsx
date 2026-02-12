@@ -70,26 +70,7 @@ export default function Home() {
   const [customCnpj, setCustomCnpj] = useState('');
   const [customDistributorId, setCustomDistributorId] = useState('');
 
-  const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: async () => {
-      try {
-        const data = await base44.entities.Client.list('-updated_date', 100);
-        return data.filter(c => 
-          c && 
-          c.id && 
-          typeof c.id === 'string' && 
-          c.id.length >= 20 && 
-          c.first_name
-        );
-      } catch (error) {
-        console.warn('Erro ao carregar clientes:', error);
-        return [];
-      }
-    },
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { clients, isOffline, isLoading, isCached, cacheAge } = useOfflineClients();
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -300,6 +281,12 @@ Retorne até 15 clínicas.`,
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* CONTROLE DE IA */}
+        <AIControlCenter />
+
+        {/* INDICADOR OFFLINE */}
+        <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
+
         {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
         {showCompetitorAnalysis && (
           <div className="mb-4">
