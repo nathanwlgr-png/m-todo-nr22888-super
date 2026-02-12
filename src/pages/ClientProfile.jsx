@@ -150,6 +150,9 @@ import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashbo
 import AIAutomationEngine from '@/components/AIAutomationEngine';
 import SmartInteractionProcessor from '@/components/SmartInteractionProcessor';
 import { toast } from 'sonner';
+import { useOfflineClientEdit } from '@/components/OfflineDataSync';
+import OfflineIndicator from '@/components/OfflineIndicator';
+import OfflineSyncStatus from '@/components/OfflineSyncStatus';
 
 const getSegmentBadge = (segment) => {
   const config = {
@@ -208,6 +211,8 @@ export default function ClientProfile() {
   const [closingProbability, setClosingProbability] = React.useState(null);
   const [postVisitOpen, setPostVisitOpen] = React.useState(false);
   const [selectedVisitId, setSelectedVisitId] = React.useState(null);
+  
+  const { isOffline: clientIsOffline, updateClient: updateClientOffline } = useOfflineClientEdit();
 
   const { data: client, isLoading, isError } = useQuery({
     queryKey: ['client', clientId],
@@ -360,11 +365,15 @@ export default function ClientProfile() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.update(clientId, data),
+    mutationFn: async (data) => {
+      return await updateClientOffline(clientId, data, client.first_name);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['client', clientId]);
       queryClient.invalidateQueries(['clients']);
-      toast.success('Salvo!', { duration: 1000 });
+      if (!clientIsOffline) {
+        toast.success('Salvo!', { duration: 1000 });
+      }
     }
   });
 
@@ -374,12 +383,15 @@ export default function ClientProfile() {
     }
   };
 
-  // Auto-save imediato
+  // Auto-save imediato com suporte offline
   const handleQuickUpdate = async (field, value) => {
     try {
-      await base44.entities.Client.update(clientId, { [field]: value });
+      await updateClientOffline(clientId, { [field]: value }, client.first_name);
       queryClient.invalidateQueries(['client', clientId]);
-      toast.success('✓ Salvo', { duration: 800 });
+      
+      if (!clientIsOffline) {
+        toast.success('✓ Salvo', { duration: 800 });
+      }
     } catch (error) {
       console.error('Erro ao salvar:', error);
       toast.error('Erro ao salvar');
@@ -421,6 +433,14 @@ export default function ClientProfile() {
     setSelectedMessageType(messageType);
     
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home');
+        setGeneratingMessage(false);
+        return;
+      }
+
       const prompt = `Você é um especialista em vendas consultivas de equipamentos veterinários.
 
 CONTEXTO COMPLETO DO CLIENTE:
@@ -501,7 +521,11 @@ Objetivo: Maximizar probabilidade de avanço na venda`;
       setGeneratedMessage(result);
       setClosingProbability(result.closing_probability);
     } catch (error) {
-      alert('Erro ao gerar mensagem');
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido');
+      } else {
+        toast.error('Erro ao gerar mensagem');
+      }
     } finally {
       setGeneratingMessage(false);
     }
@@ -576,6 +600,14 @@ Objetivo: Maximizar probabilidade de avanço na venda`;
   const generateAISummary = async () => {
     setLoadingSummary(true);
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home');
+        setLoadingSummary(false);
+        return;
+      }
+
       const summary = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um assistente de vendas especializado. Crie um resumo CONCISO e ACIONÁVEL do cliente.
 
@@ -601,6 +633,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
       });
       setAiSummary(summary);
     } catch (error) {
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido');
+      } else {
+        toast.error('Erro ao gerar resumo');
+      }
       console.error('Erro ao gerar resumo:', error);
     } finally {
       setLoadingSummary(false);
@@ -681,6 +718,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
       {/* Content */}
       <div className="px-6 -mt-16 space-y-4">
+        {/* Status de Sincronização */}
+        <OfflineSyncStatus />
+        
         {/* Collaboration Indicator */}
         <CollaborationIndicator contextType="client" contextId={clientId} />
 
@@ -864,9 +904,12 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           <h3 className="font-semibold text-slate-800 mb-3">🎯 Equipamento de Interesse</h3>
           <Select
             value={client.equipment_interest || ''}
-            onValueChange={(value) => {
-              base44.entities.Client.update(clientId, { equipment_interest: value });
-              toast.success('Interesse salvo!', { duration: 1000 });
+            onValueChange={async (value) => {
+              await updateClientOffline(clientId, { equipment_interest: value }, client.first_name);
+              queryClient.invalidateQueries(['client', clientId]);
+              if (!clientIsOffline) {
+                toast.success('Interesse salvo!', { duration: 1000 });
+              }
             }}
           >
             <SelectTrigger className="h-12">
