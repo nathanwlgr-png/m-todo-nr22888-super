@@ -52,6 +52,7 @@ import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
 import AIContentGenerator from '@/components/AIContentGenerator';
 import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
 import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWidget';
+import SystemHealthReport from '@/components/SystemHealthReport';
 import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
 import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
@@ -126,6 +127,14 @@ export default function Home() {
       toast.info('Buscando clínicas em 50km da sua localização...');
 
       // Buscar clínicas via API do Google
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative para busca GPS inteligente');
+        setSearchingClinics(false);
+        return;
+      }
+
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `BUSCA GPS DE CLÍNICAS VETERINÁRIAS - COORDENADA EXATA
 
@@ -235,7 +244,11 @@ Retorne até 15 clínicas.`,
       
     } catch (error) {
       console.error('Erro na busca:', error);
-      toast.error('Erro ao buscar clínicas: ' + error.message);
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido - Use importação MobVendedor ou modo econômico');
+      } else {
+        toast.error('Erro ao buscar clínicas: ' + error.message);
+      }
     } finally {
       setSearchingClinics(false);
       setAutoSaveProgress(null);
@@ -808,6 +821,9 @@ Retorne até 15 clínicas.`,
 
         {/* DOCUMENTAÇÃO DO SISTEMA */}
         <SystemDocumentationPDF />
+
+        {/* RELATÓRIO DE SAÚDE DO SISTEMA */}
+        <SystemHealthReport />
 
         {/* BUSCA RÁPIDA */}
         <div className="pt-4 border-t">
