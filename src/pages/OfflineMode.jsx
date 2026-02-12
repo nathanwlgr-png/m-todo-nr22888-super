@@ -4,8 +4,9 @@ import { ArrowLeft, Wifi } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OfflineSyncManager from '../components/OfflineSyncManager';
-import OfflineDataManager from '../components/OfflineDataManager';
+import { useOfflineData, syncAllData, getCacheStats } from '../components/OfflineDataManager';
 import ProductCatalog from '../components/ProductCatalog';
+import OfflineSyncStatus from '../components/OfflineSyncStatus';
 
 export default function OfflineMode() {
     const navigate = useNavigate();
