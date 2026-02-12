@@ -37,6 +37,14 @@ export default function RegionalClinicAnalyzer() {
 
     setLoading(true);
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home para análise regional');
+        setLoading(false);
+        return;
+      }
+
       const prompt = `Você é um especialista em pesquisa de mercado veterinário e inteligência comercial.
 
 🎯 MISSÃO: Pesquise e analise TODAS as clínicas veterinárias na cidade de ${city}.
@@ -283,7 +291,11 @@ INSTRUÇÕES CRÍTICAS:
       toast.success(`${result.total_clinics_found} clínicas encontradas!`);
     } catch (error) {
       console.error('Erro:', error);
-      toast.error('Erro ao analisar mercado');
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido - Use importação MobVendedor');
+      } else {
+        toast.error('Erro ao analisar mercado');
+      }
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,14 @@ export default function CompleteClientAnalysis({ client }) {
   const generateCompleteAnalysis = async () => {
     setLoading(true);
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home');
+        setLoading(false);
+        return;
+      }
+
       const prompt = `Você é um especialista em vendas B2B veterinária com domínio profundo em psicologia de consumo, numerologia, neuromarketing e gatilhos mentais.
 
 DADOS DO CLIENTE:
@@ -168,7 +176,11 @@ Retorne em JSON:
       setAnalysis(result);
       toast.success('Análise completa gerada!');
     } catch (error) {
-      toast.error('Erro ao gerar análise');
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido');
+      } else {
+        toast.error('Erro ao gerar análise');
+      }
       console.error(error);
     } finally {
       setLoading(false);
