@@ -302,6 +302,9 @@ Retorne até 15 clínicas.`,
           <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
         )}
 
+        {/* STATUS DE SINCRONIZAÇÃO */}
+        <OfflineSyncStatus />
+
         {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
         {showCompetitorAnalysis && (
           <div className="mb-4">
