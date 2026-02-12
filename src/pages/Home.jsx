@@ -307,31 +307,75 @@ Retorne até 15 clínicas.`,
           </div>
         )}
 
-        {/* MOBVENDEDOR - BAIXAR CLIENTES DE OUTRO TABLET */}
-        <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300">
+        {/* MOBVENDEDOR - BUSCA COMPLETA 200KM MARÍLIA */}
+        <Card className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-400">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-              <RefreshCw className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-indigo-900">📱 Importar MobVendedor</h3>
-              <p className="text-xs text-indigo-700">Baixar clientes de qualquer tablet</p>
+              <h3 className="font-bold text-orange-900">🎯 Importação MobVendedor - Raio 200km</h3>
+              <p className="text-xs text-orange-700">Busca COMPLETA de todos clientes em 200km de Marília</p>
             </div>
           </div>
           
           <div className="space-y-3">
+            {/* Busca Completa 200km */}
+            <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border-2 border-orange-400">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="w-5 h-5 text-orange-600" />
+                <div>
+                  <p className="text-sm font-bold text-orange-900">🎯 Busca Completa Regional</p>
+                  <p className="text-xs text-orange-700">Centro: Marília-SP • Raio: 200km</p>
+                </div>
+              </div>
+              <Button
+                onClick={async () => {
+                  const loading = toast.loading('🔍 Buscando TODOS clientes em 200km de Marília...', { duration: Infinity });
+                  try {
+                    const response = await base44.functions.invoke('importMobVendedorMarilia200km', {
+                      cnpj: '13693877000157',
+                      mobvendedor_id: '53'
+                    });
+
+                    toast.dismiss(loading);
+                    if (response.data.success) {
+                      toast.success(
+                        `✅ IMPORTAÇÃO COMPLETA!\n\n` +
+                        `📊 ${response.data.synced} clientes importados\n` +
+                        `📍 Raio: ${response.data.radius_km}km de ${response.data.center}\n` +
+                        `❌ ${response.data.skipped} fora do raio\n` +
+                        `Total processados: ${response.data.total}`,
+                        { duration: 8000 }
+                      );
+                      queryClient.invalidateQueries(['clients']);
+                    } else {
+                      toast.error('❌ Erro: ' + response.data.error);
+                    }
+                  } catch (error) {
+                    toast.dismiss(loading);
+                    toast.error('Erro na importação: ' + error.message);
+                  }
+                }}
+                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold"
+              >
+                <MapPin className="w-5 h-5 mr-2" />
+                🎯 BUSCAR TODOS - 200KM MARÍLIA
+              </Button>
+            </div>
+
             {/* Tablet 53 (Padrão) */}
             <div className="p-3 bg-white rounded-lg border border-indigo-200">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-sm font-bold text-slate-800">Tablet 53 (Principal)</p>
+                  <p className="text-sm font-bold text-slate-800">Tablet 53 (Todos Clientes)</p>
                   <p className="text-xs text-slate-600">CNPJ: 13.693.877/0001-57</p>
                 </div>
                 <Badge className="bg-indigo-600">Padrão</Badge>
               </div>
               <Button
                 onClick={async () => {
-                  const loading = toast.loading('Baixando clientes do Tablet 53...');
+                  const loading = toast.loading('Baixando TODOS clientes do Tablet 53...');
                   try {
                     const response = await base44.functions.invoke('mobVendedorIntegration', {
                       action: 'sync_clients',
@@ -343,7 +387,7 @@ Retorne até 15 clínicas.`,
 
                     toast.dismiss(loading);
                     if (response.data.success) {
-                      toast.success(`✅ ${response.data.synced} clientes importados!`);
+                      toast.success(`✅ ${response.data.synced} de ${response.data.total} clientes importados!`);
                       queryClient.invalidateQueries(['clients']);
                     } else {
                       toast.error('❌ ' + response.data.error);
@@ -357,7 +401,7 @@ Retorne até 15 clínicas.`,
                 size="sm"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Baixar Clientes
+                Baixar Todos Clientes
               </Button>
             </div>
 
