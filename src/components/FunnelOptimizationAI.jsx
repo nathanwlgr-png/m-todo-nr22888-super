@@ -53,6 +53,13 @@ export default function FunnelOptimizationAI() {
   const analyzeAndOptimize = async () => {
     setAnalyzing(true);
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home para otimizar funil');
+        setAnalyzing(false);
+        return;
+      }
       // Calcular métricas do funil
       const funnelStages = ['lead', 'qualificado', 'proposta', 'negociacao', 'fechado', 'perdido'];
       const funnelData = {};
@@ -241,7 +248,11 @@ Para cada teste:
 
       toast.success('Análise de otimização concluída!');
     } catch (error) {
-      toast.error('Erro ao analisar funil');
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido - Aguarde renovação');
+      } else {
+        toast.error('Erro ao analisar funil');
+      }
       console.error(error);
     } finally {
       setAnalyzing(false);

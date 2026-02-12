@@ -75,25 +75,8 @@ export default function Clients() {
   const [editingName, setEditingName] = useState('');
   const [segmentFilter, setSegmentFilter] = useState('all');
 
-  const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: async () => {
-      try {
-        const data = await base44.entities.Client.list('-updated_date');
-        return data.filter(c => c && c.id && c.first_name && !c.is_deleted);
-      } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-        return [];
-      }
-    },
-    retry: 0,
-    staleTime: 60 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    meta: {
-      errorHandler: () => {}
-    }
-  });
+  const { clients, isOffline, isLoading: offlineLoading, isCached, cacheAge } = useOfflineClients();
+  const isLoading = offlineLoading;
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
@@ -392,6 +375,14 @@ export default function Clients() {
         toast.info('Extraindo dados do arquivo...');
       }
 
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home para importar via IA');
+        setProcessing(false);
+        return;
+      }
+
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Analise ${fileUrl ? 'este arquivo/imagem' : googleSheetsUrl ? 'esta planilha do Google Sheets' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
 
@@ -533,7 +524,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
       
     } catch (error) {
       console.error('Erro ao importar:', error);
-      toast.error('Erro ao processar: ' + (error.message || 'Erro desconhecido'));
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido - Aguarde renovação ou use modo econômico');
+      } else {
+        toast.error('Erro ao processar: ' + (error.message || 'Erro desconhecido'));
+      }
     } finally {
       setProcessing(false);
     }
@@ -543,6 +538,13 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
+        {/* Offline Indicator */}
+        {(isOffline || isCached) && (
+          <div className="px-4 pt-4">
+            <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
+          </div>
+        )}
+        
         <div className="px-4 py-4 flex items-center gap-4">
           <button onClick={() => navigate(createPageUrl('Home'))} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
             <ArrowLeft className="w-5 h-5 text-slate-600" />
