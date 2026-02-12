@@ -9,7 +9,7 @@ const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 horas
  * Sistema de cache offline para clientes
  * Permite acesso aos dados mesmo sem internet
  */
-export function useOfflineClients() {
+export const useOfflineClients = () => {
   const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
   const [cachedClients, setCachedClients] = useState([]);
 
@@ -88,7 +88,7 @@ export function useOfflineClients() {
 /**
  * Hook para dados offline de um cliente específico
  */
-export function useOfflineClient(clientId) {
+export const useOfflineClient = (clientId) => {
   const [client, setClient] = useState(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
@@ -140,14 +140,14 @@ export function useOfflineClient(clientId) {
 /**
  * Limpar cache manualmente
  */
-export function clearOfflineCache() {
+export const clearOfflineCache = () => {
   localStorage.removeItem(CACHE_KEY);
-}
+};
 
 /**
  * Forçar atualização do cache
  */
-export async function forceUpdateCache() {
+export const forceUpdateCache = async () => {
   try {
     const clients = await base44.entities.Client.list('-updated_date', 200);
     const cacheData = {
@@ -159,4 +159,4 @@ export async function forceUpdateCache() {
   } catch (error) {
     return { success: false, error: error.message };
   }
-}
+};
