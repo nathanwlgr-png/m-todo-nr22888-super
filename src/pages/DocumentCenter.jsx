@@ -323,6 +323,14 @@ Seja TÉCNICO mas ACESSÍVEL.`
     };
 
     try {
+      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
+      
+      if (aiMode === 'off') {
+        toast.error('IA desligada - Ative na Home para gerar documentos');
+        setGenerating(false);
+        return;
+      }
+
       const doc = await base44.integrations.Core.InvokeLLM({
         prompt: prompts[docType]
       });
@@ -330,7 +338,11 @@ Seja TÉCNICO mas ACESSÍVEL.`
       setGeneratedDoc(doc);
       toast.success('Documento gerado com sucesso!');
     } catch (error) {
-      toast.error('Erro ao gerar documento: ' + error.message);
+      if (error.message?.includes('limit')) {
+        toast.error('Limite de IA atingido - Aguarde renovação ou use modo econômico');
+      } else {
+        toast.error('Erro ao gerar documento: ' + error.message);
+      }
     } finally {
       setGenerating(false);
     }
