@@ -58,6 +58,10 @@ import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
 import SalesIntelligenceDashboard from '@/components/SalesIntelligenceDashboard';
 import CompetitorAnalysisNoAI from '@/components/CompetitorAnalysisNoAI';
+import { useOfflineClients } from '@/components/OfflineClientCache';
+import OfflineIndicator from '@/components/OfflineIndicator';
+import OfflineSyncStatus from '@/components/OfflineSyncStatus';
+import AIControlCenter from '@/components/AIControlCenter';
 
 export default function Home() {
   const navigate = useNavigate();
