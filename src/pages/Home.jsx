@@ -398,9 +398,6 @@ export default function Home() {
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
 
-        {/* DOCUMENTOS PRONTOS PARA WHATSAPP */}
-        <QuickExportedDocs />
-
         {/* ANÁLISE DE MERCADO COMPETITIVA */}
         <CompetitorMarketAnalyzer />
 
