@@ -41,6 +41,7 @@ import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
 import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
 import CompetitorMarketAnalyzer from '@/components/CompetitorMarketAnalyzer';
+import QuickExportedDocs from '@/components/QuickExportedDocs';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -396,6 +397,9 @@ export default function Home() {
 
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
+
+        {/* DOCUMENTOS PRONTOS PARA WHATSAPP */}
+        <QuickExportedDocs />
 
         {/* ANÁLISE DE MERCADO COMPETITIVA */}
         <CompetitorMarketAnalyzer />
