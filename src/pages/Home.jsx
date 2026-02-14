@@ -62,6 +62,8 @@ import { useOfflineClients } from '@/components/OfflineClientCache';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineSyncStatus from '@/components/OfflineSyncStatus';
 import AIControlCenter from '@/components/AIControlCenter';
+import MultiDeviceSync from '@/components/MultiDeviceSync';
+import UniversalTableImporter from '@/components/UniversalTableImporter';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -308,6 +310,12 @@ Retorne até 15 clínicas.`,
 
         {/* STATUS DE SINCRONIZAÇÃO */}
         <OfflineSyncStatus />
+
+        {/* SINCRONIZAÇÃO MULTI-DISPOSITIVOS */}
+        <MultiDeviceSync />
+
+        {/* IMPORTADOR UNIVERSAL DE TABELAS */}
+        <UniversalTableImporter />
 
         {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
         {showCompetitorAnalysis && (
