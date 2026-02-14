@@ -20,11 +20,6 @@ function setCachedData(key, data) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
 
     // Verificar cache
     const cachedSync = getCachedData('mobi_sync_equipment');
@@ -91,14 +86,14 @@ Deno.serve(async (req) => {
     let syncedCount = 0;
     for (const record of syncRecords) {
       try {
-        const existing = await base44.entities.MobVendedorSync.filter({
+        const existing = await base44.asServiceRole.entities.MobVendedorSync.filter({
           equipment_id: record.equipment_id
         }).catch(() => []);
 
         if (existing?.length > 0) {
-          await base44.entities.MobVendedorSync.update(existing[0].id, record);
+          await base44.asServiceRole.entities.MobVendedorSync.update(existing[0].id, record);
         } else {
-          await base44.entities.MobVendedorSync.create(record);
+          await base44.asServiceRole.entities.MobVendedorSync.create(record);
         }
         syncedCount++;
       } catch (e) {
