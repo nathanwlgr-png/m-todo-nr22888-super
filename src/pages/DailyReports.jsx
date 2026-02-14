@@ -58,6 +58,14 @@ export default function DailyReports() {
       if (response.data.success) {
         setGeneratedUrl(response.data.file_url);
         toast.success('Relatório gerado com sucesso!');
+        
+        // Enviar para botão flutuante
+        window.dispatchEvent(new CustomEvent('documentReady', {
+          detail: {
+            url: response.data.file_url,
+            name: `Relatorio_${reportDate}.${format}`
+          }
+        }));
       } else {
         toast.error(response.data.error || 'Erro ao gerar relatório');
       }

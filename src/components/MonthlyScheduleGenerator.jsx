@@ -39,6 +39,15 @@ export default function MonthlyScheduleGenerator() {
         a.download = `agenda_${city}_mensal.xlsx`;
         document.body.appendChild(a);
         a.click();
+        
+        // Enviar para botão flutuante (antes de revogar URL)
+        window.dispatchEvent(new CustomEvent('documentReady', {
+          detail: {
+            url: url,
+            name: `agenda_${city}_mensal.xlsx`
+          }
+        }));
+        
         window.URL.revokeObjectURL(url);
         a.remove();
 
