@@ -483,6 +483,22 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* BASE DE CONHECIMENTO E RELATÓRIOS - NOVOS */}
+        <div className="grid grid-cols-2 gap-2">
+          <Link to={createPageUrl('KnowledgeBaseManager')}>
+            <Button variant="outline" className="w-full h-16 flex-col border-indigo-300">
+              <Sparkles className="w-5 h-5 mb-1 text-indigo-600" />
+              <span className="text-xs">Conhecimento</span>
+            </Button>
+          </Link>
+          <Link to={createPageUrl('DailyReports')}>
+            <Button variant="outline" className="w-full h-16 flex-col border-blue-300">
+              <Calendar className="w-5 h-5 mb-1 text-blue-600" />
+              <span className="text-xs">Relatórios</span>
+            </Button>
+          </Link>
+        </div>
+
         {/* IMPORTAÇÃO MOBVENDEDOR - COMPACTO */}
         <Card className="p-3 bg-orange-50 border border-orange-300">
           <div className="flex items-center justify-between mb-2">
