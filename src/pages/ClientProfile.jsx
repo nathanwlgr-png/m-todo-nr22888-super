@@ -149,6 +149,7 @@ import AIContentGenerator from '@/components/AIContentGenerator';
 import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashboard';
 import AIAutomationEngine from '@/components/AIAutomationEngine';
 import SmartInteractionProcessor from '@/components/SmartInteractionProcessor';
+import EngagementTracker from '@/components/EngagementTracker';
 import { toast } from 'sonner';
 import { useOfflineClientEdit } from '@/components/OfflineDataSync';
 import OfflineIndicator from '@/components/OfflineIndicator';
@@ -1268,6 +1269,9 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           client={client} 
           onTaskCreated={() => queryClient.invalidateQueries(['client-tasks', clientId])}
         />
+
+        {/* RASTREAMENTO DE ENGAJAMENTO - NOVO */}
+        <EngagementTracker clientId={clientId} />
 
         {/* ANÁLISE PREDITIVA COMPLETA - LTV, CHURN, OPORTUNIDADES - NOVO */}
         <PredictiveAnalyticsDashboard client={client} />
