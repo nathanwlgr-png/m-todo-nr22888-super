@@ -29,7 +29,7 @@ export default function CompetitorMarketAnalyzer() {
 
   const analyzeMutation = useMutation({
     mutationFn: async (data) => {
-      const response = await base44.functions.invoke('generateCompetitorMarketAnalysis', data);
+      const response = await base44.functions.invoke('generateCompetitorMarketAnalysisNoAI', data);
       return response.data;
     },
     onSuccess: (data) => {
@@ -59,9 +59,9 @@ export default function CompetitorMarketAnalyzer() {
   };
 
   const copyToWhatsApp = () => {
-    if (!analysisResult?.report_preview) return;
+    if (!analysisResult?.report_text) return;
     
-    navigator.clipboard.writeText(analysisResult.report_preview);
+    navigator.clipboard.writeText(analysisResult.report_text);
     toast.success('Relatório copiado! Cole no WhatsApp');
   };
 
@@ -281,12 +281,12 @@ export default function CompetitorMarketAnalyzer() {
           </div>
 
           {/* Preview do Relatório */}
-          {analysisResult.report_preview && (
+          {analysisResult.report_text && (
             <Card className="p-4 bg-slate-50">
               <h3 className="font-semibold text-slate-800 mb-2">Preview do Relatório</h3>
               <ScrollArea className="h-[200px]">
                 <pre className="text-xs text-slate-700 whitespace-pre-wrap">
-                  {analysisResult.report_preview}
+                  {analysisResult.report_text}
                 </pre>
               </ScrollArea>
             </Card>
