@@ -37,6 +37,9 @@ import DocumentsCenter from '@/components/DocumentsCenter';
 import OfflineDataPack from '@/components/OfflineDataPack';
 import CompetitorPriceAnalysis from '@/components/CompetitorPriceAnalysis';
 import CityLeadCapture from '@/components/CityLeadCapture';
+import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
+import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
+import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -392,6 +395,17 @@ export default function Home() {
 
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
+
+        {/* SISTEMA DE AUTOMAÇÃO INTELIGENTE */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-indigo-600" />
+            🤖 Automação Inteligente
+          </h3>
+          <AutomaticClientFollowUp />
+          <PerformanceAnalyticsDashboard />
+          <AdvancedLeadQualification />
+        </div>
 
         {/* BUSCA RÁPIDA DE CLIENTES */}
         <Card className="p-4">
