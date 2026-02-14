@@ -16,72 +16,34 @@ import {
   Calendar,
   Target,
   TrendingUp,
-  Loader2,
-  CheckCircle2,
-  Sparkles,
   MessageSquare,
   FileText,
   Settings,
-  Play,
-  Zap,
-  Cog,
-  BookOpen,
+  Sparkles,
+  CheckCircle2,
+  RefreshCw,
   Award,
-  AlertTriangle,
-  RefreshCw
+  ChevronDown,
+  ChevronUp,
+  Play,
+  BarChart3,
+  Zap,
+  Download
 } from 'lucide-react';
-import CompleteProfileSearch from '@/components/CompleteProfileSearch';
-import RegionalClinicAnalyzer from '@/components/RegionalClinicAnalyzer';
-import UniversalClientSearch from '@/components/UniversalClientSearch';
-import BulkClientImporter from '@/components/BulkClientImporter';
-import StockManagement from '@/components/StockManagement';
-import AdvancedSalesForecast from '@/components/AdvancedSalesForecast';
-import EnhancedPerformanceDashboard from '@/components/EnhancedPerformanceDashboard';
-import SalesForecastDashboard from '@/components/SalesForecastDashboard';
-import GamificationSystem from '@/components/GamificationSystem';
-import SmartSegmentationEngine from '@/components/SmartSegmentationEngine';
-import ProactiveAlertsSystem from '@/components/ProactiveAlertsSystem';
-import AutoCampaignGenerator from '@/components/AutoCampaignGenerator';
-import CoachingDashboard from '@/components/CoachingDashboard';
-import WhatsAppMasterAssistant from '@/components/WhatsAppMasterAssistant';
-import BrazilCitiesMap from '@/components/BrazilCitiesMap';
-import ClientSearchBar from '@/components/ClientSearchBar';
-import CompleteClientAnalysis from '@/components/CompleteClientAnalysis';
-import DictionTrainer from '@/components/DictionTrainer';
-import EnhancedClinicAnalyzer from '@/components/EnhancedClinicAnalyzer';
-import AIContentGenerator from '@/components/AIContentGenerator';
-import SystemDocumentationPDF from '@/components/SystemDocumentationPDF';
-import ProactiveNotificationsWidget from '@/components/ProactiveNotificationsWidget';
-import SystemHealthReport from '@/components/SystemHealthReport';
-import QuickRegionalPDFGenerator from '@/components/QuickRegionalPDFGenerator';
-import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
-import AIContactTimingOptimizer from '@/components/AIContactTimingOptimizer';
-import SalesIntelligenceDashboard from '@/components/SalesIntelligenceDashboard';
-import CompetitorAnalysisNoAI from '@/components/CompetitorAnalysisNoAI';
 import { useOfflineClients } from '@/components/OfflineClientCache';
-import OfflineIndicator from '@/components/OfflineIndicator';
-import OfflineSyncStatus from '@/components/OfflineSyncStatus';
 import AIControlCenter from '@/components/AIControlCenter';
-import MultiDeviceSync from '@/components/MultiDeviceSync';
-import UniversalTableImporter from '@/components/UniversalTableImporter';
 import MonthlyScheduleGenerator from '@/components/MonthlyScheduleGenerator';
 
 export default function Home() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchingClinics, setSearchingClinics] = useState(false);
-  const [autoSaveProgress, setAutoSaveProgress] = useState(null);
-  const [selectedClientForAnalysis, setSelectedClientForAnalysis] = useState(null);
   const [newMasterPhone, setNewMasterPhone] = useState('');
-  const [showCompetitorAnalysis, setShowCompetitorAnalysis] = useState(false);
   const [customCnpj, setCustomCnpj] = useState('');
   const [customDistributorId, setCustomDistributorId] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const { clients: allClients = [], isOffline, isLoading, isCached, cacheAge } = useOfflineClients();
-  
-  // Garantir que todos os clientes sejam carregados
-  const clients = allClients;
+  const { clients, isOffline, isLoading } = useOfflineClients();
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -108,162 +70,13 @@ export default function Home() {
   }, [clients]);
 
   const filteredClients = useMemo(() => {
-    if (!searchTerm) return clients.slice(0, 10);
+    if (!searchTerm) return [];
     return clients.filter(c =>
       c.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.clinic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.city?.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 10);
+    ).slice(0, 15);
   }, [clients, searchTerm]);
-
-  const handleAutoSearchAndSave = async () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocalização não disponível');
-      return;
-    }
-
-    setSearchingClinics(true);
-    setAutoSaveProgress({ total: 0, saved: 0, skipped: 0 });
-
-    try {
-      // Pegar localização
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-
-      const { latitude, longitude } = position.coords;
-      
-      toast.success(`📍 GPS obtido: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-      toast.info('Buscando clínicas em 50km da sua localização...');
-
-      // Buscar clínicas via API do Google
-      const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
-      
-      if (aiMode === 'off') {
-        toast.error('IA desligada - Ative para busca GPS inteligente');
-        setSearchingClinics(false);
-        return;
-      }
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `BUSCA GPS DE CLÍNICAS VETERINÁRIAS - COORDENADA EXATA
-
-═══════════════════════════════════════
-📍 LOCALIZAÇÃO ATUAL DO USUÁRIO
-═══════════════════════════════════════
-LATITUDE: ${latitude}
-LONGITUDE: ${longitude}
-RAIO: 50 QUILÔMETROS
-
-═══════════════════════════════════════
-🎯 IMPORTANTE - LEIA COM ATENÇÃO
-═══════════════════════════════════════
-Use Google Maps/Places API com esta coordenada EXATA como ponto central.
-
-Busque SOMENTE clínicas veterinárias dentro de 50km desta localização GPS específica.
-
-NÃO busque em outras cidades ou regiões.
-Use a coordenada (${latitude}, ${longitude}) como referência.
-
-Para cada clínica encontrada, retorne:
-- Nome da clínica
-- Endereço completo
-- Cidade
-- CEP
-- Telefone (formato 5511999999999)
-- Distância em KM da localização atual
-- Rating do Google
-- Website (se disponível)
-
-Ordene por distância (mais próximas primeiro).
-Retorne até 15 clínicas.`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            clinics: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  address: { type: "string" },
-                  city: { type: "string" },
-                  phone: { type: "string" },
-                  rating: { type: "number" }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const clinicsFound = result.clinics || [];
-      setAutoSaveProgress({ total: clinicsFound.length, saved: 0, skipped: 0 });
-
-      if (clinicsFound.length === 0) {
-        toast.warning('Nenhuma clínica encontrada');
-        return;
-      }
-
-      toast.success(`${clinicsFound.length} clínicas encontradas! Salvando automaticamente...`);
-
-      let saved = 0;
-      let skipped = 0;
-
-      // Salvar automaticamente cada clínica
-      for (const clinic of clinicsFound) {
-        try {
-          // Verificar se já existe
-          const exists = clients.some(c => 
-            c.clinic_name?.toLowerCase() === clinic.name?.toLowerCase() ||
-            c.address?.toLowerCase() === clinic.address?.toLowerCase()
-          );
-
-          if (exists) {
-            skipped++;
-            setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
-            continue;
-          }
-
-          // Criar novo cliente
-          await createClientMutation.mutateAsync({
-            first_name: clinic.name.split(' ')[0] || clinic.name,
-            clinic_name: clinic.name,
-            address: clinic.address,
-            city: clinic.city,
-            phone: clinic.phone,
-            status: 'morno',
-            purchase_score: 50,
-            lead_source: 'analise_mercado_ia'
-          });
-
-          saved++;
-          setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
-          
-          // Pequeno delay para não sobrecarregar
-          await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (error) {
-          console.error('Erro ao salvar clínica:', error);
-          skipped++;
-          setAutoSaveProgress({ total: clinicsFound.length, saved, skipped });
-        }
-      }
-
-      toast.success(`✅ Processo concluído! ${saved} clínicas salvas, ${skipped} ignoradas (duplicadas/erros)`);
-      
-    } catch (error) {
-      console.error('Erro na busca:', error);
-      if (error.message?.includes('limit')) {
-        toast.error('Limite de IA atingido - Use importação MobVendedor ou modo econômico');
-      } else {
-        toast.error('Erro ao buscar clínicas: ' + error.message);
-      }
-    } finally {
-      setSearchingClinics(false);
-      setAutoSaveProgress(null);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
@@ -280,15 +93,6 @@ Retorne até 15 clínicas.`,
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="text-white hover:bg-orange-600"
-              onClick={() => setShowCompetitorAnalysis(!showCompetitorAnalysis)}
-            >
-              <Target className="w-4 h-4 mr-1" />
-              <span className="text-xs font-semibold">IDEXX/ISOETES</span>
-            </Button>
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">
                 <Settings className="w-4 h-4" />
@@ -304,219 +108,212 @@ Retorne até 15 clínicas.`,
       </div>
 
       <div className="px-4 py-6 space-y-4">
-        {/* CONTROLE DE IA */}
+        {/* CONTROLE DE IA - ECONOMIA DE CRÉDITOS */}
         <AIControlCenter />
 
-        {/* INDICADOR OFFLINE */}
-        {(isOffline || isCached) && (
-          <OfflineIndicator cacheAge={cacheAge} clientsCount={clients.length} />
-        )}
+        {/* ========================================
+            FLUXO CRONOLÓGICO COMPLETO - OTIMIZADO
+            ======================================== */}
+        
+        <div className="text-center mb-2">
+          <h2 className="text-lg font-bold text-slate-900">🎯 Fluxo de Vendas</h2>
+          <p className="text-xs text-slate-600">Siga a ordem: Lead → Cliente → Venda</p>
+        </div>
 
-        {/* STATUS DE SINCRONIZAÇÃO */}
-        <OfflineSyncStatus />
-
-        {/* SINCRONIZAÇÃO MULTI-DISPOSITIVOS */}
-        <MultiDeviceSync />
-
-        {/* IMPORTADOR UNIVERSAL DE TABELAS */}
-        <UniversalTableImporter />
-
-        {/* ANÁLISE DE CONCORRÊNCIA - SEM IA */}
-        {showCompetitorAnalysis && (
-          <div className="mb-4">
-            <CompetitorAnalysisNoAI />
-          </div>
-        )}
-
-        {/* MOBVENDEDOR - BUSCA COMPLETA 200KM MARÍLIA */}
-        <Card className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-400">
+        {/* FASE 1: CAPTAÇÃO DE LEADS */}
+        <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-400">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">1</span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-orange-900">🎯 Importação MobVendedor - Raio 200km</h3>
-              <p className="text-xs text-orange-700">Busca COMPLETA de todos clientes em 200km de Marília</p>
+              <h3 className="font-bold text-blue-900">Captação de Leads</h3>
+              <p className="text-xs text-blue-700">Encontre e qualifique novos prospects</p>
             </div>
           </div>
-          
-          <div className="space-y-3">
-            {/* Busca Completa 200km */}
-            <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border-2 border-orange-400">
-              <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-5 h-5 text-orange-600" />
-                <div>
-                  <p className="text-sm font-bold text-orange-900">🎯 Busca Completa Regional</p>
-                  <p className="text-xs text-orange-700">Centro: Marília-SP • Raio: 200km</p>
-                </div>
-              </div>
-              <Button
-                onClick={async () => {
-                  const loading = toast.loading('🔍 Buscando TODOS clientes em 200km de Marília...', { duration: Infinity });
-                  try {
-                    const response = await base44.functions.invoke('importMobVendedorMarilia200km', {
-                      cnpj: '13693877000157',
-                      mobvendedor_id: '53'
-                    });
-
-                    toast.dismiss(loading);
-                    if (response.data.success) {
-                      toast.success(
-                        `✅ IMPORTAÇÃO COMPLETA!\n\n` +
-                        `📊 ${response.data.synced} clientes importados\n` +
-                        `📍 Raio: ${response.data.radius_km}km de ${response.data.center}\n` +
-                        `❌ ${response.data.skipped} fora do raio\n` +
-                        `Total processados: ${response.data.total}`,
-                        { duration: 8000 }
-                      );
-                      queryClient.invalidateQueries(['clients']);
-                    } else {
-                      toast.error('❌ Erro: ' + response.data.error);
-                    }
-                  } catch (error) {
-                    toast.dismiss(loading);
-                    toast.error('Erro na importação: ' + error.message);
-                  }
-                }}
-                className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold"
-              >
-                <MapPin className="w-5 h-5 mr-2" />
-                🎯 BUSCAR TODOS - 200KM MARÍLIA
+          <div className="grid grid-cols-2 gap-2">
+            <Link to={createPageUrl('CaptureLeads')}>
+              <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                <UserPlus className="w-4 h-4 mr-1" />
+                Capturar Lead
               </Button>
-            </div>
-
-            {/* Tablet 53 (Padrão) */}
-            <div className="p-3 bg-white rounded-lg border border-indigo-200">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-sm font-bold text-slate-800">Tablet 53 (Todos Clientes)</p>
-                  <p className="text-xs text-slate-600">CNPJ: 13.693.877/0001-57</p>
-                </div>
-                <Badge className="bg-indigo-600">Padrão</Badge>
-              </div>
-              <Button
-                onClick={async () => {
-                  const loading = toast.loading('Baixando TODOS clientes do Tablet 53...');
-                  try {
-                    const response = await base44.functions.invoke('mobVendedorIntegration', {
-                      action: 'sync_clients',
-                      credentials: {
-                        cnpj: '13693877000157',
-                        mobvendedor_id: '53'
-                      }
-                    });
-
-                    toast.dismiss(loading);
-                    if (response.data.success) {
-                      toast.success(`✅ ${response.data.synced} de ${response.data.total} clientes importados!`);
-                      queryClient.invalidateQueries(['clients']);
-                    } else {
-                      toast.error('❌ ' + response.data.error);
-                    }
-                  } catch (error) {
-                    toast.dismiss(loading);
-                    toast.error('Erro: ' + error.message);
-                  }
-                }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
-                size="sm"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Baixar Todos Clientes
+            </Link>
+            <Link to={createPageUrl('LeadsKanban')}>
+              <Button size="sm" variant="outline" className="w-full border-blue-300">
+                <Target className="w-4 h-4 mr-1" />
+                Pipeline
               </Button>
-            </div>
-
-            {/* Importação de Outro Tablet */}
-            <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-300">
-              <p className="text-sm font-bold text-purple-900 mb-2">🔄 Outro Tablet</p>
-              <div className="space-y-2">
-                <Input
-                  placeholder="CNPJ (ex: 12345678000199)"
-                  value={customCnpj}
-                  onChange={(e) => setCustomCnpj(e.target.value)}
-                  className="text-sm"
-                />
-                <Input
-                  placeholder="ID Distribuidor (ex: 1, 2, 3...)"
-                  value={customDistributorId}
-                  onChange={(e) => setCustomDistributorId(e.target.value)}
-                  className="text-sm"
-                />
-                <Button
-                  onClick={async () => {
-                    const cnpj = customCnpj.replace(/\D/g, '');
-                    const distributorId = customDistributorId.trim();
-
-                    if (!cnpj || cnpj.length !== 14) {
-                      toast.error('CNPJ inválido (14 dígitos)');
-                      return;
-                    }
-
-                    if (!distributorId) {
-                      toast.error('Informe o ID do distribuidor');
-                      return;
-                    }
-
-                    const loading = toast.loading(`Baixando clientes do CNPJ ${cnpj}...`);
-                    try {
-                      const response = await base44.functions.invoke('mobVendedorIntegration', {
-                        action: 'sync_clients',
-                        credentials: {
-                          cnpj: cnpj,
-                          mobvendedor_id: distributorId
-                        }
-                      });
-
-                      toast.dismiss(loading);
-                      if (response.data.success) {
-                        toast.success(`✅ ${response.data.synced} de ${response.data.total} clientes importados!`);
-                        queryClient.invalidateQueries(['clients']);
-                        setCustomCnpj('');
-                        setCustomDistributorId('');
-                      } else {
-                        toast.error('❌ ' + response.data.error);
-                      }
-                    } catch (error) {
-                      toast.dismiss(loading);
-                      toast.error('Erro: ' + error.message);
-                    }
-                  }}
-                  className="w-full bg-purple-600 hover:bg-purple-700"
-                  size="sm"
-                  disabled={!customCnpj || !customDistributorId}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Importar de Outro Tablet
-                </Button>
-              </div>
-            </div>
+            </Link>
           </div>
         </Card>
 
-        {/* CADASTRO DE WHATSAPP MASTER */}
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 border-2">
-          <div className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-white" />
+        {/* FASE 2: CADASTRO DE CLIENTES */}
+        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">2</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-green-900">Cadastro de Clientes</h3>
+              <p className="text-xs text-green-700">Adicione clientes ao sistema</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to={createPageUrl('ImportClientsTable')}>
+              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                <FileText className="w-4 h-4 mr-1" />
+                Importar Tabela
+              </Button>
+            </Link>
+            <Link to={createPageUrl('NewClient')}>
+              <Button size="sm" variant="outline" className="w-full border-green-300">
+                <UserPlus className="w-4 h-4 mr-1" />
+                Novo Manual
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
+        {/* FASE 3: VER E GERENCIAR CLIENTES */}
+        <Link to={createPageUrl('Clients')}>
+          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-400 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">3</span>
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888 Turbo - Nathan</h3>
-                <p className="text-xs text-green-700">Cadastre números com acesso total (inclui você, Nathan!)</p>
+                <h3 className="font-bold text-purple-900">👥 Todos os Clientes</h3>
+                <p className="text-xs text-purple-700">{metrics.total} cadastrados</p>
               </div>
+              <Users className="w-6 h-6 text-purple-600" />
             </div>
-            <div className="flex items-center gap-2">
+          </Card>
+        </Link>
+
+        {/* FASE 4: PRÉ-VISITA */}
+        <Link to={createPageUrl('PreVisitChecklist')}>
+          <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-400 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">4</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-orange-900">✅ Checklist Pré-Visita</h3>
+                <p className="text-xs text-orange-700">Prepare-se antes de visitar</p>
+              </div>
+              <CheckCircle2 className="w-6 h-6 text-orange-600" />
+            </div>
+          </Card>
+        </Link>
+
+        {/* FASE 5: AGENDAR VISITA */}
+        <Link to={createPageUrl('ScheduledAgenda')}>
+          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-400 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">5</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-indigo-900">📅 Agendar Visita</h3>
+                <p className="text-xs text-indigo-700">Programar visitas</p>
+              </div>
+              <Calendar className="w-6 h-6 text-indigo-600" />
+            </div>
+          </Card>
+        </Link>
+
+        {/* FASE 6: PÓS-VISITA */}
+        <Link to={createPageUrl('PostVisitAnalysis')}>
+          <Card className="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-400 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">6</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-teal-900">📝 Pós-Visita</h3>
+                <p className="text-xs text-teal-700">Registre resultado</p>
+              </div>
+              <CheckCircle2 className="w-6 h-6 text-teal-600" />
+            </div>
+          </Card>
+        </Link>
+
+        {/* FASE 7: RELATÓRIOS E ANÁLISES */}
+        <Card className="p-4 bg-gradient-to-r from-purple-50 to-fuchsia-50 border-2 border-purple-400">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">7</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-purple-900">📊 Análises & Relatórios</h3>
+              <p className="text-xs text-purple-700">Métricas e insights</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Link to={createPageUrl('SalesAnalytics')}>
+              <Button size="sm" variant="outline" className="w-full text-xs">
+                <BarChart3 className="w-3 h-3 mr-1" />
+                Analytics
+              </Button>
+            </Link>
+            <Link to={createPageUrl('CRMAnalyticsDashboard')}>
+              <Button size="sm" variant="outline" className="w-full text-xs">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link to={createPageUrl('MonthlyReport')}>
+              <Button size="sm" variant="outline" className="w-full text-xs">
+                <FileText className="w-3 h-3 mr-1" />
+                Mensal
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
+        {/* =======================================
+            FERRAMENTAS PRINCIPAIS - COMPACTADO
+            ======================================= */}
+
+        {/* WHATSAPP MASTER NR22888 */}
+        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-green-900">🚀 WhatsApp Master</h3>
+              <p className="text-xs text-green-700">Assistente total de vendas</p>
+            </div>
+          </div>
+          <Button 
+            onClick={() => {
+              const url = base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant');
+              navigator.clipboard.writeText(url);
+              toast.success('Link copiado!', { duration: 3000 });
+              window.open(url, '_blank');
+            }}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Conectar WhatsApp Master
+          </Button>
+          
+          {/* Cadastro de WhatsApp Master */}
+          <div className="mt-3 pt-3 border-t border-green-300">
+            <p className="text-xs font-semibold text-green-800 mb-2">Números autorizados:</p>
+            <div className="flex gap-2">
               <Input
                 type="text"
                 placeholder="5511999999999"
                 value={newMasterPhone}
                 onChange={(e) => setNewMasterPhone(e.target.value)}
-                className="flex-1"
+                className="flex-1 text-sm"
               />
               <Button
                 onClick={async () => {
                   if (!newMasterPhone || newMasterPhone.length < 12) {
-                    toast.error('Digite um número válido (ex: 5511999999999)');
+                    toast.error('Número inválido');
                     return;
                   }
                   
@@ -525,66 +322,42 @@ Retorne até 15 clínicas.`,
                   try {
                     const currentNumbers = user?.master_whatsapp_numbers || [];
                     if (currentNumbers.includes(cleanPhone)) {
-                      toast.error('Número já cadastrado');
+                      toast.error('Já cadastrado');
                       return;
                     }
-                    
-                    const loadingToast = toast.loading('Cadastrando...');
                     
                     await base44.auth.updateMe({
                       master_whatsapp_numbers: [...currentNumbers, cleanPhone]
                     });
                     
-                    toast.dismiss(loadingToast);
-                    toast.success('✅ WhatsApp cadastrado com acesso Master!');
+                    toast.success('✅ Cadastrado!');
                     setNewMasterPhone('');
-                    
-                    setTimeout(() => {
-                      queryClient.invalidateQueries(['current-user']);
-                    }, 500);
+                    queryClient.invalidateQueries(['current-user']);
                   } catch (error) {
-                    if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-                      toast.error('⏳ Aguarde alguns segundos e tente novamente');
-                    } else {
-                      toast.error('Erro: ' + error.message);
-                    }
+                    toast.error('Erro: ' + error.message);
                   }
                 }}
+                size="sm"
                 className="bg-green-600 hover:bg-green-700"
-                disabled={!newMasterPhone || newMasterPhone.replace(/\s/g, '').length < 12}
+                disabled={!newMasterPhone || newMasterPhone.length < 12}
               >
-                <UserPlus className="w-4 h-4 mr-1" />
-                Adicionar
+                <UserPlus className="w-4 h-4" />
               </Button>
             </div>
             {user?.master_whatsapp_numbers?.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-1">
                 {user.master_whatsapp_numbers.map((phone, idx) => (
-                  <Badge key={idx} variant="outline" className="bg-white flex items-center gap-2">
-                    <MessageSquare className="w-3 h-3" />
+                  <Badge key={idx} variant="outline" className="bg-white text-xs">
                     {phone}
                     <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        try {
-                          const loadingToast = toast.loading('Removendo...');
-                          await base44.auth.updateMe({
-                            master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
-                          });
-                          toast.dismiss(loadingToast);
-                          toast.success('WhatsApp removido');
-                          setTimeout(() => {
-                            queryClient.invalidateQueries(['current-user']);
-                          }, 500);
-                        } catch (error) {
-                          if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-                            toast.error('⏳ Aguarde alguns segundos');
-                          } else {
-                            toast.error('Erro ao remover');
-                          }
-                        }
+                      onClick={async () => {
+                        await base44.auth.updateMe({
+                          master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
+                        });
+                        toast.success('Removido');
+                        queryClient.invalidateQueries(['current-user']);
                       }}
-                      className="text-red-500 hover:text-red-700 font-bold"
+                      className="text-red-500 ml-1 font-bold"
                     >
                       ×
                     </button>
@@ -595,267 +368,15 @@ Retorne até 15 clínicas.`,
           </div>
         </Card>
 
-        {/* BARRA DE BUSCA DE CLIENTE */}
-        <ClientSearchBar 
-          clients={clients} 
-          onSelectClient={setSelectedClientForAnalysis}
-          selectedClient={selectedClientForAnalysis}
-        />
-
-        {/* LINK WHATSAPP NR22888 */}
-        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-green-900">🚀 WhatsApp NR22888 TURBO</h3>
-              <p className="text-xs text-green-700">Para Nathan - Todos os livros de vendas + PDFs automáticos</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Button 
-              onClick={() => {
-                const url = base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo');
-                navigator.clipboard.writeText(url);
-                toast.success('Link NR22888 Turbo copiado, Nathan!', { duration: 4000 });
-                window.open(url, '_blank');
-              }}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            >
-              <MessageSquare className="w-4 h-4 mr-2" />
-              🚀 WhatsApp NR22888 TURBO
-            </Button>
-            <p className="text-xs text-center text-green-700 font-semibold">
-              Biblioteca completa de vendas + PDFs automáticos
-            </p>
-          </div>
-        </Card>
-
-        {/* GERADOR DE AGENDA MENSAL AUTOMATIZADO */}
+        {/* GERADOR DE AGENDA MENSAL AUTOMÁTICA */}
         <MonthlyScheduleGenerator />
 
-        {/* ASSISTENTE IA WHATSAPP MASTER (PRIMORI) - PRIMEIRO */}
-        <WhatsAppMasterAssistant />
-
-        {/* ANÁLISE COMPLETA DO CLIENTE */}
-        {selectedClientForAnalysis && (
-          <CompleteClientAnalysis client={selectedClientForAnalysis} />
-        )}
-
-        {/* TREINADOR DE DICÇÃO */}
-        <DictionTrainer />
-
-        {/* MAPA DO BRASIL - PLANEJADOR DE ROTAS */}
-        <BrazilCitiesMap selectedClients={clients} />
-
-        {/* NOTIFICAÇÕES PROATIVAS IA */}
-        <ProactiveNotificationsWidget />
-
-        {/* GAMIFICAÇÃO */}
-        <GamificationSystem compact={true} />
-
-        {/* ALERTAS PROATIVOS */}
-        <ProactiveAlertsSystem />
-
-        {/* GERADOR DE CAMPANHAS AUTOMÁTICAS */}
-        <AutoCampaignGenerator />
-
-        {/* 🎯 FLUXO CRONOLÓGICO COMPLETO */}
-        <div className="space-y-3">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold text-slate-900">📋 Fluxo de Trabalho</h2>
-            <p className="text-xs text-slate-600">Siga na ordem para máximo resultado</p>
-          </div>
-
-          {/* ETAPA 1A: ANÁLISE COMPLETA DE CLÍNICA (NOVA - COM EQUIPAMENTOS) */}
-          <EnhancedClinicAnalyzer 
-            onClientCreated={(newClient) => {
-              queryClient.invalidateQueries(['clients']);
-              toast.success('Cliente criado!');
-            }}
-          />
-
-          {/* ETAPA 1B: ANÁLISE REGIONAL POR CIDADE */}
-          <RegionalClinicAnalyzer />
-
-          {/* ETAPA 1C: BUSCA GPS */}
-          <CompleteProfileSearch />
-
-          {/* PESQUISA PARA CLIENTE */}
-          <UniversalClientSearch />
-
-          {/* ETAPA 2A: IMPORTAÇÃO POR TABELA - PÁGINA DEDICADA */}
-          <Link to={createPageUrl('ImportClientsTable')}>
-            <Card className="p-4 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">2A</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900">📊 Cadastrar por Tabela</p>
-                  <p className="text-xs text-slate-600">Cole Excel, WhatsApp, CSV - IA cadastra tudo</p>
-                </div>
-                <Badge className="bg-green-600 text-white">IA</Badge>
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 2B: CADASTRO MANUAL */}
-          <Link to={createPageUrl('NewClient')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">2B</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900">➕ Novo Cliente Manual</p>
-                  <p className="text-xs text-slate-600">Cadastrar cliente manualmente</p>
-                </div>
-                <UserPlus className="w-6 h-6 text-orange-600" />
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 3: VER TODOS */}
-          <Link to={createPageUrl('Clients')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">3</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900">👥 Ver Todos os Clientes</p>
-                  <p className="text-xs text-slate-600">{metrics.total} clientes cadastrados</p>
-                </div>
-                <Users className="w-6 h-6 text-slate-700" />
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 4: PRÉ-VISITA */}
-          <Link to={createPageUrl('PreVisitChecklist')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">4</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-blue-900">✅ Checklist Pré-Visita</p>
-                  <p className="text-xs text-blue-700">Preparação antes de visitar</p>
-                </div>
-                <CheckCircle2 className="w-6 h-6 text-blue-600" />
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 5: AGENDAR */}
-          <Link to={createPageUrl('ScheduledAgenda')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">5</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-purple-900">📅 Agendar Visita</p>
-                  <p className="text-xs text-purple-700">Programar visitas</p>
-                </div>
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 6: PÓS-VISITA */}
-          <Link to={createPageUrl('PostVisitAnalysis')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold text-white">6</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-green-900">📝 Pós-Visita</p>
-                  <p className="text-xs text-green-700">Registrar resultado da visita</p>
-                </div>
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
-              </div>
-            </Card>
-          </Link>
-
-          {/* RELATÓRIO MENSAL */}
-          <Link to={createPageUrl('MonthlyReport')}>
-            <Card className="p-4 hover:shadow-lg transition-shadow border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-fuchsia-50">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-purple-900">📊 Relatório Mensal</p>
-                  <p className="text-xs text-purple-700">Visitas + avaliações + PDF automático</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* ETAPA 7: ANÁLISES E DASHBOARD */}
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={createPageUrl('SalesAnalytics')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-r from-indigo-50 to-blue-50">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">7A</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-indigo-900">Analytics</p>
-                    <p className="text-xs text-indigo-700">Métricas</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-            
-            <Link to={createPageUrl('CRMAnalyticsDashboard')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">7B</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-blue-900">Dashboard</p>
-                    <p className="text-xs text-blue-700">Visão 360°</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* INTELIGÊNCIA DE VENDAS IA */}
-        <SalesIntelligenceDashboard />
-
-        {/* FOLLOW-UP AUTOMÁTICO IA */}
-        <AIFollowUpAutomation />
-
-        {/* TIMING IDEAL DE CONTATO IA */}
-        <AIContactTimingOptimizer />
-
-        {/* GERADOR PDF REGIONAL */}
-        <QuickRegionalPDFGenerator />
-
-        {/* GERADOR DE CONTEÚDO IA */}
-        <AIContentGenerator client={null} context="" />
-
-        {/* DOCUMENTAÇÃO DO SISTEMA */}
-        <SystemDocumentationPDF />
-
-        {/* RELATÓRIO DE SAÚDE DO SISTEMA */}
-        <SystemHealthReport />
-
-        {/* BUSCA RÁPIDA */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">🔍 Busca Rápida</h3>
+        {/* BUSCA RÁPIDA DE CLIENTES */}
+        <Card className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Buscar clientes..."
+              placeholder="🔍 Buscar clientes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -863,7 +384,7 @@ Retorne até 15 clínicas.`,
           </div>
           
           {searchTerm && filteredClients.length > 0 && (
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
               {filteredClients.map((client) => {
                 if (!client?.id || !client?.first_name) return null;
                 return (
@@ -889,519 +410,225 @@ Retorne até 15 clínicas.`,
               })}
             </div>
           )}
-        </div>
+        </Card>
 
-        {/* FUNIL DE VENDAS */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">📊 Funil & Análises</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={createPageUrl('FunnelOptimization')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-indigo-900">Funil IA</p>
-                    <p className="text-xs text-indigo-600">Otimização + A/B</p>
-                  </div>
+        {/* MÉTRICAS CLICÁVEIS */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link to={createPageUrl('Clients')}>
+            <Card className="p-3 bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-slate-600" />
+                <div>
+                  <p className="text-2xl font-bold text-slate-900">{metrics.total}</p>
+                  <p className="text-xs text-slate-600">Total</p>
                 </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('SalesFunnel')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-indigo-900">Funil Clássico</p>
-                    <p className="text-xs text-indigo-600">Gráficos estáticos</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('SalesAnalytics')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-purple-900">Analytics</p>
-                    <p className="text-xs text-purple-600">Métricas</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('ClientsByCity')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-green-900">Por Região</p>
-                    <p className="text-xs text-green-600">Cidades</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('RouteOptimizer')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-blue-900">Rotas IA</p>
-                    <p className="text-xs text-blue-600">Otimização</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('AdvancedAIReports')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-purple-900">Relatórios IA</p>
-                    <p className="text-xs text-purple-600">Customizados</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('PredictiveAnalyticsDashboard')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-green-900">Predictive AI</p>
-                    <p className="text-xs text-green-600">Churn + Forecast</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* GESTÃO DE LEADS IA */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">🎯 Gestão de Leads IA</h3>
-          <div className="space-y-2">
-            <Link to={createPageUrl('LeadsKanban')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-400">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-purple-900">🎯 Pipeline Visual (Kanban)</p>
-                    <p className="text-xs text-purple-600">Arrastar e soltar + IA</p>
-                  </div>
-                  <Badge className="bg-purple-600 text-white">NOVO</Badge>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('Leads')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-indigo-900">Leads Qualificados</p>
-                    <p className="text-xs text-indigo-600">Scoring automático IA</p>
-                  </div>
-                  <Badge className="bg-indigo-600 text-white">IA</Badge>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('CaptureLeads')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-slate-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center">
-                    <UserPlus className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-900">Capturar Leads</p>
-                    <p className="text-xs text-slate-600">Formulário rápido</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* AUTOMAÇÕES IA */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">🤖 Automações IA</h3>
-          <div className="space-y-2">
-            <Link to={createPageUrl('AutomationManager')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-purple-50 to-fuchsia-50 border-2 border-purple-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-purple-900">Central de Automação</p>
-                    <p className="text-xs text-purple-600">Follow-ups, tarefas, alertas</p>
-                  </div>
-                  <Badge className="bg-purple-600 text-white">AUTO</Badge>
-                </div>
-              </Card>
-            </Link>
-
-            <Link to={createPageUrl('AIFollowUpSequences')}>
-              <Card className="p-3 hover:shadow-lg transition-shadow border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 to-purple-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-indigo-900">Sequências IA</p>
-                    <p className="text-xs text-indigo-600">Follow-up personalizado</p>
-                  </div>
-                  <Badge className="bg-indigo-600 text-white text-xs">IA</Badge>
-                </div>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* PAINEL DE DESEMPENHO APRIMORADO */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">📈 Desempenho</h3>
-          <EnhancedPerformanceDashboard />
-        </div>
-
-        {/* COACHING IA */}
-        <div className="pt-4 border-t">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">🏆 Coaching IA</h3>
-        <CoachingDashboard compact={true} />
-        </div>
-
-        {/* ANÁLISE DE CHURN E PERFORMANCE */}
-        <div className="pt-4 border-t">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">📊 Análises IA Avançadas</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <Link to={createPageUrl('TeamPerformanceAnalytics')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
-              <div className="flex items-center gap-2 mb-1">
-                <Users className="w-5 h-5 text-purple-600" />
-                <h3 className="font-bold text-purple-900 text-sm">Performance</h3>
               </div>
-              <p className="text-xs text-purple-700">Análise equipe IA</p>
             </Card>
           </Link>
-
-          <Link to={createPageUrl('ChurnAnalysis')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-                <h3 className="font-bold text-red-900 text-sm">Churn</h3>
+          
+          <Link to={createPageUrl('Clients?filter=quente')}>
+            <Card className="p-3 bg-gradient-to-br from-red-50 to-orange-50 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-2xl font-bold text-red-900">{metrics.hot}</p>
+                  <p className="text-xs text-red-600">Quentes 🔥</p>
+                </div>
               </div>
-              <p className="text-xs text-red-700">Previsão perda IA</p>
             </Card>
           </Link>
         </div>
-        </div>
 
-        {/* FERRAMENTAS EXTRAS */}
-        <div className="pt-4 border-t">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">⚡ Ferramentas</h3>
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          <Link to={createPageUrl('WhatsAppDataAccess')}>
-            <Button size="sm" className="w-full h-12 bg-green-600 hover:bg-green-700 flex-col">
-              <MessageSquare className="w-4 h-4 mb-1" />
-              <span className="text-xs">WhatsApp</span>
-            </Button>
-          </Link>
-          <Link to={createPageUrl('Tasks')}>
-            <Button size="sm" variant="outline" className="w-full h-12 flex-col">
-              <CheckCircle2 className="w-4 h-4 mb-1" />
-              <span className="text-xs">Tarefas</span>
-            </Button>
-          </Link>
+        {/* FERRAMENTAS ESSENCIAIS - GRID COMPACTO */}
+        <div className="grid grid-cols-3 gap-2">
           <Link to={createPageUrl('AIAssistant')}>
-            <Button size="sm" className="w-full h-12 bg-purple-600 hover:bg-purple-700 flex-col">
-              <Sparkles className="w-4 h-4 mb-1" />
+            <Button className="w-full h-16 bg-purple-600 hover:bg-purple-700 flex-col">
+              <Sparkles className="w-5 h-5 mb-1" />
               <span className="text-xs">IA</span>
             </Button>
           </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <Link to={createPageUrl('RouteOptimizer')}>
-            <Button size="sm" variant="outline" className="w-full h-12 flex-col border-blue-300">
-              <svg className="w-4 h-4 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              <span className="text-xs">Rotas IA</span>
+          <Link to={createPageUrl('Tasks')}>
+            <Button variant="outline" className="w-full h-16 flex-col">
+              <CheckCircle2 className="w-5 h-5 mb-1" />
+              <span className="text-xs">Tarefas</span>
             </Button>
           </Link>
-          <Link to={createPageUrl('SalesCoaching')}>
-            <Button size="sm" variant="outline" className="w-full h-12 flex-col border-purple-300">
-              <Award className="w-4 h-4 mb-1" />
-              <span className="text-xs">Coaching</span>
-            </Button>
-          </Link>
-          <Link to={createPageUrl('RolePlayTraining')}>
-            <Button size="sm" className="w-full h-12 flex-col bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
-              <Play className="w-4 h-4 mb-1" />
-              <span className="text-xs font-semibold">Role-Play IA</span>
-            </Button>
-          </Link>
-        </div>
-
-          {/* Stock & Forecast */}
-          <div className="space-y-3">
-            <StockManagement />
-            <SalesForecastDashboard compact={true} />
-            <AdvancedSalesForecast />
-          </div>
-
-          {/* mobVendedor Analytics */}
-          <Link to={createPageUrl('MobVendedorAnalytics')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-purple-900">Analytics mobVendedor</p>
-                  <p className="text-xs text-purple-600">Previsões e análise</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Client Dashboard */}
-          <Link to={createPageUrl('ClientDashboard')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-cyan-600 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-cyan-900">Dashboard Clientes</p>
-                  <p className="text-xs text-cyan-600">Score + Busca Avançada</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* mobVendedor Backup */}
-          <Link to={createPageUrl('MobVendedorBackup')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-blue-900">📦 Backup mobVendedor</p>
-                  <p className="text-xs text-blue-600">Clientes, vendas, produtos</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* MOBI Migration */}
-          <Link to={createPageUrl('MobiMigration')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-purple-900">🚀 Migração MOBI</p>
-                  <p className="text-xs text-purple-600">Importar todos dados + estrutura</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Automation Manager */}
-          <Link to={createPageUrl('AutomationManager')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-600 flex items-center justify-center">
-                  <Cog className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-amber-900">⚙️ Automações</p>
-                  <p className="text-xs text-amber-600">Tarefas e alertas inteligentes</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Technical Materials Hub */}
-          <Link to={createPageUrl('TechnicalMaterialsHub')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-indigo-900">📚 Materiais Técnicos</p>
-                  <p className="text-xs text-indigo-600">PDFs hemogasometria + hematologia</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Document Center */}
           <Link to={createPageUrl('DocumentCenter')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-fuchsia-50 border-2 border-purple-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-purple-900">📋 Central de Docs</p>
-                  <p className="text-xs text-purple-600">Propostas + análises prontas</p>
-                </div>
-              </div>
-            </Card>
+            <Button variant="outline" className="w-full h-16 flex-col">
+              <FileText className="w-5 h-5 mb-1" />
+              <span className="text-xs">Docs</span>
+            </Button>
           </Link>
-
-          {/* Client Document Center */}
-          <Link to={createPageUrl('ClientDocumentCenter')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-indigo-900">📚 Documentos Clientes</p>
-                  <p className="text-xs text-indigo-600">Upload + Busca IA + Envio</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Data Hub - Central de Dados */}
-          <Link to={createPageUrl('DataHub')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-green-900">🗄️ Central de Dados</p>
-                  <p className="text-xs text-green-600">Importar + Documentos + Exportar</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* AI Content Generator */}
-          <Link to={createPageUrl('AIContentGenerator')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-400">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-purple-900">✨ Gerador Conteúdo IA</p>
-                  <p className="text-xs text-purple-600">Emails, posts, descrições, follow-ups</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-
-          {/* Exportador de Documentos */}
-          <Link to={createPageUrl('ExportedDocuments')}>
-            <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-green-900">📦 Exportador</p>
-                  <p className="text-xs text-green-600">PDFs, Excel, Word - Pronto p/ WhatsApp</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-          </div>
-
-        {/* SEGMENTAÇÃO INTELIGENTE */}
-        <div className="pt-4 border-t">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">🎯 Segmentação Inteligente</h3>
-          <SmartSegmentationEngine />
         </div>
 
-        {/* MÉTRICAS RÁPIDAS - CLICÁVEIS */}
-        <div className="pt-4 border-t">
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={createPageUrl('Clients')}>
-              <Card className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50 cursor-pointer hover:shadow-lg transition-all">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-indigo-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-indigo-900">{metrics.total}</p>
-                    <p className="text-xs text-indigo-600">Total Clientes</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-            
-            <Link to={createPageUrl('Clients?filter=quente')}>
-              <Card className="p-3 bg-gradient-to-br from-red-50 to-orange-50 cursor-pointer hover:shadow-lg transition-all">
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-red-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-red-900">{metrics.hot}</p>
-                    <p className="text-xs text-red-600">Quentes 🔥</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
+        {/* IMPORTAÇÃO MOBVENDEDOR - COMPACTO */}
+        <Card className="p-3 bg-orange-50 border border-orange-300">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-orange-600" />
+              <h3 className="font-bold text-orange-900 text-sm">MobVendedor</h3>
+            </div>
+            <Badge className="bg-orange-600 text-white text-xs">200km</Badge>
           </div>
+          <Button
+            onClick={async () => {
+              const loading = toast.loading('Importando...');
+              try {
+                const response = await base44.functions.invoke('importMobVendedorMarilia200km', {
+                  cnpj: '13693877000157',
+                  mobvendedor_id: '53'
+                });
+                toast.dismiss(loading);
+                if (response.data.success) {
+                  toast.success(`✅ ${response.data.synced} clientes importados!`);
+                  queryClient.invalidateQueries(['clients']);
+                } else {
+                  toast.error('Erro: ' + response.data.error);
+                }
+              } catch (error) {
+                toast.dismiss(loading);
+                toast.error('Erro: ' + error.message);
+              }
+            }}
+            className="w-full bg-orange-600 hover:bg-orange-700"
+            size="sm"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Importar 200km Marília
+          </Button>
+        </Card>
+
+        {/* FERRAMENTAS AVANÇADAS - EXPANSÍVEL */}
+        <Card className="p-3">
+          <button 
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-indigo-600" />
+              <h3 className="font-semibold text-slate-800 text-sm">Ferramentas Avançadas</h3>
+            </div>
+            {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
           
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            <Link to={createPageUrl('Clients?filter=morno')}>
-              <Card className="p-3 bg-gradient-to-br from-yellow-50 to-amber-50 cursor-pointer hover:shadow-lg transition-all">
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-yellow-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-yellow-900">{metrics.warm}</p>
-                    <p className="text-xs text-yellow-600">Mornos 🌡️</p>
-                  </div>
+          {showAdvanced && (
+            <div className="mt-3 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Link to={createPageUrl('FunnelOptimization')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Funil IA
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('RouteOptimizer')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    Rotas
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('RolePlayTraining')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <Play className="w-3 h-3 mr-1" />
+                    Role-Play
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('SalesCoaching')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <Award className="w-3 h-3 mr-1" />
+                    Coaching
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('AutomationManager')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Automações
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('ChurnAnalysis')}>
+                  <Button size="sm" variant="outline" className="w-full">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Churn
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Importação customizada */}
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-xs font-semibold text-slate-700 mb-2">Outro Tablet:</p>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="CNPJ"
+                    value={customCnpj}
+                    onChange={(e) => setCustomCnpj(e.target.value)}
+                    className="text-sm h-9"
+                  />
+                  <Input
+                    placeholder="ID Distribuidor"
+                    value={customDistributorId}
+                    onChange={(e) => setCustomDistributorId(e.target.value)}
+                    className="text-sm h-9"
+                  />
+                  <Button
+                    onClick={async () => {
+                      const cnpj = customCnpj.replace(/\D/g, '');
+                      if (!cnpj || cnpj.length !== 14 || !customDistributorId) {
+                        toast.error('Preencha CNPJ e ID');
+                        return;
+                      }
+                      const loading = toast.loading('Importando...');
+                      try {
+                        const response = await base44.functions.invoke('mobVendedorIntegration', {
+                          action: 'sync_clients',
+                          credentials: { cnpj, mobvendedor_id: customDistributorId.trim() }
+                        });
+                        toast.dismiss(loading);
+                        if (response.data.success) {
+                          toast.success(`✅ ${response.data.synced} importados!`);
+                          queryClient.invalidateQueries(['clients']);
+                          setCustomCnpj('');
+                          setCustomDistributorId('');
+                        } else {
+                          toast.error(response.data.error);
+                        }
+                      } catch (error) {
+                        toast.dismiss(loading);
+                        toast.error('Erro: ' + error.message);
+                      }
+                    }}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    size="sm"
+                    disabled={!customCnpj || !customDistributorId}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Importar
+                  </Button>
                 </div>
-              </Card>
-            </Link>
-            
-            <Link to={createPageUrl('Clients?filter=frio')}>
-              <Card className="p-3 bg-gradient-to-br from-blue-50 to-cyan-50 cursor-pointer hover:shadow-lg transition-all">
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-blue-900">{metrics.cold}</p>
-                    <p className="text-xs text-blue-600">Frios ❄️</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div>
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* LINKS RÁPIDOS - MAIS COMPACTO */}
+        <div className="grid grid-cols-2 gap-2">
+          <Link to={createPageUrl('ClientsByCity')}>
+            <Button variant="outline" className="w-full h-12 text-xs">
+              <MapPin className="w-4 h-4 mr-1" />
+              Por Região
+            </Button>
+          </Link>
+          <Link to={createPageUrl('TechnicalMaterialsHub')}>
+            <Button variant="outline" className="w-full h-12 text-xs">
+              <FileText className="w-4 h-4 mr-1" />
+              Materiais
+            </Button>
+          </Link>
+        </div>
+
+        {/* INFO RÁPIDA */}
+        <div className="text-center pt-4 border-t">
+          <p className="text-xs text-slate-500">
+            💡 <strong>Dica:</strong> Use o WhatsApp Master para criar clientes, agendar visitas e gerar propostas via voz!
+          </p>
         </div>
       </div>
     </div>

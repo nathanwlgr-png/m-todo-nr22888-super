@@ -23,24 +23,27 @@ export default function EngagementTracker({ clientId }) {
 
   const createTrackingMutation = useMutation({
     mutationFn: async (data) => {
-      const trackingId = Math.random().toString(36).substring(2, 15);
+      const trackingId = `trk_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const trackingData = {
         ...data,
         tracking_id: trackingId,
         sent_at: new Date().toISOString(),
-        views_count: 0
+        views_count: 0,
+        engagement_score: 0
       };
       
-      await base44.entities.DocumentEngagement.create(trackingData);
+      const created = await base44.entities.DocumentEngagement.create(trackingData);
       
-      // Gerar URL rastreável
+      // Gerar URL rastreável curta
       const baseUrl = window.location.origin;
-      return `${baseUrl}/track/${trackingId}`;
+      const shortUrl = `${baseUrl}/v/${trackingId}`;
+      
+      return { url: shortUrl, id: created.id };
     },
-    onSuccess: (url) => {
-      setTrackingUrl(url);
+    onSuccess: (data) => {
+      setTrackingUrl(data.url);
       queryClient.invalidateQueries(['engagements']);
-      toast.success('Link rastreável criado!');
+      toast.success('✅ Link rastreável criado! Cliente será notificado quando abrir.', { duration: 5000 });
     }
   });
 
@@ -67,6 +70,10 @@ export default function EngagementTracker({ clientId }) {
   const avgEngagement = engagements.length > 0 
     ? Math.round(engagements.reduce((sum, e) => sum + (e.engagement_score || 0), 0) / engagements.length)
     : 0;
+  
+  const highInterestDocs = engagements.filter(e => 
+    e.interest_level === 'muito_alto' || e.interest_level === 'alto'
+  ).length;
 
   return (
     <div className="space-y-4">
@@ -83,18 +90,22 @@ export default function EngagementTracker({ clientId }) {
 
         {/* Métricas Gerais */}
         {engagements.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="bg-white rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-purple-900">{engagements.length}</p>
-              <p className="text-xs text-purple-600">Documentos</p>
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            <div className="bg-white rounded-lg p-2 text-center">
+              <p className="text-xl font-bold text-purple-900">{engagements.length}</p>
+              <p className="text-xs text-purple-600">Enviados</p>
             </div>
-            <div className="bg-white rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-purple-900">{totalViews}</p>
-              <p className="text-xs text-purple-600">Visualizações</p>
+            <div className="bg-white rounded-lg p-2 text-center">
+              <p className="text-xl font-bold text-purple-900">{totalViews}</p>
+              <p className="text-xs text-purple-600">Views</p>
             </div>
-            <div className="bg-white rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-purple-900">{avgEngagement}%</p>
-              <p className="text-xs text-purple-600">Engajamento</p>
+            <div className="bg-white rounded-lg p-2 text-center">
+              <p className="text-xl font-bold text-purple-900">{avgEngagement}%</p>
+              <p className="text-xs text-purple-600">Score</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-2 text-center border border-green-300">
+              <p className="text-xl font-bold text-green-900">{highInterestDocs}</p>
+              <p className="text-xs text-green-700">🔥 Quentes</p>
             </div>
           </div>
         )}
@@ -176,11 +187,18 @@ export default function EngagementTracker({ clientId }) {
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">
                         <Eye className="w-3 h-3 mr-1" />
-                        {engagement.views_count || 0} views
+                        {engagement.views_count || 0}x
                       </Badge>
                       {engagement.interest_level && (
                         <Badge className={`${getInterestColor(engagement.interest_level)} text-white text-xs`}>
-                          {engagement.interest_level.replace('_', ' ')}
+                          {engagement.interest_level === 'muito_alto' ? '🔥🔥' : 
+                           engagement.interest_level === 'alto' ? '🔥' :
+                           engagement.interest_level === 'medio' ? '🌡️' : '❄️'}
+                        </Badge>
+                      )}
+                      {engagement.response_received && (
+                        <Badge className="bg-green-600 text-white text-xs">
+                          ✓ Respondeu
                         </Badge>
                       )}
                     </div>
