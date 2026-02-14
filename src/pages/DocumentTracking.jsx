@@ -1,19 +1,20 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, CheckCircle2, Loader2 } from 'lucide-react';
+import { Eye, Download, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function DocumentTracking() {
-  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
-  const trackingPath = window.location.pathname;
-  const trackingId = trackingPath.split('/v/')[1] || urlParams.get('id');
+  const trackingId = urlParams.get('id');
+  const navigate = useNavigate();
   
-  const [tracking, setTracking] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
+  const [loading, setLoading] = useState(true);
+  const [engagement, setEngagement] = useState(null);
+  const [startTime] = useState(Date.now());
+  const [timeSpent, setTimeSpent] = useState(0);
 
   useEffect(() => {
     if (!trackingId) {
@@ -21,76 +22,144 @@ export default function DocumentTracking() {
       return;
     }
 
-    const recordView = async () => {
-      setTracking(true);
-      
-      try {
-        // Detectar informações do dispositivo
-        const deviceInfo = `${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'} - ${navigator.platform}`;
-        
-        // Registrar visualização
-        const response = await base44.functions.invoke('trackDocumentView', {
-          tracking_id: trackingId,
-          device_info: deviceInfo,
-          location: 'Brasil' // Pode expandir com geolocalização
-        });
+    loadEngagement();
+  }, [trackingId]);
 
-        if (response.data.success) {
-          setSuccess(true);
-          toast.success(
-            `✅ Visualização registrada!\n\n` +
-            `📊 Total de visualizações: ${response.data.views}\n` +
-            `🎯 Score de engajamento: ${response.data.engagement_score}%\n` +
-            `💡 Interesse: ${response.data.interest_level}`,
-            { duration: 6000 }
-          );
-        }
-      } catch (error) {
-        console.error('Erro ao rastrear:', error);
-        toast.error('Erro ao registrar visualização');
-      } finally {
-        setTracking(false);
+  // Rastrear tempo gasto
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeSpent(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  // Enviar atualização de tempo quando usuário sai
+  useEffect(() => {
+    const handleUnload = () => {
+      if (engagement) {
+        trackView(timeSpent);
       }
     };
 
-    recordView();
-  }, [trackingId]);
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [engagement, timeSpent]);
+
+  const loadEngagement = async () => {
+    try {
+      const engagements = await base44.entities.DocumentEngagement.filter({ tracking_id: trackingId });
+      
+      if (engagements.length === 0) {
+        toast.error('Documento não encontrado');
+        return;
+      }
+
+      setEngagement(engagements[0]);
+      
+      // Registrar visualização inicial
+      await trackView(0);
+      
+    } catch (error) {
+      toast.error('Erro ao carregar documento');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const trackView = async (seconds) => {
+    if (!engagement) return;
+
+    try {
+      // Detectar dispositivo e localização
+      const deviceInfo = /mobile|android|iphone/i.test(navigator.userAgent) ? 'Mobile' :
+                         /tablet|ipad/i.test(navigator.userAgent) ? 'Tablet' : 'Desktop';
+      
+      let location = 'Desconhecido';
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            location = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+          },
+          () => {}
+        );
+      }
+
+      await base44.functions.invoke('trackDocumentView', {
+        tracking_id: trackingId,
+        device_info: deviceInfo,
+        location: location,
+        time_spent_seconds: seconds
+      });
+    } catch (error) {
+      console.error('Erro ao rastrear:', error);
+    }
+  };
+
+  const handleDownload = async () => {
+    await trackView(timeSpent);
+    
+    // Marcar como baixado
+    await base44.functions.invoke('trackDocumentView', {
+      tracking_id: trackingId,
+      downloaded: true
+    });
+
+    if (engagement.document_url) {
+      window.open(engagement.document_url, '_blank');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-6">
-      <Card className="max-w-md w-full p-8 text-center">
-        {tracking && (
-          <>
-            <Loader2 className="w-16 h-16 text-purple-600 mx-auto mb-4 animate-spin" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Carregando documento...</h2>
-            <p className="text-sm text-slate-600">Aguarde um momento</p>
-          </>
-        )}
-        
-        {success && !tracking && (
-          <>
-            <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">✅ Visualização Registrada</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              O vendedor foi notificado que você visualizou este documento.
-            </p>
-            <Eye className="w-12 h-12 text-purple-400 mx-auto opacity-50 mb-4" />
-            <p className="text-xs text-slate-500">
-              Este é um link rastreável para análise de engajamento
-            </p>
-          </>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+      <div className="max-w-2xl mx-auto">
+        <Card className="p-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-slate-900">
+                {engagement?.document_title || 'Documento'}
+              </h1>
+              <p className="text-sm text-slate-600">
+                Enviado por {engagement?.created_by || 'Vendedor'}
+              </p>
+            </div>
+          </div>
 
-        {!tracking && !success && (
-          <>
-            <Eye className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Link Rastreável</h2>
-            <p className="text-sm text-slate-600">
-              Este link permite ao vendedor acompanhar visualizações de documentos
+          <div className="bg-purple-50 rounded-lg p-4 mb-4 border-2 border-purple-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-purple-600" />
+                <p className="font-semibold text-purple-900">Documento Rastreado</p>
+              </div>
+              <p className="text-sm text-purple-700">Tempo: {Math.floor(timeSpent / 60)}:{String(timeSpent % 60).padStart(2, '0')}</p>
+            </div>
+            <p className="text-xs text-purple-700">
+              Este documento está sendo rastreado. O vendedor saberá que você visualizou.
             </p>
-          </>
-        )}
-      </Card>
+          </div>
+
+          {engagement?.document_url && (
+            <Button
+              onClick={handleDownload}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
+              <Download className="w-5 h-5 mr-2" />
+              Baixar Documento
+            </Button>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
