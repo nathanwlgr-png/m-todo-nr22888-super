@@ -64,6 +64,7 @@ import OfflineSyncStatus from '@/components/OfflineSyncStatus';
 import AIControlCenter from '@/components/AIControlCenter';
 import MultiDeviceSync from '@/components/MultiDeviceSync';
 import UniversalTableImporter from '@/components/UniversalTableImporter';
+import MonthlyScheduleGenerator from '@/components/MonthlyScheduleGenerator';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -630,6 +631,9 @@ Retorne até 15 clínicas.`,
             </p>
           </div>
         </Card>
+
+        {/* GERADOR DE AGENDA MENSAL AUTOMATIZADO */}
+        <MonthlyScheduleGenerator />
 
         {/* ASSISTENTE IA WHATSAPP MASTER (PRIMORI) - PRIMEIRO */}
         <WhatsAppMasterAssistant />
