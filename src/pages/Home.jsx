@@ -126,6 +126,9 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
+        {/* DOCUMENTOS PRONTOS PARA WHATSAPP */}
+        <QuickExportedDocs />
+
         {/* CONTROLE DE IA - ECONOMIA DE CRÉDITOS */}
         <AIControlCenter />
 
