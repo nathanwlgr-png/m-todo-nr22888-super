@@ -1,188 +1,134 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Zap, ZapOff, Globe, Bot, CheckCircle2, XCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-
-const AI_MODE_KEY = 'nr22_ai_mode';
-const AI_WHATSAPP_KEY = 'nr22_ai_whatsapp';
+import { Sparkles, Zap, DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
 
 export default function AIControlCenter() {
   const [aiMode, setAiMode] = useState(() => {
-    return localStorage.getItem(AI_MODE_KEY) || 'economy';
+    return localStorage.getItem('nr22_ai_mode') || 'manual';
   });
   
-  const [whatsappAI, setWhatsappAI] = useState(() => {
-    return localStorage.getItem(AI_WHATSAPP_KEY) !== 'false';
+  const [aiUsageCount, setAiUsageCount] = useState(() => {
+    const saved = localStorage.getItem('nr22_ai_usage_count');
+    return saved ? parseInt(saved) : 0;
   });
-
-  useEffect(() => {
-    localStorage.setItem(AI_MODE_KEY, aiMode);
-  }, [aiMode]);
-
-  useEffect(() => {
-    localStorage.setItem(AI_WHATSAPP_KEY, whatsappAI);
-  }, [whatsappAI]);
-
-  const modes = {
-    off: {
-      label: 'Desligado',
-      icon: ZapOff,
-      color: 'text-gray-500',
-      bg: 'bg-gray-100',
-      description: 'Todas as IAs desligadas, usa apenas busca web'
-    },
-    economy: {
-      label: 'Econômico',
-      icon: Zap,
-      color: 'text-yellow-600',
-      bg: 'bg-yellow-100',
-      description: 'IA ativada apenas quando solicitado manualmente'
-    },
-    full: {
-      label: 'Completo',
-      icon: Bot,
-      color: 'text-green-600',
-      bg: 'bg-green-100',
-      description: 'Todas as IAs ativas automaticamente'
-    }
-  };
+  
+  const monthlyLimit = 200;
 
   const handleModeChange = (newMode) => {
     setAiMode(newMode);
-    const modeInfo = modes[newMode];
-    toast.success(`Modo ${modeInfo.label} ativado!`, {
-      description: modeInfo.description
-    });
+    localStorage.setItem('nr22_ai_mode', newMode);
+    
+    let message = '';
+    if (newMode === 'manual') {
+      message = '🎯 Modo Manual: IA só quando você pedir explicitamente';
+    } else if (newMode === 'economy') {
+      message = '💰 Economia: IA otimizada, cache inteligente';
+    } else if (newMode === 'performance') {
+      message = '⚡ Performance: IA completa ativada';
+    } else if (newMode === 'off') {
+      message = '❌ IA Desligada: Sem uso de créditos';
+    }
+    
+    toast.success(message, { duration: 3000 });
   };
+  
+  useEffect(() => {
+    const count = parseInt(localStorage.getItem('nr22_ai_usage_count') || '0');
+    if (count > monthlyLimit * 0.8) {
+      toast.warning(`⚠️ ${count}/${monthlyLimit} calls IA usadas este mês`, { duration: 5000 });
+    }
+  }, []);
 
-  const currentMode = modes[aiMode];
-  const Icon = currentMode.icon;
+  const usagePercent = Math.round((aiUsageCount / monthlyLimit) * 100);
+  const isNearLimit = usagePercent >= 80;
 
   return (
-    <Card className="border-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className={`w-5 h-5 ${currentMode.color}`} />
-          Controle de IA - Modo {currentMode.label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Seletor de Modo */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Modo de Operação:</label>
-          <div className="grid grid-cols-3 gap-2">
-            {Object.entries(modes).map(([key, mode]) => {
-              const ModeIcon = mode.icon;
-              return (
-                <Button
-                  key={key}
-                  variant={aiMode === key ? 'default' : 'outline'}
-                  onClick={() => handleModeChange(key)}
-                  className="flex flex-col items-center gap-2 h-auto py-3"
-                >
-                  <ModeIcon className={`w-5 h-5 ${aiMode === key ? 'text-white' : mode.color}`} />
-                  <span className="text-xs">{mode.label}</span>
-                </Button>
-              );
-            })}
-          </div>
+    <Card className={`p-4 border-2 ${isNearLimit ? 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400' : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-300'}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isNearLimit ? 'bg-red-600' : 'bg-gradient-to-br from-purple-600 to-pink-600'}`}>
+          {isNearLimit ? <AlertTriangle className="w-5 h-5 text-white" /> : <Sparkles className="w-5 h-5 text-white" />}
         </div>
-
-        {/* Status atual */}
-        <div className={`p-4 rounded-lg ${currentMode.bg}`}>
-          <p className="text-sm text-slate-700">{currentMode.description}</p>
+        <div className="flex-1">
+          <h3 className="font-bold text-purple-900">🎛️ Controle de IA</h3>
+          <p className="text-xs text-purple-600">
+            {aiUsageCount}/{monthlyLimit} calls ({usagePercent}%)
+          </p>
         </div>
+        <Badge className={isNearLimit ? 'bg-red-600' : 'bg-purple-600'}>
+          {aiMode === 'manual' ? '🎯 Manual' :
+           aiMode === 'economy' ? '💰 Economia' :
+           aiMode === 'performance' ? '⚡ Performance' : '❌ OFF'}
+        </Badge>
+      </div>
 
-        {/* WhatsApp AI */}
-        <div className="flex items-center justify-between p-4 border rounded-lg">
-          <div className="flex items-center gap-3">
-            <Bot className="w-5 h-5 text-green-600" />
-            <div>
-              <p className="font-medium">WhatsApp AI Master</p>
-              <p className="text-xs text-slate-600">Mantém IA do WhatsApp sempre ativa</p>
-            </div>
-          </div>
-          <Switch
-            checked={whatsappAI}
-            onCheckedChange={(checked) => {
-              setWhatsappAI(checked);
-              toast.success(checked ? 'WhatsApp AI ativado' : 'WhatsApp AI desativado');
-            }}
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          onClick={() => handleModeChange('manual')}
+          variant={aiMode === 'manual' ? 'default' : 'outline'}
+          className={aiMode === 'manual' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}
+          size="sm"
+        >
+          <Sparkles className="w-4 h-4 mr-1" />
+          Manual
+        </Button>
+        <Button
+          onClick={() => handleModeChange('economy')}
+          variant={aiMode === 'economy' ? 'default' : 'outline'}
+          className={aiMode === 'economy' ? 'bg-green-600 hover:bg-green-700' : ''}
+          size="sm"
+        >
+          <DollarSign className="w-4 h-4 mr-1" />
+          Economia
+        </Button>
+        <Button
+          onClick={() => handleModeChange('performance')}
+          variant={aiMode === 'performance' ? 'default' : 'outline'}
+          className={aiMode === 'performance' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+          size="sm"
+        >
+          <Zap className="w-4 h-4 mr-1" />
+          Performance
+        </Button>
+        <Button
+          onClick={() => handleModeChange('off')}
+          variant={aiMode === 'off' ? 'default' : 'outline'}
+          className={aiMode === 'off' ? 'bg-red-600 hover:bg-red-700' : ''}
+          size="sm"
+        >
+          <TrendingDown className="w-4 h-4 mr-1" />
+          OFF
+        </Button>
+      </div>
+      
+      {/* Barra de Uso */}
+      <div className="mt-3">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-purple-700">Uso Mensal</span>
+          <span className="text-xs font-bold text-purple-900">{usagePercent}%</span>
+        </div>
+        <div className="h-2 bg-purple-100 rounded-full overflow-hidden">
+          <div 
+            className={`h-full transition-all ${isNearLimit ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-purple-500 to-pink-500'}`}
+            style={{ width: `${Math.min(usagePercent, 100)}%` }}
           />
         </div>
-
-        {/* Resumo de funcionalidades */}
-        <div className="space-y-2 text-sm">
-          <p className="font-medium">Status dos Recursos:</p>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              {aiMode === 'off' ? (
-                <XCircle className="w-4 h-4 text-red-500" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-              )}
-              <span>Análises com IA: {aiMode === 'off' ? 'Desativadas' : aiMode === 'economy' ? 'Sob demanda' : 'Ativas'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span>Busca Web: Sempre ativa</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {whatsappAI ? (
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-              ) : (
-                <XCircle className="w-4 h-4 text-red-500" />
-              )}
-              <span>WhatsApp AI: {whatsappAI ? 'Ativo' : 'Desativado'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Alternativas sem IA */}
-        {aiMode === 'off' && (
-          <div className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded">
-            <div className="flex items-start gap-2">
-              <Globe className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-blue-900">Modo Web Ativo</p>
-                <p className="text-xs text-blue-700 mt-1">
-                  Sistema usando busca na internet para análises e dados de mercado
-                </p>
-              </div>
-            </div>
-          </div>
+        {isNearLimit && (
+          <p className="text-xs text-red-600 mt-2 font-semibold">
+            ⚠️ Próximo do limite! Use modo Manual ou Economy
+          </p>
         )}
-      </CardContent>
+      </div>
+
+      <div className="mt-3 p-3 bg-white rounded-lg border border-purple-200">
+        <p className="text-xs text-slate-600">
+          <strong>Manual:</strong> IA só quando clicar em botão específico<br/>
+          <strong>Economia:</strong> Cache + IA seletiva<br/>
+          <strong>Performance:</strong> IA completa (gasta mais)
+        </p>
+      </div>
     </Card>
   );
 }
-
-// Hook para verificar se IA está ativa
-export const useAIMode = () => {
-  const [aiMode, setAiMode] = useState(() => {
-    return localStorage.getItem(AI_MODE_KEY) || 'economy';
-  });
-
-  const [whatsappAI] = useState(() => {
-    return localStorage.getItem(AI_WHATSAPP_KEY) !== 'false';
-  });
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setAiMode(localStorage.getItem(AI_MODE_KEY) || 'economy');
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  return {
-    aiMode,
-    isAIEnabled: aiMode !== 'off',
-    isWhatsAppAIEnabled: whatsappAI,
-    needsManualActivation: aiMode === 'economy'
-  };
-};
