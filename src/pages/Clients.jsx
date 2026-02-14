@@ -85,43 +85,31 @@ export default function Clients() {
     queryFn: async () => {
       try {
         const allSales = await base44.entities.Sale.list();
-        const validClientIds = new Set(clients.filter(c => c && c.id && !c.is_deleted).map(c => c.id));
-        return allSales.filter(s => {
-          if (!s || !s.id) return false;
-          if (!s.client_id) return true;
-          return validClientIds.has(s.client_id);
-        });
+        return allSales.filter(s => s && s.id);
       } catch (error) {
-        console.warn('Erro ao carregar vendas (ignorando):', error);
+        console.warn('Erro ao carregar vendas:', error);
         return [];
       }
     },
-    enabled: clients.length > 0,
-    retry: 0,
-    staleTime: 60 * 60 * 1000,
-    meta: {
-      errorHandler: () => {}
-    }
+    enabled: !isOffline && clients.length > 0,
+    retry: 1,
+    staleTime: 5 * 60 * 1000
   });
 
   const { data: allVisits = [] } = useQuery({
     queryKey: ['all-visits'],
     queryFn: async () => {
       try {
-        const allVisits = await base44.entities.Visit.list('-scheduled_date');
-        const validClientIds = new Set(clients.map(c => c.id));
-        return allVisits.filter(v => !v.client_id || validClientIds.has(v.client_id));
+        const allVisits = await base44.entities.Visit.list('-scheduled_date', 200);
+        return allVisits.filter(v => v && v.id);
       } catch (error) {
-        console.warn('Erro ao carregar visitas (ignorando):', error);
+        console.warn('Erro ao carregar visitas:', error);
         return [];
       }
     },
-    enabled: clients.length > 0,
-    retry: 0,
-    staleTime: 60 * 60 * 1000,
-    meta: {
-      errorHandler: () => {}
-    }
+    enabled: !isOffline && clients.length > 0,
+    retry: 1,
+    staleTime: 5 * 60 * 1000
   });
 
   // Lista única de cidades
@@ -132,30 +120,38 @@ export default function Clients() {
   ];
 
   const cities = useMemo(() => {
-    const unique = [...new Set(clients.map(c => c.city).filter(Boolean))];
-    return unique.sort();
+    if (!Array.isArray(clients)) return [];
+    const unique = [...new Set(clients.map(c => c?.city).filter(Boolean))];
+    return unique.sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [clients]);
 
   const cityCoverage = useMemo(() => {
-    const clientCities = new Set(clients.map(c => c.city).filter(Boolean));
+    if (!Array.isArray(clients)) return { covered: [], missing: ORANGE_REGION_CITIES, clientCities: [] };
+    
+    const clientCities = new Set(clients.map(c => c?.city).filter(Boolean));
     const covered = ORANGE_REGION_CITIES.filter(city => 
       Array.from(clientCities).some(clientCity => 
-        clientCity.toLowerCase().includes(city.toLowerCase())
+        clientCity?.toLowerCase().includes(city.toLowerCase())
       )
     );
     const missing = ORANGE_REGION_CITIES.filter(city => !covered.includes(city));
     
-    return { covered, missing, clientCities: Array.from(clientCities) };
+    return { covered, missing, clientCities: Array.from(clientCities).sort() };
   }, [clients]);
 
   // Busca e ordenação
   const filteredClients = useMemo(() => {
+    if (!Array.isArray(clients) || clients.length === 0) return [];
+    
     let filtered = clients.filter(client => {
+      if (!client || !client.id) return false;
+      
       // Busca por nome do cliente ou clínica
       const matchesSearch = !search || (
         client.first_name?.toLowerCase().includes(search.toLowerCase()) ||
         client.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        client.clinic_name?.toLowerCase().includes(search.toLowerCase())
+        client.clinic_name?.toLowerCase().includes(search.toLowerCase()) ||
+        client.city?.toLowerCase().includes(search.toLowerCase())
       );
       
       // Filtros
