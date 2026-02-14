@@ -36,6 +36,7 @@ import MonthlyScheduleGenerator from '@/components/MonthlyScheduleGenerator';
 import DocumentsCenter from '@/components/DocumentsCenter';
 import OfflineDataPack from '@/components/OfflineDataPack';
 import CompetitorPriceAnalysis from '@/components/CompetitorPriceAnalysis';
+import CityLeadCapture from '@/components/CityLeadCapture';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -389,7 +390,8 @@ export default function Home() {
         {/* ANÁLISE DE CONCORRENTES */}
         <CompetitorPriceAnalysis />
 
-        {/* BUSCA RÁPIDA DE CLIENTES */}
+        {/* CAPTURA DE LEADS POR CIDADE */}
+        <CityLeadCapture />
 
         {/* BUSCA RÁPIDA DE CLIENTES */}
         <Card className="p-4">
