@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { AILimitProtection } from '@/components/AILimitProtection';
 import AIUsageIndicator from '@/components/AIUsageIndicator';
-import FloatingWhatsAppDocButton from '@/components/FloatingWhatsAppDocButton';
 
 export default function Layout({ children, currentPageName }) {
   // Restaurar posição de scroll ao voltar
@@ -25,7 +24,6 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </div>
       <AIUsageIndicator />
-      <FloatingWhatsAppDocButton />
     </AILimitProtection>
   );
 }

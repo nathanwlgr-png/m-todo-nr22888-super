@@ -40,8 +40,6 @@ import CityLeadCapture from '@/components/CityLeadCapture';
 import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
 import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
-import CompetitorMarketAnalyzer from '@/components/CompetitorMarketAnalyzer';
-import QuickExportedDocs from '@/components/QuickExportedDocs';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -126,9 +124,6 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
-        {/* DOCUMENTOS PRONTOS PARA WHATSAPP */}
-        <QuickExportedDocs />
-
         {/* CONTROLE DE IA - ECONOMIA DE CRÉDITOS */}
         <AIControlCenter />
 
@@ -400,9 +395,6 @@ export default function Home() {
 
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
-
-        {/* ANÁLISE DE MERCADO COMPETITIVA */}
-        <CompetitorMarketAnalyzer />
 
         {/* SISTEMA DE AUTOMAÇÃO INTELIGENTE */}
         <div className="space-y-3">
