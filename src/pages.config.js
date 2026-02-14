@@ -77,6 +77,7 @@ import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
+import DailyReports from './pages/DailyReports';
 import Dashboard from './pages/Dashboard';
 import DataHub from './pages/DataHub';
 import DocumentCenter from './pages/DocumentCenter';
@@ -100,6 +101,7 @@ import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
+import KnowledgeBaseManager from './pages/KnowledgeBaseManager';
 import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
 import Leads from './pages/Leads';
@@ -159,8 +161,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import DailyReports from './pages/DailyReports';
-import KnowledgeBaseManager from './pages/KnowledgeBaseManager';
 import __Layout from './Layout.jsx';
 
 
@@ -195,6 +195,7 @@ export const PAGES = {
     "ConsumablePriceList": ConsumablePriceList,
     "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
+    "DailyReports": DailyReports,
     "Dashboard": Dashboard,
     "DataHub": DataHub,
     "DocumentCenter": DocumentCenter,
@@ -218,6 +219,7 @@ export const PAGES = {
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
+    "KnowledgeBaseManager": KnowledgeBaseManager,
     "LeadProfile": LeadProfile,
     "Leaderboard": Leaderboard,
     "Leads": Leads,
@@ -277,8 +279,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "DailyReports": DailyReports,
-    "KnowledgeBaseManager": KnowledgeBaseManager,
 }
 
 export const pagesConfig = {

@@ -42,6 +42,7 @@ import {
   Funnel,
   FunnelChart
 } from 'recharts';
+import ChartDetailsOverlay from '@/components/ChartDetailsOverlay';
 
 const STATUS_COLORS = {
   quente: '#ef4444',
@@ -53,6 +54,9 @@ export default function SalesFunnel() {
   const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState('30'); // days
   const [salespersonFilter, setSalespersonFilter] = useState('all');
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [overlayClients, setOverlayClients] = useState([]);
+  const [overlayTitle, setOverlayTitle] = useState('');
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['clients'],
@@ -145,6 +149,14 @@ export default function SalesFunnel() {
       clientsWithVisits
     };
   }, [filteredData, sequences, visits]);
+
+  // Functions to open overlay
+  const showClientsInOverlay = (filterFn, title) => {
+    const clientsToShow = filteredData.clients.filter(filterFn);
+    setOverlayClients(clientsToShow);
+    setOverlayTitle(title);
+    setOverlayOpen(true);
+  };
 
   // Funnel data
   const funnelData = [
@@ -305,6 +317,21 @@ export default function SalesFunnel() {
                 dataKey="value"
                 data={funnelData}
                 isAnimationActive
+                onClick={(data) => {
+                  if (data.name === 'Leads Totais') {
+                    showClientsInOverlay(() => true, 'Todos os Leads');
+                  } else if (data.name === 'Com Visita') {
+                    showClientsInOverlay(
+                      (c) => visits.some(v => v.client_id === c.id && v.status === 'realizada'),
+                      'Clientes com Visita Realizada'
+                    );
+                  } else if (data.name === 'Quentes') {
+                    showClientsInOverlay((c) => c.status === 'quente', 'Clientes Quentes');
+                  } else if (data.name === 'Vendas Fechadas') {
+                    const closedSaleClientIds = sales.filter(s => s.status === 'fechada').map(s => s.client_id);
+                    showClientsInOverlay((c) => closedSaleClientIds.includes(c.id), 'Vendas Fechadas');
+                  }
+                }}
               >
                 {funnelData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -314,10 +341,28 @@ export default function SalesFunnel() {
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-2 mt-3">
             {funnelData.map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs">
+              <button
+                key={i}
+                onClick={() => {
+                  if (item.name === 'Leads Totais') {
+                    showClientsInOverlay(() => true, 'Todos os Leads');
+                  } else if (item.name === 'Com Visita') {
+                    showClientsInOverlay(
+                      (c) => visits.some(v => v.client_id === c.id && v.status === 'realizada'),
+                      'Clientes com Visita Realizada'
+                    );
+                  } else if (item.name === 'Quentes') {
+                    showClientsInOverlay((c) => c.status === 'quente', 'Clientes Quentes');
+                  } else if (item.name === 'Vendas Fechadas') {
+                    const closedSaleClientIds = sales.filter(s => s.status === 'fechada').map(s => s.client_id);
+                    showClientsInOverlay((c) => closedSaleClientIds.includes(c.id), 'Vendas Fechadas');
+                  }
+                }}
+                className="flex items-center gap-2 text-xs hover:bg-slate-50 p-1 rounded transition-colors cursor-pointer"
+              >
                 <div className="w-3 h-3 rounded" style={{ backgroundColor: item.fill }} />
                 <span className="text-slate-600">{item.name}: {item.value}</span>
-              </div>
+              </button>
             ))}
           </div>
         </Card>
@@ -339,6 +384,13 @@ export default function SalesFunnel() {
                 outerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
+                onClick={(data) => {
+                  const statusMap = { 'Quente': 'quente', 'Morno': 'morno', 'Frio': 'frio' };
+                  showClientsInOverlay(
+                    (c) => c.status === statusMap[data.name],
+                    `Clientes ${data.name}`
+                  );
+                }}
               >
                 {statusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -361,7 +413,17 @@ export default function SalesFunnel() {
               <XAxis dataKey="status" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+              <Bar 
+                dataKey="revenue" 
+                radius={[8, 8, 0, 0]}
+                onClick={(data) => {
+                  const statusMap = { 'Quente': 'quente', 'Morno': 'morno', 'Frio': 'frio' };
+                  showClientsInOverlay(
+                    (c) => c.status === statusMap[data.status],
+                    `Clientes ${data.status}`
+                  );
+                }}
+              >
                 {revenueByStatus.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -405,6 +467,13 @@ export default function SalesFunnel() {
           </div>
         </Card>
       </div>
+
+      <ChartDetailsOverlay
+        isOpen={overlayOpen}
+        onClose={() => setOverlayOpen(false)}
+        clients={overlayClients}
+        title={overlayTitle}
+      />
     </div>
   );
 }
