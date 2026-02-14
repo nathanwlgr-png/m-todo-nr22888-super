@@ -992,6 +992,21 @@ Retorne até 15 clínicas.`,
         <div className="pt-4 border-t">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">🎯 Gestão de Leads IA</h3>
           <div className="space-y-2">
+            <Link to={createPageUrl('LeadsKanban')}>
+              <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-400">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-purple-900">🎯 Pipeline Visual (Kanban)</p>
+                    <p className="text-xs text-purple-600">Arrastar e soltar + IA</p>
+                  </div>
+                  <Badge className="bg-purple-600 text-white">NOVO</Badge>
+                </div>
+              </Card>
+            </Link>
+
             <Link to={createPageUrl('Leads')}>
               <Card className="p-3 hover:shadow-lg transition-shadow bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-300">
                 <div className="flex items-center gap-3">
