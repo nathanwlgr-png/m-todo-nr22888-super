@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { AILimitProtection } from '@/components/AILimitProtection';
 import AIUsageIndicator from '@/components/AIUsageIndicator';
+import FloatingExportButton from '@/components/FloatingExportButton';
 
 export default function Layout({ children, currentPageName }) {
   // Restaurar posição de scroll ao voltar
@@ -23,6 +24,7 @@ export default function Layout({ children, currentPageName }) {
       <div className="pb-20">
         {children}
       </div>
+      <FloatingExportButton />
       <AIUsageIndicator />
     </AILimitProtection>
   );
