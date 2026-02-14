@@ -678,19 +678,21 @@ Retorne até 15 clínicas.`,
           {/* PESQUISA PARA CLIENTE */}
           <UniversalClientSearch />
 
-          {/* ETAPA 2A: IMPORTAÇÃO EM MASSA */}
-          <Card className="p-4 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl font-bold text-white">2</span>
+          {/* ETAPA 2A: IMPORTAÇÃO POR TABELA - PÁGINA DEDICADA */}
+          <Link to={createPageUrl('ImportClientsTable')}>
+            <Card className="p-4 border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl font-bold text-white">2A</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-slate-900">📊 Cadastrar por Tabela</p>
+                  <p className="text-xs text-slate-600">Cole Excel, WhatsApp, CSV - IA cadastra tudo</p>
+                </div>
+                <Badge className="bg-green-600 text-white">IA</Badge>
               </div>
-              <div className="flex-1">
-                <p className="font-bold text-slate-900">📊 Importação em Massa</p>
-                <p className="text-xs text-slate-600">Excel, Google Sheets, PDF, Word</p>
-              </div>
-            </div>
-            <BulkClientImporter />
-          </Card>
+            </Card>
+          </Link>
 
           {/* ETAPA 2B: CADASTRO MANUAL */}
           <Link to={createPageUrl('NewClient')}>

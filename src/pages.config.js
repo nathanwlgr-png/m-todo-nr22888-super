@@ -103,6 +103,7 @@ import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
 import Leads from './pages/Leads';
 import LeadsDashboard from './pages/LeadsDashboard';
+import LeadsKanban from './pages/LeadsKanban';
 import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
@@ -157,7 +158,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import LeadsKanban from './pages/LeadsKanban';
 import __Layout from './Layout.jsx';
 
 
@@ -218,6 +218,7 @@ export const PAGES = {
     "Leaderboard": Leaderboard,
     "Leads": Leads,
     "LeadsDashboard": LeadsDashboard,
+    "LeadsKanban": LeadsKanban,
     "LoadEquipmentCatalog": LoadEquipmentCatalog,
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
@@ -272,7 +273,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "LeadsKanban": LeadsKanban,
 }
 
 export const pagesConfig = {
