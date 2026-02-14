@@ -40,6 +40,7 @@ import CityLeadCapture from '@/components/CityLeadCapture';
 import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
 import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
+import CompetitorMarketAnalyzer from '@/components/CompetitorMarketAnalyzer';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -395,6 +396,9 @@ export default function Home() {
 
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
+
+        {/* ANÁLISE DE MERCADO COMPETITIVA */}
+        <CompetitorMarketAnalyzer />
 
         {/* SISTEMA DE AUTOMAÇÃO INTELIGENTE */}
         <div className="space-y-3">
