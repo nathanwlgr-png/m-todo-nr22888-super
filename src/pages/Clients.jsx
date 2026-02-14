@@ -35,6 +35,8 @@ import {
 import ClientCard from '@/components/ClientCard';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
+import { useOfflineClients } from '@/components/OfflineClientCache';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import {
   Dialog,
   DialogContent,

@@ -390,6 +390,8 @@ export default function Home() {
         <CompetitorPriceAnalysis />
 
         {/* BUSCA RÁPIDA DE CLIENTES */}
+
+        {/* BUSCA RÁPIDA DE CLIENTES */}
         <Card className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
