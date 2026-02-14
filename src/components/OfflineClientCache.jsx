@@ -45,11 +45,12 @@ export function useOfflineClients() {
     loadCache();
   }, []);
 
-  // Query online
+  // Query online - BUSCAR TODOS OS CLIENTES SEM LIMITE
   const { data: onlineClients = [], isLoading, isError } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      const clients = await base44.entities.Client.list('-updated_date', 200);
+      // Buscar TODOS os clientes (máximo 10.000)
+      const clients = await base44.entities.Client.list('-updated_date', 10000);
       
       // Salvar no cache
       const cacheData = {
@@ -123,7 +124,7 @@ export function useOfflineClient(clientId) {
   const { data: onlineClient, isLoading } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.list();
+      const clients = await base44.entities.Client.list('-updated_date', 10000);
       return clients.find(c => c.id === clientId) || null;
     },
     enabled: !isOffline && !!clientId,
@@ -149,7 +150,8 @@ export function clearOfflineCache() {
  */
 export async function forceUpdateCache() {
   try {
-    const clients = await base44.entities.Client.list('-updated_date', 200);
+    // Buscar TODOS os clientes
+    const clients = await base44.entities.Client.list('-updated_date', 10000);
     const cacheData = {
       clients: clients,
       timestamp: Date.now()
