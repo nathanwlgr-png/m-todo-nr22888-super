@@ -81,6 +81,7 @@ import Dashboard from './pages/Dashboard';
 import DataHub from './pages/DataHub';
 import DocumentCenter from './pages/DocumentCenter';
 import DocumentRepository from './pages/DocumentRepository';
+import DocumentTracking from './pages/DocumentTracking';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
 import EquipmentComparison from './pages/EquipmentComparison';
@@ -158,7 +159,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import DocumentTracking from './pages/DocumentTracking';
 import __Layout from './Layout.jsx';
 
 
@@ -197,6 +197,7 @@ export const PAGES = {
     "DataHub": DataHub,
     "DocumentCenter": DocumentCenter,
     "DocumentRepository": DocumentRepository,
+    "DocumentTracking": DocumentTracking,
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
     "EquipmentComparison": EquipmentComparison,
@@ -274,7 +275,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "DocumentTracking": DocumentTracking,
 }
 
 export const pagesConfig = {

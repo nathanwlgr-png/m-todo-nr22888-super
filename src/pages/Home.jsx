@@ -33,8 +33,12 @@ import {
 import { useOfflineClients } from '@/components/OfflineClientCache';
 import AIControlCenter from '@/components/AIControlCenter';
 import MonthlyScheduleGenerator from '@/components/MonthlyScheduleGenerator';
+import DocumentsCenter from '@/components/DocumentsCenter';
+import OfflineDataPack from '@/components/OfflineDataPack';
+import CompetitorPriceAnalysis from '@/components/CompetitorPriceAnalysis';
 
 export default function Home() {
+  const [docsDialogOpen, setDocsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,6 +97,14 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-white"
+              onClick={() => setDocsDialogOpen(true)}
+            >
+              <FileText className="w-4 h-4" />
+            </Button>
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">
                 <Settings className="w-4 h-4" />
@@ -371,6 +383,12 @@ export default function Home() {
         {/* GERADOR DE AGENDA MENSAL AUTOMÁTICA */}
         <MonthlyScheduleGenerator />
 
+        {/* PACOTE OFFLINE COMPLETO */}
+        <OfflineDataPack />
+
+        {/* ANÁLISE DE CONCORRENTES */}
+        <CompetitorPriceAnalysis />
+
         {/* BUSCA RÁPIDA DE CLIENTES */}
         <Card className="p-4">
           <div className="relative">
@@ -631,6 +649,9 @@ export default function Home() {
           </p>
         </div>
       </div>
+
+      {/* Central de Documentos */}
+      <DocumentsCenter open={docsDialogOpen} onOpenChange={setDocsDialogOpen} />
     </div>
   );
 }
