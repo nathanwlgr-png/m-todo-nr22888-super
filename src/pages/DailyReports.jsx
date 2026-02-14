@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, FileText, Download, Calendar, CheckCircle2, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 
 export default function DailyReports() {
