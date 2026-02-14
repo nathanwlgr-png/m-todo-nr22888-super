@@ -77,7 +77,10 @@ export default function Home() {
   const [customCnpj, setCustomCnpj] = useState('');
   const [customDistributorId, setCustomDistributorId] = useState('');
 
-  const { clients, isOffline, isLoading, isCached, cacheAge } = useOfflineClients();
+  const { clients: allClients = [], isOffline, isLoading, isCached, cacheAge } = useOfflineClients();
+  
+  // Garantir que todos os clientes sejam carregados
+  const clients = allClients;
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
