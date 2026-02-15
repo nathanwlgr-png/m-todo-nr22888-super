@@ -40,6 +40,7 @@ import CityLeadCapture from '@/components/CityLeadCapture';
 import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
 import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
+import BirthdayReminders from '@/components/BirthdayReminders';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
