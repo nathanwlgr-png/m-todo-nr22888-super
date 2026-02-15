@@ -396,6 +396,9 @@ export default function Home() {
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
 
+        {/* ANIVERSÁRIOS E COMEMORAÇÕES */}
+        <BirthdayReminders />
+
         {/* SISTEMA DE AUTOMAÇÃO INTELIGENTE */}
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
