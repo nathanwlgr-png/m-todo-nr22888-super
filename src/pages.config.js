@@ -164,6 +164,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import InteractiveDashboard from './pages/InteractiveDashboard';
 import NotificationSettings from './pages/NotificationSettings';
 import Integrations from './pages/Integrations';
+import TasksUnified from './pages/TasksUnified';
 import __Layout from './Layout.jsx';
 
 
@@ -285,6 +286,7 @@ export const PAGES = {
     "InteractiveDashboard": InteractiveDashboard,
     "NotificationSettings": NotificationSettings,
     "Integrations": Integrations,
+    "TasksUnified": TasksUnified,
 }
 
 export const pagesConfig = {
