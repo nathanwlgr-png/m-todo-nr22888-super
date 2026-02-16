@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import OfflineDataEntryForm from '@/components/OfflineDataEntryForm';
 import OfflineDashboard from '@/components/OfflineDashboard';
 import SeamatyCatalogOffline from '@/components/SeamatyCatalogOffline';
+import OfflineSyncService from '@/components/OfflineSyncService';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, FileText, AlertCircle, Package } from 'lucide-react';

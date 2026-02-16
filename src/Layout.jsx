@@ -5,10 +5,11 @@ import { AILimitProtection } from '@/components/AILimitProtection';
 import AIUsageIndicator from '@/components/AIUsageIndicator';
 import FloatingExportButton from '@/components/FloatingExportButton';
 import FloatingPerformanceButton from '@/components/FloatingPerformanceButton';
+import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
   Home, Users, UserPlus, Route, Settings, Zap, 
   Calendar, CheckSquare, BarChart3, Menu, X,
-  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText
+  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,9 @@ import { base44 } from '@/api/base44Client';
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
+  
+  // Offline sync hook
+  const { pendingCount: offlinePendingCount } = useOfflineSync();
 
   // Fetch notifications count
   const { data: notifications = [] } = useQuery({
@@ -123,8 +127,9 @@ export default function Layout({ children, currentPageName }) {
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
     { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
+    { icon: Database, label: 'Offline Analytics', page: 'OfflineAnalytics', badge: true },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
-  ];
+    ];
 
   return (
     <AILimitProtection>
@@ -169,6 +174,9 @@ export default function Layout({ children, currentPageName }) {
                 )}
                 {item.badge && item.page === 'MessageApproval' && pendingMsgCount > 0 && (
                   <Badge className="bg-orange-500 animate-pulse">{pendingMsgCount}</Badge>
+                )}
+                {item.badge && item.page === 'OfflineAnalytics' && offlinePendingCount > 0 && (
+                  <Badge className="bg-blue-500 animate-pulse">{offlinePendingCount}</Badge>
                 )}
               </Link>
             ))}
