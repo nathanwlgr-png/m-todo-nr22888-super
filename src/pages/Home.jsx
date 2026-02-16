@@ -41,6 +41,7 @@ import AutomaticClientFollowUp from '@/components/AutomaticClientFollowUp';
 import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDashboard';
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
 import BirthdayReminders from '@/components/BirthdayReminders';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -110,6 +111,7 @@ export default function Home() {
             >
               <FileText className="w-4 h-4" />
             </Button>
+            <NotificationCenter />
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">
                 <Settings className="w-4 h-4" />

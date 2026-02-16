@@ -162,6 +162,7 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import InteractiveDashboard from './pages/InteractiveDashboard';
+import NotificationSettings from './pages/NotificationSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -281,6 +282,7 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
     "InteractiveDashboard": InteractiveDashboard,
+    "NotificationSettings": NotificationSettings,
 }
 
 export const pagesConfig = {
