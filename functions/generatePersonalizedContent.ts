@@ -16,6 +16,10 @@ Deno.serve(async (req) => {
       base44.entities.Lead.get(contact_id)
     );
 
+    // Buscar dados dos produtos
+    const allEquipment = await base44.asServiceRole.entities.Equipment.list();
+    const activeEquipment = allEquipment.filter(e => e.is_active !== false);
+
     // Buscar dados contextuais
     const interactions = await base44.entities.Interaction.filter({ client_id: contact_id });
     const sales = await base44.entities.Sale?.filter({ client_id: contact_id }).catch(() => []);
@@ -44,6 +48,17 @@ PERFIL DO DESTINATÁRIO:
 - Numerologia: ${contact.numerology_number}
 - Tom: ${contact.client_tone}
 - Interesse: ${contact.equipment_interest || contact.interest}
+
+PRODUTOS DISPONÍVEIS (USE DADOS REAIS):
+${activeEquipment.map(e => `
+  • ${e.name} - R$ ${e.price?.toLocaleString('pt-BR')}
+    - Tempo: ${e.processing_time || 'N/A'}
+    - Amostra: ${e.sample_volume || 'N/A'}
+    - ROI: ${e.roi_months || 'N/A'} meses
+    - Economia: R$ ${e.monthly_savings || 'N/A'}/mês
+    - Parâmetros: ${e.parameters_measured || 'N/A'}
+    - Benefícios: ${e.key_benefits || 'N/A'}
+`).join('\n')}
 
 CONTEXTO:
 - Sentimento médio: ${avgSentiment.toFixed(2)} (${lastSentiment})

@@ -173,6 +173,7 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import AIContentStudio from './pages/AIContentStudio';
+import ProductManager from './pages/ProductManager';
 import __Layout from './Layout.jsx';
 
 
@@ -303,6 +304,7 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
     "AIContentStudio": AIContentStudio,
+    "ProductManager": ProductManager,
 }
 
 export const pagesConfig = {
