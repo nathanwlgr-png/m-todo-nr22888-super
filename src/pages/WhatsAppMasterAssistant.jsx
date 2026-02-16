@@ -166,7 +166,7 @@ export default function WhatsAppMasterAssistant() {
             <div>
               <h4 className="font-bold text-gray-900 mb-2">📄 Gerar Propostas em PDF</h4>
               <p className="text-gray-700">
-                1. Envie a proposta em Word com placeholders como <code className="bg-gray-200 px-1">{{'{cliente}'}}</code>, <code className="bg-gray-200 px-1">{{'{email}'}}</code>, etc<br/>
+                1. Envie a proposta em Word com placeholders como <code className="bg-gray-200 px-1">{`{cliente}`}</code>, <code className="bg-gray-200 px-1">{`{email}`}</code>, etc<br/>
                 2. Diga: <em>"Proposta do João Silva"</em><br/>
                 3. Ele busca os dados no CRM, personaliza e envia PDF pronto
               </p>
