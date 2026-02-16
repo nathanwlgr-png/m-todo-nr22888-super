@@ -275,13 +275,13 @@ export default function Home() {
             <Link to={createPageUrl('SalesAnalytics')}>
               <Button size="sm" variant="outline" className="w-full text-xs">
                 <BarChart3 className="w-3 h-3 mr-1" />
-                Analytics
+                Análises
               </Button>
             </Link>
             <Link to={createPageUrl('InteractiveDashboard')}>
               <Button size="sm" variant="outline" className="w-full text-xs">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                Dashboard
+                Painel
               </Button>
             </Link>
             <Link to={createPageUrl('MonthlyReport')}>
