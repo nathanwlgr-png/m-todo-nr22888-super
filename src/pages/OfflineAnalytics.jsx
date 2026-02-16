@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
-import { OfflineDataEntryForm } from '@/components/OfflineDataEntryForm';
-import { OfflineDashboard } from '@/components/OfflineDashboard';
+import OfflineDataEntryForm from '@/components/OfflineDataEntryForm';
+import OfflineDashboard from '@/components/OfflineDashboard';
 import { Card } from '@/components/ui/card';
 import { Download, FileText, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
