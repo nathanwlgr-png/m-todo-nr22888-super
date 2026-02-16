@@ -7,7 +7,7 @@ import FloatingExportButton from '@/components/FloatingExportButton';
 import { 
   Home, Users, UserPlus, Route, Settings, Zap, 
   Calendar, CheckSquare, BarChart3, Menu, X,
-  ChevronRight, Bell, MessageSquare
+  ChevronRight, Bell, MessageSquare, TrendingUp, Award
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -102,8 +102,10 @@ export default function Layout({ children, currentPageName }) {
     { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
     { icon: Route, label: 'Rotas', page: 'RouteOptimizer', tourId: 'routes' },
     { icon: Calendar, label: 'Agenda', page: 'ScheduledAgenda' },
-    { icon: BarChart3, label: 'Analytics', page: 'InteractiveDashboard', tourId: 'analytics' },
+    { icon: BarChart3, label: 'Analytics', page: 'CustomDashboard', tourId: 'analytics' },
+    { icon: TrendingUp, label: 'Funil Vendas', page: 'RealtimeSalesFunnel' },
     { icon: MessageSquare, label: 'WhatsApp', page: 'WhatsAppInbox', tourId: 'whatsapp' },
+    { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
   ];

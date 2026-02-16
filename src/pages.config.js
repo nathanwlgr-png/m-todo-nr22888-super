@@ -167,6 +167,8 @@ import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import Onboarding from './pages/Onboarding';
 import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
+import CustomDashboard from './pages/CustomDashboard';
+import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
 import __Layout from './Layout.jsx';
 
 
@@ -291,6 +293,8 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "Onboarding": Onboarding,
     "SalesCoachingDashboard": SalesCoachingDashboard,
+    "CustomDashboard": CustomDashboard,
+    "RealtimeSalesFunnel": RealtimeSalesFunnel,
 }
 
 export const pagesConfig = {
