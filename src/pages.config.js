@@ -180,6 +180,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import ProposalTemplateManager from './pages/ProposalTemplateManager';
+import MessageHistory from './pages/MessageHistory';
 import __Layout from './Layout.jsx';
 
 
@@ -317,6 +318,7 @@ export const PAGES = {
     "WorkflowAutomation": WorkflowAutomation,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "ProposalTemplateManager": ProposalTemplateManager,
+    "MessageHistory": MessageHistory,
 }
 
 export const pagesConfig = {
