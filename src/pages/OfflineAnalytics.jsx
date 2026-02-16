@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import OfflineDataEntryForm from '@/components/OfflineDataEntryForm';
 import OfflineDashboard from '@/components/OfflineDashboard';
+import SeamatyCatalogOffline from '@/components/SeamatyCatalogOffline';
 import { Card } from '@/components/ui/card';
-import { Download, FileText, AlertCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download, FileText, AlertCircle, Package } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function OfflineAnalytics() {
@@ -19,6 +21,15 @@ export default function OfflineAnalytics() {
       toast.error('Erro ao gerar relatório');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const loadCatalog = async () => {
+    try {
+      await base44.functions.invoke('processSeamatyCatalog', {});
+      toast.success('Catálogo Seamaty carregado!');
+    } catch (error) {
+      toast.error('Erro ao carregar catálogo');
     }
   };
 
@@ -41,18 +52,28 @@ export default function OfflineAnalytics() {
           </Button>
         </div>
 
-        {/* Abas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna 1: Formulário de Entrada */}
-          <div className="lg:col-span-1">
-            <OfflineDataEntryForm />
-          </div>
+        {/* Abas Principais */}
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dashboard">Dashboard Offline</TabsTrigger>
+            <TabsTrigger value="entry">Registrar Dados</TabsTrigger>
+            <TabsTrigger value="catalog">Catálogo Seamaty</TabsTrigger>
+          </TabsList>
 
-          {/* Coluna 2-3: Dashboard */}
-          <div className="lg:col-span-2">
+          <TabsContent value="dashboard" className="mt-4">
             <OfflineDashboard />
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="entry" className="mt-4">
+            <div className="max-w-2xl mx-auto">
+              <OfflineDataEntryForm />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="catalog" className="mt-4">
+            <SeamatyCatalogOffline />
+          </TabsContent>
+        </Tabs>
 
         {/* Info Box */}
         <Card className="p-4 bg-blue-50 border-blue-200 flex items-start gap-3">
