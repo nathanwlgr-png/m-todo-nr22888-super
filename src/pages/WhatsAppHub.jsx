@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
+import WhatsAppAIProposalGenerator from '@/components/WhatsAppAIProposalGenerator';
 import {
   MessageSquare, Phone, Send, Calendar, FileText, MessageCircle,
   Settings, Bot, Users, Zap, Copy, CheckCircle2, Clock, Sparkles
@@ -162,6 +163,10 @@ export default function WhatsAppHub() {
               <Sparkles className="w-4 h-4 text-purple-600" />
               <span className="hidden sm:inline">IA Follow-up</span>
             </TabsTrigger>
+            <TabsTrigger value="proposal" className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-purple-600" />
+              <span className="hidden sm:inline">IA Proposta</span>
+            </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <Bot className="w-4 h-4" />
               <span className="hidden sm:inline">Templates</span>
@@ -242,6 +247,14 @@ export default function WhatsAppHub() {
           {/* IA FOLLOW-UP */}
           <TabsContent value="followup" className="space-y-4">
             <AIFollowUpAutomation clientId={selectedClient?.id} />
+          </TabsContent>
+
+          {/* IA PROPOSTA */}
+          <TabsContent value="proposal" className="space-y-4">
+            <WhatsAppAIProposalGenerator 
+              client={selectedClient}
+              conversationHistory={messages.filter(m => m.client_id === selectedClient?.id)}
+            />
           </TabsContent>
 
           {/* ENVIAR MENSAGEM */}
