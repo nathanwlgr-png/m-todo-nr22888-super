@@ -20,35 +20,37 @@ export default function MessageApproval() {
 
   const { data: pendingMessages = [], isLoading } = useQuery({
     queryKey: ['pending-messages'],
-    queryFn: () => base44.entities.PendingMessage.filter({ status: 'pending' }).catch(() => []),
-    refetchInterval: 10000 // Atualiza a cada 10 segundos
+    queryFn: () => base44.entities.AutomatedMessageLog?.filter({ sent_status: 'pendente' }).catch(() => []),
+    refetchInterval: 5000 // Atualiza a cada 5 segundos
   });
 
   const approveMutation = useMutation({
     mutationFn: async ({ id, content }) => {
-      await base44.entities.PendingMessage.update(id, {
-        status: 'approved',
-        approved_by: (await base44.auth.me()).email,
-        approved_at: new Date().toISOString(),
-        edited_content: content
+      await base44.entities.AutomatedMessageLog.update(id, {
+        sent_status: 'enviada',
+        message_content: content,
+        sent_at: new Date().toISOString()
       });
+      
+      // Enviar a mensagem via WhatsApp ou email
+      await base44.functions.invoke('sendApprovedMessages', { message_id: id });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['pending-messages']);
-      toast.success('Mensagem aprovada! Será enviada em breve.');
+      queryClient.invalidateQueries({ queryKey: ['pending-messages'] });
+      toast.success('✅ Mensagem aprovada e enviada!');
       setEditingId(null);
     }
   });
 
   const rejectMutation = useMutation({
     mutationFn: async (id) => {
-      await base44.entities.PendingMessage.update(id, {
-        status: 'rejected'
+      await base44.entities.AutomatedMessageLog.update(id, {
+        sent_status: 'bloqueado'
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['pending-messages']);
-      toast.success('Mensagem rejeitada.');
+      queryClient.invalidateQueries({ queryKey: ['pending-messages'] });
+      toast.success('❌ Mensagem bloqueada.');
     }
   });
 
@@ -99,26 +101,22 @@ export default function MessageApproval() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {msg.channel === 'whatsapp' ? (
+                    {msg.message_type?.includes('whatsapp') ? (
                       <MessageSquare className="w-6 h-6 text-green-600" />
                     ) : (
                       <Mail className="w-6 h-6 text-blue-600" />
                     )}
                     <div>
                       <CardTitle className="text-lg">
-                        {msg.recipient_name}
+                        {msg.client_name}
                       </CardTitle>
                       <p className="text-sm text-slate-600">
-                        {msg.channel === 'whatsapp' ? msg.recipient_phone : msg.recipient_id}
+                        {msg.message_type} • {msg.trigger_reason || 'Sem motivo especificado'}
                       </p>
                     </div>
                   </div>
-                  <Badge className={
-                    msg.priority === 'urgente' ? 'bg-red-500' :
-                    msg.priority === 'alta' ? 'bg-orange-500' :
-                    msg.priority === 'media' ? 'bg-blue-500' : 'bg-slate-500'
-                  }>
-                    {msg.priority}
+                  <Badge className="bg-orange-500">
+                    Pendente
                   </Badge>
                 </div>
               </CardHeader>
