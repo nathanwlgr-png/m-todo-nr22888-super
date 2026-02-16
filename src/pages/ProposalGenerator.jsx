@@ -23,11 +23,21 @@ import { Badge } from '@/components/ui/badge';
 export default function ProposalGenerator() {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedConsumables, setSelectedConsumables] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [generating, setGenerating] = useState(false);
   const [proposal, setProposal] = useState('');
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
   const [newTemplate, setNewTemplate] = useState({ name: '', content_template: '' });
+  const [newBonus, setNewBonus] = useState({
+    campaign_name: '',
+    equipment_sold: '',
+    total_bonus_items: [],
+    first_contact_percentage: 20,
+    per_usage_percentage: 20,
+    release_mode: 'manual'
+  });
   const queryClient = useQueryClient();
 
   const { data: documents = [] } = useQuery({
@@ -38,6 +48,17 @@ export default function ProposalGenerator() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-simple'],
     queryFn: () => base44.entities.Client.list('-updated_date'),
+  });
+
+  const { data: consumables = [] } = useQuery({
+    queryKey: ['consumables'],
+    queryFn: () => base44.entities.Consumable.list(),
+  });
+
+  const { data: bonusCampaigns = [] } = useQuery({
+    queryKey: ['bonus-campaigns', selectedClientId],
+    queryFn: () => selectedClientId ? base44.entities.BonusReleaseRule.filter({ client_id: selectedClientId }) : [],
+    enabled: !!selectedClientId
   });
 
   const { data: templates = [] } = useQuery({
@@ -64,6 +85,40 @@ export default function ProposalGenerator() {
       toast.success('Template criado!');
       setTemplateDialogOpen(false);
       setNewTemplate({ name: '', content_template: '' });
+    }
+  });
+
+  const createBonusCampaignMutation = useMutation({
+    mutationFn: (data) => base44.entities.BonusReleaseRule.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bonus-campaigns']);
+      toast.success('Campanha de bonificação criada!');
+      setBonusDialogOpen(false);
+      setNewBonus({
+        campaign_name: '',
+        equipment_sold: '',
+        total_bonus_items: [],
+        first_contact_percentage: 20,
+        per_usage_percentage: 20,
+        release_mode: 'manual'
+      });
+    }
+  });
+
+  const releaseBonusMutation = useMutation({
+    mutationFn: async ({ campaignId, releaseData }) => {
+      const campaign = bonusCampaigns.find(c => c.id === campaignId);
+      const newReleases = [...(campaign.releases || []), releaseData];
+      const newPercentage = campaign.total_released_percentage + releaseData.percentage_released;
+      
+      return base44.entities.BonusReleaseRule.update(campaignId, {
+        releases: newReleases,
+        total_released_percentage: newPercentage
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bonus-campaigns']);
+      toast.success('Bonificação liberada!');
     }
   });
 
@@ -97,6 +152,14 @@ export default function ProposalGenerator() {
     );
   };
 
+  const toggleConsumable = (consumableId) => {
+    setSelectedConsumables(prev => 
+      prev.includes(consumableId) 
+        ? prev.filter(c => c !== consumableId)
+        : [...prev, consumableId]
+    );
+  };
+
   const generateProposal = async () => {
     if (!selectedClientId || selectedProducts.length === 0) {
       toast.error('Selecione cliente e pelo menos um produto');
@@ -107,6 +170,7 @@ export default function ProposalGenerator() {
     try {
       const selectedProds = selectedProducts.map(prodName => products.find(p => p.nome === prodName));
       const selectedPrices = selectedProducts.map(prodName => prices.find(p => p.produto?.includes(prodName)));
+      const selectedConsums = selectedConsumables.map(id => consumables.find(c => c.id === id));
 
       // Dados do cliente para personalização
       const clientHistory = interactions.slice(0, 5).map(i => `- ${i.type}: ${i.notes}`).join('\n');
@@ -170,6 +234,21 @@ ${price ? `INVESTIMENTO:
   • Garantia: ${price.garantia}
 ` : ''}`;
       });
+
+      if (selectedConsums.length > 0) {
+        prompt += `\n\n═══════════════════════════════════════
+INSUMOS/CONSUMÍVEIS INCLUSOS NA PROPOSTA
+═══════════════════════════════════════
+`;
+        selectedConsums.forEach((cons, idx) => {
+          prompt += `\n${idx + 1}. ${cons.name}
+  • Tipo: ${cons.type || 'N/A'}
+  • Compatível com: ${cons.compatible_equipment?.join(', ') || 'N/A'}
+  • Preço: R$ ${cons.price?.toLocaleString('pt-BR') || 'Sob consulta'}
+  • Estoque: ${cons.stock_quantity || 'Disponível'}
+`;
+        });
+      }
 
       if (template) {
         prompt += `\n\n═══════════════════════════════════════
@@ -244,6 +323,61 @@ Use as variáveis:
     createTemplateMutation.mutate(newTemplate);
   };
 
+  const createBonusCampaign = () => {
+    if (!selectedClientId || !newBonus.campaign_name || newBonus.total_bonus_items.length === 0) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+    
+    createBonusCampaignMutation.mutate({
+      ...newBonus,
+      client_id: selectedClientId,
+      client_name: selectedClient?.first_name
+    });
+  };
+
+  const addBonusItem = () => {
+    setNewBonus({
+      ...newBonus,
+      total_bonus_items: [...newBonus.total_bonus_items, { item_name: '', quantity: 0, unit: 'caixa' }]
+    });
+  };
+
+  const updateBonusItem = (index, field, value) => {
+    const items = [...newBonus.total_bonus_items];
+    items[index][field] = value;
+    setNewBonus({ ...newBonus, total_bonus_items: items });
+  };
+
+  const removeBonusItem = (index) => {
+    setNewBonus({
+      ...newBonus,
+      total_bonus_items: newBonus.total_bonus_items.filter((_, i) => i !== index)
+    });
+  };
+
+  const releaseNextBonus = (campaign) => {
+    const releaseNumber = (campaign.releases?.length || 0) + 1;
+    const percentage = releaseNumber === 1 ? campaign.first_contact_percentage : campaign.per_usage_percentage;
+    
+    const itemsToRelease = campaign.total_bonus_items.map(item => ({
+      ...item,
+      quantity: Math.ceil((item.quantity * percentage) / 100)
+    }));
+
+    releaseBonusMutation.mutate({
+      campaignId: campaign.id,
+      releaseData: {
+        release_number: releaseNumber,
+        release_date: new Date().toISOString(),
+        items_released: itemsToRelease,
+        percentage_released: percentage,
+        status: 'released',
+        notes: releaseNumber === 1 ? 'Liberação inicial (primeiro contato)' : `Liberação ${releaseNumber} - Reposição`
+      }
+    });
+  };
+
   return (
     <div className="space-y-4 pb-20">
       <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
@@ -259,8 +393,9 @@ Use as variáveis:
       </Card>
 
       <Tabs defaultValue="proposta" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="proposta">Gerar Proposta</TabsTrigger>
+          <TabsTrigger value="bonus">Bonificações</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="regiao">Região Laranja</TabsTrigger>
         </TabsList>
@@ -334,7 +469,38 @@ Use as variáveis:
 
           <Card>
             <CardHeader>
-              <CardTitle>3. Template (Opcional)</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                <span>3. Insumos/Consumíveis</span>
+                <Badge variant="outline">{selectedConsumables.length} selecionados</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {consumables.length === 0 ? (
+                <p className="text-sm text-slate-600 text-center py-2">
+                  Nenhum insumo cadastrado
+                </p>
+              ) : (
+                consumables.map((c) => (
+                  <div key={c.id} className="flex items-center space-x-2 p-2 border rounded hover:bg-slate-50">
+                    <Checkbox 
+                      checked={selectedConsumables.includes(c.id)}
+                      onCheckedChange={() => toggleConsumable(c.id)}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{c.name}</p>
+                      <p className="text-xs text-slate-600">
+                        {c.type} | R$ {c.price?.toLocaleString('pt-BR') || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>4. Template (Opcional)</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
@@ -398,6 +564,250 @@ Use as variáveis:
         </Card>
       )}
 
+        </TabsContent>
+
+        <TabsContent value="bonus" className="space-y-4">
+          <Card className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            <CardContent className="pt-6">
+              <h3 className="text-xl font-bold mb-2">🎁 Campanhas de Bonificação Progressiva</h3>
+              <p className="text-sm text-green-100">
+                Nunca libere 100% da bonificação de uma vez! Divida em partes e libere gradualmente.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Dialog open={bonusDialogOpen} onOpenChange={setBonusDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Campanha de Bonificação
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Criar Campanha de Bonificação</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Nome da Campanha</Label>
+                  <Input 
+                    value={newBonus.campaign_name}
+                    onChange={(e) => setNewBonus({...newBonus, campaign_name: e.target.value})}
+                    placeholder="Ex: Bonificação VG2 - Cliente XYZ"
+                  />
+                </div>
+
+                <div>
+                  <Label>Equipamento Vendido</Label>
+                  <Input 
+                    value={newBonus.equipment_sold}
+                    onChange={(e) => setNewBonus({...newBonus, equipment_sold: e.target.value})}
+                    placeholder="Ex: VG2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Cliente</Label>
+                  <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map(c => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.first_name} - {c.clinic_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold">Itens da Bonificação TOTAL</h4>
+                      <Button size="sm" onClick={addBonusItem} variant="outline">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Adicionar Item
+                      </Button>
+                    </div>
+                    {newBonus.total_bonus_items.map((item, idx) => (
+                      <div key={idx} className="flex gap-2 mb-2">
+                        <Input 
+                          placeholder="Nome do item"
+                          value={item.item_name}
+                          onChange={(e) => updateBonusItem(idx, 'item_name', e.target.value)}
+                          className="flex-1"
+                        />
+                        <Input 
+                          type="number"
+                          placeholder="Qtd"
+                          value={item.quantity}
+                          onChange={(e) => updateBonusItem(idx, 'quantity', parseInt(e.target.value))}
+                          className="w-20"
+                        />
+                        <Select 
+                          value={item.unit}
+                          onValueChange={(value) => updateBonusItem(idx, 'unit', value)}
+                        >
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="caixa">Caixa</SelectItem>
+                            <SelectItem value="unidade">Unidade</SelectItem>
+                            <SelectItem value="litro">Litro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" variant="ghost" onClick={() => removeBonusItem(idx)}>
+                          <X className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-yellow-50 border-yellow-300">
+                  <CardContent className="pt-4">
+                    <h4 className="font-semibold mb-3">⚙️ Regras de Liberação</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>% Liberado no Primeiro Contato</Label>
+                        <Input 
+                          type="number"
+                          value={newBonus.first_contact_percentage}
+                          onChange={(e) => setNewBonus({...newBonus, first_contact_percentage: parseInt(e.target.value)})}
+                          placeholder="20"
+                        />
+                        <p className="text-xs text-slate-600 mt-1">
+                          Exemplo: 20% de 5 caixas = 1 caixa liberada inicialmente
+                        </p>
+                      </div>
+                      <div>
+                        <Label>% Liberado por Uso/Reposição</Label>
+                        <Input 
+                          type="number"
+                          value={newBonus.per_usage_percentage}
+                          onChange={(e) => setNewBonus({...newBonus, per_usage_percentage: parseInt(e.target.value)})}
+                          placeholder="20"
+                        />
+                        <p className="text-xs text-slate-600 mt-1">
+                          A cada reposição, libera mais 20%
+                        </p>
+                      </div>
+                      <div>
+                        <Label>Modo de Liberação</Label>
+                        <Select 
+                          value={newBonus.release_mode}
+                          onValueChange={(value) => setNewBonus({...newBonus, release_mode: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manual">Manual (você aprova cada liberação)</SelectItem>
+                            <SelectItem value="automatic">Automático (libera ao detectar uso)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Button onClick={createBonusCampaign} className="w-full bg-green-600 hover:bg-green-700">
+                  Criar Campanha
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold">Campanhas Ativas</h3>
+            {bonusCampaigns.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6 text-center text-slate-600">
+                  Nenhuma campanha criada ainda
+                </CardContent>
+              </Card>
+            ) : (
+              bonusCampaigns.filter(c => c.is_active).map(campaign => (
+                <Card key={campaign.id} className="border-l-4 border-l-green-500">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-lg">{campaign.campaign_name}</h4>
+                        <p className="text-sm text-slate-600">{campaign.client_name} | {campaign.equipment_sold}</p>
+                      </div>
+                      <Badge className={campaign.release_mode === 'automatic' ? 'bg-purple-600' : 'bg-blue-600'}>
+                        {campaign.release_mode === 'automatic' ? '⚡ Automático' : '👤 Manual'}
+                      </Badge>
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span>Progresso da Liberação</span>
+                        <span className="font-bold">{campaign.total_released_percentage || 0}%</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-3">
+                        <div 
+                          className="bg-green-600 h-3 rounded-full transition-all"
+                          style={{ width: `${campaign.total_released_percentage || 0}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <Card className="bg-slate-50">
+                      <CardContent className="pt-3">
+                        <h5 className="text-sm font-semibold mb-2">🎁 Total da Bonificação:</h5>
+                        {campaign.total_bonus_items?.map((item, idx) => (
+                          <p key={idx} className="text-sm">
+                            • {item.quantity} {item.unit}(s) de {item.item_name}
+                          </p>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <div className="mt-3">
+                      <h5 className="text-sm font-semibold mb-2">📋 Histórico de Liberações:</h5>
+                      {(!campaign.releases || campaign.releases.length === 0) ? (
+                        <p className="text-sm text-slate-600">Nenhuma liberação ainda</p>
+                      ) : (
+                        campaign.releases.map((release, idx) => (
+                          <div key={idx} className="text-sm bg-white p-2 rounded border mb-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">Liberação #{release.release_number}</span>
+                              <Badge variant={release.status === 'delivered' ? 'default' : 'outline'}>
+                                {release.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-slate-600">
+                              {new Date(release.release_date).toLocaleDateString()} | {release.percentage_released}%
+                            </p>
+                            <p className="text-xs">{release.notes}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {campaign.total_released_percentage < 100 && (
+                      <Button 
+                        className="w-full mt-3 bg-green-600 hover:bg-green-700"
+                        onClick={() => releaseNextBonus(campaign)}
+                        disabled={releaseBonusMutation.isPending}
+                      >
+                        {releaseBonusMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4 mr-2" />
+                        )}
+                        Liberar Próxima Parte ({campaign.releases?.length === 0 ? campaign.first_contact_percentage : campaign.per_usage_percentage}%)
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
