@@ -130,6 +130,7 @@ import NewClient from './pages/NewClient';
 import NotificationSettings from './pages/NotificationSettings';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
+import OfflineAnalytics from './pages/OfflineAnalytics';
 import OfflineMode from './pages/OfflineMode';
 import Onboarding from './pages/Onboarding';
 import PartyStoresProspecting from './pages/PartyStoresProspecting';
@@ -177,7 +178,6 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import OfflineAnalytics from './pages/OfflineAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -265,6 +265,7 @@ export const PAGES = {
     "NotificationSettings": NotificationSettings,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
+    "OfflineAnalytics": OfflineAnalytics,
     "OfflineMode": OfflineMode,
     "Onboarding": Onboarding,
     "PartyStoresProspecting": PartyStoresProspecting,
@@ -312,7 +313,6 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
     "WorkflowAutomation": WorkflowAutomation,
-    "OfflineAnalytics": OfflineAnalytics,
 }
 
 export const pagesConfig = {
