@@ -59,6 +59,7 @@ import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
+import AutomationSettings from './pages/AutomationSettings';
 import CRMAnalyticsDashboard from './pages/CRMAnalyticsDashboard';
 import Calendar from './pages/Calendar';
 import CampaignCenter from './pages/CampaignCenter';
@@ -89,6 +90,7 @@ import DocumentRepository from './pages/DocumentRepository';
 import DocumentTracking from './pages/DocumentTracking';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
+import EquipmentCatalogManager from './pages/EquipmentCatalogManager';
 import EquipmentComparison from './pages/EquipmentComparison';
 import EquipmentConsumables from './pages/EquipmentConsumables';
 import EquipmentPriceList from './pages/EquipmentPriceList';
@@ -178,12 +180,11 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
+import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import WhatsAppHub from './pages/WhatsAppHub';
-import AutomationSettings from './pages/AutomationSettings';
-import EquipmentCatalogManager from './pages/EquipmentCatalogManager';
+import VQ1PanelPricing from './pages/VQ1PanelPricing';
 import __Layout from './Layout.jsx';
 
 
@@ -200,6 +201,7 @@ export const PAGES = {
     "AutoFollowUpDashboard": AutoFollowUpDashboard,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
+    "AutomationSettings": AutomationSettings,
     "CRMAnalyticsDashboard": CRMAnalyticsDashboard,
     "Calendar": Calendar,
     "CampaignCenter": CampaignCenter,
@@ -230,6 +232,7 @@ export const PAGES = {
     "DocumentTracking": DocumentTracking,
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
+    "EquipmentCatalogManager": EquipmentCatalogManager,
     "EquipmentComparison": EquipmentComparison,
     "EquipmentConsumables": EquipmentConsumables,
     "EquipmentPriceList": EquipmentPriceList,
@@ -319,12 +322,11 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
+    "WhatsAppHub": WhatsAppHub,
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "WhatsAppHub": WhatsAppHub,
-    "AutomationSettings": AutomationSettings,
-    "EquipmentCatalogManager": EquipmentCatalogManager,
+    "VQ1PanelPricing": VQ1PanelPricing,
 }
 
 export const pagesConfig = {
