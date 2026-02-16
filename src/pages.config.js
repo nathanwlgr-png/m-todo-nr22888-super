@@ -163,6 +163,7 @@ import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import InteractiveDashboard from './pages/InteractiveDashboard';
 import NotificationSettings from './pages/NotificationSettings';
+import Integrations from './pages/Integrations';
 import __Layout from './Layout.jsx';
 
 
@@ -283,6 +284,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "InteractiveDashboard": InteractiveDashboard,
     "NotificationSettings": NotificationSettings,
+    "Integrations": Integrations,
 }
 
 export const pagesConfig = {
