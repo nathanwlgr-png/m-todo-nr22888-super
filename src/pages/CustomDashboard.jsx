@@ -143,6 +143,7 @@ export default function CustomDashboard() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
+    if (!over || !active) return;
     if (active.id !== over.id) {
       setWidgets((items) => {
         const oldIndex = items.indexOf(active.id);
