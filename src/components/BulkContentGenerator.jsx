@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Zap, Mail, Download, Loader2 } from 'lucide-react';
+import { Zap, Mail, Download, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Select,
