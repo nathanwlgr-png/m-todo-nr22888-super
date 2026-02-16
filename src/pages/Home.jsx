@@ -43,6 +43,7 @@ import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
 import BirthdayReminders from '@/components/BirthdayReminders';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import AIPriorityLeads from '@/components/AIPriorityLeads';
+import ProactiveAIDashboard from '@/components/ProactiveAIDashboard';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -404,6 +405,9 @@ export default function Home() {
 
         {/* ANIVERSÁRIOS E COMEMORAÇÕES */}
         <BirthdayReminders />
+
+        {/* DASHBOARD PROATIVO DE IA */}
+        <ProactiveAIDashboard />
 
         {/* SISTEMA DE AUTOMAÇÃO INTELIGENTE */}
         <div className="space-y-3">
