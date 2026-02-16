@@ -7,7 +7,7 @@ import FloatingExportButton from '@/components/FloatingExportButton';
 import { 
   Home, Users, UserPlus, Route, Settings, Zap, 
   Calendar, CheckSquare, BarChart3, Menu, X,
-  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package
+  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -118,6 +118,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
+    { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
   ];
 
