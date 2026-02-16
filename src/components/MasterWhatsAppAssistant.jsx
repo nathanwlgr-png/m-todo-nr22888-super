@@ -149,7 +149,7 @@ export default function MasterWhatsAppAssistant({ client }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-green-900">
             <Sparkles className="w-5 h-5" />
-            Maestro de Mensagens
+            Maestro de Mensagens - Nathan CMAT Brasil
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
