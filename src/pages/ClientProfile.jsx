@@ -147,6 +147,7 @@ import MarketContextualIntelligence from '@/components/MarketContextualIntellige
 import MarketTrendsAlerts from '@/components/MarketTrendsAlerts';
 import EditableClientFields from '@/components/EditableClientFields';
 import AIContentGenerator from '@/components/AIContentGenerator';
+import AIContentPersonalizer from '@/components/AIContentPersonalizer';
 import PredictiveAnalyticsDashboard from '@/components/PredictiveAnalyticsDashboard';
 import AIAutomationEngine from '@/components/AIAutomationEngine';
 import SmartInteractionProcessor from '@/components/SmartInteractionProcessor';
