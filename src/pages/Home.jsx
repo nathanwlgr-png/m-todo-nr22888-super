@@ -42,6 +42,7 @@ import PerformanceAnalyticsDashboard from '@/components/PerformanceAnalyticsDash
 import AdvancedLeadQualification from '@/components/AdvancedLeadQualification';
 import BirthdayReminders from '@/components/BirthdayReminders';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import AIPriorityLeads from '@/components/AIPriorityLeads';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -410,6 +411,7 @@ export default function Home() {
             <Zap className="w-5 h-5 text-indigo-600" />
             🤖 Automação Inteligente
           </h3>
+          <AIPriorityLeads />
           <AutomaticClientFollowUp />
           <PerformanceAnalyticsDashboard />
           <AdvancedLeadQualification />
