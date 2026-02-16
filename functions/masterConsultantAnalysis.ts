@@ -160,7 +160,7 @@ Responda em JSON estruturado.`,
         recommendation: aiAnalysis
       },
       interaction_history_count: interactions?.length || 0,
-      presentation: `N - Consultor Técnico da Ciamat Brasil`,
+      presentation: `Nathan - Consultor Técnico da CMAT Brasil`,
       next_steps: {
         methodology: profile?.methodology,
         best_time: profile?.best_time,

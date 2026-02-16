@@ -82,7 +82,7 @@ ${humanApproach}
 CRIE uma mensagem WhatsApp que:
 1. Use elementos de AMBAS as abordagens
 2. Mantenha tom natural e autêntico
-3. Se apresente como: "N - Consultor Técnico da Ciamat Brasil"
+3. Se apresente como: "Nathan - Consultor Técnico da CMAT Brasil"
 4. Seja concisa (máx 4 linhas)
 5. Termine com CTA claro (pergunta ou proposta)
 
