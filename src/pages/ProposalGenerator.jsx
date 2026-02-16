@@ -265,8 +265,7 @@ Use as variáveis:
           <TabsTrigger value="regiao">Região Laranja</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="proposta" className="space-y-4"
-
+        <TabsContent value="proposta" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>1. Selecione o Cliente</CardTitle>
