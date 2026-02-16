@@ -114,6 +114,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
     { icon: Bell, label: 'Aprovar Msgs', page: 'MessageApproval', badge: true },
     { icon: MessageSquare, label: 'Histórico Msgs', page: 'MessageHistory' },
+    { icon: MessageSquare, label: 'WhatsApp Hub', page: 'WhatsAppHub' },
     { icon: Target, label: 'Segmentos', page: 'ClientSegmentation' },
     { icon: TrendingUp, label: 'Sentimento', page: 'SentimentDashboard' },
     { icon: Sparkles, label: 'Conteúdo IA', page: 'AIContentStudio' },
