@@ -49,7 +49,9 @@
  */
 import AIAssistant from './pages/AIAssistant';
 import AIContentGenerator from './pages/AIContentGenerator';
+import AIContentStudio from './pages/AIContentStudio';
 import AIFollowUpSequences from './pages/AIFollowUpSequences';
+import AIKnowledgeUploader from './pages/AIKnowledgeUploader';
 import AdvancedAIReports from './pages/AdvancedAIReports';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
@@ -136,6 +138,7 @@ import PossibleSales from './pages/PossibleSales';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
+import ProductManager from './pages/ProductManager';
 import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
@@ -172,9 +175,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import AIContentStudio from './pages/AIContentStudio';
-import ProductManager from './pages/ProductManager';
-import AIKnowledgeUploader from './pages/AIKnowledgeUploader';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import __Layout from './Layout.jsx';
 
@@ -182,7 +182,9 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AIAssistant": AIAssistant,
     "AIContentGenerator": AIContentGenerator,
+    "AIContentStudio": AIContentStudio,
     "AIFollowUpSequences": AIFollowUpSequences,
+    "AIKnowledgeUploader": AIKnowledgeUploader,
     "AdvancedAIReports": AdvancedAIReports,
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
@@ -269,6 +271,7 @@ export const PAGES = {
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
     "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
+    "ProductManager": ProductManager,
     "ProposalGenerator": ProposalGenerator,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
@@ -305,9 +308,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "AIContentStudio": AIContentStudio,
-    "ProductManager": ProductManager,
-    "AIKnowledgeUploader": AIKnowledgeUploader,
     "WorkflowAutomation": WorkflowAutomation,
 }
 

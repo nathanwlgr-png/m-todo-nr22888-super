@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import LeadsPriorityList from '@/components/LeadsPriorityList';
 import {
   Select,
   SelectContent,
@@ -124,6 +125,8 @@ export default function Leads() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
       {/* Header */}
       <div className="bg-gradient-to-br from-purple-600 to-indigo-600 px-4 pt-4 pb-16 rounded-b-[2rem]">
         <div className="flex items-center gap-4 mb-6">
@@ -333,6 +336,13 @@ export default function Leads() {
             })}
           </div>
         )}
+      </div>
+        </div>
+        <div className="hidden lg:block">
+          <div className="sticky top-6">
+            <LeadsPriorityList />
+          </div>
+        </div>
       </div>
     </div>
   );
