@@ -51,6 +51,54 @@ export default function ProactiveAIDashboard() {
     }
   });
 
+  // Clientes em risco de churn
+  const { data: churnRiskClients = [] } = useQuery({
+    queryKey: ['churn-risk-clients'],
+    queryFn: async () => {
+      const clients = await base44.entities.Client.list();
+      return clients
+        .filter(c => c.ai_sales_intelligence?.churn_risk >= 60)
+        .sort((a, b) => (b.ai_sales_intelligence?.churn_risk || 0) - (a.ai_sales_intelligence?.churn_risk || 0))
+        .slice(0, 5);
+    }
+  });
+
+  // Top oportunidades de upsell/cross-sell
+  const { data: topOpportunities = [] } = useQuery({
+    queryKey: ['top-opportunities'],
+    queryFn: async () => {
+      const clients = await base44.entities.Client.list();
+      const opportunities = [];
+      
+      clients.forEach(client => {
+        if (client.ai_sales_intelligence?.upsell_opportunities) {
+          client.ai_sales_intelligence.upsell_opportunities.forEach(opp => {
+            opportunities.push({
+              type: 'upsell',
+              client_name: client.first_name,
+              client_id: client.id,
+              ...opp
+            });
+          });
+        }
+        if (client.ai_sales_intelligence?.cross_sell_opportunities) {
+          client.ai_sales_intelligence.cross_sell_opportunities.forEach(opp => {
+            opportunities.push({
+              type: 'cross-sell',
+              client_name: client.first_name,
+              client_id: client.id,
+              ...opp
+            });
+          });
+        }
+      });
+
+      return opportunities
+        .sort((a, b) => b.probability - a.probability)
+        .slice(0, 5);
+    }
+  });
+
   const priorityColors = {
     critical: 'bg-red-500',
     high: 'bg-orange-500',
@@ -225,6 +273,81 @@ export default function ProactiveAIDashboard() {
                     </Button>
                   </Link>
                 </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Clientes em Risco de Churn */}
+      {churnRiskClients.length > 0 && (
+        <Card className="border-red-200">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              🚨 Clientes em Risco de Churn
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {churnRiskClients.map(client => (
+                <Link key={client.id} to={createPageUrl('ClientProfile') + '?id=' + client.id}>
+                  <div className="p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-semibold text-red-900">{client.first_name}</p>
+                        <p className="text-sm text-red-700">{client.clinic_name}</p>
+                        {client.ai_sales_intelligence?.best_approach && (
+                          <p className="text-xs text-red-600 mt-2">
+                            💡 {client.ai_sales_intelligence.best_approach}
+                          </p>
+                        )}
+                      </div>
+                      <Badge className="bg-red-600 text-white">
+                        {client.ai_sales_intelligence?.churn_risk}% risco
+                      </Badge>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Oportunidades */}
+      {topOpportunities.length > 0 && (
+        <Card className="border-green-200">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              💰 Top Oportunidades de Venda
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topOpportunities.map((opp, i) => (
+                <Link key={i} to={createPageUrl('ClientProfile') + '?id=' + opp.client_id}>
+                  <div className="p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-green-900">{opp.client_name}</p>
+                        <p className="text-sm text-green-700">{opp.product}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge className="bg-green-600 text-white mb-1">
+                          {opp.probability}%
+                        </Badge>
+                        <p className="text-xs font-semibold text-green-700">
+                          R$ {opp.expected_value?.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {opp.type === 'upsell' ? '⬆️ Upsell' : '➕ Cross-sell'}
+                    </Badge>
+                  </div>
+                </Link>
               ))}
             </div>
           </CardContent>
