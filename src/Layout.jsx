@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { AILimitProtection } from '@/components/AILimitProtection';
 import AIUsageIndicator from '@/components/AIUsageIndicator';
 import FloatingExportButton from '@/components/FloatingExportButton';
+import FloatingPerformanceButton from '@/components/FloatingPerformanceButton';
 import { 
   Home, Users, UserPlus, Route, Settings, Zap, 
   Calendar, CheckSquare, BarChart3, Menu, X,
