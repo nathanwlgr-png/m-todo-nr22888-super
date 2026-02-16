@@ -185,6 +185,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import VQ1PanelPricing from './pages/VQ1PanelPricing';
+import OrderManagement from './pages/OrderManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -327,6 +328,7 @@ export const PAGES = {
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
     "VQ1PanelPricing": VQ1PanelPricing,
+    "OrderManagement": OrderManagement,
 }
 
 export const pagesConfig = {
