@@ -2,14 +2,26 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Sparkles, Send, Loader, Download, MessageSquare } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function WhatsAppAIProposalGenerator({ client, conversationHistory = [] }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [proposalContent, setProposalContent] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState('');
+  const [includePayment, setIncludePayment] = useState(false);
+  const [includeCalibration, setIncludeCalibration] = useState(false);
+
+  // Buscar equipamentos disponíveis
+  const { data: equipments = [] } = useQuery({
+    queryKey: ['seamaty-equipment'],
+    queryFn: () => base44.entities.SeamatyPriceTable.list().catch(() => []),
+    enabled: !!client
+  });
 
   if (!client) {
     return (
@@ -21,59 +33,28 @@ export default function WhatsAppAIProposalGenerator({ client, conversationHistor
   }
 
   const generateProposal = async () => {
+    if (!selectedEquipment) {
+      toast.error('Selecione um equipamento');
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // Estruturar histórico da conversa
-      const conversationContext = conversationHistory
-        .slice(-10) // Últimas 10 mensagens
-        .map(msg => `${msg.role}: ${msg.content}`)
-        .join('\n');
-
-      // Dados do cliente
-      const clientContext = `
-CLIENTE:
-- Nome: ${client.first_name} ${client.last_name || ''}
-- Empresa: ${client.clinic_name || 'Não informado'}
-- Telefone: ${client.phone}
-- Cidade: ${client.city}
-- Equipamento de Interesse: ${client.equipment_interest || 'Não especificado'}
-- Orçamento: ${client.available_budget ? `R$ ${client.available_budget}` : 'Não informado'}
-- Necessidades Técnicas: ${client.lab_needs?.join(', ') || 'Não especificadas'}
-- Status: ${client.status || 'Novo'}
-- Dores Identificadas: ${client.main_pains?.slice(0, 3).join(', ') || 'Não identificadas'}
-`;
-
-      // Usar IA para gerar proposta personalizada
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é um especialista em vendas de equipamentos laboratoriais. Crie uma PROPOSTA DE VENDA personalizada e profissional.
-
-${clientContext}
-
-HISTÓRICO DA CONVERSA:
-${conversationContext || 'Nenhuma conversa prévia'}
-
-TAREFA:
-1. Analise as necessidades do cliente baseado em: equipamento de interesse, orçamento, dores e histórico
-2. Gere uma proposta profissional estruturada com:
-   - Saudação personalizada
-   - 2-3 parágrafos descrevendo a solução (equipamento/serviço)
-   - Lista de benefícios específicos para suas necessidades
-   - Proposta comercial (quantidade, valores estimados - use o orçamento disponível)
-   - Call-to-action claro (próximos passos)
-   - Fechamento profissional
-
-3. Mantenha um tom profissional mas amigável
-4. Use dados reais do cliente (nome, empresa, cidade)
-5. Referencia as dores/necessidades mencionadas
-
-Gere a proposta em MARKDOWN para fácil leitura no WhatsApp.`,
-        add_context_from_internet: false
+      const response = await base44.functions.invoke('generateWhatsAppProposal', {
+        client_id: client.id,
+        equipment_code: selectedEquipment,
+        include_payment_terms: includePayment,
+        include_calibration: includeCalibration
       });
 
-      setProposalContent(response);
-      toast.success('✅ Proposta gerada com sucesso!');
+      if (response.data.success) {
+        setProposalContent(response.data.proposal_content);
+        toast.success('✅ Proposta gerada com dados reais!');
+      } else {
+        toast.error('❌ ' + response.data.error);
+      }
     } catch (error) {
-      toast.error('❌ Erro ao gerar proposta: ' + error.message);
+      toast.error('❌ Erro: ' + error.message);
       console.error(error);
     } finally {
       setIsGenerating(false);
@@ -175,17 +156,57 @@ Gere a proposta em MARKDOWN para fácil leitura no WhatsApp.`,
         </p>
       </div>
 
+      {/* Seleção de Equipamento */}
+      {!proposalContent && (
+        <div className="space-y-3 mb-4">
+          <label className="text-sm font-semibold text-slate-900">Equipamento</label>
+          <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione um equipamento..." />
+            </SelectTrigger>
+            <SelectContent>
+              {equipments.map(eq => (
+                <SelectItem key={eq.id} value={eq.product_code}>
+                  {eq.product_name} (R$ {eq.price_cash?.toLocaleString('pt-BR') || 'N/A'})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="space-y-2 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={includePayment} 
+                onChange={(e) => setIncludePayment(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <span>Incluir formas de pagamento</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={includeCalibration} 
+                onChange={(e) => setIncludeCalibration(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <span>Incluir calibração (R$ 500)</span>
+            </label>
+          </div>
+        </div>
+      )}
+
       {/* Botão Gerar */}
       {!proposalContent && (
         <Button
           onClick={generateProposal}
-          disabled={isGenerating}
+          disabled={isGenerating || !selectedEquipment}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 mb-4"
         >
           {isGenerating ? (
             <>
               <Loader className="w-4 h-4 mr-2 animate-spin" />
-              Analisando dados...
+              Gerando...
             </>
           ) : (
             <>
