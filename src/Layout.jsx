@@ -174,14 +174,7 @@ export default function Layout({ children, currentPageName }) {
             ))}
           </nav>
 
-          <div className="absolute bottom-4 left-4 right-4 p-3 bg-slate-100 rounded-lg text-xs">
-            <p className="font-semibold mb-1">Atalhos de Teclado:</p>
-            <p>⌘K - Buscar</p>
-            <p>⌘H - Home</p>
-            <p>⌘N - Novo Cliente</p>
-            <p>⌘T - Tarefas</p>
-            <p>⌘B - Toggle Menu</p>
-          </div>
+
         </aside>
 
         {/* Main Content */}

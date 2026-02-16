@@ -147,6 +147,7 @@ import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
+import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
 import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
@@ -176,7 +177,6 @@ import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import ReportsAutomation from './pages/ReportsAutomation';
 import __Layout from './Layout.jsx';
 
 
@@ -281,6 +281,7 @@ export const PAGES = {
     "RegionalSearch": RegionalSearch,
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
+    "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
     "RolePlayTraining": RolePlayTraining,
     "RouteOptimizer": RouteOptimizer,
@@ -310,7 +311,6 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
     "WorkflowAutomation": WorkflowAutomation,
-    "ReportsAutomation": ReportsAutomation,
 }
 
 export const pagesConfig = {
