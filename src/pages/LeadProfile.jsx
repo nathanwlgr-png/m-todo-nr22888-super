@@ -286,6 +286,8 @@ export default function LeadProfile() {
             <p className="text-slate-700">{lead.notes}</p>
           </Card>
         )}
+
+        <AIContentPersonalizer contact={lead} />
       </div>
 
       {/* Assign Dialog */}
