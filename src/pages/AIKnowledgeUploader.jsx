@@ -72,6 +72,11 @@ export default function AIKnowledgeUploader() {
     manual_tecnico: 'Manual Técnico',
     case_sucesso: 'Case de Sucesso',
     lista_clientes: 'Lista de Clientes',
+    planilha_excel: 'Planilha Excel',
+    apresentacao_ppt: 'Apresentação PPT',
+    documento_word: 'Documento Word',
+    pdf_generico: 'PDF Genérico',
+    imagem: 'Imagem',
     outro: 'Outro'
   };
 
@@ -84,7 +89,7 @@ export default function AIKnowledgeUploader() {
             Base de Conhecimento IA
           </CardTitle>
           <p className="text-purple-100">
-            Envie catálogos, propostas e contratos para a IA usar nas respostas
+            Envie PDF, Word, Excel, PowerPoint - TODOS os formatos suportados!
           </p>
         </CardHeader>
       </Card>
@@ -118,13 +123,16 @@ export default function AIKnowledgeUploader() {
           </div>
 
           <div>
-            <Label>Arquivo (PDF, Excel, Word, Imagem)</Label>
+            <Label>Arquivo (TODOS os formatos aceitos)</Label>
             <Input
               type="file"
               onChange={handleUpload}
               disabled={uploading}
-              accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png"
+              accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.pptx,.ppt,.txt,.jpg,.jpeg,.png"
             />
+            <p className="text-xs text-slate-500 mt-1">
+              ✅ PDF, Word, Excel, PowerPoint, CSV, TXT, Imagens
+            </p>
           </div>
 
           {uploading && (
