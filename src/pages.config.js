@@ -118,6 +118,7 @@ import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
 import MessageApproval from './pages/MessageApproval';
+import MessageHistory from './pages/MessageHistory';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import MobVendedorBackup from './pages/MobVendedorBackup';
 import MobVendedorDashboard from './pages/MobVendedorDashboard';
@@ -141,6 +142,7 @@ import PreVisitChecklist from './pages/PreVisitChecklist';
 import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import ProductManager from './pages/ProductManager';
 import ProposalGenerator from './pages/ProposalGenerator';
+import ProposalTemplateManager from './pages/ProposalTemplateManager';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
@@ -177,10 +179,8 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import WorkflowAutomation from './pages/WorkflowAutomation';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
-import ProposalTemplateManager from './pages/ProposalTemplateManager';
-import MessageHistory from './pages/MessageHistory';
+import WorkflowAutomation from './pages/WorkflowAutomation';
 import __Layout from './Layout.jsx';
 
 
@@ -256,6 +256,7 @@ export const PAGES = {
     "MarketIntelligence": MarketIntelligence,
     "MarketResearch": MarketResearch,
     "MessageApproval": MessageApproval,
+    "MessageHistory": MessageHistory,
     "MobVendedorAnalytics": MobVendedorAnalytics,
     "MobVendedorBackup": MobVendedorBackup,
     "MobVendedorDashboard": MobVendedorDashboard,
@@ -279,6 +280,7 @@ export const PAGES = {
     "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
     "ProductManager": ProductManager,
     "ProposalGenerator": ProposalGenerator,
+    "ProposalTemplateManager": ProposalTemplateManager,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
@@ -315,10 +317,8 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "WorkflowAutomation": WorkflowAutomation,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
-    "ProposalTemplateManager": ProposalTemplateManager,
-    "MessageHistory": MessageHistory,
+    "WorkflowAutomation": WorkflowAutomation,
 }
 
 export const pagesConfig = {

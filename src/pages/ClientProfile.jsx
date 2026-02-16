@@ -99,6 +99,7 @@ import WhatsAppPackageSender from '@/components/WhatsAppPackageSender';
 import InstagramProfileFinder from '@/components/InstagramProfileFinder';
 import MultiProposalGeneratorAI from '@/components/MultiProposalGeneratorAI';
 import WhatsAppProposalPackage from '@/components/WhatsAppProposalPackage';
+import WhatsAppConversationView from '@/components/WhatsAppConversationView';
 import AdvancedClientAnalytics from '@/components/AdvancedClientAnalytics';
 import NextStepAI from '@/components/NextStepAI';
 import AutoFollowUpGenerator from '@/components/AutoFollowUpGenerator';
@@ -1584,15 +1585,13 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           </div>
         )}
 
-        {/* WhatsApp Card */}
+        {/* WhatsApp Conversation View */}
         {client.phone && (
-          <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-md">
-            <QuickWhatsAppSend
-              contactId={client.id}
-              contactName={client.first_name}
-              contactPhone={client.phone}
-            />
-          </Card>
+          <WhatsAppConversationView 
+            clientId={client.id}
+            clientName={client.first_name}
+            clientPhone={client.phone}
+          />
         )}
 
         {/* Score Dinâmico */}
