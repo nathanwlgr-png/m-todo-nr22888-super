@@ -236,6 +236,7 @@ export default function Layout({ children, currentPageName }) {
       
       <FloatingExportButton />
       <AIUsageIndicator />
+      <FloatingPerformanceButton />
     </AILimitProtection>
   );
 }
