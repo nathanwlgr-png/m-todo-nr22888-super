@@ -96,15 +96,15 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H' },
-    { icon: Users, label: 'Clientes', page: 'Clients' },
-    { icon: UserPlus, label: 'Leads', page: 'Leads' },
-    { icon: CheckSquare, label: 'Tarefas', page: 'Tasks', shortcut: '⌘T' },
-    { icon: Route, label: 'Rotas', page: 'RouteOptimizer' },
+    { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H', tourId: 'dashboard' },
+    { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
+    { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
+    { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
+    { icon: Route, label: 'Rotas', page: 'RouteOptimizer', tourId: 'routes' },
     { icon: Calendar, label: 'Agenda', page: 'ScheduledAgenda' },
-    { icon: BarChart3, label: 'Analytics', page: 'InteractiveDashboard' },
-    { icon: MessageSquare, label: 'WhatsApp', page: 'WhatsAppInbox' },
-    { icon: Zap, label: 'Integrações', page: 'Integrations' },
+    { icon: BarChart3, label: 'Analytics', page: 'InteractiveDashboard', tourId: 'analytics' },
+    { icon: MessageSquare, label: 'WhatsApp', page: 'WhatsAppInbox', tourId: 'whatsapp' },
+    { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
   ];
 
@@ -134,6 +134,7 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
+                data-tour={item.tourId}
                 className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors ${
                   currentPageName === item.page ? 'bg-indigo-50 text-indigo-600 font-semibold' : ''
                 }`}

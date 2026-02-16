@@ -101,6 +101,8 @@ import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
+import Integrations from './pages/Integrations';
+import InteractiveDashboard from './pages/InteractiveDashboard';
 import KnowledgeBaseManager from './pages/KnowledgeBaseManager';
 import LeadProfile from './pages/LeadProfile';
 import Leaderboard from './pages/Leaderboard';
@@ -120,6 +122,7 @@ import MonthlyVisitPlanner from './pages/MonthlyVisitPlanner';
 import MyProfile from './pages/MyProfile';
 import NewCampaign from './pages/NewCampaign';
 import NewClient from './pages/NewClient';
+import NotificationSettings from './pages/NotificationSettings';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
 import OfflineMode from './pages/OfflineMode';
@@ -152,6 +155,7 @@ import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
 import Tasks from './pages/Tasks';
+import TasksUnified from './pages/TasksUnified';
 import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
 import VisitManager from './pages/VisitManager';
@@ -161,10 +165,7 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import InteractiveDashboard from './pages/InteractiveDashboard';
-import NotificationSettings from './pages/NotificationSettings';
-import Integrations from './pages/Integrations';
-import TasksUnified from './pages/TasksUnified';
+import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
@@ -223,6 +224,8 @@ export const PAGES = {
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
+    "Integrations": Integrations,
+    "InteractiveDashboard": InteractiveDashboard,
     "KnowledgeBaseManager": KnowledgeBaseManager,
     "LeadProfile": LeadProfile,
     "Leaderboard": Leaderboard,
@@ -242,6 +245,7 @@ export const PAGES = {
     "MyProfile": MyProfile,
     "NewCampaign": NewCampaign,
     "NewClient": NewClient,
+    "NotificationSettings": NotificationSettings,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
     "OfflineMode": OfflineMode,
@@ -274,6 +278,7 @@ export const PAGES = {
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
     "Tasks": Tasks,
+    "TasksUnified": TasksUnified,
     "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
     "VisitManager": VisitManager,
@@ -283,10 +288,7 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "InteractiveDashboard": InteractiveDashboard,
-    "NotificationSettings": NotificationSettings,
-    "Integrations": Integrations,
-    "TasksUnified": TasksUnified,
+    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {
