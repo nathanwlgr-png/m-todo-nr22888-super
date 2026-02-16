@@ -1285,11 +1285,8 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
           equipmentInterest={client.equipment_interest}
         />
 
-        {/* GERADOR DE CONTEÚDO IA - NOVO */}
-        <AIContentGenerator 
-          client={client}
-          context={`Interações: ${interactions.length}, Vendas: ${sales.length}, Visitas: ${visits.length}`}
-        />
+        {/* GERADOR DE CONTEÚDO PERSONALIZADO - NOVO */}
+        <AIContentPersonalizer contact={client} />
 
         {/* 13. ANÁLISE REGIONAL ULTRA-PROFUNDA */}
         <UltraDeepMarketIntelligence 

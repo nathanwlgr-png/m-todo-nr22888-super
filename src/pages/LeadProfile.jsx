@@ -33,6 +33,8 @@ import {
 import { getLeadQuality } from '@/components/LeadScoringEngine';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import AIContentPersonalizer from '@/components/AIContentPersonalizer';
+import RealtimeCoachingWidget from '@/components/RealtimeCoachingWidget';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
 import AILeadMessenger from '@/components/AILeadMessenger';
 
