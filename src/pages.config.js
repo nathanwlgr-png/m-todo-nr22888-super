@@ -69,6 +69,7 @@ import ChurnAnalysis from './pages/ChurnAnalysis';
 import ClientDashboard from './pages/ClientDashboard';
 import ClientDocumentCenter from './pages/ClientDocumentCenter';
 import ClientProfile from './pages/ClientProfile';
+import ClientSegmentation from './pages/ClientSegmentation';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
 import ClientsMap from './pages/ClientsMap';
@@ -77,6 +78,7 @@ import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
+import CustomDashboard from './pages/CustomDashboard';
 import DailyReports from './pages/DailyReports';
 import Dashboard from './pages/Dashboard';
 import DataHub from './pages/DataHub';
@@ -113,6 +115,7 @@ import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
+import MessageApproval from './pages/MessageApproval';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
 import MobVendedorBackup from './pages/MobVendedorBackup';
 import MobVendedorDashboard from './pages/MobVendedorDashboard';
@@ -126,6 +129,7 @@ import NotificationSettings from './pages/NotificationSettings';
 import NumerologyAnalysis from './pages/NumerologyAnalysis';
 import ObjectionAnalyzer from './pages/ObjectionAnalyzer';
 import OfflineMode from './pages/OfflineMode';
+import Onboarding from './pages/Onboarding';
 import PartyStoresProspecting from './pages/PartyStoresProspecting';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import PossibleSales from './pages/PossibleSales';
@@ -135,6 +139,7 @@ import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
+import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
 import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
@@ -145,11 +150,13 @@ import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
 import SalesCoaching from './pages/SalesCoaching';
+import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
 import SalesForecastPage from './pages/SalesForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
+import SentimentDashboard from './pages/SentimentDashboard';
 import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
@@ -165,13 +172,6 @@ import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppInbox from './pages/WhatsAppInbox';
-import Onboarding from './pages/Onboarding';
-import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
-import CustomDashboard from './pages/CustomDashboard';
-import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
-import MessageApproval from './pages/MessageApproval';
-import ClientSegmentation from './pages/ClientSegmentation';
-import SentimentDashboard from './pages/SentimentDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -198,6 +198,7 @@ export const PAGES = {
     "ClientDashboard": ClientDashboard,
     "ClientDocumentCenter": ClientDocumentCenter,
     "ClientProfile": ClientProfile,
+    "ClientSegmentation": ClientSegmentation,
     "Clients": Clients,
     "ClientsByCity": ClientsByCity,
     "ClientsMap": ClientsMap,
@@ -206,6 +207,7 @@ export const PAGES = {
     "ConsumablePriceList": ConsumablePriceList,
     "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
+    "CustomDashboard": CustomDashboard,
     "DailyReports": DailyReports,
     "Dashboard": Dashboard,
     "DataHub": DataHub,
@@ -242,6 +244,7 @@ export const PAGES = {
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
     "MarketResearch": MarketResearch,
+    "MessageApproval": MessageApproval,
     "MobVendedorAnalytics": MobVendedorAnalytics,
     "MobVendedorBackup": MobVendedorBackup,
     "MobVendedorDashboard": MobVendedorDashboard,
@@ -255,6 +258,7 @@ export const PAGES = {
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,
     "OfflineMode": OfflineMode,
+    "Onboarding": Onboarding,
     "PartyStoresProspecting": PartyStoresProspecting,
     "PerformanceDashboard": PerformanceDashboard,
     "PossibleSales": PossibleSales,
@@ -264,6 +268,7 @@ export const PAGES = {
     "ProposalGenerator": ProposalGenerator,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
+    "RealtimeSalesFunnel": RealtimeSalesFunnel,
     "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
     "RegionalSearch": RegionalSearch,
     "Reports": Reports,
@@ -274,11 +279,13 @@ export const PAGES = {
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
     "SalesCoaching": SalesCoaching,
+    "SalesCoachingDashboard": SalesCoachingDashboard,
     "SalesForecastPage": SalesForecastPage,
     "SalesFunnel": SalesFunnel,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
+    "SentimentDashboard": SentimentDashboard,
     "SignedContracts": SignedContracts,
     "SystemAudit": SystemAudit,
     "TaskAutomation": TaskAutomation,
@@ -294,13 +301,6 @@ export const PAGES = {
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppInbox": WhatsAppInbox,
-    "Onboarding": Onboarding,
-    "SalesCoachingDashboard": SalesCoachingDashboard,
-    "CustomDashboard": CustomDashboard,
-    "RealtimeSalesFunnel": RealtimeSalesFunnel,
-    "MessageApproval": MessageApproval,
-    "ClientSegmentation": ClientSegmentation,
-    "SentimentDashboard": SentimentDashboard,
 }
 
 export const pagesConfig = {

@@ -327,27 +327,69 @@ export default function CustomDashboard() {
         );
 
       case 'priority_leads':
+        const topLeads = [...leads]
+          .filter(l => l.ai_score > 0)
+          .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
+          .slice(0, 5);
+
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Leads Prioritários (IA)</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                <span>Leads Prioritários (IA)</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => base44.functions.invoke('autoLeadScoring', {}).then(() => {
+                    queryClient.invalidateQueries(['leads']);
+                    toast.success('Scores atualizados!');
+                  })}
+                >
+                  <Zap className="w-3 h-3 mr-1" />
+                  Recalcular
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {priorities.slice(0, 5).map((priority) => (
-                  <div key={priority.id} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm">{priority.lead_name}</p>
-                      <p className="text-xs text-slate-600">{priority.recommended_action}</p>
+                {topLeads.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">
+                    Nenhum lead com score. Clique em "Recalcular".
+                  </p>
+                ) : (
+                  topLeads.map((lead) => (
+                    <div key={lead.id} className="flex items-center justify-between p-3 bg-slate-50 rounded hover:bg-slate-100">
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{lead.full_name}</p>
+                        <p className="text-xs text-slate-600">{lead.company || lead.interest}</p>
+                        <div className="flex gap-1 mt-1">
+                          {lead.urgency === 'imediata' && (
+                            <Badge className="bg-red-500 text-xs">🔥 Urgente</Badge>
+                          )}
+                          {lead.ai_score_breakdown?.engagement_score > 70 && (
+                            <Badge className="bg-green-500 text-xs">Alto Engajamento</Badge>
+                          )}
+                          {lead.score_reasons?.some(r => r.impact === 'positive' && r.weight > 0.3) && (
+                            <Badge className="bg-purple-500 text-xs">Alta Intenção</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={
+                          lead.ai_score >= 80 ? 'bg-red-500' :
+                          lead.ai_score >= 60 ? 'bg-orange-500' : 'bg-blue-500'
+                        }>
+                          {Math.round(lead.ai_score)}
+                        </Badge>
+                        {lead.ai_score_breakdown && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Intent: {Math.round(lead.ai_score_breakdown.intent_score)}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <Badge className={
-                      priority.priority_level === 'urgente' ? 'bg-red-500' :
-                      priority.priority_level === 'alta' ? 'bg-orange-500' : 'bg-blue-500'
-                    }>
-                      {priority.priority_score}
-                    </Badge>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
