@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import {
   MessageSquare, Phone, Send, Calendar, FileText, MessageCircle,
-  Settings, Bot, Users, Zap, Copy, CheckCircle2, Clock
+  Settings, Bot, Users, Zap, Copy, CheckCircle2, Clock, Sparkles
 } from 'lucide-react';
 
 const MAIN_PHONE = '5514991676428'; // Seu número
@@ -144,7 +145,7 @@ export default function WhatsAppHub() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="contacts" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Contatos</span>
@@ -156,6 +157,10 @@ export default function WhatsAppHub() {
             <TabsTrigger value="send" className="flex items-center gap-2">
               <Send className="w-4 h-4" />
               <span className="hidden sm:inline">Enviar</span>
+            </TabsTrigger>
+            <TabsTrigger value="followup" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="hidden sm:inline">IA Follow-up</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <Bot className="w-4 h-4" />
@@ -232,6 +237,11 @@ export default function WhatsAppHub() {
                 )}
               </div>
             </Card>
+          </TabsContent>
+
+          {/* IA FOLLOW-UP */}
+          <TabsContent value="followup" className="space-y-4">
+            <AIFollowUpAutomation clientId={selectedClient?.id} />
           </TabsContent>
 
           {/* ENVIAR MENSAGEM */}
