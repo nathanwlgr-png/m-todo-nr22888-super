@@ -24,7 +24,14 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.entities.Alert?.list().catch(() => []),
   });
 
+  const { data: pendingMessages = [] } = useQuery({
+    queryKey: ['pending-messages-count'],
+    queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
+    refetchInterval: 30000 // Atualiza a cada 30 segundos
+  });
+
   const unreadCount = notifications.filter(n => !n.read).length;
+  const pendingMsgCount = pendingMessages.length;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -100,6 +107,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
     { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
     { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
+    { icon: Bell, label: 'Aprovar Msgs', page: 'MessageApproval', badge: true },
     { icon: Route, label: 'Rotas', page: 'RouteOptimizer', tourId: 'routes' },
     { icon: Calendar, label: 'Agenda', page: 'ScheduledAgenda' },
     { icon: BarChart3, label: 'Analytics', page: 'CustomDashboard', tourId: 'analytics' },
@@ -150,6 +158,9 @@ export default function Layout({ children, currentPageName }) {
                 )}
                 {item.page === 'NotificationSettings' && unreadCount > 0 && (
                   <Badge className="bg-red-500">{unreadCount}</Badge>
+                )}
+                {item.badge && item.page === 'MessageApproval' && pendingMsgCount > 0 && (
+                  <Badge className="bg-orange-500 animate-pulse">{pendingMsgCount}</Badge>
                 )}
               </Link>
             ))}

@@ -169,6 +169,7 @@ import Onboarding from './pages/Onboarding';
 import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
 import CustomDashboard from './pages/CustomDashboard';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
+import MessageApproval from './pages/MessageApproval';
 import __Layout from './Layout.jsx';
 
 
@@ -295,6 +296,7 @@ export const PAGES = {
     "SalesCoachingDashboard": SalesCoachingDashboard,
     "CustomDashboard": CustomDashboard,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
+    "MessageApproval": MessageApproval,
 }
 
 export const pagesConfig = {
