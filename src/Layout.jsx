@@ -131,6 +131,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
     { icon: Database, label: 'Offline Analytics', page: 'OfflineAnalytics', badge: true },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
+    { icon: Zap, label: 'Automação Msgs', page: 'AutomationSettings' },
     ];
 
   return (
