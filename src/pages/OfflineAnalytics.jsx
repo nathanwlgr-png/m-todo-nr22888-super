@@ -5,6 +5,7 @@ import OfflineDataEntryForm from '@/components/OfflineDataEntryForm';
 import OfflineDashboard from '@/components/OfflineDashboard';
 import SeamatyCatalogOffline from '@/components/SeamatyCatalogOffline';
 import OfflineSyncService from '@/components/OfflineSyncService';
+import SeamatyPriceTableViewer from '@/components/SeamatyPriceTableViewer';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, FileText, AlertCircle, Package } from 'lucide-react';
@@ -55,10 +56,11 @@ export default function OfflineAnalytics() {
 
         {/* Abas Principais */}
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dashboard">Dashboard Offline</TabsTrigger>
-            <TabsTrigger value="entry">Registrar Dados</TabsTrigger>
-            <TabsTrigger value="catalog">Catálogo Seamaty</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="entry">Registrar</TabsTrigger>
+            <TabsTrigger value="catalog">Catálogo</TabsTrigger>
+            <TabsTrigger value="prices">Preços SP</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-4">
@@ -73,6 +75,10 @@ export default function OfflineAnalytics() {
 
           <TabsContent value="catalog" className="mt-4">
             <SeamatyCatalogOffline />
+          </TabsContent>
+
+          <TabsContent value="prices" className="mt-4">
+            <SeamatyPriceTableViewer />
           </TabsContent>
         </Tabs>
 
