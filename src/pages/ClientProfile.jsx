@@ -56,7 +56,8 @@ import {
   Target,
   RotateCcw,
   TrendingUp,
-  Copy
+  Copy,
+  Send
 } from 'lucide-react';
 import NumerologyCard from '@/components/NumerologyCard';
 import ScoreBar from '@/components/ScoreBar';

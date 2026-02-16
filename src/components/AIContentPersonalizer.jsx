@@ -163,28 +163,35 @@ export default function AIContentPersonalizer({ contact }) {
               </div>
             )}
 
-            <div className="flex gap-2">
-              {contact.email && activeType.startsWith('email') && (
-                <Button
-                  size="sm"
-                  className="flex-1 bg-indigo-600"
-                  onClick={() => window.open(`mailto:${contact.email}?subject=${encodeURIComponent(generatedContent.subject)}&body=${encodeURIComponent(generatedContent.content)}`)}
-                >
-                  <Mail className="w-3 h-3 mr-1" />
-                  Abrir no Email
-                </Button>
-              )}
-              {contact.phone && activeType === 'whatsapp_sequence' && (
-                <Button
-                  size="sm"
-                  className="flex-1 bg-green-600"
-                  onClick={() => window.open(`https://wa.me/${contact.phone}?text=${encodeURIComponent(generatedContent.content.split('\n\n')[0])}`)}
-                >
-                  <MessageSquare className="w-3 h-3 mr-1" />
-                  WhatsApp
-                </Button>
-              )}
-            </div>
+            <Button
+              size="sm"
+              className="w-full bg-gradient-to-r from-orange-600 to-orange-500"
+              onClick={async () => {
+                try {
+                  await base44.entities.PendingMessage.create({
+                    recipient_id: contact.id,
+                    recipient_name: contact.first_name || contact.full_name,
+                    recipient_phone: contact.phone,
+                    channel: activeType.startsWith('email') ? 'email' : 
+                            activeType === 'whatsapp_sequence' ? 'whatsapp' : 'whatsapp',
+                    message_content: generatedContent.content,
+                    email_subject: generatedContent.subject,
+                    context: `Tipo: ${activeType}. Engajamento: ${generateMutation.data?.engagement}. Sentimento: ${generateMutation.data?.sentiment}`,
+                    ai_reasoning: `Score esperado: ${generatedContent.expected_response_rate}%. Personalização: ${generatedContent.personalization_elements?.join(', ')}`,
+                    priority: generatedContent.expected_response_rate > 70 ? 'alta' : 'media',
+                    suggested_send_time: generatedContent.best_send_time,
+                    status: 'pending'
+                  });
+                  toast.success('Enviado para aprovação!');
+                  setGeneratedContent(null);
+                } catch (error) {
+                  toast.error('Erro ao enviar para aprovação');
+                }
+              }}
+            >
+              <Send className="w-3 h-3 mr-2" />
+              Enviar para Aprovação
+            </Button>
           </div>
         )}
       </CardContent>
