@@ -119,6 +119,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
+    { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
   ];
 
