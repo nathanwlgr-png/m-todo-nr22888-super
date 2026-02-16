@@ -103,6 +103,9 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationCenter 
+              onSettingsClick={() => navigate(createPageUrl('NotificationSettings'))}
+            />
             <Button 
               size="sm" 
               variant="ghost" 
@@ -111,7 +114,6 @@ export default function Home() {
             >
               <FileText className="w-4 h-4" />
             </Button>
-            <NotificationCenter />
             <Link to={createPageUrl('ContactSettings')}>
               <Button size="sm" variant="ghost" className="text-white">
                 <Settings className="w-4 h-4" />
