@@ -7,7 +7,7 @@ import FloatingExportButton from '@/components/FloatingExportButton';
 import { 
   Home, Users, UserPlus, Route, Settings, Zap, 
   Calendar, CheckSquare, BarChart3, Menu, X,
-  ChevronRight, Bell, MessageSquare, TrendingUp, Award
+  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -108,6 +108,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
     { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
     { icon: Bell, label: 'Aprovar Msgs', page: 'MessageApproval', badge: true },
+    { icon: Target, label: 'Segmentos', page: 'ClientSegmentation' },
     { icon: Route, label: 'Rotas', page: 'RouteOptimizer', tourId: 'routes' },
     { icon: Calendar, label: 'Agenda', page: 'ScheduledAgenda' },
     { icon: BarChart3, label: 'Analytics', page: 'CustomDashboard', tourId: 'analytics' },

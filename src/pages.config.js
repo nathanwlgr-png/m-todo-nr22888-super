@@ -170,6 +170,7 @@ import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
 import CustomDashboard from './pages/CustomDashboard';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
 import MessageApproval from './pages/MessageApproval';
+import ClientSegmentation from './pages/ClientSegmentation';
 import __Layout from './Layout.jsx';
 
 
@@ -297,6 +298,7 @@ export const PAGES = {
     "CustomDashboard": CustomDashboard,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
     "MessageApproval": MessageApproval,
+    "ClientSegmentation": ClientSegmentation,
 }
 
 export const pagesConfig = {
