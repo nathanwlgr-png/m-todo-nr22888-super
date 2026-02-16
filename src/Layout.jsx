@@ -121,6 +121,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
+    { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
   ];
 
