@@ -45,6 +45,7 @@ import NotificationCenter from '@/components/notifications/NotificationCenter';
 import AIPriorityLeads from '@/components/AIPriorityLeads';
 import ProactiveAIDashboard from '@/components/ProactiveAIDashboard';
 import SmartClinicFinder from '@/components/SmartClinicFinder';
+import QuickNavigation from '@/components/QuickNavigation';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -132,264 +133,94 @@ export default function Home() {
       </div>
 
       <div className="px-4 py-6 space-y-4">
-        {/* CONTROLE DE IA - ECONOMIA DE CRÉDITOS */}
+        {/* CONTROLE DE IA */}
         <AIControlCenter />
 
-        {/* ========================================
-            FLUXO CRONOLÓGICO COMPLETO - OTIMIZADO
-            ======================================== */}
-        
-        <div className="text-center mb-2">
-          <h2 className="text-lg font-bold text-slate-900">🎯 Fluxo de Vendas</h2>
-          <p className="text-xs text-slate-600">Siga a ordem: Lead → Cliente → Venda</p>
-        </div>
-
-        {/* FASE 1: CAPTAÇÃO DE LEADS */}
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-400">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">1</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-blue-900">Captação de Leads</h3>
-              <p className="text-xs text-blue-700">Encontre e qualifique novos prospects</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Link to={createPageUrl('CaptureLeads')}>
-              <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
-                <UserPlus className="w-4 h-4 mr-1" />
-                Capturar Lead
-              </Button>
-            </Link>
-            <Link to={createPageUrl('LeadsKanban')}>
-              <Button size="sm" variant="outline" className="w-full border-blue-300">
-                <Target className="w-4 h-4 mr-1" />
-                Pipeline
-              </Button>
-            </Link>
-          </div>
-        </Card>
-
-        {/* FASE 2: CADASTRO DE CLIENTES */}
-        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">2</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-green-900">Cadastro de Clientes</h3>
-              <p className="text-xs text-green-700">Adicione clientes ao sistema</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Link to={createPageUrl('ImportClientsTable')}>
-              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
-                <FileText className="w-4 h-4 mr-1" />
-                Importar Tabela
-              </Button>
-            </Link>
-            <Link to={createPageUrl('NewClient')}>
-              <Button size="sm" variant="outline" className="w-full border-green-300">
-                <UserPlus className="w-4 h-4 mr-1" />
-                Novo Manual
-              </Button>
-            </Link>
-          </div>
-        </Card>
-
-        {/* FASE 3: VER E GERENCIAR CLIENTES */}
-        <Link to={createPageUrl('Clients')}>
-          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-400 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">3</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-purple-900">👥 Todos os Clientes</h3>
-                <p className="text-xs text-purple-700">{metrics.total} cadastrados</p>
-              </div>
-              <Users className="w-6 h-6 text-purple-600" />
-            </div>
-          </Card>
-        </Link>
-
-        {/* FASE 4: PRÉ-VISITA */}
-        <Link to={createPageUrl('PreVisitChecklist')}>
-          <Card className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-400 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">4</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-orange-900">✅ Checklist Pré-Visita</h3>
-                <p className="text-xs text-orange-700">Prepare-se antes de visitar</p>
-              </div>
-              <CheckCircle2 className="w-6 h-6 text-orange-600" />
-            </div>
-          </Card>
-        </Link>
-
-        {/* FASE 5: AGENDAR VISITA */}
-        <Link to={createPageUrl('ScheduledAgenda')}>
-          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-indigo-400 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">5</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-indigo-900">📅 Agendar Visita</h3>
-                <p className="text-xs text-indigo-700">Programar visitas</p>
-              </div>
-              <Calendar className="w-6 h-6 text-indigo-600" />
-            </div>
-          </Card>
-        </Link>
-
-        {/* FASE 6: PÓS-VISITA */}
-        <Link to={createPageUrl('PostVisitAnalysis')}>
-          <Card className="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-400 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">6</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-teal-900">📝 Pós-Visita</h3>
-                <p className="text-xs text-teal-700">Registre resultado</p>
-              </div>
-              <CheckCircle2 className="w-6 h-6 text-teal-600" />
-            </div>
-          </Card>
-        </Link>
-
-        {/* FASE 7: RELATÓRIOS E ANÁLISES */}
-        <Card className="p-4 bg-gradient-to-r from-purple-50 to-fuchsia-50 border-2 border-purple-400">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">7</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-purple-900">📊 Análises & Relatórios</h3>
-              <p className="text-xs text-purple-700">Métricas e insights</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <Link to={createPageUrl('SalesAnalytics')}>
-              <Button size="sm" variant="outline" className="w-full text-xs">
-                <BarChart3 className="w-3 h-3 mr-1" />
-                Análises
-              </Button>
-            </Link>
-            <Link to={createPageUrl('InteractiveDashboard')}>
-              <Button size="sm" variant="outline" className="w-full text-xs">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                Painel
-              </Button>
-            </Link>
-            <Link to={createPageUrl('MonthlyReport')}>
-              <Button size="sm" variant="outline" className="w-full text-xs">
-                <FileText className="w-3 h-3 mr-1" />
-                Mensal
-              </Button>
-            </Link>
-          </div>
-        </Card>
+        {/* NAVEGAÇÃO RÁPIDA COMPACTADA */}
+        <QuickNavigation />
 
         {/* =======================================
             FERRAMENTAS PRINCIPAIS - COMPACTADO
             ======================================= */}
 
-        {/* WHATSAPP MASTER NR22888 */}
-        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-green-900">🚀 WhatsApp Master</h3>
-              <p className="text-xs text-green-700">Assistente total de vendas</p>
-            </div>
+        {/* WHATSAPP MASTER - COMPACTO */}
+        <Card className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquare className="w-5 h-5 text-green-600" />
+            <h3 className="font-bold text-green-900 text-sm">🚀 WhatsApp Master</h3>
           </div>
           <Button 
             onClick={() => {
               const url = base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant');
               navigator.clipboard.writeText(url);
-              toast.success('Link copiado!', { duration: 3000 });
+              toast.success('Link copiado!', { duration: 2000 });
               window.open(url, '_blank');
             }}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            size="sm"
+            className="w-full bg-green-600 hover:bg-green-700 mb-2"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Conectar WhatsApp Master
+            <MessageSquare className="w-3 h-3 mr-1" />
+            Conectar
           </Button>
-          
-          {/* Cadastro de WhatsApp Master */}
-          <div className="mt-3 pt-3 border-t border-green-300">
-            <p className="text-xs font-semibold text-green-800 mb-2">Números autorizados:</p>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="5511999999999"
-                value={newMasterPhone}
-                onChange={(e) => setNewMasterPhone(e.target.value)}
-                className="flex-1 text-sm"
-              />
-              <Button
-                onClick={async () => {
-                  if (!newMasterPhone || newMasterPhone.length < 12) {
-                    toast.error('Número inválido');
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Número"
+              value={newMasterPhone}
+              onChange={(e) => setNewMasterPhone(e.target.value)}
+              className="text-xs h-8"
+            />
+            <Button
+              onClick={async () => {
+                if (!newMasterPhone || newMasterPhone.length < 12) {
+                  toast.error('Inválido');
+                  return;
+                }
+                const cleanPhone = newMasterPhone.replace(/\s/g, '');
+                try {
+                  const currentNumbers = user?.master_whatsapp_numbers || [];
+                  if (currentNumbers.includes(cleanPhone)) {
+                    toast.error('Existe');
                     return;
                   }
-                  
-                  const cleanPhone = newMasterPhone.replace(/\s/g, '');
-                  
-                  try {
-                    const currentNumbers = user?.master_whatsapp_numbers || [];
-                    if (currentNumbers.includes(cleanPhone)) {
-                      toast.error('Já cadastrado');
-                      return;
-                    }
-                    
-                    await base44.auth.updateMe({
-                      master_whatsapp_numbers: [...currentNumbers, cleanPhone]
-                    });
-                    
-                    toast.success('✅ Cadastrado!');
-                    setNewMasterPhone('');
-                    queryClient.invalidateQueries(['current-user']);
-                  } catch (error) {
-                    toast.error('Erro: ' + error.message);
-                  }
-                }}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700"
-                disabled={!newMasterPhone || newMasterPhone.length < 12}
-              >
-                <UserPlus className="w-4 h-4" />
-              </Button>
-            </div>
-            {user?.master_whatsapp_numbers?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {user.master_whatsapp_numbers.map((phone, idx) => (
-                  <Badge key={idx} variant="outline" className="bg-white text-xs">
-                    {phone}
-                    <button
-                      onClick={async () => {
-                        await base44.auth.updateMe({
-                          master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
-                        });
-                        toast.success('Removido');
-                        queryClient.invalidateQueries(['current-user']);
-                      }}
-                      className="text-red-500 ml-1 font-bold"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
+                  await base44.auth.updateMe({
+                    master_whatsapp_numbers: [...currentNumbers, cleanPhone]
+                  });
+                  toast.success('✅ OK');
+                  setNewMasterPhone('');
+                  queryClient.invalidateQueries(['current-user']);
+                } catch (error) {
+                  toast.error('Erro');
+                }
+              }}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 h-8"
+              disabled={!newMasterPhone || newMasterPhone.length < 12}
+            >
+              +
+            </Button>
           </div>
+          {user?.master_whatsapp_numbers?.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {user.master_whatsapp_numbers.map((phone, idx) => (
+                <Badge key={idx} variant="outline" className="bg-white text-xs py-0.5">
+                  {phone.slice(-8)}
+                  <button
+                    onClick={async () => {
+                      await base44.auth.updateMe({
+                        master_whatsapp_numbers: user.master_whatsapp_numbers.filter(p => p !== phone)
+                      });
+                      toast.success('✓');
+                      queryClient.invalidateQueries(['current-user']);
+                    }}
+                    className="text-red-500 ml-1 font-bold text-xs leading-none"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* GERADOR DE AGENDA MENSAL AUTOMÁTICA */}
@@ -425,46 +256,36 @@ export default function Home() {
           <AdvancedLeadQualification />
         </div>
 
-        {/* BUSCA RÁPIDA DE CLIENTES */}
-        <Card className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="🔍 Buscar clientes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
+        {/* BUSCA RÁPIDA - MINI */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <Input
+            placeholder="🔍 Buscar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 h-10"
+          />
           {searchTerm && filteredClients.length > 0 && (
-            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+            <div className="absolute top-12 left-0 right-0 bg-white border rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
               {filteredClients.map((client) => {
                 if (!client?.id || !client?.first_name) return null;
                 return (
-                  <Card
+                  <div
                     key={client.id}
-                    className="p-3 cursor-pointer hover:bg-slate-50"
-                    onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+                    className="p-2 border-b cursor-pointer hover:bg-slate-50 text-xs"
+                    onClick={() => {
+                      navigate(createPageUrl(`ClientProfile?id=${client.id}`));
+                      setSearchTerm('');
+                    }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-sm text-slate-800">{client.first_name}</p>
-                        <p className="text-xs text-slate-600">{client.clinic_name} • {client.city}</p>
-                      </div>
-                      <Badge className={
-                        client.status === 'quente' ? 'bg-red-500' :
-                        client.status === 'morno' ? 'bg-orange-500' : 'bg-blue-500'
-                      }>
-                        {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
-                      </Badge>
-                    </div>
-                  </Card>
+                    <p className="font-semibold">{client.first_name}</p>
+                    <p className="text-slate-500">{client.city}</p>
+                  </div>
                 );
               })}
             </div>
           )}
-        </Card>
+        </div>
 
         {/* MÉTRICAS CLICÁVEIS */}
         <div className="grid grid-cols-2 gap-3">
@@ -493,43 +314,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* FERRAMENTAS ESSENCIAIS - GRID COMPACTO */}
-        <div className="grid grid-cols-3 gap-2">
-          <Link to={createPageUrl('AIAssistant')}>
-            <Button className="w-full h-16 bg-purple-600 hover:bg-purple-700 flex-col">
-              <Sparkles className="w-5 h-5 mb-1" />
-              <span className="text-xs">IA</span>
-            </Button>
-          </Link>
-          <Link to={createPageUrl('Tasks')}>
-            <Button variant="outline" className="w-full h-16 flex-col">
-              <CheckCircle2 className="w-5 h-5 mb-1" />
-              <span className="text-xs">Tarefas</span>
-            </Button>
-          </Link>
-          <Link to={createPageUrl('DocumentCenter')}>
-            <Button variant="outline" className="w-full h-16 flex-col">
-              <FileText className="w-5 h-5 mb-1" />
-              <span className="text-xs">Docs</span>
-            </Button>
-          </Link>
-        </div>
 
-        {/* BASE DE CONHECIMENTO E RELATÓRIOS - NOVOS */}
-        <div className="grid grid-cols-2 gap-2">
-          <Link to={createPageUrl('KnowledgeBaseManager')}>
-            <Button variant="outline" className="w-full h-16 flex-col border-indigo-300">
-              <Sparkles className="w-5 h-5 mb-1 text-indigo-600" />
-              <span className="text-xs">Conhecimento</span>
-            </Button>
-          </Link>
-          <Link to={createPageUrl('DailyReports')}>
-            <Button variant="outline" className="w-full h-16 flex-col border-blue-300">
-              <Calendar className="w-5 h-5 mb-1 text-blue-600" />
-              <span className="text-xs">Relatórios</span>
-            </Button>
-          </Link>
-        </div>
 
         {/* IMPORTAÇÃO MOBVENDEDOR - COMPACTO */}
         <Card className="p-3 bg-orange-50 border border-orange-300">
@@ -568,115 +353,7 @@ export default function Home() {
           </Button>
         </Card>
 
-        {/* FERRAMENTAS AVANÇADAS - EXPANSÍVEL */}
-        <Card className="p-3">
-          <button 
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-indigo-600" />
-              <h3 className="font-semibold text-slate-800 text-sm">Ferramentas Avançadas</h3>
-            </div>
-            {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          
-          {showAdvanced && (
-            <div className="mt-3 space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <Link to={createPageUrl('FunnelOptimization')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    Funil IA
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('RouteOptimizer')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    Rotas
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('RolePlayTraining')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <Play className="w-3 h-3 mr-1" />
-                    Role-Play
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('SalesCoaching')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <Award className="w-3 h-3 mr-1" />
-                    Coaching
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('AutomationManager')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Automações
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('ChurnAnalysis')}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    Churn
-                  </Button>
-                </Link>
-              </div>
 
-              {/* Importação customizada */}
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-xs font-semibold text-slate-700 mb-2">Outro Tablet:</p>
-                <div className="space-y-2">
-                  <Input
-                    placeholder="CNPJ"
-                    value={customCnpj}
-                    onChange={(e) => setCustomCnpj(e.target.value)}
-                    className="text-sm h-9"
-                  />
-                  <Input
-                    placeholder="ID Distribuidor"
-                    value={customDistributorId}
-                    onChange={(e) => setCustomDistributorId(e.target.value)}
-                    className="text-sm h-9"
-                  />
-                  <Button
-                    onClick={async () => {
-                      const cnpj = customCnpj.replace(/\D/g, '');
-                      if (!cnpj || cnpj.length !== 14 || !customDistributorId) {
-                        toast.error('Preencha CNPJ e ID');
-                        return;
-                      }
-                      const loading = toast.loading('Importando...');
-                      try {
-                        const response = await base44.functions.invoke('mobVendedorIntegration', {
-                          action: 'sync_clients',
-                          credentials: { cnpj, mobvendedor_id: customDistributorId.trim() }
-                        });
-                        toast.dismiss(loading);
-                        if (response.data.success) {
-                          toast.success(`✅ ${response.data.synced} importados!`);
-                          queryClient.invalidateQueries(['clients']);
-                          setCustomCnpj('');
-                          setCustomDistributorId('');
-                        } else {
-                          toast.error(response.data.error);
-                        }
-                      } catch (error) {
-                        toast.dismiss(loading);
-                        toast.error('Erro: ' + error.message);
-                      }
-                    }}
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    size="sm"
-                    disabled={!customCnpj || !customDistributorId}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Importar
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </Card>
 
         {/* LINKS RÁPIDOS - MAIS COMPACTO */}
         <div className="grid grid-cols-2 gap-2">
