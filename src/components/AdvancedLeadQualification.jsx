@@ -25,6 +25,7 @@ export default function AdvancedLeadQualification() {
   const [searchTerm, setSearchTerm] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [analyzing, setAnalyzing] = useState(false);
+  const [expandedLead, setExpandedLead] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: leads = [], isLoading } = useQuery({
