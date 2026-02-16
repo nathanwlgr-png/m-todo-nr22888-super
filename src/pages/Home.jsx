@@ -44,6 +44,7 @@ import BirthdayReminders from '@/components/BirthdayReminders';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import AIPriorityLeads from '@/components/AIPriorityLeads';
 import ProactiveAIDashboard from '@/components/ProactiveAIDashboard';
+import SmartClinicFinder from '@/components/SmartClinicFinder';
 
 export default function Home() {
   const [docsDialogOpen, setDocsDialogOpen] = useState(false);
@@ -399,6 +400,9 @@ export default function Home() {
 
         {/* ANÁLISE DE CONCORRENTES */}
         <CompetitorPriceAnalysis />
+
+        {/* BUSCA INTELIGENTE DE CLÍNICAS */}
+        <SmartClinicFinder />
 
         {/* CAPTURA DE LEADS POR CIDADE */}
         <CityLeadCapture />
