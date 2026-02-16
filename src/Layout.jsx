@@ -117,6 +117,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: MessageSquare, label: 'WhatsApp', page: 'WhatsAppInbox', tourId: 'whatsapp' },
     { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
+    { icon: Settings, label: 'Workflows', page: 'WorkflowAutomation' },
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },

@@ -175,6 +175,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import AIContentStudio from './pages/AIContentStudio';
 import ProductManager from './pages/ProductManager';
 import AIKnowledgeUploader from './pages/AIKnowledgeUploader';
+import WorkflowAutomation from './pages/WorkflowAutomation';
 import __Layout from './Layout.jsx';
 
 
@@ -307,6 +308,7 @@ export const PAGES = {
     "AIContentStudio": AIContentStudio,
     "ProductManager": ProductManager,
     "AIKnowledgeUploader": AIKnowledgeUploader,
+    "WorkflowAutomation": WorkflowAutomation,
 }
 
 export const pagesConfig = {
