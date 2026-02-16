@@ -56,9 +56,14 @@ const SEAMATY_EQUIPMENT = [
   },
   {
     code: 'VQ1',
-    name: 'Analisador Veterinário de PCR em Tempo Real',
-    description: 'PCR quantitativa fluorescente com cartucho microfluídico. Aquecimento rápido 10°C/segundo.',
-    specifications: 'Tipo: PCR em tempo real | Velocidade: 10°C/segundo | Cartuchos: Fechados | Liofilizados | Reduz contaminação',
+    name: 'Seamaty VQ1 - Analisador Veterinário de PCR em Tempo Real',
+    description: 'PCR quantitativa fluorescente com cartucho microfluídico patenteado. Operação fácil em 4 etapas. Resultados em 40 minutos.',
+    specifications: 'Velocidade: 10°C/seg | Sensibilidade: 10 cópias/ciclo | Tempo: 40 min/amostra | Cartucho fechado | Tampão: Swab nasof./ocular/oral/anal | Impressora integrada | Peso: 8kg | Curva calibração contínua | 500k resultados memória',
+    test_menu: {
+      felino: ['Trato Respiratório', 'Patógenos Diarreia', 'Peritonite Infecciosa', 'Anemia'],
+      canino: ['Trato Respiratório', 'Patógenos Diarreia', 'Arbovírus', 'Zoonose'],
+      parametros: ['FHV-1', 'FCV', 'CHL', 'MYC', 'CPV', 'CDV', 'FIV', 'FeLV', 'Leptospira', 'Toxoplasma', 'Babesia', 'Ehrlichia']
+    },
     image_url: 'https://images.unsplash.com/photo-1576091160550-112173f7f869?w=300&h=300&fit=crop',
     price_sp: 155000,
     category: 'PCR'
