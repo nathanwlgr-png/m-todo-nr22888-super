@@ -77,6 +77,9 @@ export default function AIKnowledgeUploader() {
     documento_word: 'Documento Word',
     pdf_generico: 'PDF Genérico',
     imagem: 'Imagem',
+    relatorio_financeiro: 'Relatório Financeiro',
+    analise_mercado: 'Análise de Mercado',
+    documento_operacional: 'Doc. Operacional',
     outro: 'Outro'
   };
 
@@ -86,11 +89,29 @@ export default function AIKnowledgeUploader() {
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
             <FileText className="w-6 h-6" />
-            Base de Conhecimento IA
+            Base de Conhecimento IA Pro
           </CardTitle>
-          <p className="text-purple-100">
-            Envie PDF, Word, Excel, PowerPoint - TODOS os formatos suportados!
+          <p className="text-purple-100 mb-2">
+            Upload inteligente com análise profunda automática!
           </p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-white/10 p-2 rounded">
+              <p className="font-semibold">📊 Extração de KPIs</p>
+              <p className="text-purple-200">Automática</p>
+            </div>
+            <div className="bg-white/10 p-2 rounded">
+              <p className="font-semibold">🏷️ Tags & Categorias</p>
+              <p className="text-purple-200">IA Inteligente</p>
+            </div>
+            <div className="bg-white/10 p-2 rounded">
+              <p className="font-semibold">📝 Resumos</p>
+              <p className="text-purple-200">Executivo + Detalhado</p>
+            </div>
+            <div className="bg-white/10 p-2 rounded">
+              <p className="font-semibold">💡 Insights</p>
+              <p className="text-purple-200">Ações Práticas</p>
+            </div>
+          </div>
         </CardHeader>
       </Card>
 
@@ -164,11 +185,64 @@ export default function AIKnowledgeUploader() {
                     )}
                   </div>
                   <Badge variant="outline" className="mb-2">
-                    {docTypeLabels[doc.document_type]}
+                    {docTypeLabels[doc.document_type] || doc.document_type}
                   </Badge>
+                  
                   {doc.summary && (
-                    <p className="text-xs text-slate-600 mt-2">{doc.summary}</p>
+                    <div className="bg-blue-50 p-2 rounded-lg mt-2">
+                      <p className="text-xs font-semibold text-blue-900 mb-1">📝 Resumo Executivo:</p>
+                      <p className="text-xs text-blue-800">{doc.summary}</p>
+                    </div>
                   )}
+
+                  {doc.detailed_summary && (
+                    <div className="bg-purple-50 p-2 rounded-lg mt-2">
+                      <p className="text-xs font-semibold text-purple-900 mb-1">📄 Resumo Detalhado:</p>
+                      <p className="text-xs text-purple-800">{doc.detailed_summary}</p>
+                    </div>
+                  )}
+
+                  {doc.key_data?.kpis?.length > 0 && (
+                    <div className="bg-green-50 p-2 rounded-lg mt-2">
+                      <p className="text-xs font-semibold text-green-900 mb-1">📊 KPIs Detectados:</p>
+                      <div className="space-y-1">
+                        {doc.key_data.kpis.slice(0, 3).map((kpi, i) => (
+                          <div key={i} className="flex items-center justify-between text-xs">
+                            <span className="text-green-800">{kpi.kpi_name}</span>
+                            <Badge variant="outline" className="text-xs bg-white">
+                              {kpi.value} {kpi.unit}
+                            </Badge>
+                          </div>
+                        ))}
+                        {doc.key_data.kpis.length > 3 && (
+                          <p className="text-xs text-green-600">+{doc.key_data.kpis.length - 3} mais</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {doc.key_data?.insights?.length > 0 && (
+                    <div className="bg-yellow-50 p-2 rounded-lg mt-2">
+                      <p className="text-xs font-semibold text-yellow-900 mb-1">💡 Insights Principais:</p>
+                      <ul className="text-xs text-yellow-800 space-y-1">
+                        {doc.key_data.insights.slice(0, 2).map((insight, i) => (
+                          <li key={i}>• {insight}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {doc.key_data?.industry_relevance?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <p className="text-xs text-slate-500 w-full">Relevância:</p>
+                      {doc.key_data.industry_relevance.map((ind, i) => (
+                        <Badge key={i} variant="outline" className="text-xs bg-indigo-50 text-indigo-700">
+                          {ind}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
                   {doc.tags?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {doc.tags.map((tag, i) => (
