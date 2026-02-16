@@ -273,7 +273,7 @@ export default function Home() {
                 Analytics
               </Button>
             </Link>
-            <Link to={createPageUrl('CRMAnalyticsDashboard')}>
+            <Link to={createPageUrl('InteractiveDashboard')}>
               <Button size="sm" variant="outline" className="w-full text-xs">
                 <TrendingUp className="w-3 h-3 mr-1" />
                 Dashboard
