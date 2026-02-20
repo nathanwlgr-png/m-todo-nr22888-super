@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp, Calendar, Car, DollarSign, AlertTriangle } from 'lucide-react';
+import { Sparkles, Loader2, Navigation, Clock, MapPin, TrendingUp, Calendar, Car, DollarSign, AlertTriangle, Utensils } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
 import { format } from 'date-fns';
