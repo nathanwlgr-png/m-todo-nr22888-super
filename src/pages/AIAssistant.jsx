@@ -73,6 +73,8 @@ export default function AIAssistant() {
   const [showLiveCoaching, setShowLiveCoaching] = useState(false);
   const [showWhatsAppBot, setShowWhatsAppBot] = useState(false);
   const [showProactive, setShowProactive] = useState(true);
+  const [showWhatsAppNotif, setShowWhatsAppNotif] = useState(false);
+  const [sendingNotif, setSendingNotif] = useState(false);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
