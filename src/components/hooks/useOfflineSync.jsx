@@ -11,7 +11,7 @@ export function useOfflineSync() {
     try {
       const meta = JSON.parse(localStorage.getItem(OFFLINE_META_KEY) || '{}');
       return meta.last_sync ? new Date(meta.last_sync) : null;
-    } catch { return null; }
+    } catch (_e) { return null; }
   });
   const [pendingCount, setPendingCount] = useState(0);
   const [conflicts, setConflicts] = useState([]);
@@ -19,7 +19,7 @@ export function useOfflineSync() {
     try {
       const meta = JSON.parse(localStorage.getItem(OFFLINE_META_KEY) || '{}');
       return meta.stats || null;
-    } catch { return null; }
+    } catch (_e) { return null; }
   });
 
   // Detectar mudanças de conexão
