@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     const subtotal = equipmentPrice + kitPrice + installationFee + calibrationFee;
 
     // Gerar proposta usando IA
-    const proposalContent = await base44.integrations.Core.InvokeLLM({
+    const proposalContent = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Gere uma PROPOSTA DE VENDA profissional e personalizada em MARKDOWN.
 
 DADOS DO CLIENTE:
