@@ -18,8 +18,15 @@ Deno.serve(async (req) => {
     );
 
     // ─── GPS + CLIENTES PRÓXIMOS ─────────────────────────────────────────────
+    // parse inline: "gps lat:-22.21 lng:-49.94"
+    const latMatch = messageText.match(/lat[:\s]*([-\d.]+)/);
+    const lngMatch = messageText.match(/lng[:\s]*([-\d.]+)/);
+    const parsedLat = latMatch ? parseFloat(latMatch[1]) : lat;
+    const parsedLng = lngMatch ? parseFloat(lngMatch[1]) : lng;
+
     if (messageText.includes('gps') || messageText.includes('onde estou') || messageText.includes('próximos') || messageText.includes('proximos')) {
-      if (lat && lng) {
+      if (parsedLat && parsedLng) {
+        const lat = parsedLat; const lng = parsedLng;
         // Clientes com cidade mapeada — retorna os mais prioritários da região
         const cityClients = clients
           .filter(c => c.city)
