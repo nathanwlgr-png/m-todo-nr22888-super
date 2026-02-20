@@ -5,50 +5,29 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  Send, 
-  HelpCircle,
-  MessageCircle,
-  MessageSquare,
-  Target,
-  RotateCcw,
-  Loader2,
-  Sparkles,
-  Save,
-  Copy,
-  Check,
-  TrendingUp,
-  FileText,
-  Search,
-  Brain,
-  CheckSquare,
-  Handshake,
-  Globe,
-  Zap
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  ArrowLeft, Send, Loader2, Sparkles, Save, Copy, Check, FileText,
+  Search, Brain, CheckSquare, Handshake, Globe, Zap, MessageCircle,
+  MessageSquare, Target, RotateCcw, TrendingUp, HelpCircle, Calendar,
+  Building2, Bell, ChevronRight, X, Phone, Star
+} from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
-import LiveSalesCoachingModule from '@/components/LiveSalesCoachingModule';
-import WhatsAppBotIntegration from '@/components/WhatsAppBotIntegration';
-import ProactiveSalesAutomation from '@/components/ProactiveSalesAutomation';
+import AgendaComandoPanel from '@/components/AgendaComandoPanel';
+import BuscaClinicaCNPJ from '@/components/BuscaClinicaCNPJ';
+import AlertasTempoReal from '@/components/AlertasTempoReal';
 import EditableClientName from '@/components/EditableClientName';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
 import { getFallbackResponse } from '@/components/LocalAIFallbacks';
-import ReactMarkdown from 'react-markdown';
 
 export default function AIAssistant() {
   const { limitReached, getCachedResponse, setCachedResponse, handleLimitError, checkQuotaBeforeCall, trackAICall, quotaExceeded } = useAILimit();
@@ -56,7 +35,7 @@ export default function AIAssistant() {
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const clientIdFromUrl = urlParams.get('id');
-  
+
   const [selectedClientId, setSelectedClientId] = useState(clientIdFromUrl || null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -64,17 +43,12 @@ export default function AIAssistant() {
   const [quickLoading, setQuickLoading] = useState({});
   const [generatedScript, setGeneratedScript] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [whatsappSent, setWhatsappSent] = useState(false);
-  const messagesEndRef = useRef(null);
   const [rolePlayMode, setRolePlayMode] = useState(false);
   const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
-  const fileInputRef = useRef(null);
-  const [showMasterAI, setShowMasterAI] = useState(false);
-  const [showLiveCoaching, setShowLiveCoaching] = useState(false);
-  const [showWhatsAppBot, setShowWhatsAppBot] = useState(false);
-  const [showProactive, setShowProactive] = useState(true);
-  const [showWhatsAppNotif, setShowWhatsAppNotif] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const [sendingNotif, setSendingNotif] = useState(false);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
@@ -85,19 +59,10 @@ export default function AIAssistant() {
     queryKey: ['client', selectedClientId],
     queryFn: async () => {
       if (!selectedClientId) return null;
-      try {
-        const clients = await base44.entities.Client.list();
-        const found = clients.find(c => c && c.id === selectedClientId);
-        if (!found) {
-          setSelectedClientId(null);
-          return null;
-        }
-        return found;
-      } catch (error) {
-        console.error('Erro ao buscar cliente:', error);
-        setSelectedClientId(null);
-        return null;
-      }
+      const clients = await base44.entities.Client.list();
+      const found = clients.find(c => c && c.id === selectedClientId);
+      if (!found) { setSelectedClientId(null); return null; }
+      return found;
     },
     enabled: !!selectedClientId,
     retry: 0
@@ -127,915 +92,285 @@ export default function AIAssistant() {
     enabled: !!selectedClientId
   });
 
-  const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.update(selectedClientId, data),
-    onSuccess: () => queryClient.invalidateQueries(['client', selectedClientId])
-  });
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (client && messages.length === 0 && client.first_name) {
-      const greeting = `👋 Olá! Sou **Primori**, sua Assistente de Venda Integrativa.
-
-🧠 **Metodologia Híbrida:**
-• Numerologia Pitagórica + SPIN + Cialdini
-• Análise Estatística + Inteligência Emocional
-• Arte da Guerra (Sun Tzu)
-
-📊 **Cliente:** ${client.first_name}
-• Perfil: ${client.numerology_number} - ${client.behavioral_profile || 'Análise pendente'}
-• Score: ${client.purchase_score || 50}% | Status: ${client.status}
-• Estilo: ${client.decision_style || 'A definir'}
-
-🎯 **Posso ajudar com:**
-• Estratégias de abordagem personalizadas
-• Perguntas SPIN contextualizadas
-• Controle de objeções avançado
-• Análise probabilística de fechamento
-• Simulações de conversa (Modo Treinamento)
-
-💬 Me faça uma pergunta ou use os botões rápidos acima!`;
-      
-      setMessages([{
-        role: 'assistant',
-        content: greeting
-      }]);
-    }
-  }, [client]);
-
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: () => base44.auth.me()
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (data) => base44.entities.Client.update(selectedClientId, data),
+    onSuccess: () => queryClient.invalidateQueries(['client', selectedClientId])
+  });
+
+  const createTasksMutation = useMutation({
+    mutationFn: (tasks) => Promise.all(tasks.map(task => base44.entities.Task.create(task))),
+    onSuccess: () => { queryClient.invalidateQueries(['client-tasks']); toast.success('Tarefas criadas!'); }
+  });
+
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  useEffect(() => {
+    if (client && messages.length === 0 && client.first_name) {
+      setMessages([{
+        role: 'assistant',
+        content: `👋 Olá! Sou **Primori**, sua Assistente Master de Vendas.\n\n📊 **Cliente:** ${client.first_name} | Score: ${client.purchase_score || 50}% | Status: ${client.status}\n\n💬 Pergunte qualquer coisa ou use as ferramentas acima!`
+      }]);
+    }
+  }, [client]);
+
   const getSystemContext = (isRolePlay = false) => {
     if (!client) return '';
-    
-    const vendorPersonality = currentUser && (currentUser.communication_style || currentUser.personality_traits?.length > 0)
-      ? `
-PERSONALIDADE DO VENDEDOR (você):
-- Nome: ${currentUser.full_name}
-- Estilo: ${currentUser.communication_style || 'Profissional'}
-- Características: ${currentUser.personality_traits?.join(', ') || 'empático, consultivo'}
-- Abordagem: ${currentUser.sales_approach || 'Consultiva'}
-${currentUser.signature_phrases?.length > 0 ? `- Frases típicas: ${currentUser.signature_phrases.join(', ')}` : ''}
-
-IMPORTANTE: Todas as sugestões devem refletir o estilo pessoal de ${currentUser.full_name}.
-      `
-      : '';
-    
-    const interactionHistory = `
-HISTÓRICO DE INTERAÇÕES:
-- Total de visitas: ${visits.length}
-- Última visita: ${client.last_visit_date || 'Nenhuma ainda'}
-- Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
-- Dores identificadas: ${client.main_pains?.join(', ') || 'Não identificadas'}
-- Gatilhos usados: ${client.triggers_used?.join(', ') || 'Nenhum'}
-- Notas anteriores: ${client.notes?.substring(0, 200) || 'Sem notas'}
-    `;
+    const interactionHistory = `HISTÓRICO: ${visits.length} visitas | ${tasks.filter(t => t.status === 'pendente').length} tarefas | Dores: ${client.main_pains?.join(', ') || 'N/A'}`;
 
     if (isRolePlay) {
-      return `
-MODO TREINAMENTO - SIMULAÇÃO DE ROLE-PLAY
+      return `MODO ROLE-PLAY: Você É ${client.first_name}. Perfil: ${client.behavioral_profile}. Tom: ${client.client_tone}. ${interactionHistory}. Responda em 1ª pessoa SEMPRE.`;
+    }
 
-Você agora É o cliente ${client.first_name}. Interprete o papel dele de forma realista.
-
-PERFIL DO CLIENTE (você):
-- Nome: ${client.first_name}
-- Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
-- Estilo de Decisão: ${client.decision_style}
-- Tom de Voz: ${client.client_tone || 'profissional'}
-- Tipo: ${client.client_type}
-- Papel: ${client.decision_role}
-- Status: ${client.status} | Score: ${client.purchase_score}%
-- Equipamento Atual: ${client.current_equipment || 'Nenhum'}
-- Dores: ${client.main_pains?.join(', ') || 'Preço alto'}
-
+    return `VOCÊ É PRIMORI - IA MASTER DE VENDAS INTEGRATIVA.
+    
+Cliente: ${client.first_name} | Tipo: ${client.client_type} | Score: ${client.purchase_score}%
+Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
+Status: ${client.status} | Pipeline: ${client.pipeline_stage}
+Dores: ${client.main_pains?.join(', ') || 'N/A'}
 ${interactionHistory}
 
-INSTRUÇÕES IMPORTANTES:
-1. Responda SEMPRE em primeira pessoa como se você FOSSE ${client.first_name}
-2. Mantenha o perfil numerológico (${client.behavioral_profile})
-3. Use o tom de voz apropriado: ${client.client_tone || 'profissional'}
-4. Seja realista: levante objeções típicas do seu perfil
-5. Se perfil 4 ou 7: seja analítico, peça dados técnicos
-6. Se perfil 3 ou 5: seja mais emocional e entusiasmado
-7. Se perfil 1 ou 8: seja direto, foque em ROI
-8. NÃO quebre o personagem. NÃO dê dicas ao vendedor.
-9. Responda como um cliente REAL responderia
+FRAMEWORKS: Numerologia Pitagórica + SPIN Selling + Cialdini + Arte da Guerra + Neurovendas
 
-Comece a simulação reagindo ao que o vendedor disser.
-      `;
-    }
-    
-    return `
-      ${vendorPersonality}
+PRODUTOS NR22: VG1/VG2 (Gasometria), VBC-50A (Hematologia), QT3/SMT-120VP (Bioquímica), VI1 (Imunofluorescência), VQ1 (PCR)
+DIFERENCIAIS: 25 meses garantia, manutenção vitalícia, bonificação insumos, ISO 13485
 
-      VOCÊ É PRIMORI - IA DE VENDA INTEGRATIVA E GESTÃO
-      
-      FRAMEWORKS ESTRATÉGICOS INTEGRADOS:
-      1. **Numerologia Pitagórica**: Perfis 1-9, 11, 22 (comportamento, decisão, comunicação)
-      2. **SPIN Selling**: Situation, Problem, Implication, Need-Payoff (vendas consultivas)
-      3. **Cialdini**: Reciprocidade, Compromisso, Prova Social, Autoridade, Escassez, Apreço
-      4. **Inteligência Emocional**: Empatia, Autorregulação, Autoconsciência, Motivação
-      5. **Arte da Guerra**: Timing, Estratégia, Conhecer o Cliente, Adaptabilidade
-      6. **Análise Probabilística**: Estatísticas de conversão, padrões de comportamento
-      7. **Neurovendas**: Gatilhos cerebrais, storytelling, ancoragem de valor
-
-      Contexto do Cliente:
-      - Nome: ${client.first_name}
-      - Tipo: ${client.client_type}
-      - Decisor: ${client.decision_role}
-      - Perfil comportamental: ${client.behavioral_profile}
-      - Estilo de decisão: ${client.decision_style}
-      - Número numerológico: ${client.numerology_number}
-      - Tom de voz: ${client.client_tone || 'não observado'}
-      - Comunicação recomendada: ${client.recommended_communication || 'padrão'}
-      - Status: ${client.status}
-      - Score de compra: ${client.purchase_score}%
-      - Objetivo da visita: ${client.visit_objective || 'diagnosticar'}
-      
-      ${interactionHistory}
-      
-      PRIMORI - METODOLOGIA INTEGRATIVA DE VENDAS:
-      
-      **ANÁLISE MULTI-CAMADAS:**
-      1. **Numerológica**: Como o cliente ${client.numerology_number} pensa, decide e se comunica
-      2. **Estatística**: Probabilidade de conversão baseada em dados históricos
-      3. **Psicológica**: Motivadores inconscientes e gatilhos emocionais
-      4. **Estratégica**: Timing ideal, sequência de abordagem, momento de fechamento
-      
-      **DADOS ESTATÍSTICOS PARA USAR:**
-      • Perfil ${client.numerology_number}: taxa de conversão típica, ciclo médio de venda
-      • ${client.client_type}: orçamento médio, objeções mais comuns
-      • Score ${client.purchase_score}%: probabilidade de fechamento em 7/15/30 dias
-      • Status ${client.status}: técnicas com maior ROI para este estágio
-      
-      **FORMATO DE RESPOSTA PRIMORI:**
-      • Sempre cite o framework principal usado
-      • Inclua probabilidades quando aplicável
-      • Forneça scripts/perguntas prontas para usar
-      • Indique QUANDO executar cada ação
-      • Explique POR QUÊ a estratégia funciona para este perfil
-      
-      PRODUTOS:
-      - Analisadores Bioquímicos: SMT-120VP, QT3
-      - Analisadores de Gases Sanguíneos: VG1, VG2
-      - Analisador de Imunofluorescência: VI1
-      - Analisador Hematológico: VBC-50A
-      - Analisador PCR: VQ1
-      
-      DIFERENCIAIS:
-      - 25 meses de garantia (mercado oferece 12)
-      - Manutenção vitalícia inclusa
-      - Bonificação em insumos (não damos desconto no equipamento)
-      - Certificação ISO 13485:2016
-      - Tecnologia POCT de ponta
-      
-      **REGRAS DE OURO PRIMORI:**
-      1. Cite o framework principal em cada resposta
-      2. Combine no mínimo 2 frameworks por análise
-      3. Forneça probabilidades baseadas em dados
-      4. Seja ESTRATÉGICO, não genérico
-      5. Máximo 4 parágrafos por resposta
-      6. Sempre inclua ação CONCRETA e mensurável
-      7. Use markdown para estruturar respostas longas
-      
-      Responda em português brasileiro com expertise consultiva.
-    `;
+Responda em português. Seja ESTRATÉGICO, cite frameworks, dê probabilidades. Máx 4 parágrafos.`;
   };
 
+  // ─── ENVIAR MENSAGEM COM MENSAGEM COMPLETA (SEM CORTAR) ───────────────────────
   const sendMessage = async (userMessage) => {
     if (!userMessage.trim()) return;
-    
-    if (!client && !rolePlayMode) {
-      toast.error('Selecione um cliente primeiro');
-      return;
-    }
-
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setLoading(true);
 
     try {
-      // Verificar quota diária primeiro
-      if (quotaExceeded || !checkQuotaBeforeCall()) {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: '⏱️ Quota diária atingida. Use botões rápidos (templates locais). Reset automático amanhã.' 
-        }]);
-        setLoading(false);
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '⏱️ Quota atingida. Use os botões rápidos.' }]);
         return;
       }
 
-      // Verificar limite mensal
-      if (limitReached) {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: '⚠️ Limite mensal atingido. Use os botões rápidos com templates locais.' 
-        }]);
-        setLoading(false);
-        return;
-      }
-
-      // Rastrear uso
       trackAICall();
-      if (window.trackAIUsage) window.trackAIUsage();
-      
-      const conversationHistory = messages.slice(-6).map(m => 
-        `${m.role === 'user' ? 'Vendedor' : rolePlayMode ? client?.first_name : 'Assistente'}: ${m.content}`
+      const conversationHistory = messages.slice(-6).map(m =>
+        `${m.role === 'user' ? 'Vendedor' : 'Primori'}: ${m.content}`
       ).join('\n\n');
 
-      const enhancedPrompt = `${getSystemContext(rolePlayMode)}
-
-HISTÓRICO DA CONVERSA ATUAL:
-${conversationHistory}
-
-${rolePlayMode ? 'Vendedor diz:' : 'Pergunta do vendedor:'} ${userMessage}
-
-${!rolePlayMode ? `
-INSTRUÇÕES PRIMORI (IA INTEGRATIVA):
-1. Analise o contexto completo: perfil + histórico + pergunta
-2. Forneça resposta ESTRATÉGICA multi-framework
-3. Cite probabilidades e dados quando relevante
-4. Seja CONCISO mas COMPLETO (máximo 4 parágrafos)
-5. Sempre indique qual framework está usando
-6. Se for sugestão de ação, inclua QUANDO fazer e COMO medir resultado
-` : ''}`;
+      // Detectar comando de agenda
+      const msgLower = userMessage.toLowerCase();
+      if (msgLower.includes('agenda') || msgLower.includes('visita') && (msgLower.includes('semana') || msgLower.includes('mês') || msgLower.includes('mes'))) {
+        const cidadeMatch = ['Marília', 'Bauru', 'Botucatu', 'Lins', 'Ourinhos', 'Assis', 'Tupã', 'Jaú'].filter(c =>
+          msgLower.includes(c.toLowerCase())
+        );
+        if (cidadeMatch.length > 0 || msgLower.includes('agenda')) {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `📅 **Comando de Agenda detectado!**\n\nCidades identificadas: ${cidadeMatch.length > 0 ? cidadeMatch.join(', ') : 'nenhuma específica'}\n\n👉 Clique na aba **📅 Agenda** para gerar sua agenda completa automaticamente com os melhores clientes!`
+          }]);
+          setActiveTab('agenda');
+          return;
+        }
+      }
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: enhancedPrompt
+        prompt: `${getSystemContext(rolePlayMode)}
+
+HISTÓRICO DA CONVERSA:
+${conversationHistory}
+
+${rolePlayMode ? 'Vendedor diz:' : 'Pergunta:'} ${userMessage}
+
+IMPORTANTE: Resposta COMPLETA, nunca corte no meio. Use markdown estruturado.`
       });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
-      console.error('Erro ao enviar:', error);
-      
       const isLimit = handleLimitError(error);
-      
-      const errorMsg = isLimit
-        ? '⚠️ Limite de IA atingido. Use os botões rápidos (templates locais disponíveis).' 
-        : '⚠️ Erro ao processar. Tente novamente.';
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: errorMsg
-      }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: isLimit ? '⚠️ Limite de IA atingido.' : '⚠️ Erro ao processar.' }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleRolePlayMode = () => {
-    if (!client) return;
-    
-    if (!rolePlayMode) {
-      setMessages([{
-        role: 'assistant',
-        content: `🎭 **MODO TREINAMENTO ATIVADO**\n\nOlá, sou ${client.first_name || 'o cliente'}, ${client.decision_role || 'decisor'} na ${client.clinic_name || 'minha clínica'}.\n\n${client.behavioral_profile || 'Perfil analítico'}. ${client.decision_style || 'Decisões cuidadosas'}.\n\nComo você vai me abordar? 🤔`
-      }]);
-    } else {
-      setMessages([{
-        role: 'assistant',
-        content: `Modo Treinamento desativado. Voltando ao modo assistente normal.\n\nComo posso ajudar?`
-      }]);
-    }
-    setRolePlayMode(!rolePlayMode);
-  };
-
-  const analyzeTranscript = async (transcriptText) => {
-    if (!client) {
-      toast.error('Selecione um cliente primeiro');
-      return;
-    }
-
-    setAnalyzingTranscript(true);
-    try {
-      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
-        toast.error(quotaExceeded ? 'Quota diária atingida. Reset amanhã.' : 'Limite IA atingido.');
-        setAnalyzingTranscript(false);
-        return;
-      }
-
-      // Rastrear uso
-      trackAICall();
-      if (window.trackAIUsage) window.trackAIUsage();
-      
-      const analysis = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é um coach de vendas especializado. Analise esta transcrição de conversa com o cliente.
-
-PERFIL DO CLIENTE:
-- Nome: ${client.first_name}
-- Numerologia: ${client.numerology_number} - ${client.behavioral_profile}
-- Estilo de Decisão: ${client.decision_style}
-- Tom Ideal: ${client.recommended_communication || 'Não definido'}
-
-TRANSCRIÇÃO:
-${transcriptText}
-
-Analise e forneça feedback estruturado:
-
-**1. PONTOS FORTES** (2-3 pontos)
-- O que o vendedor fez bem
-
-**2. ÁREAS DE MELHORIA** (2-3 pontos críticos)
-- Erros de comunicação
-- Oportunidades perdidas
-
-**3. ADERÊNCIA À METODOLOGIA** (score 0-10)
-- SPIN Selling: [score/10] - comentário
-- Numerologia: [score/10] - se adaptou ao perfil?
-- Gatilhos Persuasão: [score/10] - usou quais?
-
-**4. ANÁLISE DE TOM/LINGUAGEM**
-- Tom usado vs. tom ideal para este cliente
-- Linguagem apropriada ao perfil numerológico?
-
-**5. PRÓXIMAS AÇÕES RECOMENDADAS** (3 ações específicas)
-
-Seja DIRETO, CONSTRUTIVO e ACIONÁVEL. Use dados da transcrição.`
-      });
-
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: `📊 **ANÁLISE DA CONVERSA**\n\n${analysis}`
-      }]);
-      toast.success('Análise concluída!');
-    } catch (error) {
-      console.error('Erro análise:', error);
-      handleLimitError(error);
-      toast.error(error.message?.includes('limit') ? 'Limite de IA atingido' : 'Erro ao analisar');
-    } finally {
-      setAnalyzingTranscript(false);
-    }
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const text = event.target?.result;
-      await analyzeTranscript(text);
-    };
-    reader.readAsText(file);
-  };
-
+  // ─── AÇÃO RÁPIDA ──────────────────────────────────────────────────────────────
   const generateQuickAction = async (type) => {
-    if (!client && type !== 'autoTasks') {
-      toast.error('Selecione um cliente primeiro');
-      return;
-    }
-
+    if (!client) { toast.error('Selecione um cliente primeiro'); return; }
     setQuickLoading(prev => ({ ...prev, [type]: true }));
     setGeneratedScript(null);
 
     try {
-      const prompts = {
-        presentation: `Você é um especialista em comunicação e vendas consultivas.
+      const cacheKey = `${type}_${client.id}_${client.numerology_number}`;
+      const cached = getCachedResponse(cacheKey);
+      if (cached) { setGeneratedScript({ type, content: cached }); toast.success('📦 Cache'); return; }
 
-Crie um guia COMPLETO de como se apresentar e fazer o primeiro contato${client?.first_name ? ' com ' + client.first_name : ''}.
-
-IMPORTANTE: Se o nome do decisor não estiver disponível, use "você" ou "contato" nas sugestões. NUNCA use placeholders como [nome] ou invente nomes.
-
-═══════════════════════════════════════
-📊 PERFIL NUMEROLÓGICO COMPLETO
-═══════════════════════════════════════
-- Número Nome: ${client?.numerology_number} - ${client?.behavioral_profile}
-- Caminho de Vida: ${client?.life_path_number || 'Não disponível'}
-- Estilo de Decisão: ${client?.decision_style}
-- Tom Observado: ${client?.client_tone || 'Não observado'}
-- Comunicação Recomendada: ${client?.recommended_communication || 'Padrão'}
-
-═══════════════════════════════════════
-💼 CONTEXTO DO CLIENTE
-═══════════════════════════════════════
-- Tipo: ${client?.client_type}
-- Decisor: ${client?.decision_role}
-- Clínica: ${client?.clinic_name || 'Não informada'}
-- Status: ${client?.status} | Score: ${client?.purchase_score}%
-- Visitas anteriores: ${visits.length}
-- Equipamento atual: ${client?.current_equipment || 'Nenhum'}
-
-═══════════════════════════════════════
-🎯 SUA MISSÃO
-═══════════════════════════════════════
-
-Forneça um guia estruturado em MARKDOWN com:
-
-**1. APRESENTAÇÃO PESSOAL (PRESENCIAL)**
-
-**Tom e Postura Corporal:**
-- Tom de voz ideal (grave/agudo, pausado/rápido)
-- Linguagem corporal apropriada
-- Distância física ideal
-- Aperto de mão (firme/suave/médio)
-
-**Frase de Abertura:**
-- Primeira frase exata adaptada ao perfil numerológico
-- Como mencionar seu nome e empresa
-- Gancho de conexão emocional/racional
-
-**Primeiros 30 Segundos:**
-- O que falar (e o que NÃO falar)
-- Como capturar atenção imediata
-- Transição para conversa consultiva
-
----
-
-**2. PRIMEIRO CONTATO POR CELULAR/WHATSAPP**
-
-**Mensagem de Texto (WhatsApp):**
-- Template de mensagem adaptado ao perfil
-- Melhor horário para enviar
-- Emoji strategy (usar ou não usar)
-- Call-to-action ideal
-
-**Ligação Telefônica:**
-- Script de abertura (primeiras 3 frases)
-- Como contornar secretária/recepção
-- Melhor horário para ligar
-- Tom de voz e ritmo da fala
-
----
-
-**3. ESTRATÉGIA DE CONEXÃO EMOCIONAL**
-
-Baseado no perfil numerológico ${client?.numerology_number}:
-- Gatilho emocional principal (medo, ambição, segurança, reconhecimento)
-- Palavras-chave que ressoam
-- Histórias/analogias que funcionam
-- Erros fatais a evitar
-
----
-
-**4. DIFERENCIAÇÃO IMEDIATA**
-
-Como se destacar da concorrência desde o primeiro contato:
-- Proposta de valor em 1 frase
-- Elemento surpresa/inesperado
-- Prova social estratégica
-- Bonificação diferencial (25 meses garantia, etc)
-
----
-
-**5. CHECKLIST DE PREPARAÇÃO**
-
-Antes do primeiro contato, tenha em mãos:
-- [ ] ...
-- [ ] ...
-- [ ] ...
-
----
-
-**6. SINAIS DE ALERTA**
-
-Fique atento a estes sinais no primeiro contato:
-- 🔴 Sinal de desinteresse: ...
-- 🟡 Sinal de dúvida: ...
-- 🟢 Sinal de engajamento: ...
-
-Seja EXTREMAMENTE PRÁTICO e específico para este cliente. Use dados do perfil numerológico.`,
-        question: `Gere UMA pergunta SPIN Selling para abrir a conversa${client?.first_name ? ' com ' + client.first_name : ''}. 
-        Numerologia: ${client?.numerology_number} - ${client?.behavioral_profile}
-        Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}.
-        
-        IMPORTANTE: Se o nome não estiver disponível, formule a pergunta de forma neutra sem usar nome.
-        
-        Use SPIN (Situation/Problem/Implication/Need-Payoff) adaptado ao perfil numerológico.
-        Indique qual tipo SPIN você usou.`,
-        objection: `Controle de objeção estratégico${client?.first_name ? ' para ' + client.first_name : ''}.
-        
-        PERFIL: Numerologia ${client?.numerology_number} - ${client?.behavioral_profile}
-        Tipo: ${client?.client_type}, Tom: ${client?.client_tone || 'padrão'}
-        
-        IMPORTANTE: Se nome não disponível, use forma neutra ("Entendo sua preocupação..." ao invés de "Entendo, [nome]...")
-        
-        Combine:
-        1. SPIN Selling: Transforme objeção em pergunta de Implication
-        2. Persuasão (Cialdini): Use autoridade, prova social ou reciprocidade
-        3. Inteligência Emocional: Empatia + autorregulação
-        4. Numerologia: Adapte ao perfil comportamental
-        
-        Forneça:
-        - Técnica principal (cite o framework)
-        - Frase exemplo usando SPIN
-        - Tom emocional ideal (Int. Emocional)
-        
-        Seja estratégico e multi-framework.`,
-        closing: `Sugira UMA frase de fechamento adequada${client?.first_name ? ' para ' + client.first_name : ''}.
-        Perfil: ${client?.behavioral_profile}. Objetivo: ${client?.visit_objective || 'apresentar_solucao'}.
-        Se nome não disponível, use abordagem direta sem personalização.`,
-        followup: `Crie UMA mensagem de follow-up curta e profissional${client?.first_name ? ' para ' + client.first_name : ''}.
-        Tipo: ${client?.client_type}. Mantenha breve e com próximo passo claro.
-        Se nome não disponível, inicie com "Olá!" apenas.`,
-        prospecting: `Crie técnicas de prospecção personalizadas${client?.first_name ? ' para ' + client.first_name : ''}.
-        
-        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
-        Tipo: ${client?.client_type}, Decisor: ${client?.decision_role}
-        Tom: ${client?.client_tone || 'padrão'}
-        
-        Baseado no perfil, sugira:
-        1) Melhor canal de contato (telefone, WhatsApp, email, presencial)
-        2) Melhor horário e frequência de abordagem
-        3) Estratégia de entrada (consultiva, técnica, ROI, emocional)
-        4) Primeira frase de impacto personalizada
-        
-        Seja prático e acionável.`,
-        needs: `Analise o histórico e preveja necessidades futuras${client?.first_name ? ' de ' + client.first_name : ''}.
-        
-        HISTÓRICO:
-        - Visitas: ${visits.length}
-        - Dores: ${client?.main_pains?.join(', ') || 'Não identificadas'}
-        - Status: ${client?.status}, Score: ${client?.purchase_score}%
-        - Equipamento atual: ${client?.current_equipment || 'Não informado'}
-        
-        Com base nisso, identifique:
-        1) Equipamento(s) complementar(es) que ele pode precisar em breve
-        2) Dores não exploradas ainda
-        3) Momento ideal para upsell/cross-sell
-        4) Gatilho emocional/prático a explorar na próxima interação
-        
-        Seja estratégico e preditivo.`,
-        proposal: `Crie uma proposta comercial personalizada${client?.first_name ? ' para ' + client.first_name : ''}.
-        
-        PERFIL NUMEROLÓGICO: ${client?.numerology_number} - ${client?.behavioral_profile}
-        Tom de voz: ${client?.client_tone || 'padrão'}
-        Tipo: ${client?.client_type}
-        Dores: ${client?.main_pains?.join(', ') || 'Gerais'}
-        
-        Adapte o tom da proposta (técnico, emocional, visual, ROI) ao perfil numerológico.
-        
-        Estruture em 3 parágrafos curtos:
-        1) Abertura personalizada conectando com a dor específica
-        2) Solução com diferenciais (garantia 25 meses, bonificação insumos)
-        3) Call-to-action assertivo adaptado ao estilo de decisão
-        
-        Tom: ${client?.client_tone || 'profissional equilibrado'}
-        Foco em conversão imediata.`,
-        insights: `Você é um consultor de vendas especialista em análise psicológica e estratégica de clientes.
-
-ANÁLISE PROFUNDA DO CLIENTE${client?.first_name ? ': ' + client.first_name : ''}
-
-═══════════════════════════════════════
-📊 DADOS NUMEROLÓGICOS
-═══════════════════════════════════════
-- Número Nome: ${client?.numerology_number}
-- Número Caminho de Vida: ${client?.life_path_number || 'Não disponível'}
-- Perfil Comportamental: ${client?.behavioral_profile}
-- Estilo de Decisão: ${client?.decision_style}
-- Tom de Voz Observado: ${client?.client_tone || 'Não observado'}
-
-═══════════════════════════════════════
-💼 CONTEXTO PROFISSIONAL
-═══════════════════════════════════════
-- Tipo de Negócio: ${client?.client_type}
-- Papel: ${client?.decision_role}
-- Clínica: ${client?.clinic_name || 'Não informada'}
-- Equipamento Atual: ${client?.current_equipment || 'Nenhum'}
-- Status: ${client?.status} | Score: ${client?.purchase_score}%
-
-═══════════════════════════════════════
-📈 HISTÓRICO DE VENDAS
-═══════════════════════════════════════
-${sales.length > 0 ? sales.map(s => `- ${s.equipment_name}: R$ ${s.sale_value} (${s.status})`).join('\n') : '- Nenhuma venda registrada'}
-
-═══════════════════════════════════════
-📅 HISTÓRICO DE VISITAS
-═══════════════════════════════════════
-- Total de visitas: ${visits.length}
-- Última visita: ${client?.last_visit_date || 'Nenhuma ainda'}
-${visits.slice(0, 3).map(v => `- ${v.visit_type} em ${v.scheduled_date?.split('T')[0]} - ${v.status}`).join('\n')}
-
-═══════════════════════════════════════
-📝 INTERAÇÕES E FOLLOW-UPS
-═══════════════════════════════════════
-- Follow-ups enviados: ${followupLogs.length}
-- Dores identificadas: ${client?.main_pains?.join(', ') || 'Não identificadas'}
-- Gatilhos usados: ${client?.triggers_used?.join(', ') || 'Nenhum'}
-- Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
-
-═══════════════════════════════════════
-📋 NOTAS ANTERIORES
-═══════════════════════════════════════
-${client?.notes || 'Sem notas anteriores'}
-
-═══════════════════════════════════════
-🎯 SUA MISSÃO
-═══════════════════════════════════════
-
-Com base em TODOS os dados acima, forneça uma análise ESTRATÉGICA e PROFUNDA em formato estruturado:
-
-**1. PERFIL PSICOLÓGICO COMPLETO** (2-3 parágrafos)
-   - Combine numerologia + tom observado + comportamento nas visitas
-   - Motivações profundas (medo, ambição, reconhecimento, segurança?)
-   - Padrões de decisão observados no histórico
-
-**2. MOTIVADORES PRINCIPAIS** (lista)
-   - Gatilhos emocionais mais efetivos
-   - Argumentos racionais que ressoam
-   - Prova social que funciona (testemunhos, cases)
-
-**3. ESTILO DE COMUNICAÇÃO IDEAL**
-   - Tom exato (formal/informal, técnico/emocional, direto/indireto)
-   - Canais preferidos (email, WhatsApp, presencial, ligação)
-   - Frequência de contato ideal
-   - Melhores horários baseados no perfil
-
-**4. OBJEÇÕES PREVISTAS** (3-5 principais)
-   - Liste objeções específicas que ele provavelmente levantará
-   - Para cada objeção, forneça:
-     * Por que essa objeção é provável (baseado em dados)
-     * Técnica de controle (SPIN/Cialdini/Int. Emocional)
-     * Frase exata de resposta
-
-**5. ESTRATÉGIA DE PITCH PERSONALIZADA**
-   - Abertura perfeita para este cliente
-   - Sequência de argumentos (priorize ROI? Qualidade? Segurança? Inovação?)
-   - Fechamento adaptado ao estilo de decisão dele
-   - Momento ideal para pedir o fechamento
-
-**6. PRÓXIMOS PASSOS TÁTICOS** (3-4 ações)
-   - Ações imediatas para avançar na venda
-   - O que NÃO fazer com este cliente
-   - Oportunidades de upsell/cross-sell
-   - Timeline esperado até fechamento
-
-**7. ALERTA DE RISCO**
-   - Sinais de que está esfriando
-   - O que pode fazer perder esta venda
-   - Como recuperar se esfriar
-
-Use MARKDOWN para estruturar. Seja ESTRATÉGICO, não genérico. Cite dados específicos do histórico.`,
-        suggestTasks: `Você é um assistente de produtividade em vendas. 
-
-Analise o cliente${client?.first_name ? ' ' + client.first_name : ''} e sugira 3-5 tarefas CONCRETAS e ACIONÁVEIS para avançar na venda.
-
-DADOS DO CLIENTE:
-- Perfil: ${client?.numerology_number} - ${client?.behavioral_profile}
-- Status: ${client?.status} | Score: ${client?.purchase_score}%
-- Tipo: ${client?.client_type}
-- Visitas: ${visits.length}
-- Última visita: ${client?.last_visit_date || 'Nenhuma'}
-- Dores: ${client?.main_pains?.join(', ') || 'Não identificadas'}
-- Equipamento atual: ${client?.current_equipment || 'Nenhum'}
-- Notas: ${client?.notes || 'Sem notas'}
-
-Com base nisso, sugira tarefas no formato:
-
-**1. [Tipo de tarefa] - [Título]**
-Prioridade: [alta/media/baixa]
-Prazo sugerido: [dias a partir de hoje]
-Descrição: [2-3 linhas explicando o que fazer e por quê]
-
-**2. [Tipo de tarefa] - [Título]**
-...
-
-Tipos válidos: follow_up, ligacao, email, visita
-
-As tarefas devem:
-- Ser específicas para este cliente
-- Estar alinhadas com o perfil numerológico
-- Ter objetivo claro (agendar, enviar, fechar, diagnosticar)
-- Incluir timing estratégico
-
-Seja prático e direto ao ponto.`
-      };
-
-      if (!prompts[type]) {
-        toast.error('Ação não encontrada');
-        setQuickLoading(prev => ({ ...prev, [type]: false }));
-        return;
-      }
-
-      // Verificar cache primeiro
-      const cacheKey = `${type}_${client?.id || 'general'}_${client?.numerology_number}`;
-      const cachedResponse = getCachedResponse(cacheKey);
-      
-      if (cachedResponse) {
-        setGeneratedScript({ type, content: cachedResponse });
-        toast.success('📦 Usando resposta em cache');
-        setQuickLoading(prev => ({ ...prev, [type]: false }));
-        return;
-      }
-
-      // Se quota ou limite atingido, usar fallback local
       if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
         const fallback = getFallbackResponse(type, client);
         setGeneratedScript({ type, content: fallback });
-        toast.info(quotaExceeded ? '⏱️ Quota diária - template local' : '📋 Template local (limite IA)');
-        setQuickLoading(prev => ({ ...prev, [type]: false }));
+        toast.info('📋 Template local');
         return;
       }
 
-      // Rastrear uso
       trackAICall();
-      if (window.trackAIUsage) window.trackAIUsage();
+
+      const prompts = {
+        presentation: `Crie guia completo de apresentação para ${client.first_name}. Perfil ${client.numerology_number}: ${client.behavioral_profile}. Tom: ${client.client_tone}. Tipo: ${client.client_type}. Inclua: apresentação presencial, WhatsApp, telefone, diferenciação, checklist. Resposta COMPLETA em markdown.`,
+        insights: `Análise psicológica e estratégica PROFUNDA de ${client.first_name}. Numerologia: ${client.numerology_number}. Score: ${client.purchase_score}%. Vendas: ${sales.length}. Dores: ${client.main_pains?.join(', ')}. Gere: perfil psicológico completo, motivadores, comunicação ideal, objeções previstas, estratégia de pitch, próximos passos, alerta de risco. Resposta COMPLETA.`,
+        prospecting: `Técnicas de prospecção para ${client.first_name}. Perfil ${client.numerology_number}: ${client.behavioral_profile}. Inclua canal ideal, horário, frequência, estratégia de entrada, primeira frase. COMPLETO.`,
+        question: `Pergunta SPIN Selling para ${client.first_name}. Numerologia ${client.numerology_number}. Tipo: ${client.client_type}. Indique qual tipo SPIN (S/P/I/N).`,
+        objection: `Controle de objeção multi-framework para ${client.first_name}. Perfil ${client.numerology_number}. Combine SPIN + Cialdini + IE. Frase exata de resposta.`,
+        closing: `Frase de fechamento personalizada para ${client.first_name}. Perfil: ${client.behavioral_profile}. Objetivo: ${client.visit_objective}. Direto e assertivo.`,
+        followup: `Mensagem de follow-up profissional para ${client.first_name}. Tipo: ${client.client_type}. Breve, com próximo passo claro.`,
+        proposal: `Proposta comercial personalizada para ${client.first_name}. Perfil ${client.numerology_number}. Tom: ${client.client_tone}. Dores: ${client.main_pains?.join(', ')}. 3 parágrafos: abertura, solução NR22 (25 meses garantia, bonificação), CTA. COMPLETA.`,
+        needs: `Análise preditiva de necessidades de ${client.first_name}. Histórico: ${visits.length} visitas, ${sales.length} vendas. Dores: ${client.main_pains?.join(', ')}. Equipamento atual: ${client.current_equipment}. Preveja: próximo produto, dores inexploradas, upsell timing, gatilho.`,
+        suggestTasks: `Sugira 3-5 tarefas concretas para ${client.first_name}. Status: ${client.status}. Score: ${client.purchase_score}%. Última visita: ${client.last_visit_date}. Formato: **1. [tipo] - [título]** Prioridade/Prazo/Descrição.`,
+      };
+
+      const prompt = prompts[type];
+      if (!prompt) { toast.error('Ação não encontrada'); return; }
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: prompts[type]
+        prompt: prompt + '\n\nRESPOSTA OBRIGATORIAMENTE COMPLETA. NÃO corte no meio. Use markdown estruturado.'
       });
 
-      // Salvar no cache
       setCachedResponse(cacheKey, response);
-
       setGeneratedScript({ type, content: response });
-      toast.success('✅ Conteúdo gerado!');
-
+      toast.success('✅ Gerado!');
     } catch (error) {
-      console.error('Erro ao gerar:', error);
-      
       const isLimit = handleLimitError(error);
-      
-      if (isLimit) {
-        // Usar fallback local
-        const fallback = getFallbackResponse(type, client);
-        setGeneratedScript({ type, content: fallback });
-        toast.warning('📋 Usando template local');
-      } else {
-        toast.error('Erro ao gerar conteúdo');
-      }
+      if (isLimit) { setGeneratedScript({ type, content: getFallbackResponse(type, client) }); }
+      else { toast.error('Erro ao gerar'); }
     } finally {
       setQuickLoading(prev => ({ ...prev, [type]: false }));
     }
   };
 
-  const handleCopyScript = () => {
-    if (generatedScript) {
-      navigator.clipboard.writeText(generatedScript.content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleShareWhatsApp = () => {
-    if (generatedScript && client?.phone) {
-      const message = encodeURIComponent(generatedScript.content);
-      window.open(`https://wa.me/${client.phone}?text=${message}`, '_blank');
-      setWhatsappSent(true);
-      setTimeout(() => setWhatsappSent(false), 2000);
-    }
-  };
-
-  const createTasksMutation = useMutation({
-    mutationFn: (tasks) => Promise.all(
-      tasks.map(task => base44.entities.Task.create(task))
-    ),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['client-tasks']);
-      toast.success('Tarefas criadas com sucesso!');
-    }
-  });
-
+  // ─── AUTO CRIAR TAREFAS ───────────────────────────────────────────────────────
   const handleAutoCreateTasks = async () => {
-    if (!selectedClientId || !client) {
-      toast.error('Selecione um cliente primeiro');
-      return;
-    }
-
+    if (!selectedClientId || !client) { toast.error('Selecione um cliente'); return; }
     setQuickLoading(prev => ({ ...prev, autoTasks: true }));
-
     try {
-      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
-        toast.error(quotaExceeded ? 'Quota diária atingida. Reset amanhã.' : 'Limite IA atingido.');
-        setQuickLoading(prev => ({ ...prev, autoTasks: false }));
-        return;
-      }
-
-      const prompt = `Você é um assistente de automação de tarefas. Analise o cliente e crie 3-5 tarefas CONCRETAS e ACIONÁVEIS.
-
-CLIENTE: ${client.first_name}
-Status: ${client.status} | Score: ${client.purchase_score}%
-Tipo: ${client.client_type}
-Visitas: ${visits.length}
-Última visita: ${client.last_visit_date || 'Nenhuma'}
-Dores: ${client.main_pains?.join(', ') || 'Não identificadas'}
-Equipamento: ${client.current_equipment || 'Nenhum'}
-
-Crie tarefas no formato JSON:
-{
-  "tasks": [
-    {
-      "title": "Título curto e claro",
-      "description": "Descrição detalhada do que fazer",
-      "type": "follow_up" | "ligacao" | "email" | "visita",
-      "priority": "baixa" | "media" | "alta",
-      "due_days": 1-30 (dias a partir de hoje)
-    }
-  ]
-}
-
-Tarefas devem:
-- Ser específicas para este cliente
-- Ter objetivo claro (agendar, enviar, fechar)
-- Incluir timing estratégico
-- Estar alinhadas com perfil numerológico ${client.numerology_number}`;
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) { toast.error('Limite IA atingido.'); return; }
+      trackAICall();
 
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
+        prompt: `Crie 3-5 tarefas para ${client.first_name}. Status: ${client.status}. Score: ${client.purchase_score}%. JSON obrigatório.`,
         response_json_schema: {
           type: "object",
           properties: {
-            tasks: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  type: { type: "string" },
-                  priority: { type: "string" },
-                  due_days: { type: "number" }
-                }
-              }
-            }
+            tasks: { type: "array", items: { type: "object", properties: {
+              title: { type: "string" }, description: { type: "string" },
+              type: { type: "string" }, priority: { type: "string" }, due_days: { type: "number" }
+            }}}
           }
         }
       });
 
       const tasksToCreate = result.tasks.map(task => ({
-        client_id: selectedClientId,
-        client_name: client.first_name,
-        title: task.title,
-        description: task.description,
-        type: task.type,
-        priority: task.priority,
-        due_date: new Date(Date.now() + task.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'pendente',
-        auto_created: true
+        client_id: selectedClientId, client_name: client.first_name,
+        title: task.title, description: task.description,
+        type: task.type, priority: task.priority,
+        due_date: new Date(Date.now() + task.due_days * 86400000).toISOString().split('T')[0],
+        status: 'pendente', auto_created: true
       }));
 
-      // Rastrear uso
-      trackAICall();
-      if (window.trackAIUsage) window.trackAIUsage();
-
       await createTasksMutation.mutateAsync(tasksToCreate);
-      
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `✅ **${tasksToCreate.length} Tarefas Criadas Automaticamente**\n\n${tasksToCreate.map((t, i) => 
-          `${i + 1}. **${t.title}** (${t.type})\n   ⏰ ${t.due_date} | Prioridade: ${t.priority}\n   📝 ${t.description}`
-        ).join('\n\n')}`
+        content: `✅ **${tasksToCreate.length} Tarefas Criadas!**\n\n${tasksToCreate.map((t, i) => `${i + 1}. **${t.title}** (${t.type}) - ${t.due_date}`).join('\n')}`
       }]);
-
     } catch (error) {
-      console.error('Erro criar tarefas:', error);
-      handleLimitError(error);
-      toast.error(error.message?.includes('limit') ? '⚠️ Limite de IA atingido' : 'Erro ao criar tarefas');
+      handleLimitError(error); toast.error('Erro ao criar tarefas');
     } finally {
       setQuickLoading(prev => ({ ...prev, autoTasks: false }));
     }
   };
 
-  const exportChatToPDF = () => {
-    if (messages.length === 0) {
-      toast.error('Nenhuma mensagem para exportar');
-      return;
-    }
-
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 15;
-    const maxWidth = pageWidth - (margin * 2);
-    let y = margin;
-
-    const addText = (text, fontSize = 10, isBold = false) => {
-      doc.setFontSize(fontSize);
-      doc.setFont(undefined, isBold ? 'bold' : 'normal');
-      const lines = doc.splitTextToSize(text, maxWidth);
-      
-      lines.forEach(line => {
-        if (y > pageHeight - margin) {
-          doc.addPage();
-          y = margin;
-        }
-        doc.text(line, margin, y);
-        y += fontSize * 0.5;
+  // ─── ENVIAR WHATSAPP COM CHUNKS (SEM PERDER CONTEÚDO) ────────────────────────
+  const handleShareWhatsApp = async () => {
+    if (!generatedScript || !client?.phone) return;
+    try {
+      const res = await base44.functions.invoke('whatsappSendChunked', {
+        message: generatedScript.content,
+        phone: client.phone,
+        client_id: client.id,
+        client_name: client.first_name,
       });
+
+      if (res.data?.success) {
+        const chunks = res.data.chunks || [];
+        if (chunks.length === 1) {
+          window.open(chunks[0].whatsapp_url, '_blank');
+          toast.success('WhatsApp aberto!');
+        } else {
+          // Abrir todos os chunks sequencialmente
+          toast.success(`Mensagem dividida em ${chunks.length} partes. Abrindo...`);
+          chunks.forEach((chunk, i) => {
+            setTimeout(() => window.open(chunk.whatsapp_url, '_blank'), i * 1500);
+          });
+        }
+      }
+    } catch (e) {
+      // Fallback direto
+      const msg = encodeURIComponent(generatedScript.content.substring(0, 3800));
+      window.open(`https://wa.me/${client.phone}?text=${msg}`, '_blank');
+    }
+  };
+
+  // ─── ANÁLISE DE TRANSCRIÇÃO ───────────────────────────────────────────────────
+  const analyzeTranscript = async (transcriptText) => {
+    if (!client) { toast.error('Selecione um cliente'); return; }
+    setAnalyzingTranscript(true);
+    try {
+      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) { toast.error('Limite IA atingido.'); return; }
+      trackAICall();
+      const analysis = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise esta transcrição de conversa com ${client.first_name} (perfil numerológico ${client.numerology_number}).
+
+TRANSCRIÇÃO: ${transcriptText}
+
+Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerologia/Gatilhos) 4.Tom/Linguagem 5.Próximas Ações. Resposta COMPLETA em markdown.`
+      });
+      setMessages(prev => [...prev, { role: 'assistant', content: `📊 **ANÁLISE DA CONVERSA**\n\n${analysis}` }]);
+      toast.success('Análise concluída!');
+    } catch (error) {
+      handleLimitError(error); toast.error('Erro ao analisar');
+    } finally {
+      setAnalyzingTranscript(false);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => analyzeTranscript(ev.target?.result);
+    reader.readAsText(file);
+  };
+
+  const exportChatToPDF = () => {
+    if (messages.length === 0) { toast.error('Nenhuma mensagem'); return; }
+    const doc = new jsPDF();
+    let y = 15;
+    const addLine = (text, size = 10, bold = false) => {
+      doc.setFontSize(size); doc.setFont(undefined, bold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text, 180);
+      lines.forEach(l => { if (y > 280) { doc.addPage(); y = 15; } doc.text(l, 15, y); y += size * 0.5; });
       y += 2;
     };
-
-    addText(`CONVERSA PRIMORI - ${client?.first_name || 'Assistente IA'}`, 14, true);
-    addText(`Data: ${new Date().toLocaleString('pt-BR')}`, 9);
+    addLine(`CONVERSA PRIMORI - ${client?.first_name || 'IA'}`, 14, true);
+    addLine(`Data: ${new Date().toLocaleString('pt-BR')}`, 9);
     y += 5;
-
-    messages.forEach((msg) => {
-      addText(msg.role === 'user' ? 'VOCÊ:' : 'PRIMORI:', 11, true);
-      addText(msg.content, 10);
+    messages.forEach(msg => {
+      addLine(msg.role === 'user' ? 'VOCÊ:' : 'PRIMORI:', 11, true);
+      addLine(msg.content, 10);
       y += 3;
     });
-
-    doc.save(`Conversa_PRIMORI_${client?.first_name || 'IA'}_${Date.now()}.pdf`);
-    toast.success('Chat exportado em PDF!');
+    doc.save(`Primori_${client?.first_name || 'IA'}_${Date.now()}.pdf`);
+    toast.success('PDF exportado!');
   };
 
   const sendWhatsAppNotif = async (action) => {
@@ -1043,515 +378,306 @@ Tarefas devem:
     try {
       const res = await base44.functions.invoke('whatsappMasterNotificacao', { action, phone: '5514991676428' });
       const link = res.data?.whatsapp_link;
-      if (link) {
-        window.open(link, '_blank');
-        toast.success('WhatsApp aberto! Clique em Enviar na janela.');
-      } else {
-        toast.error('Erro ao gerar link');
-      }
-    } catch (e) {
-      toast.error('Erro: ' + e.message);
-    } finally {
-      setSendingNotif(false);
-    }
+      if (link) { window.open(link, '_blank'); toast.success('WhatsApp aberto!'); }
+      else { toast.error('Erro ao gerar link'); }
+    } catch (e) { toast.error('Erro: ' + e.message); }
+    finally { setSendingNotif(false); }
   };
 
-  const handleSaveAndContinue = () => {
-    if (messages.length > 2) {
-      const lastMessages = messages.slice(-4).map(m => m.content).join(' ');
-      updateMutation.mutate({
-        notes: lastMessages.substring(0, 500),
-        last_visit_date: new Date().toISOString().split('T')[0]
-      });
-    }
-    toast.success('Conversa salva com sucesso!');
+  const toggleRolePlay = () => {
+    if (!client) return;
+    setRolePlayMode(!rolePlayMode);
+    setMessages([{
+      role: 'assistant',
+      content: !rolePlayMode
+        ? `🎭 **MODO TREINAMENTO** - Sou ${client.first_name}. ${client.behavioral_profile}. Como você vai me abordar?`
+        : `Modo Treinamento desativado. Como posso ajudar?`
+    }]);
   };
 
   const scriptLabels = {
-    presentation: 'Como Se Apresentar',
-    insights: 'Insights Profundos',
-    prospecting: 'Prospecção',
-    question: 'Pergunta',
-    objection: 'Controle de Objeções',
-    proposal: 'Proposta Comercial',
-    closing: 'Fechamento',
-    needs: 'Previsão de Necessidades',
-    followup: 'Follow-up',
-    suggestTasks: 'Sugestão de Tarefas',
-    autoTasks: 'Tarefas Criadas'
+    presentation: '🤝 Apresentação', insights: '🧠 Insights', prospecting: '🔍 Prospecção',
+    question: '❓ Pergunta SPIN', objection: '🛡️ Objeções', proposal: '📄 Proposta',
+    closing: '🎯 Fechamento', needs: '📈 Previsão', followup: '🔄 Follow-up', suggestTasks: '✅ Tarefas'
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4 mb-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* ═══ HEADER ═══ */}
+      <div className="bg-gradient-to-r from-indigo-700 to-purple-700 px-4 py-3 sticky top-0 z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-white/20">
+            <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-              {rolePlayMode ? '🎭 Treinamento' : (
-                <>
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  Primori
-                </>
-              )}
+            <h1 className="text-white font-bold text-base flex items-center gap-1.5">
+              <Sparkles className="w-5 h-5 text-yellow-300" />
+              Primori - Master de Vendas
             </h1>
-            {!rolePlayMode && (
-              <p className="text-xs text-purple-600 font-medium">IA Venda Integrativa</p>
+            <p className="text-indigo-200 text-xs">IA Integrativa + Agenda + Pesquisa + Alertas em Tempo Real</p>
+          </div>
+          {/* Alertas em tempo real */}
+          <AlertasTempoReal />
+          <Button size="sm" variant="ghost" onClick={exportChatToPDF} className="text-white hover:bg-white/20 h-8 px-2">
+            <FileText className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            onClick={toggleRolePlay}
+            disabled={!selectedClientId}
+            className={`h-8 text-xs ${rolePlayMode ? 'bg-yellow-400 text-black hover:bg-yellow-300' : 'bg-white/20 text-white hover:bg-white/30'}`}
+          >
+            🎭 {rolePlayMode ? 'Treinando' : 'Treinar'}
+          </Button>
+        </div>
+
+        {/* Seletor de cliente */}
+        <Select value={selectedClientId || ''} onValueChange={v => { setSelectedClientId(v === 'none' ? null : v); setMessages([]); setRolePlayMode(false); }}>
+          <SelectTrigger className="h-10 bg-white/20 border-white/30 text-white placeholder:text-white/60">
+            <SelectValue placeholder="Selecione um cliente..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Sem cliente específico</SelectItem>
+            {allClients.map(c => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.first_name} {c.clinic_name ? `- ${c.clinic_name}` : ''} {c.status === 'quente' ? '🔥' : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {client && (
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <EditableClientName client={client} onUpdate={() => queryClient.invalidateQueries(['client', selectedClientId])} />
+            <Badge className={`text-xs ${client.status === 'quente' ? 'bg-red-400' : client.status === 'morno' ? 'bg-yellow-400 text-black' : 'bg-slate-400'}`}>
+              {client.status}
+            </Badge>
+            <Badge className="bg-white/20 text-white text-xs">Score: {client.purchase_score}%</Badge>
+            {client.pipeline_stage && <Badge className="bg-indigo-400 text-xs">{client.pipeline_stage}</Badge>}
+            {client.phone && (
+              <a href={`https://wa.me/${client.phone}`} target="_blank" rel="noreferrer">
+                <Badge className="bg-green-500 text-white text-xs cursor-pointer hover:bg-green-400">📱 WhatsApp</Badge>
+              </a>
             )}
           </div>
-          <Button
-            variant={rolePlayMode ? "default" : "outline"}
-            size="sm"
-            onClick={toggleRolePlayMode}
-            disabled={!selectedClientId}
-            className={rolePlayMode ? "bg-purple-600 hover:bg-purple-700" : ""}
-          >
-            {rolePlayMode ? '🎭 Treinar' : '🎭 Treinar'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowMasterAI(!showMasterAI)}
-            className={showMasterAI ? 'bg-orange-100 border-orange-300' : ''}
-          >
-            <Globe className="w-4 h-4 mr-1" />
-            Web
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowLiveCoaching(!showLiveCoaching)}
-            className={showLiveCoaching ? 'bg-purple-100 border-purple-300' : ''}
-          >
-            <Sparkles className="w-4 h-4 mr-1" />
-            Live Coaching
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowWhatsAppBot(!showWhatsAppBot)}
-            className={showWhatsAppBot ? 'bg-green-100 border-green-300' : ''}
-          >
-            <MessageSquare className="w-4 h-4 mr-1" />
-            Bot WhatsApp
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowProactive(!showProactive)}
-            className={showProactive ? 'bg-indigo-100 border-indigo-300' : ''}
-          >
-            <Zap className="w-4 h-4 mr-1" />
-            Auto
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowWhatsAppNotif(!showWhatsAppNotif)}
-            className={showWhatsAppNotif ? 'bg-green-100 border-green-400 text-green-700' : 'border-green-300 text-green-600'}
-          >
-            📲 Notif
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportChatToPDF}
-            disabled={messages.length === 0}
-          >
-            <FileText className="w-4 h-4 mr-1" />
-            PDF
-          </Button>
-          {selectedClientId && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveAndContinue}
-              className="text-emerald-600 border-emerald-200"
-            >
-              <Save className="w-4 h-4 mr-1" />
-              Salvar
-            </Button>
-          )}
-        </div>
-        
-        {/* Client Selector */}
-        <div className="space-y-2">
-          <Label className="text-xs text-slate-600">Cliente</Label>
-          <Select
-            value={selectedClientId || ''}
-            onValueChange={(value) => {
-              setSelectedClientId(value === 'none' ? null : value);
-              setMessages([]);
-              setRolePlayMode(false);
-            }}
-          >
-            <SelectTrigger className="h-12 bg-slate-50">
-              <SelectValue placeholder="Selecione um cliente..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Sem cliente específico</SelectItem>
-              {allClients.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.first_name} {c.clinic_name ? `- ${c.clinic_name}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {client && (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600">Decisor:</span>
-                <EditableClientName 
-                  client={client} 
-                  onUpdate={() => queryClient.invalidateQueries(['client', selectedClientId])}
-                />
+        )}
+      </div>
+
+      {/* ═══ TABS PRINCIPAIS ═══ */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid grid-cols-5 m-2 mb-0 shrink-0">
+            <TabsTrigger value="chat" className="text-xs">💬 Chat</TabsTrigger>
+            <TabsTrigger value="agenda" className="text-xs">📅 Agenda</TabsTrigger>
+            <TabsTrigger value="pesquisa" className="text-xs">🔍 Pesquisa</TabsTrigger>
+            <TabsTrigger value="web" className="text-xs">🌐 Web/IA</TabsTrigger>
+            <TabsTrigger value="notif" className="text-xs">📲 Notif</TabsTrigger>
+          </TabsList>
+
+          {/* ── TAB CHAT ── */}
+          <TabsContent value="chat" className="flex-1 flex flex-col overflow-hidden m-0 p-0">
+            {/* Ações rápidas */}
+            <div className="bg-white border-b px-3 py-2 shrink-0">
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {[
+                  { type: 'presentation', icon: Handshake, label: 'Apresentar', color: 'bg-green-50 border-green-300 text-green-700' },
+                  { type: 'insights', icon: Brain, label: 'Insights', color: 'bg-pink-50 border-pink-300 text-pink-700' },
+                  { type: 'prospecting', icon: Search, label: 'Prospecção', color: 'bg-purple-50 border-purple-300 text-purple-700' },
+                  { type: 'question', icon: HelpCircle, label: 'Pergunta', color: 'bg-indigo-50 border-indigo-300 text-indigo-700' },
+                  { type: 'objection', icon: MessageCircle, label: 'Objeções', color: 'bg-red-50 border-red-300 text-red-700' },
+                  { type: 'proposal', icon: FileText, label: 'Proposta', color: 'bg-orange-50 border-orange-300 text-orange-700' },
+                  { type: 'closing', icon: Target, label: 'Fechamento', color: 'bg-emerald-50 border-emerald-300 text-emerald-700' },
+                  { type: 'needs', icon: TrendingUp, label: 'Previsão', color: 'bg-cyan-50 border-cyan-300 text-cyan-700' },
+                  { type: 'followup', icon: RotateCcw, label: 'Follow-up', color: 'bg-amber-50 border-amber-300 text-amber-700' },
+                  { type: 'suggestTasks', icon: CheckSquare, label: 'Tarefas', color: 'bg-teal-50 border-teal-300 text-teal-700' },
+                ].map(({ type, icon: Icon, label, color }) => (
+                  <QuickActionButton key={type} icon={Icon} label={label}
+                    onClick={() => generateQuickAction(type)} loading={quickLoading[type]}
+                    className={`shrink-0 ${color} text-xs`} />
+                ))}
+                <QuickActionButton icon={Zap} label="🤖 Criar Tarefas"
+                  onClick={handleAutoCreateTasks} loading={quickLoading.autoTasks}
+                  className="shrink-0 bg-gradient-to-r from-fuchsia-50 to-purple-50 border-fuchsia-300 text-fuchsia-700 font-bold text-xs" />
               </div>
-              <p className="text-xs text-slate-500">
-                {client.client_type ? `${client.client_type}` : 'Cliente'} • Score: {client.purchase_score}%
-              </p>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Transcript Analysis */}
-      {!rolePlayMode && (
-        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border-b px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="text-sm font-medium text-cyan-800">Análise de Conversa</span>
-            </div>
-            <div className="flex gap-2">
-              {client?.phone && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.open(`https://wa.me/${client.phone}`, '_blank')}
-                  className="border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
-                >
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  WhatsApp
-                </Button>
+            {/* Script gerado */}
+            {generatedScript && (
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b p-3 shrink-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-indigo-700">{scriptLabels[generatedScript.type] || generatedScript.type}</span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(generatedScript.content); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+                      {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    </Button>
+                    {client?.phone && (
+                      <Button size="sm" onClick={handleShareWhatsApp} className="h-6 px-2 bg-green-500 hover:bg-green-600 text-xs">
+                        WhatsApp
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setGeneratedScript(null)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-700 max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                  {generatedScript.content}
+                </div>
+              </div>
+            )}
+
+            {/* Mensagens */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {messages.length === 0 && (
+                <div className="text-center py-8 text-slate-400">
+                  <Sparkles className="w-10 h-10 mx-auto mb-2 text-indigo-300" />
+                  <p className="font-medium text-slate-500">Primori - Assistente Master de Vendas</p>
+                  <p className="text-xs mt-1">Selecione um cliente e use os botões acima ou digite sua pergunta</p>
+                  <p className="text-xs mt-1 text-indigo-500">Dica: "faça agenda da semana em Marília" 👆 aba Agenda</p>
+                </div>
               )}
-              <a 
-                href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} 
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold"
-                >
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  💬 NR22888
-                </Button>
-              </a>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={analyzingTranscript}
-                className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
-              >
-                {analyzingTranscript ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    Upload .txt
-                  </>
-                )}
-              </Button>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".txt"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="bg-white border-b px-4 py-3">
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-          <QuickActionButton
-            icon={Handshake}
-            label="Apresentação"
-            onClick={() => generateQuickAction('presentation')}
-            loading={quickLoading.presentation}
-            className="shrink-0 bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 text-green-700 hover:bg-green-100 font-semibold"
-          />
-          <QuickActionButton
-            icon={Brain}
-            label="Insights Profundos"
-            onClick={() => generateQuickAction('insights')}
-            loading={quickLoading.insights}
-            className="shrink-0 bg-gradient-to-r from-pink-50 to-rose-50 border-pink-300 text-pink-700 hover:bg-pink-100 font-semibold"
-          />
-          <QuickActionButton
-            icon={Search}
-            label="Prospecção"
-            onClick={() => generateQuickAction('prospecting')}
-            loading={quickLoading.prospecting}
-            className="shrink-0 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-          />
-          <QuickActionButton
-            icon={HelpCircle}
-            label="Pergunta"
-            onClick={() => generateQuickAction('question')}
-            loading={quickLoading.question}
-            className="shrink-0 bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
-          />
-          <QuickActionButton
-            icon={MessageCircle}
-            label="Controle de Objeções"
-            onClick={() => generateQuickAction('objection')}
-            loading={quickLoading.objection}
-            className="shrink-0 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-          />
-          <QuickActionButton
-            icon={FileText}
-            label="Proposta"
-            onClick={() => generateQuickAction('proposal')}
-            loading={quickLoading.proposal}
-            className="shrink-0 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
-          />
-          <QuickActionButton
-            icon={Target}
-            label="Fechamento"
-            onClick={() => generateQuickAction('closing')}
-            loading={quickLoading.closing}
-            className="shrink-0 bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-          />
-          <QuickActionButton
-            icon={TrendingUp}
-            label="Previsão"
-            onClick={() => generateQuickAction('needs')}
-            loading={quickLoading.needs}
-            className="shrink-0 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
-          />
-          <QuickActionButton
-            icon={RotateCcw}
-            label="Follow-up"
-            onClick={() => generateQuickAction('followup')}
-            loading={quickLoading.followup}
-            className="shrink-0 bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-          />
-          <QuickActionButton
-            icon={CheckSquare}
-            label="Sugerir Tarefas"
-            onClick={() => generateQuickAction('suggestTasks')}
-            loading={quickLoading.suggestTasks}
-            className="shrink-0 bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100"
-          />
-          <QuickActionButton
-            icon={Zap}
-            label="🤖 Criar Tarefas Auto"
-            onClick={handleAutoCreateTasks}
-            loading={quickLoading.autoTasks}
-            className="shrink-0 bg-gradient-to-r from-fuchsia-50 to-purple-50 border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-100 font-bold"
-          />
-        </div>
-      </div>
-
-      {/* Generated Script Modal */}
-      {generatedScript && (
-        <div className="p-4 bg-white border-b">
-          <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
-                {scriptLabels[generatedScript.type]}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyScript}
-                className="h-8"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-            <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {generatedScript.content}
-            </div>
-            <div className="flex gap-2 mt-3">
-              {client?.phone && (
-                <Button
-                  size="sm"
-                  onClick={handleShareWhatsApp}
-                  className="flex-1 bg-green-500 hover:bg-green-600"
-                >
-                  {whatsappSent ? (
-                    <>
-                      <Check className="w-4 h-4 mr-1" />
-                      Enviado
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                      </svg>
-                      WhatsApp
-                    </>
-                  )}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => generateQuickAction(generatedScript.type)}
-                className="flex-1"
-              >
-                <Sparkles className="w-4 h-4 mr-1" />
-                Nova
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setGeneratedScript(null)}
-              >
-                Fechar
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* WhatsApp Notificações Rápidas */}
-      {showWhatsAppNotif && (
-        <div className="px-4 pt-4 pb-2">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">📲</span>
-              <span className="font-semibold text-green-800">Enviar para WhatsApp (5514991676428)</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { action: 'resumo_diario', label: '🌅 Resumo Diário', desc: 'Clientes, tarefas, visitas' },
-                { action: 'relatorio_pipeline', label: '📊 Pipeline', desc: 'Funil de vendas' },
-                { action: 'alerta_clientes_frios', label: '❄️ Clientes Frios', desc: 'Sem contato há 14+ dias' },
-                { action: 'test', label: '✅ Teste Conexão', desc: 'Verificar sistema ativo' },
-              ].map(({ action, label, desc }) => (
-                <button
-                  key={action}
-                  onClick={() => sendWhatsAppNotif(action)}
-                  disabled={sendingNotif}
-                  className="text-left p-3 bg-white rounded-lg border border-green-200 hover:bg-green-50 transition-colors disabled:opacity-50"
-                >
-                  <div className="font-medium text-sm text-green-800">{label}</div>
-                  <div className="text-xs text-green-600 mt-0.5">{desc}</div>
-                </button>
+              {messages.map((msg, i) => (
+                <ChatMessage key={i} message={msg.content} isUser={msg.role === 'user'} />
               ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-white border rounded-2xl px-4 py-3 shadow-sm">
+                    <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Master AI Assistant */}
-      {showMasterAI && (
-        <div className="px-4 pt-4">
-          <MasterAIAssistant client={client} />
-        </div>
-      )}
-
-      {/* Live Sales Coaching */}
-      {showLiveCoaching && (
-        <div className="px-4 pt-4">
-          <LiveSalesCoachingModule 
-            client={client} 
-            visits={visits}
-            interactions={followupLogs}
-          />
-        </div>
-      )}
-
-      {/* WhatsApp Bot Integration */}
-      {showWhatsAppBot && (
-        <div className="px-4 pt-4">
-          <WhatsAppBotIntegration />
-        </div>
-      )}
-
-      {/* Proactive Sales Automation */}
-      {showProactive && client && (
-        <div className="px-4 pt-4">
-          <ProactiveSalesAutomation 
-            client={client} 
-            visits={visits}
-            interactions={[...followupLogs, ...tasks]}
-          />
-        </div>
-      )}
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && !showMasterAI && (
-          <div className="text-center py-8 text-slate-400">
-            <Sparkles className="w-12 h-12 mx-auto mb-3 text-orange-500" />
-            <p className="font-medium">PRIMORI - Assistente Master Autônomo</p>
-            <p className="text-sm mt-1">🌐 Pesquise qualquer coisa • 📄 Gere PDFs instantâneos • 💬 Chat IA Total</p>
-            <p className="text-xs mt-2 text-orange-600">Clique em "Web" para começar pesquisas</p>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <ChatMessage key={i} message={msg.content} isUser={msg.role === 'user'} />
-        ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
-              <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+            {/* Análise transcrição + Input */}
+            <div className="bg-white border-t p-3 shrink-0 space-y-2">
+              <div className="flex gap-2 flex-wrap">
+                {client?.phone && (
+                  <a href={`https://wa.me/${client.phone}`} target="_blank" rel="noreferrer">
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700 h-7 text-xs">
+                      <MessageCircle className="w-3 h-3 mr-1" /> WhatsApp
+                    </Button>
+                  </a>
+                )}
+                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} target="_blank" rel="noreferrer">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 text-xs">
+                    💬 NR22888
+                  </Button>
+                </a>
+                <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={analyzingTranscript} className="border-cyan-300 text-cyan-700 h-7 text-xs">
+                  {analyzingTranscript ? <Loader2 className="w-3 h-3 animate-spin" /> : '📎 Analisar .txt'}
+                </Button>
+                <input ref={fileInputRef} type="file" accept=".txt" className="hidden" onChange={handleFileUpload} />
+              </div>
+              {rolePlayMode && (
+                <div className="px-2 py-1 bg-purple-50 rounded border border-purple-200 text-xs text-purple-700">
+                  🎭 Modo Treinamento: você fala com {client?.first_name}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <VoiceRecorderButton onTranscript={t => setInput(t)} size="icon" className="h-11 w-11 shrink-0" />
+                <Input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && !loading && sendMessage(input)}
+                  placeholder={rolePlayMode ? 'Sua abordagem...' : 'Pergunte ou dê comandos... (ex: faça agenda semana Marília)'}
+                  className="flex-1 h-11 rounded-xl"
+                  disabled={loading}
+                />
+                <Button onClick={() => sendMessage(input)} disabled={loading || !input.trim()}
+                  className={`h-11 w-11 rounded-xl ${rolePlayMode ? 'bg-purple-600' : 'bg-indigo-600'}`}>
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          </TabsContent>
 
-      {/* Input */}
-      <div className="bg-white border-t p-4">
-        {rolePlayMode && (
-          <div className="mb-2 px-3 py-2 bg-purple-50 rounded-lg border border-purple-200">
-            <p className="text-xs text-purple-700">
-              🎭 Você está praticando com {client?.first_name}. Tente sua abordagem!
-            </p>
-          </div>
-        )}
-        <div className="flex gap-2">
-          <VoiceRecorderButton
-            onTranscript={(transcript) => setInput(transcript)}
-            size="icon"
-            className="h-12 w-12 shrink-0"
-          />
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !loading && sendMessage(input)}
-            placeholder={rolePlayMode ? "Sua abordagem/resposta..." : "Digite ou grave..."}
-            className="flex-1 h-12 rounded-xl border-2"
-            disabled={loading}
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={loading || !input.trim()}
-            className={`h-12 w-12 rounded-xl ${rolePlayMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
-          >
-            <Send className="w-5 h-5" />
-          </Button>
-        </div>
+          {/* ── TAB AGENDA ── */}
+          <TabsContent value="agenda" className="overflow-y-auto p-3 space-y-3">
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
+              <p className="font-medium text-indigo-800 mb-1">💡 Como usar a Agenda Inteligente:</p>
+              <ul className="text-xs text-indigo-700 space-y-0.5">
+                <li>• Digite cidades (ex: Marília, Bauru) e clique em Gerar</li>
+                <li>• A IA organiza os melhores clientes por score e potencial</li>
+                <li>• As visitas são criadas automaticamente no CRM</li>
+                <li>• Envie a agenda direto para seu WhatsApp</li>
+              </ul>
+            </div>
+            <AgendaComandoPanel />
+          </TabsContent>
+
+          {/* ── TAB PESQUISA ── */}
+          <TabsContent value="pesquisa" className="overflow-y-auto p-3 space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+              <p className="font-medium text-blue-800 mb-1">🔍 Ferramentas de Pesquisa:</p>
+              <ul className="text-xs text-blue-700 space-y-0.5">
+                <li>• <strong>Internet:</strong> Busca clínicas por cidade com dados de contato e proprietário</li>
+                <li>• <strong>CNPJ:</strong> Consulta Receita Federal - razão social, sócios, endereço</li>
+                <li>• <strong>CRMV:</strong> Veterinários registrados por cidade</li>
+                <li>• Adicione clínicas como Lead ou Cliente diretamente</li>
+              </ul>
+            </div>
+            <BuscaClinicaCNPJ />
+          </TabsContent>
+
+          {/* ── TAB WEB IA ── */}
+          <TabsContent value="web" className="overflow-y-auto p-3">
+            <MasterAIAssistant client={client} />
+          </TabsContent>
+
+          {/* ── TAB NOTIF ── */}
+          <TabsContent value="notif" className="overflow-y-auto p-3 space-y-3">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="font-semibold text-green-800 mb-2">📲 Enviar para WhatsApp (5514991676428)</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { action: 'resumo_diario', label: '🌅 Resumo Diário', desc: 'Clientes, tarefas, visitas do dia' },
+                  { action: 'relatorio_pipeline', label: '📊 Pipeline', desc: 'Funil de vendas completo' },
+                  { action: 'alerta_clientes_frios', label: '❄️ Clientes Frios', desc: 'Sem contato há 14+ dias' },
+                  { action: 'test', label: '✅ Teste Sistema', desc: 'Verificar conexão ativa' },
+                ].map(({ action, label, desc }) => (
+                  <button
+                    key={action}
+                    onClick={() => sendWhatsAppNotif(action)}
+                    disabled={sendingNotif}
+                    className="text-left p-3 bg-white rounded-lg border border-green-200 hover:bg-green-50 transition-colors disabled:opacity-50"
+                  >
+                    <div className="font-medium text-sm text-green-800">{label}</div>
+                    <div className="text-xs text-green-600 mt-0.5">{desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Enviar conteúdo gerado via chunks */}
+            {generatedScript && client?.phone && (
+              <Card>
+                <CardContent className="pt-4">
+                  <p className="text-sm font-medium mb-2">📤 Enviar último conteúdo gerado</p>
+                  <p className="text-xs text-slate-500 mb-2">{generatedScript.content.substring(0, 100)}...</p>
+                  <Button onClick={handleShareWhatsApp} className="w-full bg-green-600 hover:bg-green-700 text-sm h-9">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Enviar para {client.first_name} ({client.phone})
+                  </Button>
+                  <p className="text-xs text-slate-400 mt-1 text-center">Mensagens longas são divididas automaticamente em partes</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Link NR22888 */}
+            <Card>
+              <CardContent className="pt-4">
+                <p className="text-sm font-semibold mb-2">🤖 WhatsApp Bot NR22888</p>
+                <p className="text-xs text-slate-500 mb-3">Acesse o assistente master diretamente no WhatsApp</p>
+                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} target="_blank" rel="noreferrer">
+                  <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-sm h-9">
+                    <MessageCircle className="w-4 h-4 mr-2" /> Conectar NR22888
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
