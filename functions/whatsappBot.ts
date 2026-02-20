@@ -247,7 +247,74 @@ SEJA ULTRA-CONCISO para WhatsApp!`,
       }
     }
     
-    // 8. ANÁLISE RÁPIDA CLIENTE
+    // 8. BUSCA CLÍNICAS DA CIDADE (NOVO)
+    else if (messageText.startsWith('clinicas ') || messageText.startsWith('clínicas ')) {
+      const cityName = messageText.replace('clinicas ', '').replace('clínicas ', '').trim();
+      responseText = `🔍 *Buscando clínicas em ${cityName}...*\n\nUse a função "buscaClinicasCidade" no CRM para análise completa com internet.\n\n*Clientes já cadastrados nesta cidade:*\n`;
+      const cityClients = clients.filter(c => c.city?.toLowerCase().includes(cityName.toLowerCase())).slice(0, 5);
+      if (cityClients.length === 0) {
+        responseText += `❌ Nenhum cliente de ${cityName} no CRM ainda.\n\nDica: Use *buscar mercado ${cityName}* para prospectar!`;
+      } else {
+        cityClients.forEach((c, i) => {
+          responseText += `${i + 1}. ${c.first_name} - ${c.clinic_name || 'N/A'} (${c.status})\n`;
+        });
+      }
+    }
+
+    // 8B. INTELIGÊNCIA COMPLETA DE CLÍNICA (NOVO)
+    else if (messageText.startsWith('inteligencia ') || messageText.startsWith('inteligência ') || messageText.startsWith('perfil completo ')) {
+      const clinicName = messageText.replace('inteligencia ', '').replace('inteligência ', '').replace('perfil completo ', '').trim();
+      const client = clients.find(c =>
+        c.first_name?.toLowerCase().includes(clinicName) ||
+        c.clinic_name?.toLowerCase().includes(clinicName)
+      );
+
+      if (!client) {
+        responseText = `❌ Cliente "${clinicName}" não encontrado.\n\nTente: *perfil completo [nome]*`;
+      } else {
+        // Chamar função de inteligência total
+        const result = await base44.asServiceRole.functions.invoke('clinicaInteligenciaTotal', {
+          client_id: client.id,
+          clinic_name: client.clinic_name,
+          city: client.city,
+        }).catch(e => null);
+
+        if (result?.internet_research) {
+          const r = result.internet_research;
+          responseText = `🔬 *ANÁLISE TOTAL: ${client.first_name}*\n`;
+          responseText += `━━━━━━━━━━━━━━━━━━━\n`;
+          responseText += `📋 *CRM:* Score ${client.purchase_score}% | ${client.status}\n`;
+          responseText += `🏥 *Porte:* ${r.porte_clinica || 'N/D'}\n`;
+          responseText += `📊 *Volume/mês:* ${r.volume_estimado_mensal || 'N/D'}\n`;
+          responseText += `⭐ *Google:* ${r.clinic_info?.avaliacao_google || 'N/D'} (${r.clinic_info?.numero_avaliacoes || 0} avaliações)\n`;
+          responseText += `🎯 *Score Oportunidade:* ${r.score_oportunidade || 'N/D'}/100\n`;
+          responseText += `🔧 *Equipamento Rec.:* ${r.equipamento_recomendado || 'N/D'}\n`;
+          responseText += `━━━━━━━━━━━━━━━━━━━\n`;
+          responseText += `💡 *Insights:* ${r.resumo_executivo || 'Ver CRM'}\n\n`;
+          responseText += `⚡ *Abordagem:* ${r.abordagem_ideal || client.next_action || 'Ver playbook'}`;
+        } else {
+          responseText = `📋 *${client.first_name} - Perfil CRM*\n\n`;
+          responseText += `Status: ${client.status} | Score: ${client.purchase_score}%\n`;
+          responseText += `Clínica: ${client.clinic_name}\n`;
+          responseText += `Cidade: ${client.city}\n`;
+          responseText += `Pipeline: ${client.pipeline_stage}\n`;
+          responseText += `Numerologia: ${client.numerology_number} - ${client.behavioral_profile}\n`;
+          if (client.main_pains?.length) responseText += `\nDores: ${client.main_pains.join(', ')}\n`;
+          if (client.next_action) responseText += `\nPróxima ação: ${client.next_action}`;
+        }
+      }
+    }
+
+    // 8C. RESUMO DIÁRIO (NOVO)
+    else if (messageText.includes('resumo') && (messageText.includes('diario') || messageText.includes('diário'))) {
+      const result = await base44.asServiceRole.functions.invoke('whatsappMasterNotificacao', {
+        action: 'resumo_diario',
+        phone: from || '5514991676428',
+      }).catch(e => null);
+      responseText = result?.message_text || '❌ Erro ao gerar resumo diário';
+    }
+
+    // 9. ANÁLISE RÁPIDA CLIENTE
     else if (messageText.startsWith('analisar ') || messageText.startsWith('análise ')) {
       const clientName = messageText.replace('analisar ', '').replace('análise ', '').trim();
       const client = clients.find(c => 
@@ -295,7 +362,11 @@ Dê: 1 insight principal + 1 ação imediata`,
       responseText += `✅ tarefas\n`;
       responseText += `➕ criar tarefa [texto]\n`;
       responseText += `🔬 analisar [nome]\n`;
+      responseText += `🏥 clínicas [cidade]\n`;
+      responseText += `🔍 inteligência [nome]\n`;
+      responseText += `📊 perfil completo [nome]\n`;
       responseText += `📅 resumo\n`;
+      responseText += `📅 resumo diário\n`;
       responseText += `💬 ajuda\n\n`;
       responseText += `_Conectado aos módulos de IA!_`;
     }
