@@ -68,7 +68,7 @@ Não seja artificial. Fale como uma pessoa real.`,
     });
 
     // Orquestrar as duas
-    const finalMessage = await base44.integrations.Core.InvokeLLM({
+    const finalMessage = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é o MAESTRO que unifica duas abordagens de IA em uma mensagem perfeita.
 
 ABORDAGEM TÉCNICA:
