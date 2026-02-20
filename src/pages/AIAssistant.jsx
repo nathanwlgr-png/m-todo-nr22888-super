@@ -1150,6 +1150,14 @@ Tarefas devem:
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowWhatsAppNotif(!showWhatsAppNotif)}
+            className={showWhatsAppNotif ? 'bg-green-100 border-green-400 text-green-700' : 'border-green-300 text-green-600'}
+          >
+            📲 Notif
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={exportChatToPDF}
             disabled={messages.length === 0}
           >
