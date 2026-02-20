@@ -174,9 +174,9 @@ async function getSuggestions(base44, clientId) {
 
     for (const client of needsFollowUp) {
       try {
-        const analysis = await analyzeClientForFollowUp(base44, client.id);
-        if (analysis.ok) {
-          const data = await analysis.json();
+        const analysisResponse = await analyzeClientForFollowUp(base44, client.id);
+        const data = await analysisResponse.json();
+        if (data.success) {
           suggestions.push({
             client_id: client.id,
             client_name: client.first_name,

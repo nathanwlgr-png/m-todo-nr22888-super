@@ -127,7 +127,7 @@ ANALISE:
 5. Como se apresentar mantendo AUTENTICIDADE?
 
 Responda em JSON estruturado.`,
-      add_context_from_internet: true
+      add_context_from_internet: false
     });
 
     // Classificar lead baseado em dados
