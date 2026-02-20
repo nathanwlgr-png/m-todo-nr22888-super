@@ -580,15 +580,23 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                                   <p className="text-xs text-slate-500 mt-1">{client.address}</p>
                                 )}
                                 <p className="text-xs text-indigo-600 mt-2 italic">{client.reason}</p>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => openClientNavigation(client)}
-                                  className="mt-2 h-7 text-xs"
-                                >
-                                  <Navigation className="w-3 h-3 mr-1" />
-                                  Navegar para este cliente
-                                </Button>
+                                <div className="flex gap-1.5 mt-2">
+                                                   <Button size="sm" variant="outline"
+                                                     onClick={() => openClientNavigation(client)}
+                                                     className="flex-1 h-7 text-xs bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
+                                                   >
+                                                     <Navigation className="w-3 h-3 mr-1" /> Google Maps
+                                                   </Button>
+                                                   <Button size="sm" variant="outline"
+                                                     onClick={() => {
+                                                       const addr = encodeURIComponent(client.clinic_name ? `${client.clinic_name}, ${client.city}` : client.city);
+                                                       window.open(`https://waze.com/ul?q=${addr}&navigate=yes`, '_blank');
+                                                     }}
+                                                     className="flex-1 h-7 text-xs bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100"
+                                                   >
+                                                     <Car className="w-3 h-3 mr-1" /> Waze
+                                                   </Button>
+                                                 </div>
                               </div>
                             </div>
                           </div>
