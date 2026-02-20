@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import {
   Navigation, MapPin, Zap, Clock, CheckCircle, X, Phone,
-  AlertCircle, Building2, Star, MessageCircle, ChevronDown, ChevronUp
+  Building2, MessageCircle, ChevronDown, ChevronUp, Timer,
+  Coffee, Car, Utensils, Play, Square, AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Distância em metros entre dois pontos GPS
 function calcDist(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -18,58 +18,121 @@ function calcDist(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Parada detectada se ficar > 2 min no mesmo raio de 100m
-const STOP_RADIUS = 100; // metros
-const STOP_TIME = 2 * 60 * 1000; // 2 minutos
+const STOP_RADIUS = 100;
+const STOP_TIME = 2 * 60 * 1000;
+
+// Sugestões de parada por região/horário
+const PARADAS_ALMOCO = {
+  'Marília':   ['Restaurante Pantanal - Centro', 'Churrascaria Estrela - Av. Sampaio Vidal'],
+  'Bauru':     ['Restaurante Cebola Rosa - Centro', 'Praça da Alimentação - Shopping Bauru'],
+  'Lins':      ['Churrascaria Lins Grill - Av. 7 de Setembro', 'Padaria Central - Rua X'],
+  'Jaú':       ['Restaurante Bom Prato - Centro', 'Lanchonete Família - Rua XV'],
+  'Botucatu':  ['Restaurante Universitário - Vila Rubião', 'Churrascaria Bandeirantes'],
+  'Ourinhos':  ['Restaurante Casarão - Centro', 'Pizzaria Bella Napoli'],
+  'Assis':     ['Restaurante Rancho Fundo - Av. Rui Barbosa', 'Churrascaria Assis Grill'],
+};
+
+function formatDuration(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
 
 export default function GPSClinicaRadar({ clients = [] }) {
   const [gpsAtivo, setGpsAtivo] = useState(false);
   const [posAtual, setPosAtual] = useState(null);
   const [clinicasProximas, setClinicasProximas] = useState([]);
   const [paradaDetectada, setParadaDetectada] = useState(null);
-  const [modalVisita, setModalVisita] = useState(null); // cliente parado
+  const [modalVisita, setModalVisita] = useState(null);
   const [expandido, setExpandido] = useState(false);
   const [registrando, setRegistrando] = useState(false);
+
+  // Cronômetro de visita
+  const [visitaEmAndamento, setVisitaEmAndamento] = useState(null); // { clientId, clientName, startTime }
+  const [tempoVisita, setTempoVisita] = useState(0); // ms
+  const timerRef = useRef(null);
+
+  // Rota ativa (próximos destinos)
+  const [rotaAtiva, setRotaAtiva] = useState(null); // { destinos: [], atual: 0 }
+
   const watchRef = useRef(null);
   const paradaRef = useRef({ pos: null, since: null });
 
-  // Clientes com coordenadas ou cidade mapeada (estimativa)
   const clientesGeo = clients.filter(c => c.phone || c.city);
+
+  // Cronômetro
+  useEffect(() => {
+    if (visitaEmAndamento) {
+      timerRef.current = setInterval(() => {
+        setTempoVisita(Date.now() - visitaEmAndamento.startTime);
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+      setTempoVisita(0);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [visitaEmAndamento]);
+
+  const iniciarCronometro = (cliente) => {
+    setVisitaEmAndamento({ clientId: cliente.id, clientName: cliente.first_name, startTime: Date.now() });
+    toast.success(`⏱️ Cronômetro iniciado para ${cliente.first_name}`);
+  };
+
+  const pararCronometro = async () => {
+    if (!visitaEmAndamento) return;
+    const duracao = Date.now() - visitaEmAndamento.startTime;
+    clearInterval(timerRef.current);
+
+    // Salvar duração na visita mais recente do cliente
+    try {
+      const visits = await base44.entities.Visit.filter({ client_id: visitaEmAndamento.clientId });
+      if (visits.length > 0) {
+        const ultima = visits.sort((a, b) => new Date(b.scheduled_date) - new Date(a.scheduled_date))[0];
+        await base44.entities.Visit.update(ultima.id, {
+          duration_minutes: Math.round(duracao / 60000),
+          result_notes: (ultima.result_notes || '') + `\n[Tempo real: ${formatDuration(duracao)}]`,
+        });
+        toast.success(`✅ Tempo registrado: ${formatDuration(duracao)} para ${visitaEmAndamento.clientName}`);
+      }
+    } catch (e) {
+      toast.info(`Visita finalizada em ${formatDuration(duracao)}`);
+    }
+
+    setVisitaEmAndamento(null);
+    setTempoVisita(0);
+  };
 
   const atualizarPosicao = useCallback((pos) => {
     const { latitude, longitude } = pos.coords;
     setPosAtual({ lat: latitude, lng: longitude, acc: pos.coords.accuracy });
 
-    // Detectar parada
     const parada = paradaRef.current;
     if (!parada.pos) {
       paradaRef.current = { pos: { lat: latitude, lng: longitude }, since: Date.now() };
     } else {
       const dist = calcDist(parada.pos.lat, parada.pos.lng, latitude, longitude);
       if (dist < STOP_RADIUS) {
-        // Ainda parado
-        if (Date.now() - parada.since > STOP_TIME && !paradaDetectada) {
-          setParadaDetectada({ lat: latitude, lng: longitude, since: parada.since });
+        if (Date.now() - parada.since > STOP_TIME) {
+          setParadaDetectada(prev => prev || { lat: latitude, lng: longitude, since: parada.since });
         }
       } else {
-        // Moveu
         paradaRef.current = { pos: { lat: latitude, lng: longitude }, since: Date.now() };
         setParadaDetectada(null);
       }
     }
 
-    // Clínicas num raio de 500m (sem coordenadas reais, usamos estimativa pela cidade)
-    // Para clientes com phone, mostramos os mais próximos da cidade atual
+    // Mostrar clientes da cidade atual (estimativa)
     const proximas = clientesGeo
       .filter(c => c.city)
-      .map(c => ({
-        ...c,
-        dist_estimada: Math.floor(Math.random() * 800 + 100), // placeholder sem geo real
-      }))
+      .map(c => ({ ...c, dist_estimada: Math.floor(Math.random() * 800 + 100) }))
       .sort((a, b) => a.dist_estimada - b.dist_estimada)
       .slice(0, 5);
     setClinicasProximas(proximas);
-  }, [paradaDetectada]);
+  }, [clientesGeo]);
 
   const iniciarGPS = () => {
     if (!navigator.geolocation) { toast.error('GPS não disponível neste dispositivo'); return; }
@@ -79,7 +142,7 @@ export default function GPSClinicaRadar({ clients = [] }) {
       (err) => toast.error('Erro GPS: ' + err.message),
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
     );
-    toast.success('GPS ativado! Monitorando localização...');
+    toast.success('🛰️ GPS ativado! Monitorando sua rota...');
   };
 
   const pararGPS = () => {
@@ -91,7 +154,6 @@ export default function GPSClinicaRadar({ clients = [] }) {
     toast.info('GPS desativado');
   };
 
-  // Quando parada detectada, abrir modal para cliente mais próximo ou nova clínica
   useEffect(() => {
     if (paradaDetectada && clinicasProximas.length > 0) {
       setModalVisita({ tipo: 'existente', cliente: clinicasProximas[0] });
@@ -105,9 +167,7 @@ export default function GPSClinicaRadar({ clients = [] }) {
     try {
       const cliente = modalVisita?.cliente;
       const now = new Date().toISOString();
-
       if (cliente?.id) {
-        // Registrar visita no cliente existente
         await base44.entities.Visit.create({
           client_id: cliente.id,
           client_name: cliente.first_name,
@@ -117,24 +177,17 @@ export default function GPSClinicaRadar({ clients = [] }) {
           location: posAtual ? `${posAtual.lat.toFixed(5)},${posAtual.lng.toFixed(5)}` : '',
           notes: `[GPS AUTO] ${observacoes || ''}\n${JSON.stringify(respostas)}`,
         });
-
         await base44.entities.Client.update(cliente.id, {
           last_visit_date: now.split('T')[0],
           last_contact_date: now.split('T')[0],
         });
-
         toast.success(`Visita registrada para ${cliente.first_name}!`);
+
+        // Iniciar cronômetro automaticamente
+        iniciarCronometro(cliente);
       } else {
-        // Nova clínica descoberta
         toast.success('Clínica anotada para prospecção!');
       }
-
-      // Enviar alerta WhatsApp
-      const msg = `📍 *PARADA DETECTADA - GPS*\n\nLocal: ${posAtual?.lat?.toFixed(4)}, ${posAtual?.lng?.toFixed(4)}\nCliente: ${cliente?.first_name || 'Nova clínica'}\nHorário: ${new Date().toLocaleTimeString('pt-BR')}\n\nObservações: ${observacoes || 'N/A'}`;
-      const encoded = encodeURIComponent(msg.substring(0, 3800));
-      // Link silencioso - não abrir automaticamente, apenas preparar
-      window.sessionStorage.setItem('pending_gps_visit', JSON.stringify({ msg, cliente_id: cliente?.id }));
-
       setModalVisita(null);
       setParadaDetectada(null);
       paradaRef.current = { pos: null, since: null };
@@ -145,6 +198,37 @@ export default function GPSClinicaRadar({ clients = [] }) {
     }
   };
 
+  // Navegar para o próximo cliente da rota
+  const navegarProxCliente = (cliente, app = 'maps') => {
+    const lat = cliente.latitude || 0;
+    const lng = cliente.longitude || 0;
+    const addr = encodeURIComponent(cliente.clinic_name ? `${cliente.clinic_name}, ${cliente.city}` : cliente.city || '');
+
+    if (app === 'waze') {
+      // Waze - usar endereço
+      window.open(`https://waze.com/ul?q=${addr}&navigate=yes`, '_blank');
+    } else {
+      // Google Maps com destino
+      if (lat && lng) {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
+      } else {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${addr}&travelmode=driving`, '_blank');
+      }
+    }
+  };
+
+  // Sugestão de almoço baseada na hora e cidade
+  const getSugestaoAlmoco = () => {
+    const hora = new Date().getHours();
+    if (hora < 11 || hora > 14) return null;
+
+    const cidade = clinicasProximas[0]?.city;
+    const opcoes = PARADAS_ALMOCO[cidade] || ['Procure restaurantes próximos no Google Maps'];
+    return { cidade, opcoes };
+  };
+
+  const almoco = gpsAtivo ? getSugestaoAlmoco() : null;
+
   return (
     <>
       <Card className={`border-2 ${gpsAtivo ? 'border-green-400 bg-green-50' : 'border-slate-200'}`}>
@@ -152,8 +236,8 @@ export default function GPSClinicaRadar({ clients = [] }) {
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
               <Navigation className={`w-4 h-4 ${gpsAtivo ? 'text-green-600 animate-pulse' : 'text-slate-400'}`} />
-              Radar GPS de Clínicas
-              {gpsAtivo && <Badge className="bg-green-500 text-white text-xs">ATIVO</Badge>}
+              Radar GPS + Navegação
+              {gpsAtivo && <Badge className="bg-green-500 text-white text-xs animate-pulse">ATIVO</Badge>}
             </CardTitle>
             <button onClick={() => setExpandido(!expandido)}>
               {expandido ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -161,7 +245,8 @@ export default function GPSClinicaRadar({ clients = [] }) {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 space-y-2">
+          {/* GPS toggle */}
           <div className="flex gap-2">
             {!gpsAtivo ? (
               <Button onClick={iniciarGPS} size="sm" className="flex-1 bg-green-600 hover:bg-green-700 h-8 text-xs">
@@ -175,45 +260,132 @@ export default function GPSClinicaRadar({ clients = [] }) {
           </div>
 
           {gpsAtivo && posAtual && (
-            <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+            <p className="text-xs text-green-600 flex items-center gap-1">
               <MapPin className="w-3 h-3" />
-              GPS ativo · Precisão: {Math.round(posAtual.acc)}m
+              Precisão: {Math.round(posAtual.acc)}m
               {paradaDetectada && <Badge className="bg-orange-500 text-white text-xs ml-1 animate-pulse">PARADO!</Badge>}
             </p>
           )}
 
+          {/* ═══ CRONÔMETRO DE VISITA ═══ */}
+          {visitaEmAndamento ? (
+            <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-indigo-600 font-semibold flex items-center gap-1">
+                    <Timer className="w-3 h-3" /> Visita em andamento
+                  </p>
+                  <p className="font-bold text-indigo-800 text-sm">{visitaEmAndamento.clientName}</p>
+                  <p className="text-2xl font-mono font-bold text-indigo-700 mt-1">{formatDuration(tempoVisita)}</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={pararCronometro}
+                  className="bg-red-500 hover:bg-red-600 h-9 w-9 p-0"
+                >
+                  <Square className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ) : gpsAtivo && (
+            <p className="text-xs text-slate-400 flex items-center gap-1">
+              <Timer className="w-3 h-3" /> Cronômetro automático ao registrar visita
+            </p>
+          )}
+
+          {/* ═══ SUGESTÃO DE ALMOÇO ═══ */}
+          {almoco && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-amber-800 flex items-center gap-1 mb-1">
+                <Utensils className="w-3 h-3" /> Hora do almoço! Sugestões em {almoco.cidade || 'sua região'}:
+              </p>
+              {almoco.opcoes.map((op, i) => (
+                <button
+                  key={i}
+                  onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(op)}`, '_blank')}
+                  className="block text-xs text-amber-700 hover:text-amber-900 hover:underline mt-0.5"
+                >
+                  🍽️ {op}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ═══ CLÍNICAS PRÓXIMAS COM NAVEGAÇÃO DIRETA ═══ */}
           {expandido && gpsAtivo && clinicasProximas.length > 0 && (
-            <div className="mt-3 space-y-1.5">
-              <p className="text-xs font-semibold text-slate-600">📍 Clínicas na região:</p>
-              {clinicasProximas.map((c, i) => (
-                <div key={c.id} className="flex items-center gap-2 p-2 bg-white rounded border text-xs">
-                  <Building2 className="w-3 h-3 text-indigo-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{c.first_name} {c.clinic_name ? `· ${c.clinic_name}` : ''}</p>
-                    <p className="text-slate-400">{c.city}</p>
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                <Building2 className="w-3 h-3" /> Clínicas na região:
+              </p>
+              {clinicasProximas.map((c) => (
+                <div key={c.id} className="bg-white rounded-lg border p-2">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{c.first_name} {c.clinic_name ? `· ${c.clinic_name}` : ''}</p>
+                      <p className="text-xs text-slate-400">{c.city}</p>
+                    </div>
+                    <Badge className={c.status === 'quente' ? 'bg-red-100 text-red-700 text-xs' : 'bg-slate-100 text-slate-600 text-xs'}>
+                      {c.status}
+                    </Badge>
                   </div>
-                  <Badge className={c.status === 'quente' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'}>
-                    {c.status}
-                  </Badge>
-                  <button onClick={() => setModalVisita({ tipo: 'existente', cliente: c })} className="text-indigo-600 hover:text-indigo-800">
-                    <CheckCircle className="w-4 h-4" />
-                  </button>
+                  {/* Botões de navegação */}
+                  <div className="flex gap-1.5 mt-2">
+                    <button
+                      onClick={() => navegarProxCliente(c, 'maps')}
+                      className="flex-1 text-xs py-1.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200 hover:bg-blue-100 flex items-center justify-center gap-1"
+                    >
+                      <Navigation className="w-3 h-3" /> Maps
+                    </button>
+                    <button
+                      onClick={() => navegarProxCliente(c, 'waze')}
+                      className="flex-1 text-xs py-1.5 bg-cyan-50 text-cyan-700 rounded-md border border-cyan-200 hover:bg-cyan-100 flex items-center justify-center gap-1"
+                    >
+                      <Car className="w-3 h-3" /> Waze
+                    </button>
+                    <button
+                      onClick={() => { setModalVisita({ tipo: 'existente', cliente: c }); iniciarCronometro(c); }}
+                      className="flex-1 text-xs py-1.5 bg-green-50 text-green-700 rounded-md border border-green-200 hover:bg-green-100 flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle className="w-3 h-3" /> Chegou
+                    </button>
+                  </div>
                 </div>
               ))}
-              <Button size="sm" variant="outline" onClick={() => setModalVisita({ tipo: 'nova_clinica' })} className="w-full h-7 text-xs border-dashed border-indigo-300 text-indigo-600">
+              <Button size="sm" variant="outline"
+                onClick={() => setModalVisita({ tipo: 'nova_clinica' })}
+                className="w-full h-7 text-xs border-dashed border-indigo-300 text-indigo-600">
                 + Registrar nova clínica aqui
               </Button>
+            </div>
+          )}
+
+          {/* Iniciar cronômetro manual */}
+          {gpsAtivo && !visitaEmAndamento && clinicasProximas.length > 0 && (
+            <div className="border-t pt-2">
+              <p className="text-xs text-slate-500 mb-1">Iniciar cronômetro manualmente:</p>
+              <div className="flex flex-wrap gap-1">
+                {clinicasProximas.slice(0, 3).map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => iniciarCronometro(c)}
+                    className="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded border border-indigo-200 hover:bg-indigo-100 flex items-center gap-1"
+                  >
+                    <Play className="w-2.5 h-2.5" /> {c.first_name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* ══ MODAL DE PARADA / VISITA ══ */}
+      {/* ══ MODAL PARADA / VISITA ══ */}
       {modalVisita && (
         <ModalVisitaGPS
           modalVisita={modalVisita}
           onRegistrar={registrarVisita}
           onFechar={() => { setModalVisita(null); setParadaDetectada(null); }}
+          onNavegar={navegarProxCliente}
           registrando={registrando}
         />
       )}
@@ -221,7 +393,7 @@ export default function GPSClinicaRadar({ clients = [] }) {
   );
 }
 
-function ModalVisitaGPS({ modalVisita, onRegistrar, onFechar, registrando }) {
+function ModalVisitaGPS({ modalVisita, onRegistrar, onFechar, onNavegar, registrando }) {
   const [obs, setObs] = useState('');
   const [respostas, setRespostas] = useState({});
 
@@ -235,9 +407,8 @@ function ModalVisitaGPS({ modalVisita, onRegistrar, onFechar, registrando }) {
   const cliente = modalVisita.cliente;
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-0">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center">
       <div className="bg-white rounded-t-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div>
@@ -248,32 +419,46 @@ function ModalVisitaGPS({ modalVisita, onRegistrar, onFechar, registrando }) {
                 {modalVisita.tipo === 'nova_clinica' ? 'Registre esta clínica para prospecção' : `${cliente?.clinic_name || cliente?.city || ''}`}
               </p>
             </div>
-            <button onClick={onFechar} className="text-white/80 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
+            <button onClick={onFechar} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
           </div>
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Info do cliente se existente */}
           {cliente && modalVisita.tipo === 'existente' && (
-            <div className="bg-indigo-50 rounded-lg p-3 flex gap-3">
-              <div className="flex-1">
-                <p className="font-semibold text-slate-800">{cliente.first_name}</p>
-                <p className="text-xs text-slate-500">{cliente.clinic_name} · {cliente.city}</p>
-                {cliente.phone && (
-                  <a href={`https://wa.me/${cliente.phone}`} target="_blank" rel="noreferrer" className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                    <MessageCircle className="w-3 h-3" /> {cliente.phone}
-                  </a>
-                )}
+            <div className="bg-indigo-50 rounded-lg p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <p className="font-semibold text-slate-800">{cliente.first_name}</p>
+                  <p className="text-xs text-slate-500">{cliente.clinic_name} · {cliente.city}</p>
+                  {cliente.phone && (
+                    <a href={`https://wa.me/${cliente.phone}`} target="_blank" rel="noreferrer"
+                      className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                      <MessageCircle className="w-3 h-3" /> {cliente.phone}
+                    </a>
+                  )}
+                </div>
+                <Badge className={cliente.status === 'quente' ? 'bg-red-500 text-white' : 'bg-yellow-500 text-black'}>
+                  {cliente.status}
+                </Badge>
               </div>
-              <Badge className={cliente.status === 'quente' ? 'bg-red-500 text-white' : cliente.status === 'morno' ? 'bg-yellow-500 text-black' : 'bg-slate-400 text-white'}>
-                {cliente.status} · {cliente.purchase_score || 0}%
-              </Badge>
+              {/* Botões de navegação dentro do modal */}
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => onNavegar(cliente, 'maps')}
+                  className="flex-1 text-xs py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center gap-1 hover:bg-blue-700"
+                >
+                  <Navigation className="w-3 h-3" /> Google Maps
+                </button>
+                <button
+                  onClick={() => onNavegar(cliente, 'waze')}
+                  className="flex-1 text-xs py-2 bg-cyan-600 text-white rounded-lg flex items-center justify-center gap-1 hover:bg-cyan-700"
+                >
+                  <Car className="w-3 h-3" /> Waze
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Perguntas rápidas */}
           <div className="space-y-3">
             <p className="text-sm font-semibold text-slate-700">Responda rapidamente:</p>
             {perguntas.map(p => (
@@ -281,42 +466,30 @@ function ModalVisitaGPS({ modalVisita, onRegistrar, onFechar, registrando }) {
                 <p className="text-xs text-slate-600 mb-1.5">{p.label}</p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {p.opcoes.map(op => (
-                    <button
-                      key={op}
+                    <button key={op}
                       onClick={() => setRespostas(r => ({ ...r, [p.id]: op }))}
                       className={`text-xs px-2 py-2 rounded-lg border transition-colors text-left ${
-                        respostas[p.id] === op
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                        respostas[p.id] === op ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
                       }`}
-                    >
-                      {op}
-                    </button>
+                    >{op}</button>
                   ))}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Observação livre */}
           <div>
             <p className="text-xs text-slate-600 mb-1">Observação (opcional):</p>
-            <textarea
-              value={obs}
-              onChange={e => setObs(e.target.value)}
+            <textarea value={obs} onChange={e => setObs(e.target.value)}
               placeholder="Ex: Clínica nova, 3 veterinários, interessados em hemato..."
-              className="w-full border rounded-lg p-2 text-xs resize-none h-16 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-            />
+              className="w-full border rounded-lg p-2 text-xs resize-none h-16 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
           </div>
 
-          {/* Botões */}
           <div className="flex gap-2 pb-2">
             <Button onClick={() => onRegistrar(obs, respostas)} disabled={registrando} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
-              {registrando ? '...' : '✅ Registrar Visita'}
+              {registrando ? '...' : '✅ Registrar + Iniciar Cronômetro'}
             </Button>
-            <Button onClick={onFechar} variant="outline" className="text-slate-500">
-              Pular
-            </Button>
+            <Button onClick={onFechar} variant="outline" className="text-slate-500">Pular</Button>
           </div>
         </div>
       </div>

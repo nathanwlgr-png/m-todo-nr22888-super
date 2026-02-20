@@ -118,6 +118,15 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
   "traffic_adjusted_time": string (tempo total considerando trânsito),
   "route_efficiency_score": número de 0-100,
   "insights": [array de strings com 3-4 insights sobre rota, custos e trânsito],
+  "lunch_stops": [
+  {
+  "day": número do dia,
+  "suggested_time": "12:30",
+  "city": string (cidade mais próxima no horário de almoço),
+  "suggestions": [string] (2-3 restaurantes/opções reais naquela cidade),
+  "rest_duration_minutes": número (15-30 min recomendados)
+  }
+  ],
   "daily_routes": [
     {
       "day": número,
