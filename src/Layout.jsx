@@ -127,6 +127,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Settings, label: 'Workflows', page: 'WorkflowAutomation' },
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
+    { icon: Brain, label: 'Inteligência 360°', page: 'ProactiveIntelligenceDashboard' },
     { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
     { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
     { icon: Database, label: 'Offline Analytics', page: 'OfflineAnalytics', badge: true },
