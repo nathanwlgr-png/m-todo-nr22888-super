@@ -70,7 +70,7 @@ async function analyzeClientForFollowUp(base44, clientId) {
     };
 
     // Call AI to analyze and suggest follow-up
-    const aiResponse = await base44.integrations.Core.InvokeLLM({
+    const aiResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Analise este cliente e sugira a melhor estratégia de follow-up:
 
 CLIENTE: ${JSON.stringify(context, null, 2)}
