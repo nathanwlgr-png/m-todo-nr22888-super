@@ -116,17 +116,16 @@ Baseado na análise, forneça em JSON:
 
 async function scheduleFollowUp(base44, clientId, followUpData, user) {
   try {
-    const clients = await base44.entities.Client.filter({ id: clientId });
-    if (clients.length === 0) {
+    const client = await base44.asServiceRole.entities.Client.get(clientId).catch(() => null);
+    if (!client) {
       return Response.json({ error: 'Client not found' }, { status: 404 });
     }
-    const client = clients[0];
 
     // Create task
     const taskDate = new Date();
     taskDate.setDate(taskDate.getDate() + (followUpData.days_to_contact || 3));
 
-    const task = await base44.entities.Task.create({
+    const task = await base44.asServiceRole.entities.Task.create({
       title: followUpData.task_title || `Follow-up: ${client.first_name}`,
       description: `Channel: ${followUpData.recommended_channel}\n\nMessage:\n${followUpData.message_suggestion}`,
       assigned_to: user.email,
