@@ -98,6 +98,7 @@ export default function ScheduledAgenda() {
 
   const abasConfig = [
     { id: 'agenda', icon: Calendar, label: 'Agenda' },
+    { id: 'chat', icon: MessageCircle, label: 'Chat IA' },
     { id: 'gps', icon: Navigation, label: 'GPS' },
     { id: 'contatos', icon: Phone, label: 'Contatos' },
     { id: 'ia', icon: Zap, label: 'Rota IA' },
