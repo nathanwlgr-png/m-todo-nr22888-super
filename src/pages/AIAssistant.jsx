@@ -14,7 +14,7 @@ import {
   ArrowLeft, Send, Loader2, Sparkles, Save, Copy, Check, FileText,
   Search, Brain, CheckSquare, Handshake, Globe, Zap, MessageCircle,
   MessageSquare, Target, RotateCcw, TrendingUp, HelpCircle, Calendar,
-  Building2, Bell, ChevronRight, X, Phone, Star
+  Building2, Bell, ChevronRight, X, Phone, Star, MapPin, Navigation
 } from 'lucide-react';
 import ChatMessage from '@/components/ChatMessage';
 import QuickActionButton from '@/components/QuickActionButton';
