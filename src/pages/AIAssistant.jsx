@@ -1038,6 +1038,24 @@ Tarefas devem:
     toast.success('Chat exportado em PDF!');
   };
 
+  const sendWhatsAppNotif = async (action) => {
+    setSendingNotif(true);
+    try {
+      const res = await base44.functions.invoke('whatsappMasterNotificacao', { action, phone: '5514991676428' });
+      const link = res.data?.whatsapp_link;
+      if (link) {
+        window.open(link, '_blank');
+        toast.success('WhatsApp aberto! Clique em Enviar na janela.');
+      } else {
+        toast.error('Erro ao gerar link');
+      }
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setSendingNotif(false);
+    }
+  };
+
   const handleSaveAndContinue = () => {
     if (messages.length > 2) {
       const lastMessages = messages.slice(-4).map(m => m.content).join(' ');
