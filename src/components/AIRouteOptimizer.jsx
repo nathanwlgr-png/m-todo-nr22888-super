@@ -465,6 +465,35 @@ Pedágio: R$ ${dayRoute.toll_cost_day?.toFixed(2)}
                 </Card>
               )}
 
+              {/* Paradas de Almoço */}
+              {optimizedRoute.lunch_stops?.length > 0 && (
+                <Card className="p-4 bg-amber-50 border-amber-200">
+                  <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                    <Utensils className="w-4 h-4 text-amber-600" />
+                    Sugestões de Almoço/Pausa
+                  </h4>
+                  <div className="space-y-2">
+                    {optimizedRoute.lunch_stops.map((stop, i) => (
+                      <div key={i} className="bg-white rounded-lg p-3 border border-amber-200">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-amber-800">Dia {stop.day} · {stop.suggested_time} em {stop.city}</span>
+                          <span className="text-xs text-amber-600">⏸️ {stop.rest_duration_minutes} min</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          {stop.suggestions?.map((s, j) => (
+                            <button key={j}
+                              onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(s + ', ' + stop.city)}`, '_blank')}
+                              className="block text-xs text-amber-700 hover:underline">
+                              🍽️ {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
               {/* Rota Otimizada por Dia */}
               <div>
                 <h4 className="font-semibold text-slate-800 mb-3">Roteiro Diário (Saída e Retorno de Marília)</h4>
