@@ -58,10 +58,14 @@ export default function CustomDashboard() {
 
   const { data: config } = useQuery({
     queryKey: ['dashboard-config', user?.email],
-    queryFn: () => base44.entities.DashboardConfig?.filter({ 
-      user_email: user.email, 
-      is_default: true 
-    }).then(r => r[0]).catch(() => null),
+    queryFn: async () => {
+      try {
+        const r = await base44.entities.DashboardConfig?.filter({ user_email: user.email, is_default: true });
+        return r?.[0] || null;
+      } catch {
+        return null;
+      }
+    },
     enabled: !!user,
   });
 
