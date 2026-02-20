@@ -415,6 +415,13 @@ export default function ScheduledAgenda() {
           </>
         )}
 
+        {/* ══ ABA CHAT IA ══ */}
+        {abaAtiva === 'chat' && (
+          <div className="mt-8" style={{ height: 'calc(100vh - 220px)' }}>
+            <ContextualChatIA clients={clients} />
+          </div>
+        )}
+
         {/* ══ ABA GPS ══ */}
         {abaAtiva === 'gps' && (
           <div className="mt-8 space-y-3">
