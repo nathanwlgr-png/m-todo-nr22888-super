@@ -127,11 +127,14 @@ async function scheduleFollowUp(base44, clientId, followUpData, user) {
 
     const task = await base44.asServiceRole.entities.Task.create({
       title: followUpData.task_title || `Follow-up: ${client.first_name}`,
-      description: `Channel: ${followUpData.recommended_channel}\n\nMessage:\n${followUpData.message_suggestion}`,
+      description: `Canal: ${followUpData.recommended_channel}\n\nMensagem:\n${followUpData.message_suggestion}`,
       assigned_to: user.email,
       client_id: clientId,
-      status: 'pending',
-      priority: followUpData.urgency === 'alto' ? 'high' : 'medium'
+      client_name: client.first_name,
+      status: 'pendente',
+      priority: followUpData.urgency === 'alto' ? 'alta' : 'media',
+      type: 'follow_up',
+      due_date: new Date(taskDate).toISOString().split('T')[0]
     });
 
     // Log the automation
