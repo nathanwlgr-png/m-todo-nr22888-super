@@ -49,7 +49,7 @@ Foco em entender problema antes de vender.`,
     });
 
     // IA 2: Abordagem Humanizada (empatia e relacionamento)
-    const humanApproach = await base44.integrations.Core.InvokeLLM({
+    const humanApproach = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é IA especialista em RELACIONAMENTO e EMPATIA em vendas.
 
 CLIENTE: ${client.first_name} | COMUNICAÇÃO: ${clinic_intelligence?.communication_style || 'desconhecida'}
