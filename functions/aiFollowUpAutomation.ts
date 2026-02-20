@@ -9,12 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { action, clientId } = await req.json();
+    const body = await req.json();
+    const { action, clientId, followUpData } = body;
 
     if (action === 'analyze') {
       return await analyzeClientForFollowUp(base44, clientId);
     } else if (action === 'schedule_followup') {
-      const { followUpData } = await req.json();
       return await scheduleFollowUp(base44, clientId, followUpData, user);
     } else if (action === 'get_suggestions') {
       return await getSuggestions(base44, clientId);
