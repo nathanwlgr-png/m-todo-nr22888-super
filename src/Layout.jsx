@@ -137,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <AILimitProtection>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50" data-layout="root">
         {/* Sidebar */}
         <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col ${
           sidebarOpen ? 'w-64' : 'w-0'
