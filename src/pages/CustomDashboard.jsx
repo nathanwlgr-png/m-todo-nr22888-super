@@ -43,6 +43,8 @@ export default function CustomDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [widgets, setWidgets] = useState([
     'kpi_cards',
+    'clinic_search',
+    'prospeccao_ia',
     'sales_funnel',
     'revenue_chart',
     'client_status',
