@@ -84,7 +84,7 @@ export function useOfflineSync() {
       const raw = localStorage.getItem(OFFLINE_CACHE_KEY);
       if (!raw) return null;
       return JSON.parse(raw);
-    } catch {
+    } catch (_e) {
       return null;
     }
   }, []);
