@@ -41,10 +41,9 @@ Deno.serve(async (req) => {
           if (c.phone) responseText += `   📱 wa.me/${c.phone}\n`;
           responseText += '\n';
         });
-        responseText += `🗺️ *Google Maps rota completa:*\nhttps://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=Marília,SP&travelmode=driving`;
+        responseText += `🗺️ *Google Maps rota:*\nhttps://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=Marília,SP&travelmode=driving`;
       } else {
-        // Sem coordenadas: mostrar como enviar
-        responseText = `📍 *Para usar GPS, envie:*\n\ngps lat:-22.2139 lng:-49.9461\n\nOu acesse o CRM → Agenda → GPS para monitoramento automático.`;
+        responseText = `📍 *Envie suas coordenadas:*\n\n_gps lat:-22.2139 lng:-49.9461_\n\nOu acesse o CRM → Agenda → GPS para ativação automática.`;
       }
     }
 
