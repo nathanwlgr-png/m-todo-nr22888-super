@@ -103,6 +103,7 @@ import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import HemogasEquineGuide from './pages/HemogasEquineGuide';
+import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
@@ -158,7 +159,6 @@ import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
-import Tasks from './pages/Tasks';
 import SalesCoaching from './pages/SalesCoaching';
 import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
 import SalesForecastPage from './pages/SalesForecastPage';
@@ -171,6 +171,7 @@ import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
+import Tasks from './pages/Tasks';
 import TasksUnified from './pages/TasksUnified';
 import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
@@ -181,11 +182,10 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
+import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import Home from './pages/Home';
-import WhatsAppHub from './pages/WhatsAppHub';
 import __Layout from './Layout.jsx';
 
 
@@ -246,6 +246,7 @@ export const PAGES = {
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "HemogasEquineGuide": HemogasEquineGuide,
+    "Home": Home,
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
@@ -301,7 +302,6 @@ export const PAGES = {
     "RouteOptimizer": RouteOptimizer,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
-    "Tasks": Tasks,
     "SalesCoaching": SalesCoaching,
     "SalesCoachingDashboard": SalesCoachingDashboard,
     "SalesForecastPage": SalesForecastPage,
@@ -314,6 +314,7 @@ export const PAGES = {
     "SystemAudit": SystemAudit,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
+    "Tasks": Tasks,
     "TasksUnified": TasksUnified,
     "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
@@ -324,11 +325,10 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
+    "WhatsAppHub": WhatsAppHub,
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "Home": Home,
-    "WhatsAppHub": WhatsAppHub,
 }
 
 export const pagesConfig = {

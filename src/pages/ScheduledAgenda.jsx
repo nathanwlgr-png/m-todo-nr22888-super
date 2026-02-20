@@ -16,6 +16,7 @@ import AgendaComandoPanel from '@/components/AgendaComandoPanel';
 import GPSClinicaRadar from '@/components/GPSClinicaRadar';
 import VincularTelefones from '@/components/VincularTelefones';
 import FloatingInfoCard from '@/components/FloatingInfoCard';
+import ContextualChatIA from '@/components/ContextualChatIA';
 
 const STATUS_COLOR = {
   quente: 'bg-red-100 text-red-700 border-red-300',
