@@ -430,6 +430,12 @@ export default function CustomDashboard() {
           </Card>
         );
 
+      case 'clinic_search':
+        return <ClinicSearchWidget />;
+
+      case 'prospeccao_ia':
+        return <ProspeccaoWidget />;
+
       default:
         return null;
     }
