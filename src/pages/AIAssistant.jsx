@@ -1432,6 +1432,36 @@ Tarefas devem:
         </div>
       )}
 
+      {/* WhatsApp Notificações Rápidas */}
+      {showWhatsAppNotif && (
+        <div className="px-4 pt-4 pb-2">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">📲</span>
+              <span className="font-semibold text-green-800">Enviar para WhatsApp (5514991676428)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { action: 'resumo_diario', label: '🌅 Resumo Diário', desc: 'Clientes, tarefas, visitas' },
+                { action: 'relatorio_pipeline', label: '📊 Pipeline', desc: 'Funil de vendas' },
+                { action: 'alerta_clientes_frios', label: '❄️ Clientes Frios', desc: 'Sem contato há 14+ dias' },
+                { action: 'test', label: '✅ Teste Conexão', desc: 'Verificar sistema ativo' },
+              ].map(({ action, label, desc }) => (
+                <button
+                  key={action}
+                  onClick={() => sendWhatsAppNotif(action)}
+                  disabled={sendingNotif}
+                  className="text-left p-3 bg-white rounded-lg border border-green-200 hover:bg-green-50 transition-colors disabled:opacity-50"
+                >
+                  <div className="font-medium text-sm text-green-800">{label}</div>
+                  <div className="text-xs text-green-600 mt-0.5">{desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Master AI Assistant */}
       {showMasterAI && (
         <div className="px-4 pt-4">
