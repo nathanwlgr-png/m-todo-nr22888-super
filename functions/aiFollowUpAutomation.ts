@@ -135,7 +135,7 @@ async function scheduleFollowUp(base44, clientId, followUpData, user) {
     });
 
     // Log the automation
-    await base44.entities.AutomatedMessageLog.create({
+    await base44.asServiceRole.entities.AutomatedMessageLog.create({
       client_id: clientId,
       client_phone: client.phone,
       message_type: 'ai_followup_scheduled',
