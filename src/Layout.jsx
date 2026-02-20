@@ -234,7 +234,7 @@ export default function Layout({ children, currentPageName }) {
           </header>
 
           {/* Page Content */}
-          <main className="p-6 pb-24">
+          <main className="p-6 pb-24 min-h-screen overflow-y-auto">
             {children}
           </main>
         </div>
