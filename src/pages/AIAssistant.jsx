@@ -574,8 +574,38 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                 <QuickActionButton icon={Zap} label="🤖 Criar Tarefas"
                   onClick={handleAutoCreateTasks} loading={quickLoading.autoTasks}
                   className="shrink-0 bg-gradient-to-r from-fuchsia-50 to-purple-50 border-fuchsia-300 text-fuchsia-700 font-bold text-xs" />
+                <button
+                  onClick={buscarPorGPS}
+                  disabled={gpsLoading}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 border rounded-lg text-xs font-medium bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                >
+                  {gpsLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+                  {gpsLoading ? 'Buscando...' : '📍 GPS'}
+                </button>
               </div>
             </div>
+
+            {/* Clientes próximos via GPS */}
+            {nearbyClients.length > 0 && (
+              <div className="bg-blue-50 border-b border-blue-200 px-3 py-2 shrink-0">
+                <p className="text-xs font-semibold text-blue-800 mb-1.5 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" /> {nearbyClients.length} clientes próximos
+                  <button onClick={() => setNearbyClients([])} className="ml-auto text-blue-400 hover:text-blue-600"><X className="w-3.5 h-3.5" /></button>
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {nearbyClients.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setSelectedClientId(c.id); setMessages([]); setNearbyClients([]); }}
+                      className="shrink-0 text-left bg-white border border-blue-200 rounded-lg px-2.5 py-1.5 hover:bg-blue-100 transition-colors"
+                    >
+                      <div className="text-xs font-medium text-slate-800">{c.first_name} {c.status === 'quente' ? '🔥' : ''}</div>
+                      <div className="text-[10px] text-slate-500">{c.city} • {c.distance < 10 ? `${(c.distance*1000).toFixed(0)}m` : `${c.distance.toFixed(0)}km`}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Script gerado */}
             {generatedScript && (
