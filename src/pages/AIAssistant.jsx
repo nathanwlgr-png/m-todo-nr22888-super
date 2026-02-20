@@ -47,6 +47,9 @@ export default function AIAssistant() {
   const [analyzingTranscript, setAnalyzingTranscript] = useState(false);
   const [activeTab, setActiveTab] = useState('chat');
   const [sendingNotif, setSendingNotif] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [nearbyClients, setNearbyClients] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
