@@ -387,6 +387,79 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
     finally { setSendingNotif(false); }
   };
 
+  // ─── BUSCA POR GPS ────────────────────────────────────────────────────────────
+  const buscarPorGPS = () => {
+    if (!navigator.geolocation) {
+      toast.error('GPS não disponível neste dispositivo');
+      return;
+    }
+    setGpsLoading(true);
+    setNearbyClients([]);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setUserLocation({ lat, lng });
+
+        // Calcular distância de cada cliente
+        const withDist = allClients
+          .filter(c => c.address || c.city)
+          .map(c => {
+            // Coordenadas aproximadas por cidade conhecida
+            const cityCoords = {
+              'marília': { lat: -22.2139, lng: -49.9461 },
+              'bauru': { lat: -22.3246, lng: -49.0653 },
+              'botucatu': { lat: -22.8834, lng: -48.4446 },
+              'lins': { lat: -21.6775, lng: -49.7445 },
+              'ourinhos': { lat: -22.9788, lng: -49.8696 },
+              'assis': { lat: -22.6622, lng: -50.4124 },
+              'tupã': { lat: -21.9347, lng: -50.5127 },
+              'jaú': { lat: -22.2966, lng: -48.5580 },
+              'garça': { lat: -22.2128, lng: -49.6537 },
+              'presidente prudente': { lat: -22.1256, lng: -51.3886 },
+            };
+            const cityKey = (c.city || '').toLowerCase().trim();
+            const coord = cityCoords[cityKey];
+            if (!coord) return { ...c, distance: 9999 };
+            const R = 6371;
+            const dLat = (coord.lat - lat) * Math.PI / 180;
+            const dLng = (coord.lng - lng) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(coord.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+            const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return { ...c, distance: dist, cityCoord: coord };
+          })
+          .filter(c => c.distance < 150)
+          .sort((a, b) => {
+            // Prioriza por distância + score
+            const aDist = a.distance || 999;
+            const bDist = b.distance || 999;
+            const aScore = (a.purchase_score || 0) + (a.status === 'quente' ? 30 : a.status === 'morno' ? 15 : 0);
+            const bScore = (b.purchase_score || 0) + (b.status === 'quente' ? 30 : b.status === 'morno' ? 15 : 0);
+            return (aDist - aScore * 0.5) - (bDist - bScore * 0.5);
+          })
+          .slice(0, 10);
+
+        setNearbyClients(withDist);
+        setGpsLoading(false);
+
+        if (withDist.length === 0) {
+          toast.info('Nenhum cliente encontrado nas proximidades (150km)');
+        } else {
+          toast.success(`${withDist.length} clientes próximos encontrados!`);
+          setActiveTab('chat');
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `📍 **GPS Ativado** — Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}\n\n🏥 **${withDist.length} clientes nas proximidades (até 150km):**\n\n${withDist.map((c, i) => `${i+1}. **${c.first_name}** ${c.clinic_name ? `(${c.clinic_name})` : ''} — ${c.city} — ${c.distance < 10 ? `${(c.distance*1000).toFixed(0)}m` : `${c.distance.toFixed(0)}km`} — ${c.status === 'quente' ? '🔥' : c.status === 'morno' ? '🌡️' : '❄️'} Score: ${c.purchase_score || 0}%`).join('\n')}\n\n💡 Clique em um cliente para selecionar e iniciar abordagem.`
+          }]);
+        }
+      },
+      (err) => {
+        setGpsLoading(false);
+        toast.error('Erro ao obter localização: ' + (err.message || 'Permissão negada'));
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const toggleRolePlay = () => {
     if (!client) return;
     setRolePlayMode(!rolePlayMode);
