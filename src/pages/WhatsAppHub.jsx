@@ -260,62 +260,27 @@ export default function WhatsAppHub() {
 
           {/* ENVIAR MENSAGEM */}
           <TabsContent value="send" className="space-y-4">
-            <Card className="p-4">
-              <h2 className="font-bold mb-4">Enviar Mensagem</h2>
-              
-              {selectedClient ? (
-                <div className="space-y-4">
-                  <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                    <p className="text-sm font-semibold text-green-900">{selectedClient.first_name}</p>
-                    <p className="text-xs text-green-700">{selectedClient.phone}</p>
-                  </div>
+            {/* Sender sem cortes - principal */}
+            <WhatsAppChunkedSender client={selectedClient} />
 
-                  <textarea
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Escreva sua mensagem..."
-                    className="w-full p-3 border rounded-lg text-sm resize-none h-32 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
+            {selectedClient && (
+              <div className="grid grid-cols-2 gap-3">
+                <Button onClick={handleCreateTask} variant="outline">
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Criar Tarefa
+                </Button>
+                <Button onClick={handleScheduleVisit} variant="outline">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Agendar Visita
+                </Button>
+              </div>
+            )}
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={sendMutation.isPending || !messageText.trim()}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      Enviar
-                    </Button>
-                    <Button
-                      onClick={handleCreateTask}
-                      variant="outline"
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Criar Tarefa
-                    </Button>
-                    <Button
-                      onClick={handleScheduleVisit}
-                      variant="outline"
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Agendar Visita
-                    </Button>
-                    <Button
-                      onClick={handleGenerateProposal}
-                      variant="outline"
-                    >
-                      <FileText className="w-4 h-4 mr-2" />
-                      Gerar Proposta
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-500">
-                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Selecione um contato para enviar mensagem</p>
-                </div>
-              )}
-            </Card>
+            {!selectedClient && (
+              <div className="text-center py-4 text-slate-500 text-sm">
+                💡 Selecione um contato na aba <strong>Contatos</strong> para preencher o telefone automaticamente
+              </div>
+            )}
           </TabsContent>
 
           {/* TEMPLATES */}
