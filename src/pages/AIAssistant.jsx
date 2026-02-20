@@ -48,6 +48,7 @@ import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
 import { getFallbackResponse } from '@/components/LocalAIFallbacks';
+import ReactMarkdown from 'react-markdown';
 
 export default function AIAssistant() {
   const { limitReached, getCachedResponse, setCachedResponse, handleLimitError, checkQuotaBeforeCall, trackAICall, quotaExceeded } = useAILimit();
