@@ -190,7 +190,7 @@ export default function Layout({ children, currentPageName }) {
         </aside>
 
         {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'} min-h-screen overflow-y-auto`}>
           {/* Top Bar with Breadcrumbs */}
           <header className="sticky top-0 z-30 bg-white border-b px-6 py-3">
             <div className="flex items-center justify-between">
