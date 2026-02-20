@@ -43,6 +43,7 @@ export default function ScheduledAgenda() {
   const [abaAtiva, setAbaAtiva] = useState('agenda'); // agenda | gps | contatos | ia
   const [floatingInfo, setFloatingInfo] = useState(null); // { titulo, content, clienteId }
   const [filtroStatus, setFiltroStatus] = useState('todos');
+  const [visitaEmAndamento, setVisitaEmAndamento] = useState(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients-agenda'],
