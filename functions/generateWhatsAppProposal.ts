@@ -23,15 +23,14 @@ Deno.serve(async (req) => {
     }
 
     // Buscar cliente
-    const client = await base44.asServiceRole.entities.Client.filter({ id: client_id }).then(r => r[0]);
+    const client = await base44.asServiceRole.entities.Client.get(client_id).catch(() => null);
     if (!client) {
       return Response.json({ error: 'Cliente não encontrado' }, { status: 404 });
     }
 
     // Buscar dados do equipamento na tabela SeamatyPriceTable
-    const equipment = await base44.asServiceRole.entities.SeamatyPriceTable
-      .filter({ product_code: equipment_code })
-      .then(r => r[0]);
+    const allEquip = await base44.asServiceRole.entities.SeamatyPriceTable.list().catch(() => []);
+    const equipment = allEquip.find(e => e.product_code === equipment_code);
     
     if (!equipment) {
       return Response.json({ error: 'Equipamento não encontrado' }, { status: 404 });
