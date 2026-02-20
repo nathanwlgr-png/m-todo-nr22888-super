@@ -142,6 +142,7 @@ import PossibleSales from './pages/PossibleSales';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
 import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
+import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboard';
 import ProductManager from './pages/ProductManager';
 import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplateManager from './pages/ProposalTemplateManager';
@@ -185,7 +186,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -285,6 +285,7 @@ export const PAGES = {
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
     "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
+    "ProactiveIntelligenceDashboard": ProactiveIntelligenceDashboard,
     "ProductManager": ProductManager,
     "ProposalGenerator": ProposalGenerator,
     "ProposalTemplateManager": ProposalTemplateManager,
@@ -328,7 +329,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "ProactiveIntelligenceDashboard": ProactiveIntelligenceDashboard,
 }
 
 export const pagesConfig = {

@@ -139,10 +139,10 @@ export default function Layout({ children, currentPageName }) {
     <AILimitProtection>
       <div className="flex min-h-screen bg-slate-50">
         {/* Sidebar */}
-        <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 ${
+        <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col ${
           sidebarOpen ? 'w-64' : 'w-0'
         } overflow-hidden`}>
-          <div className="p-4 border-b flex items-center justify-between">
+          <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg" />
               <span className="font-bold text-lg">CRM NR22</span>
@@ -156,7 +156,7 @@ export default function Layout({ children, currentPageName }) {
             </Button>
           </div>
 
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 overflow-y-auto flex-1">
             {menuItems.map((item) => (
               <Link
                 key={item.page}
