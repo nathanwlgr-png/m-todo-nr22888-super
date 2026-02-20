@@ -84,10 +84,8 @@ Deno.serve(async (req) => {
     }
 
     // Buscar cliente
-    const client = await base44.asServiceRole.entities.Client
-      .filter({ id: client_id })
-      .then(r => r[0]);
-    
+    const client = await base44.asServiceRole.entities.Client.get(client_id).catch(() => null);
+
     if (!client) {
       return Response.json({ error: 'Cliente não encontrado' }, { status: 404 });
     }
@@ -99,12 +97,11 @@ Deno.serve(async (req) => {
 
     // Buscar histórico de interações
     const interactions = await base44.asServiceRole.entities.WhatsAppMessage
-      ?.filter({ client_id: client_id })
-      .then(r => r || [])
+      .filter({ contact_id: client_id })
       .catch(() => []);
 
     // Análise IA para próxima abordagem
-    const aiAnalysis = await base44.integrations.Core.InvokeLLM({
+    const aiAnalysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é um consultor técnico master de equipamentos laboratoriais.
 
 CLIENTE:
