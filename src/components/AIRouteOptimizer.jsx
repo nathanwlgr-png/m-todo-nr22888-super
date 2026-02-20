@@ -174,6 +174,19 @@ Retorne APENAS um JSON com a estrutura abaixo, SEM texto adicional:
             traffic_adjusted_time: { type: "string" },
             route_efficiency_score: { type: "number" },
             insights: { type: "array", items: { type: "string" } },
+            lunch_stops: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  day: { type: "number" },
+                  suggested_time: { type: "string" },
+                  city: { type: "string" },
+                  suggestions: { type: "array", items: { type: "string" } },
+                  rest_duration_minutes: { type: "number" }
+                }
+              }
+            },
             daily_routes: {
               type: "array",
               items: {
