@@ -103,7 +103,6 @@ import GlobalSearch from './pages/GlobalSearch';
 import Goals from './pages/Goals';
 import GoogleCalendarSettings from './pages/GoogleCalendarSettings';
 import HemogasEquineGuide from './pages/HemogasEquineGuide';
-import Home from './pages/Home';
 import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
@@ -182,7 +181,6 @@ import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
-import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
@@ -246,7 +244,6 @@ export const PAGES = {
     "Goals": Goals,
     "GoogleCalendarSettings": GoogleCalendarSettings,
     "HemogasEquineGuide": HemogasEquineGuide,
-    "Home": Home,
     "ImportClientsTable": ImportClientsTable,
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
@@ -325,14 +322,13 @@ export const PAGES = {
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
     "WhatsAppDataAccess": WhatsAppDataAccess,
-    "WhatsAppHub": WhatsAppHub,
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
 }
 
 export const pagesConfig = {
-    mainPage: "Home",
+    mainPage: "AIAssistant",
     Pages: PAGES,
     Layout: __Layout,
 };
