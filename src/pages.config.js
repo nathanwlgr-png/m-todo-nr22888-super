@@ -174,6 +174,7 @@ import Tasks from './pages/Tasks';
 import TasksUnified from './pages/TasksUnified';
 import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
+import VQ1PanelPricing from './pages/VQ1PanelPricing';
 import VisitManager from './pages/VisitManager';
 import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
@@ -184,7 +185,7 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import VQ1PanelPricing from './pages/VQ1PanelPricing';
+import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -316,6 +317,7 @@ export const PAGES = {
     "TasksUnified": TasksUnified,
     "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
+    "VQ1PanelPricing": VQ1PanelPricing,
     "VisitManager": VisitManager,
     "VisitPlanner": VisitPlanner,
     "VisitSummary": VisitSummary,
@@ -326,7 +328,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "VQ1PanelPricing": VQ1PanelPricing,
+    "ProactiveIntelligenceDashboard": ProactiveIntelligenceDashboard,
 }
 
 export const pagesConfig = {
