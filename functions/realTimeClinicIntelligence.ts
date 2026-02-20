@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     }
 
     // Busca de inteligência na web
-    const webIntelligence = await base44.integrations.Core.InvokeLLM({
+    const webIntelligence = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Faça uma pesquisa minuciosa sobre a clínica veterinária: "${clinic_name}" em ${city}, Brasil.
 
 PROCURE POR:
