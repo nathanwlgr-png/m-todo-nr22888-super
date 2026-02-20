@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     }
 
     // IA 1: Abordagem Técnica (especialista em vendas consultivas)
-    const technicalApproach = await base44.integrations.Core.InvokeLLM({
+    const technicalApproach = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é IA especialista em VENDAS CONSULTIVAS para equipamentos laboratoriais.
 
 CLIENTE: ${client.first_name} | NUMEROLOGIA: ${numerology_profile?.number} (${numerology_profile?.profile})
