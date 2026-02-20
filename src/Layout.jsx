@@ -207,14 +207,14 @@ export default function Layout({ children, currentPageName }) {
                 
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-sm">
-                  {breadcrumbs.map((crumb, index) => (
-                    <React.Fragment key={index}>
-                      {index > 0 && <ChevronRight className="w-4 h-4 text-slate-400" />}
-                      <span className={index === breadcrumbs.length - 1 ? 'text-indigo-600 font-semibold' : 'text-slate-600'}>
-                        {crumb}
-                      </span>
-                    </React.Fragment>
-                  ))}
+                 {breadcrumbs.map((crumb, index) => (
+                   <span key={index} className="flex items-center gap-2">
+                     {index > 0 && <ChevronRight className="w-4 h-4 text-slate-400" />}
+                     <span className={index === breadcrumbs.length - 1 ? 'text-indigo-600 font-semibold' : 'text-slate-600'}>
+                       {crumb}
+                     </span>
+                   </span>
+                 ))}
                 </div>
               </div>
 
