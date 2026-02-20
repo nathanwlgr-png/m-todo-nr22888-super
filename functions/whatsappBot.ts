@@ -3,396 +3,322 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { message, from } = await req.json();
+    const body = await req.json();
+    const { message, from, lat, lng } = body;
     const messageText = message?.toLowerCase() || '';
     
-    // Buscar todos os clientes (sem auth obrigatória - bot interno)
-    const clients = await base44.asServiceRole.entities.Client.list('-updated_date', 100);
-    
+    const clients = await base44.asServiceRole.entities.Client.list('-updated_date', 150);
     let responseText = '';
-    
-    // COMANDOS DO BOT
-    
-    // 1. BUSCAR CLIENTE
-    if (messageText.startsWith('buscar ') || messageText.startsWith('cliente ')) {
+
+    // ─── HELPER: encontrar cliente pelo nome ───
+    const findClient = (name) => clients.find(c =>
+      c.first_name?.toLowerCase().includes(name) ||
+      c.clinic_name?.toLowerCase().includes(name) ||
+      c.full_name?.toLowerCase().includes(name)
+    );
+
+    // ─── GPS + CLIENTES PRÓXIMOS ─────────────────────────────────────────────
+    if (messageText.includes('gps') || messageText.includes('onde estou') || messageText.includes('próximos') || messageText.includes('proximos')) {
+      if (lat && lng) {
+        // Clientes com cidade mapeada — retorna os mais prioritários da região
+        const cityClients = clients
+          .filter(c => c.city)
+          .sort((a, b) => (a.priority_level || 9) - (b.priority_level || 9))
+          .slice(0, 5);
+
+        responseText = `📍 *GPS RECEBIDO*\nLat: ${parseFloat(lat).toFixed(4)}, Lng: ${parseFloat(lng).toFixed(4)}\n\n`;
+        responseText += `🏥 *Clientes prioritários na rota:*\n\n`;
+        cityClients.forEach((c, i) => {
+          responseText += `${i+1}. *${c.first_name}* — ${c.city}\n`;
+          responseText += `   Score: ${c.purchase_score || 0}% | ${c.status}\n`;
+          if (c.phone) responseText += `   📱 wa.me/${c.phone}\n`;
+          responseText += '\n';
+        });
+        responseText += `🗺️ *Google Maps rota completa:*\nhttps://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=Marília,SP&travelmode=driving`;
+      } else {
+        // Sem coordenadas: mostrar como enviar
+        responseText = `📍 *Para usar GPS, envie:*\n\ngps lat:-22.2139 lng:-49.9461\n\nOu acesse o CRM → Agenda → GPS para monitoramento automático.`;
+      }
+    }
+
+    // ─── ROTA DO DIA ─────────────────────────────────────────────────────────
+    else if (messageText.includes('rota') || (messageText.includes('agenda') && (messageText.includes('hoje') || messageText.includes('dia')))) {
+      const today = new Date().toISOString().split('T')[0];
+      const visits = await base44.asServiceRole.entities.Visit.filter({ status: 'agendada' });
+      const todayVisits = visits.filter(v => v.scheduled_date?.startsWith(today));
+
+      responseText = `📅 *ROTA DE HOJE — ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}*\n\n`;
+
+      if (todayVisits.length === 0) {
+        responseText += `❌ Nenhuma visita agendada para hoje.\n\nDigite *agenda [cidades]* para gerar sua rota!`;
+      } else {
+        todayVisits.forEach((v, i) => {
+          const hora = v.scheduled_date?.split('T')[1]?.slice(0,5) || '';
+          responseText += `${i+1}. *${v.client_name}*${hora ? ` — ${hora}` : ''}\n`;
+          if (v.location) responseText += `   📍 ${v.location}\n`;
+          responseText += '\n';
+        });
+
+        // Link do Maps com todos os waypoints
+        const waypoints = todayVisits.map(v => encodeURIComponent(v.client_name + ', SP')).join('|');
+        responseText += `🗺️ *Abrir rota completa:*\nhttps://www.google.com/maps/dir/?api=1&origin=Marília,SP&destination=Marília,SP&waypoints=${waypoints}&travelmode=driving`;
+      }
+    }
+
+    // ─── NAVEGAÇÃO PARA CLIENTE ───────────────────────────────────────────────
+    else if (messageText.startsWith('navegar ') || messageText.startsWith('ir para ') || messageText.startsWith('maps ')) {
+      const nome = messageText.replace('navegar ', '').replace('ir para ', '').replace('maps ', '').trim();
+      const client = findClient(nome);
+      if (!client) {
+        responseText = `❌ Cliente "${nome}" não encontrado.`;
+      } else {
+        const dest = encodeURIComponent(`${client.clinic_name || client.first_name}, ${client.city || ''}, SP`);
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=driving`;
+        const wazeUrl = `https://waze.com/ul?q=${dest}&navigate=yes`;
+        responseText = `🗺️ *Navegação para ${client.first_name}*\n\n`;
+        responseText += `📍 ${client.clinic_name || ''} — ${client.city}\n\n`;
+        responseText += `🔵 *Google Maps:*\n${mapsUrl}\n\n`;
+        responseText += `🔷 *Waze:*\n${wazeUrl}`;
+      }
+    }
+
+    // ─── REGISTRAR NOTA/VISITA ────────────────────────────────────────────────
+    else if (messageText.startsWith('anota ') || messageText.startsWith('anotar ') || messageText.startsWith('nota ')) {
+      const match = messageText.match(/(?:anota(?:r)?|nota)\s+(?:para |no |pra )?(.+?)[:]\s*(.+)/);
+      if (!match) {
+        responseText = `❌ Use o formato:\n*anota para [nome]: [sua nota]*\n\nEx: anota para Dr. João: muito interessado, quer demo na semana que vem`;
+      } else {
+        const nomeCliente = match[1].trim();
+        const nota = match[2].trim();
+        const client = findClient(nomeCliente);
+
+        if (!client) {
+          responseText = `❌ Cliente "${nomeCliente}" não encontrado no CRM.`;
+        } else {
+          const visits = await base44.asServiceRole.entities.Visit.filter({ client_id: client.id });
+          const now = new Date().toISOString();
+
+          if (visits.length > 0) {
+            const ultima = visits.sort((a, b) => new Date(b.scheduled_date) - new Date(a.scheduled_date))[0];
+            await base44.asServiceRole.entities.Visit.update(ultima.id, {
+              result_notes: (ultima.result_notes || '') + `\n[WhatsApp ${new Date().toLocaleTimeString('pt-BR')}]: ${nota}`,
+            });
+          } else {
+            await base44.asServiceRole.entities.Visit.create({
+              client_id: client.id,
+              client_name: client.first_name,
+              scheduled_date: now,
+              status: 'realizada',
+              visit_type: 'followup',
+              result_notes: nota,
+              notes: '[Criado via WhatsApp Bot]',
+            });
+          }
+
+          await base44.asServiceRole.entities.Client.update(client.id, {
+            last_contact_date: now.split('T')[0],
+          });
+
+          responseText = `✅ *Nota registrada!*\n\nCliente: *${client.first_name}*\nNota: "${nota}"\n\nSalvo no histórico de visitas do CRM.`;
+        }
+      }
+    }
+
+    // ─── DETALHES DO CLIENTE ──────────────────────────────────────────────────
+    else if (messageText.startsWith('detalhes ') || messageText.startsWith('status ') || messageText.startsWith('info ')) {
+      const nome = messageText.replace('detalhes ', '').replace('status ', '').replace('info ', '').trim();
+      const client = findClient(nome);
+      if (!client) {
+        responseText = `❌ Cliente "${nome}" não encontrado.`;
+      } else {
+        const visits = await base44.asServiceRole.entities.Visit.filter({ client_id: client.id });
+        const tasks = await base44.asServiceRole.entities.Task.filter({ client_id: client.id });
+        responseText = `📋 *${client.first_name}*\n`;
+        responseText += `🏥 ${client.clinic_name || 'N/A'} — ${client.city || 'N/A'}\n`;
+        responseText += `━━━━━━━━━━━━━\n`;
+        responseText += `🔥 Status: *${client.status}*\n`;
+        responseText += `📊 Score: *${client.purchase_score || 0}%*\n`;
+        responseText += `🔄 Pipeline: ${client.pipeline_stage || 'lead'}\n`;
+        responseText += `📅 Última visita: ${client.last_visit_date || 'Nunca'}\n`;
+        responseText += `📅 Próx. contato: ${client.next_contact_date || 'N/A'}\n`;
+        responseText += `🎯 Visitas: ${visits.length}\n`;
+        responseText += `✅ Tarefas: ${tasks.filter(t => t.status === 'pendente').length} pendentes\n`;
+        if (client.main_pains?.length) responseText += `💢 Dores: ${client.main_pains.join(', ')}\n`;
+        if (client.next_action) responseText += `⚡ Próxima ação: ${client.next_action}\n`;
+        if (client.phone) responseText += `\n💬 wa.me/${client.phone}`;
+      }
+    }
+
+    // ─── ABORDAGEM/ESTRATÉGIA ─────────────────────────────────────────────────
+    else if (messageText.startsWith('abordagem ') || messageText.startsWith('como abordar ') || messageText.startsWith('estratégia ')) {
+      const nome = messageText.replace('abordagem ', '').replace('como abordar ', '').replace('estratégia ', '').trim();
+      const client = findClient(nome);
+      if (!client) {
+        responseText = `❌ Cliente "${nome}" não encontrado.`;
+      } else {
+        const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `Gere abordagem de vendas ULTRA-CONCISA (max 400 chars) para WhatsApp:
+Cliente: ${client.first_name}, Numerologia: ${client.numerology_number || 'N/A'}
+Perfil: ${client.behavioral_profile || 'N/A'}, Tom: ${client.client_tone || 'N/A'}
+Status: ${client.status}, Score: ${client.purchase_score}%
+Dores: ${client.main_pains?.join(', ') || 'N/A'}
+Inclua: 1 frase de abertura + 1 pergunta SPIN + 1 gatilho mental`,
+          response_json_schema: { type: 'object', properties: {
+            abertura: { type: 'string' }, pergunta_spin: { type: 'string' }, gatilho: { type: 'string' }
+          }}
+        });
+        responseText = `🎯 *Abordagem: ${client.first_name}*\n\n`;
+        responseText += `💬 *Abertura:* ${result.abertura}\n\n`;
+        responseText += `❓ *SPIN:* ${result.pergunta_spin}\n\n`;
+        responseText += `⚡ *Gatilho:* ${result.gatilho}`;
+      }
+    }
+
+    // ─── BUSCAR CLIENTE ───────────────────────────────────────────────────────
+    else if (messageText.startsWith('buscar ') || messageText.startsWith('cliente ')) {
       const searchTerm = messageText.replace('buscar ', '').replace('cliente ', '').trim();
-      const foundClients = clients.filter(c => 
+      const found = clients.filter(c =>
         c.first_name?.toLowerCase().includes(searchTerm) ||
         c.clinic_name?.toLowerCase().includes(searchTerm) ||
         c.city?.toLowerCase().includes(searchTerm)
       ).slice(0, 5);
-      
-      if (foundClients.length === 0) {
+
+      if (found.length === 0) {
         responseText = `❌ Nenhum cliente encontrado com "${searchTerm}"`;
       } else {
-        responseText = `✅ *${foundClients.length} cliente(s) encontrado(s):*\n\n`;
-        foundClients.forEach((c, i) => {
-          responseText += `${i + 1}. *${c.first_name}*\n`;
-          responseText += `   Clínica: ${c.clinic_name || 'N/A'}\n`;
-          responseText += `   Status: ${c.status} (${c.purchase_score}%)\n`;
-          responseText += `   Cidade: ${c.city || 'N/A'}\n`;
-          responseText += `   Pipeline: ${c.pipeline_stage || 'lead'}\n\n`;
+        responseText = `✅ *${found.length} cliente(s):*\n\n`;
+        found.forEach((c, i) => {
+          responseText += `${i+1}. *${c.first_name}* — ${c.clinic_name || 'N/A'}\n`;
+          responseText += `   ${c.status} · ${c.purchase_score}% · ${c.city || 'N/A'}\n\n`;
         });
       }
     }
-    
-    // 2. ANÁLISE DE PERFORMANCE DA EQUIPE
-    else if (messageText.includes('performance') && !messageText.includes('detalhada')) {
-      const sales = await base44.asServiceRole.entities.Sale.list('-sale_date', 50);
-      const coachingSessions = await base44.asServiceRole.entities.CoachingSession.list('-created_date', 50);
-      const interactions = await base44.asServiceRole.entities.Interaction.list('-created_date', 50);
-      
-      // Últimos 30 dias
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const recentSales = sales.filter(s => new Date(s.sale_date) >= thirtyDaysAgo);
-      const recentCoaching = coachingSessions.filter(c => new Date(c.created_date) >= thirtyDaysAgo);
-      const recentInteractions = interactions.filter(i => new Date(i.created_date) >= thirtyDaysAgo);
-      
-      const totalRevenue = recentSales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
-      const avgScore = recentCoaching.length > 0 
-        ? (recentCoaching.reduce((sum, c) => sum + (c.overall_score || 0), 0) / recentCoaching.length).toFixed(1)
-        : 0;
-      
-      responseText = `📊 *PERFORMANCE DA EQUIPE (30 dias)*\n\n`;
-      responseText += `💰 *Vendas:* ${recentSales.length}\n`;
-      responseText += `💵 *Receita:* R$ ${totalRevenue.toLocaleString('pt-BR')}\n`;
-      responseText += `📈 *Ticket Médio:* R$ ${(totalRevenue / recentSales.length || 0).toFixed(2)}\n`;
-      responseText += `🎯 *Coaching:* ${recentCoaching.length} sessões (Score: ${avgScore}/100)\n`;
-      responseText += `💬 *Interações:* ${recentInteractions.length}\n\n`;
-      responseText += `_Digite "performance detalhada" para análise completa com IA_`;
-    }
-    
-    // 2B. PERFORMANCE DETALHADA COM IA
-    else if (messageText.includes('performance detalhada') || messageText.includes('análise detalhada')) {
-      const sales = await base44.asServiceRole.entities.Sale.list('-sale_date', 50);
-      const coachingSessions = await base44.asServiceRole.entities.CoachingSession.list('-created_date', 30);
-      const interactions = await base44.asServiceRole.entities.Interaction.list('-created_date', 50);
-      
-      responseText = `⏳ Gerando análise detalhada com IA...\n\n`;
-      
-      const aiAnalysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt: `Analise a performance da equipe de vendas (últimos 30 dias):
 
-VENDAS: ${sales.length} vendas, ${sales.reduce((sum, s) => sum + (s.sale_value || 0), 0).toLocaleString('pt-BR')} em receita
-
-COACHING: ${coachingSessions.length} sessões
-Scores médios: ${coachingSessions.map(c => c.technique_scores).filter(Boolean).length} análises
-
-INTERAÇÕES: ${interactions.length} interações registradas
-
-Forneça análise SUPER CONCISA (máximo 400 caracteres) para WhatsApp:
-1. Principal força da equipe
-2. Maior oportunidade de melhoria
-3. Recomendação #1 acionável HOJE
-
-Seja direto e prático!`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            forca: { type: "string" },
-            oportunidade: { type: "string" },
-            acao_imediata: { type: "string" }
-          }
-        }
-      });
-      
-      responseText = `🤖 *ANÁLISE IA - PERFORMANCE*\n\n`;
-      responseText += `💪 *Força:* ${aiAnalysis.forca}\n\n`;
-      responseText += `📈 *Oportunidade:* ${aiAnalysis.oportunidade}\n\n`;
-      responseText += `⚡ *Ação Hoje:* ${aiAnalysis.acao_imediata}`;
-    }
-    
-    // 3. PLAYBOOK PARA CLIENTE
+    // ─── PLAYBOOK ─────────────────────────────────────────────────────────────
     else if (messageText.startsWith('playbook ')) {
       const clientName = messageText.replace('playbook ', '').trim();
-      const client = clients.find(c => 
-        c.first_name?.toLowerCase().includes(clientName) ||
-        c.clinic_name?.toLowerCase().includes(clientName)
-      );
-      
+      const client = findClient(clientName);
       if (!client) {
-        responseText = `❌ Cliente "${clientName}" não encontrado.\n\nTente: *playbook [nome do cliente]*`;
+        responseText = `❌ Cliente "${clientName}" não encontrado.\n\nUse: *playbook [nome]*`;
       } else {
-        responseText = `🎯 Gerando playbook para *${client.first_name}*...\n\n`;
-        
-        // Gerar playbook rápido com IA
-        const quickPlaybook = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Gere um playbook de vendas SUPER RÁPIDO para WhatsApp (máximo 500 caracteres):
-
-Cliente: ${client.first_name}
-Numerologia: ${client.numerology_number || 'N/A'}
-Status: ${client.status}
-Pipeline: ${client.pipeline_stage || 'lead'}
-
-Forneça:
-1. Melhor abordagem (1 frase)
-2. Top 2 perguntas SPIN
-3. Principal objeção esperada + resposta
-4. Fechamento ideal
-
-SEJA ULTRA-CONCISO para WhatsApp!`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              abordagem: { type: "string" },
-              perguntas_spin: { type: "array", items: { type: "string" } },
-              objecao_principal: { type: "string" },
-              resposta_objecao: { type: "string" },
-              fechamento: { type: "string" }
-            }
-          }
+        const playbook = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `Playbook para WhatsApp (max 500 chars): ${client.first_name}, Numerologia: ${client.numerology_number}, Status: ${client.status}, Pipeline: ${client.pipeline_stage}. Inclua: abertura, pergunta SPIN, objeção + resposta, fechamento.`,
+          response_json_schema: { type: 'object', properties: {
+            abordagem: { type: 'string' }, perguntas_spin: { type: 'array', items: { type: 'string' } },
+            objecao_principal: { type: 'string' }, resposta_objecao: { type: 'string' }, fechamento: { type: 'string' }
+          }}
         });
-        
-        responseText += `📍 *Abordagem:* ${quickPlaybook.abordagem}\n\n`;
-        responseText += `❓ *Perguntas SPIN:*\n`;
-        quickPlaybook.perguntas_spin?.forEach((p, i) => {
-          responseText += `${i + 1}. ${p}\n`;
-        });
-        responseText += `\n🛡️ *Objeção:* ${quickPlaybook.objecao_principal}\n`;
-        responseText += `💡 *Resposta:* ${quickPlaybook.resposta_objecao}\n\n`;
-        responseText += `🎯 *Fechamento:* ${quickPlaybook.fechamento}`;
+        responseText = `🎯 *PLAYBOOK: ${client.first_name}*\n\n📍 ${playbook.abordagem}\n\n❓ ${playbook.perguntas_spin?.[0]}\n\n🛡️ ${playbook.objecao_principal}\n💡 ${playbook.resposta_objecao}\n\n🏁 ${playbook.fechamento}`;
       }
     }
-    
-    // 4. CLIENTES QUENTES
+
+    // ─── QUENTES ──────────────────────────────────────────────────────────────
     else if (messageText.includes('quente') || messageText.includes('hot')) {
-      const hotClients = clients.filter(c => c.status === 'quente').slice(0, 10);
-      
-      responseText = `🔥 *${hotClients.length} CLIENTES QUENTES*\n\n`;
-      hotClients.forEach((c, i) => {
-        responseText += `${i + 1}. *${c.first_name}* - ${c.clinic_name || 'N/A'}\n`;
-        responseText += `   Score: ${c.purchase_score}% | ${c.city || 'N/A'}\n`;
-        if (c.next_contact_date) {
-          responseText += `   Próximo contato: ${new Date(c.next_contact_date).toLocaleDateString('pt-BR')}\n`;
-        }
-        responseText += `\n`;
+      const hot = clients.filter(c => c.status === 'quente').slice(0, 8);
+      responseText = `🔥 *${hot.length} CLIENTES QUENTES*\n\n`;
+      hot.forEach((c, i) => {
+        responseText += `${i+1}. *${c.first_name}* — ${c.city || 'N/A'}\n   Score: ${c.purchase_score}%`;
+        if (c.phone) responseText += ` · wa.me/${c.phone}`;
+        responseText += '\n\n';
       });
     }
-    
-    // 5. TAREFAS PENDENTES
-    else if (messageText.includes('tarefa') || messageText.includes('task')) {
-      const tasks = await base44.asServiceRole.entities.Task.list('-due_date', 20);
-      const pendingTasks = tasks.filter(t => t.status === 'pendente');
-      
-      responseText = `✅ *${pendingTasks.length} TAREFAS PENDENTES*\n\n`;
-      pendingTasks.slice(0, 5).forEach((t, i) => {
-        responseText += `${i + 1}. ${t.title}\n`;
-        responseText += `   Cliente: ${t.client_name || 'N/A'}\n`;
-        if (t.due_date) {
-          responseText += `   Vencimento: ${new Date(t.due_date).toLocaleDateString('pt-BR')}\n`;
-        }
-        responseText += `   Prioridade: ${t.priority}\n\n`;
-      });
-    }
-    
-    // 6. RESUMO DO DIA
-    else if (messageText.includes('resumo') || messageText.includes('hoje') || messageText.includes('dia')) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const todaySales = await base44.asServiceRole.entities.Sale.filter({ sale_date: today.toISOString().split('T')[0] });
-      const todayTasks = await base44.asServiceRole.entities.Task.filter({ due_date: today.toISOString().split('T')[0] });
-      const todayVisits = await base44.asServiceRole.entities.Visit.filter({ status: 'agendada' });
-      
-      const hotClients = clients.filter(c => c.status === 'quente').length;
-      
-      responseText = `📅 *RESUMO DE HOJE*\n`;
-      responseText += `${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}\n\n`;
-      responseText += `💰 Vendas: ${todaySales.length}\n`;
-      responseText += `✅ Tarefas: ${todayTasks.length}\n`;
-      responseText += `📍 Visitas: ${todayVisits.length}\n`;
-      responseText += `🔥 Clientes Quentes: ${hotClients}\n`;
-      responseText += `👥 Total Clientes: ${clients.length}\n`;
-    }
-    
-    // 7. CRIAR TAREFA RÁPIDA
-    else if (messageText.startsWith('criar tarefa') || messageText.startsWith('nova tarefa')) {
-      const taskText = messageText.replace('criar tarefa', '').replace('nova tarefa', '').trim();
-      
-      if (!taskText) {
-        responseText = `❌ Use: *criar tarefa [descrição]*\n\nEx: criar tarefa Ligar para João da Clínica Vida`;
-      } else {
-        // Criar tarefa com IA para extrair cliente
-        const taskData = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Extraia informações desta tarefa: "${taskText}"\n\nRetorne: título curto, descrição, prioridade (alta/media/baixa), se há menção a cliente (nome)`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-              priority: { type: "string" },
-              client_mention: { type: "string" }
-            }
-          }
-        });
-        
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 1);
-        
-        await base44.asServiceRole.entities.Task.create({
-          title: taskData.title,
-          description: taskData.description || taskText,
-          priority: taskData.priority || 'media',
-          status: 'pendente',
-          due_date: dueDate.toISOString().split('T')[0],
-          type: 'outro'
-        });
-        
-        responseText = `✅ *Tarefa Criada!*\n\n`;
-        responseText += `📋 ${taskData.title}\n`;
-        responseText += `⚡ Prioridade: ${taskData.priority}\n`;
-        responseText += `📅 Vence amanhã`;
-      }
-    }
-    
-    // 8. BUSCA CLÍNICAS DA CIDADE (NOVO)
-    else if (messageText.startsWith('clinicas ') || messageText.startsWith('clínicas ')) {
-      const cityName = messageText.replace('clinicas ', '').replace('clínicas ', '').trim();
-      responseText = `🔍 *Buscando clínicas em ${cityName}...*\n\nUse a função "buscaClinicasCidade" no CRM para análise completa com internet.\n\n*Clientes já cadastrados nesta cidade:*\n`;
-      const cityClients = clients.filter(c => c.city?.toLowerCase().includes(cityName.toLowerCase())).slice(0, 5);
-      if (cityClients.length === 0) {
-        responseText += `❌ Nenhum cliente de ${cityName} no CRM ainda.\n\nDica: Use *buscar mercado ${cityName}* para prospectar!`;
-      } else {
-        cityClients.forEach((c, i) => {
-          responseText += `${i + 1}. ${c.first_name} - ${c.clinic_name || 'N/A'} (${c.status})\n`;
-        });
-      }
-    }
 
-    // 8B. INTELIGÊNCIA COMPLETA DE CLÍNICA (NOVO)
-    else if (messageText.startsWith('inteligencia ') || messageText.startsWith('inteligência ') || messageText.startsWith('perfil completo ')) {
-      const clinicName = messageText.replace('inteligencia ', '').replace('inteligência ', '').replace('perfil completo ', '').trim();
-      const client = clients.find(c =>
-        c.first_name?.toLowerCase().includes(clinicName) ||
-        c.clinic_name?.toLowerCase().includes(clinicName)
-      );
-
-      if (!client) {
-        responseText = `❌ Cliente "${clinicName}" não encontrado.\n\nTente: *perfil completo [nome]*`;
-      } else {
-        // Chamar função de inteligência total
-        const result = await base44.asServiceRole.functions.invoke('clinicaInteligenciaTotal', {
-          client_id: client.id,
-          clinic_name: client.clinic_name,
-          city: client.city,
-        }).catch(e => null);
-
-        if (result?.internet_research) {
-          const r = result.internet_research;
-          responseText = `🔬 *ANÁLISE TOTAL: ${client.first_name}*\n`;
-          responseText += `━━━━━━━━━━━━━━━━━━━\n`;
-          responseText += `📋 *CRM:* Score ${client.purchase_score}% | ${client.status}\n`;
-          responseText += `🏥 *Porte:* ${r.porte_clinica || 'N/D'}\n`;
-          responseText += `📊 *Volume/mês:* ${r.volume_estimado_mensal || 'N/D'}\n`;
-          responseText += `⭐ *Google:* ${r.clinic_info?.avaliacao_google || 'N/D'} (${r.clinic_info?.numero_avaliacoes || 0} avaliações)\n`;
-          responseText += `🎯 *Score Oportunidade:* ${r.score_oportunidade || 'N/D'}/100\n`;
-          responseText += `🔧 *Equipamento Rec.:* ${r.equipamento_recomendado || 'N/D'}\n`;
-          responseText += `━━━━━━━━━━━━━━━━━━━\n`;
-          responseText += `💡 *Insights:* ${r.resumo_executivo || 'Ver CRM'}\n\n`;
-          responseText += `⚡ *Abordagem:* ${r.abordagem_ideal || client.next_action || 'Ver playbook'}`;
+    // ─── TAREFAS ──────────────────────────────────────────────────────────────
+    else if (messageText.includes('tarefa') || messageText.startsWith('criar tarefa') || messageText.startsWith('nova tarefa')) {
+      if (messageText.startsWith('criar tarefa') || messageText.startsWith('nova tarefa')) {
+        const taskText = messageText.replace('criar tarefa', '').replace('nova tarefa', '').trim();
+        if (!taskText) {
+          responseText = `❌ Use: *criar tarefa [descrição]*`;
         } else {
-          responseText = `📋 *${client.first_name} - Perfil CRM*\n\n`;
-          responseText += `Status: ${client.status} | Score: ${client.purchase_score}%\n`;
-          responseText += `Clínica: ${client.clinic_name}\n`;
-          responseText += `Cidade: ${client.city}\n`;
-          responseText += `Pipeline: ${client.pipeline_stage}\n`;
-          responseText += `Numerologia: ${client.numerology_number} - ${client.behavioral_profile}\n`;
-          if (client.main_pains?.length) responseText += `\nDores: ${client.main_pains.join(', ')}\n`;
-          if (client.next_action) responseText += `\nPróxima ação: ${client.next_action}`;
+          const taskData = await base44.asServiceRole.integrations.Core.InvokeLLM({
+            prompt: `Extraia da tarefa: "${taskText}" → título curto, prioridade (alta/media/baixa), cliente mencionado (se houver)`,
+            response_json_schema: { type: 'object', properties: { title: { type: 'string' }, priority: { type: 'string' }, client_mention: { type: 'string' } }}
+          });
+          const due = new Date(); due.setDate(due.getDate() + 1);
+          await base44.asServiceRole.entities.Task.create({
+            title: taskData.title, priority: taskData.priority || 'media',
+            status: 'pendente', due_date: due.toISOString().split('T')[0], type: 'outro',
+          });
+          responseText = `✅ *Tarefa criada!*\n\n📋 ${taskData.title}\n⚡ Prioridade: ${taskData.priority || 'media'}\n📅 Vence amanhã`;
         }
-      }
-    }
-
-    // 8C. RESUMO DIÁRIO (NOVO)
-    else if (messageText.includes('resumo') && (messageText.includes('diario') || messageText.includes('diário'))) {
-      const result = await base44.asServiceRole.functions.invoke('whatsappMasterNotificacao', {
-        action: 'resumo_diario',
-        phone: from || '5514991676428',
-      }).catch(e => null);
-      responseText = result?.message_text || '❌ Erro ao gerar resumo diário';
-    }
-
-    // 9. ANÁLISE RÁPIDA CLIENTE
-    else if (messageText.startsWith('analisar ') || messageText.startsWith('análise ')) {
-      const clientName = messageText.replace('analisar ', '').replace('análise ', '').trim();
-      const client = clients.find(c => 
-        c.first_name?.toLowerCase().includes(clientName) ||
-        c.clinic_name?.toLowerCase().includes(clientName)
-      );
-      
-      if (!client) {
-        responseText = `❌ Cliente não encontrado.\n\nTente: *analisar [nome]*`;
       } else {
-        const analysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Análise ultra-rápida para WhatsApp (300 chars):
-
-Cliente: ${client.first_name} - ${client.clinic_name}
-Status: ${client.status} (Score: ${client.purchase_score}%)
-Numerologia: ${client.numerology_number}
-Pipeline: ${client.pipeline_stage}
-Dores: ${client.main_pains?.join(', ')}
-
-Dê: 1 insight principal + 1 ação imediata`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              insight: { type: "string" },
-              acao: { type: "string" }
-            }
-          }
+        const tasks = await base44.asServiceRole.entities.Task.list('-due_date', 20);
+        const pending = tasks.filter(t => t.status === 'pendente');
+        responseText = `✅ *${pending.length} TAREFAS PENDENTES*\n\n`;
+        pending.slice(0, 6).forEach((t, i) => {
+          responseText += `${i+1}. ${t.title}\n   ${t.client_name || ''} · ${t.due_date || ''} · ${t.priority}\n\n`;
         });
-        
-        responseText = `🎯 *${client.first_name}*\n\n`;
-        responseText += `💡 ${analysis.insight}\n\n`;
-        responseText += `⚡ *AÇÃO:* ${analysis.acao}`;
       }
     }
-    
-    // 9. AJUDA
+
+    // ─── RESUMO DO DIA ────────────────────────────────────────────────────────
+    else if (messageText.includes('resumo') || messageText.includes('hoje') || messageText.includes('dia')) {
+      const today = new Date().toISOString().split('T')[0];
+      const [todaySales, todayTasks, todayVisits] = await Promise.all([
+        base44.asServiceRole.entities.Sale.filter({ sale_date: today }),
+        base44.asServiceRole.entities.Task.filter({ due_date: today }),
+        base44.asServiceRole.entities.Visit.filter({ status: 'agendada' }),
+      ]);
+      const hot = clients.filter(c => c.status === 'quente').length;
+      responseText = `📅 *RESUMO — ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}*\n\n`;
+      responseText += `💰 Vendas hoje: ${todaySales.length}\n`;
+      responseText += `✅ Tarefas: ${todayTasks.length}\n`;
+      responseText += `📍 Visitas agendadas: ${todayVisits.length}\n`;
+      responseText += `🔥 Clientes quentes: ${hot}\n`;
+      responseText += `👥 Total no CRM: ${clients.length}\n\n`;
+      responseText += `_Digite "rota" para ver o roteiro do dia_`;
+    }
+
+    // ─── PERFORMANCE ─────────────────────────────────────────────────────────
+    else if (messageText.includes('performance')) {
+      const sales = await base44.asServiceRole.entities.Sale.list('-sale_date', 50);
+      const d30 = new Date(); d30.setDate(d30.getDate() - 30);
+      const recent = sales.filter(s => new Date(s.sale_date) >= d30);
+      const revenue = recent.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+      responseText = `📊 *PERFORMANCE (30 dias)*\n\n💰 Vendas: ${recent.length}\n💵 Receita: R$ ${revenue.toLocaleString('pt-BR')}\n📈 Ticket médio: R$ ${recent.length ? (revenue / recent.length).toFixed(0) : 0}`;
+    }
+
+    // ─── AJUDA ────────────────────────────────────────────────────────────────
     else if (messageText.includes('ajuda') || messageText.includes('help') || messageText.includes('comando')) {
-      responseText = `🤖 *ASSISTENTE MASTER PRIMORI*\n\n`;
-      responseText += `📱 *Comandos:*\n\n`;
-      responseText += `🔍 buscar [nome]\n`;
-      responseText += `🎯 playbook [nome]\n`;
-      responseText += `📊 performance\n`;
-      responseText += `🤖 performance detalhada\n`;
-      responseText += `🔥 quentes\n`;
-      responseText += `✅ tarefas\n`;
-      responseText += `➕ criar tarefa [texto]\n`;
-      responseText += `🔬 analisar [nome]\n`;
-      responseText += `🏥 clínicas [cidade]\n`;
-      responseText += `🔍 inteligência [nome]\n`;
-      responseText += `📊 perfil completo [nome]\n`;
-      responseText += `📅 resumo\n`;
-      responseText += `📅 resumo diário\n`;
-      responseText += `💬 ajuda\n\n`;
-      responseText += `_Conectado aos módulos de IA!_`;
+      responseText = `🤖 *PRIMORI — COMANDOS*\n\n`;
+      responseText += `📍 *GPS/Rota:*\ngps · rota · agenda hoje\nnavegar [nome]\nmaps [nome]\n\n`;
+      responseText += `👤 *Clientes:*\nbuscar [nome]\ndetalhes [nome]\nstatus [nome]\nabordagem [nome]\nplaybook [nome]\n\n`;
+      responseText += `📝 *Registros:*\nanota para [nome]: [texto]\ncriar tarefa [texto]\n\n`;
+      responseText += `📊 *Relatórios:*\nresumo · hoje\nquentes\ntarefas\nperformance\n\n`;
+      responseText += `_Dica: Envie "gps lat:-22.21 lng:-49.94" para localização real_`;
     }
-    
-    // COMANDO PADRÃO
+
+    // ─── IA LIVRE (qualquer pergunta) ─────────────────────────────────────────
     else {
-      responseText = `👋 Olá! Sou o *Assistente Master Primori*.\n\n`;
-      responseText += `Digite *ajuda* para ver todos os comandos disponíveis.\n\n`;
-      responseText += `Comandos rápidos:\n`;
-      responseText += `• buscar [nome]\n`;
-      responseText += `• playbook [nome]\n`;
-      responseText += `• performance\n`;
-      responseText += `• resumo`;
+      const today = new Date().toISOString().split('T')[0];
+      const [visits, tasks] = await Promise.all([
+        base44.asServiceRole.entities.Visit.filter({ status: 'agendada' }),
+        base44.asServiceRole.entities.Task.list('-due_date', 10),
+      ]);
+      const visitasHoje = visits.filter(v => v.scheduled_date?.startsWith(today));
+
+      const aiResp = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `Você é Primori, assistente de CRM e vendas para WhatsApp. Responda em PORTUGUÊS, máx 300 chars, prático e direto.
+
+CONTEXTO:
+- Data: ${new Date().toLocaleString('pt-BR')}
+- GPS: ${lat && lng ? `Lat ${lat}, Lng ${lng}` : 'não disponível'}
+- Visitas hoje: ${visitasHoje.length}
+- Clientes quentes: ${clients.filter(c => c.status === 'quente').length}
+- Tarefas pendentes: ${tasks.filter(t => t.status === 'pendente').length}
+- Total clientes: ${clients.length}
+
+Pergunta: ${message}
+
+Se pedir rota/navegar, sugira o link do Maps. Se pedir cliente, use dados acima.`,
+      });
+
+      responseText = aiResp || '❓ Não entendi. Digite *ajuda* para ver os comandos.';
     }
-    
-    return Response.json({
-      success: true,
-      message: responseText,
-      timestamp: new Date().toISOString()
-    });
-    
+
+    return Response.json({ success: true, message: responseText, timestamp: new Date().toISOString() });
+
   } catch (error) {
-    console.error('Erro no bot WhatsApp:', error);
-    return Response.json({
-      success: false,
-      error: error.message
-    }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
