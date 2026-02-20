@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import AIFollowUpAutomation from '@/components/AIFollowUpAutomation';
 import WhatsAppAIProposalGenerator from '@/components/WhatsAppAIProposalGenerator';
+import WhatsAppChunkedSender from '@/components/WhatsAppChunkedSender';
 import {
   MessageSquare, Phone, Send, Calendar, FileText, MessageCircle,
   Settings, Bot, Users, Zap, Copy, CheckCircle2, Clock, Sparkles
