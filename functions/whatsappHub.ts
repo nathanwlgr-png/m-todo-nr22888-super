@@ -107,7 +107,7 @@ async function sendWhatsAppMessage(phoneNumber, message) {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) return;
   
   try {
-    const response = await fetch(`https://graph.instagram.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
+    const response = await fetch(`https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
@@ -132,7 +132,7 @@ async function generateAIResponse(question, clientId) {
   try {
     const base44 = createClientFromRequest(new Request('http://dummy', { method: 'GET' }));
     
-    const response = await base44.integrations.Core.InvokeLLM({
+    const response = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é um assistente de vendas de laboratórios veterinários. Responda de forma curta e profissional em português sobre: "${question}". Máximo 2 linhas.`,
       add_context_from_internet: false
     });

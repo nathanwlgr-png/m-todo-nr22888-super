@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       };
 
       // Buscar nome do cliente
-      const client = await base44.entities.Client.read(client_id);
+      const client = await base44.asServiceRole.entities.Client.get(client_id).catch(() => null);
       if (client) {
         logData.client_name = client.full_name || client.clinic_name;
       }
