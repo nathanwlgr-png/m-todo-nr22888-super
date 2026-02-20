@@ -30,19 +30,18 @@ Deno.serve(async (req) => {
 async function analyzeClientForFollowUp(base44, clientId) {
   try {
     // Get client data
-    const clients = await base44.entities.Client.filter({ id: clientId });
-    if (clients.length === 0) {
+    const client = await base44.asServiceRole.entities.Client.get(clientId).catch(() => null);
+    if (!client) {
       return Response.json({ error: 'Client not found' }, { status: 404 });
     }
-    const client = clients[0];
 
     // Get message history
-    const messages = await base44.entities.AutomatedMessageLog.filter({
+    const messages = await base44.asServiceRole.entities.AutomatedMessageLog.filter({
       client_id: clientId
     }).catch(() => []);
 
     // Get interaction history
-    const interactions = await base44.entities.Interaction?.filter({
+    const interactions = await base44.asServiceRole.entities.Interaction.filter({
       client_id: clientId
     }).catch(() => []);
 
