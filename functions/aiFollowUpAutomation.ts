@@ -159,7 +159,7 @@ async function scheduleFollowUp(base44, clientId, followUpData, user) {
 async function getSuggestions(base44, clientId) {
   try {
     // Get all clients that need follow-up (not contacted in last 7 days)
-    const allClients = await base44.entities.Client.list();
+    const allClients = await base44.asServiceRole.entities.Client.list();
     
     const needsFollowUp = allClients.filter(c => {
       if (!c.last_contact_date) return true;
