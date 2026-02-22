@@ -584,9 +584,9 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
           <div className="flex-1">
             <h1 className="text-white font-bold text-base flex items-center gap-1.5">
               <Sparkles className="w-5 h-5 text-yellow-300" />
-              Primori - Master de Vendas
+              Método NR22 — Master de Vendas
             </h1>
-            <p className="text-indigo-200 text-xs">IA Integrativa + Agenda + Pesquisa + Alertas em Tempo Real</p>
+            <p className="text-indigo-200 text-xs">47 variáveis × 15.000 cruzamentos/min × IA Integrativa completa</p>
           </div>
           {/* Alertas em tempo real */}
           <AlertasTempoReal />
