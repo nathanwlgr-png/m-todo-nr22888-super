@@ -210,21 +210,68 @@ function TriggerConditionFields({ triggerType, condition, onChange }) {
 }
 
 function ActionConfigFields({ actionType, config, onChange }) {
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const generateAISuggestion = async (template, channel) => {
+    setAiLoading(true);
+    try {
+      const response = await base44.functions.invoke('generateAIMessageSuggestion', {
+        clientId: 'sample', // Será dinâmico quando usado em automação real
+        channel,
+        template,
+        actionType: template
+      });
+      setAiSuggestion(response.data.suggestion?.body || response.data.suggestion);
+      toast.success('Sugestão gerada com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao gerar sugestão');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   switch (actionType) {
     case 'send_email':
       return (
-        <div>
-          <label className="text-sm font-semibold text-slate-700 mb-2 block">Template Email</label>
-          <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="followup_after_visit">Follow-up após Visita</SelectItem>
-              <SelectItem value="welcome_new_client">Bem-vindo Novo Cliente</SelectItem>
-              <SelectItem value="reactivation">Reativação de Cliente</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Template Email</label>
+            <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="followup_after_visit">Follow-up após Visita</SelectItem>
+                <SelectItem value="welcome_new_client">Bem-vindo Novo Cliente</SelectItem>
+                <SelectItem value="reactivation">Reativação de Cliente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {config.template && (
+            <Button
+              onClick={() => generateAISuggestion(config.template, 'email')}
+              disabled={aiLoading}
+              variant="outline"
+              className="w-full text-xs"
+            >
+              {aiLoading ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Sparkles className="w-3 h-3 mr-2" />}
+              Gerar Texto com IA
+            </Button>
+          )}
+          {aiSuggestion && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded p-3">
+              <p className="text-xs font-semibold text-indigo-900 mb-2">Sugestão IA:</p>
+              <p className="text-xs text-indigo-800">{aiSuggestion}</p>
+              <Button
+                onClick={() => onChange({ ...config, aiSuggestedText: aiSuggestion })}
+                size="sm"
+                className="mt-2 w-full text-xs bg-indigo-600 hover:bg-indigo-700"
+              >
+                ✓ Usar esta sugestão
+              </Button>
+            </div>
+          )}
         </div>
       );
     case 'create_task':
