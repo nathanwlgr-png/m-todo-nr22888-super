@@ -276,6 +276,36 @@ Retorne:
 
       {report && (
         <div className="space-y-3">
+          {/* Gráficos Avançados */}
+          <div>
+            <button
+              onClick={() => setShowGraphs(!showGraphs)}
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 mb-2 flex items-center gap-1"
+            >
+              {showGraphs ? '▼' : '▶'} 📊 Gráficos Interativos & Tendências
+            </button>
+            {showGraphs && (
+              <>
+                <AdvancedPerformanceGraphs
+                  salesData={metrics.dailyRevenue}
+                  clientScores={metrics.clientScoresData}
+                  periodComparison={{ byProduct: metrics.byProductComparison }}
+                  trends={{
+                    weekly: metrics.dailyRevenue,
+                    trend: metrics.revenueGrowth > 0 ? 'up' : 'down',
+                    comment: metrics.revenueGrowth > 0 ? `Tendência de alta: +${metrics.revenueGrowth}%` : `Tendência de queda: ${metrics.revenueGrowth}%`
+                  }}
+                />
+                <TrendAnalysisPanel
+                  data={metrics.dailyRevenue}
+                  periodComparison={{ byProduct: metrics.byProductComparison }}
+                  outliers={true}
+                  insights={report.insights}
+                />
+              </>
+            )}
+          </div>
+
           {/* Header */}
           <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 border-0">
             <CardContent className="p-3">
