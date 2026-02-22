@@ -297,11 +297,46 @@ Cada versão deve ser PRÉ-FORMATADA para copiar e usar imediatamente. Inclua em
           <p className="text-sm font-semibold text-slate-800">🔔 Reativação Proativa IA</p>
           <p className="text-xs text-slate-500">{atRiskClients.length} clientes detectados para reativação</p>
         </div>
-        <Button size="sm" onClick={analyzeReactivation} disabled={loading} className="bg-orange-500 hover:bg-orange-600 h-8 text-xs">
-          {loading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Bell className="w-3 h-3 mr-1" />}
-          {loading ? 'Analisando...' : 'Analisar IA'}
-        </Button>
+        <div className="flex gap-1.5">
+          <Button size="sm" onClick={generateComparison} variant="outline" className="h-8 text-xs">
+            📊 Comparativo
+          </Button>
+          <Button size="sm" onClick={analyzeReactivation} disabled={loading} className="bg-orange-500 hover:bg-orange-600 h-8 text-xs">
+            {loading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Bell className="w-3 h-3 mr-1" />}
+            {loading ? 'Analisando...' : 'Analisar IA'}
+          </Button>
+        </div>
       </div>
+
+      {/* Comparativo de Períodos */}
+      {showComparison && comparisonData && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-2.5">
+            <p className="text-[10px] font-bold text-blue-700 mb-2">📊 COMPARATIVO ÚLTIMOS 30 DIAS vs 30 DIAS ANTERIORES</p>
+            <div className="grid grid-cols-4 gap-1.5">
+              <div className="bg-white rounded p-1.5 text-center">
+                <p className="text-[9px] text-slate-600">Receita Atual</p>
+                <p className="text-xs font-bold text-blue-600">R${(comparisonData.currentPeriod.revenue / 1000).toFixed(1)}k</p>
+              </div>
+              <div className="bg-white rounded p-1.5 text-center">
+                <p className="text-[9px] text-slate-600">Receita Anterior</p>
+                <p className="text-xs font-bold text-slate-600">R${(comparisonData.previousPeriod.revenue / 1000).toFixed(1)}k</p>
+              </div>
+              <div className="bg-white rounded p-1.5 text-center">
+                <p className="text-[9px] text-slate-600">Clientes Únicos</p>
+                <p className="text-xs font-bold">{comparisonData.currentPeriod.uniqueClients} vs {comparisonData.previousPeriod.uniqueClients}</p>
+              </div>
+              <div className={`rounded p-1.5 text-center ${comparisonData.variance >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                <p className="text-[9px] text-slate-600">Variação</p>
+                <p className={`text-xs font-bold ${comparisonData.variance >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                  {comparisonData.variance >= 0 ? '+' : ''}{comparisonData.variance.toFixed(1)}%
+                </p>
+              </div>
+            </div>
+            <p className="text-[9px] text-blue-600 mt-1.5 italic">💡 Reativar clientes inativos pode recuperar {Math.round(atRiskClients.length * 0.3)} clientes/mês</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filtros */}
       <div className="flex gap-1.5 flex-wrap">
