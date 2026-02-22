@@ -120,6 +120,11 @@ export default function WorkflowAutomation() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Campanhas Preditivas */}
+          {activeTab === 'campaigns' && (
+            <PredictiveCampaignSuggestions />
+          )}
+
           {/* Automações */}
           {activeTab === 'rules' && (
             <>
