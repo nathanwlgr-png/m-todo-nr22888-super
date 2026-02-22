@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, TrendingUp, Users, Target } from 'lucide-react';
-import DataWrapperDashboard from '@/components/DataWrapperDashboard';
+import GeoMapClients from '@/components/GeoMapClients';
+import CityAnalyticsCard from '@/components/CityAnalyticsCard';
 import SmartMapRoute from '@/components/SmartMapRoute';
 
 // Dashboard geográfico de vendas com mapa DataWrapper + Rota Otimizada
@@ -64,10 +64,10 @@ export default function AnalyticsDashboardGeo() {
           <TabsTrigger value="cidades" className="text-xs">🏘️ Cidades</TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: Geografia DataWrapper */}
+        {/* TAB 1: Mapa Geográfico */}
         <TabsContent value="geografia" className="space-y-2">
-          <p className="text-xs text-slate-600 font-semibold">Mapa interativo de vendas por region. Click em região para detalhes.</p>
-          <DataWrapperDashboard />
+          <p className="text-xs text-slate-600 font-semibold">Clientes por localização • 🟢Quente 🟡Morno 🔵Frio</p>
+          <GeoMapClients clients={clients} />
         </TabsContent>
 
         {/* TAB 2: Rotas Otimizadas */}
@@ -76,44 +76,9 @@ export default function AnalyticsDashboardGeo() {
           <SmartMapRoute clientsData={clients} center={[-22.2141, -49.9477]} />
         </TabsContent>
 
-        {/* TAB 3: Top Cidades */}
+        {/* TAB 3: Análise por Cidade */}
         <TabsContent value="cidades" className="space-y-2">
-          <Card>
-            <CardContent className="p-2.5">
-              <p className="text-xs font-bold text-slate-700 mb-2">🏘️ TOP 5 CIDADES</p>
-              <div className="space-y-1">
-                {topCities.map(([city, count], idx) => (
-                  <div key={city} className="flex items-center justify-between text-xs p-1.5 bg-slate-50 rounded">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold">{idx + 1}</span>
-                      <span className="font-semibold">{city}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1 bg-indigo-200 rounded" style={{ width: `${(count / Math.max(...Object.values(byCity))) * 60}px` }} />
-                      <span className="w-6 text-right font-bold text-indigo-600">{count}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Clientes por Cidade Selecionada */}
-          <Card>
-            <CardContent className="p-2.5">
-              <p className="text-xs font-bold text-slate-700 mb-2">📋 Distribuição Completa</p>
-              <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto">
-                {Object.entries(byCity)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([city, count]) => (
-                    <div key={city} className="text-[9px] bg-slate-50 p-1 rounded flex justify-between">
-                      <span>{city}</span>
-                      <span className="font-bold text-indigo-600">{count}</span>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
+          <CityAnalyticsCard clients={clients} />
         </TabsContent>
       </Tabs>
     </div>
