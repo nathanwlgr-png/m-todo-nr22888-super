@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Edit2, Trash2, Power, AlertCircle } from 'lucide-react';
@@ -50,7 +50,7 @@ export default function AutomationRulesList({ rules, isLoading, onEdit, onDelete
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4">
               {/* Nome e Status */}
-              <div className="col-span-1 md:col-span-1">
+              <div className="col-span-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-bold text-slate-900">{rule.name}</h3>
                   <Badge variant={rule.active ? 'default' : 'secondary'} className={rule.active ? 'bg-green-600' : 'bg-slate-400'}>
@@ -63,19 +63,19 @@ export default function AutomationRulesList({ rules, isLoading, onEdit, onDelete
               </div>
 
               {/* Gatilho */}
-              <div className="col-span-1 md:col-span-1 bg-purple-50 rounded-lg p-3 border border-purple-200">
+              <div className="col-span-1 bg-purple-50 rounded-lg p-3 border border-purple-200">
                 <p className="text-xs font-semibold text-slate-700 mb-1">Gatilho</p>
                 <p className="text-sm font-bold text-purple-700">{triggerLabels[rule.trigger_type] || rule.trigger_type}</p>
               </div>
 
               {/* Ação */}
-              <div className="col-span-1 md:col-span-1 bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+              <div className="col-span-1 bg-indigo-50 rounded-lg p-3 border border-indigo-200">
                 <p className="text-xs font-semibold text-slate-700 mb-1">Ação</p>
                 <p className="text-sm font-bold text-indigo-700">{actionLabels[rule.action_type] || rule.action_type}</p>
               </div>
 
               {/* Botões */}
-              <div className="col-span-1 md:col-span-1 flex gap-2 justify-end">
+              <div className="col-span-1 flex gap-2 justify-end">
                 <Button
                   onClick={() => onToggle(rule)}
                   variant="outline"
@@ -116,15 +116,6 @@ export default function AutomationRulesList({ rules, isLoading, onEdit, onDelete
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Histórico de Execução */}
-            {rule.last_execution && (
-              <div className="border-t pt-3 mt-3">
-                <p className="text-xs text-slate-600">
-                  Última execução: {new Date(rule.last_execution).toLocaleDateString('pt-BR')} às {new Date(rule.last_execution).toLocaleTimeString('pt-BR')}
-                </p>
               </div>
             )}
           </CardContent>
