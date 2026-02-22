@@ -570,11 +570,12 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
       {/* ═══ TABS PRINCIPAIS ═══ */}
       <div className="flex-1 overflow-hidden flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid grid-cols-6 m-2 mb-0 shrink-0">
+          <TabsList className="grid grid-cols-7 m-2 mb-0 shrink-0">
             <TabsTrigger value="chat" className="text-xs">💬 Chat</TabsTrigger>
             <TabsTrigger value="rota" className="text-xs">🗺️ Rota</TabsTrigger>
             <TabsTrigger value="agenda" className="text-xs">📅 Agenda</TabsTrigger>
             <TabsTrigger value="pesquisa" className="text-xs">🔍 Busca</TabsTrigger>
+            <TabsTrigger value="mercado" className="text-xs">📈 Mercado</TabsTrigger>
             <TabsTrigger value="web" className="text-xs">🌐 IA</TabsTrigger>
             <TabsTrigger value="notif" className="text-xs">📲 Notif</TabsTrigger>
           </TabsList>
