@@ -50,6 +50,8 @@ export default function AIAssistant() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [nearbyClients, setNearbyClients] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
+  const [systemStatus, setSystemStatus] = useState({});
+  const [testingSystem, setTestingSystem] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
