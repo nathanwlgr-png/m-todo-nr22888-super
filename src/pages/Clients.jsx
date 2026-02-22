@@ -444,20 +444,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
       const duplicates = [];
       
       for (const clientData of response.clients) {
-        if (!clientData.first_name) continue;
-        
-        const cityMatch = ORANGE_REGION_CITIES.some(validCity => 
-          clientData.city?.toLowerCase().includes(validCity.toLowerCase())
-        );
-        
-        if (!cityMatch) {
-          rejected.push({ 
-            name: clientData.first_name, 
-            city: clientData.city, 
-            reason: 'Cidade fora da região laranja' 
-          });
-          continue;
-        }
+         if (!clientData.first_name) continue;
         
         // Verificar duplicatas por nome ou telefone
         const duplicate = existingClients.find(c => 
