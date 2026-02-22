@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 const TRIGGER_TYPES = [
   { value: 'visit_completed', label: 'Visita Realizada' },
