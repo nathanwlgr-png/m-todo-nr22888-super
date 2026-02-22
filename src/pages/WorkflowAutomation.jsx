@@ -97,6 +97,12 @@ export default function WorkflowAutomation() {
           </div>
         </div>
 
+        {/* Seções de IA acima das abas */}
+        <div className="space-y-6 mb-8">
+          <AIAutomationSuggestions />
+          <PredictiveSalesAnalysis />
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white shadow-lg rounded-xl p-1">
             <TabsTrigger value="rules" className="flex-1">
