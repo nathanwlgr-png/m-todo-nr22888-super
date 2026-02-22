@@ -241,9 +241,26 @@ Inclua: 1 frase de abertura + 1 pergunta SPIN + 1 gatilho mental`,
             response_json_schema: { type: 'object', properties: { title: { type: 'string' }, priority: { type: 'string' }, client_mention: { type: 'string' } }}
           });
           const due = new Date(); due.setDate(due.getDate() + 1);
+
+          // Tenta vincular ao cliente mencionado
+          let clientId = 'geral';
+          let clientName = '';
+          if (taskData.client_mention) {
+            const found = clients.find(c =>
+              c.first_name?.toLowerCase().includes(taskData.client_mention.toLowerCase()) ||
+              c.clinic_name?.toLowerCase().includes(taskData.client_mention.toLowerCase())
+            );
+            if (found) { clientId = found.id; clientName = found.first_name; }
+          }
+
           await base44.asServiceRole.entities.Task.create({
-            title: taskData.title, priority: taskData.priority || 'media',
-            status: 'pendente', due_date: due.toISOString().split('T')[0], type: 'outro',
+            client_id: clientId,
+            client_name: clientName,
+            title: taskData.title,
+            priority: taskData.priority || 'media',
+            status: 'pendente',
+            due_date: due.toISOString().split('T')[0],
+            type: 'outro',
           });
           responseText = `✅ *Tarefa criada!*\n\n📋 ${taskData.title}\n⚡ Prioridade: ${taskData.priority || 'media'}\n📅 Vence amanhã`;
         }
