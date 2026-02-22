@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Zap, MessageCircle, Sparkles, TrendingUp, FileText } from 'lucide-react';
+import { Send, Loader2, Zap, MessageCircle, Sparkles, TrendingUp, FileText, Clock, BarChart3, Phone } from 'lucide-react';
 import { toast } from 'sonner';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 // WhatsApp Master Assistant - Acesso total via WhatsApp
 export default function WhatsAppAgentMaster() {
