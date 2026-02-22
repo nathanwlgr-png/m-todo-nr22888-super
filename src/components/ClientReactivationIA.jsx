@@ -18,6 +18,8 @@ export default function ClientReactivationIA() {
   const [scripts, setScripts] = useState({});
   const [creatingTask, setCreatingTask] = useState(null);
   const [filter, setFilter] = useState('all'); // all | frio | morno | inativo
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonData, setComparisonData] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: clients = [] } = useQuery({
