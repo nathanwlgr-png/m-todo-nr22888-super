@@ -32,6 +32,11 @@ export default function ClientReactivationIA() {
     queryFn: () => base44.entities.Interaction.list('-created_date')
   });
 
+  const { data: sales = [] } = useQuery({
+    queryKey: ['sales-for-comparison'],
+    queryFn: () => base44.entities.Sale.list('-sale_date')
+  });
+
   // Clientes em risco com segmentação avançada
   const atRiskClients = useMemo(() => {
     const cutoff30 = new Date(Date.now() - 30 * 86400000);
