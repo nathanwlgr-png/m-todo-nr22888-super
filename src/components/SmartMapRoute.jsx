@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Navigation, MapPin, Clock } from 'lucide-react';
+import { Loader2, Navigation, MapPin } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
@@ -136,33 +136,46 @@ export default function SmartMapRoute({ clientsData = [], center = [-20.3, -49.0
                 attribution='&copy; OpenStreetMap contributors'
               />
 
-              {/* Marcadores */}
-              {mapData.map((marker) => (
-                <Marker key={marker.id} position={marker.coords}>
-                  <Popup>
-                    <div className="text-xs space-y-1">
-                      <p className="font-bold">{marker.name}</p>
-                      <p className="text-slate-600">{marker.city}</p>
-                      <p className={`text-[10px] px-2 py-0.5 rounded w-fit ${
-                        marker.status === 'quente' ? 'bg-green-100 text-green-700' :
-                        marker.status === 'morno' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {marker.status}
-                      </p>
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedClients.has(marker.id)}
-                          onChange={() => toggleClient(marker.id)}
-                          className="w-3 h-3"
-                        />
-                        <span className="text-[10px]">Incluir na rota</span>
-                      </label>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+              {/* Marcadores com cores por status */}
+              {mapData.map((marker) => {
+                const statusColor = marker.status === 'quente' ? '#22c55e' : marker.status === 'morno' ? '#f59e0b' : '#6366f1';
+                return (
+                  <CircleMarker
+                    key={marker.id}
+                    center={marker.coords}
+                    radius={8}
+                    fill={true}
+                    fillColor={statusColor}
+                    fillOpacity={0.8}
+                    color={statusColor}
+                    weight={2}
+                    opacity={0.9}
+                  >
+                    <Popup>
+                      <div className="text-xs space-y-1">
+                        <p className="font-bold">{marker.name}</p>
+                        <p className="text-slate-600">{marker.city}</p>
+                        <p className={`text-[10px] px-2 py-0.5 rounded w-fit ${
+                          marker.status === 'quente' ? 'bg-green-100 text-green-700' :
+                          marker.status === 'morno' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {marker.status}
+                        </p>
+                        <label className="flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedClients.has(marker.id)}
+                            onChange={() => toggleClient(marker.id)}
+                            className="w-3 h-3"
+                          />
+                          <span className="text-[10px]">Incluir na rota</span>
+                        </label>
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                );
+              })}
 
               {/* Rota otimizada */}
               {routeCoords.length > 1 && (
