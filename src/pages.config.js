@@ -193,6 +193,7 @@ import WorkflowAutomation from './pages/WorkflowAutomation';
 import PipelineVisualization from './pages/PipelineVisualization';
 import SalesAIHub from './pages/SalesAIHub';
 import AgentSetup from './pages/AgentSetup';
+import SalesDashboard from './pages/SalesDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -343,6 +344,7 @@ export const PAGES = {
     "PipelineVisualization": PipelineVisualization,
     "SalesAIHub": SalesAIHub,
     "AgentSetup": AgentSetup,
+    "SalesDashboard": SalesDashboard,
 }
 
 export const pagesConfig = {
