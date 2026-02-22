@@ -109,7 +109,9 @@ export default function SalesPerformanceReport() {
       hotClients: hotClients.length, coldClients: coldClients.length, warmClients: warmClients.length,
       conversionRate, avgScore, totalClients: clients.length, closedClients: closedClients.length,
       byProduct, positiveInteractions, negativeInteractions, inactive30, pipelineValue,
-      avgTicket: recentSales.length > 0 ? Math.round(totalRevenue / recentSales.length) : 0
+      avgTicket: recentSales.length > 0 ? Math.round(totalRevenue / recentSales.length) : 0,
+      // Dados para gráficos e análise de tendências
+      byProductComparison, clientScoresData, dailyRevenue
     };
   }, [sales, clients, tasks, visits, interactions, period]);
 
