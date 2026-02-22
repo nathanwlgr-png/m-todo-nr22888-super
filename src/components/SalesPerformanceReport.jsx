@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, BarChart3, Copy, RefreshCw, TrendingUp, TrendingDown, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import AdvancedPerformanceGraphs from './AdvancedPerformanceGraphs';
+import TrendAnalysisPanel from './TrendAnalysisPanel';
 
 export default function SalesPerformanceReport() {
   const [period, setPeriod] = useState('semanal');
