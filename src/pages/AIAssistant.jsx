@@ -124,9 +124,12 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (client && messages.length === 0 && client.first_name) {
+      const num = client.numerology_number;
+      const perfisNum = {1:'Líder/Direto',2:'Diplomata/Relacional',3:'Comunicador/Entusiasta',4:'Analítico/Dados',5:'Aventureiro/Inovador',6:'Conselheiro/Segurança',7:'Analista/Pesquisador',8:'Executivo/ROI',9:'Humanitário/Missão',11:'Mestre Visionário',22:'Mestre Construtor'};
+      const conversao = client.ai_sales_intelligence?.conversion_probability || client.purchase_score || 50;
       setMessages([{
         role: 'assistant',
-        content: `👋 Olá! Sou **Primori**, sua Assistente Master de Vendas.\n\n📊 **Cliente:** ${client.first_name} | Score: ${client.purchase_score || 50}% | Status: ${client.status}\n\n💬 Pergunte qualquer coisa ou use as ferramentas acima!`
+        content: `🔥 **MÉTODO NR22 — ANÁLISE INSTANTÂNEA**\n\n**Cliente:** ${client.first_name}${client.clinic_name ? ` | ${client.clinic_name}` : ''}${client.city ? ` | ${client.city}` : ''}\n\n📊 **Score:** ${client.purchase_score || 0}% | **Status:** ${client.status?.toUpperCase()} | **Pipeline:** ${client.pipeline_stage || 'lead'}\n🔢 **Numerologia ${num}:** ${perfisNum[num] || 'Perfil ' + num} | **Tom:** ${client.client_tone || 'a identificar'}\n🎯 **Conversão IA:** ${conversao}% | **Health:** ${client.health_score || 0}% | **Prioridade:** ${client.attention_priority || 5}/10\n\n💡 **Próxima Ação IA:** ${client.ai_next_best_action || client.next_action || 'Analisar necessidades e agendar visita'}\n\n🚀 *Use os botões acima para gerar apresentação, proposta, insights e mais. Ou pergunte qualquer coisa!*`
       }]);
     }
   }, [client]);
