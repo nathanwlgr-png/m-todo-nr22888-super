@@ -192,6 +192,7 @@ import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import PipelineVisualization from './pages/PipelineVisualization';
 import SalesAIHub from './pages/SalesAIHub';
+import AgentSetup from './pages/AgentSetup';
 import __Layout from './Layout.jsx';
 
 
@@ -341,6 +342,7 @@ export const PAGES = {
     "WorkflowAutomation": WorkflowAutomation,
     "PipelineVisualization": PipelineVisualization,
     "SalesAIHub": SalesAIHub,
+    "AgentSetup": AgentSetup,
 }
 
 export const pagesConfig = {
