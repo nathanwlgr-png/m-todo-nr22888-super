@@ -106,8 +106,11 @@ export default function WorkflowAutomation() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white shadow-lg rounded-xl p-1">
+            <TabsTrigger value="campaigns" className="flex-1">
+              🎯 Campanhas IA
+            </TabsTrigger>
             <TabsTrigger value="rules" className="flex-1">
-              📋 Minhas Automações
+              📋 Automações
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex-1">
               ⭐ Templates
