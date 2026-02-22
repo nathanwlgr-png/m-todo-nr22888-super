@@ -275,7 +275,7 @@ Inclua: 1 frase de abertura + 1 pergunta SPIN + 1 gatilho mental`,
     }
 
     // ─── RESUMO DO DIA ────────────────────────────────────────────────────────
-    else if (messageText.includes('resumo') || messageText.includes('hoje') || messageText.includes('dia')) {
+    else if (messageText.includes('resumo') || (messageText.includes('hoje') && !messageText.includes('?')) || (messageText.includes('dia') && messageText.split(' ').length <= 3)) {
       const today = new Date().toISOString().split('T')[0];
       const [todaySales, todayTasks, todayVisits] = await Promise.all([
         base44.asServiceRole.entities.Sale.filter({ sale_date: today }),
