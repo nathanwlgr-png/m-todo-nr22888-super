@@ -176,14 +176,21 @@ export function clearOfflineCache() {
  */
 export async function forceUpdateCache() {
   try {
-    // Buscar TODOS os clientes
-    const clients = await base44.entities.Client.list('-updated_date', 10000);
-    const cacheData = {
-      clients: clients,
-      timestamp: Date.now()
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-    return { success: true, count: clients.length };
+    const PAGE_SIZE = 500;
+    let allClients = [];
+    let skip = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const batch = await base44.entities.Client.list('-updated_date', PAGE_SIZE, skip);
+      if (!batch || batch.length === 0) break;
+      allClients = [...allClients, ...batch];
+      skip += PAGE_SIZE;
+      hasMore = batch.length === PAGE_SIZE;
+    }
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ clients: allClients, timestamp: Date.now() }));
+    } catch (_) {}
+    return { success: true, count: allClients.length };
   } catch (error) {
     return { success: false, error: error.message };
   }
