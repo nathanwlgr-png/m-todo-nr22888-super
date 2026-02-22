@@ -149,11 +149,12 @@ export function useOfflineClient(clientId) {
   const { data: onlineClient, isLoading } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
-      const clients = await base44.entities.Client.list('-updated_date', 10000);
-      return clients.find(c => c.id === clientId) || null;
+      // Busca direta pelo ID via filter
+      const result = await base44.entities.Client.filter({ id: clientId });
+      return result?.[0] || null;
     },
     enabled: !isOffline && !!clientId,
-    retry: 0
+    retry: 1
   });
 
   return {
