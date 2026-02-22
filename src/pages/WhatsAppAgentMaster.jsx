@@ -273,7 +273,7 @@ export default function WhatsAppAgentMaster() {
                 </Button>
               ))}
             </div>
-            <p className="text-[9px] text-slate-600 mt-2 text-center">Clique rápido • Processamento em <1s</p>
+            <p className="text-[9px] text-slate-600 mt-2 text-center">Clique rápido • Processamento em &lt;1s</p>
           </CardContent>
         </Card>
       )}
