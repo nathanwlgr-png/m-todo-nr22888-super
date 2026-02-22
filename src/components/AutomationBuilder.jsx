@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const TRIGGER_TYPES = [
   { value: 'visit_completed', label: 'Visita Realizada' },
@@ -202,39 +202,6 @@ function TriggerConditionFields({ triggerType, condition, onChange }) {
           />
         </div>
       );
-    case 'status_change':
-      return (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-semibold text-slate-700 mb-2 block">De Status</label>
-            <Select value={condition.from_status || ''} onValueChange={(v) => onChange({ ...condition, from_status: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lead">Lead</SelectItem>
-                <SelectItem value="qualificado">Qualificado</SelectItem>
-                <SelectItem value="proposta">Proposta</SelectItem>
-                <SelectItem value="negociacao">Negociação</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-slate-700 mb-2 block">Para Status</label>
-            <Select value={condition.to_status || ''} onValueChange={(v) => onChange({ ...condition, to_status: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="qualificado">Qualificado</SelectItem>
-                <SelectItem value="proposta">Proposta</SelectItem>
-                <SelectItem value="negociacao">Negociação</SelectItem>
-                <SelectItem value="fechado">Fechado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      );
     default:
       return <p className="text-sm text-slate-600">Selecione um tipo de gatilho</p>;
   }
@@ -244,20 +211,18 @@ function ActionConfigFields({ actionType, config, onChange }) {
   switch (actionType) {
     case 'send_email':
       return (
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm font-semibold text-slate-700 mb-2 block">Template Email</label>
-            <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="followup_after_visit">Follow-up após Visita</SelectItem>
-                <SelectItem value="welcome_new_client">Bem-vindo Novo Cliente</SelectItem>
-                <SelectItem value="reactivation">Reativação de Cliente</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div>
+          <label className="text-sm font-semibold text-slate-700 mb-2 block">Template Email</label>
+          <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="followup_after_visit">Follow-up após Visita</SelectItem>
+              <SelectItem value="welcome_new_client">Bem-vindo Novo Cliente</SelectItem>
+              <SelectItem value="reactivation">Reativação de Cliente</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       );
     case 'create_task':
