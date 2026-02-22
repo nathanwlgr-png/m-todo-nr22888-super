@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Plus, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import AutomationBuilder from '@/components/AutomationBuilder';
-import AutomationRulesList from '@/components/AutomationRulesList';
+import AutomationBuilder from '@/components/AutomationBuilder.jsx';
+import AutomationRulesList from '@/components/AutomationRulesList.jsx';
 import { toast } from 'sonner';
 
 export default function WorkflowAutomation() {
