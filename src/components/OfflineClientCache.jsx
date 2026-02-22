@@ -45,26 +45,51 @@ export function useOfflineClients() {
     loadCache();
   }, []);
 
-  // Query online - BUSCAR TODOS OS CLIENTES SEM LIMITE
+  // Query online - busca paginada para suportar grandes volumes
   const { data: onlineClients = [], isLoading, isError } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      // Buscar TODOS os clientes (máximo 10.000) - otimizado para mobile
-      const clients = await base44.entities.Client.list('-updated_date', 10000);
-      
-      // Salvar no cache
-      const cacheData = {
-        clients: clients,
-        timestamp: Date.now()
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-      setCachedClients(clients);
-      
-      return clients;
+      // Buscar em lotes para evitar timeout e limite de memória
+      const PAGE_SIZE = 500;
+      let allClients = [];
+      let skip = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const batch = await base44.entities.Client.list('-updated_date', PAGE_SIZE, skip);
+        if (!batch || batch.length === 0) break;
+        allClients = [...allClients, ...batch];
+        skip += PAGE_SIZE;
+        hasMore = batch.length === PAGE_SIZE;
+      }
+
+      // Salvar no cache (com proteção contra localStorage cheio)
+      try {
+        const cacheData = { clients: allClients, timestamp: Date.now() };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        setCachedClients(allClients);
+      } catch (e) {
+        // localStorage cheio - salva versão reduzida (só campos essenciais)
+        try {
+          const slim = allClients.map(c => ({
+            id: c.id, first_name: c.first_name, full_name: c.full_name,
+            clinic_name: c.clinic_name, city: c.city, phone: c.phone,
+            status: c.status, purchase_score: c.purchase_score,
+            pipeline_stage: c.pipeline_stage, email: c.email,
+            updated_date: c.updated_date
+          }));
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ clients: slim, timestamp: Date.now() }));
+          setCachedClients(allClients);
+        } catch (_) {
+          setCachedClients(allClients);
+        }
+      }
+
+      return allClients;
     },
     enabled: !offlineMode,
     staleTime: 5 * 60 * 1000,
-    retry: 0
+    retry: 1
   });
 
   return {
