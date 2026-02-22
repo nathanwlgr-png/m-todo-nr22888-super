@@ -253,26 +253,27 @@ export default function WhatsAppAgentMaster() {
         </div>
       </div>
 
-      {/* Comandos Rápidos */}
+      {/* Comandos Rápidos - Footer */}
       {commands.length > 0 && (
-        <Card className="border-purple-200 bg-purple-50">
-          <CardContent className="p-2.5">
-            <p className="text-xs font-bold text-purple-700 mb-2">⚡ COMANDOS RÁPIDOS NR22888</p>
-            <div className="grid grid-cols-2 gap-1">
+        <Card className="border-0 bg-gradient-to-r from-blue-100 via-orange-100 to-orange-50 shadow-md">
+          <CardContent className="p-3">
+            <p className="text-xs font-black text-blue-800 mb-2 flex items-center gap-1">
+              <Zap className="w-4 h-4 text-orange-500" /> RÁPIDOS NR22888
+            </p>
+            <div className="grid grid-cols-4 gap-2">
               {commands.map((cmd, idx) => (
                 <Button
                   key={idx}
-                  variant="outline"
                   size="sm"
                   onClick={() => sendMessage(cmd.cmd)}
                   disabled={loading}
-                  className="text-xs h-7 justify-start text-purple-700 hover:bg-purple-100"
+                  className="text-xs h-8 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold"
                 >
-                  <span>{cmd.emoji}</span>
-                  <span className="ml-1 truncate text-[10px]">{cmd.desc}</span>
+                  <span className="text-xs">{cmd.emoji}</span>
                 </Button>
               ))}
             </div>
+            <p className="text-[9px] text-slate-600 mt-2 text-center">Clique rápido • Processamento em <1s</p>
           </CardContent>
         </Card>
       )}
