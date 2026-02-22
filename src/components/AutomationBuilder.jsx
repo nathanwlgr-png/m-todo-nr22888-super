@@ -333,19 +333,66 @@ function ActionConfigFields({ actionType, config, onChange }) {
         </div>
       );
     case 'send_whatsapp':
+      const [whatsappSuggestion, setWhatsappSuggestion] = useState('');
+      const [whatsappLoading, setWhatsappLoading] = useState(false);
+
+      const generateWhatsAppSuggestion = async (template) => {
+        setWhatsappLoading(true);
+        try {
+          const response = await base44.functions.invoke('generateAIMessageSuggestion', {
+            clientId: 'sample',
+            channel: 'whatsapp',
+            template,
+            actionType: template
+          });
+          setWhatsappSuggestion(response.data.suggestion);
+          toast.success('Sugestão gerada!');
+        } catch (error) {
+          toast.error('Erro ao gerar sugestão');
+        } finally {
+          setWhatsappLoading(false);
+        }
+      };
+
       return (
-        <div>
-          <label className="text-sm font-semibold text-slate-700 mb-2 block">Template WhatsApp</label>
-          <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="welcome_new_lead">Bem-vindo Lead</SelectItem>
-              <SelectItem value="followup_visit">Follow-up Visita</SelectItem>
-              <SelectItem value="proposal_reminder">Lembrete Proposta</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Template WhatsApp</label>
+            <Select value={config.template || ''} onValueChange={(v) => onChange({ ...config, template: v })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="welcome_new_lead">Bem-vindo Lead</SelectItem>
+                <SelectItem value="followup_visit">Follow-up Visita</SelectItem>
+                <SelectItem value="proposal_reminder">Lembrete Proposta</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {config.template && (
+            <Button
+              onClick={() => generateWhatsAppSuggestion(config.template)}
+              disabled={whatsappLoading}
+              variant="outline"
+              className="w-full text-xs"
+            >
+              {whatsappLoading ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Sparkles className="w-3 h-3 mr-2" />}
+              Gerar Mensagem com IA
+            </Button>
+          )}
+          {whatsappSuggestion && (
+            <div className="bg-green-50 border border-green-200 rounded p-3">
+              <p className="text-xs font-semibold text-green-900 mb-2">Sugestão IA:</p>
+              <p className="text-xs text-green-800">{whatsappSuggestion}</p>
+              <Button
+                onClick={() => onChange({ ...config, aiSuggestedText: whatsappSuggestion })}
+                size="sm"
+                className="mt-2 w-full text-xs bg-green-600 hover:bg-green-700"
+              >
+                ✓ Usar esta sugestão
+              </Button>
+            </div>
+          )}
         </div>
       );
     default:
