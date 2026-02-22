@@ -76,6 +76,32 @@ export default function ClientReactivationIA() {
       .slice(0, 20);
   }, [clients, filter]);
 
+  const generateComparison = async () => {
+    try {
+      const last30 = new Date(Date.now() - 30 * 86400000);
+      const last60_30 = new Date(Date.now() - 60 * 86400000);
+      
+      const currentPeriod = sales.filter(s => new Date(s.sale_date) >= last30);
+      const previousPeriod = sales.filter(s => new Date(s.sale_date) >= last60_30 && new Date(s.sale_date) < last30);
+      
+      const currentTotal = currentPeriod.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+      const previousTotal = previousPeriod.reduce((sum, s) => sum + (s.sale_value || 0), 0);
+      const variance = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal * 100) : 0;
+      
+      const currentClientCount = new Set(currentPeriod.map(s => s.client_id)).size;
+      const previousClientCount = new Set(previousPeriod.map(s => s.client_id)).size;
+      
+      setComparisonData({
+        currentPeriod: { revenue: currentTotal, sales: currentPeriod.length, uniqueClients: currentClientCount },
+        previousPeriod: { revenue: previousTotal, sales: previousPeriod.length, uniqueClients: previousClientCount },
+        variance
+      });
+      setShowComparison(true);
+    } catch (e) {
+      toast.error('Erro ao gerar comparativo');
+    }
+  };
+
   const analyzeReactivation = async () => {
     setLoading(true);
     setSuggestions(null);
