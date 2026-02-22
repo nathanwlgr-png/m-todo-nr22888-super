@@ -127,23 +127,23 @@ export default function WhatsAppAgentMaster() {
     <div className="space-y-3 h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-orange-50">
       {/* Header com cores NR22888 */}
       <Card className="border-0 bg-gradient-to-r from-blue-700 via-blue-600 to-orange-600 shadow-lg">
-        <CardContent className="p-3">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                <MessageCircle className="w-5 h-5" />
-                WhatsApp Master NR22888 TURBO
+              <h1 className="text-2xl font-black text-white flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-orange-300 animate-pulse" />
+                NR22888 MASTER
               </h1>
-              <p className="text-xs text-green-100">Assistente de vendas com acesso total • IA avançada</p>
+              <p className="text-xs text-blue-100 mt-1">WhatsApp • Vendas • IA Completa</p>
             </div>
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white text-green-600 px-3 py-2 rounded font-semibold text-xs hover:bg-green-50 flex items-center gap-2"
+              className="bg-orange-400 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-500 flex items-center gap-2 shadow-lg"
             >
               <Phone className="w-4 h-4" />
-              Conectar WhatsApp
+              WhatsApp
             </a>
           </div>
         </CardContent>
