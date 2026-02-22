@@ -45,23 +45,12 @@ export function useOfflineClients() {
     loadCache();
   }, []);
 
-  // Query online - busca paginada para suportar grandes volumes
+  // Query online - busca todos os clientes
   const { data: onlineClients = [], isLoading, isError } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      // Buscar em lotes para evitar timeout e limite de memória
-      const PAGE_SIZE = 500;
-      let allClients = [];
-      let skip = 0;
-      let hasMore = true;
-
-      while (hasMore) {
-        const batch = await base44.entities.Client.list('-updated_date', PAGE_SIZE, skip);
-        if (!batch || batch.length === 0) break;
-        allClients = [...allClients, ...batch];
-        skip += PAGE_SIZE;
-        hasMore = batch.length === PAGE_SIZE;
-      }
+      // Buscar todos os clientes com limite alto
+      const allClients = await base44.entities.Client.list('-updated_date', 5000);
 
       // Salvar no cache (com proteção contra localStorage cheio)
       try {
@@ -176,21 +165,14 @@ export function clearOfflineCache() {
  */
 export async function forceUpdateCache() {
   try {
-    const PAGE_SIZE = 500;
-    let allClients = [];
-    let skip = 0;
-    let hasMore = true;
-    while (hasMore) {
-      const batch = await base44.entities.Client.list('-updated_date', PAGE_SIZE, skip);
-      if (!batch || batch.length === 0) break;
-      allClients = [...allClients, ...batch];
-      skip += PAGE_SIZE;
-      hasMore = batch.length === PAGE_SIZE;
-    }
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ clients: allClients, timestamp: Date.now() }));
-    } catch (_) {}
-    return { success: true, count: allClients.length };
+    // Buscar TODOS os clientes
+    const clients = await base44.entities.Client.list('-updated_date', 10000);
+    const cacheData = {
+      clients: clients,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    return { success: true, count: clients.length };
   } catch (error) {
     return { success: false, error: error.message };
   }
