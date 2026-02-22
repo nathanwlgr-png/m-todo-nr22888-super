@@ -108,6 +108,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   const menuItems = [
+    { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
     { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H', tourId: 'dashboard' },
     { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
     { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
