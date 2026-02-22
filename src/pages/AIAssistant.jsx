@@ -761,6 +761,11 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
             <BuscaClinicaCNPJ />
           </TabsContent>
 
+          {/* ── TAB MERCADO ── */}
+          <TabsContent value="mercado" className="overflow-y-auto p-3">
+            <MarketIntelligenceDashboard />
+          </TabsContent>
+
           {/* ── TAB WEB IA ── */}
           <TabsContent value="web" className="overflow-y-auto p-3">
             <MasterAIAssistant client={client} />
