@@ -60,20 +60,25 @@ export default function AIAssistant() {
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date')
+    queryFn: () => base44.entities.Client.list('-updated_date'),
+    retry: 1,
+    staleTime: 60000
   });
 
   const { data: client } = useQuery({
     queryKey: ['client', selectedClientId],
     queryFn: async () => {
       if (!selectedClientId) return null;
+      const found = allClients.find(c => c && c.id === selectedClientId);
+      if (found) return found;
       const clients = await base44.entities.Client.list();
-      const found = clients.find(c => c && c.id === selectedClientId);
-      if (!found) { setSelectedClientId(null); return null; }
-      return found;
+      const fromList = clients.find(c => c && c.id === selectedClientId);
+      if (!fromList) { setSelectedClientId(null); return null; }
+      return fromList;
     },
     enabled: !!selectedClientId,
-    retry: 0
+    retry: 0,
+    staleTime: 30000
   });
 
   const { data: visits = [] } = useQuery({
