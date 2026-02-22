@@ -800,8 +800,6 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2 hidden">{/* placeholder to close grid above */}
-              </div>
             </div>
 
             {/* Enviar conteúdo gerado via chunks */}
