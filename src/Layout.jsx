@@ -130,6 +130,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Brain, label: 'Inteligência 360°', page: 'ProactiveIntelligenceDashboard' },
     { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
     { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
+    { icon: MapPin, label: 'Analytics Geo', page: 'AnalyticsDashboardGeo' },
     { icon: Database, label: 'Offline Analytics', page: 'OfflineAnalytics', badge: true },
     { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
     { icon: Zap, label: 'Automação Msgs', page: 'AutomationSettings' },
