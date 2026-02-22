@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
               duration_minutes: 60,
               visit_type: c.pipeline_stage === 'negociacao' ? 'fechamento' : 
                           c.pipeline_stage === 'proposta' ? 'followup' :
-                          visits?.length === 0 ? 'primeira_visita' : 'demonstracao',
+                          'primeira_visita',
               location: c.address || c.city || '',
               status: 'agendada',
               notes: `Agenda ${tipo} - Cidade: ${cidadeAtual} - Score: ${c.purchase_score}% - Pipeline: ${c.pipeline_stage}`,
