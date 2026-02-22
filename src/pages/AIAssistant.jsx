@@ -750,8 +750,9 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
 
           {/* ── TAB PESQUISA ── */}
           <TabsContent value="pesquisa" className="overflow-y-auto p-3 space-y-3">
+            <TGPSVetSearch />
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-              <p className="font-medium text-blue-800 mb-1">🔍 Ferramentas de Pesquisa:</p>
+              <p className="font-medium text-blue-800 mb-1">🔍 Outras Ferramentas de Pesquisa:</p>
               <ul className="text-xs text-blue-700 space-y-0.5">
                 <li>• <strong>Internet:</strong> Busca clínicas por cidade com dados de contato e proprietário</li>
                 <li>• <strong>CNPJ:</strong> Consulta Receita Federal - razão social, sócios, endereço</li>
