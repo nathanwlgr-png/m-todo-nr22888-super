@@ -779,6 +779,29 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                   </button>
                 ))}
               </div>
+              
+              {/* Diagnóstico Completo */}
+              <div className="mt-3 pt-3 border-t border-green-200">
+                <button
+                  onClick={runSystemDiagnostic}
+                  disabled={testingSystem}
+                  className="w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium text-sm hover:opacity-90 disabled:opacity-50"
+                >
+                  {testingSystem ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  {testingSystem ? 'Testando todos sistemas...' : '🔧 Diagnóstico Completo do Sistema'}
+                </button>
+                {Object.keys(systemStatus).length > 0 && (
+                  <div className="mt-2 grid grid-cols-2 gap-1">
+                    {Object.entries(systemStatus).map(([k, v]) => (
+                      <div key={k} className="text-xs flex items-center gap-1 bg-white border rounded px-2 py-1">
+                        <span>{v}</span><span className="text-slate-600">{k}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2 hidden">{/* placeholder to close grid above */}
+              </div>
             </div>
 
             {/* Enviar conteúdo gerado via chunks */}
