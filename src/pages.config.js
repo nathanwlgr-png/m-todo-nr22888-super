@@ -83,6 +83,7 @@ import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
 import CreateFollowUpSequence from './pages/CreateFollowUpSequence';
 import CustomDashboard from './pages/CustomDashboard';
+import CustomReports from './pages/CustomReports';
 import DailyReports from './pages/DailyReports';
 import Dashboard from './pages/Dashboard';
 import DataHub from './pages/DataHub';
@@ -157,8 +158,8 @@ import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
-import RolePlayTraining from './pages/RolePlayTraining';
 import Tasks from './pages/Tasks';
+import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
@@ -189,7 +190,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import CustomReports from './pages/CustomReports';
 import __Layout from './Layout.jsx';
 
 
@@ -230,6 +230,7 @@ export const PAGES = {
     "ContactSettings": ContactSettings,
     "CreateFollowUpSequence": CreateFollowUpSequence,
     "CustomDashboard": CustomDashboard,
+    "CustomReports": CustomReports,
     "DailyReports": DailyReports,
     "Dashboard": Dashboard,
     "DataHub": DataHub,
@@ -304,8 +305,8 @@ export const PAGES = {
     "ReportsAdvanced": ReportsAdvanced,
     "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
-    "RolePlayTraining": RolePlayTraining,
     "Tasks": Tasks,
+    "RolePlayTraining": RolePlayTraining,
     "RouteOptimizer": RouteOptimizer,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
@@ -336,7 +337,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "CustomReports": CustomReports,
 }
 
 export const pagesConfig = {

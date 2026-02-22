@@ -9,6 +9,7 @@ import AutomationBuilder from '@/components/AutomationBuilder.jsx';
 import AutomationRulesList from '@/components/AutomationRulesList.jsx';
 import AIAutomationSuggestions from '@/components/AIAutomationSuggestions.jsx';
 import PredictiveSalesAnalysis from '@/components/PredictiveSalesAnalysis.jsx';
+import PredictiveCampaignSuggestions from '@/components/PredictiveCampaignSuggestions.jsx';
 import { toast } from 'sonner';
 
 export default function WorkflowAutomation() {
