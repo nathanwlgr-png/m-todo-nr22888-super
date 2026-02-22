@@ -735,9 +735,15 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
               {messages.length === 0 && (
                 <div className="text-center py-8 text-slate-400">
                   <Sparkles className="w-10 h-10 mx-auto mb-2 text-indigo-300" />
-                  <p className="font-medium text-slate-500">Primori - Assistente Master de Vendas</p>
-                  <p className="text-xs mt-1">Selecione um cliente e use os botões acima ou digite sua pergunta</p>
-                  <p className="text-xs mt-1 text-indigo-500">Dica: "faça agenda da semana em Marília" 👆 aba Agenda</p>
+                  <p className="font-bold text-slate-700 text-base">Método NR22</p>
+                  <p className="text-xs mt-1 text-slate-500">Fusão de Vendas + Neurociência + IA de Última Geração</p>
+                  <div className="mt-3 text-left bg-indigo-50 rounded-lg p-3 mx-4 text-xs text-indigo-700 space-y-1">
+                    <p>🎯 Selecione um cliente → análise automática de 47 variáveis</p>
+                    <p>🔢 Numerologia aplicada a vendas (perfis 1-22 incluindo mestres)</p>
+                    <p>📊 Score preditivo + probabilidade de conversão por IA</p>
+                    <p>📅 Dica: "agenda semana Marília" → aba Agenda</p>
+                    <p>🤖 NR22888 TURBO → WhatsApp com IA completa</p>
+                  </div>
                 </div>
               )}
               {messages.map((msg, i) => (
