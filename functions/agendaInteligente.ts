@@ -96,13 +96,30 @@ Deno.serve(async (req) => {
 
     // Distribuir clientes pelos dias: cada dia uma cidade/rota
     const agenda = [];
+
+    // Normaliza cidades: compatibilidade com nomes parciais
     const cidadesOrdenadas = cidades.length > 0
-      ? cidades
+      ? cidades.map(c => {
+          const match = Object.keys(clientesPorCidade).find(k => k.toLowerCase().includes(c.toLowerCase()));
+          return match || c;
+        })
       : Object.keys(clientesPorCidade).sort((a, b) => {
           const countA = clientesPorCidade[a]?.length || 0;
           const countB = clientesPorCidade[b]?.length || 0;
           return countB - countA;
         });
+
+    // Se não há clientes suficientes, retorna resumo sem erro
+    if (cidadesOrdenadas.length === 0 || clientes.length === 0) {
+      return Response.json({
+        success: true,
+        agenda: [],
+        resumo: { tipo, total_dias: 0, total_visitas: 0, cidades_cobertas: [], clientes_quentes: 0, potencial_fechamento: 0, visitas_criadas_crm: 0 },
+        whatsapp_preview: `📅 *AGENDA ${tipo.toUpperCase()}*\n\n⚠️ Nenhum cliente encontrado para as cidades solicitadas.\n\nCadastre clientes com cidade preenchida no CRM para gerar agendas!`,
+        visitas_criadas: [],
+        info: 'Nenhum cliente com as cidades solicitadas. Cadastre clientes no CRM primeiro.'
+      });
+    }
 
     let cidadeIdx = 0;
     const visitasCriadas = [];
