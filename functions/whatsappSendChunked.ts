@@ -55,8 +55,12 @@ Deno.serve(async (req) => {
 
     const { message, phone, client_id, client_name } = await req.json();
 
-    if (!message || !phone) {
-      return Response.json({ error: 'message e phone são obrigatórios' }, { status: 400 });
+    if (!message) {
+      return Response.json({ error: 'message é obrigatório', success: false }, { status: 400 });
+    }
+    if (!phone) {
+      // Retorna sucesso mas sem link
+      return Response.json({ success: true, total_chunks: 0, original_length: message.length, chunks: [], info: 'phone não fornecido, mensagem não enviada' });
     }
 
     // Divide a mensagem em partes

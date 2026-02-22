@@ -802,6 +802,7 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
               </div>
             </div>
 
+
             {/* Enviar conteúdo gerado via chunks */}
             {generatedScript && client?.phone && (
               <Card>

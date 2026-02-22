@@ -181,7 +181,7 @@ Inclua: 1 frase de abertura + 1 pergunta SPIN + 1 gatilho mental`,
     }
 
     // ─── BUSCAR CLIENTE ───────────────────────────────────────────────────────
-    else if (messageText.startsWith('buscar ') || messageText.startsWith('cliente ')) {
+    else if (messageText.startsWith('buscar ') || (messageText.startsWith('cliente ') && !messageText.includes('quente'))) {
       const searchTerm = messageText.replace('buscar ', '').replace('cliente ', '').trim();
       const found = clients.filter(c =>
         c.first_name?.toLowerCase().includes(searchTerm) ||
