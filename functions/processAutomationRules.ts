@@ -5,261 +5,343 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { trigger_type, event_data } = await req.json().catch(() => ({}));
-
-    if (!trigger_type) {
-      return Response.json({ error: 'trigger_type required' }, { status: 400 });
+    // Fetch all active automation rules
+    const rules = await base44.asServiceRole.entities.AutomationRule.filter({ active: true });
+    
+    if (!rules || rules.length === 0) {
+      return Response.json({ message: 'No active automation rules', processed: 0 });
     }
 
-    // Buscar todas as regras ativas para este gatilho
-    const rules = await base44.entities.AutomationRule.filter({
-      trigger_type,
-      enabled: true
-    }).catch(() => []);
-
-    let totalExecuted = 0;
-    let successCount = 0;
-    let failureCount = 0;
+    let processed = 0;
     const results = [];
 
     for (const rule of rules) {
-      const startTime = Date.now();
-      let status = 'success';
-      let resultData = {};
-      let errorMessage = null;
-      let affectedEntities = {};
-
       try {
-        // Validar condições do gatilho
-        if (!validateTriggerConditions(rule.trigger_conditions, event_data)) {
-          continue; // Pular para próxima regra
+        const executionResult = await processRule(base44, rule);
+        if (executionResult) {
+          processed++;
+          results.push({
+            rule_id: rule.id,
+            rule_name: rule.name,
+            status: 'success',
+            count: executionResult.count || 0
+          });
         }
-
-        // Verificar frequência
-        if (rule.frequency !== 'on_each_event' && rule.last_triggered) {
-          const hoursSinceLastTrigger = (Date.now() - new Date(rule.last_triggered).getTime()) / (1000 * 60 * 60);
-          
-          if (rule.frequency === 'daily' && hoursSinceLastTrigger < 24) continue;
-          if (rule.frequency === 'weekly' && hoursSinceLastTrigger < 168) continue;
-        }
-
-        // Executar ação
-        if (rule.action_type === 'create_task') {
-          affectedEntities = await executeTaskCreation(base44, rule, event_data);
-        } else if (rule.action_type === 'send_notification') {
-          affectedEntities = await executeSendNotification(base44, rule, event_data);
-        } else if (rule.action_type === 'send_email') {
-          affectedEntities = await executeSendEmail(base44, rule, event_data);
-        } else if (rule.action_type === 'update_client') {
-          affectedEntities = await executeUpdateClient(base44, rule, event_data);
-        }
-
-        resultData = affectedEntities;
-        successCount++;
-
-        // Atualizar regra com timestamp e contadores
-        await base44.entities.AutomationRule.update(rule.id, {
-          last_triggered: new Date().toISOString(),
-          execution_count: (rule.execution_count || 0) + 1,
-          success_count: (rule.success_count || 0) + 1
-        }).catch(() => {});
-
       } catch (error) {
-        status = 'failed';
-        errorMessage = error.message;
-        failureCount++;
-
-        // Incrementar contador de falhas
-        await base44.entities.AutomationRule.update(rule.id, {
-          failure_count: (rule.failure_count || 0) + 1
-        }).catch(() => {});
+        console.error(`Error processing rule ${rule.id}:`, error.message);
+        results.push({
+          rule_id: rule.id,
+          rule_name: rule.name,
+          status: 'error',
+          error: error.message
+        });
       }
+    }
 
-      const executionTimeMs = Date.now() - startTime;
-
-      // Registrar execução
-      await base44.entities.AutomationLog.create({
-        rule_id: rule.id,
-        rule_name: rule.name,
-        trigger_type: rule.trigger_type,
-        action_type: rule.action_type,
-        status,
-        event_data,
-        result_data: resultData,
-        error_message: errorMessage,
-        execution_time_ms: executionTimeMs,
-        affected_entities: affectedEntities
-      }).catch(() => {});
-
-      totalExecuted++;
-      results.push({
-        rule_id: rule.id,
-        rule_name: rule.name,
-        status,
-        execution_time_ms: executionTimeMs,
-        affected_entities: affectedEntities
+    // Update last_execution timestamp
+    for (const rule of rules) {
+      await base44.asServiceRole.entities.AutomationRule.update(rule.id, {
+        last_execution: new Date().toISOString()
       });
     }
 
     return Response.json({
-      success: true,
-      timestamp: new Date().toISOString(),
-      trigger_type,
-      summary: {
-        rules_found: rules.length,
-        rules_executed: totalExecuted,
-        success_count: successCount,
-        failure_count: failureCount
-      },
-      results
+      message: 'Automation rules processed successfully',
+      processed,
+      results,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 });
 
-function validateTriggerConditions(conditions, eventData) {
-  if (!conditions || !eventData) return true;
-
-  // Validar cada condição
-  for (const [key, expectedValue] of Object.entries(conditions)) {
-    const actualValue = eventData[key];
-
-    if (typeof expectedValue === 'object' && expectedValue.operator) {
-      const { operator, value } = expectedValue;
-      
-      if (operator === 'less_than' && actualValue >= value) return false;
-      if (operator === 'greater_than' && actualValue <= value) return false;
-      if (operator === 'equals' && actualValue !== value) return false;
-      if (operator === 'includes' && !String(actualValue).includes(value)) return false;
-    } else {
-      if (actualValue !== expectedValue) return false;
-    }
+async function processRule(base44, rule) {
+  switch (rule.trigger_type) {
+    case 'visit_completed':
+      return await handleVisitCompleted(base44, rule);
+    case 'days_without_interaction':
+      return await handleDaysWithoutInteraction(base44, rule);
+    case 'score_threshold':
+      return await handleScoreThreshold(base44, rule);
+    case 'lead_created':
+      return await handleLeadCreated(base44, rule);
+    case 'status_change':
+      return await handleStatusChange(base44, rule);
+    default:
+      console.warn(`Unknown trigger type: ${rule.trigger_type}`);
+      return null;
   }
-
-  return true;
 }
 
-async function executeTaskCreation(base44, rule, eventData) {
-  const template = rule.action_config?.task_template || {};
-  const dueDateOffset = template.due_days_offset || 1;
-  const dueDate = new Date(Date.now() + dueDateOffset * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+async function handleVisitCompleted(base44, rule) {
+  const daysOffset = rule.trigger_condition?.days_offset || 2;
+  const targetDate = new Date(Date.now() - daysOffset * 24 * 60 * 60 * 1000);
 
-  // Interpolação de variáveis
-  let title = template.title || 'Tarefa Automática';
-  let description = template.description || '';
-
-  if (eventData) {
-    title = interpelateVariables(title, eventData);
-    description = interpelateVariables(description, eventData);
-  }
-
-  const task = await base44.entities.Task.create({
-    title,
-    description,
-    type: template.type || 'outro',
-    priority: template.priority || 'media',
-    due_date: dueDate,
-    status: 'pendente',
-    auto_created: true,
-    client_id: eventData?.client_id,
-    assigned_to: eventData?.assigned_to || rule.action_config?.notification_config?.assign_to_emails?.[0]
+  // Find visits completed around the target date
+  const visits = await base44.asServiceRole.entities.Visit.filter({
+    status: 'realizada'
   });
 
-  return { tasks_created: 1 };
-}
+  const targetVisits = visits.filter(v => {
+    const visitDate = new Date(v.scheduled_date);
+    const diffDays = Math.floor((Date.now() - visitDate.getTime()) / (24 * 60 * 60 * 1000));
+    return diffDays >= daysOffset - 1 && diffDays <= daysOffset + 1;
+  });
 
-async function executeSendNotification(base44, rule, eventData) {
-  const config = rule.action_config?.notification_config || {};
-  const channels = config.channels || ['in_app'];
-  const assignees = config.assign_to_emails || [];
-
-  let title = config.title || rule.name;
-  let message = config.message_template || '';
-
-  if (eventData) {
-    title = interpelateVariables(title, eventData);
-    message = interpelateVariables(message, eventData);
+  let executed = 0;
+  for (const visit of targetVisits) {
+    if (rule.action_type === 'send_email') {
+      executed += await sendFollowUpEmail(base44, visit.client_id, rule.action_config);
+    } else if (rule.action_type === 'create_task') {
+      executed += await createFollowUpTask(base44, visit.client_id, rule.action_config);
+    } else if (rule.action_type === 'send_whatsapp') {
+      executed += await sendWhatsAppMessage(base44, visit.client_id, rule.action_config);
+    }
   }
 
-  let notificationCount = 0;
+  return { count: executed };
+}
 
-  // Enviar notificações in-app
-  if (channels.includes('in_app')) {
-    for (const email of assignees) {
-      await base44.entities.Alert.create({
-        user_email: email,
-        title,
-        message,
-        type: 'automation_alert',
+async function handleDaysWithoutInteraction(base44, rule) {
+  const days = rule.trigger_condition?.days || 30;
+  const targetDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  const clients = await base44.asServiceRole.entities.Client.list();
+  let executed = 0;
+
+  for (const client of clients) {
+    const lastContactDate = client.last_contact_date ? new Date(client.last_contact_date) : null;
+    
+    if (!lastContactDate || lastContactDate < targetDate) {
+      if (rule.action_type === 'update_client_status') {
+        await base44.asServiceRole.entities.Client.update(client.id, {
+          status: rule.action_config?.status || 'frio'
+        });
+        executed++;
+      } else if (rule.action_type === 'create_task') {
+        await createFollowUpTask(base44, client.id, rule.action_config);
+        executed++;
+      } else if (rule.action_type === 'send_alert') {
+        await createAlert(base44, client.full_name, `Cliente ${client.full_name} sem interação há ${days} dias`);
+        executed++;
+      }
+    }
+  }
+
+  return { count: executed };
+}
+
+async function handleScoreThreshold(base44, rule) {
+  const minScore = rule.trigger_condition?.min_score || 0;
+  const maxScore = rule.trigger_condition?.max_score || 100;
+
+  const clients = await base44.asServiceRole.entities.Client.list();
+  let executed = 0;
+
+  for (const client of clients) {
+    const score = client.purchase_score || 0;
+    
+    if (score >= minScore && score <= maxScore) {
+      if (rule.action_type === 'create_task') {
+        await createFollowUpTask(base44, client.id, rule.action_config);
+        executed++;
+      } else if (rule.action_type === 'send_alert') {
+        await createAlert(base44, client.full_name, `Score do cliente: ${score}`);
+        executed++;
+      } else if (rule.action_type === 'send_whatsapp') {
+        await sendWhatsAppMessage(base44, client.id, rule.action_config);
+        executed++;
+      }
+    }
+  }
+
+  return { count: executed };
+}
+
+async function handleLeadCreated(base44, rule) {
+  // Get leads created in the last 24 hours
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  
+  const leads = await base44.asServiceRole.entities.Lead.filter({
+    stage: 'novo'
+  });
+
+  const recentLeads = leads.filter(lead => 
+    new Date(lead.created_date) > yesterday
+  );
+
+  let executed = 0;
+  for (const lead of recentLeads) {
+    if (rule.action_type === 'send_whatsapp') {
+      await sendWhatsAppToLead(base44, lead, rule.action_config);
+      executed++;
+    } else if (rule.action_type === 'create_task') {
+      await createTaskForLead(base44, lead.id, rule.action_config);
+      executed++;
+    }
+  }
+
+  return { count: executed };
+}
+
+async function handleStatusChange(base44, rule) {
+  // This would typically require tracking historical changes
+  // For now, we'll handle it as a manual trigger check
+  const { from_status, to_status } = rule.trigger_condition;
+
+  const clients = await base44.asServiceRole.entities.Client.list();
+  let executed = 0;
+
+  for (const client of clients) {
+    if (client.pipeline_stage === to_status) {
+      if (rule.action_type === 'create_task') {
+        await createFollowUpTask(base44, client.id, rule.action_config);
+        executed++;
+      } else if (rule.action_type === 'send_email') {
+        await sendFollowUpEmail(base44, client.id, rule.action_config);
+        executed++;
+      }
+    }
+  }
+
+  return { count: executed };
+}
+
+// Helper Functions
+async function sendFollowUpEmail(base44, clientId, config) {
+  try {
+    const client = await base44.asServiceRole.entities.Client.get(clientId);
+    if (!client?.email) return 0;
+
+    // Call email sending function
+    await base44.asServiceRole.functions.invoke('sendFollowUpEmail', {
+      client_id: clientId,
+      client_email: client.email,
+      template: config?.template || 'default'
+    });
+
+    return 1;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return 0;
+  }
+}
+
+async function sendWhatsAppMessage(base44, clientId, config) {
+  try {
+    const client = await base44.asServiceRole.entities.Client.get(clientId);
+    if (!client?.phone) return 0;
+
+    await base44.asServiceRole.functions.invoke('sendWhatsAppMessage', {
+      phone: client.phone,
+      template: config?.template || 'welcome',
+      client_name: client.first_name
+    });
+
+    return 1;
+  } catch (error) {
+    console.error('Error sending WhatsApp:', error);
+    return 0;
+  }
+}
+
+async function sendWhatsAppToLead(base44, lead, config) {
+  try {
+    if (!lead?.phone) return 0;
+
+    await base44.asServiceRole.functions.invoke('sendWhatsAppMessage', {
+      phone: lead.phone,
+      template: config?.template || 'welcome_lead',
+      client_name: lead.full_name
+    });
+
+    return 1;
+  } catch (error) {
+    console.error('Error sending WhatsApp to lead:', error);
+    return 0;
+  }
+}
+
+async function createFollowUpTask(base44, clientId, config) {
+  try {
+    const client = await base44.asServiceRole.entities.Client.get(clientId);
+    
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + (config?.days_offset || 7));
+
+    await base44.asServiceRole.entities.Task.create({
+      client_id: clientId,
+      client_name: client?.full_name || 'Unknown',
+      title: config?.title || 'Follow-up automático',
+      description: `Tarefa criada automaticamente pela regra: ${config?.description || ''}`,
+      due_date: dueDate.toISOString().split('T')[0],
+      status: 'pendente',
+      priority: config?.priority || 'media',
+      type: config?.type || 'follow_up',
+      auto_created: true
+    });
+
+    return 1;
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return 0;
+  }
+}
+
+async function createTaskForLead(base44, leadId, config) {
+  try {
+    const lead = await base44.asServiceRole.entities.Lead.get(leadId);
+    
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + (config?.days_offset || 1));
+
+    // Create as a Task associated with the lead
+    await base44.asServiceRole.entities.Task.create({
+      client_id: leadId,
+      client_name: lead?.full_name || 'New Lead',
+      title: config?.title || 'Qualificar novo lead',
+      due_date: dueDate.toISOString().split('T')[0],
+      status: 'pendente',
+      priority: config?.priority || 'alta',
+      type: 'follow_up',
+      auto_created: true
+    });
+
+    return 1;
+  } catch (error) {
+    console.error('Error creating task for lead:', error);
+    return 0;
+  }
+}
+
+async function createAlert(base44, clientName, message) {
+  try {
+    // Create an alert for the first admin user
+    const users = await base44.asServiceRole.entities.User.list();
+    const adminUser = users.find(u => u.role === 'admin');
+
+    if (adminUser) {
+      await base44.asServiceRole.entities.Alert.create({
+        user_email: adminUser.email,
+        title: `Automação: ${clientName}`,
+        message: message,
+        type: 'automation',
         priority: 'media',
-        link_to: eventData?.link_to
-      }).catch(() => {});
-      notificationCount++;
+        read: false
+      });
     }
+
+    return 1;
+  } catch (error) {
+    console.error('Error creating alert:', error);
+    return 0;
   }
-
-  // Enviar emails
-  if (channels.includes('email')) {
-    for (const email of assignees) {
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: title,
-        body: message
-      }).catch(() => {});
-      notificationCount++;
-    }
-  }
-
-  return { notifications_sent: notificationCount };
-}
-
-async function executeSendEmail(base44, rule, eventData) {
-  const config = rule.action_config?.email_config || {};
-  const recipients = config.recipients || [];
-
-  let subject = config.subject || rule.name;
-  let body = config.body_template || '';
-
-  if (eventData) {
-    subject = interpelateVariables(subject, eventData);
-    body = interpelateVariables(body, eventData);
-  }
-
-  let emailCount = 0;
-
-  for (const email of recipients) {
-    await base44.integrations.Core.SendEmail({
-      to: email,
-      subject,
-      body
-    }).catch(() => {});
-    emailCount++;
-  }
-
-  return { emails_sent: emailCount };
-}
-
-async function executeUpdateClient(base44, rule, eventData) {
-  if (!eventData?.client_id) return { clients_updated: 0 };
-
-  const updates = rule.action_config?.update_fields || {};
-  await base44.entities.Client.update(eventData.client_id, updates).catch(() => {});
-
-  return { clients_updated: 1 };
-}
-
-function interpelateVariables(text, data) {
-  if (!text) return text;
-  
-  let result = text;
-  for (const [key, value] of Object.entries(data)) {
-    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), String(value));
-  }
-  
-  return result;
 }
