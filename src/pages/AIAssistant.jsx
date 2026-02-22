@@ -21,6 +21,7 @@ import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
 import AgendaComandoPanel from '@/components/AgendaComandoPanel';
+import SmartSalesRouteOptimizer from '@/components/SmartSalesRouteOptimizer';
 import BuscaClinicaCNPJ from '@/components/BuscaClinicaCNPJ';
 import AlertasTempoReal from '@/components/AlertasTempoReal';
 import EditableClientName from '@/components/EditableClientName';
