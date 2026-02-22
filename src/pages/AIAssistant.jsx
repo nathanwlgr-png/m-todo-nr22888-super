@@ -1052,6 +1052,31 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
             )}
           </TabsContent>
 
+          {/* ── TAB IA AUTO (Follow-up + Relatórios + Reativação) ── */}
+          <TabsContent value="automacao" className="overflow-y-auto p-3">
+            <Tabs defaultValue="followup" className="space-y-3">
+              <TabsList className="grid grid-cols-3 h-8">
+                <TabsTrigger value="followup" className="text-[10px]">🔄 Follow-up</TabsTrigger>
+                <TabsTrigger value="relatorio" className="text-[10px]">📊 Relatório</TabsTrigger>
+                <TabsTrigger value="reativacao" className="text-[10px]">🔔 Reativar</TabsTrigger>
+              </TabsList>
+              <TabsContent value="followup">
+                <AutoFollowUpIA client={client} visits={visits} tasks={tasks} />
+              </TabsContent>
+              <TabsContent value="relatorio">
+                <SalesPerformanceReport />
+              </TabsContent>
+              <TabsContent value="reativacao">
+                <ClientReactivationIA />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* ── TAB MAIS ── */}
+          <TabsContent value="mais" className="overflow-y-auto p-3">
+            <MasterAIAssistant client={client} />
+          </TabsContent>
+
           {/* ── TAB ROTA ── */}
           <TabsContent value="rota" className="overflow-y-auto p-3">
             <SmartSalesRouteOptimizer />
