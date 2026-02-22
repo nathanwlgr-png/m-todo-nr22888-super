@@ -389,6 +389,30 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
     finally { setSendingNotif(false); }
   };
 
+  const runSystemDiagnostic = async () => {
+    setTestingSystem(true);
+    const results = {};
+    const tests = [
+      { name: 'whatsappBot', label: 'Bot WhatsApp', payload: { message: 'ajuda' } },
+      { name: 'whatsappMasterNotificacao', label: 'Notificações', payload: { action: 'test', phone: '5514991676428' } },
+      { name: 'agendaInteligente', label: 'Agenda IA', payload: { tipo: 'semana', cidades: [], criar_visitas: false } },
+      { name: 'whatsappSendChunked', label: 'Envio Chunked', payload: { message: 'Teste sistema OK', phone: '5514991676428' } },
+    ];
+    for (const t of tests) {
+      try {
+        const r = await base44.functions.invoke(t.name, t.payload);
+        results[t.label] = r.data?.success !== false ? '✅' : '⚠️';
+      } catch (e) {
+        results[t.label] = '❌';
+      }
+    }
+    setSystemStatus(results);
+    setTestingSystem(false);
+    const statusMsg = Object.entries(results).map(([k, v]) => `${v} ${k}`).join('\n');
+    setMessages(prev => [...prev, { role: 'assistant', content: `🔧 **Diagnóstico do Sistema:**\n\n${statusMsg}\n\n${Object.values(results).every(v => v === '✅') ? '🎉 Todos os sistemas operacionais!' : '⚠️ Verifique os itens com erro.'}` }]);
+    setActiveTab('chat');
+  };
+
   // ─── BUSCA POR GPS ────────────────────────────────────────────────────────────
   const buscarPorGPS = () => {
     if (!navigator.geolocation) {
