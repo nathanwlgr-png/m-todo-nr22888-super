@@ -26,10 +26,10 @@ export default function ChatMessage({ message, isUser }) {
           }`}
         >
           {isUser ? (
-            <p className="text-sm leading-relaxed">{message}</p>
+            <p className="text-sm leading-relaxed">{text}</p>
           ) : (
             <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-slate">
-              <ReactMarkdown>{message}</ReactMarkdown>
+              <ReactMarkdown>{text}</ReactMarkdown>
             </div>
           )}
         </div>

@@ -674,7 +674,7 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                 </div>
               )}
               {messages.map((msg, i) => (
-                <ChatMessage key={i} message={msg.content} isUser={msg.role === 'user'} />
+                <ChatMessage key={i} message={msg.content || msg} isUser={msg.role === 'user'} />
               ))}
               {loading && (
                 <div className="flex justify-start">
@@ -716,7 +716,7 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                 <Input
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && !loading && sendMessage(input)}
+                  onKeyDown={e => e.key === 'Enter' && !loading && sendMessage(input)}
                   placeholder={rolePlayMode ? 'Sua abordagem...' : 'Pergunte ou dê comandos... (ex: faça agenda semana Marília)'}
                   className="flex-1 h-11 rounded-xl"
                   disabled={loading}
