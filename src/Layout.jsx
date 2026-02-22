@@ -7,10 +7,10 @@ import FloatingExportButton from '@/components/FloatingExportButton';
 import FloatingPerformanceButton from '@/components/FloatingPerformanceButton';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
-  Home, Users, UserPlus, Route, Settings, Zap, 
-  Calendar, CheckSquare, BarChart3, Menu, X,
-  ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain
-} from 'lucide-react';
+        Home, Users, UserPlus, Route, Settings, Zap, 
+        Calendar, CheckSquare, BarChart3, Menu, X,
+        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin
+      } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
