@@ -103,7 +103,7 @@ export default function AgendaComandoPanel({ onAgendaGerada }) {
             placeholder='Ex: "faça agenda da semana em Marília" ou "agenda do mês"'
             value={comando}
             onChange={e => setComando(e.target.value)}
-            onKeyPress={e => e.key === 'Enter' && processarComando()}
+            onKeyDown={e => e.key === 'Enter' && processarComando()}
             className="flex-1 text-sm"
           />
           <Button size="sm" variant="outline" onClick={processarComando} className="text-indigo-600 border-indigo-300">

@@ -6,9 +6,10 @@ import { toast } from "sonner";
 
 export default function ChatMessage({ message, isUser }) {
   const [copied, setCopied] = React.useState(false);
+  const text = typeof message === 'string' ? message : (message?.content || '');
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(message);
+    navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success('Copiado!');
     setTimeout(() => setCopied(false), 2000);
