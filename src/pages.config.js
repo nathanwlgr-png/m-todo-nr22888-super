@@ -56,6 +56,7 @@ import AdvancedAIReports from './pages/AdvancedAIReports';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
+import AnalyticsDashboardGeo from './pages/AnalyticsDashboardGeo';
 import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
 import AutomationRules from './pages/AutomationRules';
@@ -119,6 +120,7 @@ import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
+import MasterControlPanel from './pages/MasterControlPanel';
 import MessageApproval from './pages/MessageApproval';
 import MessageHistory from './pages/MessageHistory';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
@@ -156,6 +158,7 @@ import ReportsAdvanced from './pages/ReportsAdvanced';
 import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
 import RolePlayTraining from './pages/RolePlayTraining';
+import Tasks from './pages/Tasks';
 import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
@@ -171,7 +174,6 @@ import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
-import Tasks from './pages/Tasks';
 import TasksUnified from './pages/TasksUnified';
 import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
@@ -181,14 +183,13 @@ import VisitPlanner from './pages/VisitPlanner';
 import VisitSummary from './pages/VisitSummary';
 import VisitWorkflow from './pages/VisitWorkflow';
 import VoiceClientScanner from './pages/VoiceClientScanner';
+import WhatsAppAgentMaster from './pages/WhatsAppAgentMaster';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import AnalyticsDashboardGeo from './pages/AnalyticsDashboardGeo';
-import WhatsAppAgentMaster from './pages/WhatsAppAgentMaster';
-import MasterControlPanel from './pages/MasterControlPanel';
+import CustomReports from './pages/CustomReports';
 import __Layout from './Layout.jsx';
 
 
@@ -202,6 +203,7 @@ export const PAGES = {
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
+    "AnalyticsDashboardGeo": AnalyticsDashboardGeo,
     "AutoFollowUpDashboard": AutoFollowUpDashboard,
     "AutomationManager": AutomationManager,
     "AutomationRules": AutomationRules,
@@ -265,6 +267,7 @@ export const PAGES = {
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
     "MarketResearch": MarketResearch,
+    "MasterControlPanel": MasterControlPanel,
     "MessageApproval": MessageApproval,
     "MessageHistory": MessageHistory,
     "MobVendedorAnalytics": MobVendedorAnalytics,
@@ -302,6 +305,7 @@ export const PAGES = {
     "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
     "RolePlayTraining": RolePlayTraining,
+    "Tasks": Tasks,
     "RouteOptimizer": RouteOptimizer,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
@@ -317,7 +321,6 @@ export const PAGES = {
     "SystemAudit": SystemAudit,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
-    "Tasks": Tasks,
     "TasksUnified": TasksUnified,
     "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
@@ -327,14 +330,13 @@ export const PAGES = {
     "VisitSummary": VisitSummary,
     "VisitWorkflow": VisitWorkflow,
     "VoiceClientScanner": VoiceClientScanner,
+    "WhatsAppAgentMaster": WhatsAppAgentMaster,
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppHub": WhatsAppHub,
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "AnalyticsDashboardGeo": AnalyticsDashboardGeo,
-    "WhatsAppAgentMaster": WhatsAppAgentMaster,
-    "MasterControlPanel": MasterControlPanel,
+    "CustomReports": CustomReports,
 }
 
 export const pagesConfig = {
