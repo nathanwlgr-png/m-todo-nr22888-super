@@ -617,16 +617,28 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
       {/* ═══ TABS PRINCIPAIS ═══ */}
       <div className="flex-1 overflow-hidden flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid grid-cols-8 m-2 mb-0 shrink-0 h-9">
+          <TabsList className="grid grid-cols-5 m-2 mb-0 shrink-0 h-9">
             <TabsTrigger value="chat" className="text-[10px] px-1">💬 Chat</TabsTrigger>
             <TabsTrigger value="score" className="text-[10px] px-1">📊 Score</TabsTrigger>
             <TabsTrigger value="coaching" className="text-[10px] px-1">🏆 Coach</TabsTrigger>
-            <TabsTrigger value="rota" className="text-[10px] px-1">🗺️ Rota</TabsTrigger>
-            <TabsTrigger value="agenda" className="text-[10px] px-1">📅 Agenda</TabsTrigger>
-            <TabsTrigger value="pesquisa" className="text-[10px] px-1">🔍 Busca</TabsTrigger>
-            <TabsTrigger value="mercado" className="text-[10px] px-1">📈 Mercado</TabsTrigger>
-            <TabsTrigger value="notif" className="text-[10px] px-1">⚡ Ops</TabsTrigger>
+            <TabsTrigger value="automacao" className="text-[10px] px-1">🤖 IA Auto</TabsTrigger>
+            <TabsTrigger value="mais" className="text-[10px] px-1">⚡ Mais</TabsTrigger>
           </TabsList>
+          {/* Segunda linha de tabs */}
+          <div className="flex gap-1 mx-2 mt-1 overflow-x-auto">
+            {[
+              { value: 'rota', label: '🗺️ Rota' },
+              { value: 'agenda', label: '📅 Agenda' },
+              { value: 'pesquisa', label: '🔍 Busca' },
+              { value: 'mercado', label: '📈 Mercado' },
+              { value: 'notif', label: '⚙️ Ops' },
+            ].map(({ value, label }) => (
+              <button key={value} onClick={() => setActiveTab(value)}
+                className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-medium transition-colors ${activeTab === value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* ── TAB CHAT ── */}
           <TabsContent value="chat" className="flex-1 flex flex-col overflow-hidden m-0 p-0">
