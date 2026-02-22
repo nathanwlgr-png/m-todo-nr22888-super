@@ -191,7 +191,7 @@ Busque pelo menos 10-15 estabelecimentos reais. Priorize hospitais veterinários
             placeholder="Ou digite uma cidade... ex: Marília"
             value={manualCity}
             onChange={e => setManualCity(e.target.value)}
-            onKeyPress={e => e.key === 'Enter' && buscarPorCidade()}
+            onKeyDown={e => e.key === 'Enter' && buscarPorCidade()}
             className="flex-1 h-9 text-sm"
           />
           <Button
