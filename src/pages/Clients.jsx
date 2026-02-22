@@ -1012,12 +1012,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
           </DialogHeader>
           
           <div className="space-y-4">
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-sm text-orange-800 font-medium mb-2">🟠 Região Laranja (Nathan)</p>
-              <p className="text-xs text-orange-700">
-                Apenas cidades: Marília, Presidente Prudente, Assis, Tupã, Adamantina, Bauru, Araçatuba, Ourinhos, Dracena, Lins
-              </p>
-            </div>
+
 
             <div className="space-y-4">
               <div>
