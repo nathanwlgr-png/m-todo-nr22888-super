@@ -16,6 +16,7 @@ export default function SalesPerformanceReport() {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
   const [sending, setSending] = useState(false);
+  const [showGraphs, setShowGraphs] = useState(false);
 
   const { data: sales = [] } = useQuery({ queryKey: ['all-sales'], queryFn: () => base44.entities.Sale.list('-sale_date') });
   const { data: clients = [] } = useQuery({ queryKey: ['all-clients-report'], queryFn: () => base44.entities.Client.list() });
