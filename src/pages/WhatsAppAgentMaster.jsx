@@ -149,56 +149,109 @@ export default function WhatsAppAgentMaster() {
         </CardContent>
       </Card>
 
-      {/* Conversa */}
-      <Card className="flex-1 flex flex-col overflow-hidden">
-        <CardContent className="flex-1 p-3 overflow-y-auto space-y-2">
-          {messages.length === 0 ? (
-            <div className="text-center text-sm text-slate-500 mt-6">
-              <p>Nenhuma mensagem ainda</p>
-              <p className="text-[10px] mt-1">Digite uma mensagem para começar</p>
-            </div>
-          ) : (
-            messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+      {/* Grid com Chat + Gráficos */}
+      <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
+        {/* Chat - Coluna Principal */}
+        <Card className="col-span-2 flex flex-col overflow-hidden bg-white shadow-md border-blue-100">
+          <CardContent className="flex-1 p-4 overflow-y-auto space-y-2">
+            {messages.length === 0 ? (
+              <div className="text-center text-sm text-slate-400 mt-8">
+                <MessageCircle className="w-8 h-8 mx-auto mb-2 text-blue-300" />
+                <p className="font-semibold">Inicie a conversa</p>
+                <p className="text-[10px] mt-1">Use comandos rápidos ou digite livremente</p>
+              </div>
+            ) : (
+              messages.map((msg, idx) => (
                 <div
-                  className={`max-w-xs px-3 py-2 rounded-lg text-xs ${
-                    msg.role === 'user'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-100 text-slate-800'
-                  }`}
+                  key={idx}
+                  className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {msg.content}
+                  <div
+                    className={`max-w-xs px-3 py-2 rounded-lg text-xs font-medium ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-none'
+                        : 'bg-gradient-to-r from-orange-50 to-orange-100 text-slate-800 border border-orange-200 rounded-bl-none'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </CardContent>
+
+          {/* Input */}
+          <div className="border-t border-blue-100 p-3 space-y-2 bg-gradient-to-r from-blue-50 to-orange-50">
+            <Textarea
+              placeholder="Digite comando, análise ou pergunta..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.ctrlKey) sendMessage();
+              }}
+              className="min-h-16 text-xs resize-none border-blue-200 focus:border-orange-400"
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="w-full bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 h-9 text-xs font-bold text-white"
+            >
+              {loading ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Send className="w-3 h-3 mr-2" />}
+              {loading ? 'Processando...' : 'Enviar'}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Painel Lateral - Gráficos + Stats */}
+        <div className="space-y-3 overflow-y-auto">
+          {/* Gráfico de Mensagens */}
+          <Card className="bg-white shadow-md border-orange-100">
+            <CardContent className="p-3">
+              <p className="text-xs font-bold text-orange-700 mb-2 flex items-center gap-1">
+                <TrendingUp className="w-4 h-4" /> Últimas 7 dias
+              </p>
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={messageStats}>
+                  <XAxis dataKey="date" tick={{ fontSize: 8 }} />
+                  <YAxis tick={{ fontSize: 8 }} />
+                  <Tooltip contentStyle={{ fontSize: '10px' }} />
+                  <Line type="monotone" dataKey="msgs" stroke="#2563eb" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* KPIs Rápidos */}
+          <Card className="bg-gradient-to-br from-blue-600 to-blue-700 border-0 text-white shadow-md">
+            <CardContent className="p-3">
+              <p className="text-[10px] font-bold opacity-80 mb-2">📊 STATUS</p>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Mensagens</span>
+                  <span className="font-bold">{messages.length}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Online</span>
+                  <span className="font-bold text-orange-300">✓ Ativo</span>
                 </div>
               </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </CardContent>
+            </CardContent>
+          </Card>
 
-        {/* Input */}
-        <div className="border-t p-3 space-y-2">
-          <Textarea
-            placeholder="Envie comandos, análises, ou qualquer requisição de vendas..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && e.ctrlKey) sendMessage();
-            }}
-            className="min-h-20 text-xs resize-none"
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="w-full bg-green-600 hover:bg-green-700 h-8 text-xs"
-          >
-            {loading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Send className="w-3 h-3 mr-1" />}
-            {loading ? 'Processando...' : 'Enviar'}
-          </Button>
+          {/* Status Badge */}
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-300 shadow-md">
+            <CardContent className="p-3">
+              <p className="text-[10px] font-bold text-orange-800 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> Tempo Real
+              </p>
+              <p className="text-xs font-mono text-orange-700 mt-1">
+                {new Date().toLocaleTimeString('pt-BR')}
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </Card>
+      </div>
 
       {/* Comandos Rápidos */}
       {commands.length > 0 && (
