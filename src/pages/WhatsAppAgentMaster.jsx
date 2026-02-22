@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Phone, MessageCircle } from 'lucide-react';
+import { Send, Loader2, Zap, MessageCircle, Sparkles, TrendingUp, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 // WhatsApp Master Assistant - Acesso total via WhatsApp
@@ -14,9 +13,25 @@ export default function WhatsAppAgentMaster() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [commands, setCommands] = useState([]);
   const messagesEndRef = useRef(null);
 
   const agentName = 'whatsapp_nr22888_turbo';
+
+  // Carregar comandos disponíveis
+  useEffect(() => {
+    const loadCommands = async () => {
+      try {
+        const result = await base44.functions.invoke('whatsappMasterOrchestrator', {
+          action: 'getQuickCommands'
+        });
+        setCommands(result.data?.commands || []);
+      } catch (e) {
+        console.error('Erro ao carregar comandos');
+      }
+    };
+    loadCommands();
+  }, []);
 
   // Criar ou recuperar conversa
   useEffect(() => {
@@ -59,18 +74,33 @@ export default function WhatsAppAgentMaster() {
     return unsubscribe;
   }, [conversation?.id]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || !conversation) return;
+  const sendMessage = async (text = input) => {
+    if (!text.trim() || !conversation) return;
 
     setLoading(true);
     try {
-      await base44.agents.addMessage(conversation, {
-        role: 'user',
-        content: input.trim()
+      // Processa comando se for um dos rápidos
+      const cmdResult = await base44.functions.invoke('whatsappMasterOrchestrator', {
+        action: 'processCommand',
+        data: { cmd: text.toLowerCase(), context: 'whatsapp' }
       });
+
+      // Se houver resultado de comando, mostra; senão envia para o agente
+      if (cmdResult.data?.success && cmdResult.data?.hotClients) {
+        const cmdMsg = `🔥 Clientes Quentes:\n${cmdResult.data.hotClients.join('\n')}`;
+        await base44.agents.addMessage(conversation, {
+          role: 'assistant',
+          content: cmdMsg
+        });
+      } else {
+        await base44.agents.addMessage(conversation, {
+          role: 'user',
+          content: text.trim()
+        });
+      }
       setInput('');
     } catch (e) {
-      toast.error('Erro ao enviar mensagem');
+      toast.error('Erro ao processar');
     } finally {
       setLoading(false);
     }
@@ -156,33 +186,28 @@ export default function WhatsAppAgentMaster() {
       </Card>
 
       {/* Comandos Rápidos */}
-      <Card>
-        <CardContent className="p-2.5">
-          <p className="text-xs font-bold text-slate-700 mb-2">⚡ COMANDOS RÁPIDOS</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {[
-              { emoji: '📊', text: 'Relatório Vendas', cmd: 'Gere relatório de vendas do período' },
-              { emoji: '🎯', text: 'Leads Quentes', cmd: 'Mostre os top 5 leads mais quentes' },
-              { emoji: '🗺️', text: 'Rota Otimizada', cmd: 'Otimize minha rota de visitas hoje' },
-              { emoji: '💼', text: 'Proposta IA', cmd: 'Gere proposta personalizada' },
-            ].map((cmd, idx) => (
-              <Button
-                key={idx}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setInput(cmd.cmd);
-                  setTimeout(() => sendMessage(), 100);
-                }}
-                className="text-xs h-8 justify-start"
-              >
-                <span>{cmd.emoji}</span>
-                <span className="ml-1">{cmd.text}</span>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {commands.length > 0 && (
+        <Card className="border-purple-200 bg-purple-50">
+          <CardContent className="p-2.5">
+            <p className="text-xs font-bold text-purple-700 mb-2">⚡ COMANDOS RÁPIDOS NR22888</p>
+            <div className="grid grid-cols-2 gap-1">
+              {commands.map((cmd, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => sendMessage(cmd.cmd)}
+                  disabled={loading}
+                  className="text-xs h-7 justify-start text-purple-700 hover:bg-purple-100"
+                >
+                  <span>{cmd.emoji}</span>
+                  <span className="ml-1 truncate text-[10px]">{cmd.desc}</span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
