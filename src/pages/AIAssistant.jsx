@@ -24,6 +24,7 @@ import MarketIntelligenceDashboard from '@/components/MarketIntelligenceDashboar
 import AgendaComandoPanel from '@/components/AgendaComandoPanel';
 import SmartSalesRouteOptimizer from '@/components/SmartSalesRouteOptimizer';
 import BuscaClinicaCNPJ from '@/components/BuscaClinicaCNPJ';
+import TGPSVetSearch from '@/components/TGPSVetSearch';
 import AlertasTempoReal from '@/components/AlertasTempoReal';
 import EditableClientName from '@/components/EditableClientName';
 import jsPDF from 'jspdf';
