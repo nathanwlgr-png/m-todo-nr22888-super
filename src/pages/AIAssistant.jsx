@@ -693,9 +693,9 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
                     </Button>
                   </a>
                 )}
-                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} target="_blank" rel="noreferrer">
+                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo')} target="_blank" rel="noreferrer">
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 h-7 text-xs">
-                    💬 NR22888
+                    💬 NR22888 TURBO
                   </Button>
                 </a>
                 <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={analyzingTranscript} className="border-cyan-300 text-cyan-700 h-7 text-xs">
@@ -829,9 +829,9 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
               <CardContent className="pt-4">
                 <p className="text-sm font-semibold mb-2">🤖 WhatsApp Bot NR22888</p>
                 <p className="text-xs text-slate-500 mb-3">Acesse o assistente master diretamente no WhatsApp</p>
-                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')} target="_blank" rel="noreferrer">
+                <a href={base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo')} target="_blank" rel="noreferrer">
                   <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-sm h-9">
-                    <MessageCircle className="w-4 h-4 mr-2" /> Conectar NR22888
+                    <MessageCircle className="w-4 h-4 mr-2" /> Conectar NR22888 TURBO
                   </Button>
                 </a>
               </CardContent>
