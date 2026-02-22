@@ -22,16 +22,7 @@ export default function AnalyticsDashboardGeo() {
     queryFn: () => base44.entities.Sale.list('-sale_date')
   });
 
-  // Agregar por cidade
-  const byCity = clients.reduce((acc, c) => {
-    const city = c.city || 'Outro';
-    acc[city] = (acc[city] || 0) + 1;
-    return acc;
-  }, {});
 
-  const topCities = Object.entries(byCity)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
 
   return (
     <div className="space-y-3">
