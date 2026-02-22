@@ -24,11 +24,20 @@ Deno.serve(async (req) => {
           (c.status === 'morno' && (c.purchase_score || 0) >= 60)
         );
 
-    // Filtrar apenas clientes com endereço
-    targetClients = targetClients.filter(c => c.city && (c.address || c.cep));
+    // Filtrar apenas clientes com cidade (endereço OU cep são opcionais)
+    targetClients = targetClients.filter(c => c.city);
 
     if (targetClients.length === 0) {
-      return Response.json({ error: 'Nenhum cliente com endereço encontrado' }, { status: 400 });
+      // Fallback: retorna clientes por score mesmo sem endereço completo
+      const fallbackClients = clients.filter(c => c.city).slice(0, max_visits_per_day);
+      if (fallbackClients.length === 0) {
+        return Response.json({
+          success: false,
+          error: 'Nenhum cliente com cidade cadastrada encontrado. Preencha o campo "Cidade" nos clientes.',
+          route: { daily_routes: [], optimization_summary: 'Sem clientes com localização', key_recommendations: ['Cadastre a cidade dos clientes no CRM'], alternative_route: '' }
+        }, { status: 200 });
+      }
+      targetClients = fallbackClients;
     }
 
     // Verificar visitas já agendadas
