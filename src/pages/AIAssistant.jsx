@@ -726,6 +726,11 @@ Forneça feedback COMPLETO: 1.Pontos Fortes 2.Melhorias 3.Scores (SPIN/Numerolog
             </div>
           </TabsContent>
 
+          {/* ── TAB ROTA IA ── */}
+          <TabsContent value="rota" className="overflow-y-auto p-3">
+            <SmartSalesRouteOptimizer />
+          </TabsContent>
+
           {/* ── TAB AGENDA ── */}
           <TabsContent value="agenda" className="overflow-y-auto p-3 space-y-3">
             <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
