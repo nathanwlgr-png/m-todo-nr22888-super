@@ -41,6 +41,39 @@ export default function SalesPerformanceReport() {
     const prevRevenue = prevSales.reduce((sum, s) => sum + (s.sale_value || 0), 0);
     const revenueGrowth = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue * 100).toFixed(1) : null;
 
+    // Dados para gráficos avançados
+    const byProductComparison = {};
+    recentSales.forEach(s => {
+      const name = s.equipment_name || 'Outro';
+      byProductComparison[name] = {
+        current: (byProductComparison[name]?.current || 0) + (s.sale_value || 0),
+        previous: byProductComparison[name]?.previous || 0
+      };
+    });
+    prevSales.forEach(s => {
+      const name = s.equipment_name || 'Outro';
+      byProductComparison[name] = {
+        current: byProductComparison[name]?.current || 0,
+        previous: (byProductComparison[name]?.previous || 0) + (s.sale_value || 0)
+      };
+    });
+
+    const clientScoresData = clients.map(c => ({
+      clientName: c.first_name,
+      score: c.purchase_score || 0,
+      revenue: recentSales.filter(s => s.client_id === c.id).reduce((sum, s) => sum + (s.sale_value || 0), 0),
+      isOutlier: false
+    }));
+
+    const dailyRevenue = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      const dayRevenue = recentSales
+        .filter(s => s.sale_date?.substring(0, 10) === date)
+        .reduce((sum, s) => sum + (s.sale_value || 0), 0);
+      dailyRevenue.push({ date, revenue: dayRevenue, sales: recentSales.filter(s => s.sale_date?.substring(0, 10) === date).length });
+    }
+
     const hotClients = clients.filter(c => c.status === 'quente');
     const coldClients = clients.filter(c => c.status === 'frio');
     const warmClients = clients.filter(c => c.status === 'morno');
