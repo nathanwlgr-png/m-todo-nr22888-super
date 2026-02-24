@@ -356,51 +356,11 @@ export default function WhatsAppHub() {
 
         {/* Tab: Histórico */}
         <TabsContent value="historico" className="mt-4">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-slate-500">{messages.length} mensagens</p>
-            <Button size="sm" variant="outline" onClick={() => queryClient.invalidateQueries(['whatsapp-messages'])}>
-              <RefreshCw className="w-4 h-4 mr-1" />
-              Atualizar
-            </Button>
-          </div>
-
-          {loadingMessages ? (
-            <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" /></div>
-          ) : messages.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <MessageSquare className="w-12 h-12 mx-auto mb-3" />
-              <p>Nenhuma mensagem registrada</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {messages.map(msg => (
-                <Card key={msg.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold text-sm">{msg.contact_name || 'Desconhecido'}</p>
-                          <Badge className={getStatusColor(msg.status)}>{msg.status}</Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {msg.direction === 'sent' ? '↑ Enviada' : '↓ Recebida'}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-slate-600 line-clamp-2">{msg.message}</p>
-                        <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(msg.created_date).toLocaleString('pt-BR')}
-                          {msg.sent_by_name && ` • ${msg.sent_by_name}`}
-                        </p>
-                      </div>
-                      <Button size="sm" variant="ghost" onClick={() => handleCopyMessage(msg.message)}>
-                        {copied === msg.message ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <ConversationLog
+            messages={messages}
+            loading={loadingMessages}
+            onRefresh={() => queryClient.invalidateQueries(['whatsapp-messages'])}
+          />
         </TabsContent>
       </Tabs>
     </div>
