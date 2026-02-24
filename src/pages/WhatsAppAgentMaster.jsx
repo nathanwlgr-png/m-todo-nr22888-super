@@ -136,15 +136,18 @@ export default function WhatsAppAgentMaster() {
               </h1>
               <p className="text-xs text-blue-100 mt-1">WhatsApp • Vendas • IA Completa</p>
             </div>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-orange-400 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-500 flex items-center gap-2 shadow-lg"
-            >
-              <Phone className="w-4 h-4" />
-              WhatsApp
-            </a>
+            <div className="flex flex-col gap-2 items-end">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-orange-400 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-500 flex items-center gap-2 shadow-lg"
+              >
+                <Phone className="w-4 h-4" />
+                WhatsApp
+              </a>
+              <span className="text-[10px] text-blue-200">Número: 14 99167-6428</span>
+            </div>
           </div>
         </CardContent>
       </Card>
