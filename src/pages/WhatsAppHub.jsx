@@ -104,7 +104,7 @@ export default function WhatsAppHub() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MessageSquare className="w-7 h-7 text-green-600" />
@@ -112,18 +112,24 @@ export default function WhatsAppHub() {
           </h1>
           <p className="text-slate-500 text-sm">Central de mensagens e automação</p>
         </div>
-        <a
-          href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button className="bg-green-600 hover:bg-green-700">
-            <Bot className="w-4 h-4 mr-2" />
-            Nathan NR22888
-            <ExternalLink className="w-3 h-3 ml-2" />
-          </Button>
-        </a>
+        <div className="flex items-center gap-2">
+          <PushNotificationManager messages={messages} />
+          <a
+            href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="bg-green-600 hover:bg-green-700">
+              <Bot className="w-4 h-4 mr-2" />
+              Nathan NR22888
+              <ExternalLink className="w-3 h-3 ml-2" />
+            </Button>
+          </a>
+        </div>
       </div>
+
+      {/* Real-time agent status */}
+      <AgentStatusBar />
 
       {/* Stats rápidas */}
       <div className="grid grid-cols-3 gap-3">
