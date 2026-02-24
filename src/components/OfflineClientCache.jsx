@@ -49,8 +49,7 @@ export function useOfflineClients() {
   const { data: onlineClients = [], isLoading, isError } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      // Buscar todos os clientes com limite alto
-      const allClients = await base44.entities.Client.list('-updated_date', 5000);
+      const allClients = await base44.entities.Client.list('-updated_date', 9999);
 
       // Salvar no cache (com proteção contra localStorage cheio)
       try {
