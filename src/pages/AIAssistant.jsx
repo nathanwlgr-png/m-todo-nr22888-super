@@ -1178,7 +1178,28 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
             <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
               <CardContent className="p-3">
                 <p className="text-sm font-semibold text-green-800 mb-1">🤖 WhatsApp Bot NR22888 TURBO</p>
-                <p className="text-xs text-green-600 mb-3">22 IAs + CRM completo + Pesquisa web em tempo real</p>
+                <p className="text-xs text-green-600 mb-2">22 IAs + CRM completo + Pesquisa web em tempo real</p>
+
+                {/* Aviso de erro de conexão */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-2.5 mb-3">
+                  <p className="text-xs font-bold text-orange-700 mb-1">⚠️ Problema de conexão? Siga estes passos:</p>
+                  <ol className="text-[11px] text-orange-700 space-y-1 list-decimal ml-3">
+                    <li>Abra o WhatsApp no número <strong>14 99167-6428</strong></li>
+                    <li>Encontre a conversa com <strong>"Nr22888 Vendas"</strong></li>
+                    <li>Envie exatamente: <code className="bg-orange-100 px-1 rounded font-mono">/disconnect</code></li>
+                    <li>Aguarde a confirmação de desconexão</li>
+                    <li>Clique em <strong>"Conectar NR22888 TURBO"</strong> abaixo</li>
+                  </ol>
+                  <a
+                    href="https://wa.me/14991676428?text=/disconnect"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg px-3 py-1.5 transition-colors"
+                  >
+                    📲 Abrir WhatsApp e enviar /disconnect
+                  </a>
+                </div>
+
                 <a href={base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo')} target="_blank" rel="noreferrer">
                   <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-sm h-9 hover:opacity-90">
                     <MessageCircle className="w-4 h-4 mr-2" /> Conectar NR22888 TURBO
