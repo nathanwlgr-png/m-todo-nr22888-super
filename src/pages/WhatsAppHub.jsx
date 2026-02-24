@@ -32,8 +32,8 @@ export default function WhatsAppHub() {
 
   const { data: messages = [], isLoading: loadingMessages } = useQuery({
     queryKey: ['whatsapp-messages'],
-    queryFn: () => base44.entities.WhatsAppMessage.list('-created_date', 50),
-    refetchInterval: 30000,
+    queryFn: () => base44.entities.WhatsAppMessage.list('-created_date', 200),
+    refetchInterval: 15000,
   });
 
   const { data: pendingMessages = [] } = useQuery({
