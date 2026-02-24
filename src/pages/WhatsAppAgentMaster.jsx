@@ -152,6 +152,26 @@ export default function WhatsAppAgentMaster() {
         </CardContent>
       </Card>
 
+      {/* Banner de resolução de conflito */}
+      <Card className="border border-orange-300 bg-orange-50">
+        <CardContent className="p-3">
+          <p className="text-xs font-bold text-orange-800 mb-2">⚠️ Número já conectado em outro app? Siga estes passos:</p>
+          <ol className="text-[11px] text-orange-700 space-y-0.5 list-decimal ml-4 mb-2">
+            <li>Clique no botão abaixo para abrir o WhatsApp com o bot Nr22888</li>
+            <li>Envie a mensagem <code className="bg-orange-200 px-1 rounded font-mono">/disconnect</code></li>
+            <li>Aguarde a confirmação, depois clique em <strong>WhatsApp</strong> no topo para reconectar</li>
+          </ol>
+          <a
+            href="https://wa.me/14991676428?text=/disconnect"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <Phone className="w-3 h-3" /> Enviar /disconnect agora
+          </a>
+        </CardContent>
+      </Card>
+
       {/* Grid com Chat + Gráficos */}
       <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
         {/* Chat - Coluna Principal */}
