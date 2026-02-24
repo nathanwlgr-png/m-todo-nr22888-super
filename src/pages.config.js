@@ -56,6 +56,7 @@ import AdvancedAIReports from './pages/AdvancedAIReports';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
+import AgentSetup from './pages/AgentSetup';
 import AnalyticsDashboardGeo from './pages/AnalyticsDashboardGeo';
 import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import AutomationManager from './pages/AutomationManager';
@@ -141,6 +142,7 @@ import OfflineMode from './pages/OfflineMode';
 import Onboarding from './pages/Onboarding';
 import PartyStoresProspecting from './pages/PartyStoresProspecting';
 import PerformanceDashboard from './pages/PerformanceDashboard';
+import PipelineVisualization from './pages/PipelineVisualization';
 import PossibleSales from './pages/PossibleSales';
 import PostVisitAnalysis from './pages/PostVisitAnalysis';
 import PreVisitChecklist from './pages/PreVisitChecklist';
@@ -156,15 +158,16 @@ import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
+import RolePlayTraining from './pages/RolePlayTraining';
 import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
-import Tasks from './pages/Tasks';
-import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
+import SalesAIHub from './pages/SalesAIHub';
 import SalesAnalytics from './pages/SalesAnalytics';
 import SalesAnalyticsDashboard from './pages/SalesAnalyticsDashboard';
 import SalesCoaching from './pages/SalesCoaching';
 import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
+import SalesDashboard from './pages/SalesDashboard';
 import SalesForecastPage from './pages/SalesForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
@@ -175,6 +178,7 @@ import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
 import TaskAutomation from './pages/TaskAutomation';
 import TaskCalendar from './pages/TaskCalendar';
+import Tasks from './pages/Tasks';
 import TasksUnified from './pages/TasksUnified';
 import TeamPerformanceAnalytics from './pages/TeamPerformanceAnalytics';
 import TechnicalMaterialsHub from './pages/TechnicalMaterialsHub';
@@ -190,10 +194,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import PipelineVisualization from './pages/PipelineVisualization';
-import SalesAIHub from './pages/SalesAIHub';
-import AgentSetup from './pages/AgentSetup';
-import SalesDashboard from './pages/SalesDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -207,6 +207,7 @@ export const PAGES = {
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
     "AdvancedSalesReports": AdvancedSalesReports,
+    "AgentSetup": AgentSetup,
     "AnalyticsDashboardGeo": AnalyticsDashboardGeo,
     "AutoFollowUpDashboard": AutoFollowUpDashboard,
     "AutomationManager": AutomationManager,
@@ -292,6 +293,7 @@ export const PAGES = {
     "Onboarding": Onboarding,
     "PartyStoresProspecting": PartyStoresProspecting,
     "PerformanceDashboard": PerformanceDashboard,
+    "PipelineVisualization": PipelineVisualization,
     "PossibleSales": PossibleSales,
     "PostVisitAnalysis": PostVisitAnalysis,
     "PreVisitChecklist": PreVisitChecklist,
@@ -307,15 +309,16 @@ export const PAGES = {
     "RegionalSearch": RegionalSearch,
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
+    "RolePlayTraining": RolePlayTraining,
     "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
-    "Tasks": Tasks,
-    "RolePlayTraining": RolePlayTraining,
     "RouteOptimizer": RouteOptimizer,
+    "SalesAIHub": SalesAIHub,
     "SalesAnalytics": SalesAnalytics,
     "SalesAnalyticsDashboard": SalesAnalyticsDashboard,
     "SalesCoaching": SalesCoaching,
     "SalesCoachingDashboard": SalesCoachingDashboard,
+    "SalesDashboard": SalesDashboard,
     "SalesForecastPage": SalesForecastPage,
     "SalesFunnel": SalesFunnel,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
@@ -326,6 +329,7 @@ export const PAGES = {
     "SystemAudit": SystemAudit,
     "TaskAutomation": TaskAutomation,
     "TaskCalendar": TaskCalendar,
+    "Tasks": Tasks,
     "TasksUnified": TasksUnified,
     "TeamPerformanceAnalytics": TeamPerformanceAnalytics,
     "TechnicalMaterialsHub": TechnicalMaterialsHub,
@@ -341,10 +345,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "PipelineVisualization": PipelineVisualization,
-    "SalesAIHub": SalesAIHub,
-    "AgentSetup": AgentSetup,
-    "SalesDashboard": SalesDashboard,
 }
 
 export const pagesConfig = {

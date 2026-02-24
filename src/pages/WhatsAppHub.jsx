@@ -13,6 +13,9 @@ import {
   Zap, Copy, Check, ExternalLink, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AgentStatusBar from '@/components/whatsapp/AgentStatusBar';
+import PushNotificationManager from '@/components/whatsapp/PushNotificationManager';
+import ConversationLog from '@/components/whatsapp/ConversationLog';
 
 export default function WhatsAppHub() {
   const [search, setSearch] = useState('');
