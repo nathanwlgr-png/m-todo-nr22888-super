@@ -10,7 +10,7 @@ const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 horas
  * Permite acesso aos dados mesmo sem internet
  */
 export function useOfflineClients() {
-  const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
+  const [offlineMode, setOfflineMode] = useState(false);
   const [cachedClients, setCachedClients] = useState([]);
 
   // Monitorar conexão
@@ -76,15 +76,26 @@ export function useOfflineClients() {
 
       return allClients;
     },
-    enabled: !offlineMode,
-    staleTime: 5 * 60 * 1000,
-    retry: 1
+    enabled: true,
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 2
   });
 
+  // Se tem dados online, usa eles. Se erro, usa cache. Se carregando e tem cache, usa cache.
+  const clients = onlineClients.length > 0 
+    ? onlineClients 
+    : isError 
+    ? cachedClients 
+    : isLoading && cachedClients.length > 0 
+    ? cachedClients 
+    : onlineClients;
+
   return {
-    clients: offlineMode || isError ? cachedClients : onlineClients,
+    clients,
     isOffline: offlineMode,
-    isLoading: !offlineMode && isLoading,
+    isLoading: isLoading && clients.length === 0,
     isCached: offlineMode || isError,
     cacheAge: (() => {
       try {
