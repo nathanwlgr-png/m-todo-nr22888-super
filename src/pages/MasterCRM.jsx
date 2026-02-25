@@ -27,6 +27,7 @@ import AutoFollowUpIA from '@/components/AutoFollowUpIA';
 import SalesPerformanceReport from '@/components/SalesPerformanceReport';
 import ClientReactivationIA from '@/components/ClientReactivationIA';
 import DemandForecastAI from '@/components/DemandForecastAI';
+import WhatsAppFileShare from '@/components/WhatsAppFileShare';
 import MarketIntelligenceDashboard from '@/components/MarketIntelligenceDashboard';
 import CrossSellUpsellAnalyzer from '@/components/CrossSellUpsellAnalyzer';
 import FunnelAnalysisAI from '@/components/FunnelAnalysisAI';
