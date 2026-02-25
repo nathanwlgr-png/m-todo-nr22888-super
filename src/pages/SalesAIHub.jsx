@@ -33,6 +33,11 @@ export default function SalesAIHub() {
         </div>
 
         {/* Tabs */}
+        {/* Demand Forecast — top of page */}
+        <div className="mb-8">
+          <DemandForecastAI />
+        </div>
+
         <Tabs defaultValue="crosssell" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="crosssell">📈 Cross/Upsell</TabsTrigger>
