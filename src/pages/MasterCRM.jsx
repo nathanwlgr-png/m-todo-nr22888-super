@@ -366,10 +366,13 @@ Responda em português, use markdown estruturado com próximos passos concretos.
             🎭 {rolePlay ? 'Treinando' : 'Treinar'}
           </Button>
           <a href={base44.agents.getWhatsAppConnectURL('whatsapp_nr22888_turbo')} target="_blank" rel="noreferrer">
-            <Button size="sm" className="bg-green-500 hover:bg-green-400 text-white h-7 text-[10px] px-2">
+            <Button size="sm" className="bg-green-500 hover:bg-green-400 text-white h-7 text-[10px] px-2 animate-pulse">
               🤖 NR22888
             </Button>
           </a>
+          <Button size="sm" onClick={runDiag} disabled={testingSys} className="bg-white/20 hover:bg-white/30 text-white h-7 text-[10px] px-2">
+            {testingSys ? <Loader2 className="w-3 h-3 animate-spin" /> : '⚡ Run'}
+          </Button>
         </div>
 
         {/* Seletor de cliente */}
