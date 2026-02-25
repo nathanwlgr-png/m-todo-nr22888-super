@@ -103,71 +103,64 @@ Não filtre nada. Não pule linhas.`,
       totalProcessed: rawClients.length
     };
 
-    // Processa em lotes de 20 em paralelo (sem limite de quantidade total)
-    const BATCH_SIZE = 20;
-    const batches = chunk(rawClients, BATCH_SIZE);
+    // Processa SEQUENCIALMENTE para garantir anti-duplicidade correta dentro do lote
+    // (índice em memória atualizado imediatamente após cada cadastro)
+    for (const clientData of rawClients) {
+      if (!clientData.first_name?.trim()) {
+        results.errors.push({ name: clientData.clinic_name || '?', reason: 'Sem nome' });
+        continue;
+      }
 
-    for (const batch of batches) {
-      await Promise.all(batch.map(async (clientData) => {
-        if (!clientData.first_name?.trim()) {
-          results.errors.push({ name: clientData.clinic_name || '?', reason: 'Sem nome' });
-          return;
-        }
+      const phoneKey = normalizePhone(clientData.phone);
+      const nameKey = `${normalizeName(clientData.first_name)}|${normalizeName(clientData.city)}`;
+      const cnpjKey = normalizeCNPJ(clientData.cnpj);
+      const emailKey = clientData.email?.toLowerCase().trim();
 
-        // Verifica duplicidade por phone, CNPJ, email ou nome+cidade
-        const phoneKey = normalizePhone(clientData.phone);
-        const nameKey = `${normalizeName(clientData.first_name)}|${normalizeName(clientData.city)}`;
-        const cnpjKey = normalizeCNPJ(clientData.cnpj);
-        const emailKey = clientData.email?.toLowerCase().trim();
+      const dupPhone = phoneKey && phoneIndex.get(phoneKey);
+      const dupName = nameIndex.get(nameKey);
+      const dupCNPJ = cnpjKey && cnpjKey.length === 14 && cnpjIndex.get(cnpjKey);
+      const dupEmail = emailKey && emailIndex.get(emailKey);
+      const dupId = dupPhone || dupName || dupCNPJ || dupEmail;
 
-        const dupId =
-          (phoneKey && phoneIndex.get(phoneKey)) ||
-          nameIndex.get(nameKey) ||
-          (cnpjKey && cnpjKey.length === 14 && cnpjIndex.get(cnpjKey)) ||
-          (emailKey && emailIndex.get(emailKey));
+      if (dupId) {
+        results.duplicates.push({
+          name: clientData.first_name,
+          clinic: clientData.clinic_name,
+          city: clientData.city,
+          reason: dupPhone ? 'Telefone já existe' : dupName ? 'Nome+cidade já existe' : dupCNPJ ? 'CNPJ já existe' : 'Email já existe',
+          existingId: dupId
+        });
+        continue;
+      }
 
-        if (dupId) {
-          results.duplicates.push({
-            name: clientData.first_name,
-            clinic: clientData.clinic_name,
-            city: clientData.city,
-            reason: phoneKey && phoneIndex.get(phoneKey) ? 'Telefone já existe' :
-                    nameIndex.get(nameKey) ? 'Nome+cidade já existe' :
-                    cnpjKey && cnpjIndex.get(cnpjKey) ? 'CNPJ já existe' : 'Email já existe',
-            existingId: dupId
-          });
-          return;
-        }
+      try {
+        const created = await base44.asServiceRole.entities.Client.create({
+          first_name: clientData.first_name.trim(),
+          full_name: clientData.full_name?.trim() || undefined,
+          clinic_name: clientData.clinic_name?.trim() || undefined,
+          city: clientData.city?.trim() || undefined,
+          phone: clientData.phone?.trim() || undefined,
+          email: clientData.email?.trim() || undefined,
+          address: clientData.address?.trim() || undefined,
+          cnpj: clientData.cnpj?.trim() || undefined,
+          external_code: clientData.external_code?.trim() || undefined,
+          status: 'morno',
+          purchase_score: 50,
+          lead_source: 'importacao_planilha',
+          decision_role: 'proprietario'
+        });
 
-        try {
-          const created = await base44.asServiceRole.entities.Client.create({
-            first_name: clientData.first_name.trim(),
-            full_name: clientData.full_name?.trim() || undefined,
-            clinic_name: clientData.clinic_name?.trim() || undefined,
-            city: clientData.city?.trim() || undefined,
-            phone: clientData.phone?.trim() || undefined,
-            email: clientData.email?.trim() || undefined,
-            address: clientData.address?.trim() || undefined,
-            cnpj: clientData.cnpj?.trim() || undefined,
-            external_code: clientData.external_code?.trim() || undefined,
-            status: 'morno',
-            purchase_score: 50,
-            lead_source: 'importacao_planilha',
-            decision_role: 'proprietario'
-          });
+        results.created.push({ id: created.id, name: clientData.first_name, city: clientData.city });
 
-          results.created.push({ id: created.id, name: clientData.first_name, city: clientData.city });
+        // Atualiza índices imediatamente para detectar duplicatas nos próximos registros
+        if (phoneKey) phoneIndex.set(phoneKey, created.id);
+        nameIndex.set(nameKey, created.id);
+        if (cnpjKey && cnpjKey.length === 14) cnpjIndex.set(cnpjKey, created.id);
+        if (emailKey) emailIndex.set(emailKey, created.id);
 
-          // Atualiza índices para evitar duplicidade dentro do mesmo lote
-          if (phoneKey) phoneIndex.set(phoneKey, created.id);
-          nameIndex.set(nameKey, created.id);
-          if (cnpjKey && cnpjKey.length === 14) cnpjIndex.set(cnpjKey, created.id);
-          if (emailKey) emailIndex.set(emailKey, created.id);
-
-        } catch (error) {
-          results.errors.push({ name: clientData.first_name, city: clientData.city, reason: error.message });
-        }
-      }));
+      } catch (error) {
+        results.errors.push({ name: clientData.first_name, city: clientData.city, reason: error.message });
+      }
     }
 
     return Response.json({
