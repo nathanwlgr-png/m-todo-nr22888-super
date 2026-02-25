@@ -1112,7 +1112,8 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
           </TabsContent>
 
           {/* ── TAB MERCADO ── */}
-          <TabsContent value="mercado" className="overflow-y-auto p-3">
+          <TabsContent value="mercado" className="overflow-y-auto p-3 space-y-4">
+            <DemandForecastAI />
             <MarketIntelligenceDashboard />
           </TabsContent>
 
