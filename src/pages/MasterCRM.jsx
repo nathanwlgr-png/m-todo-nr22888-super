@@ -314,6 +314,8 @@ Responda em português, use markdown estruturado com próximos passos concretos.
       { name: 'whatsappSendChunked', label: 'Envio Chunked', payload: { message: 'Teste', phone: '5514991676428' } },
       { name: 'predictiveLeadScoring', label: 'Score Preditivo', payload: { action: 'get_priorities' } },
       { name: 'marketIntelligenceMonitor', label: 'Intel Mercado', payload: { action: 'market_scan', region: 'São Paulo' } },
+      { name: 'processAutoFollowUps', label: 'Auto Follow-up', payload: {} },
+      { name: 'proactiveAIAutomation', label: 'Proactive AI', payload: { action: 'run_all' } },
     ];
     const results = {};
     await Promise.allSettled(tests.map(async t => {
@@ -321,7 +323,10 @@ Responda em português, use markdown estruturado com próximos passos concretos.
       catch { results[t.label] = '❌'; }
     }));
     setSysStatus(results); setTestingSys(false);
-    toast.success('Diagnóstico concluído!');
+    const ok = Object.values(results).filter(v => v === '✅').length;
+    const total = Object.keys(results).length;
+    toast.success(`Diagnóstico: ${ok}/${total} sistemas OK`);
+    setTab('ops');
   };
 
   const exportPDF = () => {
