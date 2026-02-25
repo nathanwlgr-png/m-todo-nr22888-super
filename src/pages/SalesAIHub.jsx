@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import CrossSellUpsellAnalyzer from '@/components/CrossSellUpsellAnalyzer';
 import FunnelAnalysisAI from '@/components/FunnelAnalysisAI';
 import ProspectingEmailSequenceGenerator from '@/components/ProspectingEmailSequenceGenerator';
+import DemandForecastAI from '@/components/DemandForecastAI';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

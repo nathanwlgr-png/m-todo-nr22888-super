@@ -21,6 +21,7 @@ import QuickActionButton from '@/components/QuickActionButton';
 import VoiceRecorderButton from '@/components/VoiceRecorderButton';
 import MasterAIAssistant from '@/components/MasterAIAssistant';
 import MarketIntelligenceDashboard from '@/components/MarketIntelligenceDashboard';
+import DemandForecastAI from '@/components/DemandForecastAI';
 import AgendaComandoPanel from '@/components/AgendaComandoPanel';
 import SmartSalesRouteOptimizer from '@/components/SmartSalesRouteOptimizer';
 import BuscaClinicaCNPJ from '@/components/BuscaClinicaCNPJ';
