@@ -27,6 +27,7 @@ import SmartSalesRouteOptimizer from '@/components/SmartSalesRouteOptimizer';
 import BuscaClinicaCNPJ from '@/components/BuscaClinicaCNPJ';
 import TGPSVetSearch from '@/components/TGPSVetSearch';
 import AlertasTempoReal from '@/components/AlertasTempoReal';
+import WhatsAppFileShare from '@/components/WhatsAppFileShare';
 import EditableClientName from '@/components/EditableClientName';
 import AutoFollowUpIA from '@/components/AutoFollowUpIA';
 import SalesPerformanceReport from '@/components/SalesPerformanceReport';
@@ -1119,6 +1120,9 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
 
           {/* ── TAB OPS ── */}
           <TabsContent value="notif" className="overflow-y-auto p-3 space-y-3">
+
+            {/* Envio de arquivos pelo WhatsApp */}
+            <WhatsAppFileShare client={client} />
 
             {/* Notificações WhatsApp */}
             <Card>
