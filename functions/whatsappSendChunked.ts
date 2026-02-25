@@ -5,7 +5,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * O WhatsApp tem limite de ~4096 caracteres por mensagem
  * Esta função divide de forma inteligente, preservando palavras e parágrafos
  */
-function splitMessageIntoChunks(text, maxLen = 3800) {
+// Divide APENAS se ultrapassar 4000 chars (limite do WhatsApp)
+// Sem cabeçalhos, sem marcadores de parte — mensagem limpa e completa
+function splitMessageIntoChunks(text, maxLen = 4000) {
   if (text.length <= maxLen) return [text];
 
   const chunks = [];
@@ -13,13 +15,8 @@ function splitMessageIntoChunks(text, maxLen = 3800) {
   let current = '';
 
   for (const para of paragraphs) {
-    // Se o parágrafo sozinho já excede o limite, divide por frases
     if (para.length > maxLen) {
-      if (current.trim()) {
-        chunks.push(current.trim());
-        current = '';
-      }
-      // Divide o parágrafo longo em partes menores
+      if (current.trim()) { chunks.push(current.trim()); current = ''; }
       let remaining = para;
       while (remaining.length > maxLen) {
         const cut = remaining.lastIndexOf(' ', maxLen);
@@ -40,7 +37,6 @@ function splitMessageIntoChunks(text, maxLen = 3800) {
   }
 
   if (current.trim()) chunks.push(current.trim());
-
   return chunks;
 }
 
