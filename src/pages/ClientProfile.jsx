@@ -730,6 +730,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* Collaboration Indicator */}
         <CollaborationIndicator contextType="client" contextId={clientId} />
 
+        {/* IA INTEGRADA — Análise automática de campos + Scripts + Chat */}
+        <ClientAIFieldsPanel
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
         {/* AI Metrics Badges - Destaque */}
         <AIMetricsBadges client={client} variant="full" />
 
