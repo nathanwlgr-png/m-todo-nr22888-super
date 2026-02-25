@@ -667,14 +667,7 @@ Responda em português, use markdown estruturado com próximos passos concretos.
 
         {/* ── IA AUTO ── */}
         {tab === 'ia-auto' && (
-          <div className="p-3 space-y-3">
-            <div className="flex gap-2 mb-3">
-              {['followup','relatorio','reativacao'].map((s, i) => {
-                const labels = ['🔄 Follow-up', '📊 Relatório', '🔔 Reativação'];
-                const [subTab, setSubTab] = React.useState('followup');
-                return null; // handled below with useState at component level
-              })}
-            </div>
+          <div className="p-3 space-y-4">
             <AutoFollowUpIA client={client} visits={visits} tasks={tasks} />
             <SalesPerformanceReport />
             <ClientReactivationIA />

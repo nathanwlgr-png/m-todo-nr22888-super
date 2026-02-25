@@ -128,7 +128,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Zap, label: 'Automações', page: 'WorkflowAutomation', tourId: 'automations' },
-    { icon: Settings, label: 'Workflows', page: 'WorkflowAutomation' },
+
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Brain, label: 'Inteligência 360°', page: 'ProactiveIntelligenceDashboard' },
