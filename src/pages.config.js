@@ -122,6 +122,7 @@ import LoadEquipmentCatalog from './pages/LoadEquipmentCatalog';
 import LoadPremiumDifferentials from './pages/LoadPremiumDifferentials';
 import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
+import MasterCRM from './pages/MasterCRM';
 import MasterControlPanel from './pages/MasterControlPanel';
 import MessageApproval from './pages/MessageApproval';
 import MessageHistory from './pages/MessageHistory';
@@ -158,9 +159,9 @@ import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
 import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
-import RolePlayTraining from './pages/RolePlayTraining';
 import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
+import RolePlayTraining from './pages/RolePlayTraining';
 import RouteOptimizer from './pages/RouteOptimizer';
 import SalesAIHub from './pages/SalesAIHub';
 import SalesAnalytics from './pages/SalesAnalytics';
@@ -194,7 +195,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import MasterCRM from './pages/MasterCRM';
 import __Layout from './Layout.jsx';
 
 
@@ -274,6 +274,7 @@ export const PAGES = {
     "LoadPremiumDifferentials": LoadPremiumDifferentials,
     "MarketIntelligence": MarketIntelligence,
     "MarketResearch": MarketResearch,
+    "MasterCRM": MasterCRM,
     "MasterControlPanel": MasterControlPanel,
     "MessageApproval": MessageApproval,
     "MessageHistory": MessageHistory,
@@ -310,9 +311,9 @@ export const PAGES = {
     "RegionalSearch": RegionalSearch,
     "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
-    "RolePlayTraining": RolePlayTraining,
     "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
+    "RolePlayTraining": RolePlayTraining,
     "RouteOptimizer": RouteOptimizer,
     "SalesAIHub": SalesAIHub,
     "SalesAnalytics": SalesAnalytics,
@@ -346,7 +347,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "MasterCRM": MasterCRM,
 }
 
 export const pagesConfig = {

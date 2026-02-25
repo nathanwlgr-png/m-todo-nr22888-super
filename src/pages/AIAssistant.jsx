@@ -396,19 +396,26 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
   // ─── ENVIAR WHATSAPP CHUNKED ──────────────────────────────────────────────────
   const handleShareWhatsApp = async () => {
     if (!generatedScript || !client?.phone) return;
+    const phone = client.phone.replace(/\D/g, '');
+    const phoneWithCountry = phone.startsWith('55') ? phone : `55${phone}`;
     try {
       const res = await base44.functions.invoke('whatsappSendChunked', {
-        message: generatedScript.content, phone: client.phone,
-        client_id: client.id, client_name: client.first_name,
+        message: generatedScript.content,
+        phone: phoneWithCountry,
+        client_id: client.id,
+        client_name: client.first_name,
       });
       if (res.data?.success) {
         const chunks = res.data.chunks || [];
-        if (chunks.length === 1) { window.open(chunks[0].whatsapp_url, '_blank'); toast.success('WhatsApp aberto!'); }
-        else { toast.success(`Mensagem em ${chunks.length} partes. Abrindo...`); chunks.forEach((chunk, i) => setTimeout(() => window.open(chunk.whatsapp_url, '_blank'), i * 1500)); }
+        chunks.forEach((chunk, i) =>
+          setTimeout(() => window.open(chunk.whatsapp_url, '_blank'), i * 1200)
+        );
+        toast.success(chunks.length > 1 ? `Mensagem em ${chunks.length} partes — abrindo sequencialmente` : 'WhatsApp aberto!');
       }
     } catch (e) {
-      const msg = encodeURIComponent(generatedScript.content.substring(0, 3800));
-      window.open(`https://wa.me/${client.phone}?text=${msg}`, '_blank');
+      // fallback: envia completa, sem corte
+      const encoded = encodeURIComponent(generatedScript.content);
+      window.open(`https://wa.me/${phoneWithCountry}?text=${encoded}`, '_blank');
     }
   };
 
