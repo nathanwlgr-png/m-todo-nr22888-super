@@ -707,6 +707,9 @@ Responda em português, use markdown estruturado com próximos passos concretos.
         {/* ── OPS ── */}
         {tab === 'ops' && (
           <div className="p-3 space-y-3">
+            {/* Envio de arquivos/imagens pelo WhatsApp */}
+            <WhatsAppFileShare client={client} />
+
             <Card><CardContent className="p-3">
               <p className="text-sm font-semibold mb-2">📲 Notificações WhatsApp</p>
               <div className="grid grid-cols-2 gap-2">
