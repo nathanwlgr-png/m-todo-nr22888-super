@@ -22,7 +22,10 @@ export default function AnalyticsDashboardGeo() {
     queryFn: () => base44.entities.Sale.list('-sale_date')
   });
 
-
+  const byCity = clients.reduce((acc, c) => {
+    if (c.city) acc[c.city] = (acc[c.city] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-3">
