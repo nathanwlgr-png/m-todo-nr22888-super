@@ -66,12 +66,7 @@ Deno.serve(async (req) => {
     const results = [];
 
     for (let i = 0; i < chunks.length; i++) {
-      let part = chunks[i];
-
-      // Adiciona indicador de parte se houver mais de uma
-      if (totalChunks > 1) {
-        part = `_(${i + 1}/${totalChunks})_\n\n` + part;
-      }
+      const part = chunks[i]; // sem cabeçalho, sem indicador de parte
 
       // Monta link direto para o WhatsApp
       const encodedMsg = encodeURIComponent(part);
