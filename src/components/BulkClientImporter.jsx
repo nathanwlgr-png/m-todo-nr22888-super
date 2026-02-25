@@ -1,90 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Loader2, CheckCircle2, AlertCircle, FileSpreadsheet, Table, FileText } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Upload, Loader2, CheckCircle2, AlertCircle, FileSpreadsheet, Table, FileText, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 
 export default function BulkClientImporter() {
   const queryClient = useQueryClient();
   const [importing, setImporting] = useState(false);
-  const [importMethod, setImportMethod] = useState('paste'); // paste, url, file
+  const [importMethod, setImportMethod] = useState('paste');
   const [pastedData, setPastedData] = useState('');
   const [sheetUrl, setSheetUrl] = useState('');
   const [result, setResult] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const fileInputRef = React.useRef(null);
+  const [progress, setProgress] = useState('');
+  const [showDups, setShowDups] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const createClientMutation = useMutation({
-    mutationFn: (clientData) => base44.entities.Client.create(clientData),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['clients']);
-    }
-  });
-
-  const processImport = async (tableData) => {
-    setImporting(true);
-    setResult(null);
-
+  // ── Extrai via LLM e envia ao backend ──────────────────────────────────────
+  const processViaPaste = async () => {
+    if (!pastedData.trim()) { toast.error('Cole os dados primeiro'); return; }
+    setImporting(true); setResult(null); setProgress('Extraindo clientes com IA...');
     try {
-      const prompt = `Você é um especialista em importação de dados de clientes veterinários.
+      const extracted = await base44.integrations.Core.InvokeLLM({
+        prompt: `Você é especialista em dados de CRM veterinário.
+Dados recebidos:
+${pastedData}
 
-**DADOS RECEBIDOS:**
-${tableData}
+Extraia TODOS os clientes. Para cada linha/registro retorne:
+- first_name: primeiro nome do responsável/proprietário
+- full_name: nome completo
+- clinic_name: nome da clínica/hospital
+- city: cidade
+- phone: telefone no formato 55DDD99999999 (somente números, com 55)
+- email
+- address: endereço completo
+- cnpj: somente números (14 dígitos)
+- external_code: código/ID externo
 
-**TAREFA:**
-Extraia e estruture os dados dos clientes. Procure por:
-- Nome do cliente (primeiro nome)
-- Nome completo
-- ID externo (código)
-- Nome da clínica
-- Razão social
-- CNPJ (formato: XX.XXX.XXX/XXXX-XX)
-- Telefone (formato: 5511999999999)
-- Email
-- Endereço completo
-- Cidade
-- CEP
-- Estado
-- Qualquer outro dado relevante
-
-Retorne JSON:
-{
-  "clients": [
-    {
-      "external_code": "ID do cliente",
-      "first_name": "Primeiro nome",
-      "full_name": "Nome completo",
-      "clinic_name": "Nome da clínica",
-      "razao_social": "Razão social",
-      "cnpj": "00.000.000/0000-00",
-      "phone": "5511999999999",
-      "email": "email@dominio.com",
-      "address": "Endereço completo",
-      "city": "Cidade",
-      "cep": "00000-000",
-      "notes": "Outras informações relevantes"
-    }
-  ],
-  "total_found": 10,
-  "with_cnpj": 8,
-  "with_phone": 9,
-  "data_quality": "Alta|Média|Baixa"
-}
-
-IMPORTANTE: 
-- Se não encontrar um campo, deixe como vazio ou null
-- Normalize telefone para formato internacional (55...)
-- Valide CNPJ (14 dígitos)
-- Extract first_name do nome completo`;
-
-      const extractedData = await base44.integrations.Core.InvokeLLM({
-        prompt,
+Não pule linhas. Retorne TODOS os registros encontrados.`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -93,146 +54,15 @@ IMPORTANTE:
               items: {
                 type: "object",
                 properties: {
-                  external_code: { type: "string" },
                   first_name: { type: "string" },
                   full_name: { type: "string" },
                   clinic_name: { type: "string" },
-                  razao_social: { type: "string" },
-                  cnpj: { type: "string" },
+                  city: { type: "string" },
                   phone: { type: "string" },
                   email: { type: "string" },
                   address: { type: "string" },
-                  city: { type: "string" },
-                  cep: { type: "string" },
-                  notes: { type: "string" }
-                }
-              }
-            },
-            total_found: { type: "number" },
-            with_cnpj: { type: "number" },
-            with_phone: { type: "number" },
-            data_quality: { type: "string" }
-          }
-        }
-      });
-
-      if (!extractedData.clients || extractedData.clients.length === 0) {
-        toast.error('Nenhum cliente encontrado nos dados');
-        setImporting(false);
-        return;
-      }
-
-      // Import clients
-      let imported = 0;
-      let skipped = 0;
-      let errors = [];
-
-      for (const clientData of extractedData.clients) {
-        try {
-          if (!clientData.first_name) {
-            skipped++;
-            errors.push(`Cliente sem nome: ${clientData.clinic_name || 'N/A'}`);
-            continue;
-          }
-
-          await createClientMutation.mutateAsync({
-            ...clientData,
-            status: 'morno',
-            purchase_score: 50,
-            lead_source: 'importacao_planilha',
-            client_type: 'clinica_media',
-            decision_role: 'proprietario'
-          });
-
-          imported++;
-          await new Promise(resolve => setTimeout(resolve, 100)); // Rate limit
-        } catch (error) {
-          skipped++;
-          errors.push(`Erro ao importar ${clientData.first_name}: ${error.message}`);
-        }
-      }
-
-      setResult({
-        total: extractedData.total_found,
-        imported,
-        skipped,
-        errors,
-        quality: extractedData.data_quality,
-        with_cnpj: extractedData.with_cnpj,
-        with_phone: extractedData.with_phone
-      });
-
-      toast.success(`✅ Importação concluída! ${imported} clientes importados`);
-
-    } catch (error) {
-      console.error('Erro na importação:', error);
-      toast.error('Erro ao processar importação: ' + error.message);
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const handlePasteImport = async () => {
-    if (!pastedData.trim()) {
-      toast.error('Cole os dados da tabela');
-      return;
-    }
-    await processImport(pastedData);
-  };
-
-  const handleUrlImport = async () => {
-    if (!sheetUrl.trim()) {
-      toast.error('Insira a URL da planilha');
-      return;
-    }
-
-    setImporting(true);
-    try {
-      // Use LLM with internet access to fetch Google Sheets
-      const prompt = `Acesse esta planilha Google Sheets: ${sheetUrl}
-      
-      Extraia TODOS os dados da primeira aba/sheet.
-      Retorne o conteúdo completo em formato texto estruturado.`;
-
-      const sheetData = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true
-      });
-
-      await processImport(sheetData);
-    } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro ao acessar planilha: ' + error.message);
-      setImporting(false);
-    }
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImporting(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-
-      // Extract data from file
-      const extractResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: {
-          type: "object",
-          properties: {
-            rows: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  nome: { type: "string" },
-                  clinica: { type: "string" },
                   cnpj: { type: "string" },
-                  telefone: { type: "string" },
-                  email: { type: "string" },
-                  cidade: { type: "string" },
-                  endereco: { type: "string" }
+                  external_code: { type: "string" }
                 }
               }
             }
@@ -240,129 +70,162 @@ IMPORTANTE:
         }
       });
 
-      if (extractResult.status === 'success' && extractResult.output?.rows) {
-        const tableText = JSON.stringify(extractResult.output.rows, null, 2);
-        await processImport(tableText);
-      } else {
-        toast.error('Erro ao extrair dados do arquivo');
-        setImporting(false);
-      }
-    } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro ao processar arquivo');
-      setImporting(false);
+      const clients = extracted.clients || [];
+      if (clients.length === 0) { toast.error('Nenhum cliente encontrado'); setImporting(false); return; }
+
+      setProgress(`${clients.length} clientes extraídos. Verificando duplicatas e cadastrando...`);
+      const res = await base44.functions.invoke('importClientsFromExcelV2', { clientsJson: clients });
+      setResult(res.data);
+      queryClient.invalidateQueries(['clients']);
+      toast.success(`✅ ${res.data?.summary?.created || 0} clientes cadastrados!`);
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setImporting(false); setProgress('');
     }
   };
+
+  // ── Upload de arquivo ──────────────────────────────────────────────────────
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setResult(null); setProgress('Enviando arquivo...');
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setProgress('Extraindo dados do arquivo com IA...');
+      const res = await base44.functions.invoke('importClientsFromExcelV2', { fileUrl: file_url });
+      setResult(res.data);
+      queryClient.invalidateQueries(['clients']);
+      toast.success(`✅ ${res.data?.summary?.created || 0} clientes cadastrados!`);
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setImporting(false); setProgress('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // ── Google Sheets ──────────────────────────────────────────────────────────
+  const handleUrlImport = async () => {
+    if (!sheetUrl.trim()) { toast.error('Insira a URL'); return; }
+    setImporting(true); setResult(null); setProgress('Acessando Google Sheets...');
+    try {
+      const sheetData = await base44.integrations.Core.InvokeLLM({
+        prompt: `Acesse esta planilha Google Sheets e retorne o conteúdo completo em texto estruturado:\n${sheetUrl}`,
+        add_context_from_internet: true
+      });
+      setProgress('Extraindo clientes com IA...');
+      const extracted = await base44.integrations.Core.InvokeLLM({
+        prompt: `Extraia TODOS os clientes destes dados:\n${sheetData}\nRetorne first_name, full_name, clinic_name, city, phone (55+DDD), email, address, cnpj, external_code para cada um.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            clients: { type: "array", items: { type: "object", properties: {
+              first_name:{type:"string"}, full_name:{type:"string"}, clinic_name:{type:"string"},
+              city:{type:"string"}, phone:{type:"string"}, email:{type:"string"},
+              address:{type:"string"}, cnpj:{type:"string"}, external_code:{type:"string"}
+            }}}
+          }
+        }
+      });
+      const clients = extracted.clients || [];
+      setProgress(`${clients.length} clientes extraídos. Verificando duplicatas...`);
+      const res = await base44.functions.invoke('importClientsFromExcelV2', { clientsJson: clients });
+      setResult(res.data);
+      queryClient.invalidateQueries(['clients']);
+      toast.success(`✅ ${res.data?.summary?.created || 0} clientes cadastrados!`);
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setImporting(false); setProgress('');
+    }
+  };
+
+  const reset = () => { setResult(null); setPastedData(''); setSheetUrl(''); setShowDups(false); setShowErrors(false); };
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
           <Upload className="w-4 h-4 mr-2" />
-          Importação em Massa
+          Importação em Massa — Sem Limite
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Importação de Clientes em Massa</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-green-600" />
+            Importação em Massa — Sem Limite de Clientes
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {!result && !importing && (
+        <div className="space-y-4 py-2">
+          {/* Info */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700 space-y-0.5">
+            <p className="font-semibold text-blue-800">✅ Recursos desta importação:</p>
+            <p>• <strong>Sem limite</strong> — cadastra qualquer quantidade de clientes</p>
+            <p>• <strong>Anti-duplicidade</strong> — verifica por telefone, CNPJ, email e nome+cidade</p>
+            <p>• <strong>Processamento paralelo</strong> — lotes de 20 em simultâneo</p>
+            <p>• <strong>IA extrai dados</strong> — qualquer formato de tabela ou texto</p>
+          </div>
+
+          {/* Tabs de método */}
+          {!importing && !result && (
             <>
-              {/* Method Selection */}
               <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant={importMethod === 'paste' ? 'default' : 'outline'}
-                  onClick={() => setImportMethod('paste')}
-                  className="flex-col h-auto py-3"
-                >
-                  <Table className="w-5 h-5 mb-1" />
-                  <span className="text-xs">Colar Dados</span>
-                </Button>
-                <Button
-                  variant={importMethod === 'url' ? 'default' : 'outline'}
-                  onClick={() => setImportMethod('url')}
-                  className="flex-col h-auto py-3"
-                >
-                  <FileSpreadsheet className="w-5 h-5 mb-1" />
-                  <span className="text-xs">Google Sheets</span>
-                </Button>
-                <Button
-                  variant={importMethod === 'file' ? 'default' : 'outline'}
-                  onClick={() => setImportMethod('file')}
-                  className="flex-col h-auto py-3"
-                >
-                  <FileText className="w-5 h-5 mb-1" />
-                  <span className="text-xs">Arquivo</span>
-                </Button>
+                {[
+                  { id: 'paste', icon: Table, label: 'Colar Dados' },
+                  { id: 'url', icon: FileSpreadsheet, label: 'Google Sheets' },
+                  { id: 'file', icon: FileText, label: 'Arquivo' },
+                ].map(({ id, icon: Icon, label }) => (
+                  <Button key={id} variant={importMethod === id ? 'default' : 'outline'}
+                    onClick={() => setImportMethod(id)} className="flex-col h-auto py-3">
+                    <Icon className="w-5 h-5 mb-1" />
+                    <span className="text-xs">{label}</span>
+                  </Button>
+                ))}
               </div>
 
-              {/* Paste Method */}
               {importMethod === 'paste' && (
-                <div>
-                  <Label>Cole os dados da tabela (Excel, Word, etc.)</Label>
+                <div className="space-y-2">
+                  <Label>Cole dados de qualquer tabela (Excel, Word, texto, CSV...)</Label>
                   <Textarea
                     value={pastedData}
-                    onChange={(e) => setPastedData(e.target.value)}
-                    placeholder="Cole aqui os dados da sua tabela...&#10;&#10;Exemplo:&#10;ID | Nome | Clínica | CNPJ | Telefone&#10;001 | João Silva | Clínica Vet | 12.345.678/0001-90 | (11) 99999-9999"
-                    rows={12}
+                    onChange={e => setPastedData(e.target.value)}
+                    placeholder={`Cole qualquer formato:\n\nID | Nome | Clínica | CNPJ | Telefone | Cidade\n001 | João Silva | Clínica Vet | 12.345.678/0001-90 | (14) 99999-9999 | Marília\n\nA IA extrai automaticamente!`}
+                    rows={10}
                     className="font-mono text-xs"
                   />
-                  <Button
-                    onClick={handlePasteImport}
-                    disabled={importing || !pastedData.trim()}
-                    className="w-full mt-3 bg-green-600 hover:bg-green-700"
-                  >
-                    Importar Dados Colados
+                  <p className="text-xs text-slate-500">
+                    💡 Quantidade ilimitada de linhas. Cole toda a planilha de uma vez.
+                  </p>
+                  <Button onClick={processViaPaste} disabled={!pastedData.trim()} className="w-full bg-green-600 hover:bg-green-700">
+                    <Upload className="w-4 h-4 mr-2" /> Importar Agora
                   </Button>
                 </div>
               )}
 
-              {/* URL Method */}
               {importMethod === 'url' && (
-                <div>
-                  <Label>URL da Planilha Google Sheets</Label>
-                  <Input
-                    value={sheetUrl}
-                    onChange={(e) => setSheetUrl(e.target.value)}
-                    placeholder="https://docs.google.com/spreadsheets/d/..."
-                  />
-                  <p className="text-xs text-slate-600 mt-2">
-                    ⚠️ A planilha deve estar com acesso público (qualquer pessoa com o link)
-                  </p>
-                  <Button
-                    onClick={handleUrlImport}
-                    disabled={importing || !sheetUrl.trim()}
-                    className="w-full mt-3 bg-green-600 hover:bg-green-700"
-                  >
-                    Importar do Google Sheets
+                <div className="space-y-2">
+                  <Label>URL da Planilha Google Sheets (pública)</Label>
+                  <Input value={sheetUrl} onChange={e => setSheetUrl(e.target.value)}
+                    placeholder="https://docs.google.com/spreadsheets/d/..." />
+                  <p className="text-xs text-slate-500">⚠️ A planilha deve estar com acesso público (qualquer pessoa com o link)</p>
+                  <Button onClick={handleUrlImport} disabled={!sheetUrl.trim()} className="w-full bg-green-600 hover:bg-green-700">
+                    <FileSpreadsheet className="w-4 h-4 mr-2" /> Importar do Sheets
                   </Button>
                 </div>
               )}
 
-              {/* File Method */}
               {importMethod === 'file' && (
-                <div>
-                  <Label>Upload de Arquivo (Excel, CSV, PDF, Word)</Label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls,.csv,.pdf,.doc,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={importing}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Selecionar Arquivo
+                <div className="space-y-2">
+                  <Label>Upload de Arquivo — Excel, CSV, PDF, Word (qualquer tamanho)</Label>
+                  <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv,.pdf,.doc,.docx,.txt"
+                    onChange={handleFileUpload} className="hidden" />
+                  <Button onClick={() => fileInputRef.current?.click()} className="w-full bg-green-600 hover:bg-green-700 h-16 text-base">
+                    <Upload className="w-5 h-5 mr-2" /> Selecionar Arquivo
                   </Button>
-                  <p className="text-xs text-slate-600 mt-2">
-                    Suporta: Excel (.xlsx, .xls), CSV, PDF, Word (.doc, .docx)
-                  </p>
+                  <p className="text-xs text-slate-500">Suporta: Excel (.xlsx, .xls), CSV, PDF, Word (.doc, .docx), Texto</p>
                 </div>
               )}
             </>
@@ -370,86 +233,83 @@ IMPORTANTE:
 
           {/* Loading */}
           {importing && (
-            <div className="text-center py-8">
-              <Loader2 className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
-              <p className="text-sm font-semibold text-slate-800">Processando importação...</p>
-              <p className="text-xs text-slate-600 mt-1">Extraindo dados e cadastrando clientes</p>
+            <div className="text-center py-10 space-y-3">
+              <Loader2 className="w-12 h-12 animate-spin text-green-600 mx-auto" />
+              <p className="text-sm font-semibold text-slate-800">Processando...</p>
+              {progress && <p className="text-xs text-slate-500 max-w-xs mx-auto">{progress}</p>}
             </div>
           )}
 
-          {/* Result */}
+          {/* Resultado */}
           {result && (
             <div className="space-y-3">
-              <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300">
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
-                  <h4 className="font-bold text-green-900">Importação Concluída!</h4>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-xs text-slate-600">Total Encontrado</p>
-                    <p className="text-2xl font-bold text-slate-900">{result.total}</p>
+              {/* Resumo */}
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { label: 'Processados', value: result.summary?.processed, color: 'text-slate-800' },
+                  { label: '✅ Cadastrados', value: result.summary?.created, color: 'text-green-600' },
+                  { label: '⚠️ Duplicados', value: result.summary?.duplicates, color: 'text-yellow-600' },
+                  { label: '❌ Erros', value: result.summary?.errors, color: 'text-red-600' },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="bg-slate-50 border rounded-lg p-2 text-center">
+                    <p className="text-[10px] text-slate-500">{label}</p>
+                    <p className={`text-xl font-bold ${color}`}>{value ?? 0}</p>
                   </div>
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-xs text-slate-600">Importados</p>
-                    <p className="text-2xl font-bold text-green-600">{result.imported}</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-xs text-slate-600">Com CNPJ</p>
-                    <p className="text-lg font-bold text-blue-600">{result.with_cnpj}</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <p className="text-xs text-slate-600">Com Telefone</p>
-                    <p className="text-lg font-bold text-purple-600">{result.with_phone}</p>
-                  </div>
-                </div>
+                ))}
+              </div>
 
-                {result.skipped > 0 && (
-                  <div className="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <p className="text-xs font-semibold text-yellow-800">
-                      ⚠️ {result.skipped} registros ignorados
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-3">
-                  <p className="text-xs text-slate-600">Qualidade dos Dados:</p>
-                  <Badge className={
-                    result.quality === 'Alta' ? 'bg-green-600' :
-                    result.quality === 'Média' ? 'bg-yellow-600' :
-                    'bg-red-600'
-                  }>
-                    {result.quality}
-                  </Badge>
+              {result.summary?.created > 0 && (
+                <div className="bg-green-50 border border-green-300 rounded-lg p-3 text-center">
+                  <CheckCircle2 className="w-6 h-6 text-green-600 mx-auto mb-1" />
+                  <p className="text-sm font-bold text-green-800">{result.summary.created} clientes cadastrados com sucesso!</p>
                 </div>
-              </Card>
-
-              {result.errors && result.errors.length > 0 && (
-                <Card className="p-3 bg-red-50 border border-red-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-red-600" />
-                    <p className="text-xs font-bold text-red-700">Erros ({result.errors.length})</p>
-                  </div>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {result.errors.slice(0, 10).map((error, i) => (
-                      <p key={i} className="text-xs text-red-600">{error}</p>
-                    ))}
-                  </div>
-                </Card>
               )}
 
-              <Button
-                onClick={() => {
-                  setResult(null);
-                  setPastedData('');
-                  setSheetUrl('');
-                  setDialogOpen(false);
-                }}
-                className="w-full"
-              >
-                Fechar
-              </Button>
+              {/* Duplicados */}
+              {result.details?.duplicates?.length > 0 && (
+                <div className="border rounded-lg overflow-hidden">
+                  <button onClick={() => setShowDups(!showDups)}
+                    className="w-full flex items-center justify-between p-3 bg-yellow-50 text-yellow-800 text-sm font-medium">
+                    <span>⚠️ {result.details.duplicates.length} duplicados ignorados</span>
+                    {showDups ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                  {showDups && (
+                    <div className="max-h-40 overflow-y-auto divide-y">
+                      {result.details.duplicates.map((d, i) => (
+                        <div key={i} className="px-3 py-2 text-xs text-slate-600 flex items-center justify-between">
+                          <span>{d.name} {d.city ? `— ${d.city}` : ''}</span>
+                          <Badge className="text-[9px] bg-yellow-100 text-yellow-700 border-yellow-300">{d.reason}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Erros */}
+              {result.details?.errors?.length > 0 && (
+                <div className="border rounded-lg overflow-hidden">
+                  <button onClick={() => setShowErrors(!showErrors)}
+                    className="w-full flex items-center justify-between p-3 bg-red-50 text-red-800 text-sm font-medium">
+                    <span>❌ {result.details.errors.length} erros</span>
+                    {showErrors ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                  {showErrors && (
+                    <div className="max-h-40 overflow-y-auto divide-y">
+                      {result.details.errors.map((e, i) => (
+                        <div key={i} className="px-3 py-2 text-xs text-slate-600">
+                          {e.name} — <span className="text-red-600">{e.reason}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button onClick={reset} variant="outline" className="flex-1">Nova Importação</Button>
+                <Button onClick={() => { reset(); setDialogOpen(false); }} className="flex-1">Fechar</Button>
+              </div>
             </div>
           )}
         </div>
