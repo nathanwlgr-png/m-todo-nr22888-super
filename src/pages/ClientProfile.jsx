@@ -732,6 +732,14 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* AI Metrics Badges - Destaque */}
         <AIMetricsBadges client={client} variant="full" />
 
+        {/* AI Insights Dashboard — Sentimento, Churn, Padrão de Compra */}
+        <ClientAIInsightsDashboard
+          client={client}
+          interactions={interactions}
+          visits={visits}
+          sales={sales}
+        />
+
         {/* Score Holístico 360° - NOVO */}
         <HolisticClientScore 
           client={client}
