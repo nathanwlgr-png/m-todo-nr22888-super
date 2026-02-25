@@ -133,6 +133,7 @@ import ProactiveAISalesAssistant from '@/components/ProactiveAISalesAssistant';
 import ProactiveCommunicationEngine from '@/components/ProactiveCommunicationEngine';
 import QuickCommunicationActions from '@/components/QuickCommunicationActions';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
+import ClientAIFieldsPanel from '@/components/ClientAIFieldsPanel';
 import ClientAIInsightsDashboard from '@/components/ClientAIInsightsDashboard';
 import AIFollowUpGenerator from '@/components/AIFollowUpGenerator';
 import PipelineActionRecommender from '@/components/PipelineActionRecommender';
