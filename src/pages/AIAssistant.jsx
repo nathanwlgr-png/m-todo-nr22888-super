@@ -1122,8 +1122,22 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
 
           {/* ── TAB MERCADO ── */}
           <TabsContent value="mercado" className="overflow-y-auto p-3 space-y-4">
-            <DemandForecastAI />
-            <MarketIntelligenceDashboard />
+            <Tabs defaultValue="noticias_ia">
+              <TabsList className="grid grid-cols-3 h-8 mb-3">
+                <TabsTrigger value="noticias_ia" className="text-[10px]">📰 Notícias IA</TabsTrigger>
+                <TabsTrigger value="previsao" className="text-[10px]">📈 Previsão</TabsTrigger>
+                <TabsTrigger value="inteligencia" className="text-[10px]">🔍 Inteligência</TabsTrigger>
+              </TabsList>
+              <TabsContent value="noticias_ia">
+                <MarketNewsIntelligence />
+              </TabsContent>
+              <TabsContent value="previsao">
+                <DemandForecastAI />
+              </TabsContent>
+              <TabsContent value="inteligencia">
+                <MarketIntelligenceDashboard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           {/* ── TAB OPS ── */}
