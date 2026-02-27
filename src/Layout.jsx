@@ -144,6 +144,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
     { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
     { icon: Award, label: 'Sales Coaching', page: 'SalesCoachingDashboard' },
+    { icon: Upload, label: 'Importar Clientes', page: 'ClientImportManager' },
     ];
 
   return (
