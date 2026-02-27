@@ -76,32 +76,18 @@ export default function WhatsAppAgentMaster() {
   }, [conversation?.id]);
 
   const sendMessage = async (text = input) => {
-    if (!text.trim() || !conversation) return;
+    const msg = (typeof text === 'string' ? text : input).trim();
+    if (!msg || !conversation) return;
 
     setLoading(true);
+    setInput('');
     try {
-      // Processa comando se for um dos rápidos
-      const cmdResult = await base44.functions.invoke('whatsappMasterOrchestrator', {
-        action: 'processCommand',
-        data: { cmd: text.toLowerCase(), context: 'whatsapp' }
+      await base44.agents.addMessage(conversation, {
+        role: 'user',
+        content: msg
       });
-
-      // Se houver resultado de comando, mostra; senão envia para o agente
-      if (cmdResult.data?.success && cmdResult.data?.hotClients) {
-        const cmdMsg = `🔥 Clientes Quentes:\n${cmdResult.data.hotClients.join('\n')}`;
-        await base44.agents.addMessage(conversation, {
-          role: 'assistant',
-          content: cmdMsg
-        });
-      } else {
-        await base44.agents.addMessage(conversation, {
-          role: 'user',
-          content: text.trim()
-        });
-      }
-      setInput('');
     } catch (e) {
-      toast.error('Erro ao processar');
+      toast.error('Erro ao enviar mensagem');
     } finally {
       setLoading(false);
     }
