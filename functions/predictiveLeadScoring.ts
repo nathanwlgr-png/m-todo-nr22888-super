@@ -9,14 +9,39 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { lead_id } = await req.json();
+    const body = await req.json();
+    const { lead_id, client_id, client_data, action } = body;
 
-    if (!lead_id) {
+    // Suporte a client_id (clientes CRM) ou lead_id
+    const targetId = lead_id || client_id;
+
+    if (!targetId) {
       return Response.json({ error: 'lead_id required' }, { status: 400 });
     }
 
+    // Se veio client_data direto (score rápido sem banco)
+    if (client_data && !lead_id) {
+      const score = Math.round(
+        ((client_data.purchase_score || 50) * 0.4) +
+        ((client_data.health_score || 50) * 0.3) +
+        ((client_data.engagement_score || 30) * 0.3)
+      );
+      return Response.json({
+        success: true,
+        client_id: targetId,
+        predictive_score: score,
+        conversion_probability: score,
+        priority_level: score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low',
+        next_best_action: score >= 70 ? 'Ligar agora e agendar demonstração' : 'Enviar conteúdo e nutrir',
+        score_breakdown: { purchase_score: client_data.purchase_score || 50, health_score: client_data.health_score || 50 }
+      });
+    }
+
     // Buscar lead e suas interações
-    const lead = await base44.asServiceRole.entities.Lead.get(lead_id);
+    const lead = await base44.asServiceRole.entities.Lead.get(targetId).catch(async () => {
+      // Tentar buscar como cliente
+      return await base44.asServiceRole.entities.Client.get(targetId).catch(() => null);
+    });
     const interactions = await base44.asServiceRole.entities.Interaction.filter({ 
       client_id: lead_id 
     }).catch(() => []);
