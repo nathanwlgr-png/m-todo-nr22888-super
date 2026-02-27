@@ -737,6 +737,7 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
 
             {/* Mensagens */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {messages.length === 0 && <NR22DailyMotivation />}
               {messages.length === 0 && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
