@@ -3,12 +3,24 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { report_id } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { report_id } = body;
 
-    // Buscar configuração do relatório
-    const report = await base44.asServiceRole.entities.ScheduledReport.get(report_id);
-    if (!report) {
-      return Response.json({ error: 'Relatório não encontrado' }, { status: 404 });
+    // Se não tiver report_id, gera relatório geral consolidado
+    let report;
+    if (report_id) {
+      report = await base44.asServiceRole.entities.ScheduledReport.get(report_id).catch(() => null);
+      if (!report) {
+        return Response.json({ error: 'Relatório não encontrado' }, { status: 404 });
+      }
+    } else {
+      // Relatório padrão sem configuração específica
+      report = {
+        report_name: 'Relatório Consolidado',
+        report_type: 'semanal',
+        recipients: [],
+        metrics_included: ['novos_leads', 'clientes_ativos', 'vendas_realizadas', 'pipeline_status']
+      };
     }
 
     const endDate = new Date();
