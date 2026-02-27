@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { FileText, Sparkles, Copy, Send, Loader2, Plus, X, MapPin, Edit } from 'lucide-react';
+import GoogleSlidesProposalButton from '@/components/GoogleSlidesProposalButton';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
