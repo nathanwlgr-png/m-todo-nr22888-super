@@ -81,9 +81,9 @@ export default function WhatsAppChunkedSender({ client, defaultPhone = '' }) {
 
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>{message.length} caracteres</span>
-        {message.length > 3800 && (
+        {message.length > 1400 && (
           <Badge className="bg-orange-100 text-orange-700">
-            Será dividida em ~{Math.ceil(message.length / 3800)} partes
+            Será dividida em ~{Math.ceil(message.length / 1400)} partes consecutivas
           </Badge>
         )}
       </div>
