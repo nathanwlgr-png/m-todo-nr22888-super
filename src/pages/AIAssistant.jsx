@@ -44,6 +44,7 @@ import { getFallbackResponse } from '@/components/LocalAIFallbacks';
 
 export default function AIAssistant() {
   const { limitReached, getCachedResponse, setCachedResponse, handleLimitError, checkQuotaBeforeCall, trackAICall, quotaExceeded } = useAILimit();
+  const { turboMode, offlineMode, canCallAI, trackCall: trackNR22Call, trackSaved } = useNR22Modo();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
