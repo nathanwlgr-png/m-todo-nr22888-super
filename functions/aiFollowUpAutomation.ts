@@ -10,17 +10,19 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, clientId, followUpData } = body;
+    const { action, clientId, client_id, followUpData } = body;
+    const resolvedClientId = clientId || client_id;
 
-    if (action === 'analyze') {
-      return await analyzeClientForFollowUp(base44, clientId);
-    } else if (action === 'schedule_followup') {
-      return await scheduleFollowUp(base44, clientId, followUpData, user);
-    } else if (action === 'get_suggestions') {
-      return await getSuggestions(base44, clientId);
+    // Support multiple action name formats
+    if (action === 'analyze' || action === 'create_sequence' || action === 'analyze_engagement') {
+      return await analyzeClientForFollowUp(base44, resolvedClientId);
+    } else if (action === 'schedule_followup' || action === 'execute_step') {
+      return await scheduleFollowUp(base44, resolvedClientId, followUpData || body, user);
+    } else if (action === 'get_suggestions' || action === 'get_priorities') {
+      return await getSuggestions(base44, resolvedClientId);
     }
 
-    return Response.json({ error: 'Invalid action' }, { status: 400 });
+    return Response.json({ error: 'Invalid action', valid_actions: ['analyze', 'create_sequence', 'schedule_followup', 'execute_step', 'get_suggestions'] }, { status: 400 });
   } catch (error) {
     console.error('Follow-up automation error:', error);
     return Response.json({ error: error.message }, { status: 500 });
