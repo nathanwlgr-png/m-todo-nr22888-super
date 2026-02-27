@@ -19,8 +19,9 @@ Deno.serve(async (req) => {
     const errors = [];
 
     // ─── 2. CONVERTER LEADS COM SCORE ALTO EM CLIENTES ───────────────────
+    let highScoreLeads = [];
     if (convert_leads) {
-      const highScoreLeads = allLeads.filter(l => {
+      highScoreLeads = allLeads.filter(l => {
         const score = l.predictive_score || 0;
         return score >= 60 || l.stage === 'qualificado' || l.stage === 'convertido';
       });
