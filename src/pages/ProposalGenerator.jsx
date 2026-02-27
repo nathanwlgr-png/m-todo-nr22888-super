@@ -520,6 +520,14 @@ Use as variáveis:
             </CardContent>
           </Card>
 
+          <div className="flex gap-2">
+            <GoogleSlidesProposalButton
+              clientId={selectedClientId}
+              clientName={selectedClient?.first_name}
+              selectedProducts={selectedProducts.map(name => ({ name }))}
+            />
+          </div>
+
           <Button 
             onClick={generateProposal}
             className="w-full bg-indigo-600 hover:bg-indigo-700"
