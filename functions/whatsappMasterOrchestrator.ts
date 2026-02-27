@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
             hotCount: hotClients.length,
             positiveInteractions
           },
-          nextActions: topHotClients.map(c => ({
+          nextActions: hotClients.map(c => ({
             client: c.first_name,
             action: c.ai_next_best_action || 'Fazer follow-up',
             channel: c.communication_preferences?.preferred_channel || 'whatsapp'
