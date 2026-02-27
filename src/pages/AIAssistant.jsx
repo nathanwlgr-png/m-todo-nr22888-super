@@ -331,13 +331,16 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
     try {
       const cacheKey = `${type}_${client.id}_${client.numerology_number}`;
       const cached = getCachedResponse(cacheKey);
-      if (cached) { setGeneratedScript({ type, content: cached }); setScriptExpanded(true); toast.success('📦 Cache'); return; }
-      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
+      if (cached) { setGeneratedScript({ type, content: cached }); setScriptExpanded(true); toast.success('📦 Cache — crédito economizado!'); trackSaved(); return; }
+      // Modo offline ou limite → fallback local
+      if (offlineMode || !canCallAI() || quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
         const fallback = getFallbackResponse(type, client);
-        setGeneratedScript({ type, content: fallback }); setScriptExpanded(true);
-        toast.info('📋 Template local'); return;
+        setGeneratedScript({ type, content: `📴 *Local NR22*\n\n${fallback}` }); setScriptExpanded(true);
+        trackSaved();
+        toast.info('📋 Template local (crédito economizado)'); return;
       }
       trackAICall();
+      trackNR22Call();
       const ctx = `Cliente: ${client.first_name} | Clínica: ${client.clinic_name || ''} | Cidade: ${client.city || ''} | Tipo: ${client.client_type || ''} | Numerologia ${client.numerology_number}: ${client.behavioral_profile || ''} | Tom: ${client.client_tone || ''} | Score: ${client.purchase_score}% | Status: ${client.status} | Dores: ${client.main_pains?.join(', ') || ''} | Equip atual: ${client.current_equipment || ''} | Volume: ${client.current_volume || ''} | Orçamento: R$${client.available_budget || ''} | Objeções: ${client.real_objections?.join(', ') || ''} | Motivadores: ${client.purchase_motivators?.join(', ') || ''} | Visitas: ${visits.length} | Vendas: ${sales.length}`;
       const prompts = {
         presentation: `MÉTODO NR22 — ROTEIRO COMPLETO DE APRESENTAÇÃO\n\n${ctx}\n\n1. Abertura adaptada ao numerológico ${client.numerology_number}\n2. Script presencial palavra por palavra\n3. Versão WhatsApp (pronta para copiar)\n4. Versão ligação (2 min)\n5. Diferenciação vs concorrentes (25m garantia, manutenção vitalícia, bonificação insumos, ISO 13485)\n6. Checklist pré-visita\n7. Frase motivacional de Napoleão Hill\n\nCompleto em markdown.`,
