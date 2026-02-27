@@ -15,8 +15,24 @@ Deno.serve(async (req) => {
     // Suporte a client_id (clientes CRM) ou lead_id
     const targetId = lead_id || client_id;
 
-    if (!targetId) {
-      return Response.json({ error: 'lead_id required' }, { status: 400 });
+    if (!targetId && !client_data) {
+      return Response.json({ error: 'lead_id, client_id ou client_data obrigatório' }, { status: 400 });
+    }
+    
+    if (!targetId && client_data) {
+      // Score rápido local sem banco
+      const score = Math.round(
+        ((client_data.purchase_score || 50) * 0.4) +
+        ((client_data.health_score || 50) * 0.3) +
+        ((client_data.engagement_score || 30) * 0.3)
+      );
+      return Response.json({
+        success: true,
+        predictive_score: score,
+        conversion_probability: score,
+        priority_level: score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low',
+        next_best_action: score >= 70 ? 'Ligar agora e agendar demonstração' : 'Enviar conteúdo e nutrir',
+      });
     }
 
     // Se veio client_data direto (score rápido sem banco)
