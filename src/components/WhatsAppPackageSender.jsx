@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, FileText, Image, Video, Table, Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { openWhatsAppChunked } from '@/components/utils/whatsappChunks';
 
 export default function WhatsAppPackageSender({ client, equipment }) {
   const [selectedItems, setSelectedItems] = useState({

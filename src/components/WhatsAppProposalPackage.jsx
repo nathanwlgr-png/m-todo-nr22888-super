@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageSquare, Loader2, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import { openWhatsAppChunked } from '@/components/utils/whatsappChunks';
 
 export default function WhatsAppProposalPackage({ client }) {
   const [sending, setSending] = useState(false);

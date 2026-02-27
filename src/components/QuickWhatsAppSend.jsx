@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { MessageCircle, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { openWhatsAppChunked } from '@/components/utils/whatsappChunks';
 
 const MESSAGE_TEMPLATES = {
   saudacao: 'Olá {nome}, tudo bem? Sou {vendedor} da Método NR. Vi seu interesse em nossos equipamentos!',

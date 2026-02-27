@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Upload, Image, FileSpreadsheet, FileText, Send, Phone, X, CheckCircle2, Link } from 'lucide-react';
 import { toast } from 'sonner';
+import { openWhatsAppChunked, formatPhoneBR } from '@/components/utils/whatsappChunks';
 
 const FILE_ICONS = {
   image: { icon: Image, color: 'text-pink-500', bg: 'bg-pink-50', label: 'Imagem' },
