@@ -74,6 +74,7 @@ import CaptureLeads from './pages/CaptureLeads';
 import ChurnAnalysis from './pages/ChurnAnalysis';
 import ClientDashboard from './pages/ClientDashboard';
 import ClientDocumentCenter from './pages/ClientDocumentCenter';
+import ClientImportManager from './pages/ClientImportManager';
 import ClientProfile from './pages/ClientProfile';
 import ClientSegmentation from './pages/ClientSegmentation';
 import Clients from './pages/Clients';
@@ -197,7 +198,7 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import ClientImportManager from './pages/ClientImportManager';
+import MasterUnified from './pages/MasterUnified';
 import __Layout from './Layout.jsx';
 
 
@@ -229,6 +230,7 @@ export const PAGES = {
     "ChurnAnalysis": ChurnAnalysis,
     "ClientDashboard": ClientDashboard,
     "ClientDocumentCenter": ClientDocumentCenter,
+    "ClientImportManager": ClientImportManager,
     "ClientProfile": ClientProfile,
     "ClientSegmentation": ClientSegmentation,
     "Clients": Clients,
@@ -352,7 +354,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "ClientImportManager": ClientImportManager,
+    "MasterUnified": MasterUnified,
 }
 
 export const pagesConfig = {
