@@ -100,13 +100,17 @@ export default function WhatsAppChunkedSender({ client, defaultPhone = '' }) {
       {chunks.length > 0 && (
         <div className="space-y-2 pt-2 border-t">
           <p className="text-xs font-semibold text-slate-600">
-            {chunks.length === 1 ? '✅ 1 mensagem pronta' : `✅ ${chunks.length} partes — envie em ordem:`}
+            {chunks.length === 1
+              ? '✅ 1 mensagem pronta'
+              : `✅ ${chunks.length} partes — envie NA ORDEM abaixo (nenhum conteúdo perdido):`}
           </p>
           {chunks.map((chunk, i) => (
-            <div key={i} className="border rounded-lg p-3 bg-slate-50 space-y-2">
+            <div key={i} className="border-2 rounded-lg p-3 bg-slate-50 space-y-2"
+              style={{ borderColor: i === 0 ? '#16a34a' : '#94a3b8' }}>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">
-                  Parte {chunk.part}/{chunk.total} — {chunk.length} chars
+                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <span className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">{chunk.part}</span>
+                  de {chunk.total} — {chunk.length} chars
                 </span>
                 <button
                   onClick={() => toggleExpand(i)}
@@ -115,6 +119,11 @@ export default function WhatsAppChunkedSender({ client, defaultPhone = '' }) {
                   {expanded[i] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
+
+              {/* Preview always visible (first 100 chars) */}
+              <p className="text-[11px] text-slate-600 italic line-clamp-2">
+                {chunk.text.substring(0, 120)}{chunk.text.length > 120 ? '...' : ''}
+              </p>
 
               {expanded[i] && (
                 <pre className="text-xs text-slate-700 whitespace-pre-wrap bg-white border rounded p-2 max-h-40 overflow-y-auto">
@@ -129,7 +138,7 @@ export default function WhatsAppChunkedSender({ client, defaultPhone = '' }) {
                   onClick={() => openWhatsApp(chunk.whatsapp_url)}
                 >
                   <ExternalLink className="w-3 h-3 mr-1" />
-                  Abrir WhatsApp
+                  Abrir WhatsApp ({chunk.part}/{chunk.total})
                 </Button>
                 <Button
                   size="sm"
@@ -143,6 +152,9 @@ export default function WhatsAppChunkedSender({ client, defaultPhone = '' }) {
               </div>
             </div>
           ))}
+          <p className="text-[10px] text-slate-400 text-center">
+            ⚠️ Envie as partes em ordem. Cada uma continuará exatamente do ponto que parou.
+          </p>
         </div>
       )}
     </Card>
