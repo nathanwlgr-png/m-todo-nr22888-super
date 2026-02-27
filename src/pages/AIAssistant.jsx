@@ -882,7 +882,8 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
           </TabsContent>
 
           {/* ── TAB MAIS ── */}
-          <TabsContent value="mais" className="overflow-y-auto p-3">
+          <TabsContent value="mais" className="overflow-y-auto p-3 space-y-3">
+            <NR22MetodoHub />
             <MasterAIAssistant client={client} />
           </TabsContent>
 
