@@ -142,6 +142,8 @@ export default function Layout({ children, currentPageName }) {
     { icon: Zap, label: 'Automação Msgs', page: 'AutomationSettings' },
     { icon: FileText, label: 'Relatórios Custom', page: 'CustomReports' },
     { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
+    { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
+    { icon: Award, label: 'Sales Coaching', page: 'SalesCoachingDashboard' },
     ];
 
   return (
