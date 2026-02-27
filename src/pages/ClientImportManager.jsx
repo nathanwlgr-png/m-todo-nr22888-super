@@ -6,9 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Users, CheckCircle2, AlertCircle, Zap, RefreshCw } from 'lucide-react';
-import Papa from 'papaparse';
-
-// DEPRECATED: Use MasterUnified instead (pages/MasterUnified)
 
 export default function ClientImportManager() {
   const [csvData, setCsvData] = useState([]);
@@ -52,17 +49,27 @@ export default function ClientImportManager() {
     const file = e.target.files[0];
     if (!file) return;
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        setCsvData(results.data);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const csv = event.target.result;
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',');
+        const data = lines.slice(1).filter(l => l.trim()).map(line => {
+          const values = line.split(',');
+          const obj = {};
+          headers.forEach((h, i) => {
+            obj[h.trim()] = values[i]?.trim() || '';
+          });
+          return obj;
+        });
+        setCsvData(data);
         setFileLoaded(true);
-      },
-      error: (error) => {
+      } catch (error) {
         alert(`Erro ao ler arquivo: ${error.message}`);
       }
-    });
+    };
+    reader.readAsText(file);
   };
 
   const handleManualAdd = () => {
