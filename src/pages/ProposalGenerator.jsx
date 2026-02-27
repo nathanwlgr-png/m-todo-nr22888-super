@@ -548,6 +548,11 @@ Use as variáveis:
                   <Copy className="w-4 h-4 mr-1" />
                   Copiar
                 </Button>
+                <GoogleSlidesProposalButton
+                  clientId={selectedClientId}
+                  clientName={selectedClient?.first_name}
+                  selectedProducts={selectedProducts.map(name => ({ name }))}
+                />
                 <Button size="sm" onClick={sendProposal} className="bg-green-600 hover:bg-green-700">
                   <Send className="w-4 h-4 mr-1" />
                   Enviar WhatsApp
