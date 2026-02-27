@@ -941,6 +941,9 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
           {/* ── TAB OPS ── */}
           <TabsContent value="notif" className="overflow-y-auto p-3 space-y-3">
 
+            {/* Controle de Modo NR22 */}
+            <NR22ModoControle />
+
             {/* Envio de arquivos pelo WhatsApp */}
             <WhatsAppFileShare client={client} />
 
