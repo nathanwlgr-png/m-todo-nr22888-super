@@ -196,6 +196,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import CompetitorIntelligence from './pages/CompetitorIntelligence';
+import AdvancedSalesAnalytics from './pages/AdvancedSalesAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -349,6 +350,7 @@ export const PAGES = {
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
     "CompetitorIntelligence": CompetitorIntelligence,
+    "AdvancedSalesAnalytics": AdvancedSalesAnalytics,
 }
 
 export const pagesConfig = {

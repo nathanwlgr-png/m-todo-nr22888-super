@@ -1,282 +1,306 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { 
-  TrendingUp, TrendingDown, Award, Target, Brain, 
-  Lightbulb, BookOpen, CheckCircle, AlertTriangle, Zap
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertCircle, BarChart3, Zap, PlayCircle, Award } from 'lucide-react';
 
 export default function SalesCoachingDashboard() {
-  const [analyzing, setAnalyzing] = useState(false);
-  const queryClient = useQueryClient();
+  const [userEmail, setUserEmail] = useState('');
+  const [selectedScenario, setSelectedScenario] = useState(0);
+  const [transcript, setTranscript] = useState('');
+  const [showCoaching, setShowCoaching] = useState(false);
 
-  const { data: user } = useQuery({
+  const currentUser = useQuery({
     queryKey: ['current-user'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => await base44.auth.me()
   });
 
-  const { data: coachingSessions = [] } = useQuery({
-    queryKey: ['coaching-sessions', user?.email],
-    queryFn: () => base44.entities.SalesCoaching.filter({ user_email: user.email }),
-    enabled: !!user,
-  });
-
-  const latestSession = coachingSessions[0];
-
-  const analyzePerformance = useMutation({
+  const coachingMutation = useMutation({
     mutationFn: async () => {
-      const response = await base44.functions.invoke('aiSalesCoaching', {
-        user_email: user.email,
-        period_days: 30
+      return await base44.functions.invoke('salesCoachingAI', {
+        user_email: currentUser.data?.email,
+        transcript
       });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['coaching-sessions']);
-      toast.success('Análise concluída!');
-      setAnalyzing(false);
-    },
-    onError: () => {
-      toast.error('Erro na análise');
-      setAnalyzing(false);
     }
   });
 
-  const handleAnalyze = () => {
-    setAnalyzing(true);
-    analyzePerformance.mutate();
-  };
-
-  if (!latestSession) {
+  if (coachingMutation.isPending) {
     return (
-      <div className="space-y-4">
-        <Card className="bg-gradient-to-r from-indigo-50 to-purple-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-indigo-600" />
-              Coaching de Vendas com IA
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-600 mb-4">
-              Receba feedback personalizado e melhore suas técnicas de vendas com análise de IA.
-            </p>
-            <Button onClick={handleAnalyze} disabled={analyzing} className="bg-indigo-600">
-              {analyzing ? 'Analisando...' : 'Iniciar Análise de Performance'}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
+          <p className="text-slate-600">Analisando sua performance...</p>
+        </div>
       </div>
     );
   }
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  const coachingData = coachingMutation.data?.data;
 
   return (
-    <div className="space-y-4 pb-20">
-      <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl mb-1">Performance Score</CardTitle>
-              <p className="text-indigo-100">Última análise: {new Date(latestSession.analysis_date).toLocaleDateString('pt-BR')}</p>
-            </div>
-            <Button variant="outline" onClick={handleAnalyze} disabled={analyzing} className="bg-white/10 border-white/20 text-white">
-              <Zap className="w-4 h-4 mr-2" />
-              {analyzing ? 'Analisando...' : 'Nova Análise'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="text-6xl font-bold">{latestSession.performance_score}</div>
-            <div className="flex-1">
-              <Progress value={latestSession.performance_score} className="h-3 bg-white/20" />
-              <p className="text-sm text-indigo-100 mt-2">
-                {latestSession.interactions_analyzed} interações analisadas
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-4xl font-bold text-slate-900">🎓 Sales Coaching AI</h1>
+          <p className="text-slate-600 mt-2">Análise inteligente de performance e técnicas de vendas</p>
+        </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-xs text-slate-600 mb-1">Taxa Conversão</p>
-              <p className="text-2xl font-bold text-indigo-600">{latestSession.conversion_rate?.toFixed(1)}%</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-xs text-slate-600 mb-1">Leads Contatados</p>
-              <p className="text-2xl font-bold text-blue-600">{latestSession.key_metrics?.leads_contacted}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-xs text-slate-600 mb-1">Propostas Enviadas</p>
-              <p className="text-2xl font-bold text-purple-600">{latestSession.key_metrics?.proposals_sent}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-xs text-slate-600 mb-1">Vendas Fechadas</p>
-              <p className="text-2xl font-bold text-green-600">{latestSession.key_metrics?.deals_closed}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {!showCoaching ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Input Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Carregar Transcrição</CardTitle>
+                <CardDescription>Cole ou carregue uma transcrição de chamada de vendas</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <textarea
+                  placeholder="Cole aqui a transcrição da chamada ou descrição das interações..."
+                  value={transcript}
+                  onChange={(e) => setTranscript(e.target.value)}
+                  className="w-full h-40 p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <Button
+                  onClick={() => coachingMutation.mutate()}
+                  disabled={!transcript.trim() || coachingMutation.isPending}
+                  className="w-full"
+                >
+                  {coachingMutation.isPending ? 'Analisando...' : 'Analisar Performance'}
+                </Button>
+              </CardContent>
+            </Card>
 
-      {/* Strengths */}
-      {latestSession.strengths?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-600">
-              <Award className="w-5 h-5" />
-              Seus Pontos Fortes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {latestSession.strengths.map((strength, index) => (
-              <Card key={index} className="bg-green-50 border-green-200">
-                <CardContent className="p-4">
-                  <h4 className="font-semibold mb-2">{strength.area}</h4>
-                  <p className="text-sm text-slate-600 mb-2">{strength.description}</p>
-                  {strength.examples?.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-green-700">Exemplos:</p>
-                      {strength.examples.map((ex, i) => (
-                        <p key={i} className="text-xs text-slate-600">• {ex}</p>
-                      ))}
-                    </div>
-                  )}
+            {/* Info Card */}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-amber-600" />
+                    Análise Completa
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-slate-600 space-y-2">
+                  <p>✅ Pontos fortes identificados</p>
+                  <p>✅ Áreas de melhoria detalhadas</p>
+                  <p>✅ Técnicas de vendas recomendadas</p>
+                  <p>✅ Feedback personalizado (5 ações)</p>
+                  <p>✅ Estimativa de taxa de fechamento</p>
                 </CardContent>
               </Card>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Areas for Improvement */}
-      {latestSession.areas_for_improvement?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-600">
-              <Target className="w-5 h-5" />
-              Áreas para Melhorar
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {latestSession.areas_for_improvement.map((area, index) => (
-              <Card key={index} className={
-                area.priority === 'alta' ? 'bg-red-50 border-red-200' :
-                area.priority === 'media' ? 'bg-yellow-50 border-yellow-200' :
-                'bg-blue-50 border-blue-200'
-              }>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold">{area.area}</h4>
-                    <Badge className={
-                      area.priority === 'alta' ? 'bg-red-500' :
-                      area.priority === 'media' ? 'bg-yellow-500' : 'bg-blue-500'
-                    }>
-                      {area.priority}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600 mb-3">{area.description}</p>
-                  {area.actionable_tips?.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold flex items-center gap-1">
-                        <Lightbulb className="w-3 h-3" />
-                        Dicas Práticas:
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PlayCircle className="w-5 h-5 text-blue-600" />
+                    Role-Play Prático
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-slate-600 space-y-2">
+                  <p>🎭 3 cenários realistas</p>
+                  <p>💬 Diálogos estruturados</p>
+                  <p>⚡ Objeções comuns</p>
+                  <p>🔑 Frases-chave a usar</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        ) : (
+          <Tabs defaultValue="feedback" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="feedback">Feedback</TabsTrigger>
+              <TabsTrigger value="roleplay">Role-Play</TabsTrigger>
+              <TabsTrigger value="metrics">Métricas</TabsTrigger>
+            </TabsList>
+
+            {/* Feedback Tab */}
+            <TabsContent value="feedback" className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">✅ Pontos Fortes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {coachingData?.coaching_analysis?.strengths?.map((strength, idx) => (
+                      <div key={idx} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-slate-900">{strength}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">⚠️ Áreas de Melhoria</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {coachingData?.coaching_analysis?.improvement_areas?.map((area, idx) => (
+                      <div key={idx} className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-sm text-slate-900">{area}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>🎯 Feedback Personalizado (5 Ações)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {coachingData?.coaching_analysis?.personalized_feedback?.map((action, idx) => (
+                    <div key={idx} className="p-4 border border-slate-200 rounded-lg space-y-2">
+                      <div className="flex items-start justify-between">
+                        <h4 className="font-semibold text-slate-900">Ação {idx + 1}: {action.action}</h4>
+                        <Badge className={action.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
+                          {action.priority === 'high' ? 'Alta Prioridade' : 'Média Prioridade'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-slate-700">{action.description}</p>
+                      <div className="bg-slate-50 p-3 rounded text-sm italic text-slate-600">
+                        💡 Exemplo: {action.example}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Role-Play Tab */}
+            <TabsContent value="roleplay" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {coachingData?.role_play_scenarios?.map((scenario, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedScenario(idx)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      selectedScenario === idx
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-slate-200 bg-white hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="font-semibold text-slate-900">{scenario.title}</div>
+                    <Badge className="mt-2 text-xs">{scenario.difficulty_level}</Badge>
+                  </button>
+                ))}
+              </div>
+
+              {coachingData?.role_play_scenarios?.[selectedScenario] && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{coachingData.role_play_scenarios[selectedScenario].title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">👤 Perfil do Cliente</h4>
+                      <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded">
+                        {coachingData.role_play_scenarios[selectedScenario].client_profile}
                       </p>
-                      {area.actionable_tips.map((tip, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
-                          <p className="text-sm text-slate-700">{tip}</p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">⚠️ Objeção Principal</h4>
+                      <p className="text-sm text-slate-700 bg-red-50 p-3 rounded border border-red-200">
+                        {coachingData.role_play_scenarios[selectedScenario].main_objection}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">🗣️ Passos da Conversa</h4>
+                      <ol className="space-y-2">
+                        {coachingData.role_play_scenarios[selectedScenario].conversation_steps?.map((step, i) => (
+                          <li key={i} className="text-sm text-slate-700 flex gap-3">
+                            <span className="font-bold text-indigo-600">{i + 1}.</span>
+                            {step}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">🔑 Frases-Chave</h4>
+                      <div className="space-y-2">
+                        {coachingData.role_play_scenarios[selectedScenario].key_phrases?.map((phrase, i) => (
+                          <div key={i} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm italic text-slate-700">
+                            "{phrase}"
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">💬 Resposta à Objeção</h4>
+                      <p className="text-sm text-slate-700 bg-green-50 p-3 rounded border border-green-200">
+                        {coachingData.role_play_scenarios[selectedScenario].objection_response}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">📌 Técnica SPIN</h4>
+                      <p className="text-sm text-slate-700">{coachingData.role_play_scenarios[selectedScenario].spin_technique}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Metrics Tab */}
+            <TabsContent value="metrics">
+              <Card>
+                <CardHeader>
+                  <CardTitle>📊 Métricas de Performance</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-sm text-slate-600 mb-1">Taxa de Fechamento Atual</div>
+                      <div className="text-3xl font-bold text-blue-600">
+                        {coachingData?.coaching_analysis?.current_closing_rate_estimate}
+                      </div>
+                    </div>
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="text-sm text-slate-600 mb-1">Potencial de Melhoria</div>
+                      <div className="text-3xl font-bold text-green-600">
+                        {coachingData?.coaching_analysis?.potential_improvement}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-slate-900 mb-3">📚 Técnicas Recomendadas</h4>
+                    <div className="space-y-2">
+                      {coachingData?.coaching_analysis?.recommended_techniques?.map((tech, idx) => (
+                        <div key={idx} className="p-3 bg-purple-50 border border-purple-200 rounded text-sm text-slate-900">
+                          ✨ {tech}
                         </div>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Successful Patterns */}
-      {latestSession.successful_patterns?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-600">
-              <TrendingUp className="w-5 h-5" />
-              Padrões de Sucesso
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {latestSession.successful_patterns.map((pattern, index) => (
-              <Card key={index} className="bg-indigo-50 border-indigo-200">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold">{pattern.pattern}</h4>
-                    <Badge className="bg-indigo-600">{pattern.success_rate}% sucesso</Badge>
                   </div>
-                  <p className="text-sm text-slate-600">{pattern.recommendation}</p>
                 </CardContent>
               </Card>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+            </TabsContent>
+          </Tabs>
+        )}
 
-      {/* Training Suggestions */}
-      {latestSession.training_suggestions?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-600">
-              <BookOpen className="w-5 h-5" />
-              Treinamentos Recomendados
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {latestSession.training_suggestions.map((training, index) => (
-              <Card key={index} className="bg-purple-50 border-purple-200">
-                <CardContent className="p-4">
-                  <h4 className="font-semibold mb-2">{training.topic}</h4>
-                  <p className="text-sm text-slate-600 mb-3">{training.reason}</p>
-                  {training.resources?.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-purple-700">Recursos:</p>
-                      {training.resources.map((resource, i) => (
-                        <p key={i} className="text-xs text-slate-600">• {resource}</p>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+        {coachingData && (
+          <Button
+            onClick={() => {
+              setShowCoaching(!showCoaching);
+              if (showCoaching) {
+                setTranscript('');
+                coachingMutation.reset();
+              }
+            }}
+            variant="outline"
+            className="w-full"
+          >
+            {showCoaching ? 'Analisar Novo Transcript' : 'Ver Análise Completa'}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
