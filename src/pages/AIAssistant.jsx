@@ -593,6 +593,7 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
             </h1>
             <p className="text-indigo-200 text-[10px]">47 variáveis × 15.000 cruzamentos/min × 22 IAs ativas</p>
           </div>
+          <NR22ModoControle compact />
           <AlertasTempoReal />
           <Button size="sm" variant="ghost" onClick={exportChatToPDF} className="text-white hover:bg-white/20 h-8 w-8 p-0">
             <FileText className="w-4 h-4" />
