@@ -55,6 +55,7 @@ import AIKnowledgeUploader from './pages/AIKnowledgeUploader';
 import AdvancedAIReports from './pages/AdvancedAIReports';
 import AdvancedFunnelManager from './pages/AdvancedFunnelManager';
 import AdvancedReports from './pages/AdvancedReports';
+import AdvancedSalesAnalytics from './pages/AdvancedSalesAnalytics';
 import AdvancedSalesReports from './pages/AdvancedSalesReports';
 import AgentSetup from './pages/AgentSetup';
 import AnalyticsDashboardGeo from './pages/AnalyticsDashboardGeo';
@@ -79,6 +80,7 @@ import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';
 import ClientsMap from './pages/ClientsMap';
 import ClosingForecast from './pages/ClosingForecast';
+import CompetitorIntelligence from './pages/CompetitorIntelligence';
 import ConsumableOrderHistory from './pages/ConsumableOrderHistory';
 import ConsumablePriceList from './pages/ConsumablePriceList';
 import ContactSettings from './pages/ContactSettings';
@@ -195,8 +197,7 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import CompetitorIntelligence from './pages/CompetitorIntelligence';
-import AdvancedSalesAnalytics from './pages/AdvancedSalesAnalytics';
+import ClientImportManager from './pages/ClientImportManager';
 import __Layout from './Layout.jsx';
 
 
@@ -209,6 +210,7 @@ export const PAGES = {
     "AdvancedAIReports": AdvancedAIReports,
     "AdvancedFunnelManager": AdvancedFunnelManager,
     "AdvancedReports": AdvancedReports,
+    "AdvancedSalesAnalytics": AdvancedSalesAnalytics,
     "AdvancedSalesReports": AdvancedSalesReports,
     "AgentSetup": AgentSetup,
     "AnalyticsDashboardGeo": AnalyticsDashboardGeo,
@@ -233,6 +235,7 @@ export const PAGES = {
     "ClientsByCity": ClientsByCity,
     "ClientsMap": ClientsMap,
     "ClosingForecast": ClosingForecast,
+    "CompetitorIntelligence": CompetitorIntelligence,
     "ConsumableOrderHistory": ConsumableOrderHistory,
     "ConsumablePriceList": ConsumablePriceList,
     "ContactSettings": ContactSettings,
@@ -349,8 +352,7 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "CompetitorIntelligence": CompetitorIntelligence,
-    "AdvancedSalesAnalytics": AdvancedSalesAnalytics,
+    "ClientImportManager": ClientImportManager,
 }
 
 export const pagesConfig = {
