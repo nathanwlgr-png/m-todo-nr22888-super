@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
       buying_signals: buyingSignals,
       next_best_action: nextAction,
       last_score_update: new Date().toISOString()
-    });
+    }).catch(() => {});
 
     return Response.json({
       success: true,
