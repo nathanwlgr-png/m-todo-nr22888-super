@@ -37,6 +37,7 @@ import NR22DailyMotivation from '@/components/NR22DailyMotivation';
 import NR22ScorePreditivo from '@/components/NR22ScorePreditivo';
 import NR22CoachingIA from '@/components/NR22CoachingIA';
 import NR22ModoControle, { useNR22Modo } from '@/components/NR22ModoControle';
+import NR22MetodoHub from '@/components/NR22MetodoHub';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
