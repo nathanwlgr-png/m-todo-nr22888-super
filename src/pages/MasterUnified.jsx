@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ChatMessage from '@/components/ChatMessage';
+import ScoreAnalyticsDashboard from '@/components/ScoreAnalyticsDashboard';
 import Papa from 'papaparse';
 
 const QUICK_ACTIONS = [
@@ -524,35 +525,7 @@ export default function MasterUnified() {
 
         {/* ─ ANÁLISES ─ */}
         {tab === 'score' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>📊 Análises e Métricas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {client ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-indigo-50 rounded-lg">
-                    <p className="text-xs text-slate-600 mb-1">Score Compra</p>
-                    <p className="text-2xl font-bold text-indigo-600">{client.purchase_score || 0}%</p>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <p className="text-xs text-slate-600 mb-1">Health</p>
-                    <p className="text-2xl font-bold text-green-600">{client.health_score || 0}%</p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-xs text-slate-600 mb-1">Engagement</p>
-                    <p className="text-2xl font-bold text-blue-600">{client.engagement_score || 0}%</p>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <p className="text-xs text-slate-600 mb-1">Pipeline</p>
-                    <p className="text-2xl font-bold text-orange-600 capitalize">{client.pipeline_stage || '-'}</p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-slate-500 text-center py-8">Selecione um cliente para ver análises</p>
-              )}
-            </CardContent>
-          </Card>
+          <ScoreAnalyticsDashboard client={client} />
         )}
 
         {/* ─ AGENDA ─ */}
