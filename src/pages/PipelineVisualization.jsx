@@ -16,18 +16,24 @@ export default function PipelineVisualization() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="kanban" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="kanban" className="flex items-center gap-2">
-              📋 Quadro Kanban
-            </TabsTrigger>
-            <TabsTrigger value="forecast" className="flex items-center gap-2">
-              📈 Previsão de Valor
-            </TabsTrigger>
+        <Tabs defaultValue="clients" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="clients">🏢 Clientes (Pipeline)</TabsTrigger>
+            <TabsTrigger value="leads">📋 Leads (Kanban)</TabsTrigger>
+            <TabsTrigger value="forecast">📈 Previsão de Valor</TabsTrigger>
           </TabsList>
 
-          {/* Kanban Tab */}
-          <TabsContent value="kanban" className="space-y-6">
+          {/* Clients Kanban */}
+          <TabsContent value="clients">
+            <Card>
+              <CardContent className="p-4">
+                <ClientPipelineKanban />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Leads Kanban */}
+          <TabsContent value="leads">
             <Card>
               <CardContent className="p-6">
                 <div className="mb-4">
@@ -40,7 +46,7 @@ export default function PipelineVisualization() {
           </TabsContent>
 
           {/* Forecast Tab */}
-          <TabsContent value="forecast" className="space-y-6">
+          <TabsContent value="forecast">
             <Card>
               <CardContent className="p-6">
                 <div className="mb-4">
