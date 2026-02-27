@@ -16,12 +16,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Telefone e mensagem obrigatórios' }, { status: 400 });
     }
 
-    // Formata número para WhatsApp
+    // Formata número para WhatsApp (aceita com ou sem DDI 55)
     const cleanPhone = phone.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.length === 11 ? cleanPhone : null;
-
-    if (!formattedPhone) {
-      return Response.json({ error: 'Formato de telefone inválido' }, { status: 400 });
+    let formattedPhone = cleanPhone;
+    // Se não começa com 55, adiciona DDI Brasil
+    if (!formattedPhone.startsWith('55')) {
+      formattedPhone = '55' + formattedPhone;
+    }
+    // Aceita 12 ou 13 dígitos (55 + DDD + número)
+    if (formattedPhone.length < 12 || formattedPhone.length > 13) {
+      return Response.json({ error: 'Formato de telefone inválido. Use: 11999999999 ou 5511999999999' }, { status: 400 });
     }
 
     // Abre WhatsApp Web com mensagem
