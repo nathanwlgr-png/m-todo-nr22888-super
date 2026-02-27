@@ -175,9 +175,22 @@ export default function AIAssistant() {
   // ─── COACHING IA ────────────────────────────────────────────────────────────
   const loadCoaching = async () => {
     if (!client) { toast.error('Selecione um cliente'); return; }
+    if (offlineMode || !canCallAI()) {
+      setCoachingData({
+        diagnostico: `Modo ${offlineMode ? 'Offline' : 'Economia'}: Use o script padrão para ${client.first_name}. Score: ${client.purchase_score || 0}%. Status: ${client.status}.`,
+        forcas: [`Score ${client.purchase_score || 0}% — cliente com potencial`, `Numerologia ${client.numerology_number} — perfil identificado`, `${visits.length} visitas realizadas`],
+        armadilhas: ['Não pressionar muito rápido', 'Evitar desconto no equipamento'],
+        script_contato: `Olá ${client.first_name}! Tudo bem? Queria saber se você teve tempo de analisar nossa proposta. Tenho uma novidade que pode ser interessante para você.`,
+        tecnica_psicologica: 'SPIN Selling + Gatilho de Escassez (Cialdini)',
+        insight: `Cliente com ${visits.length} visitas — insistir no ROI calculado.`,
+        frase_motivacional: 'O sucesso é a soma de pequenos esforços repetidos dia após dia. — Robert Collier'
+      });
+      trackSaved(); toast.info('📴 Coaching local (crédito economizado)'); return;
+    }
     setLoadingCoaching(true);
     try {
       trackAICall();
+      trackNR22Call();
       const res = await base44.integrations.Core.InvokeLLM({
         prompt: `MÉTODO NR22 — COACHING DE VENDAS PERSONALIZADO\n\nCliente: ${client.first_name} | Numerologia: ${client.numerology_number} | Status: ${client.status} | Score: ${client.purchase_score}% | Visitas: ${visits.length} | Vendas: ${sales.length} | Dores: ${client.main_pains?.join(', ') || 'N/A'} | Objeções: ${client.real_objections?.join(', ') || 'N/A'}\n\nGere coaching COMPLETO:\n1. 🎯 Diagnóstico do momento atual com este cliente\n2. 💪 3 forças que você pode usar agora\n3. ⚠️ 2 armadilhas a evitar\n4. 📱 Script ideal para próximo contato (copia e cola)\n5. 🧠 Técnica psicológica mais efetiva para o perfil ${client.numerology_number}\n6. 💡 Insight surpreendente baseado nos dados\n7. 🔥 Frase motivacional de Napoleão Hill para agir AGORA\n\nResposta em markdown estruturado.`,
         response_json_schema: {
