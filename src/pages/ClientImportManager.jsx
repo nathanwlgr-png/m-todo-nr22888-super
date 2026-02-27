@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Users, CheckCircle2, AlertCircle, Zap, RefreshCw } from 'lucide-react';
 import Papa from 'papaparse';
 
+// DEPRECATED: Use MasterUnified instead (pages/MasterUnified)
+
 export default function ClientImportManager() {
   const [csvData, setCsvData] = useState([]);
   const [fileLoaded, setFileLoaded] = useState(false);
