@@ -277,11 +277,19 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
     setInput('');
     setLoading(true);
     try {
-      if (quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
-        setMessages(prev => [...prev, { role: 'assistant', content: '⏱️ Quota atingida. Use os botões rápidos.' }]);
+      // Modo offline: resposta local sem consumir crédito
+      if (offlineMode) {
+        const fallback = getFallbackResponse(userMessage, client);
+        setMessages(prev => [...prev, { role: 'assistant', content: `📴 *Modo Offline*\n\n${fallback}` }]);
+        trackSaved();
+        return;
+      }
+      if (!canCallAI() || quotaExceeded || !checkQuotaBeforeCall() || limitReached) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '⏱️ Limite diário atingido. Ative Modo Turbo ou aguarde amanhã.' }]);
         return;
       }
       trackAICall();
+      trackNR22Call();
       const conversationHistory = messages.slice(-6).map(m =>
         `${m.role === 'user' ? 'Vendedor' : 'Primori'}: ${m.content}`
       ).join('\n\n');
