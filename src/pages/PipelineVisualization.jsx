@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LeadKanbanBoard from '@/components/LeadKanbanBoard';
+import ClientPipelineKanban from '@/components/ClientPipelineKanban';
 import PipelineValueForecast from '@/components/PipelineValueForecast';
 import { Card, CardContent } from '@/components/ui/card';
 
