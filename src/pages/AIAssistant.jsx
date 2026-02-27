@@ -517,7 +517,7 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
       { name: 'whatsappMasterNotificacao', label: 'Notificações', payload: { action: 'test', phone: '5514991676428' } },
       { name: 'agendaInteligente', label: 'Agenda IA', payload: { tipo: 'semana', cidades: [], criar_visitas: false } },
       { name: 'whatsappSendChunked', label: 'Envio Chunked', payload: { message: 'Teste NR22', phone: '5514991676428' } },
-      { name: 'predictiveLeadScoring', label: 'Score Preditivo', payload: { action: 'get_priorities' } },
+      { name: 'predictiveLeadScoring', label: 'Score Preditivo', payload: { action: 'calculate_score', lead_id: 'test' } },
       { name: 'marketIntelligenceMonitor', label: 'Intel Mercado', payload: { action: 'market_scan', region: 'São Paulo' } },
     ];
     await Promise.allSettled(tests.map(async (t) => {
