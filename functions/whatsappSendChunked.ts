@@ -5,26 +5,46 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * O WhatsApp tem limite de ~4096 caracteres por mensagem
  * Esta função divide de forma inteligente, preservando palavras e parágrafos
  */
-// Divide APENAS se ultrapassar 4000 chars (limite do WhatsApp)
-// Sem cabeçalhos, sem marcadores de parte — mensagem limpa e completa
-function splitMessageIntoChunks(text, maxLen = 4000) {
-  if (text.length <= maxLen) return [text];
+// Divide mensagem em partes de até MAX_LEN chars, quebrando em parágrafos/frases
+// para garantir que NENHUM conteúdo seja perdido ou truncado
+const MAX_CHUNK = 1500; // seguro para WhatsApp web URL + wa.me
+
+function splitMessageIntoChunks(text, maxLen = MAX_CHUNK) {
+  if (!text) return [];
+  // Normaliza quebras de linha
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (normalized.length <= maxLen) return [normalized];
 
   const chunks = [];
-  const paragraphs = text.split('\n');
+  const paragraphs = normalized.split('\n');
   let current = '';
 
   for (const para of paragraphs) {
+    // Parágrafo individual maior que maxLen → dividir em sentenças/palavras
     if (para.length > maxLen) {
       if (current.trim()) { chunks.push(current.trim()); current = ''; }
-      let remaining = para;
-      while (remaining.length > maxLen) {
-        const cut = remaining.lastIndexOf(' ', maxLen);
-        const breakAt = cut > 0 ? cut : maxLen;
-        chunks.push(remaining.slice(0, breakAt).trim());
-        remaining = remaining.slice(breakAt).trim();
+      // Tenta dividir por sentença (. ! ?)
+      const sentences = para.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [para];
+      for (const sentence of sentences) {
+        if ((current + ' ' + sentence).trim().length > maxLen) {
+          if (current.trim()) { chunks.push(current.trim()); current = ''; }
+          // Sentença ainda grande → divide por palavra
+          if (sentence.length > maxLen) {
+            let rem = sentence.trim();
+            while (rem.length > maxLen) {
+              const cut = rem.lastIndexOf(' ', maxLen);
+              const breakAt = cut > 0 ? cut : maxLen;
+              chunks.push(rem.slice(0, breakAt).trim());
+              rem = rem.slice(breakAt).trim();
+            }
+            current = rem;
+          } else {
+            current = sentence.trim();
+          }
+        } else {
+          current = current ? current + ' ' + sentence.trim() : sentence.trim();
+        }
       }
-      current = remaining;
     } else {
       const candidate = current ? current + '\n' + para : para;
       if (candidate.length > maxLen) {
@@ -37,7 +57,7 @@ function splitMessageIntoChunks(text, maxLen = 4000) {
   }
 
   if (current.trim()) chunks.push(current.trim());
-  return chunks;
+  return chunks.filter(c => c.length > 0);
 }
 
 Deno.serve(async (req) => {
