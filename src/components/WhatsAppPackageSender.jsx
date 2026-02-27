@@ -82,14 +82,13 @@ export default function WhatsAppPackageSender({ client, equipment }) {
 
       message += `\nQualquer dúvida, estou à disposição!`;
 
-      // Copiar mensagem
       navigator.clipboard.writeText(message);
-
-      // Abrir WhatsApp
-      const whatsappUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-
-      toast.success('Mensagem copiada! Cole os arquivos manualmente no WhatsApp');
+      const { total } = openWhatsAppChunked(client.phone, message);
+      if (total > 1) {
+        toast.success(`Mensagem dividida em ${total} partes. Envie em ordem!`);
+      } else {
+        toast.success('Mensagem copiada! Cole os arquivos manualmente no WhatsApp');
+      }
 
     } catch (error) {
       toast.error('Erro ao enviar');

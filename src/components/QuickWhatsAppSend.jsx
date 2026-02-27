@@ -116,23 +116,10 @@ Crie uma mensagem WhatsApp CURTA para ${contactName}.
       return;
     }
     
-    // Salvar e abrir WhatsApp
+    // Salvar e abrir WhatsApp com chunks
     await sendMutation.mutateAsync(message);
-    
-    // Abrir WhatsApp
-    const cleanPhone = contactPhone.replace(/\D/g, '');
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-    
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      window.location.href = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-      setTimeout(() => {
-        window.open(whatsappUrl, '_blank');
-      }, 1000);
-    } else {
-      window.open(whatsappUrl, '_blank');
-    }
+    const { total } = openWhatsAppChunked(contactPhone, message);
+    if (total > 1) toast.info(`Mensagem dividida em ${total} partes. Envie em ordem!`);
   };
 
   return (

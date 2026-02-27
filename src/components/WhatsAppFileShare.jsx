@@ -49,19 +49,17 @@ export default function WhatsAppFileShare({ client }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setFileUrl(file_url);
 
-      // Monta mensagem com link + caption
-      const cleanPhone = phone.replace(/\D/g, '');
-      const phoneWithCountry = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-      
       const msg = caption
         ? `${caption}\n\n📎 ${file.name}:\n${file_url}`
         : `📎 ${file.name}:\n${file_url}`;
 
-      const encoded = encodeURIComponent(msg);
-      const waUrl = `https://wa.me/${phoneWithCountry}?text=${encoded}`;
-      window.open(waUrl, '_blank');
+      const { total } = openWhatsAppChunked(phone, msg);
       setSent(true);
-      toast.success('WhatsApp aberto com o link do arquivo!');
+      if (total > 1) {
+        toast.success(`Mensagem dividida em ${total} partes. Envie em ordem!`);
+      } else {
+        toast.success('WhatsApp aberto com o link do arquivo!');
+      }
     } catch (e) {
       toast.error('Erro ao enviar: ' + e.message);
     } finally {

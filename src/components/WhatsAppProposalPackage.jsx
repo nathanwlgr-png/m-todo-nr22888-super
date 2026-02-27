@@ -64,12 +64,13 @@ Retorne em formato de mensagens separadas prontas para copiar/colar no WhatsApp.
         }
       });
 
-      const whatsappUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(result.complete_package_text)}`;
-      
       await navigator.clipboard.writeText(result.complete_package_text);
-      toast.success('Pacote copiado! Abrindo WhatsApp...');
-      
-      window.open(whatsappUrl, '_blank');
+      const { total } = openWhatsAppChunked(client.phone, result.complete_package_text);
+      if (total > 1) {
+        toast.success(`Pacote dividido em ${total} partes. Envie em ordem!`);
+      } else {
+        toast.success('Pacote copiado! Abrindo WhatsApp...');
+      }
 
       // Salvar como documento
       await base44.entities.GeneratedDocument.create({
