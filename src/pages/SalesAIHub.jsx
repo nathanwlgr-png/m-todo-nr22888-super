@@ -5,6 +5,7 @@ import CrossSellUpsellAnalyzer from '@/components/CrossSellUpsellAnalyzer';
 import FunnelAnalysisAI from '@/components/FunnelAnalysisAI';
 import ProspectingEmailSequenceGenerator from '@/components/ProspectingEmailSequenceGenerator';
 import DemandForecastAI from '@/components/DemandForecastAI';
+import ProposalGoogleSlidesGenerator from '@/components/ProposalGoogleSlidesGenerator';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -38,12 +39,46 @@ export default function SalesAIHub() {
           <DemandForecastAI />
         </div>
 
-        <Tabs defaultValue="crosssell" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+        <Tabs defaultValue="slides" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="slides">🎯 Proposta Slides</TabsTrigger>
             <TabsTrigger value="crosssell">📈 Cross/Upsell</TabsTrigger>
-            <TabsTrigger value="funnel">📊 Análise de Funil</TabsTrigger>
+            <TabsTrigger value="funnel">📊 Funil</TabsTrigger>
             <TabsTrigger value="email">✉️ Email Sequence</TabsTrigger>
           </TabsList>
+
+          {/* Google Slides Proposal Tab */}
+          <TabsContent value="slides" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm font-semibold text-slate-700 mb-2 block">Selecione um cliente</label>
+                <Select value={selectedClientId || ''} onValueChange={setSelectedClientId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha um cliente..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map(c => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.first_name} {c.clinic_name ? `(${c.clinic_name})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="text-sm text-slate-500 bg-indigo-50 rounded-lg p-3">
+                <p className="font-semibold text-indigo-700 mb-1">🎯 Como funciona:</p>
+                <p>• Selecione o cliente e o equipamento</p>
+                <p>• IA gera conteúdo personalizado (numerologia, dores, ROI)</p>
+                <p>• Cria 6 slides automáticos no Google Slides</p>
+                <p>• Compartilhe o link direto pelo WhatsApp</p>
+              </div>
+            </div>
+            {selectedClientId && (
+              <ProposalGoogleSlidesGenerator
+                client={clients.find(c => c.id === selectedClientId)}
+              />
+            )}
+          </TabsContent>
 
           {/* Cross-sell/Upsell Tab */}
           <TabsContent value="crosssell" className="space-y-6">
