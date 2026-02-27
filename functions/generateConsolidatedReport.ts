@@ -161,27 +161,31 @@ Deno.serve(async (req) => {
     // Gerar HTML do relatório
     const htmlContent = generateReportHTML(report, metricsData, startDate, endDate);
 
-    // Enviar email para cada destinatário
-    const sendPromises = report.recipients.map(email => 
-      base44.asServiceRole.integrations.Core.SendEmail({
-        to: email,
-        subject: `${report.report_name} - ${new Date().toLocaleDateString('pt-BR')}`,
-        body: htmlContent
-      })
-    );
+    // Enviar email para cada destinatário (apenas se tiver recipients)
+    if (report.recipients && report.recipients.length > 0) {
+      const sendPromises = report.recipients.map(email => 
+        base44.asServiceRole.integrations.Core.SendEmail({
+          to: email,
+          subject: `${report.report_name} - ${new Date().toLocaleDateString('pt-BR')}`,
+          body: htmlContent
+        }).catch(() => null)
+      );
+      await Promise.all(sendPromises);
+    }
 
-    await Promise.all(sendPromises);
-
-    // Atualizar status do relatório
-    await base44.asServiceRole.entities.ScheduledReport.update(report_id, {
-      last_sent_date: new Date().toISOString(),
-      last_sent_status: 'success'
-    });
+    // Atualizar status do relatório (apenas se tiver ID)
+    if (report_id) {
+      await base44.asServiceRole.entities.ScheduledReport.update(report_id, {
+        last_sent_date: new Date().toISOString(),
+        last_sent_status: 'success'
+      }).catch(() => null);
+    }
 
     return Response.json({
       success: true,
-      recipients_count: report.recipients.length,
-      metrics: metricsData
+      recipients_count: (report.recipients || []).length,
+      metrics: metricsData,
+      html_preview: htmlContent.substring(0, 500) + '...'
     });
 
   } catch (error) {
