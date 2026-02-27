@@ -16,18 +16,17 @@ Deno.serve(async (req) => {
     }
 
     // Buscar dados do cliente
-    const clients = await base44.entities.Client.list();
-    const client = clients.find(c => c.id === client_id);
+    const client = await base44.asServiceRole.entities.Client.get(client_id).catch(() => null);
 
     if (!client) {
       return Response.json({ error: 'Cliente não encontrado' }, { status: 404 });
     }
 
     const [interactions, visits, tasks, sales] = await Promise.all([
-      base44.entities.Interaction.filter({ client_id }),
-      base44.entities.Visit.filter({ client_id }),
-      base44.entities.Task.filter({ client_id }),
-      base44.entities.Sale.filter({ client_id })
+      base44.asServiceRole.entities.Interaction.filter({ client_id }).catch(() => []),
+      base44.asServiceRole.entities.Visit.filter({ client_id }).catch(() => []),
+      base44.asServiceRole.entities.Task.filter({ client_id }).catch(() => []),
+      base44.asServiceRole.entities.Sale.filter({ client_id }).catch(() => [])
     ]);
 
     const lastInteraction = interactions.sort((a, b) => 
@@ -39,7 +38,7 @@ Deno.serve(async (req) => {
       : 999;
 
     // Gerar sequência personalizada com IA
-    const sequence = await base44.integrations.Core.InvokeLLM({
+    const sequence = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `Você é um especialista em vendas e nurturing de leads.
 
 CLIENTE: ${client.first_name}
@@ -107,7 +106,7 @@ Retorne JSON estruturado.`,
     });
 
     // Salvar sequência
-    const followUpSequence = await base44.entities.FollowUpSequence.create({
+    const followUpSequence = await base44.asServiceRole.entities.FollowUpSequence.create({
       name: sequence.sequence_name,
       trigger_type: 'manual',
       target_status: [client.status],
@@ -127,14 +126,14 @@ Retorne JSON estruturado.`,
       
       try {
         if (firstMsg.channel === 'email' && client.email) {
-          await base44.integrations.Core.SendEmail({
+          await base44.asServiceRole.integrations.Core.SendEmail({
             to: client.email,
             subject: firstMsg.subject,
             body: firstMsg.body
           });
         }
 
-        await base44.entities.FollowUpLog.create({
+        await base44.asServiceRole.entities.FollowUpLog.create({
           client_id: client.id,
           client_name: client.first_name,
           sequence_id: followUpSequence.id,
