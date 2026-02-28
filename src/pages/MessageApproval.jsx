@@ -18,38 +18,75 @@ export default function MessageApproval() {
   const [editedContent, setEditedContent] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: pendingMessages = [], isLoading } = useQuery({
-    queryKey: ['pending-messages'],
+  const { data: automatedMessages = [], isLoading: loadingAuto } = useQuery({
+    queryKey: ['pending-messages-auto'],
     queryFn: () => base44.entities.AutomatedMessageLog?.filter({ sent_status: 'pendente' }).catch(() => []),
-    refetchInterval: 5000 // Atualiza a cada 5 segundos
+    refetchInterval: 5000
   });
 
+  const { data: pendingMsgs = [], isLoading: loadingPending } = useQuery({
+    queryKey: ['pending-messages-queue'],
+    queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
+    refetchInterval: 5000
+  });
+
+  // Normaliza ambas as fontes para um formato unificado
+  const pendingMessages = [
+    ...automatedMessages.map(m => ({ ...m, _source: 'auto' })),
+    ...pendingMsgs.map(m => ({
+      id: m.id,
+      _source: 'pending',
+      client_name: m.client_name || m.contact_name || 'Contato',
+      message_type: m.channel || 'whatsapp',
+      message_content: m.message_content || m.content || '',
+      trigger_reason: m.trigger_reason || m.reason || '',
+      ai_reasoning: m.ai_reasoning || '',
+      email_subject: m.email_subject || '',
+      context: m.context || '',
+      suggested_send_time: m.suggested_send_time || null,
+    }))
+  ];
+
+  const isLoading = loadingAuto && loadingPending;
+
   const approveMutation = useMutation({
-    mutationFn: async ({ id, content }) => {
-      await base44.entities.AutomatedMessageLog.update(id, {
-        sent_status: 'enviada',
-        message_content: content,
-        sent_at: new Date().toISOString()
-      });
-      
-      // Enviar a mensagem via WhatsApp ou email
-      await base44.functions.invoke('sendApprovedMessages', { message_id: id });
+    mutationFn: async ({ id, content, source }) => {
+      if (source === 'pending') {
+        await base44.entities.PendingMessage.update(id, {
+          status: 'approved',
+          message_content: content,
+          approved_at: new Date().toISOString()
+        });
+      } else {
+        await base44.entities.AutomatedMessageLog.update(id, {
+          sent_status: 'enviada',
+          message_content: content,
+          sent_at: new Date().toISOString()
+        });
+        await base44.functions.invoke('sendApprovedMessages', { message_id: id });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pending-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-auto'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-count'] });
       toast.success('✅ Mensagem aprovada e enviada!');
       setEditingId(null);
     }
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async (id) => {
-      await base44.entities.AutomatedMessageLog.update(id, {
-        sent_status: 'bloqueado'
-      });
+    mutationFn: async ({ id, source }) => {
+      if (source === 'pending') {
+        await base44.entities.PendingMessage.update(id, { status: 'rejected' });
+      } else {
+        await base44.entities.AutomatedMessageLog.update(id, { sent_status: 'bloqueado' });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pending-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-auto'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-messages-count'] });
       toast.success('❌ Mensagem bloqueada.');
     }
   });
