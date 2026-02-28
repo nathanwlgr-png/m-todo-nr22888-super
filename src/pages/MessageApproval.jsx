@@ -93,7 +93,7 @@ export default function MessageApproval() {
 
   const handleApprove = (msg) => {
     const finalContent = editingId === msg.id ? editedContent : msg.message_content;
-    approveMutation.mutate({ id: msg.id, content: finalContent });
+    approveMutation.mutate({ id: msg.id, content: finalContent, source: msg._source });
   };
 
   const handleEdit = (msg) => {
@@ -246,7 +246,7 @@ export default function MessageApproval() {
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button
-                        onClick={() => rejectMutation.mutate(msg.id)}
+                        onClick={() => rejectMutation.mutate({ id: msg.id, source: msg._source })}
                         variant="outline"
                         className="text-red-600"
                       >
