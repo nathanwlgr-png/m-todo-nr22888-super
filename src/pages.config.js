@@ -127,6 +127,7 @@ import MarketIntelligence from './pages/MarketIntelligence';
 import MarketResearch from './pages/MarketResearch';
 import MasterCRM from './pages/MasterCRM';
 import MasterControlPanel from './pages/MasterControlPanel';
+import MasterUnified from './pages/MasterUnified';
 import MessageApproval from './pages/MessageApproval';
 import MessageHistory from './pages/MessageHistory';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
@@ -157,10 +158,10 @@ import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplateManager from './pages/ProposalTemplateManager';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
+import Reports from './pages/Reports';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
 import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
-import Reports from './pages/Reports';
 import ReportsAdvanced from './pages/ReportsAdvanced';
 import ReportsAutomation from './pages/ReportsAutomation';
 import RevenueForecastPage from './pages/RevenueForecastPage';
@@ -198,7 +199,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import MasterUnified from './pages/MasterUnified';
 import __Layout from './Layout.jsx';
 
 
@@ -283,6 +283,7 @@ export const PAGES = {
     "MarketResearch": MarketResearch,
     "MasterCRM": MasterCRM,
     "MasterControlPanel": MasterControlPanel,
+    "MasterUnified": MasterUnified,
     "MessageApproval": MessageApproval,
     "MessageHistory": MessageHistory,
     "MobVendedorAnalytics": MobVendedorAnalytics,
@@ -313,10 +314,10 @@ export const PAGES = {
     "ProposalTemplateManager": ProposalTemplateManager,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
+    "Reports": Reports,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
     "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
     "RegionalSearch": RegionalSearch,
-    "Reports": Reports,
     "ReportsAdvanced": ReportsAdvanced,
     "ReportsAutomation": ReportsAutomation,
     "RevenueForecastPage": RevenueForecastPage,
@@ -354,7 +355,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "MasterUnified": MasterUnified,
 }
 
 export const pagesConfig = {
