@@ -744,6 +744,29 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* AI Metrics Badges - Destaque */}
         <AIMetricsBadges client={client} variant="full" />
 
+        {/* KPIs de Vendas por Cliente */}
+        <ClientSalesKPIDashboard
+          client={client}
+          sales={sales}
+          visits={visits}
+        />
+
+        {/* Relatório de Vendas por Período */}
+        <ClientSalesReport
+          client={client}
+          sales={sales}
+          visits={visits}
+          tasks={clientTasks}
+          interactions={interactions}
+        />
+
+        {/* Email Marketing — Segmentação IA */}
+        <ClientEmailMarketingSegment
+          client={client}
+          sales={sales}
+          interactions={interactions}
+        />
+
         {/* AI Insights Dashboard — Sentimento, Churn, Padrão de Compra */}
         <ClientAIInsightsDashboard
           client={client}
