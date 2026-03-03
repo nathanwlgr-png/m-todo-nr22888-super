@@ -128,7 +128,6 @@ export default function Layout({ children, currentPageName }) {
     { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
     { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
     { icon: Zap, label: 'Automações', page: 'WorkflowAutomation', tourId: 'automations' },
-
     { icon: Package, label: 'Produtos', page: 'ProductManager' },
     { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
     { icon: Brain, label: 'Inteligência 360°', page: 'ProactiveIntelligenceDashboard' },
@@ -143,7 +142,6 @@ export default function Layout({ children, currentPageName }) {
     { icon: FileText, label: 'Relatórios Custom', page: 'CustomReports' },
     { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
     { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
-    { icon: Award, label: 'Sales Coaching', page: 'SalesCoachingDashboard' },
     { icon: Upload, label: 'Importar Clientes', page: 'ClientImportManager' },
     ];
 
