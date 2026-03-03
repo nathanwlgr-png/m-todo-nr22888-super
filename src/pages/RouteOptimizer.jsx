@@ -14,13 +14,13 @@ import { Link } from 'react-router-dom';
 
 export default function RouteOptimizer() {
   const [selectedClients, setSelectedClients] = useState([]);
-  const [startAddress, setStartAddress] = useState('Curitiba, PR');
+  const [startAddress, setStartAddress] = useState('Marília, SP');
   const [routeName, setRouteName] = useState('');
   const [routeDate, setRouteDate] = useState(new Date().toISOString().split('T')[0]);
   const [visitDuration, setVisitDuration] = useState(60);
   const [optimizedRoute, setOptimizedRoute] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [cityFilter, setCityFilter] = useState('Curitiba');
+  const [cityFilter, setCityFilter] = useState('Marília');
   const queryClient = useQueryClient();
 
   const { data: clients = [] } = useQuery({
