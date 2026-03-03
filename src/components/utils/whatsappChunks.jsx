@@ -62,7 +62,9 @@ export function splitWhatsAppMessage(text, maxLen = MAX_CHUNK) {
  */
 export function formatPhoneBR(phone) {
   const clean = phone.replace(/\D/g, '');
-  return clean.startsWith('55') ? clean : `55${clean}`;
+  // Remove o 55 duplicado e garante apenas um 55 no início
+  const withoutCode = clean.startsWith('55') ? clean.slice(2) : clean;
+  return `55${withoutCode}`;
 }
 
 /**

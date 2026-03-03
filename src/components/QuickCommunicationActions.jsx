@@ -62,8 +62,10 @@ ${opportunities.length > 0 ? `TOP OPORTUNIDADE: ${opportunities[0].product} (${o
       toast.error('Cliente não tem WhatsApp cadastrado');
       return;
     }
+    const clean = client.phone.replace(/\D/g, '');
+    const phone = clean.startsWith('55') ? clean : `55${clean}`;
     const encodedMsg = encodeURIComponent(message);
-    window.open(`https://wa.me/${client.phone}?text=${encodedMsg}`, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodedMsg}`, '_blank');
   };
 
   const sendEmail = () => {
