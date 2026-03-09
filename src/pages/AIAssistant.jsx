@@ -38,6 +38,7 @@ import NR22ScorePreditivo from '@/components/NR22ScorePreditivo';
 import NR22CoachingIA from '@/components/NR22CoachingIA';
 import NR22ModoControle, { useNR22Modo } from '@/components/NR22ModoControle';
 import NR22MetodoHub from '@/components/NR22MetodoHub';
+import ProductRecommendationAI from '@/components/ProductRecommendationAI';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { useAILimit } from '@/components/AILimitProtection';
@@ -884,6 +885,9 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
           {/* ── TAB MAIS ── */}
           <TabsContent value="mais" className="overflow-y-auto p-3 space-y-3">
             <NR22MetodoHub />
+            <div className="bg-white border rounded-xl p-3">
+              <ProductRecommendationAI client={client} />
+            </div>
             <MasterAIAssistant client={client} />
           </TabsContent>
 
