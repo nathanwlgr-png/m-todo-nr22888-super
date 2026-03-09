@@ -199,6 +199,9 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
+import EliteVetSearch from './pages/EliteVetSearch';
+import IntelligenceDashboard from './pages/IntelligenceDashboard';
+import SentimentHub from './pages/SentimentHub';
 import __Layout from './Layout.jsx';
 
 
@@ -355,6 +358,9 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
+    "EliteVetSearch": EliteVetSearch,
+    "IntelligenceDashboard": IntelligenceDashboard,
+    "SentimentHub": SentimentHub,
 }
 
 export const pagesConfig = {
