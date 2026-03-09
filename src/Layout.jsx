@@ -9,7 +9,7 @@ import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
         Home, Users, UserPlus, Route, Settings, Zap, 
         Calendar, CheckSquare, BarChart3, Menu, X,
-        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin, Upload
+        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin, Upload, Crown
       } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
