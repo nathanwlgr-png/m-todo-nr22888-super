@@ -143,6 +143,9 @@ export default function Layout({ children, currentPageName }) {
     { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
     { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
     { icon: Upload, label: 'Importar Clientes', page: 'ClientImportManager' },
+    { icon: Brain, label: '🧠 Dashboard IA', page: 'IntelligenceDashboard' },
+    { icon: Crown, label: '👑 Busca Elite Vet', page: 'EliteVetClientSearch' },
+    { icon: TrendingUp, label: '💬 Sentimento IA', page: 'SentimentAnalysisDashboard' },
     ];
 
   return (
