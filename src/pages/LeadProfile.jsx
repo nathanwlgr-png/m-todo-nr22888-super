@@ -38,6 +38,7 @@ import AIContentPersonalizer from '@/components/AIContentPersonalizer';
 import RealtimeCoachingWidget from '@/components/RealtimeCoachingWidget';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
 import AILeadMessenger from '@/components/AILeadMessenger';
+import WhatsAppMasterIntegration from '@/components/WhatsAppMasterIntegration';
 
 export default function LeadProfile() {
   const navigate = useNavigate();
@@ -196,6 +197,15 @@ export default function LeadProfile() {
                 contactId={lead.id}
                 contactName={lead.full_name}
                 contactPhone={lead.phone}
+              />
+            )}
+
+            {/* WhatsApp Master Integration - NOVO */}
+            {lead.phone && (
+              <WhatsAppMasterIntegration
+                clientId={lead.id}
+                clientName={lead.full_name}
+                clientPhone={lead.phone}
               />
             )}
 
