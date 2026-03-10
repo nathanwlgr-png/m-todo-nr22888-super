@@ -1,365 +1,358 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Search, Users, X, SlidersHorizontal, ArrowUpDown, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
-import { format, subDays, subMonths, isAfter } from 'date-fns';
-
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'Todos os status' },
-  { value: 'quente', label: '🔥 Quente' },
-  { value: 'morno', label: '🌡️ Morno' },
-  { value: 'frio', label: '❄️ Frio' },
-];
-
-const PIPELINE_OPTIONS = [
-  { value: 'all', label: 'Todos os estágios' },
-  { value: 'lead', label: 'Lead' },
-  { value: 'qualificado', label: 'Qualificado' },
-  { value: 'proposta', label: 'Proposta' },
-  { value: 'negociacao', label: 'Negociação' },
-  { value: 'fechado', label: 'Fechado' },
-  { value: 'perdido', label: 'Perdido' },
-];
-
-const DATE_OPTIONS = [
-  { value: 'all', label: 'Qualquer data' },
-  { value: '7d', label: 'Últimos 7 dias' },
-  { value: '30d', label: 'Últimos 30 dias' },
-  { value: '90d', label: 'Últimos 3 meses' },
-  { value: '180d', label: 'Últimos 6 meses' },
-];
-
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevância' },
-  { value: 'updated_desc', label: 'Atualizado (recente)' },
-  { value: 'updated_asc', label: 'Atualizado (antigo)' },
-  { value: 'created_desc', label: 'Criado (recente)' },
-  { value: 'created_asc', label: 'Criado (antigo)' },
-  { value: 'score_desc', label: 'Score (maior)' },
-  { value: 'name_asc', label: 'Nome (A-Z)' },
-];
-
-function getDateCutoff(dateFilter) {
-  const now = new Date();
-  if (dateFilter === '7d') return subDays(now, 7);
-  if (dateFilter === '30d') return subDays(now, 30);
-  if (dateFilter === '90d') return subMonths(now, 3);
-  if (dateFilter === '180d') return subMonths(now, 6);
-  return null;
-}
-
-function calcRelevance(client, searchTerms) {
-  let score = 0;
-  const fields = [
-    { v: client.first_name, w: 5 },
-    { v: client.full_name, w: 4 },
-    { v: client.clinic_name, w: 3 },
-    { v: client.city, w: 2 },
-    { v: client.email, w: 2 },
-    { v: client.notes, w: 1 },
-    { v: client.equipment_interest, w: 1 },
-  ];
-  for (const term of searchTerms) {
-    for (const { v, w } of fields) {
-      if (v?.toLowerCase().includes(term)) score += w;
-    }
-  }
-  if (client.status === 'quente') score += 2;
-  if (client.purchase_score > 70) score += 2;
-  return score;
-}
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Search, MapPin, User, Building2, Phone, Mail, 
+  Calendar, Target, TrendingUp, Navigation, Loader2
+} from 'lucide-react';
+import { createPageUrl } from '@/utils';
+import { useNavigate } from 'react-router-dom';
 
 export default function GlobalSearch() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [pipelineFilter, setPipelineFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('relevance');
+  const [location, setLocation] = useState(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
-  const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date')
+  // Buscar dados
+  const { data: clients = [], isLoading: loadingClients } = useQuery({
+    queryKey: ['clients-search'],
+    queryFn: () => base44.entities.Client.list(),
   });
 
-  const activeFiltersCount = [
-    statusFilter !== 'all',
-    pipelineFilter !== 'all',
-    dateFilter !== 'all',
-  ].filter(Boolean).length;
+  const { data: leads = [], isLoading: loadingLeads } = useQuery({
+    queryKey: ['leads-search'],
+    queryFn: () => base44.entities.Lead.list(),
+  });
 
-  const results = useMemo(() => {
-    const searchTerms = searchTerm.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const dateCutoff = getDateCutoff(dateFilter);
+  const { data: visits = [], isLoading: loadingVisits } = useQuery({
+    queryKey: ['visits-search'],
+    queryFn: () => base44.entities.Visit.list(),
+  });
 
-    let filtered = clients.filter(c => {
-      // Keyword filter
-      if (searchTerms.length > 0) {
-        const matchesAny = searchTerms.some(term =>
-          c.first_name?.toLowerCase().includes(term) ||
-          c.full_name?.toLowerCase().includes(term) ||
-          c.email?.toLowerCase().includes(term) ||
-          c.phone?.includes(term) ||
-          c.clinic_name?.toLowerCase().includes(term) ||
-          c.city?.toLowerCase().includes(term) ||
-          c.notes?.toLowerCase().includes(term) ||
-          c.equipment_interest?.toLowerCase().includes(term)
-        );
-        if (!matchesAny) return false;
-      }
+  // Obter localização do usuário
+  useEffect(() => {
+    getLocation();
+  }, []);
 
-      // Status filter
-      if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+  const getLocation = () => {
+    setLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            timestamp: new Date().toISOString()
+          });
+          setLoadingLocation(false);
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+          // Usar localização padrão de São Paulo
+          setLocation({
+            lat: -23.5505,
+            lng: -46.6333,
+            timestamp: new Date().toISOString(),
+            fallback: true
+          });
+          setLoadingLocation(false);
+        }
+      );
+    } else {
+      setLocation({
+        lat: -23.5505,
+        lng: -46.6333,
+        timestamp: new Date().toISOString(),
+        fallback: true
+      });
+      setLoadingLocation(false);
+    }
+  };
 
-      // Pipeline filter
-      if (pipelineFilter !== 'all' && c.pipeline_stage !== pipelineFilter) return false;
+  // Calcular distância entre dois pontos (fórmula de Haversine)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Raio da Terra em km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
 
-      // Date filter
-      if (dateCutoff) {
-        const updatedAt = c.updated_date ? new Date(c.updated_date) : new Date(0);
-        if (!isAfter(updatedAt, dateCutoff)) return false;
-      }
+  // Filtrar e ordenar resultados
+  const filterResults = (items, type) => {
+    if (!searchTerm && !location) return items;
 
-      return true;
-    });
+    let filtered = items;
 
-    // Sorting
-    if (sortBy === 'relevance' && searchTerms.length > 0) {
-      filtered = filtered.map(c => ({ ...c, _relevance: calcRelevance(c, searchTerms) }))
-        .sort((a, b) => b._relevance - a._relevance);
-    } else if (sortBy === 'updated_desc') {
-      filtered.sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0));
-    } else if (sortBy === 'updated_asc') {
-      filtered.sort((a, b) => new Date(a.updated_date || 0) - new Date(b.updated_date || 0));
-    } else if (sortBy === 'created_desc') {
-      filtered.sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0));
-    } else if (sortBy === 'created_asc') {
-      filtered.sort((a, b) => new Date(a.created_date || 0) - new Date(b.created_date || 0));
-    } else if (sortBy === 'score_desc') {
-      filtered.sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0));
-    } else if (sortBy === 'name_asc') {
-      filtered.sort((a, b) => (a.first_name || '').localeCompare(b.first_name || ''));
+    // Filtrar por texto
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => {
+        const searchFields = [
+          item.full_name, item.first_name, item.client_name,
+          item.clinic_name, item.company, item.city,
+          item.email, item.phone, item.notes
+        ].filter(Boolean).join(' ').toLowerCase();
+        return searchFields.includes(term);
+      });
+    }
+
+    // Adicionar distância se houver localização
+    if (location && !location.fallback) {
+      filtered = filtered.map(item => {
+        // Tentar obter coordenadas da cidade (simplificado - em produção usar API de geocoding)
+        const cityCoords = getCityCoords(item.city);
+        if (cityCoords) {
+          const distance = calculateDistance(
+            location.lat, location.lng,
+            cityCoords.lat, cityCoords.lng
+          );
+          return { ...item, distance };
+        }
+        return item;
+      });
+
+      // Ordenar por distância
+      filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
     }
 
     return filtered;
-  }, [searchTerm, clients, statusFilter, pipelineFilter, dateFilter, sortBy]);
-
-  const clearAll = () => {
-    setSearchTerm('');
-    setStatusFilter('all');
-    setPipelineFilter('all');
-    setDateFilter('all');
-    setSortBy('relevance');
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 pb-24">
-      {/* Header */}
-      <div className="bg-white border-b px-4 py-4 sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </button>
-          <h1 className="text-lg font-semibold text-slate-800 flex-1">Busca Avançada</h1>
-          {(searchTerm || activeFiltersCount > 0) && (
-            <button onClick={clearAll} className="text-xs text-indigo-600 hover:underline">
-              Limpar tudo
-            </button>
-          )}
-        </div>
+  // Coordenadas aproximadas de cidades (simplificado)
+  const getCityCoords = (city) => {
+    if (!city) return null;
+    const coords = {
+      'São Paulo': { lat: -23.5505, lng: -46.6333 },
+      'Marília': { lat: -22.2139, lng: -49.9458 },
+      'Campinas': { lat: -22.9099, lng: -47.0626 },
+      'Santos': { lat: -23.9608, lng: -46.3334 },
+      'Ribeirão Preto': { lat: -21.1704, lng: -47.8103 },
+      'Sorocaba': { lat: -23.5015, lng: -47.4526 }
+    };
+    return coords[city] || null;
+  };
 
-        {/* Search input */}
-        <div className="relative mb-3">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <Input
-            placeholder="Nome, clínica, cidade, email, equipamento, notas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-11 pl-12 pr-10 text-sm rounded-xl border-2 focus:border-indigo-400"
-            autoFocus
-          />
-          {searchTerm && (
-            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded">
-              <X className="w-4 h-4 text-slate-400" />
-            </button>
-          )}
-        </div>
+  const filteredClients = filterResults(clients, 'client');
+  const filteredLeads = filterResults(leads, 'lead');
+  const filteredVisits = filterResults(visits, 'visit');
 
-        {/* Filter toggle + sort row */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(v => !v)}
-            className={`gap-1.5 text-xs h-8 ${activeFiltersCount > 0 ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : ''}`}
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            Filtros
-            {activeFiltersCount > 0 && (
-              <span className="bg-indigo-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                {activeFiltersCount}
-              </span>
+  const totalResults = filteredClients.length + filteredLeads.length + filteredVisits.length;
+
+  const ResultCard = ({ item, type }) => (
+    <Card 
+      className="mb-3 cursor-pointer hover:shadow-lg transition-all"
+      onClick={() => {
+        if (type === 'client') navigate(createPageUrl('ClientProfile') + `?id=${item.id}`);
+        if (type === 'lead') navigate(createPageUrl('LeadProfile') + `?id=${item.id}`);
+      }}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              {type === 'client' && <User className="w-4 h-4 text-blue-600" />}
+              {type === 'lead' && <Target className="w-4 h-4 text-orange-600" />}
+              {type === 'visit' && <Calendar className="w-4 h-4 text-green-600" />}
+              <h3 className="font-semibold">
+                {item.full_name || item.first_name || item.client_name}
+              </h3>
+            </div>
+
+            {(item.clinic_name || item.company) && (
+              <div className="flex items-center gap-1 text-sm text-slate-600 mb-1">
+                <Building2 className="w-3 h-3" />
+                <span>{item.clinic_name || item.company}</span>
+              </div>
             )}
-            {showFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </Button>
 
-          <div className="flex-1" />
+            {item.city && (
+              <div className="flex items-center gap-1 text-sm text-slate-600 mb-1">
+                <MapPin className="w-3 h-3" />
+                <span>{item.city}</span>
+                {item.distance && (
+                  <Badge variant="outline" className="ml-2">
+                    {item.distance.toFixed(1)} km
+                  </Badge>
+                )}
+              </div>
+            )}
 
-          <div className="flex items-center gap-1.5">
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-8 text-xs w-40 border-slate-200">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SORT_OPTIONS.map(o => (
-                  <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {item.phone && (
+              <div className="flex items-center gap-1 text-sm text-slate-600 mb-1">
+                <Phone className="w-3 h-3" />
+                <span>{item.phone}</span>
+              </div>
+            )}
+
+            {item.email && (
+              <div className="flex items-center gap-1 text-sm text-slate-600">
+                <Mail className="w-3 h-3" />
+                <span className="truncate">{item.email}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            {item.status && (
+              <Badge className={
+                item.status === 'quente' ? 'bg-red-500' :
+                item.status === 'morno' ? 'bg-yellow-500' :
+                'bg-blue-500'
+              }>
+                {item.status}
+              </Badge>
+            )}
+            {item.purchase_score > 0 && (
+              <Badge variant="outline">
+                Score: {item.purchase_score}
+              </Badge>
+            )}
+            {item.predictive_score > 0 && (
+              <Badge variant="outline">
+                {item.predictive_score}%
+              </Badge>
+            )}
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
 
-        {/* Filter panel */}
-        {showFilters && (
-          <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map(o => (
-                    <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Estágio Pipeline</label>
-              <Select value={pipelineFilter} onValueChange={setPipelineFilter}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PIPELINE_OPTIONS.map(o => (
-                    <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Atualizado em
-              </label>
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DATE_OPTIONS.map(o => (
-                    <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-
-        {/* Results count */}
-        <div className="flex items-center gap-2 mt-3">
-          <Users className="w-4 h-4 text-indigo-600" />
-          <p className="text-sm text-slate-600">
-            {searchTerm || activeFiltersCount > 0
-              ? `${results.length} resultado(s) encontrado(s)`
-              : `${clients.length} cliente(s) cadastrado(s)`}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">🔍 Busca Global Inteligente</h1>
+          <p className="text-slate-600">
+            Busque clientes, leads e visitas com localização em tempo real
           </p>
         </div>
-      </div>
 
-      {/* Results */}
-      <div className="p-4">
-        {isLoading ? (
-          <div className="text-center py-12 text-slate-400">Carregando...</div>
-        ) : results.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-            <p className="text-slate-500 font-medium">Nenhum resultado encontrado</p>
-            <p className="text-slate-400 text-sm mt-1">Tente ajustar os filtros ou o termo de busca</p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={clearAll}>
-              Limpar filtros
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {results.map(client => (
-              <Card
-                key={client.id}
-                className="p-4 cursor-pointer hover:shadow-md transition-shadow border-l-4"
-                style={{
-                  borderLeftColor:
-                    client.status === 'quente' ? '#ef4444' :
-                    client.status === 'morno' ? '#f59e0b' : '#60a5fa'
-                }}
-                onClick={() => navigate(createPageUrl(`ClientProfile?id=${client.id}`))}
+        {/* Barra de busca e localização */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex gap-4 mb-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Input
+                  placeholder="Buscar por nome, cidade, empresa, telefone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 text-lg"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={getLocation}
+                disabled={loadingLocation}
+                className="gap-2"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="font-semibold text-slate-800">{client.first_name}</p>
-                      {client.full_name && client.full_name !== client.first_name && (
-                        <span className="text-slate-500 text-sm">{client.full_name}</span>
-                      )}
-                      <Badge className={
-                        client.status === 'quente' ? 'bg-red-500 text-white text-[10px]' :
-                        client.status === 'morno' ? 'bg-yellow-500 text-white text-[10px]' :
-                        'bg-blue-400 text-white text-[10px]'
-                      }>
-                        {client.status || 'morno'}
-                      </Badge>
-                      {client.pipeline_stage && (
-                        <Badge variant="outline" className="text-[10px]">{client.pipeline_stage}</Badge>
-                      )}
-                    </div>
+                {loadingLocation ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Navigation className="w-4 h-4" />
+                )}
+                Atualizar Localização
+              </Button>
+            </div>
 
-                    {client.clinic_name && (
-                      <p className="text-sm text-slate-600 truncate">{client.clinic_name}</p>
-                    )}
+            {location && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <MapPin className="w-4 h-4 text-green-600" />
+                <span>
+                  Localização: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                  {location.fallback && ' (São Paulo - padrão)'}
+                </span>
+                <span className="text-xs text-slate-400">
+                  · Atualizado: {new Date(location.timestamp).toLocaleTimeString('pt-BR')}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-slate-500">
-                      {client.city && <span>📍 {client.city}</span>}
-                      {client.email && <span className="truncate">✉️ {client.email}</span>}
-                      {client.equipment_interest && <span>🔬 {client.equipment_interest}</span>}
-                      {client.updated_date && (
-                        <span className="ml-auto text-slate-400">
-                          {format(new Date(client.updated_date), 'dd/MM/yy')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+        {/* Resultados */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Resultados da Busca</span>
+              <Badge variant="outline" className="text-lg">
+                {totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsTrigger value="all">
+                  Todos ({totalResults})
+                </TabsTrigger>
+                <TabsTrigger value="clients">
+                  Clientes ({filteredClients.length})
+                </TabsTrigger>
+                <TabsTrigger value="leads">
+                  Leads ({filteredLeads.length})
+                </TabsTrigger>
+                <TabsTrigger value="visits">
+                  Visitas ({filteredVisits.length})
+                </TabsTrigger>
+              </TabsList>
 
-                  {client.purchase_score > 0 && (
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-lg font-bold text-indigo-600">{client.purchase_score}%</p>
-                      <p className="text-[10px] text-slate-500">Score</p>
+              <TabsContent value="all">
+                <div className="space-y-2">
+                  {filteredClients.map(c => <ResultCard key={c.id} item={c} type="client" />)}
+                  {filteredLeads.map(l => <ResultCard key={l.id} item={l} type="lead" />)}
+                  {filteredVisits.map(v => <ResultCard key={v.id} item={v} type="visit" />)}
+                  {totalResults === 0 && (
+                    <div className="text-center py-12 text-slate-500">
+                      Nenhum resultado encontrado
                     </div>
                   )}
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
+              </TabsContent>
+
+              <TabsContent value="clients">
+                {filteredClients.map(c => <ResultCard key={c.id} item={c} type="client" />)}
+                {filteredClients.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    Nenhum cliente encontrado
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="leads">
+                {filteredLeads.map(l => <ResultCard key={l.id} item={l} type="lead" />)}
+                {filteredLeads.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    Nenhum lead encontrado
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="visits">
+                {filteredVisits.map(v => <ResultCard key={v.id} item={v} type="visit" />)}
+                {filteredVisits.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    Nenhuma visita encontrada
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
