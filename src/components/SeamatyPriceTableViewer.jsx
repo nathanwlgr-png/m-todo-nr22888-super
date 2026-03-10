@@ -133,19 +133,49 @@ Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado 
   return (
     <div className="space-y-4">
       <Card className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <DollarSign className="w-6 h-6 text-green-600" />
-              Tabela de Preços SP - Seamaty 2026
+              Tabela de Preços SP - Seamaty Brasil 2026
             </h3>
             <p className="text-sm text-slate-600 mt-1">{products.length} produtos cadastrados</p>
           </div>
-          {products.length === 0 && (
-            <Button onClick={loadFromBackend} className="bg-green-600 hover:bg-green-700">
-              Carregar Tabela SP
+          <div className="flex gap-2 flex-wrap">
+            {products.length === 0 && (
+              <Button onClick={loadFromBackend} className="bg-green-600 hover:bg-green-700">
+                Carregar Tabela SP
+              </Button>
+            )}
+            <Button onClick={savePackRulesKnowledge} variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50 text-xs">
+              💾 Salvar Regras de Embalagem
             </Button>
-          )}
+          </div>
+        </div>
+
+        {/* Legenda de embalagens */}
+        <div className="mt-3 p-3 bg-white/70 rounded-lg border border-green-200">
+          <p className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1">
+            <Calculator className="w-3 h-3" /> Regras de Embalagem (preço unitário calculado automaticamente)
+          </p>
+          <div className="grid grid-cols-2 gap-1.5 text-xs">
+            <div className="flex items-center gap-1.5 bg-purple-50 rounded px-2 py-1 border border-purple-200">
+              <span className="text-purple-700 font-bold">PCR (IPCR/VQ1)</span>
+              <span className="text-purple-600">→ 6 cassetes/cx</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blue-50 rounded px-2 py-1 border border-blue-200">
+              <span className="text-blue-700 font-bold">Bioquímica (SMT/QT3/3DX)</span>
+              <span className="text-blue-600">→ 10 testes/cx</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-red-50 rounded px-2 py-1 border border-red-200">
+              <span className="text-red-700 font-bold">Hemogásio (VG1/VG2)</span>
+              <span className="text-red-600">→ 20 cartuchos/cx</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-orange-50 rounded px-2 py-1 border border-orange-200">
+              <span className="text-orange-700 font-bold">Imunofluorescência (Vi1)</span>
+              <span className="text-orange-600">→ 10 testes/cx</span>
+            </div>
+          </div>
         </div>
       </Card>
 
