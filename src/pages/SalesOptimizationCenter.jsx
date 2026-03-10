@@ -16,6 +16,7 @@ import FinalImplementationChecklist from '@/components/FinalImplementationCheckl
 import StrategicRecommendations from '@/components/StrategicRecommendations';
 import ExecutiveSummary from '@/components/ExecutiveSummary';
 import QuickStartGuide from '@/components/QuickStartGuide';
+import FinalConsolidatedReport from '@/components/FinalConsolidatedReport';
 
 export default function SalesOptimizationCenter() {
   const features = [
@@ -161,12 +162,18 @@ export default function SalesOptimizationCenter() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="features" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="summary" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="summary">Resumo</TabsTrigger>
             <TabsTrigger value="features">Funcionalidades</TabsTrigger>
             <TabsTrigger value="quickwins">Início Rápido</TabsTrigger>
             <TabsTrigger value="validation">Validação</TabsTrigger>
           </TabsList>
+
+          {/* Summary */}
+          <TabsContent value="summary" className="mt-6">
+            <FinalConsolidatedReport />
+          </TabsContent>
 
           {/* Features */}
           <TabsContent value="features" className="space-y-4 mt-6">
