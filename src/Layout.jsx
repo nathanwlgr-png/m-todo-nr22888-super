@@ -113,6 +113,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H', tourId: 'dashboard' },
     { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
     { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
+    { icon: Target, label: '🎯 Funil Kanban', page: 'SalesFunnelKanban' },
     { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
     { icon: Bell, label: 'Aprovar Msgs', page: 'MessageApproval', badge: true },
     { icon: MessageSquare, label: 'Histórico Msgs', page: 'MessageHistory' },
