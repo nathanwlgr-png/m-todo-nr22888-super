@@ -675,7 +675,7 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
               { value: 'pesquisa', label: '🔍 Busca' },
               { value: 'mercado', label: '📈 Mercado' },
               { value: 'notif', label: '⚙️ Ops' },
-              { value: 'seamaty', label: '💰 Seamaty' },
+              { value: 'precos', label: '💰 Preços' },
             ].map(({ value, label }) => (
               <button key={value} onClick={() => setActiveTab(value)}
                 className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-medium transition-colors ${activeTab === value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
@@ -946,8 +946,8 @@ Responda em português. Seja ESTRATÉGICO, cite dados. Use markdown estruturado.
             </Tabs>
           </TabsContent>
 
-          {/* ── TAB SEAMATY ── */}
-          <TabsContent value="seamaty" className="overflow-y-auto p-3">
+          {/* ── TAB PREÇOS SEAMATY ── */}
+          <TabsContent value="precos" className="overflow-y-auto p-3">
             <SeamatyPriceTableViewer />
           </TabsContent>
 
