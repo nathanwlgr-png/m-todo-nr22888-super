@@ -203,17 +203,28 @@ Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado 
 
       {/* Produtos */}
       <div className="grid grid-cols-1 gap-3">
-        {filteredProducts.map(product => (
+        {filteredProducts.map(product => {
+          const pack = getPackRule(product);
+          const unitPrice1 = pack && product.price_tier1 ? product.price_tier1 / pack.qty : null;
+          const unitPrice4 = pack && product.price_tier4 ? product.price_tier4 / pack.qty : null;
+          const unitPriceCash = pack && product.price_cash ? product.price_cash / pack.qty : null;
+
+          return (
           <Card key={product.id} className="p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   {categoryIcons[product.category]}
                   <h4 className="font-bold text-slate-800">{product.product_name}</h4>
                   <Badge variant="outline" className="text-xs">{product.product_code}</Badge>
                   {product.parameters_count && (
                     <Badge className="bg-blue-100 text-blue-800 text-xs">
                       {product.parameters_count} parâmetros
+                    </Badge>
+                  )}
+                  {pack && (
+                    <Badge className="bg-amber-100 text-amber-800 text-xs border border-amber-300">
+                      📦 {pack.label}
                     </Badge>
                   )}
                 </div>
@@ -227,7 +238,7 @@ Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado 
                 )}
 
                 {product.compatible_equipment && (
-                  <div className="flex gap-1 flex-wrap">
+                  <div className="flex gap-1 flex-wrap mb-2">
                     {product.compatible_equipment.map(eq => (
                       <Badge key={eq} variant="outline" className="text-xs bg-slate-50">
                         {eq}
@@ -235,20 +246,52 @@ Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado 
                     ))}
                   </div>
                 )}
+
+                {/* Preço unitário calculado — análise comparativa */}
+                {pack && (unitPrice1 || unitPriceCash) && (
+                  <div className="mt-2 p-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                    <p className="text-[10px] font-bold text-indigo-700 mb-1 flex items-center gap-1">
+                      <Calculator className="w-3 h-3" /> Preço por {pack.unit} (análise comparativa)
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      {unitPriceCash && (
+                        <div>
+                          <p className="text-[9px] text-slate-500">À vista / {pack.unit}</p>
+                          <p className="text-sm font-bold text-indigo-700">{formatPrice(unitPriceCash)}</p>
+                        </div>
+                      )}
+                      {unitPrice1 && (
+                        <div>
+                          <p className="text-[9px] text-slate-500">1 cx / {pack.unit}</p>
+                          <p className="text-sm font-semibold text-slate-700">{formatPrice(unitPrice1)}</p>
+                        </div>
+                      )}
+                      {unitPrice4 && (
+                        <div>
+                          <p className="text-[9px] text-slate-500">8+ cx / {pack.unit}</p>
+                          <p className="text-sm font-bold text-green-700">{formatPrice(unitPrice4)}</p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[9px] text-indigo-500 mt-1">
+                      💡 Compare com lab terceirizado para calcular economia
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Preços */}
-              <div className="text-right">
+              {/* Preços por caixa */}
+              <div className="text-right shrink-0">
                 {product.price_cash && (
                   <div className="mb-2">
-                    <p className="text-xs text-slate-500">À vista</p>
+                    <p className="text-xs text-slate-500">À vista/cx</p>
                     <p className="text-lg font-bold text-green-700">{formatPrice(product.price_cash)}</p>
                   </div>
                 )}
                 
                 {product.price_5x_card && (
                   <div className="mb-2">
-                    <p className="text-xs text-slate-500">5x cartão</p>
+                    <p className="text-xs text-slate-500">5x cartão/cx</p>
                     <p className="text-sm font-semibold text-blue-700">{formatPrice(product.price_5x_card)}</p>
                   </div>
                 )}
@@ -276,7 +319,8 @@ Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado 
               </div>
             </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       {filteredProducts.length === 0 && (
