@@ -26,12 +26,13 @@ Deno.serve(async (req) => {
     let visit = data;
     const visitId = entity_id || event?.entity_id || data?.id;
 
-    if (!visit && visitId) {
+    // Se não temos dados completos, buscar do banco
+    if (!visit?.id && visitId) {
       visit = await base44.asServiceRole.entities.Visit.get(visitId).catch(() => null);
     }
 
-    if (!visit) {
-      return Response.json({ success: false, reason: 'Visita não encontrada' });
+    if (!visit || !visit.id) {
+      return Response.json({ success: false, reason: 'Visita não encontrada ou sem ID' });
     }
 
     // Somente sincroniza visitas agendadas
