@@ -206,6 +206,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
+import SalesOptimizationCenter from './pages/SalesOptimizationCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -369,6 +370,7 @@ export const PAGES = {
     "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
+    "SalesOptimizationCenter": SalesOptimizationCenter,
 }
 
 export const pagesConfig = {
