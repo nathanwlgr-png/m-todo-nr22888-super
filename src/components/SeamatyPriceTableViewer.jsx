@@ -5,8 +5,35 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, DollarSign, Package, Layers, TestTube, Database } from 'lucide-react';
+import { Search, DollarSign, Package, Layers, TestTube, Database, Calculator, Info } from 'lucide-react';
 import { toast } from 'sonner';
+
+// ─── REGRAS DE QUANTIDADE POR EMBALAGEM ───────────────────────────────────────
+// PCR (cassetes IPCR/VQ1): vêm 6 por caixa
+// Bioquímica (SMT-120VP, QT3, 3DX rotores/kits): vêm 10 ou 12
+// Hemogásio (cartuchos VG1/VG2): vêm 20 por caixa
+const PACK_RULES = {
+  pcr: { qty: 6, label: '6 cassetes/cx', unit: 'cassete' },
+  bioquimica: { qty: 10, label: '10 testes/cx', unit: 'teste' },
+  imunofluorescencia: { qty: 10, label: '10 testes/cx', unit: 'teste' },
+  hemogas: { qty: 20, label: '20 cartuchos/cx', unit: 'cartucho' },
+  hematologia: { qty: 10, label: '10 testes/cx', unit: 'teste' },
+};
+
+const getPackRule = (product) => {
+  const cat = product.category?.toLowerCase();
+  const name = (product.product_name || '').toLowerCase();
+  const code = (product.product_code || '').toLowerCase();
+  // Detecta PCR (IPCR, VQ1)
+  if (cat === 'pcr' || name.includes('pcr') || code.includes('pcr') || code.includes('ipcr') || code.includes('vq')) return PACK_RULES.pcr;
+  // Detecta Hemogásio
+  if (cat === 'hemogas' || name.includes('hemogas') || name.includes('cartucho') || name.includes('gas') || code.includes('vg')) return PACK_RULES.hemogas;
+  // Detecta Bioquímica
+  if (cat === 'bioquimica' || name.includes('bioquim') || name.includes('smt') || name.includes('qt3') || name.includes('3dx') || code.includes('smt') || code.includes('qt')) return PACK_RULES.bioquimica;
+  // Imunofluorescência
+  if (cat === 'imunofluorescencia' || name.includes('imuno') || name.includes('vi1') || code.includes('vi')) return PACK_RULES.imunofluorescencia;
+  return null;
+};
 
 export default function SeamatyPriceTableViewer() {
   const [products, setProducts] = useState([]);
