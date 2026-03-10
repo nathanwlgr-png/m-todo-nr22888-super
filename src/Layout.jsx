@@ -233,6 +233,12 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               <div className="flex items-center gap-3">
+                <Link to={createPageUrl('GlobalSearch')}>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <span className="text-slate-600">🔍 Buscar</span>
+                    <kbd className="px-2 py-1 text-xs bg-slate-100 rounded">⌘K</kbd>
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('NotificationSettings')}>
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="w-5 h-5" />
