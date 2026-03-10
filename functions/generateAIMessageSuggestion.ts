@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
   try {
@@ -9,55 +9,45 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { clientId, channel, template, actionType } = await req.json();
+    const { client_id, context } = await req.json();
 
-    if (!clientId || !channel) {
-      return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!client_id) {
+      return Response.json({ error: 'Missing client_id' }, { status: 400 });
     }
 
     // Buscar dados do cliente
-    const client = await base44.entities.Client.filter({ id: clientId });
-    const clientData = client[0];
+    const clients = await base44.entities.Client.list();
+    const clientData = clients.find(c => c.id === client_id);
 
     if (!clientData) {
       return Response.json({ error: 'Client not found' }, { status: 404 });
     }
 
-    const prompt = `
-Você é um especialista em vendas e comunicação. Gere uma mensagem ${channel === 'email' ? 'de email' : 'de WhatsApp'} personalizada e persuasiva para o seguinte cliente:
+    const prompt = `Você é um especialista em vendas consultivas de equipamentos veterinários da Seamaty.
 
-Cliente: ${clientData.full_name || clientData.first_name}
-Empresa: ${clientData.clinic_name || clientData.razao_social || 'Clínica/Empresa'}
+CLIENTE:
+Nome: ${clientData.full_name || clientData.first_name}
 Status: ${clientData.status}
-Equipamento de interesse: ${clientData.equipment_interest || 'Não especificado'}
-Dores principais: ${clientData.main_pains?.join(', ') || 'Não identificadas'}
-Score de compra: ${clientData.purchase_score || 'Não calculado'}
+Score: ${clientData.purchase_score}%
+Perfil: ${clientData.behavioral_profile || 'N/A'}
+Equipamento de Interesse: ${clientData.equipment_interest || 'Não definido'}
+Dores: ${clientData.main_pains?.join(', ') || 'Não identificadas'}
 
-${actionType === 'follow_up' ? 'Este é um follow-up após uma visita ou contato anterior. Reforce o relacionamento e próximos passos.' : ''}
-${actionType === 'proposal' ? 'Este é um follow-up sobre uma proposta enviada. Gere urgência e interesse.' : ''}
-${actionType === 'reactivation' ? 'Este cliente está inativo há mais de 30 dias. Reative o interesse de forma estratégica.' : ''}
-${actionType === 'welcome' ? 'Este é um primeiro contato com novo lead. Crie interesse e agende conversa.' : ''}
+CONTEXTO: ${context || 'follow_up'}
 
-${channel === 'whatsapp' ? 'Mantenha a mensagem concisa (máximo 500 caracteres), use emojis estrategicamente e linguagem casual mas profissional.' : 'Crie um email com assunto e corpo, mantendo tom profissional e persuasivo.'}
+TAREFA:
+Gere uma mensagem WhatsApp CURTA (máx 300 caracteres), personalizada e estratégica para este cliente.
+Use emojis sutis e linguagem consultiva.
 
-${channel === 'email' ? 'Responda em JSON com: {"subject": "assunto", "body": "corpo do email"}' : 'Responda apenas com a mensagem WhatsApp.'}
-    `;
+Retorne APENAS a mensagem pronta para enviar.`;
 
     const response = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: channel === 'email' ? {
-        type: 'object',
-        properties: {
-          subject: { type: 'string' },
-          body: { type: 'string' }
-        }
-      } : undefined
+      prompt
     });
 
     return Response.json({
-      suggestion: response,
-      clientName: clientData.full_name || clientData.first_name,
-      channel
+      message: response,
+      client_name: clientData.full_name || clientData.first_name
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
