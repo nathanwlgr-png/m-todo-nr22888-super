@@ -94,6 +94,7 @@ import DataHub from './pages/DataHub';
 import DocumentCenter from './pages/DocumentCenter';
 import DocumentRepository from './pages/DocumentRepository';
 import DocumentTracking from './pages/DocumentTracking';
+import EliteVetClientSearch from './pages/EliteVetClientSearch';
 import Equipment from './pages/Equipment';
 import EquipmentCatalog from './pages/EquipmentCatalog';
 import EquipmentCatalogManager from './pages/EquipmentCatalogManager';
@@ -114,6 +115,7 @@ import ImportClientsTable from './pages/ImportClientsTable';
 import ImportLeads from './pages/ImportLeads';
 import ImportPriceList from './pages/ImportPriceList';
 import Integrations from './pages/Integrations';
+import IntelligenceDashboard from './pages/IntelligenceDashboard';
 import InteractiveDashboard from './pages/InteractiveDashboard';
 import KnowledgeBaseManager from './pages/KnowledgeBaseManager';
 import LeadProfile from './pages/LeadProfile';
@@ -156,9 +158,9 @@ import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboa
 import ProductManager from './pages/ProductManager';
 import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplateManager from './pages/ProposalTemplateManager';
+import Reports from './pages/Reports';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
-import Reports from './pages/Reports';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
 import RegionalCompetitorAnalysis from './pages/RegionalCompetitorAnalysis';
 import RegionalSearch from './pages/RegionalSearch';
@@ -178,6 +180,7 @@ import SalesFunnel from './pages/SalesFunnel';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
+import SentimentAnalysisDashboard from './pages/SentimentAnalysisDashboard';
 import SentimentDashboard from './pages/SentimentDashboard';
 import SignedContracts from './pages/SignedContracts';
 import SystemAudit from './pages/SystemAudit';
@@ -199,9 +202,6 @@ import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import IntelligenceDashboard from './pages/IntelligenceDashboard';
-import EliteVetClientSearch from './pages/EliteVetClientSearch';
-import SentimentAnalysisDashboard from './pages/SentimentAnalysisDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -253,6 +253,7 @@ export const PAGES = {
     "DocumentCenter": DocumentCenter,
     "DocumentRepository": DocumentRepository,
     "DocumentTracking": DocumentTracking,
+    "EliteVetClientSearch": EliteVetClientSearch,
     "Equipment": Equipment,
     "EquipmentCatalog": EquipmentCatalog,
     "EquipmentCatalogManager": EquipmentCatalogManager,
@@ -273,6 +274,7 @@ export const PAGES = {
     "ImportLeads": ImportLeads,
     "ImportPriceList": ImportPriceList,
     "Integrations": Integrations,
+    "IntelligenceDashboard": IntelligenceDashboard,
     "InteractiveDashboard": InteractiveDashboard,
     "KnowledgeBaseManager": KnowledgeBaseManager,
     "LeadProfile": LeadProfile,
@@ -315,9 +317,9 @@ export const PAGES = {
     "ProductManager": ProductManager,
     "ProposalGenerator": ProposalGenerator,
     "ProposalTemplateManager": ProposalTemplateManager,
+    "Reports": Reports,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
-    "Reports": Reports,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
     "RegionalCompetitorAnalysis": RegionalCompetitorAnalysis,
     "RegionalSearch": RegionalSearch,
@@ -337,6 +339,7 @@ export const PAGES = {
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
+    "SentimentAnalysisDashboard": SentimentAnalysisDashboard,
     "SentimentDashboard": SentimentDashboard,
     "SignedContracts": SignedContracts,
     "SystemAudit": SystemAudit,
@@ -358,9 +361,6 @@ export const PAGES = {
     "WhatsAppInbox": WhatsAppInbox,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "IntelligenceDashboard": IntelligenceDashboard,
-    "EliteVetClientSearch": EliteVetClientSearch,
-    "SentimentAnalysisDashboard": SentimentAnalysisDashboard,
 }
 
 export const pagesConfig = {

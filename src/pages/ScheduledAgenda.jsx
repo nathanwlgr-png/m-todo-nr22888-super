@@ -17,6 +17,7 @@ import GPSClinicaRadar from '@/components/GPSClinicaRadar';
 import VincularTelefones from '@/components/VincularTelefones';
 import FloatingInfoCard from '@/components/FloatingInfoCard';
 import ContextualChatIA from '@/components/ContextualChatIA';
+import GoogleCalendarSync from '@/components/GoogleCalendarSync';
 
 const STATUS_COLOR = {
   quente: 'bg-red-100 text-red-700 border-red-300',
@@ -99,9 +100,9 @@ export default function ScheduledAgenda() {
 
   const abasConfig = [
     { id: 'agenda', icon: Calendar, label: 'Agenda' },
+    { id: 'gcal', icon: Calendar, label: 'GCal' },
     { id: 'chat', icon: MessageCircle, label: 'Chat IA' },
     { id: 'gps', icon: Navigation, label: 'GPS' },
-    { id: 'contatos', icon: Phone, label: 'Contatos' },
     { id: 'ia', icon: Zap, label: 'Rota IA' },
   ];
 
@@ -414,6 +415,13 @@ export default function ScheduledAgenda() {
               </div>
             )}
           </>
+        )}
+
+        {/* ══ ABA GOOGLE CALENDAR ══ */}
+        {abaAtiva === 'gcal' && (
+          <div className="mt-8">
+            <GoogleCalendarSync />
+          </div>
         )}
 
         {/* ══ ABA CHAT IA ══ */}
