@@ -67,6 +67,47 @@ export default function SeamatyPriceTableViewer() {
     }
   };
 
+  // Salva as regras de embalagem como conhecimento permanente
+  const savePackRulesKnowledge = async () => {
+    try {
+      await base44.entities.AIKnowledgeDocument.create({
+        title: 'Regras de Embalagem Seamaty Brasil — Cálculo de Preço Unitário',
+        content: `REGRAS OFICIAIS DE QUANTIDADE POR EMBALAGEM — SEAMATY BRASIL
+
+📦 PCR (Cassetes IPCR / VQ1):
+- Quantidade por caixa: 6 cassetes
+- Cálculo: preço_cx ÷ 6 = preço por cassete
+- Produto: VQ1 PCR Quantitativo
+
+📦 Bioquímica (Rotores / Kits — SMT-120VP, QT3, 3DX):
+- Quantidade por caixa: 10 ou 12 testes
+- Padrão adotado: 10 testes/cx
+- Produtos: SMT-120VP, QT3, LAB-3DX, rotores bioquímicos
+
+📦 Hemogásio (Cartuchos — VG1 / VG2):
+- Quantidade por caixa: 20 cartuchos
+- Cálculo: preço_cx ÷ 20 = preço por cartucho
+- Produtos: VG1, VG2 (gases sanguíneos + eletrólitos)
+
+📦 Imunofluorescência (Cassetes — Vi1):
+- Quantidade por caixa: 10 testes
+- Produto: Vi1 Imunofluorescência
+
+USO NA ANÁLISE COMPARATIVA:
+Ao apresentar preços de insumos ao cliente, sempre calcule e mostre o preço unitário por cassete/cartucho/teste para facilitar a comparação com laboratório terceirizado e concorrentes.
+
+Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado que cobra R$Y por exame, ou seja, economia de R$Z por exame realizado in-house."`,
+        content_type: 'pricing_rules',
+        source: 'Nathan Rosa — Regra operacional Seamaty Brasil',
+        tags: ['seamaty', 'insumos', 'preco-unitario', 'pcr', 'bioquimica', 'hemogas', 'cassete', 'cartucho', 'embalagem'],
+        is_active: true,
+      });
+      toast.success('✅ Regras de embalagem salvas na base de conhecimento!');
+    } catch (e) {
+      toast.error('Erro ao salvar: ' + e.message);
+    }
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.product_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          p.product_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
