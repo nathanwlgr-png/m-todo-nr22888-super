@@ -13,6 +13,7 @@ import { createPageUrl } from '@/utils';
 import SalesValidationReport from '@/components/SalesValidationReport';
 import SalesOptimizationSummary from '@/components/SalesOptimizationSummary';
 import FinalImplementationChecklist from '@/components/FinalImplementationChecklist';
+import StrategicRecommendations from '@/components/StrategicRecommendations';
 
 export default function SalesOptimizationCenter() {
   const features = [
@@ -295,6 +296,9 @@ export default function SalesOptimizationCenter() {
 
         {/* Resumo de Otimizações */}
         <SalesOptimizationSummary />
+
+        {/* Recomendações Estratégicas */}
+        <StrategicRecommendations />
 
         {/* Próximas Recomendações */}
         <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
