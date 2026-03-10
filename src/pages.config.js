@@ -204,6 +204,7 @@ import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import ExecutiveSalesDashboard from './pages/ExecutiveSalesDashboard';
+import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import __Layout from './Layout.jsx';
 
 
@@ -365,6 +366,7 @@ export const PAGES = {
     "WorkflowAutomation": WorkflowAutomation,
     "SalesFunnelKanban": SalesFunnelKanban,
     "ExecutiveSalesDashboard": ExecutiveSalesDashboard,
+    "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
 }
 
 export const pagesConfig = {

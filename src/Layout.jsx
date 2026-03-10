@@ -119,6 +119,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: MessageSquare, label: 'Histórico Msgs', page: 'MessageHistory' },
     { icon: MessageSquare, label: 'WhatsApp Master', page: 'WhatsAppAgentMaster' },
     { icon: MessageSquare, label: 'WhatsApp Hub', page: 'WhatsAppHub' },
+    { icon: MessageSquare, label: '📱 Integração WhatsApp', page: 'WhatsAppIntegrationHub' },
     { icon: Target, label: 'Segmentos', page: 'ClientSegmentation' },
     { icon: TrendingUp, label: 'Sentimento', page: 'SentimentDashboard' },
     { icon: Sparkles, label: 'Conteúdo IA', page: 'AIContentStudio' },
