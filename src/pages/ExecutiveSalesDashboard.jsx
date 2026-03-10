@@ -13,6 +13,9 @@ import {
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
+import AISalesInsightsCard from '../components/AISalesInsightsCard';
+import ProactiveSalesAlerts from '../components/ProactiveSalesAlerts';
+import SmartRouteOptimizer from '../components/SmartRouteOptimizer';
 
 export default function ExecutiveSalesDashboard() {
   const navigate = useNavigate();
@@ -119,6 +122,17 @@ Considere: tempo no funil, engajamento, fit com ICP, valor do negócio.`;
   const pipelineValue = leads
     .filter(l => ['qualificado', 'proposta', 'negociacao'].includes(l.pipeline_stage))
     .reduce((sum, l) => sum + (l.estimated_deal_value || 0), 0);
+
+  // Buscar clientes com insights de IA
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients-dashboard'],
+    queryFn: () => base44.entities.Client.list(),
+  });
+
+  const topClients = clients
+    .filter(c => c.health_score > 70 || c.ai_sales_intelligence?.conversion_probability > 70)
+    .sort((a, b) => (b.health_score || 0) - (a.health_score || 0))
+    .slice(0, 5);
 
   const predictedRevenue = predictions.reduce((sum, p) => 
     sum + (p.estimated_value * (p.probability / 100)), 0
@@ -243,6 +257,28 @@ Considere: tempo no funil, engajamento, fit com ICP, valor do negócio.`;
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Alertas e Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <ProactiveSalesAlerts />
+          <AISalesInsightsCard
+            title="🔥 Top Leads"
+            description="Leads com maior probabilidade de conversão"
+            items={hotLeads.slice(0, 5)}
+            type="lead"
+          />
+          <AISalesInsightsCard
+            title="⭐ Top Clientes"
+            description="Clientes com maior potencial"
+            items={topClients}
+            type="client"
+          />
+        </div>
+
+        {/* Otimizador de Rotas */}
+        <div className="mb-6">
+          <SmartRouteOptimizer />
         </div>
 
         {/* Gráficos */}

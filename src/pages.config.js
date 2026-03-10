@@ -131,6 +131,7 @@ import MarketResearch from './pages/MarketResearch';
 import MasterCRM from './pages/MasterCRM';
 import MasterControlPanel from './pages/MasterControlPanel';
 import MasterUnified from './pages/MasterUnified';
+import MaterialUploadHub from './pages/MaterialUploadHub';
 import MessageApproval from './pages/MessageApproval';
 import MessageHistory from './pages/MessageHistory';
 import MobVendedorAnalytics from './pages/MobVendedorAnalytics';
@@ -157,8 +158,8 @@ import PreVisitChecklist from './pages/PreVisitChecklist';
 import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboard';
 import ProductManager from './pages/ProductManager';
-import ProposalGenerator from './pages/ProposalGenerator';
 import Reports from './pages/Reports';
+import ProposalGenerator from './pages/ProposalGenerator';
 import ProposalTemplateManager from './pages/ProposalTemplateManager';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
@@ -205,7 +206,6 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import MaterialUploadHub from './pages/MaterialUploadHub';
 import __Layout from './Layout.jsx';
 
 
@@ -294,6 +294,7 @@ export const PAGES = {
     "MasterCRM": MasterCRM,
     "MasterControlPanel": MasterControlPanel,
     "MasterUnified": MasterUnified,
+    "MaterialUploadHub": MaterialUploadHub,
     "MessageApproval": MessageApproval,
     "MessageHistory": MessageHistory,
     "MobVendedorAnalytics": MobVendedorAnalytics,
@@ -320,8 +321,8 @@ export const PAGES = {
     "PredictiveAnalyticsDashboard": PredictiveAnalyticsDashboard,
     "ProactiveIntelligenceDashboard": ProactiveIntelligenceDashboard,
     "ProductManager": ProductManager,
-    "ProposalGenerator": ProposalGenerator,
     "Reports": Reports,
+    "ProposalGenerator": ProposalGenerator,
     "ProposalTemplateManager": ProposalTemplateManager,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
@@ -368,7 +369,6 @@ export const PAGES = {
     "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "MaterialUploadHub": MaterialUploadHub,
 }
 
 export const pagesConfig = {
