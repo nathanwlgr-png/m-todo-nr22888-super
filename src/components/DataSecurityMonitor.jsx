@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Shield, 
   ShieldAlert, 
@@ -81,53 +81,31 @@ export default function DataSecurityMonitor() {
   const SecurityIcon = security.icon;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
-      {/* Alerta de Mudança de Rede */}
-      {showAlert && isOnline && (
-        <Alert className="w-80 bg-yellow-50 border-yellow-300 animate-in slide-in-from-bottom-2">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-sm">
-            <p className="font-semibold text-yellow-800">Nova Conexão Detectada</p>
-            <p className="text-yellow-700 mt-1">
-              Você se conectou a uma rede {isSecure ? 'segura (HTTPS)' : 'não segura'}. 
-              Seus dados estão protegidos por criptografia.
-            </p>
-            <div className="flex gap-2 mt-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs"
-                onClick={() => setShowAlert(false)}
-              >
-                Entendi
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Monitor Compacto */}
-      <Card className={`w-64 border-2 transition-all ${
-        security.color === 'green' ? 'border-green-300 bg-green-50' :
-        security.color === 'yellow' ? 'border-yellow-300 bg-yellow-50' :
-        security.color === 'red' ? 'border-red-300 bg-red-50' :
-        'border-slate-300 bg-slate-50'
-      }`}>
-        <CardContent className="p-3">
-          <div className="space-y-2">
-            {/* Status Principal */}
+    <div className="fixed bottom-6 right-6 z-50">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className={`shadow-lg border-2 ${
+              security.color === 'green' ? 'border-green-500 bg-green-50 hover:bg-green-100' :
+              security.color === 'yellow' ? 'border-yellow-500 bg-yellow-50 hover:bg-yellow-100' :
+              security.color === 'red' ? 'border-red-500 bg-red-50 hover:bg-red-100' :
+              'border-slate-500 bg-slate-50 hover:bg-slate-100'
+            }`}
+          >
+            <SecurityIcon className={`w-4 h-4 ${
+              security.color === 'green' ? 'text-green-600' :
+              security.color === 'yellow' ? 'text-yellow-600' :
+              security.color === 'red' ? 'text-red-600' :
+              'text-slate-600'
+            }`} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64" align="end">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <SecurityIcon className={`w-5 h-5 ${
-                  security.color === 'green' ? 'text-green-600' :
-                  security.color === 'yellow' ? 'text-yellow-600' :
-                  security.color === 'red' ? 'text-red-600' :
-                  'text-slate-600'
-                }`} />
-                <span className="text-sm font-semibold">
-                  Segurança dos Dados
-                </span>
-              </div>
+              <h4 className="font-semibold text-sm">Segurança</h4>
               <Badge className={`${
                 security.color === 'green' ? 'bg-green-600' :
                 security.color === 'yellow' ? 'bg-yellow-600' :
@@ -138,8 +116,7 @@ export default function DataSecurityMonitor() {
               </Badge>
             </div>
 
-            {/* Indicadores */}
-            <div className="space-y-1 text-xs">
+            <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-600">Conexão:</span>
                 <div className="flex items-center gap-1">
@@ -192,7 +169,6 @@ export default function DataSecurityMonitor() {
               </div>
             </div>
 
-            {/* Mensagem de Status */}
             {!isOnline && (
               <div className="flex items-start gap-2 bg-slate-100 p-2 rounded text-xs">
                 <Info className="w-3 h-3 text-slate-600 flex-shrink-0 mt-0.5" />
@@ -206,13 +182,13 @@ export default function DataSecurityMonitor() {
               <div className="flex items-start gap-2 bg-green-100 p-2 rounded text-xs">
                 <CheckCircle2 className="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5" />
                 <p className="text-green-700">
-                  Todos os dados estão criptografados e seguros.
+                  Dados criptografados e seguros.
                 </p>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
