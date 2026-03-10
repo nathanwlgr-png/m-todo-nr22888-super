@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import SalesValidationReport from '@/components/SalesValidationReport';
 import SalesOptimizationSummary from '@/components/SalesOptimizationSummary';
+import FinalImplementationChecklist from '@/components/FinalImplementationChecklist';
 
 export default function SalesOptimizationCenter() {
   const features = [
@@ -257,7 +258,8 @@ export default function SalesOptimizationCenter() {
           </TabsContent>
 
           {/* Validation */}
-          <TabsContent value="validation" className="mt-6">
+          <TabsContent value="validation" className="mt-6 space-y-4">
+            <FinalImplementationChecklist />
             <SalesValidationReport />
             
             <Card className="mt-4 border-2 border-green-200">
