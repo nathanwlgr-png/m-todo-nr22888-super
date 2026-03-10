@@ -14,6 +14,8 @@ import SalesValidationReport from '@/components/SalesValidationReport';
 import SalesOptimizationSummary from '@/components/SalesOptimizationSummary';
 import FinalImplementationChecklist from '@/components/FinalImplementationChecklist';
 import StrategicRecommendations from '@/components/StrategicRecommendations';
+import ExecutiveSummary from '@/components/ExecutiveSummary';
+import QuickStartGuide from '@/components/QuickStartGuide';
 
 export default function SalesOptimizationCenter() {
   const features = [
@@ -129,6 +131,9 @@ export default function SalesOptimizationCenter() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Executive Summary */}
+        <ExecutiveSummary />
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl mb-4">
@@ -204,6 +209,8 @@ export default function SalesOptimizationCenter() {
 
           {/* Quick Wins */}
           <TabsContent value="quickwins" className="space-y-4 mt-6">
+            <QuickStartGuide />
+
             <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200">
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg text-amber-900 mb-2 flex items-center gap-2">
