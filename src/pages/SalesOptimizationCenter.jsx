@@ -17,6 +17,7 @@ import StrategicRecommendations from '@/components/StrategicRecommendations';
 import ExecutiveSummary from '@/components/ExecutiveSummary';
 import QuickStartGuide from '@/components/QuickStartGuide';
 import FinalConsolidatedReport from '@/components/FinalConsolidatedReport';
+import SystemReadinessIndicator from '@/components/SystemReadinessIndicator';
 
 export default function SalesOptimizationCenter() {
   const features = [
@@ -171,7 +172,8 @@ export default function SalesOptimizationCenter() {
           </TabsList>
 
           {/* Summary */}
-          <TabsContent value="summary" className="mt-6">
+          <TabsContent value="summary" className="mt-6 space-y-4">
+            <SystemReadinessIndicator />
             <FinalConsolidatedReport />
           </TabsContent>
 
