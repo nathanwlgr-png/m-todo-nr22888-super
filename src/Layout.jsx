@@ -5,6 +5,8 @@ import { AILimitProtection } from '@/components/AILimitProtection';
 import AIUsageIndicator from '@/components/AIUsageIndicator';
 import FloatingExportButton from '@/components/FloatingExportButton';
 import FloatingPerformanceButton from '@/components/FloatingPerformanceButton';
+import EconomicModeToggle from '@/components/EconomicModeToggle';
+import DataSecurityMonitor from '@/components/DataSecurityMonitor';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
         Home, Users, UserPlus, Route, Settings, Zap, 
@@ -110,6 +112,7 @@ export default function Layout({ children, currentPageName }) {
   const menuItems = [
     { icon: Sparkles, label: '⚡ Master CRM NR22', page: 'MasterCRM', tourId: 'master-crm' },
     { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
+    { icon: Upload, label: '📤 Envio Direto Material', page: 'MaterialUploadHub' },
     { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H', tourId: 'dashboard' },
     { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
     { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
@@ -235,6 +238,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               <div className="flex items-center gap-3">
+                <EconomicModeToggle />
                 <Link to={createPageUrl('GlobalSearch')}>
                   <Button variant="outline" size="sm" className="gap-2">
                     <span className="text-slate-600">🔍 Buscar</span>
@@ -265,6 +269,7 @@ export default function Layout({ children, currentPageName }) {
       <FloatingExportButton />
       <AIUsageIndicator />
       <FloatingPerformanceButton />
+      <DataSecurityMonitor />
     </AILimitProtection>
   );
 }

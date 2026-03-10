@@ -102,6 +102,7 @@ import EquipmentComparison from './pages/EquipmentComparison';
 import EquipmentConsumables from './pages/EquipmentConsumables';
 import EquipmentPriceList from './pages/EquipmentPriceList';
 import EquipmentSalesCenter from './pages/EquipmentSalesCenter';
+import ExecutiveSalesDashboard from './pages/ExecutiveSalesDashboard';
 import ExportedDocuments from './pages/ExportedDocuments';
 import FollowUpAssistant from './pages/FollowUpAssistant';
 import FollowUpSequences from './pages/FollowUpSequences';
@@ -157,8 +158,8 @@ import PredictiveAnalyticsDashboard from './pages/PredictiveAnalyticsDashboard';
 import ProactiveIntelligenceDashboard from './pages/ProactiveIntelligenceDashboard';
 import ProductManager from './pages/ProductManager';
 import ProposalGenerator from './pages/ProposalGenerator';
-import ProposalTemplateManager from './pages/ProposalTemplateManager';
 import Reports from './pages/Reports';
+import ProposalTemplateManager from './pages/ProposalTemplateManager';
 import ProposalTemplates from './pages/ProposalTemplates';
 import ProspectingScripts from './pages/ProspectingScripts';
 import RealtimeSalesFunnel from './pages/RealtimeSalesFunnel';
@@ -177,6 +178,7 @@ import SalesCoachingDashboard from './pages/SalesCoachingDashboard';
 import SalesDashboard from './pages/SalesDashboard';
 import SalesForecastPage from './pages/SalesForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
+import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
@@ -200,11 +202,10 @@ import WhatsAppAgentMaster from './pages/WhatsAppAgentMaster';
 import WhatsAppDataAccess from './pages/WhatsAppDataAccess';
 import WhatsAppHub from './pages/WhatsAppHub';
 import WhatsAppInbox from './pages/WhatsAppInbox';
+import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import SalesFunnelKanban from './pages/SalesFunnelKanban';
-import ExecutiveSalesDashboard from './pages/ExecutiveSalesDashboard';
-import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
+import MaterialUploadHub from './pages/MaterialUploadHub';
 import __Layout from './Layout.jsx';
 
 
@@ -264,6 +265,7 @@ export const PAGES = {
     "EquipmentConsumables": EquipmentConsumables,
     "EquipmentPriceList": EquipmentPriceList,
     "EquipmentSalesCenter": EquipmentSalesCenter,
+    "ExecutiveSalesDashboard": ExecutiveSalesDashboard,
     "ExportedDocuments": ExportedDocuments,
     "FollowUpAssistant": FollowUpAssistant,
     "FollowUpSequences": FollowUpSequences,
@@ -319,8 +321,8 @@ export const PAGES = {
     "ProactiveIntelligenceDashboard": ProactiveIntelligenceDashboard,
     "ProductManager": ProductManager,
     "ProposalGenerator": ProposalGenerator,
-    "ProposalTemplateManager": ProposalTemplateManager,
     "Reports": Reports,
+    "ProposalTemplateManager": ProposalTemplateManager,
     "ProposalTemplates": ProposalTemplates,
     "ProspectingScripts": ProspectingScripts,
     "RealtimeSalesFunnel": RealtimeSalesFunnel,
@@ -339,6 +341,7 @@ export const PAGES = {
     "SalesDashboard": SalesDashboard,
     "SalesForecastPage": SalesForecastPage,
     "SalesFunnel": SalesFunnel,
+    "SalesFunnelKanban": SalesFunnelKanban,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
@@ -362,11 +365,10 @@ export const PAGES = {
     "WhatsAppDataAccess": WhatsAppDataAccess,
     "WhatsAppHub": WhatsAppHub,
     "WhatsAppInbox": WhatsAppInbox,
+    "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "SalesFunnelKanban": SalesFunnelKanban,
-    "ExecutiveSalesDashboard": ExecutiveSalesDashboard,
-    "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
+    "MaterialUploadHub": MaterialUploadHub,
 }
 
 export const pagesConfig = {
