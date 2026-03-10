@@ -31,8 +31,14 @@ Deno.serve(async (req) => {
       visit = await base44.asServiceRole.entities.Visit.get(visitId).catch(() => null);
     }
 
-    if (!visit || !visit.id) {
-      return Response.json({ success: false, reason: 'Visita não encontrada ou sem ID' });
+    if (!visit) {
+      return Response.json({ success: false, reason: 'Visita não encontrada' });
+    }
+
+    // Garantir que temos um ID válido
+    const finalVisitId = visit.id || visitId;
+    if (!finalVisitId) {
+      return Response.json({ success: false, reason: 'ID da visita não encontrado' });
     }
 
     // Somente sincroniza visitas agendadas
@@ -40,7 +46,7 @@ Deno.serve(async (req) => {
       // Se foi cancelada e tinha evento, deletar do Google Calendar
       if (visit.status === 'cancelada' && visit.google_calendar_event_id) {
         await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, { method: 'DELETE', headers }).catch(() => {});
-        await base44.asServiceRole.entities.Visit.update(visit.id, {
+        await base44.asServiceRole.entities.Visit.update(finalVisitId, {
           google_calendar_synced: false,
           google_calendar_event_id: null,
         }).catch(() => {});
@@ -102,7 +108,7 @@ Deno.serve(async (req) => {
     const gcalData = await gcalRes.json();
 
     if (gcalData.id) {
-      await base44.asServiceRole.entities.Visit.update(visit.id, {
+      await base44.asServiceRole.entities.Visit.update(finalVisitId, {
         google_calendar_synced: true,
         google_calendar_event_id: gcalData.id,
       });
