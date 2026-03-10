@@ -110,6 +110,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   const menuItems = [
+    { icon: Target, label: '🚀 Centro de Otimização', page: 'SalesOptimizationCenter' },
     { icon: Sparkles, label: '⚡ Master CRM NR22', page: 'MasterCRM', tourId: 'master-crm' },
     { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
     { icon: Upload, label: '📤 Envio Direto Material', page: 'MaterialUploadHub' },
