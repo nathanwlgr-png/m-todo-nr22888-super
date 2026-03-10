@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
+import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -205,6 +207,12 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        {/* GPS Auto-Discovery */}
+        <GPSAutoDiscovery />
+
+        {/* Análise de Clínicas por Cidade */}
+        <CityClinicAnalyzer />
 
         {/* Busca de páginas */}
         <Card className="mb-4">
