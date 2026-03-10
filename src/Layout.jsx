@@ -143,6 +143,7 @@ export default function Layout({ children, currentPageName }) {
     { icon: FileText, label: 'Relatórios Custom', page: 'CustomReports' },
     { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
     { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
+    { icon: TrendingUp, label: '📊 Dashboard Executivo', page: 'ExecutiveSalesDashboard' },
     { icon: Upload, label: 'Importar Clientes', page: 'ClientImportManager' },
     { icon: Brain, label: '🧠 Dashboard IA', page: 'IntelligenceDashboard' },
     { icon: Crown, label: '👑 Busca Elite Vet', page: 'EliteVetClientSearch' },
