@@ -71,36 +71,20 @@ export default function SeamatyPriceTableViewer() {
   const savePackRulesKnowledge = async () => {
     try {
       await base44.entities.AIKnowledgeDocument.create({
-        title: 'Regras de Embalagem Seamaty Brasil — Cálculo de Preço Unitário',
-        content: `REGRAS OFICIAIS DE QUANTIDADE POR EMBALAGEM — SEAMATY BRASIL
-
-📦 PCR (Cassetes IPCR / VQ1):
-- Quantidade por caixa: 6 cassetes
-- Cálculo: preço_cx ÷ 6 = preço por cassete
-- Produto: VQ1 PCR Quantitativo
-
-📦 Bioquímica (Rotores / Kits — SMT-120VP, QT3, 3DX):
-- Quantidade por caixa: 10 ou 12 testes
-- Padrão adotado: 10 testes/cx
-- Produtos: SMT-120VP, QT3, LAB-3DX, rotores bioquímicos
-
-📦 Hemogásio (Cartuchos — VG1 / VG2):
-- Quantidade por caixa: 20 cartuchos
-- Cálculo: preço_cx ÷ 20 = preço por cartucho
-- Produtos: VG1, VG2 (gases sanguíneos + eletrólitos)
-
-📦 Imunofluorescência (Cassetes — Vi1):
-- Quantidade por caixa: 10 testes
-- Produto: Vi1 Imunofluorescência
-
-USO NA ANÁLISE COMPARATIVA:
-Ao apresentar preços de insumos ao cliente, sempre calcule e mostre o preço unitário por cassete/cartucho/teste para facilitar a comparação com laboratório terceirizado e concorrentes.
-
-Exemplo argumento: "Cada cassete PCR custa R$X — vs laboratório terceirizado que cobra R$Y por exame, ou seja, economia de R$Z por exame realizado in-house."`,
-        content_type: 'pricing_rules',
-        source: 'Nathan Rosa — Regra operacional Seamaty Brasil',
+        title: 'Regras de Embalagem Seamaty Brasil — Cálculo de Preço Unitário por Cassete/Cartucho',
+        document_type: 'documento_operacional',
+        file_format: 'txt',
+        summary: 'PCR=6 cassetes/cx | Bioquímica=10 testes/cx | Hemogásio=20 cartuchos/cx | Imunofluorescência=10/cx',
+        extracted_text: 'PCR/IPCR/VQ1: 6 cassetes por caixa. Bioquímica SMT-120VP/QT3/3DX: 10 testes por caixa. Hemogásio VG1/VG2: 20 cartuchos por caixa. Imunofluorescência Vi1: 10 por caixa.',
+        key_data: {
+          pcr_ipcr_vq1: { qty_per_box: 6, unit: 'cassete', products: ['VQ1'] },
+          bioquimica: { qty_per_box: 10, unit: 'teste', products: ['SMT-120VP', 'QT3', 'LAB-3DX'] },
+          hemogas: { qty_per_box: 20, unit: 'cartucho', products: ['VG1', 'VG2'] },
+          imunofluorescencia: { qty_per_box: 10, unit: 'cassete', products: ['Vi1'] },
+        },
         tags: ['seamaty', 'insumos', 'preco-unitario', 'pcr', 'bioquimica', 'hemogas', 'cassete', 'cartucho', 'embalagem'],
         is_active: true,
+        upload_date: new Date().toISOString(),
       });
       toast.success('✅ Regras de embalagem salvas na base de conhecimento!');
     } catch (e) {
