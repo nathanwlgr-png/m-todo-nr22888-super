@@ -208,6 +208,7 @@ import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import DuplicateManager from './pages/DuplicateManager';
+import AutoDataManager from './pages/AutoDataManager';
 import __Layout from './Layout.jsx';
 
 
@@ -373,6 +374,7 @@ export const PAGES = {
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
     "DuplicateManager": DuplicateManager,
+    "AutoDataManager": AutoDataManager,
 }
 
 export const pagesConfig = {
