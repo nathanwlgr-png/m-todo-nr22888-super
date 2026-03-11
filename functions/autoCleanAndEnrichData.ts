@@ -92,18 +92,8 @@ Deno.serve(async (req) => {
         // Atualizar registro principal com dados mesclados
         try {
           await base44.asServiceRole.entities[entity_type].update(keepRecord.id, mergedData);
-          await new Promise(resolve => setTimeout(resolve, 300)); // Delay aumentado para rate limit
         } catch (err) {
-          if (err.message.includes('Rate limit')) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Espera maior se atingir rate limit
-            try {
-              await base44.asServiceRole.entities[entity_type].update(keepRecord.id, mergedData);
-            } catch (retryErr) {
-              results.errors.push(`Erro ao mesclar dados após retry: ${retryErr.message}`);
-            }
-          } else {
-            results.errors.push(`Erro ao mesclar dados: ${err.message}`);
-          }
+          results.errors.push(`Erro ao mesclar dados: ${err.message}`);
         }
 
         // Deletar duplicatas se auto_delete estiver ativo
@@ -113,20 +103,8 @@ Deno.serve(async (req) => {
               await base44.asServiceRole.entities[entity_type].delete(dup.id);
               results.duplicates_deleted++;
               seenRecords.add(dup.id);
-              await new Promise(resolve => setTimeout(resolve, 200)); // Delay aumentado
             } catch (err) {
-              if (err.message.includes('Rate limit')) {
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                try {
-                  await base44.asServiceRole.entities[entity_type].delete(dup.id);
-                  results.duplicates_deleted++;
-                  seenRecords.add(dup.id);
-                } catch (retryErr) {
-                  results.errors.push(`Erro ao deletar ${dup.id} após retry: ${retryErr.message}`);
-                }
-              } else {
-                results.errors.push(`Erro ao deletar ${dup.id}: ${err.message}`);
-              }
+              results.errors.push(`Erro ao deletar ${dup.id}: ${err.message}`);
             }
           }
         }
@@ -208,15 +186,9 @@ Deno.serve(async (req) => {
           try {
             await base44.asServiceRole.entities[entity_type].update(record.id, updates);
             results.records_enriched++;
-            await new Promise(resolve => setTimeout(resolve, 100)); // Delay para rate limit
           } catch (err) {
             results.errors.push(`Erro ao atualizar ${record.id}: ${err.message}`);
           }
-        }
-
-        // Delay adicional entre registros para APIs externas
-        if (enriched) {
-          await new Promise(resolve => setTimeout(resolve, 200));
         }
       }
     }
