@@ -92,6 +92,8 @@ Deno.serve(async (req) => {
         // Atualizar registro principal com dados mesclados
         try {
           await base44.asServiceRole.entities[entity_type].update(keepRecord.id, mergedData);
+          // Delay para evitar rate limit
+          await new Promise(resolve => setTimeout(resolve, 100));
         } catch (err) {
           results.errors.push(`Erro ao mesclar dados: ${err.message}`);
         }
@@ -103,6 +105,8 @@ Deno.serve(async (req) => {
               await base44.asServiceRole.entities[entity_type].delete(dup.id);
               results.duplicates_deleted++;
               seenRecords.add(dup.id);
+              // Delay para evitar rate limit
+              await new Promise(resolve => setTimeout(resolve, 50));
             } catch (err) {
               results.errors.push(`Erro ao deletar ${dup.id}: ${err.message}`);
             }
@@ -111,84 +115,96 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. ENRIQUECER DADOS
+    // 2. ENRIQUECER DADOS (Processamento em lotes para evitar rate limit)
     if (enrich_data) {
       const recordsToEnrich = await base44.asServiceRole.entities[entity_type].list();
+      const BATCH_SIZE = 10; // Processar 10 registros por vez
       
-      for (const record of recordsToEnrich) {
-        if (seenRecords.has(record.id)) continue; // Pular registros deletados
+      for (let i = 0; i < recordsToEnrich.length; i += BATCH_SIZE) {
+        const batch = recordsToEnrich.slice(i, i + BATCH_SIZE);
+        
+        for (const record of batch) {
+          if (seenRecords.has(record.id)) continue; // Pular registros deletados
 
-        let enriched = false;
-        const updates = {};
+          const updates = {};
 
-        // Enriquecer com dados de CNPJ
-        if (record.cnpj && !record.razao_social) {
-          try {
-            const cnpjClean = record.cnpj.replace(/\D/g, '');
-            const cnpjData = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjClean}`);
-            
-            if (cnpjData.ok) {
-              const data = await cnpjData.json();
+          // Enriquecer com dados de CNPJ
+          if (record.cnpj && !record.razao_social) {
+            try {
+              const cnpjClean = record.cnpj.replace(/\D/g, '');
+              const cnpjData = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjClean}`);
               
-              if (data.razao_social) updates.razao_social = data.razao_social;
-              if (data.nome_fantasia && !record.clinic_name) updates.clinic_name = data.nome_fantasia;
-              if (data.cnae_fiscal_descricao) updates.industry = data.cnae_fiscal_descricao;
-              
-              // Montar endereço completo
-              if (!record.address && data.logradouro) {
-                updates.address = `${data.logradouro}, ${data.numero || 'S/N'} - ${data.bairro}, ${data.municipio}/${data.uf}`;
-              }
-              if (!record.cep && data.cep) updates.cep = data.cep;
-              if (!record.city && data.municipio) updates.city = data.municipio;
-              
-              // Email e telefone
-              if (!record.email && data.email) updates.email = data.email;
-              if (!record.phone && data.ddd_telefone_1) {
-                updates.phone = `55${data.ddd_telefone_1.replace(/\D/g, '')}`;
-              }
-              
-              // Data de abertura
-              if (!record.clinic_opening_date && data.data_inicio_atividade) {
-                updates.clinic_opening_date = data.data_inicio_atividade;
-              }
-
-              enriched = true;
-            }
-          } catch (err) {
-            results.errors.push(`Erro ao buscar CNPJ ${record.cnpj}: ${err.message}`);
-          }
-        }
-
-        // Buscar dados de CEP se não tiver endereço completo
-        if (record.cep && !record.address) {
-          try {
-            const cepClean = record.cep.replace(/\D/g, '');
-            const cepData = await fetch(`https://viacep.com.br/ws/${cepClean}/json/`);
-            
-            if (cepData.ok) {
-              const data = await cepData.json();
-              
-              if (!data.erro) {
-                if (data.logradouro) {
-                  updates.address = `${data.logradouro} - ${data.bairro}, ${data.localidade}/${data.uf}`;
+              if (cnpjData.ok) {
+                const data = await cnpjData.json();
+                
+                if (data.razao_social) updates.razao_social = data.razao_social;
+                if (data.nome_fantasia && !record.clinic_name) updates.clinic_name = data.nome_fantasia;
+                if (data.cnae_fiscal_descricao) updates.industry = data.cnae_fiscal_descricao;
+                
+                // Montar endereço completo
+                if (!record.address && data.logradouro) {
+                  updates.address = `${data.logradouro}, ${data.numero || 'S/N'} - ${data.bairro}, ${data.municipio}/${data.uf}`;
                 }
-                if (!record.city && data.localidade) updates.city = data.localidade;
-                enriched = true;
+                if (!record.cep && data.cep) updates.cep = data.cep;
+                if (!record.city && data.municipio) updates.city = data.municipio;
+                
+                // Email e telefone
+                if (!record.email && data.email) updates.email = data.email;
+                if (!record.phone && data.ddd_telefone_1) {
+                  updates.phone = `55${data.ddd_telefone_1.replace(/\D/g, '')}`;
+                }
+                
+                // Data de abertura
+                if (!record.clinic_opening_date && data.data_inicio_atividade) {
+                  updates.clinic_opening_date = data.data_inicio_atividade;
+                }
               }
+              // Delay para APIs externas
+              await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (err) {
+              results.errors.push(`Erro ao buscar CNPJ ${record.cnpj}: ${err.message}`);
             }
-          } catch (err) {
-            results.errors.push(`Erro ao buscar CEP ${record.cep}: ${err.message}`);
+          }
+
+          // Buscar dados de CEP se não tiver endereço completo
+          if (record.cep && !record.address) {
+            try {
+              const cepClean = record.cep.replace(/\D/g, '');
+              const cepData = await fetch(`https://viacep.com.br/ws/${cepClean}/json/`);
+              
+              if (cepData.ok) {
+                const data = await cepData.json();
+                
+                if (!data.erro) {
+                  if (data.logradouro) {
+                    updates.address = `${data.logradouro} - ${data.bairro}, ${data.localidade}/${data.uf}`;
+                  }
+                  if (!record.city && data.localidade) updates.city = data.localidade;
+                }
+              }
+              // Delay para APIs externas
+              await new Promise(resolve => setTimeout(resolve, 150));
+            } catch (err) {
+              results.errors.push(`Erro ao buscar CEP ${record.cep}: ${err.message}`);
+            }
+          }
+
+          // Atualizar se houver novos dados
+          if (Object.keys(updates).length > 0) {
+            try {
+              await base44.asServiceRole.entities[entity_type].update(record.id, updates);
+              results.records_enriched++;
+              // Delay para evitar rate limit
+              await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (err) {
+              results.errors.push(`Erro ao atualizar ${record.id}: ${err.message}`);
+            }
           }
         }
-
-        // Atualizar se houver novos dados
-        if (Object.keys(updates).length > 0) {
-          try {
-            await base44.asServiceRole.entities[entity_type].update(record.id, updates);
-            results.records_enriched++;
-          } catch (err) {
-            results.errors.push(`Erro ao atualizar ${record.id}: ${err.message}`);
-          }
+        
+        // Pausa entre lotes
+        if (i + BATCH_SIZE < recordsToEnrich.length) {
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
     }
