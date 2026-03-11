@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     }
 
     // Buscar dados do cliente
-    const clients = await base44.entities.Client.list();
+    const clients = await base44.asServiceRole.entities.Client.list();
     const clientData = clients.find(c => c.id === client_id);
 
     if (!clientData) {
