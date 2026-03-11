@@ -92,9 +92,18 @@ Deno.serve(async (req) => {
         // Atualizar registro principal com dados mesclados
         try {
           await base44.asServiceRole.entities[entity_type].update(keepRecord.id, mergedData);
-          await new Promise(resolve => setTimeout(resolve, 100)); // Delay para rate limit
+          await new Promise(resolve => setTimeout(resolve, 300)); // Delay aumentado para rate limit
         } catch (err) {
-          results.errors.push(`Erro ao mesclar dados: ${err.message}`);
+          if (err.message.includes('Rate limit')) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Espera maior se atingir rate limit
+            try {
+              await base44.asServiceRole.entities[entity_type].update(keepRecord.id, mergedData);
+            } catch (retryErr) {
+              results.errors.push(`Erro ao mesclar dados após retry: ${retryErr.message}`);
+            }
+          } else {
+            results.errors.push(`Erro ao mesclar dados: ${err.message}`);
+          }
         }
 
         // Deletar duplicatas se auto_delete estiver ativo
@@ -104,9 +113,20 @@ Deno.serve(async (req) => {
               await base44.asServiceRole.entities[entity_type].delete(dup.id);
               results.duplicates_deleted++;
               seenRecords.add(dup.id);
-              await new Promise(resolve => setTimeout(resolve, 50)); // Delay para rate limit
+              await new Promise(resolve => setTimeout(resolve, 200)); // Delay aumentado
             } catch (err) {
-              results.errors.push(`Erro ao deletar ${dup.id}: ${err.message}`);
+              if (err.message.includes('Rate limit')) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                try {
+                  await base44.asServiceRole.entities[entity_type].delete(dup.id);
+                  results.duplicates_deleted++;
+                  seenRecords.add(dup.id);
+                } catch (retryErr) {
+                  results.errors.push(`Erro ao deletar ${dup.id} após retry: ${retryErr.message}`);
+                }
+              } else {
+                results.errors.push(`Erro ao deletar ${dup.id}: ${err.message}`);
+              }
             }
           }
         }
