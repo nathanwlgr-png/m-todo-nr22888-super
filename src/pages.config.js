@@ -180,6 +180,7 @@ import SalesDashboard from './pages/SalesDashboard';
 import SalesForecastPage from './pages/SalesForecastPage';
 import SalesFunnel from './pages/SalesFunnel';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
+import SalesOptimizationCenter from './pages/SalesOptimizationCenter';
 import SalesPerformanceDashboard from './pages/SalesPerformanceDashboard';
 import SalesReportsAI from './pages/SalesReportsAI';
 import ScheduledAgenda from './pages/ScheduledAgenda';
@@ -206,7 +207,7 @@ import WhatsAppInbox from './pages/WhatsAppInbox';
 import WhatsAppIntegrationHub from './pages/WhatsAppIntegrationHub';
 import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
-import SalesOptimizationCenter from './pages/SalesOptimizationCenter';
+import DuplicateManager from './pages/DuplicateManager';
 import __Layout from './Layout.jsx';
 
 
@@ -344,6 +345,7 @@ export const PAGES = {
     "SalesForecastPage": SalesForecastPage,
     "SalesFunnel": SalesFunnel,
     "SalesFunnelKanban": SalesFunnelKanban,
+    "SalesOptimizationCenter": SalesOptimizationCenter,
     "SalesPerformanceDashboard": SalesPerformanceDashboard,
     "SalesReportsAI": SalesReportsAI,
     "ScheduledAgenda": ScheduledAgenda,
@@ -370,7 +372,7 @@ export const PAGES = {
     "WhatsAppIntegrationHub": WhatsAppIntegrationHub,
     "WhatsAppMasterAssistant": WhatsAppMasterAssistant,
     "WorkflowAutomation": WorkflowAutomation,
-    "SalesOptimizationCenter": SalesOptimizationCenter,
+    "DuplicateManager": DuplicateManager,
 }
 
 export const pagesConfig = {
