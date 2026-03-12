@@ -58,6 +58,17 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route
+        path="/CampaignExamples"
+        element={
+          <LayoutWrapper currentPageName="CampaignExamples">
+            {(() => {
+              const CampaignExamples = require('./pages/CampaignExamples').default;
+              return <CampaignExamples />;
+            })()}
+          </LayoutWrapper>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
