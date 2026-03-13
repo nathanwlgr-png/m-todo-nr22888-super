@@ -11,7 +11,7 @@ import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
         Home, Users, UserPlus, Route, Settings, Zap, 
         Calendar, CheckSquare, BarChart3, Menu, X,
-        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin, Upload, Crown
+        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin, Upload, Crown, BookOpen
       } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -110,6 +110,7 @@ export default function Layout({ children, currentPageName }) {
   }, [currentPageName]);
 
   const menuItems = [
+    { icon: BookOpen, label: '📖 Manual do Sistema', page: 'SystemManual' },
     { icon: Target, label: '🚀 Centro de Otimização', page: 'SalesOptimizationCenter' },
     { icon: Sparkles, label: '⚡ Master CRM NR22', page: 'MasterCRM', tourId: 'master-crm' },
     { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
