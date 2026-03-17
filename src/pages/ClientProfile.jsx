@@ -1509,7 +1509,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
         <ClientJourneyMapper client={client} />
 
-        {/* 🤖 ASSISTENTE IA INTEGRADO */}
         <IntegratedAISalesAssistant client={client} />
 
         {/* 🎯 MATCH PERFEITO DE PRODUTO SEAMATY */}
