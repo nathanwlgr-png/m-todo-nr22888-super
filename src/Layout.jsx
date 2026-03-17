@@ -7,6 +7,7 @@ import FloatingExportButton from '@/components/FloatingExportButton';
 import FloatingPerformanceButton from '@/components/FloatingPerformanceButton';
 import EconomicModeToggle from '@/components/EconomicModeToggle';
 import DataSecurityMonitor from '@/components/DataSecurityMonitor';
+import FloatingCNPJScore from '@/components/FloatingCNPJScore';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { 
         Home, Users, UserPlus, Route, Settings, Zap, 
