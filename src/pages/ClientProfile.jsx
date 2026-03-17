@@ -728,6 +728,11 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
 
       {/* Content */}
       <div className="px-6 -mt-16 space-y-4">
+        {/* 🔍 SERASA — Consulta CNPJ + Score */}
+        <SerasaConsultaWidget
+          client={client}
+          onCnpjSaved={() => queryClient.invalidateQueries(['client', clientId])}
+        />
         {/* Status de Sincronização */}
         <OfflineSyncStatus />
         
