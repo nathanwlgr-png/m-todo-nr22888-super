@@ -1507,7 +1507,6 @@ Seja DIRETO, PRÁTICO e use linguagem de vendedor. Sem floreios.`
         {/* 🔮 ANÁLISE NUMEROLÓGICA PROFUNDA + GATILHOS */}
         <NumerologyDeepAnalysis client={client} />
 
-        {/* 🗺️ MAPEAMENTO DA JORNADA DO CLIENTE */}
         <ClientJourneyMapper client={client} />
 
         {/* 🤖 ASSISTENTE IA INTEGRADO */}
