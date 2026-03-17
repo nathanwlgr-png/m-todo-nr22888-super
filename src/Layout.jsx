@@ -273,6 +273,7 @@ export default function Layout({ children, currentPageName }) {
       <AIUsageIndicator />
       <FloatingPerformanceButton />
       <DataSecurityMonitor />
+      <FloatingCNPJScore />
     </AILimitProtection>
   );
 }
