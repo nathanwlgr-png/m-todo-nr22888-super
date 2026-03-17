@@ -162,6 +162,7 @@ import { toast } from 'sonner';
 import { useOfflineClientEdit } from '@/components/OfflineDataSync';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineSyncStatus from '@/components/OfflineSyncStatus';
+import SerasaConsultaWidget from '@/components/SerasaConsultaWidget';
 
 const getSegmentBadge = (segment) => {
   const config = {
