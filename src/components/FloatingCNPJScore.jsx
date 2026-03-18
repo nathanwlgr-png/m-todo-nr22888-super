@@ -119,17 +119,26 @@ export default function FloatingCNPJScore() {
                   <p>💰 Capital: R$ {(result.capital_social || 0).toLocaleString('pt-BR')}</p>
                 </div>
 
-                <div className={`text-xs font-medium p-2 rounded-lg ${
-                  result.score_estimado >= 700 ? 'bg-green-100 text-green-800' :
-                  result.score_estimado >= 500 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                {/* Recomendação de Boleto — decisão principal */}
+                <div className={`text-xs font-bold p-2 rounded-lg text-center border-2 ${
+                  result.score_estimado >= 700 ? 'bg-green-100 text-green-800 border-green-400' :
+                  result.score_estimado >= 650 ? 'bg-yellow-100 text-yellow-800 border-yellow-400' :
+                  'bg-red-100 text-red-800 border-red-400'
                 }`}>
+                  💳 {result.recomendacao_boleto || (result.score_estimado >= 700 ? '✅ LIBERAR BOLETO' : '🚫 NÃO OFERECER BOLETO')}
+                </div>
+
+                <div className="text-xs text-slate-600 p-2 bg-slate-50 rounded-lg leading-tight">
                   {result.recomendacao_credito}
                 </div>
 
-                {result.score_estimado >= 700 && (
-                  <div className="text-center text-xs font-bold text-green-700 bg-green-100 p-1 rounded-lg">
-                    ✅ APROVADO — Score acima de 700!
-                  </div>
+                {result.detalhes_score && result.detalhes_score.length > 0 && (
+                  <details className="text-xs text-slate-500 cursor-pointer">
+                    <summary className="font-semibold text-slate-600">📊 Ver fatores do score</summary>
+                    <ul className="mt-1 space-y-0.5 pl-1">
+                      {result.detalhes_score.map((d, i) => <li key={i}>{d}</li>)}
+                    </ul>
+                  </details>
                 )}
               </div>
             )}
