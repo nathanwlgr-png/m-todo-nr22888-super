@@ -132,9 +132,13 @@ export default function FloatingCNPJScore() {
                   {result.recomendacao_credito}
                 </div>
 
+                {result.margem_erro && (
+                  <p className="text-xs text-slate-400 text-center italic">⚡ Margem estimada: {result.margem_erro}</p>
+                )}
+
                 {result.detalhes_score && result.detalhes_score.length > 0 && (
                   <details className="text-xs text-slate-500 cursor-pointer">
-                    <summary className="font-semibold text-slate-600">📊 Ver fatores do score</summary>
+                    <summary className="font-semibold text-slate-600 cursor-pointer">📊 Ver fatores do score</summary>
                     <ul className="mt-1 space-y-0.5 pl-1">
                       {result.detalhes_score.map((d, i) => <li key={i}>{d}</li>)}
                     </ul>
