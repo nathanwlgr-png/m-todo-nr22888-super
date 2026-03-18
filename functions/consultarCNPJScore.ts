@@ -181,18 +181,8 @@ Deno.serve(async (req) => {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     const score = mapToSerasaScale(rawTotal);
 
-    // ── NOTA DE CONFIANÇA ──
-    // Sem dados de inadimplência real (não disponível publicamente),
-    // nosso score pode diferir do Serasa em ±100-150 pts.
-    // Empresas sem histórico de dívidas costumam ter score real MAIOR.
-    // Adicionamos bônus de +50 para empresas ativas sem pendências aparentes.
+    // Score final sem bônus — calibração já embutida na curva sigmóide
     let scoreAjustado = score;
-    if (situacao === 'ATIVA' && anosAtividade >= 2) {
-      // Bônus de regularidade: empresa ativa há mais de 2 anos
-      // sem indício de irregularidade nos dados públicos
-      scoreAjustado = Math.min(1000, score + 50);
-      detalhes.push(`🎯 Bônus regularidade (ativa ≥2 anos, sem ocorrências aparentes): +50`);
-    }
 
     // ── CLASSIFICAÇÃO FINAL ──
     const passa700 = scoreAjustado >= 700 ? 'Sim ✅' : scoreAjustado >= 650 ? 'Borderline ⚠️' : 'Não ❌';
