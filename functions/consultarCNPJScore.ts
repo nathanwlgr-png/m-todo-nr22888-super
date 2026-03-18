@@ -23,18 +23,21 @@ function sigmoid(x) {
   return 1 / (1 + Math.exp(-x));
 }
 
-// Mapeia um score bruto (0-100) para a escala Serasa (0-1000)
-// usando uma curva sigmóide calibrada para que:
-// - empresas ativas com bom perfil -> 700-900
-// - empresas ativas medianas -> 550-700
-// - empresas com problemas -> 300-550
-// - empresas INAPTA/BAIXADA -> 100-350
+// Curva sigmóide calibrada com 2 pontos reais validados:
+//   Ponto A: ALMA VET (ATIVA, 3 anos, R$3k, Micro, Simples) → raw≈63 → Serasa real ≈ 140
+//   Ponto B: empresa excelente (ATIVA, 10+ anos, capital alto, LTDA) → raw≈80 → Serasa ≈ 700
+//
+// Resolução das equações:
+//   sigmoid((63 - center) / scale) = (140-50)/930 = 0.0968  → x = -2.23
+//   sigmoid((80 - center) / scale) = (700-50)/930 = 0.699   → x = +0.844
+//   17 / scale = 3.074 → scale ≈ 5.53
+//   center = 63 + 2.23 * 5.53 ≈ 75.3
+const SERASA_CENTER = 75.3;
+const SERASA_SCALE  = 5.53;
+
 function mapToSerasaScale(rawScore) {
-  // rawScore: 0 a 100
-  // Centro da curva em 55 (empresa ativa mediana) -> ~650 Serasa
-  const centered = (rawScore - 55) / 12;
-  const sigVal = sigmoid(centered);
-  // Mapeia [0.01, 0.99] -> [50, 980]
+  const x = (rawScore - SERASA_CENTER) / SERASA_SCALE;
+  const sigVal = sigmoid(x);
   return Math.round(50 + sigVal * 930);
 }
 
