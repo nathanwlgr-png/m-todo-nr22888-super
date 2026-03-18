@@ -12,9 +12,9 @@ Deno.serve(async (req) => {
     const cnpjLimpo = cnpj.replace(/\D/g, '');
     if (cnpjLimpo.length !== 14) return Response.json({ error: 'CNPJ inválido — deve ter 14 dígitos' }, { status: 400 });
 
-    // 1. Buscar dados na BrasilAPI com timeout de 10s
+    // 1. Buscar dados na BrasilAPI com timeout de 12s
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 12000);
 
     let rfData;
     try {
@@ -29,105 +29,169 @@ Deno.serve(async (req) => {
       clearTimeout(timeout);
     }
 
-    // 2. Calcular score localmente com base nos dados disponíveis (sem IA externa = sem timeout)
-    let score = 500; // base
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ALGORITMO DE SCORE — CALIBRADO v2
+    // Escala: 0–1000 (alinhado ao Serasa Experian)
+    // Base: 300 (empresa existe = ponto de partida neutro)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let score = 300;
+    const detalhes = [];
 
-    // Situação cadastral
-    if (rfData.descricao_situacao_cadastral === 'ATIVA') score += 150;
-    else if (rfData.descricao_situacao_cadastral === 'SUSPENSA') score -= 100;
-    else if (rfData.descricao_situacao_cadastral === 'INAPTA' || rfData.descricao_situacao_cadastral === 'BAIXADA') score -= 250;
-
-    // Tempo de mercado
-    if (rfData.data_inicio_atividade) {
-      const inicio = new Date(rfData.data_inicio_atividade);
-      const anos = (new Date() - inicio) / (1000 * 60 * 60 * 24 * 365);
-      if (anos >= 10) score += 150;
-      else if (anos >= 5) score += 100;
-      else if (anos >= 2) score += 50;
-      else if (anos < 1) score -= 50;
+    // ── 1. SITUAÇÃO CADASTRAL (peso alto — 300 pts max) ──
+    const situacao = rfData.descricao_situacao_cadastral || '';
+    if (situacao === 'ATIVA') {
+      score += 300;
+      detalhes.push('✅ Situação ATIVA: +300');
+    } else if (situacao === 'SUSPENSA') {
+      score -= 150;
+      detalhes.push('⚠️ Situação SUSPENSA: -150');
+    } else if (situacao === 'INAPTA') {
+      score -= 300;
+      detalhes.push('🔴 Situação INAPTA: -300');
+    } else if (situacao === 'BAIXADA' || situacao === 'CANCELADA') {
+      score -= 400;
+      detalhes.push('🔴 Situação BAIXADA/CANCELADA: -400');
     }
 
-    // Capital social
+    // ── 2. TEMPO DE MERCADO (peso alto — 200 pts max) ──
+    let anosNaMercado = 0;
+    if (rfData.data_inicio_atividade) {
+      const inicio = new Date(rfData.data_inicio_atividade);
+      anosNaMercado = (new Date() - inicio) / (1000 * 60 * 60 * 24 * 365.25);
+      if (anosNaMercado >= 15) { score += 200; detalhes.push(`⏳ ${Math.floor(anosNaMercado)} anos (≥15): +200`); }
+      else if (anosNaMercado >= 10) { score += 170; detalhes.push(`⏳ ${Math.floor(anosNaMercado)} anos (≥10): +170`); }
+      else if (anosNaMercado >= 5) { score += 130; detalhes.push(`⏳ ${Math.floor(anosNaMercado)} anos (≥5): +130`); }
+      else if (anosNaMercado >= 3) { score += 90; detalhes.push(`⏳ ${Math.floor(anosNaMercado)} anos (≥3): +90`); }
+      else if (anosNaMercado >= 1) { score += 50; detalhes.push(`⏳ ${Math.floor(anosNaMercado)} anos (≥1): +50`); }
+      else { score -= 30; detalhes.push(`⏳ Menos de 1 ano: -30`); }
+    }
+
+    // ── 3. CAPITAL SOCIAL (peso médio — 150 pts max) ──
     const capital = rfData.capital_social || 0;
-    if (capital >= 500000) score += 100;
-    else if (capital >= 100000) score += 60;
-    else if (capital >= 50000) score += 30;
-    else if (capital < 5000) score -= 30;
+    if (capital >= 1000000) { score += 150; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥1M): +150`); }
+    else if (capital >= 500000) { score += 120; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥500k): +120`); }
+    else if (capital >= 200000) { score += 90; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥200k): +90`); }
+    else if (capital >= 100000) { score += 70; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥100k): +70`); }
+    else if (capital >= 50000) { score += 50; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥50k): +50`); }
+    else if (capital >= 20000) { score += 30; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥20k): +30`); }
+    else if (capital >= 5000) { score += 10; detalhes.push(`💰 Capital R$${capital.toLocaleString('pt-BR')} (≥5k): +10`); }
+    else { score -= 40; detalhes.push(`💰 Capital muito baixo (<5k): -40`); }
 
-    // Porte
-    if (rfData.porte === 'GRANDE') score += 80;
-    else if (rfData.porte === 'MÉDIA') score += 40;
-    else if (rfData.porte === 'PEQUENA') score += 10;
+    // ── 4. PORTE DA EMPRESA (peso médio — 80 pts max) ──
+    const porte = (rfData.porte || '').toUpperCase();
+    if (porte.includes('GRANDE')) { score += 80; detalhes.push('🏭 Porte GRANDE: +80'); }
+    else if (porte.includes('MÉDIA') || porte.includes('MEDIA')) { score += 55; detalhes.push('🏭 Porte MÉDIA: +55'); }
+    else if (porte.includes('PEQUENA') || porte.includes('PEQUENO')) { score += 30; detalhes.push('🏭 Porte PEQUENA: +30'); }
+    else if (porte.includes('MICRO')) { score += 10; detalhes.push('🏭 Porte MICRO: +10'); }
+    // MEI penaliza levemente
+    if (porte.includes('MEI')) { score -= 20; detalhes.push('🏭 MEI: -20'); }
 
-    // Simples Nacional (geralmente menor estrutura)
-    if (rfData.opcao_pelo_simples) score -= 20;
+    // ── 5. SÓCIOS (mais sócios = maior estrutura) ──
+    const socios = rfData.qsa || [];
+    if (socios.length >= 3) { score += 30; detalhes.push(`👥 ${socios.length} sócios: +30`); }
+    else if (socios.length === 2) { score += 15; detalhes.push(`👥 2 sócios: +15`); }
+    else if (socios.length === 1) { score += 5; detalhes.push(`👥 1 sócio: +5`); }
 
-    // Limitar entre 0 e 1000
-    score = Math.max(0, Math.min(1000, score));
+    // ── 6. REGIME TRIBUTÁRIO ──
+    // Simples Nacional é neutro (maioria das PMEs saudáveis usam)
+    // Lucro Presumido/Real = empresa maior = bônus
+    if (rfData.opcao_pelo_simples === false && rfData.opcao_pelo_mei === false) {
+      score += 25;
+      detalhes.push('📊 Lucro Presumido/Real (não Simples): +25');
+    }
+    if (rfData.opcao_pelo_mei) {
+      score -= 10;
+      detalhes.push('📊 MEI (regime): -10');
+    }
 
-    const passa700 = score >= 700 ? 'Sim' : score >= 600 ? 'Provável' : 'Não';
+    // ── 7. NATUREZA JURÍDICA (LTDA/SA = mais sólida) ──
+    const natureza = (rfData.descricao_natureza_juridica || '').toUpperCase();
+    if (natureza.includes('SOCIEDADE AN') || natureza.includes('S/A')) { score += 40; detalhes.push('⚖️ S/A: +40'); }
+    else if (natureza.includes('LIMITADA') || natureza.includes('LTDA')) { score += 20; detalhes.push('⚖️ LTDA: +20'); }
+    else if (natureza.includes('EIRELI') || natureza.includes('SLU')) { score += 10; detalhes.push('⚖️ EIRELI/SLU: +10'); }
+
+    // ── 8. VERIFICAÇÃO ESPECIAL: Matriz vs Filial ──
+    if (rfData.identificador_matriz_filial === 1) { score += 10; detalhes.push('🏢 Matriz: +10'); }
+
+    // ── 9. CLAMP FINAL: 0–1000 ──
+    score = Math.max(0, Math.min(1000, Math.round(score)));
+
+    // ── CLASSIFICAÇÃO ──
+    const passa700 = score >= 700 ? 'Sim ✅' : score >= 650 ? 'Borderline ⚠️' : 'Não ❌';
     const nivelRisco = score >= 700 ? 'BAIXO' : score >= 500 ? 'MÉDIO' : 'ALTO';
     const scoreEmoji = score >= 700 ? '🟢' : score >= 500 ? '🟡' : '🔴';
 
-    // Formatação do CNPJ
-    const cnpjFormatado = cnpjLimpo.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-
-    // Anos de mercado para exibir
-    let tempoMercado = '';
-    if (rfData.data_inicio_atividade) {
-      const anos = Math.floor((new Date() - new Date(rfData.data_inicio_atividade)) / (1000 * 60 * 60 * 24 * 365));
-      tempoMercado = `${anos} anos`;
+    // Recomendação de crédito / boleto
+    let recomendacaoCredito;
+    let recomendacaoBoleto;
+    if (score >= 700) {
+      recomendacaoCredito = '✅ Perfil favorável. Pode oferecer BOLETO BANCÁRIO e parcelamento com segurança.';
+      recomendacaoBoleto = '✅ LIBERAR BOLETO';
+    } else if (score >= 650) {
+      recomendacaoCredito = '⚠️ Score borderline (650-699). Ofereça boleto com prazo máximo de 30 dias ou 50% de entrada.';
+      recomendacaoBoleto = '⚠️ BOLETO COM RESTRIÇÃO (entrada ou prazo curto)';
+    } else if (score >= 500) {
+      recomendacaoCredito = '⚠️ Perfil moderado. Sugira parcelas menores ou entrada expressiva. Evite boleto longo prazo.';
+      recomendacaoBoleto = '🚫 NÃO OFERECER BOLETO — prefira cartão ou PIX antecipado';
+    } else {
+      recomendacaoCredito = '🚨 Risco elevado. Exija pagamento à vista (PIX/cartão). Não ofereça boleto bancário.';
+      recomendacaoBoleto = '🚫 BLOQUEAR BOLETO — pagamento à vista obrigatório';
     }
 
-    const justificativa = `Empresa ${rfData.descricao_situacao_cadastral?.toLowerCase()}, ${tempoMercado} de mercado, capital social de R$ ${(rfData.capital_social || 0).toLocaleString('pt-BR')}, porte ${rfData.porte || 'não informado'}.`;
-    const recomendacao = score >= 700
-      ? '✅ Perfil favorável para parcelamento e crédito. Pode negociar com segurança.'
-      : score >= 500
-      ? '⚠️ Perfil moderado. Sugira parcelas menores ou entrada mais expressiva.'
-      : '🚨 Risco elevado. Recomende pagamento à vista ou análise criteriosa antes de parcelar.';
+    const tempoMercadoStr = anosNaMercado > 0 ? `${Math.floor(anosNaMercado)} anos` : 'não informado';
+    const cnpjFormatado = cnpjLimpo.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
 
     const resumo = `━━━━━━━━━━━━━━━━━━━━
-🔍 *CONSULTA CNPJ + SCORE*
+🔍 *CONSULTA CNPJ + SCORE v2*
 ━━━━━━━━━━━━━━━━━━━━
 🏢 *${rfData.razao_social}*
 📋 CNPJ: ${cnpjFormatado}
 📍 ${rfData.municipio} / ${rfData.uf}
 
-✅ Situação: *${rfData.descricao_situacao_cadastral}*
+✅ Situação: *${situacao}*
 🏭 Porte: ${rfData.porte || 'Não informado'}
-💰 Capital: R$ ${(rfData.capital_social || 0).toLocaleString('pt-BR')}
-📅 Fundação: ${rfData.data_inicio_atividade} (${tempoMercado})
-📊 Regime: ${rfData.opcao_pelo_simples ? 'Simples Nacional' : 'Regime Geral'}
+💰 Capital: R$ ${capital.toLocaleString('pt-BR')}
+📅 Fundação: ${rfData.data_inicio_atividade} (${tempoMercadoStr})
+📊 Regime: ${rfData.opcao_pelo_simples ? 'Simples Nacional' : rfData.opcao_pelo_mei ? 'MEI' : 'Lucro Presumido/Real'}
+👥 Sócios: ${socios.length}
 🔬 Atividade: ${rfData.cnae_fiscal_descricao}
 
 ━━━━━━━━━━━━━━━━━━━━
 ${scoreEmoji} *SCORE ESTIMADO: ${score}/1000*
 📈 Passa de 700: *${passa700}*
 ⚠️ Risco: *${nivelRisco}*
-💡 ${justificativa}
-🎯 ${recomendacao}
+
+💳 *BOLETO BANCÁRIO:*
+${recomendacaoBoleto}
+
+🎯 ${recomendacaoCredito}
 ━━━━━━━━━━━━━━━━━━━━
-⚠️ _Score calculado com base em dados públicos. Para score oficial: serasaempreendedor.com.br_`;
+📊 Fatores analisados:
+${detalhes.join('\n')}
+━━━━━━━━━━━━━━━━━━━━
+⚠️ _Score estimado com dados públicos (Receita Federal). Score oficial: serasaempreendedor.com.br_`;
 
     return Response.json({
       success: true,
       cnpj: cnpjLimpo,
       razao_social: rfData.razao_social,
-      situacao: rfData.descricao_situacao_cadastral,
+      situacao,
       porte: rfData.porte,
-      capital_social: rfData.capital_social,
+      capital_social: capital,
       municipio: rfData.municipio,
       uf: rfData.uf,
       data_inicio: rfData.data_inicio_atividade,
-      tempo_mercado: tempoMercado,
+      tempo_mercado: tempoMercadoStr,
       atividade: rfData.cnae_fiscal_descricao,
       simples_nacional: rfData.opcao_pelo_simples,
-      socios: rfData.qsa || [],
+      mei: rfData.opcao_pelo_mei,
+      socios,
       score_estimado: score,
       passa_700: passa700,
       nivel_risco: nivelRisco,
-      justificativa,
-      recomendacao_credito: recomendacao,
+      recomendacao_credito: recomendacaoCredito,
+      recomendacao_boleto: recomendacaoBoleto,
+      detalhes_score: detalhes,
       resumo_whatsapp: resumo
     });
   } catch (error) {
