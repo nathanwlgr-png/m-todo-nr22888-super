@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import SalesDashboardWidget from '@/components/SalesDashboardWidget';
 import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
@@ -207,6 +208,9 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        {/* Sales Dashboard */}
+        <SalesDashboardWidget />
 
         {/* GPS Auto-Discovery */}
         <GPSAutoDiscovery />
