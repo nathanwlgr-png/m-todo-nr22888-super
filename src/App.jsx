@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CampaignExamples from './pages/CampaignExamples';
+import NegociacoesWhatsApp from './pages/NegociacoesWhatsApp';
 import SystemManual from './pages/SystemManual';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -73,6 +74,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="SystemManual">
             <SystemManual />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/NegociacoesWhatsApp"
+        element={
+          <LayoutWrapper currentPageName="NegociacoesWhatsApp">
+            <NegociacoesWhatsApp />
           </LayoutWrapper>
         }
       />

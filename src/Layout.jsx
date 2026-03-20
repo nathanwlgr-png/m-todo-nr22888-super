@@ -112,6 +112,7 @@ export default function Layout({ children, currentPageName }) {
 
   const menuItems = [
     { icon: BookOpen, label: '📖 Manual do Sistema', page: 'SystemManual' },
+    { icon: MessageSquare, label: '💰 Negociações + Cobrança', page: 'NegociacoesWhatsApp' },
     { icon: Target, label: '🚀 Centro de Otimização', page: 'SalesOptimizationCenter' },
     { icon: Sparkles, label: '⚡ Master CRM NR22', page: 'MasterCRM', tourId: 'master-crm' },
     { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
