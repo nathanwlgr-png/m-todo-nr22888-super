@@ -10,6 +10,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CampaignExamples from './pages/CampaignExamples';
 import NegociacoesWhatsApp from './pages/NegociacoesWhatsApp';
 import SystemManual from './pages/SystemManual';
+import FollowUpAutomationModule from './pages/FollowUpAutomationModule';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -82,6 +83,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="NegociacoesWhatsApp">
             <NegociacoesWhatsApp />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/FollowUpAutomationModule"
+        element={
+          <LayoutWrapper currentPageName="FollowUpAutomationModule">
+            <FollowUpAutomationModule />
           </LayoutWrapper>
         }
       />
