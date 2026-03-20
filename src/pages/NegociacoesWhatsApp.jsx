@@ -102,8 +102,9 @@ export default function NegociacoesWhatsApp() {
         </div>
         <div className="flex gap-2">
           <a
-            href={base44.agents.getWhatsAppConnectURL('whatsapp_crm_master')}
+            href={base44.agents?.getWhatsAppConnectURL?.('whatsapp_crm_master') || '#'}
             target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
           >
             <Bot className="w-4 h-4" />
