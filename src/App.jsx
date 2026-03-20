@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CampaignExamples from './pages/CampaignExamples';
+import NegociacoesWhatsApp from './pages/NegociacoesWhatsApp';
 import SystemManual from './pages/SystemManual';
 import FollowUpAutomationModule from './pages/FollowUpAutomationModule';
 
