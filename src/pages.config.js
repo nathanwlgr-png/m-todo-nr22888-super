@@ -209,6 +209,10 @@ import WhatsAppMasterAssistant from './pages/WhatsAppMasterAssistant';
 import WorkflowAutomation from './pages/WorkflowAutomation';
 import DuplicateManager from './pages/DuplicateManager';
 import AutoDataManager from './pages/AutoDataManager';
+import CampaignExamples from './pages/CampaignExamples';
+import SystemManual from './pages/SystemManual';
+import NegociacoesWhatsApp from './pages/NegociacoesWhatsApp';
+import FollowUpAutomationModule from './pages/FollowUpAutomationModule';
 import __Layout from './Layout.jsx';
 
 
@@ -375,10 +379,14 @@ export const PAGES = {
     "WorkflowAutomation": WorkflowAutomation,
     "DuplicateManager": DuplicateManager,
     "AutoDataManager": AutoDataManager,
+    "CampaignExamples": CampaignExamples,
+    "SystemManual": SystemManual,
+    "NegociacoesWhatsApp": NegociacoesWhatsApp,
+    "FollowUpAutomationModule": FollowUpAutomationModule,
 }
 
 export const pagesConfig = {
-    mainPage: "AIAssistant",
+    mainPage: "Home",
     Pages: PAGES,
     Layout: __Layout,
 };
