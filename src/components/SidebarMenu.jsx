@@ -1,113 +1,119 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Home, Users, Target, CheckSquare, Calendar, Map, ShoppingCart, TrendingUp, FileText, BarChart3, MessageSquare, Bot, Bell, History, Zap, Settings, Search, Package, Route, Brain, Star } from 'lucide-react';
 
 const MENU_GROUPS = [
   {
-    label: '⭐ Principais',
+    label: 'Principais',
+    icon: Star,
+    color: 'text-yellow-500',
+    defaultOpen: true,
     items: [
-      { page: 'Home', label: 'Dashboard' },
-      { page: 'Clients', label: '👥 Clientes' },
-      { page: 'Leads', label: '🎯 Leads' },
-      { page: 'TasksUnified', label: '✅ Tarefas' },
-      { page: 'ScheduledAgenda', label: '📅 Agenda' },
-      { page: 'VisitManager', label: '🗺️ Visitas' },
-      { page: 'SalesFunnelKanban', label: '📊 Funil Kanban' },
+      { page: 'Home', label: 'Dashboard', icon: Home },
+      { page: 'Clients', label: 'Clientes', icon: Users },
+      { page: 'Leads', label: 'Leads', icon: Target },
+      { page: 'TasksUnified', label: 'Tarefas', icon: CheckSquare },
+      { page: 'ScheduledAgenda', label: 'Agenda', icon: Calendar },
+      { page: 'VisitManager', label: 'Visitas', icon: Map },
     ]
   },
   {
-    label: '💬 WhatsApp & Msgs',
+    label: 'Vendas',
+    icon: TrendingUp,
+    color: 'text-emerald-500',
+    defaultOpen: false,
     items: [
-      { page: 'WhatsAppHub', label: 'WhatsApp Hub' },
-      { page: 'WhatsAppInbox', label: 'WhatsApp Inbox' },
-      { page: 'WhatsAppMasterAssistant', label: '🤖 Assistente Master' },
-      { page: 'MessageApproval', label: '🔔 Aprovar Msgs' },
-      { page: 'MessageHistory', label: 'Histórico Msgs' },
-      { page: 'NegociacoesWhatsApp', label: '💰 Negociações + Cobrança' },
-      { page: 'AutomationSettings', label: 'Automação Msgs' },
+      { page: 'SalesFunnel', label: 'Funil de Vendas', icon: TrendingUp },
+      { page: 'SalesFunnelKanban', label: 'Funil Kanban', icon: BarChart3 },
+      { page: 'ProposalGenerator', label: 'Gerar Proposta', icon: FileText },
+      { page: 'PossibleSales', label: 'Possíveis Vendas', icon: ShoppingCart },
+      { page: 'ClosingForecast', label: 'Previsão Fechamento', icon: Target },
+      { page: 'ClientSegmentation', label: 'Segmentos', icon: Users },
+      { page: 'SalesOptimizationCenter', label: 'Otimização de Vendas', icon: Zap },
+      { page: 'AIAssistant', label: 'Assistente IA Vendas', icon: Brain },
+      { page: 'SalesCoachingDashboard', label: 'Coaching IA', icon: Brain },
+      { page: 'ProposalTemplates', label: 'Templates Proposta', icon: FileText },
+      { page: 'EquipmentCatalog', label: 'Catálogo Equipamentos', icon: Package },
+      { page: 'ProductManager', label: 'Produtos', icon: Package },
+      { page: 'RouteOptimizer', label: 'Rotas', icon: Route },
+      { page: 'EliteVetClientSearch', label: 'Busca Elite Vet', icon: Search },
     ]
   },
   {
-    label: '🤖 IA & Análise',
+    label: 'Relatórios',
+    icon: BarChart3,
+    color: 'text-blue-500',
+    defaultOpen: false,
     items: [
-      { page: 'AIAssistant', label: 'Assistente IA' },
-      { page: 'AIContentStudio', label: 'Conteúdo IA' },
-      { page: 'AIKnowledgeUploader', label: 'Base de Conhecimento IA' },
-      { page: 'ProactiveIntelligenceDashboard', label: 'Inteligência 360°' },
-      { page: 'SalesCoachingDashboard', label: 'Coaching IA' },
-      { page: 'NumerologyAnalysis', label: 'Numerologia' },
-      { page: 'IntelligenceDashboard', label: '🧠 Dashboard IA' },
+      { page: 'InteractiveDashboard', label: 'Dashboard Interativo', icon: BarChart3 },
+      { page: 'ExecutiveSalesDashboard', label: 'Dashboard Executivo', icon: BarChart3 },
+      { page: 'CustomDashboard', label: 'Analytics Geral', icon: BarChart3 },
+      { page: 'AdvancedSalesAnalytics', label: 'Analytics Avançado', icon: TrendingUp },
+      { page: 'Reports', label: 'Relatórios', icon: FileText },
+      { page: 'SentimentDashboard', label: 'Sentimento', icon: Brain },
+      { page: 'SentimentAnalysisDashboard', label: 'Análise de Sentimento', icon: Brain },
+      { page: 'ProactiveIntelligenceDashboard', label: 'Inteligência 360°', icon: Brain },
+      { page: 'IntelligenceDashboard', label: 'Dashboard IA', icon: Brain },
+      { page: 'NumerologyAnalysis', label: 'Numerologia', icon: Star },
+      { page: 'OfflineAnalytics', label: 'Analytics Offline', icon: BarChart3 },
     ]
   },
   {
-    label: '💼 Vendas & Pipeline',
+    label: 'WhatsApp',
+    icon: MessageSquare,
+    color: 'text-green-500',
+    defaultOpen: false,
     items: [
-      { page: 'SalesFunnel', label: 'Funil de Vendas' },
-      { page: 'ProposalGenerator', label: 'Gerar Proposta' },
-      { page: 'PossibleSales', label: 'Possíveis Vendas' },
-      { page: 'ClosingForecast', label: 'Previsão Fechamento' },
-      { page: 'ClientSegmentation', label: 'Segmentos' },
-      { page: 'SentimentDashboard', label: 'Sentimento' },
-      { page: 'SalesOptimizationCenter', label: '🚀 Centro de Otimização' },
+      { page: 'WhatsAppHub', label: 'WhatsApp Hub', icon: MessageSquare },
+      { page: 'WhatsAppInbox', label: 'Inbox', icon: MessageSquare },
+      { page: 'WhatsAppMasterAssistant', label: 'Assistente Master', icon: Bot },
+      { page: 'NegociacoesWhatsApp', label: 'Negociações + Cobrança', icon: ShoppingCart },
+      { page: 'MessageApproval', label: 'Aprovar Mensagens', icon: Bell },
+      { page: 'MessageHistory', label: 'Histórico', icon: History },
+      { page: 'AutomationSettings', label: 'Automação de Msgs', icon: Zap },
+      { page: 'FollowUpAutomationModule', label: 'Follow-up Automático', icon: Zap },
+      { page: 'AIContentStudio', label: 'Conteúdo IA', icon: Brain },
     ]
   },
   {
-    label: '📈 Relatórios & Analytics',
+    label: 'Configurações',
+    icon: Settings,
+    color: 'text-slate-500',
+    defaultOpen: false,
     items: [
-      { page: 'CustomDashboard', label: 'Analytics' },
-      { page: 'InteractiveDashboard', label: 'Dashboard Interativo' },
-      { page: 'ExecutiveSalesDashboard', label: '📊 Dashboard Executivo' },
-      { page: 'AdvancedSalesAnalytics', label: 'Sales Analytics' },
-      { page: 'SentimentAnalysisDashboard', label: 'Sentimento IA' },
-      { page: 'Reports', label: 'Relatórios' },
-      { page: 'OfflineAnalytics', label: 'Analytics Offline' },
-    ]
-  },
-  {
-    label: '📦 Produtos & Equipamentos',
-    items: [
-      { page: 'ProductManager', label: 'Produtos' },
-      { page: 'EquipmentCatalog', label: 'Catálogo Equipamentos' },
-      { page: 'ProposalTemplates', label: 'Templates Proposta' },
-      { page: 'MaterialUploadHub', label: '📤 Envio Direto Material' },
-    ]
-  },
-  {
-    label: '⚡ Automação & Integrações',
-    items: [
-      { page: 'FollowUpAutomationModule', label: '🔔 Follow-up Automático' },
-      { page: 'WorkflowAutomation', label: 'Workflows' },
-      { page: 'Integrations', label: 'Integrações' },
-      { page: 'RouteOptimizer', label: 'Rotas' },
-      { page: 'EliteVetClientSearch', label: '👑 Busca Elite Vet' },
-      { page: 'ClientImportManager', label: 'Importar Clientes' },
-    ]
-  },
-  {
-    label: '⚙️ Sistema',
-    items: [
-      { page: 'SystemManual', label: '📖 Manual do Sistema' },
-      { page: 'MasterCRM', label: '⚡ Master CRM NR22' },
-      { page: 'MasterControlPanel', label: 'Master NR22888' },
-      { page: 'AgentSetup', label: 'Config Agentes' },
-      { page: 'ContactSettings', label: 'Configurações' },
-      { page: 'NotificationSettings', label: 'Notificações' },
-      { page: 'GlobalSearch', label: '🔍 Busca Global' },
+      { page: 'ContactSettings', label: 'Configurações', icon: Settings },
+      { page: 'NotificationSettings', label: 'Notificações', icon: Bell },
+      { page: 'Integrations', label: 'Integrações', icon: Zap },
+      { page: 'WorkflowAutomation', label: 'Workflows', icon: Zap },
+      { page: 'AIKnowledgeUploader', label: 'Base de Conhecimento IA', icon: Brain },
+      { page: 'ClientImportManager', label: 'Importar Clientes', icon: Users },
+      { page: 'MaterialUploadHub', label: 'Envio de Materiais', icon: FileText },
+      { page: 'AgentSetup', label: 'Config. Agentes', icon: Bot },
+      { page: 'MasterCRM', label: 'Master CRM NR22', icon: Zap },
+      { page: 'MasterControlPanel', label: 'Painel Master NR22888', icon: Settings },
+      { page: 'SystemManual', label: 'Manual do Sistema', icon: FileText },
+      { page: 'GlobalSearch', label: 'Busca Global', icon: Search },
     ]
   },
 ];
 
 export default function SidebarMenu({ currentPageName }) {
-  const [openGroups, setOpenGroups] = useState({ '⭐ Principais': true });
+  const initialOpen = MENU_GROUPS.reduce((acc, g) => {
+    acc[g.label] = g.defaultOpen || g.items.some(i => i.page === currentPageName);
+    return acc;
+  }, {});
+
+  const [openGroups, setOpenGroups] = useState(initialOpen);
 
   const toggle = (label) => {
     setOpenGroups(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
   return (
-    <nav className="p-3 space-y-1 overflow-y-auto flex-1">
+    <nav className="p-2 space-y-1 overflow-y-auto flex-1">
       {MENU_GROUPS.map((group) => {
+        const GroupIcon = group.icon;
         const isOpen = openGroups[group.label];
         const hasActive = group.items.some(i => i.page === currentPageName);
 
@@ -115,29 +121,42 @@ export default function SidebarMenu({ currentPageName }) {
           <div key={group.label}>
             <button
               onClick={() => toggle(group.label)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-slate-100 ${
-                hasActive ? 'text-indigo-700 bg-indigo-50' : 'text-slate-600'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                hasActive
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-700 hover:bg-slate-100'
               }`}
             >
-              <span>{group.label}</span>
-              {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              <div className="flex items-center gap-2.5">
+                <GroupIcon className={`w-4 h-4 ${hasActive ? 'text-indigo-600' : group.color}`} />
+                <span>{group.label}</span>
+              </div>
+              {isOpen
+                ? <ChevronDown className="w-4 h-4 opacity-50" />
+                : <ChevronRight className="w-4 h-4 opacity-40" />
+              }
             </button>
 
             {isOpen && (
-              <div className="ml-2 mt-1 space-y-0.5 border-l-2 border-slate-100 pl-2">
-                {group.items.map((item) => (
-                  <Link
-                    key={item.page}
-                    to={createPageUrl(item.page)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-slate-100 ${
-                      currentPageName === item.page
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                        : 'text-slate-600'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+              <div className="ml-3 mt-0.5 mb-1 border-l-2 border-slate-100 pl-2 space-y-0.5">
+                {group.items.map((item) => {
+                  const ItemIcon = item.icon;
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page}
+                      to={createPageUrl(item.page)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isActive
+                          ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                    >
+                      <ItemIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
