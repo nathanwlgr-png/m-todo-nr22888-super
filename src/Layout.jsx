@@ -9,11 +9,9 @@ import EconomicModeToggle from '@/components/EconomicModeToggle';
 import DataSecurityMonitor from '@/components/DataSecurityMonitor';
 import FloatingCNPJScore from '@/components/FloatingCNPJScore';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
-import { 
-        Home, Users, UserPlus, Route, Settings, Zap, 
-        Calendar, CheckSquare, BarChart3, Menu, X,
-        ChevronRight, Bell, MessageSquare, TrendingUp, Award, Target, Sparkles, Package, FileText, Database, Brain, MapPin, Upload, Crown, BookOpen
-      } from 'lucide-react';
+import { Menu, X, Bell, Search, ChevronRight } from 'lucide-react';
+import SidebarMenu from '@/components/SidebarMenu';
+import QuickVisitButton from '@/components/QuickVisitButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
@@ -110,54 +108,7 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [currentPageName]);
 
-  const menuItems = [
-    { icon: BookOpen, label: '📖 Manual do Sistema', page: 'SystemManual' },
-    { icon: MessageSquare, label: '💰 Negociações + Cobrança', page: 'NegociacoesWhatsApp' },
-    { icon: Zap, label: '🔔 Follow-up Automático', page: 'FollowUpAutomationModule' },
-    { icon: Target, label: '🚀 Centro de Otimização', page: 'SalesOptimizationCenter' },
-    { icon: Sparkles, label: '⚡ Master CRM NR22', page: 'MasterCRM', tourId: 'master-crm' },
-    { icon: Sparkles, label: 'Master NR22888', page: 'MasterControlPanel', tourId: 'master' },
-    { icon: Upload, label: '📤 Envio Direto Material', page: 'MaterialUploadHub' },
-    { icon: Home, label: 'Dashboard', page: 'Home', shortcut: '⌘H', tourId: 'dashboard' },
-    { icon: Users, label: 'Clientes', page: 'Clients', tourId: 'clients' },
-    { icon: UserPlus, label: 'Leads', page: 'Leads', tourId: 'leads' },
-    { icon: Target, label: '🎯 Funil Kanban', page: 'SalesFunnelKanban' },
-    { icon: CheckSquare, label: 'Tarefas', page: 'TasksUnified', shortcut: '⌘T', tourId: 'tasks' },
-    { icon: Bell, label: 'Aprovar Msgs', page: 'MessageApproval', badge: true },
-    { icon: MessageSquare, label: 'Histórico Msgs', page: 'MessageHistory' },
-    { icon: MessageSquare, label: 'WhatsApp Master', page: 'WhatsAppAgentMaster' },
-    { icon: MessageSquare, label: 'WhatsApp Hub', page: 'WhatsAppHub' },
-    { icon: MessageSquare, label: '📱 Integração WhatsApp', page: 'WhatsAppIntegrationHub' },
-    { icon: Target, label: 'Segmentos', page: 'ClientSegmentation' },
-    { icon: TrendingUp, label: 'Sentimento', page: 'SentimentDashboard' },
-    { icon: Sparkles, label: 'Conteúdo IA', page: 'AIContentStudio' },
-    { icon: Route, label: 'Rotas', page: 'RouteOptimizer', tourId: 'routes' },
-    { icon: Calendar, label: 'Agenda', page: 'ScheduledAgenda' },
-    { icon: BarChart3, label: 'Analytics', page: 'CustomDashboard', tourId: 'analytics' },
-    { icon: MessageSquare, label: 'WhatsApp', page: 'WhatsAppInbox', tourId: 'whatsapp' },
-    { icon: Award, label: 'Coaching IA', page: 'SalesCoachingDashboard' },
-    { icon: Zap, label: 'Integrações', page: 'Integrations', tourId: 'integrations' },
-    { icon: Zap, label: 'Automações', page: 'WorkflowAutomation', tourId: 'automations' },
-    { icon: Package, label: 'Produtos', page: 'ProductManager' },
-    { icon: FileText, label: 'Base IA', page: 'AIKnowledgeUploader' },
-    { icon: Brain, label: 'Inteligência 360°', page: 'ProactiveIntelligenceDashboard' },
-    { icon: Sparkles, label: 'Gerar Proposta', page: 'ProposalGenerator' },
-    { icon: Zap, label: 'IA Vendas', page: 'SalesAIHub' },
-    { icon: FileText, label: 'Relatórios Auto', page: 'ReportsAutomation' },
-    { icon: MapPin, label: 'Analytics Geo', page: 'AnalyticsDashboardGeo' },
-    { icon: Database, label: 'Offline Analytics', page: 'OfflineAnalytics', badge: true },
-    { icon: Settings, label: 'Configurações', page: 'ContactSettings' },
-    { icon: Zap, label: 'Config Agentes', page: 'AgentSetup' },
-    { icon: Zap, label: 'Automação Msgs', page: 'AutomationSettings' },
-    { icon: FileText, label: 'Relatórios Custom', page: 'CustomReports' },
-    { icon: Sparkles, label: 'Inteligência Competitiva', page: 'CompetitorIntelligence' },
-    { icon: BarChart3, label: 'Sales Analytics', page: 'AdvancedSalesAnalytics' },
-    { icon: TrendingUp, label: '📊 Dashboard Executivo', page: 'ExecutiveSalesDashboard' },
-    { icon: Upload, label: 'Importar Clientes', page: 'ClientImportManager' },
-    { icon: Brain, label: '🧠 Dashboard IA', page: 'IntelligenceDashboard' },
-    { icon: Crown, label: '👑 Busca Elite Vet', page: 'EliteVetClientSearch' },
-    { icon: TrendingUp, label: '💬 Sentimento IA', page: 'SentimentAnalysisDashboard' },
-    ];
+
 
   return (
     <AILimitProtection>
@@ -180,35 +131,7 @@ export default function Layout({ children, currentPageName }) {
             </Button>
           </div>
 
-          <nav className="p-4 space-y-1 overflow-y-auto flex-1">
-            {menuItems.map((item) => (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                data-tour={item.tourId}
-                className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors ${
-                  currentPageName === item.page ? 'bg-indigo-50 text-indigo-600 font-semibold' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </div>
-                {item.shortcut && (
-                  <span className="text-xs text-slate-400">{item.shortcut}</span>
-                )}
-                {item.page === 'NotificationSettings' && unreadCount > 0 && (
-                  <Badge className="bg-red-500">{unreadCount}</Badge>
-                )}
-                {item.badge && item.page === 'MessageApproval' && pendingMsgCount > 0 && (
-                  <Badge className="bg-orange-500 animate-pulse">{pendingMsgCount}</Badge>
-                )}
-                {item.badge && item.page === 'OfflineAnalytics' && offlinePendingCount > 0 && (
-                  <Badge className="bg-blue-500 animate-pulse">{offlinePendingCount}</Badge>
-                )}
-              </Link>
-            ))}
-          </nav>
+          <SidebarMenu currentPageName={currentPageName} />
 
 
         </aside>
@@ -276,6 +199,7 @@ export default function Layout({ children, currentPageName }) {
       <FloatingPerformanceButton />
       <DataSecurityMonitor />
       <FloatingCNPJScore />
+      <QuickVisitButton />
     </AILimitProtection>
   );
 }

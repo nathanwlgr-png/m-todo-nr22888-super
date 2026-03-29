@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import SalesDashboardWidget from '@/components/SalesDashboardWidget';
+import DaySummary from '@/components/DaySummary';
 import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
@@ -196,6 +197,12 @@ export default function Home() {
             <ChevronRight className="w-6 h-6" />
           </div>
         </a>
+
+        {/* Resumo do Dia */}
+        <div className="mb-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 px-1">📋 Resumo do Dia</p>
+          <DaySummary />
+        </div>
 
         {/* Quick Links */}
         <div className="grid grid-cols-3 gap-3 mb-4">
