@@ -16,6 +16,7 @@ const MENU_GROUPS = [
       { page: 'TasksUnified', label: 'Tarefas', icon: CheckSquare },
       { page: 'ScheduledAgenda', label: 'Agenda', icon: Calendar },
       { page: 'VisitManager', label: 'Visitas', icon: Map },
+      { page: 'VisitRouteManager', label: '🗺️ Rotas Otimizadas', icon: Route },
     ]
   },
   {
