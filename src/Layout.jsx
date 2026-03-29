@@ -9,9 +9,12 @@ import EconomicModeToggle from '@/components/EconomicModeToggle';
 import DataSecurityMonitor from '@/components/DataSecurityMonitor';
 import FloatingCNPJScore from '@/components/FloatingCNPJScore';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
-import { Menu, X, Bell, Search, ChevronRight } from 'lucide-react';
+import { Menu, X, Bell, ChevronRight } from 'lucide-react';
 import SidebarMenu from '@/components/SidebarMenu';
 import QuickVisitButton from '@/components/QuickVisitButton';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import OfflineBanner from '@/components/OfflineBanner';
+import PhoneSearch from '@/components/PhoneSearch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
@@ -112,7 +115,8 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <AILimitProtection>
-      <div className="flex min-h-screen bg-slate-50" data-layout="root">
+      <OfflineBanner />
+      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900" data-layout="root">
         {/* Sidebar */}
         <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col ${
           sidebarOpen ? 'w-64' : 'w-0'
@@ -166,6 +170,8 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               <div className="flex items-center gap-3">
+                <PhoneSearch />
+                <DarkModeToggle />
                 <EconomicModeToggle />
                 <Link to={createPageUrl('GlobalSearch')}>
                   <Button variant="outline" size="sm" className="gap-2">

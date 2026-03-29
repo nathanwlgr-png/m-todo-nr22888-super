@@ -85,4 +85,18 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .dark body {
+    background: hsl(0 0% 3.9%);
+    color: hsl(0 0% 98%);
+  }
+
+  .dark .bg-white { background: hsl(0 0% 10%) !important; }
+  .dark .bg-slate-50 { background: hsl(0 0% 8%) !important; }
+  .dark .bg-slate-100 { background: hsl(0 0% 15%) !important; }
+  .dark .border-slate-100, .dark .border-slate-200 { border-color: hsl(0 0% 20%) !important; }
+  .dark .text-slate-600, .dark .text-slate-500 { color: hsl(0 0% 70%) !important; }
+  .dark .text-slate-700, .dark .text-slate-800 { color: hsl(0 0% 85%) !important; }
+  .dark header { background: hsl(0 0% 10%) !important; border-color: hsl(0 0% 18%) !important; }
+  .dark aside { background: hsl(0 0% 10%) !important; border-color: hsl(0 0% 18%) !important; }
 }
