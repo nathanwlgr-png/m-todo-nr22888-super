@@ -893,16 +893,9 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                     </h3>
                   </div>
                   {cityClients.map((client) => {
-                    const hasPurchase = sales.some(s =>
-                      s.client_id === client.id &&
-                      (s.status === 'fechada' || s.status === 'entregue')
-                    );
-                    const scheduledVisit = allVisits.find(v =>
-                      v.client_id === client.id && v.status === 'agendada'
-                    );
-                    const lastVisit = allVisits.find(v =>
-                      v.client_id === client.id && v.status === 'realizada'
-                    );
+                    const hasPurchase = sales.some(s => s.client_id === client.id && (s.status === 'fechada' || s.status === 'entregue'));
+                    const scheduledVisit = allVisits.find(v => v.client_id === client.id && v.status === 'agendada');
+                    const lastVisit = allVisits.find(v => v.client_id === client.id && v.status === 'realizada');
                     return (
                       <div key={client.id} className="relative">
                         {editingClientId === client.id ? (
@@ -933,16 +926,9 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
             })()}
 
             {sortBy !== 'city' && filteredClients.map((client) => {
-              const hasPurchase = sales.some(s =>
-                s.client_id === client.id &&
-                (s.status === 'fechada' || s.status === 'entregue')
-              );
-              const scheduledVisit = allVisits.find(v =>
-                v.client_id === client.id && v.status === 'agendada'
-              );
-              const lastVisit = allVisits.find(v =>
-                v.client_id === client.id && v.status === 'realizada'
-              );
+              const hasPurchase = sales.some(s => s.client_id === client.id && (s.status === 'fechada' || s.status === 'entregue'));
+              const scheduledVisit = allVisits.find(v => v.client_id === client.id && v.status === 'agendada');
+              const lastVisit = allVisits.find(v => v.client_id === client.id && v.status === 'realizada');
               return (
                 <div key={client.id} className="relative">
                   {editingClientId === client.id ? (
@@ -969,9 +955,8 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
               );
             })}
           </>
-        )}
-      </div>
 
+      {/* Proposal Modal */}
       {proposalClient && (
         <ProposalModal
           client={proposalClient}
