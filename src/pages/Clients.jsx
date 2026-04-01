@@ -955,6 +955,8 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
               );
             })}
           </>
+        )}
+      </div>
 
       {/* Proposal Modal */}
       {proposalClient && (
