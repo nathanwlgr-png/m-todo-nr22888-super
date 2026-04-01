@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, MessageCircle, MoreVertical, Tag, FileText } from 'lucide-react';
+import { ChevronRight, MessageCircle, MoreVertical, Tag, Calendar } from 'lucide-react';
 import ProposalModal from './ProposalModal';
+import ScheduleVisitModal from './ScheduleVisitModal';
 import { calcHealthScore } from './WeeklyHealthReport';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -34,6 +35,7 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
+  const [showVisitModal, setShowVisitModal] = useState(false);
 
   const healthScore = calcHealthScore(client);
   const healthBadge = healthScore >= 70
@@ -170,6 +172,12 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
                   {healthBadge.label} {healthScore}
                 </div>
               </div>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowVisitModal(true); }}
+                className="p-1 hover:bg-indigo-100 rounded" title="Agendar visita"
+              >
+                <Calendar className="w-4 h-4 text-indigo-400" />
+              </button>
               <button 
                 onClick={handleMoreClick}
                 className="p-1 hover:bg-slate-100 rounded"
@@ -191,6 +199,11 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
         client={client}
         open={showProposal}
         onOpenChange={setShowProposal}
+      />
+      <ScheduleVisitModal
+        client={client}
+        open={showVisitModal}
+        onOpenChange={setShowVisitModal}
       />
     </>
   );
