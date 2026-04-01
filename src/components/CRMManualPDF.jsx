@@ -182,7 +182,15 @@ export default function CRMManualPDF() {
       ];
       dicas.forEach((d, i) => { doc.text(d, margin + 4, y + 13 + i * 4); });
 
-      doc.save('CRM_NR22_Manual_Completo.pdf');
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CRM_NR22_Manual_Completo.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       console.error(e);
     } finally {
