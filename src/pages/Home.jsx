@@ -7,6 +7,7 @@ import WeeklyHealthReport from '@/components/WeeklyHealthReport';
 import DaySummary from '@/components/DaySummary';
 import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
+import CRMManualPDF from '@/components/CRMManualPDF';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -210,6 +211,9 @@ export default function Home() {
       </div>
 
       <div className="px-4 -mt-4">
+        {/* Manual PDF */}
+        <CRMManualPDF />
+
         {/* Acesso Rápido WhatsApp Master */}
         <a
           href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')}
