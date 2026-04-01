@@ -877,7 +877,6 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
         ) : (
           <>
             {sortBy === 'city' && (() => {
-              // Agrupa por cidade
               const grouped = filteredClients.reduce((acc, client) => {
                 const city = client.city || 'Sem cidade';
                 if (!acc[city]) acc[city] = [];
@@ -894,149 +893,85 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                     </h3>
                   </div>
                   {cityClients.map((client) => {
-                    const hasPurchase = sales.some(s => 
-                      s.client_id === client.id && 
+                    const hasPurchase = sales.some(s =>
+                      s.client_id === client.id &&
                       (s.status === 'fechada' || s.status === 'entregue')
                     );
-                    const scheduledVisit = allVisits.find(v => 
-                      v.client_id === client.id && 
-                      v.status === 'agendada'
+                    const scheduledVisit = allVisits.find(v =>
+                      v.client_id === client.id && v.status === 'agendada'
                     );
-                    const lastVisit = allVisits.find(v => 
-                      v.client_id === client.id && 
-                      v.status === 'realizada'
+                    const lastVisit = allVisits.find(v =>
+                      v.client_id === client.id && v.status === 'realizada'
                     );
                     return (
                       <div key={client.id} className="relative">
                         {editingClientId === client.id ? (
                           <div className="p-4 bg-white rounded-lg border-2 border-indigo-300 shadow-sm">
                             <div className="flex gap-2 mb-3">
-                              <Input
-                                value={editingName}
-                                onChange={(e) => setEditingName(e.target.value)}
-                                placeholder="Nome do cliente"
-                                className="flex-1"
-                                autoFocus
-                              />
+                              <Input value={editingName} onChange={(e) => setEditingName(e.target.value)} placeholder="Nome do cliente" className="flex-1" autoFocus />
                             </div>
                             <div className="flex gap-2">
-                              <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">
-                                Salvar
-                              </Button>
-                              <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">
-                                Cancelar
-                              </Button>
+                              <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">Salvar</Button>
+                              <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">Cancelar</Button>
                             </div>
                           </div>
                         ) : (
                           <>
-                            <ClientCard 
-                              client={client} 
-                              hasPurchase={hasPurchase} 
-                              scheduledVisit={scheduledVisit}
-                              lastVisit={lastVisit}
-                            />
+                            <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
                             <div className="flex gap-2 mt-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleQuickEdit(client)}
-                                className="flex-1 h-9"
-                              >
-                                <Edit2 className="w-3 h-3 mr-1" />
-                                Editar
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => setProposalClient(client)}
-                                className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"
-                              >
-                                <FileText className="w-3 h-3 mr-1" />
-                                Proposta
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => exportClientDocument(client)}
-                                className="h-9"
-                              >
-                                <Download className="w-3 h-3" />
-                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="flex-1 h-9"><Edit2 className="w-3 h-3 mr-1" />Editar</Button>
+                              <Button size="sm" onClick={() => setProposalClient(client)} className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"><FileText className="w-3 h-3 mr-1" />Proposta</Button>
+                              <Button size="sm" variant="outline" onClick={() => exportClientDocument(client)} className="h-9"><Download className="w-3 h-3" /></Button>
                             </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ));
+            })()}
 
             {sortBy !== 'city' && filteredClients.map((client) => {
-              const hasPurchase = sales.some(s => 
-                s.client_id === client.id && 
+              const hasPurchase = sales.some(s =>
+                s.client_id === client.id &&
                 (s.status === 'fechada' || s.status === 'entregue')
               );
-              const scheduledVisit = allVisits.find(v => 
-                v.client_id === client.id && 
-                v.status === 'agendada'
+              const scheduledVisit = allVisits.find(v =>
+                v.client_id === client.id && v.status === 'agendada'
               );
-              const lastVisit = allVisits.find(v => 
-                v.client_id === client.id && 
-                v.status === 'realizada'
+              const lastVisit = allVisits.find(v =>
+                v.client_id === client.id && v.status === 'realizada'
               );
               return (
                 <div key={client.id} className="relative">
                   {editingClientId === client.id ? (
                     <div className="p-4 bg-white rounded-lg border-2 border-indigo-300 shadow-sm">
                       <div className="flex gap-2 mb-3">
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          placeholder="Nome do cliente"
-                          className="flex-1"
-                          autoFocus
-                        />
+                        <Input value={editingName} onChange={(e) => setEditingName(e.target.value)} placeholder="Nome do cliente" className="flex-1" autoFocus />
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">
-                          Salvar
-                        </Button>
-                        <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">
-                          Cancelar
-                        </Button>
+                        <Button onClick={saveQuickEdit} className="flex-1 bg-green-600 hover:bg-green-700">Salvar</Button>
+                        <Button variant="outline" onClick={() => setEditingClientId(null)} className="flex-1">Cancelar</Button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <ClientCard 
-                        client={client} 
-                        hasPurchase={hasPurchase} 
-                        scheduledVisit={scheduledVisit}
-                        lastVisit={lastVisit}
-                      />
+                      <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
                       <div className="flex gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleQuickEdit(client)}
-                          className="flex-1 h-9"
-                        >
-                          <Edit2 className="w-3 h-3 mr-1" />
-                          Editar
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => setProposalClient(client)}
-                          className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"
-                        >
-                          <FileText className="w-3 h-3 mr-1" />
-                          Proposta
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => exportClientDocument(client)}
-                          className="h-9"
-                        >
-                          <Download className="w-3 h-3" />
-                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="flex-1 h-9"><Edit2 className="w-3 h-3 mr-1" />Editar</Button>
+                        <Button size="sm" onClick={() => setProposalClient(client)} className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"><FileText className="w-3 h-3 mr-1" />Proposta</Button>
+                        <Button size="sm" variant="outline" onClick={() => exportClientDocument(client)} className="h-9"><Download className="w-3 h-3" /></Button>
                       </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </>
         )}
-      {/* Proposal Modal */}
+      </div>
+
       {proposalClient && (
         <ProposalModal
           client={proposalClient}
