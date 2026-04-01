@@ -33,6 +33,8 @@ import {
   Download
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
+import ProposalModal from '@/components/ProposalModal';
+import WeeklyHealthReport from '@/components/WeeklyHealthReport';
 import SalesFunnelChart from '@/components/SalesFunnelChart';
 import AIMetricsBadges from '@/components/AIMetricsBadges';
 import { useOfflineClients } from '@/components/OfflineClientCache';
@@ -76,6 +78,8 @@ export default function Clients() {
   const [editingClientId, setEditingClientId] = useState(null);
   const [editingName, setEditingName] = useState('');
   const [segmentFilter, setSegmentFilter] = useState('all');
+  const [equipmentFilter, setEquipmentFilter] = useState('all');
+  const [proposalClient, setProposalClient] = useState(null);
 
   const { clients, isOffline, isLoading: offlineLoading, isCached, cacheAge } = useOfflineClients();
   const isLoading = offlineLoading;
@@ -184,8 +188,13 @@ export default function Clients() {
       
       // Filtro de segmento IA
       const matchesSegment = segmentFilter === 'all' || client.ai_segment === segmentFilter;
+
+      // Filtro de equipamento de interesse
+      const matchesEquipment = equipmentFilter === 'all' ||
+        client.equipment_interest?.includes(equipmentFilter) ||
+        client.current_equipment?.includes(equipmentFilter);
       
-      return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline && matchesSegment;
+      return matchesSearch && matchesStatus && matchesScore && matchesCity && matchesVisit && matchesPipeline && matchesSegment && matchesEquipment;
     });
 
     // Ordenação
@@ -254,7 +263,7 @@ export default function Clients() {
     }
   };
 
-  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, segmentFilter].filter(f => f !== 'all').length;
+  const activeFiltersCount = [statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, segmentFilter, equipmentFilter].filter(f => f !== 'all').length;
 
   const handleQuickEdit = (client) => {
     setEditingClientId(client.id);
@@ -801,6 +810,25 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                 </Select>
               </div>
 
+              <div>
+                <label className="text-xs font-medium text-slate-600 mb-2 block">Equipamento de Interesse</label>
+                <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Equipamentos</SelectItem>
+                    <SelectItem value="VBC-50A">VBC-50A — Hematológico</SelectItem>
+                    <SelectItem value="SMT-120VP">SMT-120VP — Bioquímico</SelectItem>
+                    <SelectItem value="QT3">QT3 — Bioquímico Entry</SelectItem>
+                    <SelectItem value="VG1">VG1 — Gasometria</SelectItem>
+                    <SelectItem value="VG2">VG2 — Gasometria + Imuno</SelectItem>
+                    <SelectItem value="Vi1">Vi1 — Imunofluorescência</SelectItem>
+                    <SelectItem value="VQ1">VQ1 — PCR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -810,8 +838,8 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                   setVisitFilter('all');
                   setPipelineFilter('all');
                   setSegmentFilter('all');
+                  setEquipmentFilter('all');
                 }}
-                className="w-full text-sm"
               >
                 <X className="w-4 h-4 mr-2" />
                 Limpar Filtros
@@ -819,6 +847,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
             </div>
           )}
         </div>
+      </div>
+
+      {/* Weekly Health Report */}
+      <div className="px-4 pt-4">
+        <WeeklyHealthReport clients={clients} />
       </div>
 
       {/* Client List */}
@@ -911,26 +944,25 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                                 className="flex-1 h-9"
                               >
                                 <Edit2 className="w-3 h-3 mr-1" />
-                                Editar Nome
+                                Editar
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => setProposalClient(client)}
+                                className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"
+                              >
+                                <FileText className="w-3 h-3 mr-1" />
+                                Proposta
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => exportClientDocument(client)}
-                                className="flex-1 h-9"
+                                className="h-9"
                               >
-                                <FileText className="w-3 h-3 mr-1" />
-                                Exportar
+                                <Download className="w-3 h-3" />
                               </Button>
                             </div>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ));
-            })()}
 
             {sortBy !== 'city' && filteredClients.map((client) => {
               const hasPurchase = sales.some(s => 
@@ -983,26 +1015,35 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                           className="flex-1 h-9"
                         >
                           <Edit2 className="w-3 h-3 mr-1" />
-                          Editar Nome
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setProposalClient(client)}
+                          className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"
+                        >
+                          <FileText className="w-3 h-3 mr-1" />
+                          Proposta
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => exportClientDocument(client)}
-                          className="flex-1 h-9"
+                          className="h-9"
                         >
-                          <FileText className="w-3 h-3 mr-1" />
-                          Exportar
+                          <Download className="w-3 h-3" />
                         </Button>
                       </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
           </>
         )}
-      </div>
+      {/* Proposal Modal */}
+      {proposalClient && (
+        <ProposalModal
+          client={proposalClient}
+          open={!!proposalClient}
+          onOpenChange={(o) => { if (!o) setProposalClient(null); }}
+        />
+      )}
 
       {/* Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>

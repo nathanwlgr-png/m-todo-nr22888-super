@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import SalesDashboardWidget from '@/components/SalesDashboardWidget';
+import WeeklyHealthReport from '@/components/WeeklyHealthReport';
 import DaySummary from '@/components/DaySummary';
 import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
@@ -119,6 +120,38 @@ export default function Home() {
     staleTime: 30000,
   });
 
+  const { data: visits = [] } = useQuery({
+    queryKey: ['home-visits'],
+    queryFn: () => base44.entities.Visit.filter({ status: 'agendada' }),
+    staleTime: 60000,
+  });
+
+  const { data: sales = [] } = useQuery({
+    queryKey: ['home-sales'],
+    queryFn: () => base44.entities.Sale.list('-sale_date', 50),
+    staleTime: 60000,
+  });
+
+  const hotLeads = clients.filter(c => (c.purchase_score || 0) > 70).length;
+  const noContact7d = clients.filter(c => {
+    if (!c.last_contact_date) return true;
+    return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
+  }).length;
+  const META_EQUIPAMENTOS = 7;
+  const META_VALOR = 210000;
+  const salesThisMonth = sales.filter(s => {
+    const d = new Date(s.sale_date || s.created_date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && (s.status === 'fechada' || s.status === 'entregue');
+  });
+  const metaQtd = salesThisMonth.length;
+  const metaValor = salesThisMonth.reduce((a, s) => a + (s.sale_value || 0), 0);
+  const metaPct = Math.min(100, Math.round((metaValor / META_VALOR) * 100));
+  const nextVisits = visits
+    .filter(v => { const d = new Date(v.scheduled_date); const diff = (d - Date.now()) / 86400000; return diff >= 0 && diff <= 7; })
+    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+    .slice(0, 5);
+
   const filteredPages = ALL_PAGES.filter(p => {
     const matchesSearch = !search || p.label.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = activeCategory === 'Todos' || p.category === activeCategory;
@@ -215,6 +248,58 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        {/* Métricas Dashboard */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+            <p className="text-xs text-red-500 font-medium">🔥 Leads Quentes</p>
+            <p className="text-2xl font-bold text-red-700">{hotLeads}</p>
+            <p className="text-xs text-red-400">score &gt; 70</p>
+          </div>
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-3">
+            <p className="text-xs text-orange-500 font-medium">⏰ Sem Contato +7d</p>
+            <p className="text-2xl font-bold text-orange-700">{noContact7d}</p>
+            <p className="text-xs text-orange-400">precisam de follow-up</p>
+          </div>
+          <div className="col-span-2 bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <p className="text-xs text-indigo-500 font-medium">🎯 Meta do Mês</p>
+                <p className="text-lg font-bold text-indigo-700">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
+                <p className="text-xs text-indigo-400">R$ {metaValor.toLocaleString('pt-BR')} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-indigo-700">{metaPct}%</p>
+                <p className="text-xs text-indigo-400">atingido</p>
+              </div>
+            </div>
+            <div className="w-full bg-indigo-200 rounded-full h-2">
+              <div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${metaPct}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {nextVisits.length > 0 && (
+          <div className="bg-white rounded-xl border p-3 mb-4">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📅 Próximas Visitas (7 dias)</p>
+            <div className="space-y-2">
+              {nextVisits.map(v => (
+                <div key={v.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="font-semibold text-slate-800">{v.client_name}</p>
+                    <p className="text-xs text-slate-400">{v.location || 'Sem endereço'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-indigo-600">{new Date(v.scheduled_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</p>
+                    <p className="text-xs text-slate-400">{new Date(v.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <WeeklyHealthReport clients={clients} />
 
         {/* Sales Dashboard */}
         <SalesDashboardWidget />

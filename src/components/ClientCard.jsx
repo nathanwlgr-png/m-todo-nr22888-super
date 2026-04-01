@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Building2, ThermometerSun, ChevronRight, MessageCircle, MoreVertical, Tag } from 'lucide-react';
+import { ChevronRight, MessageCircle, MoreVertical, Tag, FileText } from 'lucide-react';
+import ProposalModal from './ProposalModal';
+import { calcHealthScore } from './WeeklyHealthReport';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ClientDetailsModal from './ClientDetailsModal';
@@ -31,6 +33,14 @@ const clientTypeLabels = {
 export default function ClientCard({ client, hasPurchase = false, scheduledVisit = null, lastVisit = null }) {
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
+
+  const healthScore = calcHealthScore(client);
+  const healthBadge = healthScore >= 70
+    ? { label: '🟢 Quente', cls: 'bg-green-100 text-green-700' }
+    : healthScore >= 40
+    ? { label: '🟡 Morno', cls: 'bg-yellow-100 text-yellow-700' }
+    : { label: '🔴 Frio', cls: 'bg-red-100 text-red-700' };
   
   // Validação rigorosa
   if (!client || !client.id || client.is_deleted) {
@@ -156,6 +166,9 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
                     Score: {client.purchase_score}%
                   </div>
                 )}
+                <div className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${healthBadge.cls}`}>
+                  {healthBadge.label} {healthScore}
+                </div>
               </div>
               <button 
                 onClick={handleMoreClick}
@@ -173,6 +186,11 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
         client={client}
         open={showDetailsModal}
         onOpenChange={setShowDetailsModal}
+      />
+      <ProposalModal
+        client={client}
+        open={showProposal}
+        onOpenChange={setShowProposal}
       />
     </>
   );
