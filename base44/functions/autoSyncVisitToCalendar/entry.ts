@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const GCal = 'https://www.googleapis.com/calendar/v3/calendars/primary';
 
@@ -49,6 +49,15 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.Visit.update(finalVisitId, {
           google_calendar_synced: false,
           google_calendar_event_id: null,
+        }).catch(() => {});
+        await base44.asServiceRole.integrations.Core.AnalyticsTrack({
+          eventName: 'google_calendar_sync_success',
+          properties: {
+            action: 'deleted',
+            visit_id: finalVisitId,
+            client_name: visit.client_name,
+            visit_type: visit.visit_type || 'visita',
+          },
         }).catch(() => {});
         return Response.json({ success: true, action: 'deleted' });
       }
@@ -114,6 +123,17 @@ Deno.serve(async (req) => {
       });
 
       console.log(`✅ Visita ${visit.client_name} sincronizada (${action}) - Event ID: ${gcalData.id}`);
+
+      await base44.asServiceRole.integrations.Core.AnalyticsTrack({
+        eventName: 'google_calendar_sync_success',
+        properties: {
+          action,
+          visit_id: finalVisitId,
+          client_name: visit.client_name,
+          visit_type: visit.visit_type || 'visita',
+          event_id: gcalData.id,
+        },
+      }).catch(() => {});
 
       return Response.json({
         success: true,

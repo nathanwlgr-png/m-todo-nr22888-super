@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const GCal = 'https://www.googleapis.com/calendar/v3/calendars/primary';
 
@@ -64,6 +64,14 @@ Deno.serve(async (req) => {
         }
       }
 
+      await base44.asServiceRole.integrations.Core.AnalyticsTrack({
+        eventName: 'google_calendar_sync_success',
+        properties: {
+          action: 'sync_visits',
+          synced_count: results.length,
+        },
+      }).catch(() => {});
+
       return Response.json({ success: true, synced: results.length, results });
     }
 
@@ -95,6 +103,14 @@ Deno.serve(async (req) => {
           results.push({ task_id: task.id, event_id: gcalData.id, title: task.title });
         }
       }
+
+      await base44.asServiceRole.integrations.Core.AnalyticsTrack({
+        eventName: 'google_calendar_sync_success',
+        properties: {
+          action: 'sync_tasks',
+          synced_count: results.length,
+        },
+      }).catch(() => {});
 
       return Response.json({ success: true, synced: results.length, results });
     }
@@ -131,6 +147,15 @@ Deno.serve(async (req) => {
         google_calendar_synced: true,
         google_calendar_event_id: event.id,
       });
+
+      await base44.asServiceRole.integrations.Core.AnalyticsTrack({
+        eventName: 'google_calendar_sync_success',
+        properties: {
+          action: 'import_from_calendar',
+          client_name: client_name || event.summary || 'Google Calendar',
+          event_id,
+        },
+      }).catch(() => {});
 
       return Response.json({ success: true, visit: newVisit });
     }
