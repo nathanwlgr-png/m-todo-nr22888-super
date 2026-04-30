@@ -31,7 +31,7 @@ export default function OfflineRouteCalculator() {
       const uniqueCities = [...new Set(allClients.map(c => c.city).filter(Boolean))];
       setCities(uniqueCities.sort());
       
-      setClinic(allClients);
+      setClinics(allClients);
     } catch (error) {
       console.error('Erro ao carregar cidades:', error);
     }

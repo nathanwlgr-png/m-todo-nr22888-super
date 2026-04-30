@@ -60,7 +60,8 @@ export default function CityLeadCapture() {
       return;
     }
 
-    const recognition = new webkitSpeechRecognition();
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
     recognition.continuous = false;
 

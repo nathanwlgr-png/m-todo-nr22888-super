@@ -162,7 +162,6 @@ Retorne JSON:
 
       // Incrementar total de visitas
       const currentVisitCount = client.total_visits_count || 0;
-      updateData.total_visits_count = currentVisitCount + 1;
 
       // 3. Atualizar perfil do cliente automaticamente
       const updatedPains = [...(client.main_pains || []), ...visitData.new_pains];
@@ -170,6 +169,7 @@ Retorne JSON:
       const updatedObjections = [...(client.real_objections || []), ...visitData.new_objections, ...visitData.objections_presented];
 
       const updateData = {
+        total_visits_count: currentVisitCount + 1,
         main_pains: updatedPains,
         purchase_motivators: updatedMotivators,
         real_objections: updatedObjections,
@@ -186,9 +186,9 @@ Retorne JSON:
       }
 
       // Se venda fechada
-      if (autoClosedSale || visitData.sale_closed) {
+      if (visitData.sale_closed) {
         updateData.sale_closed = true;
-        updateData.equipment_sold = autoClosedSale ? visitData.equipment_interest : visitData.equipment_sold;
+        updateData.equipment_sold = visitData.equipment_sold || visitData.equipment_interest;
         updateData.contract_signature_date = visitData.contract_signature_date;
         updateData.status = 'quente';
         updateData.visit_objective = 'fechar_venda';
@@ -214,7 +214,7 @@ Retorne JSON:
       }
 
       // 6. Se venda fechada, criar lembrete de assinatura
-      if ((autoClosedSale || visitData.sale_closed) && visitData.contract_signature_date) {
+      if (visitData.sale_closed && visitData.contract_signature_date) {
         await createVisitMutation.mutateAsync({
           client_id: client.id,
           client_name: client.first_name,
@@ -223,7 +223,7 @@ Retorne JSON:
           duration_minutes: 60,
           location: client.address || client.city,
           status: 'agendada',
-          notes: `🎉 ASSINATURA DE CONTRATO - ${autoClosedSale ? visitData.equipment_interest : visitData.equipment_sold}`
+          notes: `🎉 ASSINATURA DE CONTRATO - ${visitData.equipment_sold || visitData.equipment_interest}`
         });
         toast.success('Lembrete de assinatura criado!');
       }
@@ -243,7 +243,7 @@ DADOS DA VISITA:
 - Técnicas de Vendas Usadas: ${visitData.techniques_used.join(', ') || 'Nenhuma'}
 - Objeções Apresentadas: ${visitData.objections_presented.join(', ') || 'Nenhuma'}
 - Nível de Interesse: ${visitData.interest_level}/10
-- Venda Fechada: ${autoClosedSale || visitData.sale_closed ? 'Sim' : 'Não'}
+- Venda Fechada: ${visitData.sale_closed ? 'Sim' : 'Não'}
 
 CONTEXTO HISTÓRICO DO CLIENTE:
 - Dores Anteriores: ${client.main_pains?.join(', ') || 'Nenhuma'}
@@ -321,7 +321,7 @@ Seja HONESTO, CRÍTICO e CONSTRUTIVO. Este feedback é para aprendizado de máqu
           techniques_used: visitData.techniques_used,
           objections_faced: visitData.objections_presented,
           interest_level: visitData.interest_level,
-          sale_closed: autoClosedSale || visitData.sale_closed,
+          sale_closed: visitData.sale_closed,
           what_worked: analysisResult.what_worked,
           what_failed: analysisResult.what_failed,
           error_type: analysisResult.error_type,
@@ -345,8 +345,8 @@ Seja HONESTO, CRÍTICO e CONSTRUTIVO. Este feedback é para aprendizado de máqu
             const perf = existingPerf[0];
             await base44.entities.TechniquePerformance.update(perf.id, {
               total_uses: (perf.total_uses || 0) + 1,
-              success_count: (perf.success_count || 0) + (autoClosedSale || visitData.sale_closed ? 1 : 0),
-              success_rate: ((perf.success_count + (autoClosedSale || visitData.sale_closed ? 1 : 0)) / (perf.total_uses + 1) * 100),
+              success_count: (perf.success_count || 0) + (visitData.sale_closed ? 1 : 0),
+              success_rate: ((perf.success_count + (visitData.sale_closed ? 1 : 0)) / (perf.total_uses + 1) * 100),
               avg_interest_level: ((perf.avg_interest_level || 0) * (perf.total_uses || 0) + visitData.interest_level) / (perf.total_uses + 1)
             });
           } else {
@@ -355,8 +355,8 @@ Seja HONESTO, CRÍTICO e CONSTRUTIVO. Este feedback é para aprendizado de máqu
               client_profile: `${client.numerology_number}`,
               client_type: client.client_type,
               total_uses: 1,
-              success_count: autoClosedSale || visitData.sale_closed ? 1 : 0,
-              success_rate: autoClosedSale || visitData.sale_closed ? 100 : 0,
+              success_count: visitData.sale_closed ? 1 : 0,
+              success_rate: visitData.sale_closed ? 100 : 0,
               avg_interest_level: visitData.interest_level,
               salesperson_email: currentUser.email,
               month_year: monthYear

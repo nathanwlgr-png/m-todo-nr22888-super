@@ -149,7 +149,7 @@ export default function NotificationSettings() {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <Label className="font-semibold">Lead com alto score</Label>
-              <p className="text-sm text-slate-600">Alerta para leads qualificados (score > 70)</p>
+              <p className="text-sm text-slate-600">Alerta para leads qualificados (score &gt; 70)</p>
             </div>
             <Switch
               checked={preferences.high_score_lead}

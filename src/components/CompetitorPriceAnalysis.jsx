@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Target, TrendingDown, MapPin, Building2 } from 'lucide-react';
+import { Target, TrendingDown, MapPin, Building2, Loader2 } from 'lucide-react';
 
 // Dados de concorrentes (offline - sem IA)
 const COMPETITOR_DATA = {

@@ -6,13 +6,15 @@ import { Copy, FileText, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const EQUIPAMENTOS = [
-  { id: 'VBC-50A', nome: 'Analisador Hematológico VBC-50A', preco: 28000 },
-  { id: 'SMT-120VP', nome: 'Analisador Bioquímico SMT-120VP', preco: 45000 },
-  { id: 'QT3', nome: 'Analisador Bioquímico QT3', preco: 18000 },
-  { id: 'VG1', nome: 'Gasômetro VG1', preco: 35000 },
-  { id: 'VG2', nome: 'Gasômetro + Imunofluorescência VG2', preco: 55000 },
-  { id: 'Vi1', nome: 'Imunofluorescência Vi1', preco: 40000 },
-  { id: 'VQ1', nome: 'PCR Quantitativo VQ1', preco: 65000 },
+  { id: 'SMT-120VP', nome: 'Analisador Bioquímico Multifuncional SMT-120VP', preco: 23500, preco5x: 25000 },
+  { id: 'QT3', nome: 'Analisador Bioquímico QT3', preco: 12900, preco5x: 12900 },
+  { id: 'VG1', nome: 'Analisador de Gases e Eletrólitos VG1', preco: 28000, preco5x: 29700 },
+  { id: 'VG2', nome: 'Analisador de Imunoensaio Fluorescente VG2', preco: 33000, preco5x: 35000 },
+  { id: '3DX', nome: 'Analisador Multifuncional 3DX (hematol. + bioquím. + eletról.)', preco: 55000, preco5x: 58000 },
+  { id: 'VBC-50A', nome: 'Analisador Hematológico 5 partes VBC-50A', preco: 36376, preco5x: 38000 },
+  { id: 'Vi1', nome: 'Analisador de Imunoensaio Fluorescente Vi1', preco: 8500, preco5x: 9000 },
+  { id: 'VQ1', nome: 'Analisador PCR VQ1', preco: 45000, preco5x: 47700 },
+  { id: 'Maleta-VG1', nome: 'Maleta de Proteção VG1', preco: 1500, preco5x: 1600 },
 ];
 
 const TAXA_SANTANDER = 0.02282; // 2,282% ao mês
@@ -56,6 +58,8 @@ export default function ProposalModal({ client, open, onOpenChange }) {
 💰 CONDIÇÕES DE PAGAMENTO:
 
 • À vista: ${formatCurrency(equip.preco)}
+
+• 5x Cartão: ${formatCurrency(equip.preco5x)} (${formatCurrency(equip.preco5x / 5)}/parcela)
 
 • Financiado (Santander):
   ${PARCELAS}x de ${formatCurrency(parcela)}
@@ -123,6 +127,10 @@ export default function ProposalModal({ client, open, onOpenChange }) {
               <p className="text-xs text-slate-500">À vista</p>
               <p className="font-bold text-slate-800">{formatCurrency(equip.preco)}</p>
             </div>
+            <div className="bg-purple-50 rounded-lg p-3 text-center shadow-sm">
+              <p className="text-xs text-slate-500">5x Cartão</p>
+              <p className="font-bold text-purple-700">{formatCurrency(equip.preco5x / 5)}/parcela</p>
+            </div>
             <div className="bg-indigo-50 rounded-lg p-3 text-center shadow-sm">
               <p className="text-xs text-slate-500">36x Santander</p>
               <p className="font-bold text-indigo-700">{formatCurrency(parcela)}/mês</p>
@@ -130,10 +138,6 @@ export default function ProposalModal({ client, open, onOpenChange }) {
             <div className="bg-green-50 rounded-lg p-3 text-center shadow-sm">
               <p className="text-xs text-slate-500">ROI (exames/mês)</p>
               <p className="font-bold text-green-700">{roi} exames</p>
-            </div>
-            <div className="bg-amber-50 rounded-lg p-3 text-center shadow-sm">
-              <p className="text-xs text-slate-500">Carência</p>
-              <p className="font-bold text-amber-700">90 dias</p>
             </div>
           </div>
 

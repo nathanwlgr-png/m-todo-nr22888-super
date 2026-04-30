@@ -643,14 +643,14 @@ IMPORTANTE: Busque dados REAIS online de reputação e reviews.`;
           ))}
 
           {/* Estratégias de Posicionamento */}
-          {result?.positioning_strategies && result.positioning_strategies.length > 0 && (
+          {competitors.length > 0 && (
             <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border-2 border-violet-300">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-5 h-5 text-violet-600" />
                 <h4 className="font-bold text-violet-900">Estratégias de Posicionamento</h4>
               </div>
               <div className="space-y-2">
-                {result.positioning_strategies.map((strat, i) => (
+                {[].map((strat, i) => (
                   <div key={i} className="bg-white rounded-lg p-3 border border-violet-200">
                     <div className="flex items-center justify-between mb-1">
                       <p className="font-semibold text-slate-800 text-sm">{strat.strategy}</p>

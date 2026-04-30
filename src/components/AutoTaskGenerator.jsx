@@ -171,9 +171,9 @@ Exemplo: ligacao - Ligar para checar dúvidas | Perfil analítico, precisa de ma
               await createTaskMutation.mutateAsync({
                 client_id: client.id,
                 client_name: client.first_name,
-                title: task.title,
-                description: `${task.description} | Engagement: ${engagementScore}% | Perfil: ${client.numerology_number || 'N/A'}`,
-                type: task.type,
+                title: `Follow-up urgente — ${client.first_name}`,
+                description: `${aiSuggestion} | Engagement: ${engagementScore}% | Perfil: ${client.numerology_number || 'N/A'}`,
+                type: 'follow_up',
                 priority,
                 due_date: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0],
                 status: 'pendente',

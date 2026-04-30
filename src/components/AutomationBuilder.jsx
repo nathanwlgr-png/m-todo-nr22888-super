@@ -333,8 +333,15 @@ function ActionConfigFields({ actionType, config, onChange }) {
         </div>
       );
     case 'send_whatsapp':
-      const [whatsappSuggestion, setWhatsappSuggestion] = useState('');
-      const [whatsappLoading, setWhatsappLoading] = useState(false);
+      return <SendWhatsAppConfig config={config} onChange={onChange} />;
+    default:
+      return null;
+  }
+}
+
+function SendWhatsAppConfig({ config, onChange }) {
+  const [whatsappSuggestion, setWhatsappSuggestion] = useState('');
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
 
       const generateWhatsAppSuggestion = async (template) => {
         setWhatsappLoading(true);
@@ -395,7 +402,4 @@ function ActionConfigFields({ actionType, config, onChange }) {
           )}
         </div>
       );
-    default:
-      return null;
-  }
 }

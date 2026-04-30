@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, FileText, Send } from 'lucide-react';
@@ -43,6 +43,8 @@ export default function CompleteSystemReport() {
     queryKey: ['current-user'],
     queryFn: () => base44.auth.me()
   });
+
+  const queryClient = useQueryClient();
 
   const generateReport = async () => {
     setGenerating(true);
