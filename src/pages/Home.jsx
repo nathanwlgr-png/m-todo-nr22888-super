@@ -241,12 +241,12 @@ export default function Home() {
         {/* Manual PDF */}
         <CRMManualPDF />
 
-        {/* Acesso Rápido WhatsApp Master */}
+        {/* Acesso Rápido WhatsApp Master — AGENTE ÚNICO */}
         <a
-          href={base44.agents.getWhatsAppConnectURL('whatsapp_master_assistant')}
+          href={base44.agents.getWhatsAppConnectURL('whatsapp_master_agent')}
           target="_blank"
           rel="noopener noreferrer"
-          className="block mb-4"
+          className="block mb-3"
         >
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg">
             <div className="flex items-center gap-3">
@@ -254,13 +254,27 @@ export default function Home() {
                 <MessageSquare className="w-6 h-6" />
               </div>
               <div>
-                <p className="font-bold text-lg">Nathan - NR22888</p>
-                <p className="text-green-100 text-sm">Assistente Master de Vendas WhatsApp</p>
+                <p className="font-bold text-lg">🔥 NR22888 — Agente Único</p>
+                <p className="text-green-100 text-xs">Toque para conectar no WhatsApp • 29 IAs • CRM Total</p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6" />
           </div>
         </a>
+
+        {/* Guia rápido do agente */}
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+          <p className="text-xs font-bold text-green-700 mb-1.5">💬 Como usar o agente no WhatsApp:</p>
+          <div className="grid grid-cols-2 gap-1 text-xs text-green-700">
+            <span>🔍 <strong>pesquisa [nome]</strong> → busca clínica</span>
+            <span>🏦 <strong>score [CNPJ]</strong> → crédito</span>
+            <span>🗺️ <strong>rota hoje</strong> → visitas otimizadas</span>
+            <span>📊 <strong>relatório</strong> → KPIs do dia</span>
+            <span>💡 <strong>sugestões</strong> → 3 ações agora</span>
+            <span>🧹 <strong>limpar duplicatas</strong> → CRM limpo</span>
+          </div>
+          <p className="text-xs text-green-500 mt-1.5">✅ Fale normalmente também — ele entende contexto e identifica clientes automaticamente!</p>
+        </div>
 
         {/* Resumo do Dia */}
         <div className="mb-1">
