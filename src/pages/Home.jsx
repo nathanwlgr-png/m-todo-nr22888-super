@@ -11,17 +11,18 @@ import CRMManualPDF from '@/components/CRMManualPDF';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
 import SmartRouteMap from '@/components/SmartRouteMap';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
   Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
-  FileText, Search, Phone, Bell, Sparkles, Database, ChevronRight,
-  Activity, DollarSign, Star, Map, FileSearch, Bot, Workflow,
-  ShoppingCart, BookOpen, Shield, LayoutDashboard, Hash, Megaphone,
-  Globe, AreaChart, PieChart, ClipboardList, Loader2, X, Eye
+  FileText, Search, Bell, Sparkles, Database, ChevronRight,
+  Activity, DollarSign, Map, Bot, Workflow,
+  BookOpen, Shield, LayoutDashboard, Hash,
+  Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
+  Trash2, RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -98,6 +99,8 @@ export default function Home() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [dedupeStatus, setDedupeStatus] = useState(null);
+  const [dedupeLoading, setDedupeLoading] = useState(false);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-count'],
@@ -160,6 +163,28 @@ export default function Home() {
     const matchesCategory = activeCategory === 'Todos' || p.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleScanDuplicates = async () => {
+    setDedupeLoading(true);
+    try {
+      const res = await base44.functions.invoke('deduplicateAndClean', { mode: 'scan', entity: 'Client' });
+      setDedupeStatus(res.data);
+    } catch (e) {
+      setDedupeStatus({ error: e.message });
+    }
+    setDedupeLoading(false);
+  };
+
+  const handleMergeDuplicates = async () => {
+    setDedupeLoading(true);
+    try {
+      const res = await base44.functions.invoke('deduplicateAndClean', { mode: 'merge', entity: 'Client' });
+      setDedupeStatus(res.data);
+    } catch (e) {
+      setDedupeStatus({ error: e.message });
+    }
+    setDedupeLoading(false);
+  };
 
   const quickLinks = [
     { page: 'Clients', label: 'Clientes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -304,6 +329,40 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Painel de Deduplicação Inteligente */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">🧹 Limpeza Inteligente do CRM</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={handleScanDuplicates} disabled={dedupeLoading} className="text-xs h-7">
+                {dedupeLoading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                <span className="ml-1">Escanear</span>
+              </Button>
+              {dedupeStatus && !dedupeStatus.error && dedupeStatus.mode === 'scan' && dedupeStatus.duplicate_groups > 0 && (
+                <Button size="sm" onClick={handleMergeDuplicates} disabled={dedupeLoading} className="text-xs h-7 bg-amber-600 hover:bg-amber-700">
+                  <Trash2 className="w-3 h-3" />
+                  <span className="ml-1">Mesclar</span>
+                </Button>
+              )}
+            </div>
+          </div>
+          {dedupeStatus && !dedupeStatus.error && (
+            <div className="text-xs text-amber-800">
+              {dedupeStatus.mode === 'scan' ? (
+                <p>📊 <strong>{dedupeStatus.total_records}</strong> clientes | <strong className="text-red-600">{dedupeStatus.duplicate_groups}</strong> grupos duplicados | <strong className="text-red-600">{dedupeStatus.duplicates_to_remove}</strong> para remover</p>
+              ) : (
+                <p>✅ <strong>{dedupeStatus.records_merged}</strong> duplicatas removidas em <strong>{dedupeStatus.groups_processed}</strong> grupos!</p>
+              )}
+            </div>
+          )}
+          {!dedupeStatus && (
+            <p className="text-xs text-amber-600">Clique em "Escanear" para encontrar e mesclar registros duplicados automaticamente.</p>
+          )}
+        </div>
 
         <WeeklyHealthReport clients={clients} />
 
