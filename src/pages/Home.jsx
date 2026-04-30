@@ -9,6 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
 import CRMManualPDF from '@/components/CRMManualPDF';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
+import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
+import SmartRouteMap from '@/components/SmartRouteMap';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -304,6 +306,12 @@ export default function Home() {
         )}
 
         <WeeklyHealthReport clients={clients} />
+
+        {/* Dashboard Consolidado com Recharts */}
+        <ConsolidatedDashboard />
+
+        {/* Mapa de Rotas Inteligente */}
+        <SmartRouteMap />
 
         {/* Sales Dashboard */}
         <SalesDashboardWidget />
