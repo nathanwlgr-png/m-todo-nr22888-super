@@ -7,12 +7,12 @@ import { toast } from 'sonner';
 
 const EQUIPAMENTOS = [
   { id: 'SMT-120VP', nome: 'Analisador Bioquímico Multifuncional SMT-120VP', preco: 23500, preco5x: 25000 },
-  { id: 'QT3', nome: 'Analisador Bioquímico QT3', preco: 12900, preco5x: 12900 },
+  { id: 'QT3', nome: 'Analisador Bioquímico QT3', preco: 12900, preco5x: 14300 },
   { id: 'VG1', nome: 'Analisador de Gases e Eletrólitos VG1', preco: 28000, preco5x: 29700 },
   { id: 'VG2', nome: 'Analisador de Imunoensaio Fluorescente VG2', preco: 33000, preco5x: 35000 },
   { id: '3DX', nome: 'Analisador Multifuncional 3DX (hematol. + bioquím. + eletról.)', preco: 55000, preco5x: 58000 },
-  { id: 'VBC-50A', nome: 'Analisador Hematológico 5 partes VBC-50A', preco: 36376, preco5x: 38000 },
-  { id: 'Vi1', nome: 'Analisador de Imunoensaio Fluorescente Vi1', preco: 8500, preco5x: 9000 },
+  { id: 'VBC-50A', nome: 'Analisador Hematológico 5 partes VBC-50A', preco: 36376, preco5x: 38500 },
+  { id: 'Vi1', nome: 'Analisador de Imunoensaio Fluorescente Vi1', preco: 8500, preco5x: 9500 },
   { id: 'VQ1', nome: 'Analisador PCR VQ1', preco: 45000, preco5x: 47700 },
   { id: 'Maleta-VG1', nome: 'Maleta de Proteção VG1', preco: 1500, preco5x: 1600 },
 ];
