@@ -8,6 +8,8 @@ import DaySummary from '@/components/DaySummary';
 import { useQuery } from '@tanstack/react-query';
 import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
 import CRMManualPDF from '@/components/CRMManualPDF';
+import SniperDoDia from '@/components/SniperDoDia';
+import CRMStatsBar from '@/components/CRMStatsBar';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
 import SmartRouteMap from '@/components/SmartRouteMap';
@@ -291,6 +293,12 @@ export default function Home() {
           </div>
           <p className="text-xs text-orange-500 mt-1.5">🐾 Fale normalmente — ele entende contexto!</p>
         </div>
+
+        {/* Stats do CRM — clientes, equipamentos, mês, quentes */}
+        <CRMStatsBar />
+
+        {/* Sniper do Dia — Top 10 para contatar */}
+        <SniperDoDia />
 
         {/* Resumo do Dia */}
         <div className="mb-3">

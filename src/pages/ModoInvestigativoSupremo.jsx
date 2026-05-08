@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Target, Zap, AlertTriangle, CheckCircle, HelpCircle, XCircle, Copy, MessageSquare, Mail, Instagram } from 'lucide-react';
+import { Search, Target, AlertTriangle, CheckCircle, HelpCircle, XCircle, Copy, MessageSquare, Instagram, Save } from 'lucide-react';
 
 const STATUS_CONFIG = {
   CONFIRMADO: { color: '#00ff88', icon: CheckCircle, bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.3)' },
@@ -55,6 +55,29 @@ export default function ModoInvestigativoSupremo() {
   const [report, setReport] = useState(null);
   const [copied, setCopied] = useState('');
   const [leadTemp, setLeadTemp] = useState('quente');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSaveToLead = async () => {
+    if (!report) return;
+    setSaving(true);
+    const leadData = {
+      full_name: report.nome_clinica,
+      company: report.nome_clinica,
+      city: report.cidade,
+      source: 'analise_mercado_ia',
+      interest: report.equipamento_indicado,
+      stage: 'novo',
+      notes: formatFullReport(report),
+      predictive_score: report.score_oportunidade,
+      next_best_action: report.proximo_passo,
+      buying_signals: report.confirmados || [],
+    };
+    await base44.entities.Lead.create(leadData);
+    setSaved(true);
+    setSaving(false);
+    setTimeout(() => setSaved(false), 3000);
+  };
 
   const handleInvestigate = async () => {
     if (!input.trim()) return;
@@ -410,15 +433,26 @@ RESPONDA EXATAMENTE neste JSON (sem markdown, sem texto fora do JSON):
             <p className="text-xs mt-1" style={{ color: '#888' }}>🔒 Seg-Qui: visitas e contatos | Sex: organização, follow-up e limpeza do CRM</p>
           </div>
 
-          {/* Botão copiar relatório completo novamente */}
-          <Button
-            className="w-full h-10 font-black text-sm mb-2"
-            style={{ background: 'linear-gradient(90deg, #1a1a1a, #2a1500)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}
-            onClick={() => copyText(formatFullReport(report), 'full')}
-          >
-            <Copy className="w-4 h-4 mr-2" />
-            {copied === 'full' ? '✅ RELATÓRIO COPIADO!' : '📋 COPIAR RELATÓRIO COMPLETO NR228888'}
-          </Button>
+          {/* Botões de ação final */}
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <Button
+              className="h-10 font-black text-sm"
+              style={{ background: 'linear-gradient(90deg, #1a1a1a, #2a1500)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}
+              onClick={() => copyText(formatFullReport(report), 'full')}
+            >
+              <Copy className="w-4 h-4 mr-1" />
+              {copied === 'full' ? '✅ Copiado!' : 'Copiar Relatório'}
+            </Button>
+            <Button
+              className="h-10 font-black text-sm"
+              disabled={saving || saved}
+              style={{ background: saved ? 'rgba(0,255,136,0.15)' : 'linear-gradient(90deg, #1a3300, #0a2000)', color: saved ? '#00ff88' : '#00cc66', border: `1px solid ${saved ? 'rgba(0,255,136,0.4)' : 'rgba(0,200,80,0.3)'}` }}
+              onClick={handleSaveToLead}
+            >
+              <Save className="w-4 h-4 mr-1" />
+              {saving ? 'Salvando...' : saved ? '✅ Salvo no CRM!' : 'Salvar Lead CRM'}
+            </Button>
+          </div>
         </div>
       )}
 
