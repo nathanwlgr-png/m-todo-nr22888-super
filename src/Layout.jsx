@@ -12,6 +12,7 @@ import { useOfflineSync } from '@/components/hooks/useOfflineSync';
 import { Menu, X, Bell, ChevronRight } from 'lucide-react';
 import SidebarMenu from '@/components/SidebarMenu';
 import QuickVisitButton from '@/components/QuickVisitButton';
+import BugFixerButton from '@/components/BugFixerButton';
 import DarkModeToggle from '@/components/DarkModeToggle';
 import OfflineBanner from '@/components/OfflineBanner';
 import PhoneSearch from '@/components/PhoneSearch';
@@ -211,6 +212,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </div>
       
+      <BugFixerButton />
       <FloatingExportButton />
       <AIUsageIndicator />
       <FloatingPerformanceButton />
