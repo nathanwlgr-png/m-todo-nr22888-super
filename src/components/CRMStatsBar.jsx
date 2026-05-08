@@ -19,17 +19,19 @@ export default function CRMStatsBar() {
   });
 
   const quentes = clients.filter(c => c.status === 'quente').length;
-  const equipamentos = sales.length;
   const mesAtual = new Date();
-  const equipMes = sales.filter(s => {
+  const vendsMes = sales.filter(s => {
     const d = new Date(s.sale_date || s.created_date);
     return d.getMonth() === mesAtual.getMonth() && d.getFullYear() === mesAtual.getFullYear();
-  }).length;
+  });
+  const equipMes = vendsMes.length;
+  const valorMes = vendsMes.reduce((a, s) => a + (s.sale_value || 0), 0);
+  const valorMesStr = valorMes >= 1000 ? `R$${(valorMes / 1000).toFixed(0)}k` : `R$${valorMes}`;
 
   const stats = [
     { label: 'Clientes CRM', value: clients.length, Icon: Users, color: '#6366f1', link: 'Clients' },
-    { label: 'Equip. Vendidos', value: equipamentos, Icon: Package, color: '#10b981', link: 'SalesFunnel' },
-    { label: 'Mês Atual', value: equipMes, Icon: DollarSign, color: '#f59e0b', link: 'SalesFunnel' },
+    { label: 'Equip. Total', value: sales.length, Icon: Package, color: '#10b981', link: 'SalesFunnel' },
+    { label: `${equipMes} equip · ${valorMesStr}`, value: 'MÊS', Icon: DollarSign, color: '#f59e0b', link: 'SalesFunnel' },
     { label: 'Leads Quentes', value: quentes, Icon: Flame, color: '#ef4444', link: 'Clients' },
   ];
 

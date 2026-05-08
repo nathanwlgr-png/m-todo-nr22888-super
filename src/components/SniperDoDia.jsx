@@ -89,7 +89,12 @@ export default function SniperDoDia() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-black text-white truncate">{c.first_name} {c.full_name?.split(' ').slice(-1)[0] || ''}</p>
-                  <p className="text-xs truncate" style={{ color: '#ff9500' }}>{c.clinic_name || c.city || '—'}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <p className="text-xs truncate" style={{ color: '#ff9500' }}>{c.clinic_name || c.city || '—'}</p>
+                    {c.pipeline_stage === 'negociacao' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>NEGOC.</span>}
+                    {c.pipeline_stage === 'proposta' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>PROP.</span>}
+                    {c.pipeline_stage === 'fechado' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(0,200,81,0.2)', color: '#00c851' }}>FECHADO</span>}
+                  </div>
                 </div>
 
                 {/* Score */}

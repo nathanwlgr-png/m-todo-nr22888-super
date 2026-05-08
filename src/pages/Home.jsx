@@ -26,7 +26,7 @@ import {
   Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
   Trash2, RefreshCw
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+
 
 const ALL_PAGES = [
   // CRM Principal
@@ -99,7 +99,6 @@ const ALL_PAGES = [
 const CATEGORIES = ['Todos', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];
 
 export default function Home() {
-  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [dedupeStatus, setDedupeStatus] = useState(null);
@@ -146,16 +145,25 @@ export default function Home() {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
   }).length;
-  const META_EQUIPAMENTOS = 12;
-  const META_VALOR = 360000; // Meta junho em diante: 12 equipamentos
+  const now = new Date();
+  const isMaio2026 = now.getMonth() === 4 && now.getFullYear() === 2026; // maio = índice 4
+
+  // Meta: maio = histórica (encerrada); junho+ = nova meta 12 equip
+  const META_EQUIPAMENTOS = isMaio2026 ? 7 : 12;
+  const META_VALOR = isMaio2026 ? 210000 : 360000;
+
+  // Resultado real de maio (fixo, pois o mês encerrou)
+  const MAIO_VALOR_REAL = 12188.20; // R$9.188,20 comissão + R$3.000 fixo
+  const MAIO_EQUIP_REAL = 2; // vendas registradas em maio
+
   const salesThisMonth = sales.filter(s => {
     const d = new Date(s.sale_date || s.created_date);
-    const now = new Date();
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && (s.status === 'fechada' || s.status === 'entregue');
   });
-  const metaQtd = salesThisMonth.length;
-  const metaValor = salesThisMonth.reduce((a, s) => a + (s.sale_value || 0), 0);
-  const metaPct = Math.min(100, Math.round((metaValor / META_VALOR) * 100));
+
+  const metaQtd = isMaio2026 ? MAIO_EQUIP_REAL : salesThisMonth.length;
+  const metaValor = isMaio2026 ? MAIO_VALOR_REAL : salesThisMonth.reduce((a, s) => a + (s.sale_value || 0), 0);
+  const metaPct = isMaio2026 ? 100 : Math.min(100, Math.round((salesThisMonth.length / META_EQUIPAMENTOS) * 100));
   const nextVisits = visits
     .filter(v => { const d = new Date(v.scheduled_date); const diff = (d - Date.now()) / 86400000; return diff >= 0 && diff <= 7; })
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
@@ -330,21 +338,32 @@ export default function Home() {
             <p className="text-2xl font-black text-orange-400">{noContact7d}</p>
             <p className="text-xs text-orange-600">precisam de follow-up</p>
           </div>
-          <div className="col-span-2 rounded-xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.3)' }}>
+          <div className="col-span-2 rounded-xl p-3" style={{ background: '#111', border: `1px solid ${isMaio2026 ? 'rgba(0,255,136,0.3)' : 'rgba(255,107,0,0.3)'}` }}>
             <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="text-xs text-orange-400 font-bold">🎯 Meta do Mês</p>
-                <p className="text-lg font-black text-white">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
-                <p className="text-xs text-orange-600">R$ {metaValor.toLocaleString('pt-BR')} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
-                <p className="text-[9px] mt-0.5" style={{ color: '#ff6b00' }}>✅ Maio: R$ 9.188,20 + Fixo R$ 3.000,00</p>
+                {isMaio2026 ? (
+                  <>
+                    <p className="text-xs font-bold" style={{ color: '#00ff88' }}>✅ MAIO 2026 — ENCERRADO</p>
+                    <p className="text-lg font-black text-white">{MAIO_EQUIP_REAL} equipamentos vendidos</p>
+                    <p className="text-xs" style={{ color: '#00cc66' }}>💰 R$ {MAIO_VALOR_REAL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (comissão + fixo)</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: '#888' }}>Comissão R$9.188,20 · Fixo R$3.000,00</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-orange-400 font-bold">🎯 Meta {now.toLocaleString('pt-BR', { month: 'long' }).toUpperCase()}</p>
+                    <p className="text-lg font-black text-white">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
+                    <p className="text-xs text-orange-600">R$ {metaValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: '#ff6b00' }}>Nova meta: 12 equip/mês · R$30k/equip</p>
+                  </>
+                )}
               </div>
               <div className="text-right">
-                <p className="text-2xl font-black text-orange-400">{metaPct}%</p>
-                <p className="text-xs text-orange-600">atingido</p>
+                <p className="text-2xl font-black" style={{ color: isMaio2026 ? '#00ff88' : '#ff9500' }}>{metaPct}%</p>
+                <p className="text-xs" style={{ color: isMaio2026 ? '#00cc66' : '#ff6b00' }}>{isMaio2026 ? 'concluído' : 'atingido'}</p>
               </div>
             </div>
-            <div className="w-full rounded-full h-2" style={{ background: '#2a1500' }}>
-              <div className="h-2 rounded-full transition-all" style={{ width: `${metaPct}%`, background: 'linear-gradient(90deg, #ff6b00, #ffb347)' }} />
+            <div className="w-full rounded-full h-2" style={{ background: '#1a1a1a' }}>
+              <div className="h-2 rounded-full transition-all" style={{ width: `${metaPct}%`, background: isMaio2026 ? 'linear-gradient(90deg, #00c851, #00ff88)' : 'linear-gradient(90deg, #ff6b00, #ffb347)' }} />
             </div>
           </div>
         </div>
