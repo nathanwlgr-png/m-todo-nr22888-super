@@ -39,12 +39,19 @@ Deno.serve(async (req) => {
 
     // Gerar sequência personalizada com IA
     const sequence = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Você é um especialista em vendas e nurturing de leads.
+      prompt: `Você é NATHAN ROSA, representante comercial da SEAMATY BRASIL — empresa especializada em equipamentos de diagnóstico veterinário (hematologia, bioquímica, hemogasometria, imunofluorescência, PCR veterinário).
 
-CLIENTE: ${client.first_name}
+IDENTIDADE DO REMETENTE:
+- Nome: Nathan Rosa
+- Empresa: Seamaty Brasil
+- Produto: Equipamentos de diagnóstico in-house para clínicas e hospitais veterinários
+- Diferenciais: Garantia 25 meses, bonificação em insumos, ROI rápido, suporte técnico
+
+CLIENTE A CONTATAR: ${client.first_name}
 Clínica: ${client.clinic_name || 'N/A'}
 Status: ${client.status} | Score: ${client.purchase_score}%
 Pipeline: ${client.pipeline_stage}
+Cidade: ${client.city || 'N/A'}
 
 PERFIL NUMEROLÓGICO:
 - Número: ${client.numerology_number} - ${client.behavioral_profile}
@@ -61,23 +68,26 @@ HISTÓRICO:
 
 TAREFA:
 Crie uma sequência de follow-up COMPLETA e PERSONALIZADA com 3-5 mensagens progressivas.
+As mensagens são de NATHAN ROSA para o cliente veterinário sobre EQUIPAMENTOS SEAMATY.
+NÃO escreva sobre "crescimento pessoal", "método", "potencial inexplorado" — isso é venda de equipamento veterinário B2B.
 
 Para CADA mensagem, defina:
 1. Dia de envio (relativo a hoje: 0, 1, 3, 7, 14...)
 2. Canal preferencial (email ou whatsapp)
-3. Assunto (para email)
-4. Corpo da mensagem COMPLETO e PRONTO para enviar
+3. Assunto (para email) — objetivo e direto sobre o equipamento
+4. Corpo da mensagem COMPLETO — assine sempre como "Nathan Rosa | Seamaty Brasil"
 5. Objetivo desta mensagem específica
-6. CTA (call-to-action) claro
+6. CTA (call-to-action) claro e contextual
 
 REGRAS:
+- SEMPRE assinar como "Nathan Rosa | Seamaty Brasil"
 - Adapte tom ao perfil numerológico ${client.numerology_number}
 - Seja progressivo: comece suave, aumente urgência gradualmente
-- Use dores/interesses identificados
-- Mencione valor específico (garantia 25 meses, bonificação, etc)
-- Seja HUMANO, não robotizado
+- Use dores/interesses identificados (equipamento: ${client.equipment_interest || 'diagnóstico veterinário'})
+- Mencione valor específico (garantia 25 meses, bonificação em reagentes, ROI, etc)
+- Seja HUMANO e consultivo, não robotizado
 - Cada mensagem deve ter 2-4 parágrafos curtos
-- Inclua perguntas abertas quando apropriado
+- Inclua perguntas abertas sobre o dia a dia clínico
 
 Retorne JSON estruturado.`,
       response_json_schema: {
