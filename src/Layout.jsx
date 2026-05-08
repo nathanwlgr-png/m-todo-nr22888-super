@@ -116,7 +116,18 @@ export default function Layout({ children, currentPageName }) {
   return (
     <AILimitProtection>
       <OfflineBanner />
-      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900" data-layout="root">
+      {/* Fundo global NR2288 — Seamaty Vamos Dominar */}
+      <div
+        className="fixed inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url('https://media.base44.com/images/public/6997e09fd222346f10842c38/7d4aa5894_file_000000005a50720eb9730a2c653680ed.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.07,
+        }}
+      />
+      <div className="flex min-h-screen bg-slate-50/90 dark:bg-slate-900/90" data-layout="root" style={{ position: 'relative', zIndex: 1 }}>
         {/* Sidebar */}
         <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col ${
           sidebarOpen ? 'w-64' : 'w-0'
