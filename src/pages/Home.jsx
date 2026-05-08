@@ -196,48 +196,167 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 text-white p-6 pb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">CRM NR22</h1>
-            <p className="text-indigo-200 text-sm">Sistema Completo de Vendas</p>
-          </div>
-          <Link to={createPageUrl('NotificationSettings')}>
-            <div className="relative">
-              <Bell className="w-7 h-7 text-white" />
-              {alerts.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
-                  {alerts.length}
-                </span>
-              )}
-            </div>
-          </Link>
-        </div>
+    <div className="min-h-screen pb-20" style={{ background: '#0a0a0a' }}>
+      {/* ====== HERO HEADER — GATO PRETO + PANDA LARANJA ====== */}
+      <div className="relative overflow-hidden" style={{ minHeight: 280 }}>
 
-        {/* Métricas rápidas */}
-        <div className="grid grid-cols-4 gap-3 mt-4">
-          <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold">{clients.length}+</p>
-            <p className="text-xs text-indigo-200">Clientes</p>
+        {/* Fundo: gato preto fosco SVG inline */}
+        <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(160deg, #0d0d0d 0%, #111111 40%, #1a0a00 100%)' }} />
+
+        {/* Textura fosca overlay */}
+        <div className="absolute inset-0 z-0 opacity-30" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, #1a1a1a 0%, transparent 60%), radial-gradient(circle at 80% 20%, #0f0f0f 0%, transparent 50%)',
+        }} />
+
+        {/* Gato preto SVG — silhueta artística */}
+        <svg
+          className="absolute bottom-0 left-0 z-10 opacity-25"
+          width="320" height="240"
+          viewBox="0 0 320 240"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Corpo do gato */}
+          <ellipse cx="130" cy="190" rx="80" ry="50" fill="#1a1a1a" />
+          {/* Cabeça */}
+          <circle cx="130" cy="130" r="55" fill="#1a1a1a" />
+          {/* Orelhas */}
+          <polygon points="90,90 75,45 115,80" fill="#1a1a1a" />
+          <polygon points="170,90 185,45 145,80" fill="#1a1a1a" />
+          {/* Olhos laranja brilhantes */}
+          <ellipse cx="113" cy="125" rx="9" ry="11" fill="#ff6b00" opacity="0.9" />
+          <ellipse cx="147" cy="125" rx="9" ry="11" fill="#ff6b00" opacity="0.9" />
+          <ellipse cx="113" cy="127" rx="4" ry="9" fill="#000" />
+          <ellipse cx="147" cy="127" rx="4" ry="9" fill="#000" />
+          {/* Brilho dos olhos */}
+          <circle cx="116" cy="122" r="2.5" fill="white" opacity="0.8" />
+          <circle cx="150" cy="122" r="2.5" fill="white" opacity="0.8" />
+          {/* Bigodes */}
+          <line x1="80" y1="140" x2="115" y2="145" stroke="#333" strokeWidth="1.5" opacity="0.6" />
+          <line x1="80" y1="148" x2="115" y2="150" stroke="#333" strokeWidth="1.5" opacity="0.6" />
+          <line x1="145" y1="145" x2="180" y2="140" stroke="#333" strokeWidth="1.5" opacity="0.6" />
+          <line x1="145" y1="150" x2="180" y2="148" stroke="#333" strokeWidth="1.5" opacity="0.6" />
+          {/* Rabo */}
+          <path d="M 200 190 Q 260 160 280 130 Q 295 105 270 100 Q 255 98 250 120 Q 240 150 210 175" stroke="#1a1a1a" strokeWidth="14" fill="none" strokeLinecap="round" />
+          {/* Patas */}
+          <ellipse cx="95" cy="228" rx="22" ry="12" fill="#1a1a1a" />
+          <ellipse cx="160" cy="230" rx="22" ry="12" fill="#1a1a1a" />
+        </svg>
+
+        {/* Panda laranja — lado direito */}
+        <svg
+          className="absolute bottom-0 right-0 z-10 opacity-80"
+          width="160" height="200"
+          viewBox="0 0 160 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Corpo */}
+          <ellipse cx="80" cy="155" rx="55" ry="45" fill="#ff6b00" />
+          {/* Cabeça */}
+          <circle cx="80" cy="95" r="48" fill="#ff7c1a" />
+          {/* Manchas escuras nos olhos — estilo panda */}
+          <ellipse cx="62" cy="90" rx="14" ry="12" fill="#c44a00" />
+          <ellipse cx="98" cy="90" rx="14" ry="12" fill="#c44a00" />
+          {/* Olhos */}
+          <circle cx="62" cy="90" r="7" fill="white" />
+          <circle cx="98" cy="90" r="7" fill="white" />
+          <circle cx="63" cy="90" r="4" fill="#111" />
+          <circle cx="99" cy="90" r="4" fill="#111" />
+          <circle cx="64" cy="88" r="1.5" fill="white" />
+          <circle cx="100" cy="88" r="1.5" fill="white" />
+          {/* Orelhas redondas — panda */}
+          <circle cx="42" cy="55" r="18" fill="#c44a00" />
+          <circle cx="118" cy="55" r="18" fill="#c44a00" />
+          <circle cx="42" cy="55" r="10" fill="#ff6b00" />
+          <circle cx="118" cy="55" r="10" fill="#ff6b00" />
+          {/* Focinho */}
+          <ellipse cx="80" cy="108" rx="16" ry="12" fill="#e55a00" />
+          <ellipse cx="80" cy="110" rx="7" ry="5" fill="#c44a00" />
+          {/* Nariz */}
+          <ellipse cx="80" cy="105" rx="5" ry="3" fill="#8b2e00" />
+          {/* Braços */}
+          <ellipse cx="30" cy="155" rx="16" ry="30" fill="#e55a00" transform="rotate(-20 30 155)" />
+          <ellipse cx="130" cy="155" rx="16" ry="30" fill="#e55a00" transform="rotate(20 130 155)" />
+          {/* Patas */}
+          <ellipse cx="60" cy="192" rx="20" ry="12" fill="#c44a00" />
+          <ellipse cx="100" cy="192" rx="20" ry="12" fill="#c44a00" />
+        </svg>
+
+        {/* Brilho laranja atrás do panda */}
+        <div className="absolute bottom-0 right-0 w-48 h-48 rounded-full z-0 opacity-20" style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }} />
+
+        {/* Conteúdo do header sobre tudo */}
+        <div className="relative z-20 p-5 pt-6">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Sistema Ativo</span>
+              </div>
+              <h1 className="text-3xl font-black text-white leading-none tracking-tight">CRM NR22</h1>
+              <p className="text-orange-300 text-xs font-medium mt-0.5">29 IAs • Seamaty Brasil</p>
+            </div>
+            <Link to={createPageUrl('NotificationSettings')}>
+              <div className="relative">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
+                  <Bell className="w-5 h-5 text-orange-400" />
+                </div>
+                {alerts.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full text-xs flex items-center justify-center font-black text-white">
+                    {alerts.length}
+                  </span>
+                )}
+              </div>
+            </Link>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold">{tasks.length}</p>
-            <p className="text-xs text-indigo-200">Tarefas</p>
+
+          {/* VAMOS DOMINAR — texto principal */}
+          <div className="mt-2 mb-4">
+            <div className="inline-flex items-center gap-2">
+              <span className="text-4xl font-black uppercase tracking-wider" style={{
+                background: 'linear-gradient(90deg, #ff6b00, #ff9500, #ffb347)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: 'none',
+                filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.5))',
+              }}>
+                VAMOS
+              </span>
+            </div>
+            <div>
+              <span className="text-4xl font-black uppercase tracking-wider" style={{
+                background: 'linear-gradient(90deg, #ffb347, #ff9500, #ff6b00)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.6))',
+              }}>
+                DOMINAR 🐾
+              </span>
+            </div>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold">{pendingMessages.length}</p>
-            <p className="text-xs text-indigo-200">Msgs Pend.</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold">{alerts.length}</p>
-            <p className="text-xs text-indigo-200">Alertas</p>
+
+          {/* Métricas rápidas — dark glassmorphism */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { val: `${clients.length}+`, label: 'Clientes' },
+              { val: tasks.length, label: 'Tarefas' },
+              { val: pendingMessages.length, label: 'Msgs' },
+              { val: alerts.length, label: 'Alertas' },
+            ].map(({ val, label }) => (
+              <div key={label} className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}>
+                <p className="text-xl font-black text-orange-400">{val}</p>
+                <p className="text-[10px] text-orange-200 font-medium">{label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="px-4 -mt-4">
+      {/* Linha divisória laranja */}
+      <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #ff6b00, transparent)' }} />
+
+      <div className="px-4 pt-4" style={{ background: '#0a0a0a' }}>
         {/* Manual PDF */}
         <CRMManualPDF />
 
@@ -248,95 +367,95 @@ export default function Home() {
           rel="noopener noreferrer"
           className="block mb-3"
         >
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg">
+          <div className="rounded-2xl p-4 flex items-center justify-between text-white shadow-xl" style={{ background: 'linear-gradient(135deg, #1a1a1a, #2a1500)', border: '1px solid rgba(255,107,0,0.4)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,107,0,0.2)', border: '1px solid rgba(255,107,0,0.5)' }}>
+                <MessageSquare className="w-6 h-6 text-orange-400" />
               </div>
               <div>
-                <p className="font-bold text-lg">🔥 NR22888 — Agente Único</p>
-                <p className="text-green-100 text-xs">Toque para conectar no WhatsApp • 29 IAs • CRM Total</p>
+                <p className="font-black text-base text-orange-400">🔥 NR22888 — Agente Master</p>
+                <p className="text-orange-200 text-xs">WhatsApp • 29 IAs • CRM Total • Modo Predador</p>
               </div>
             </div>
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-6 h-6 text-orange-400" />
           </div>
         </a>
 
         {/* Guia rápido do agente */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-          <p className="text-xs font-bold text-green-700 mb-1.5">💬 Como usar o agente no WhatsApp:</p>
-          <div className="grid grid-cols-2 gap-1 text-xs text-green-700">
-            <span>🔍 <strong>pesquisa [nome]</strong> → busca clínica</span>
+        <div className="rounded-xl p-3 mb-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+          <p className="text-xs font-bold text-orange-400 mb-1.5">💬 Comandos do Agente Master:</p>
+          <div className="grid grid-cols-2 gap-1 text-xs text-orange-200">
+            <span>🔍 <strong>pesquisa [nome]</strong> → clínica</span>
             <span>🏦 <strong>score [CNPJ]</strong> → crédito</span>
-            <span>🗺️ <strong>rota hoje</strong> → visitas otimizadas</span>
-            <span>📊 <strong>relatório</strong> → KPIs do dia</span>
-            <span>💡 <strong>sugestões</strong> → 3 ações agora</span>
-            <span>🧹 <strong>limpar duplicatas</strong> → CRM limpo</span>
+            <span>🗺️ <strong>rota hoje</strong> → otimizada</span>
+            <span>📊 <strong>relatório</strong> → KPIs</span>
+            <span>💡 <strong>sugestões</strong> → 3 ações</span>
+            <span>🧹 <strong>limpar dupl.</strong> → CRM limpo</span>
           </div>
-          <p className="text-xs text-green-500 mt-1.5">✅ Fale normalmente também — ele entende contexto e identifica clientes automaticamente!</p>
+          <p className="text-xs text-orange-500 mt-1.5">🐾 Fale normalmente — ele entende contexto!</p>
         </div>
 
         {/* Resumo do Dia */}
-        <div className="mb-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 px-1">📋 Resumo do Dia</p>
+        <div className="mb-3">
+          <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2 px-1">📋 Resumo do Dia</p>
           <DaySummary />
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-4">
           {quickLinks.map(({ page, label, icon: Icon, color, bg }) => (
             <Link key={page} to={createPageUrl(page)}>
-              <div className={`${bg} rounded-xl p-4 flex flex-col items-center gap-2 hover:opacity-80 transition-opacity`}>
-                <Icon className={`w-6 h-6 ${color}`} />
-                <p className={`text-xs font-semibold text-center ${color}`}>{label}</p>
+              <div className="rounded-xl p-3 flex flex-col items-center gap-2 hover:opacity-80 transition-opacity" style={{ background: '#161616', border: '1px solid rgba(255,107,0,0.15)' }}>
+                <Icon className="w-6 h-6 text-orange-400" />
+                <p className="text-xs font-bold text-center text-orange-200">{label}</p>
               </div>
             </Link>
           ))}
         </div>
 
         {/* Métricas Dashboard */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-            <p className="text-xs text-red-500 font-medium">🔥 Leads Quentes</p>
-            <p className="text-2xl font-bold text-red-700">{hotLeads}</p>
-            <p className="text-xs text-red-400">score &gt; 70</p>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="rounded-xl p-3" style={{ background: '#1a0a00', border: '1px solid rgba(255,50,50,0.3)' }}>
+            <p className="text-xs text-red-400 font-bold">🔥 Leads Quentes</p>
+            <p className="text-2xl font-black text-red-400">{hotLeads}</p>
+            <p className="text-xs text-red-600">score &gt; 70</p>
           </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-3">
-            <p className="text-xs text-orange-500 font-medium">⏰ Sem Contato +7d</p>
-            <p className="text-2xl font-bold text-orange-700">{noContact7d}</p>
-            <p className="text-xs text-orange-400">precisam de follow-up</p>
+          <div className="rounded-xl p-3" style={{ background: '#1a0a00', border: '1px solid rgba(255,107,0,0.3)' }}>
+            <p className="text-xs text-orange-400 font-bold">⏰ Sem Contato +7d</p>
+            <p className="text-2xl font-black text-orange-400">{noContact7d}</p>
+            <p className="text-xs text-orange-600">precisam de follow-up</p>
           </div>
-          <div className="col-span-2 bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+          <div className="col-span-2 rounded-xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.3)' }}>
             <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="text-xs text-indigo-500 font-medium">🎯 Meta do Mês</p>
-                <p className="text-lg font-bold text-indigo-700">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
-                <p className="text-xs text-indigo-400">R$ {metaValor.toLocaleString('pt-BR')} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
+                <p className="text-xs text-orange-400 font-bold">🎯 Meta do Mês</p>
+                <p className="text-lg font-black text-white">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
+                <p className="text-xs text-orange-600">R$ {metaValor.toLocaleString('pt-BR')} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-indigo-700">{metaPct}%</p>
-                <p className="text-xs text-indigo-400">atingido</p>
+                <p className="text-2xl font-black text-orange-400">{metaPct}%</p>
+                <p className="text-xs text-orange-600">atingido</p>
               </div>
             </div>
-            <div className="w-full bg-indigo-200 rounded-full h-2">
-              <div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${metaPct}%` }} />
+            <div className="w-full rounded-full h-2" style={{ background: '#2a1500' }}>
+              <div className="h-2 rounded-full transition-all" style={{ width: `${metaPct}%`, background: 'linear-gradient(90deg, #ff6b00, #ffb347)' }} />
             </div>
           </div>
         </div>
 
         {nextVisits.length > 0 && (
-          <div className="bg-white rounded-xl border p-3 mb-4">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📅 Próximas Visitas (7 dias)</p>
+          <div className="rounded-xl p-3 mb-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+            <p className="text-xs font-black text-orange-400 uppercase tracking-wider mb-2">📅 Próximas Visitas (7 dias)</p>
             <div className="space-y-2">
               {nextVisits.map(v => (
                 <div key={v.id} className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="font-semibold text-slate-800">{v.client_name}</p>
-                    <p className="text-xs text-slate-400">{v.location || 'Sem endereço'}</p>
+                    <p className="font-bold text-white">{v.client_name}</p>
+                    <p className="text-xs text-orange-600">{v.location || 'Sem endereço'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-medium text-indigo-600">{new Date(v.scheduled_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</p>
-                    <p className="text-xs text-slate-400">{new Date(v.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-xs font-bold text-orange-400">{new Date(v.scheduled_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</p>
+                    <p className="text-xs text-orange-600">{new Date(v.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
               ))}
@@ -345,11 +464,11 @@ export default function Home() {
         )}
 
         {/* Painel de Deduplicação Inteligente */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+        <div className="rounded-xl p-3 mb-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">🧹 Limpeza Inteligente do CRM</p>
+              <AlertTriangle className="w-4 h-4 text-orange-500" />
+              <p className="text-xs font-black text-orange-400 uppercase tracking-wider">🧹 Limpeza Inteligente do CRM</p>
             </div>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={handleScanDuplicates} disabled={dedupeLoading} className="text-xs h-7">
@@ -365,16 +484,16 @@ export default function Home() {
             </div>
           </div>
           {dedupeStatus && !dedupeStatus.error && (
-            <div className="text-xs text-amber-800">
+            <div className="text-xs text-orange-300">
               {dedupeStatus.mode === 'scan' ? (
-                <p>📊 <strong>{dedupeStatus.total_records}</strong> clientes | <strong className="text-red-600">{dedupeStatus.duplicate_groups}</strong> grupos duplicados | <strong className="text-red-600">{dedupeStatus.duplicates_to_remove}</strong> para remover</p>
+                <p>📊 <strong>{dedupeStatus.total_records}</strong> clientes | <strong className="text-red-400">{dedupeStatus.duplicate_groups}</strong> grupos duplicados | <strong className="text-red-400">{dedupeStatus.duplicates_to_remove}</strong> para remover</p>
               ) : (
                 <p>✅ <strong>{dedupeStatus.records_merged}</strong> duplicatas removidas em <strong>{dedupeStatus.groups_processed}</strong> grupos!</p>
               )}
             </div>
           )}
           {!dedupeStatus && (
-            <p className="text-xs text-amber-600">Clique em "Escanear" para encontrar e mesclar registros duplicados automaticamente.</p>
+            <p className="text-xs text-orange-600">Clique em "Escanear" para encontrar e mesclar registros duplicados automaticamente.</p>
           )}
         </div>
 
@@ -396,61 +515,60 @@ export default function Home() {
         <CityClinicAnalyzer />
 
         {/* Busca de páginas */}
-        <Card className="mb-4">
-          <CardContent className="pt-4 pb-3">
-            <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                placeholder="Buscar página..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-10"
-              />
-              {search && (
-                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <X className="w-4 h-4 text-slate-400" />
-                </button>
-              )}
-            </div>
+        <div className="rounded-2xl mb-4 p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
+            <input
+              placeholder="Buscar página..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 h-10 rounded-lg text-sm text-orange-100 placeholder-orange-700 focus:outline-none"
+              style={{ background: '#1a1a1a', border: '1px solid rgba(255,107,0,0.3)' }}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="w-4 h-4 text-orange-600" />
+              </button>
+            )}
+          </div>
 
-            {/* Categorias */}
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          {/* Categorias */}
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={activeCategory === cat
+                  ? { background: '#ff6b00', color: 'white' }
+                  : { background: '#1a1a1a', color: '#ff9500', border: '1px solid rgba(255,107,0,0.2)' }
+                }
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Grid de todas as páginas */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {filteredPages.map(({ page, label, icon: Icon, color, category }) => (
             <Link key={page} to={createPageUrl(page)}>
-              <div className="bg-white rounded-xl p-3 flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-shadow border border-slate-100">
-                <div className={`w-10 h-10 ${color} rounded-xl flex items-center justify-center`}>
-                  <Icon className="w-5 h-5 text-white" />
+              <div className="rounded-xl p-3 flex flex-col items-center gap-2 hover:opacity-75 transition-opacity" style={{ background: '#141414', border: '1px solid rgba(255,107,0,0.12)' }}>
+                <div className={`w-9 h-9 ${color} rounded-lg flex items-center justify-center`}>
+                  <Icon className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs font-medium text-slate-700 text-center leading-tight">{label}</p>
-                <span className="text-[10px] text-slate-400">{category}</span>
+                <p className="text-[11px] font-bold text-orange-200 text-center leading-tight">{label}</p>
+                <span className="text-[9px] text-orange-700">{category}</span>
               </div>
             </Link>
           ))}
         </div>
 
         {filteredPages.length === 0 && (
-          <div className="text-center py-12 text-slate-400">
-            <Search className="w-12 h-12 mx-auto mb-3" />
-            <p>Nenhuma página encontrada para "{search}"</p>
+          <div className="text-center py-12" style={{ color: '#ff6b00', opacity: 0.5 }}>
+            <Search className="w-10 h-10 mx-auto mb-2" />
+            <p className="text-sm">Nenhuma página encontrada para "{search}"</p>
           </div>
         )}
       </div>
