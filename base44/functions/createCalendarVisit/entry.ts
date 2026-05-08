@@ -1,4 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+const GCAL = 'https://www.googleapis.com/calendar/v3';
 
 Deno.serve(async (req) => {
   try {
@@ -8,6 +10,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const {
+      action = 'create',
       visit_id,
       client_name,
       clinic_name,
@@ -16,83 +19,154 @@ Deno.serve(async (req) => {
       scheduled_date,
       visit_type,
       notes,
+      vet_email,          // e-mail do veterinário para convite
+      duration_minutes = 60,
     } = body;
 
-    // Get Google Calendar access token
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('googlecalendar');
-
-    const visitTypeLabels = {
-      primeira_visita: 'Primeira Visita',
-      demonstracao: 'Demonstração Técnica',
-      followup: 'Follow-up',
-      fechamento: 'Fechamento',
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
     };
 
-    const typeLabel = visitTypeLabels[visit_type] || visit_type;
-    const title = `🏥 ${typeLabel} — ${client_name}${clinic_name ? ' (' + clinic_name + ')' : ''}`;
+    // ── CHECK AVAILABILITY ──────────────────────────────────────────────────
+    if (action === 'check_availability') {
+      const startTime = new Date(scheduled_date);
+      const endTime = new Date(startTime.getTime() + duration_minutes * 60 * 1000);
 
-    const startTime = new Date(scheduled_date);
-    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 hora
-
-    const description = [
-      `Tipo: ${typeLabel}`,
-      `Cliente: ${client_name}`,
-      clinic_name ? `Clínica: ${clinic_name}` : '',
-      phone ? `Telefone: ${phone}` : '',
-      address ? `Endereço: ${address}` : '',
-      notes ? `Observações: ${notes}` : '',
-      `\nVisita ID: ${visit_id}`,
-    ].filter(Boolean).join('\n');
-
-    const event = {
-      summary: title,
-      description,
-      location: address || '',
-      start: {
-        dateTime: startTime.toISOString(),
-        timeZone: 'America/Sao_Paulo',
-      },
-      end: {
-        dateTime: endTime.toISOString(),
-        timeZone: 'America/Sao_Paulo',
-      },
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: 'popup', minutes: 60 },
-          { method: 'popup', minutes: 1440 }, // 1 dia antes
-        ],
-      },
-    };
-
-    const calRes = await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-      {
+      const freeBusyRes = await fetch(`${GCAL}/freeBusy`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(event),
-      }
-    );
+        headers,
+        body: JSON.stringify({
+          timeMin: startTime.toISOString(),
+          timeMax: endTime.toISOString(),
+          timeZone: 'America/Sao_Paulo',
+          items: [{ id: 'primary' }],
+        }),
+      });
 
-    if (!calRes.ok) {
-      const err = await calRes.text();
-      throw new Error('Google Calendar error: ' + err);
+      if (!freeBusyRes.ok) {
+        const err = await freeBusyRes.text();
+        throw new Error('FreeBusy API error: ' + err);
+      }
+
+      const freeBusyData = await freeBusyRes.json();
+      const busy = freeBusyData.calendars?.primary?.busy || [];
+
+      if (busy.length > 0) {
+        return Response.json({
+          available: false,
+          conflicts: busy.map(b => ({
+            start: b.start,
+            end: b.end,
+          })),
+        });
+      }
+
+      return Response.json({ available: true, conflicts: [] });
     }
 
-    const calEvent = await calRes.json();
+    // ── CREATE EVENT ────────────────────────────────────────────────────────
+    if (action === 'create') {
+      const visitTypeLabels = {
+        primeira_visita: 'Primeira Visita',
+        demonstracao: 'Demonstração Técnica',
+        followup: 'Follow-up',
+        fechamento: 'Fechamento',
+      };
 
-    // Atualizar visita com o ID do evento no Google Calendar
-    if (visit_id) {
-      await base44.asServiceRole.entities.Visit.update(visit_id, {
-        google_calendar_synced: true,
-        google_calendar_event_id: calEvent.id,
+      const typeLabel = visitTypeLabels[visit_type] || visit_type;
+      const title = `🏥 ${typeLabel} — ${client_name}${clinic_name ? ' (' + clinic_name + ')' : ''}`;
+
+      const startTime = new Date(scheduled_date);
+      const endTime = new Date(startTime.getTime() + duration_minutes * 60 * 1000);
+
+      const description = [
+        `Tipo: ${typeLabel}`,
+        `Cliente: ${client_name}`,
+        clinic_name ? `Clínica: ${clinic_name}` : '',
+        phone ? `WhatsApp: ${phone}` : '',
+        address ? `Endereço: ${address}` : '',
+        notes ? `Observações: ${notes}` : '',
+        '',
+        `Gerado automaticamente pelo CRM NR22 | Visita ID: ${visit_id}`,
+      ].filter(l => l !== null && l !== undefined && !(l === '' && notes === '' && !clinic_name && !phone && !address)).join('\n');
+
+      // Montar attendees: apenas o vet se o e-mail for informado
+      const attendees = [];
+      if (vet_email && vet_email.includes('@')) {
+        attendees.push({
+          email: vet_email,
+          displayName: `Dr(a). ${client_name}`,
+          responseStatus: 'needsAction',
+        });
+      }
+
+      const colorMap = {
+        fechamento: '11',    // vermelho
+        demonstracao: '6',   // tangerina
+        followup: '5',       // banana
+        primeira_visita: '1', // azul
+      };
+
+      const event = {
+        summary: title,
+        description,
+        location: address || '',
+        start: { dateTime: startTime.toISOString(), timeZone: 'America/Sao_Paulo' },
+        end: { dateTime: endTime.toISOString(), timeZone: 'America/Sao_Paulo' },
+        colorId: colorMap[visit_type] || '1',
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: 'popup', minutes: 60 },
+            { method: 'popup', minutes: 1440 },
+            { method: 'email', minutes: 1440 },
+          ],
+        },
+        ...(attendees.length > 0 && {
+          attendees,
+          guestsCanModifyEvent: false,
+          guestsCanSeeOtherGuests: false,
+          sendUpdates: 'all', // dispara convite por e-mail para o veterinário
+        }),
+        extendedProperties: {
+          private: { crm_visit_id: visit_id || '' },
+        },
+      };
+
+      const calRes = await fetch(`${GCAL}/calendars/primary/events`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(event),
+      });
+
+      if (!calRes.ok) {
+        const err = await calRes.text();
+        throw new Error('Google Calendar error: ' + err);
+      }
+
+      const calEvent = await calRes.json();
+
+      // Atualizar visita no CRM
+      if (visit_id) {
+        await base44.asServiceRole.entities.Visit.update(visit_id, {
+          google_calendar_synced: true,
+          google_calendar_event_id: calEvent.id,
+        });
+      }
+
+      return Response.json({
+        success: true,
+        event_id: calEvent.id,
+        event_link: calEvent.htmlLink,
+        invite_sent: attendees.length > 0,
+        vet_email: vet_email || null,
       });
     }
 
-    return Response.json({ success: true, event_id: calEvent.id, event_link: calEvent.htmlLink });
+    return Response.json({ error: 'Unknown action' }, { status: 400 });
+
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
