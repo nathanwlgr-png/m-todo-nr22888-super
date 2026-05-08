@@ -146,8 +146,8 @@ export default function Home() {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
   }).length;
-  const META_EQUIPAMENTOS = 7;
-  const META_VALOR = 210000;
+  const META_EQUIPAMENTOS = 12;
+  const META_VALOR = 360000; // Meta junho em diante: 12 equipamentos
   const salesThisMonth = sales.filter(s => {
     const d = new Date(s.sale_date || s.created_date);
     const now = new Date();
@@ -336,6 +336,7 @@ export default function Home() {
                 <p className="text-xs text-orange-400 font-bold">🎯 Meta do Mês</p>
                 <p className="text-lg font-black text-white">{metaQtd}/{META_EQUIPAMENTOS} equipamentos</p>
                 <p className="text-xs text-orange-600">R$ {metaValor.toLocaleString('pt-BR')} / R$ {META_VALOR.toLocaleString('pt-BR')}</p>
+                <p className="text-[9px] mt-0.5" style={{ color: '#ff6b00' }}>✅ Maio: R$ 9.188,20 + Fixo R$ 3.000,00</p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-black text-orange-400">{metaPct}%</p>
