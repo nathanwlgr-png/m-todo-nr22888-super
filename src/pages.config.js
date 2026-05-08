@@ -213,6 +213,7 @@ import CampaignExamples from './pages/CampaignExamples';
 import SystemManual from './pages/SystemManual';
 import NegociacoesWhatsApp from './pages/NegociacoesWhatsApp';
 import FollowUpAutomationModule from './pages/FollowUpAutomationModule';
+import ModoInvestigativoSupremo from './pages/ModoInvestigativoSupremo';
 import __Layout from './Layout.jsx';
 
 
@@ -383,6 +384,7 @@ export const PAGES = {
     "SystemManual": SystemManual,
     "NegociacoesWhatsApp": NegociacoesWhatsApp,
     "FollowUpAutomationModule": FollowUpAutomationModule,
+    "ModoInvestigativoSupremo": ModoInvestigativoSupremo,
 }
 
 export const pagesConfig = {

@@ -91,6 +91,7 @@ const ALL_PAGES = [
   { page: 'GlobalSearch', label: 'Busca Global', icon: Search, color: 'bg-indigo-500', category: 'Sistema' },
   { page: 'DataHub', label: 'Hub de Dados', icon: Database, color: 'bg-slate-700', category: 'Sistema' },
   { page: 'SystemAudit', label: 'Auditoria', icon: Shield, color: 'bg-red-700', category: 'Sistema' },
+  { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigativo', icon: Target, color: 'bg-red-900', category: 'IA' },
 ];
 
 const CATEGORIES = ['Todos', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];
