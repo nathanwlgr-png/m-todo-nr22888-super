@@ -197,156 +197,52 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0a0a' }}>
-      {/* ====== HERO HEADER — GATO PRETO + PANDA LARANJA ====== */}
-      <div className="relative overflow-hidden" style={{ minHeight: 280 }}>
+      {/* ====== HERO BANNER — SEAMATY EM KARANJA ====== */}
+      <div className="relative overflow-hidden">
+        {/* Imagem banner principal */}
+        <img
+          src="https://media.base44.com/images/public/6997e09fd222346f10842c38/253b40388_file_00000000151071fbb26c5abe25068f16.png"
+          alt="Seamaty em Karanja — Vamos Dominar 2026"
+          className="w-full object-cover"
+          style={{ maxHeight: 260, objectPosition: 'center top' }}
+        />
 
-        {/* Fundo: gato preto fosco SVG inline */}
-        <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(160deg, #0d0d0d 0%, #111111 40%, #1a0a00 100%)' }} />
+        {/* Overlay escuro inferior para transição suave */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 z-10" style={{ background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} />
 
-        {/* Textura fosca overlay */}
-        <div className="absolute inset-0 z-0 opacity-30" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 50%, #1a1a1a 0%, transparent 60%), radial-gradient(circle at 80% 20%, #0f0f0f 0%, transparent 50%)',
-        }} />
-
-        {/* Gato preto SVG — silhueta artística */}
-        <svg
-          className="absolute bottom-0 left-0 z-10 opacity-25"
-          width="320" height="240"
-          viewBox="0 0 320 240"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* Corpo do gato */}
-          <ellipse cx="130" cy="190" rx="80" ry="50" fill="#1a1a1a" />
-          {/* Cabeça */}
-          <circle cx="130" cy="130" r="55" fill="#1a1a1a" />
-          {/* Orelhas */}
-          <polygon points="90,90 75,45 115,80" fill="#1a1a1a" />
-          <polygon points="170,90 185,45 145,80" fill="#1a1a1a" />
-          {/* Olhos laranja brilhantes */}
-          <ellipse cx="113" cy="125" rx="9" ry="11" fill="#ff6b00" opacity="0.9" />
-          <ellipse cx="147" cy="125" rx="9" ry="11" fill="#ff6b00" opacity="0.9" />
-          <ellipse cx="113" cy="127" rx="4" ry="9" fill="#000" />
-          <ellipse cx="147" cy="127" rx="4" ry="9" fill="#000" />
-          {/* Brilho dos olhos */}
-          <circle cx="116" cy="122" r="2.5" fill="white" opacity="0.8" />
-          <circle cx="150" cy="122" r="2.5" fill="white" opacity="0.8" />
-          {/* Bigodes */}
-          <line x1="80" y1="140" x2="115" y2="145" stroke="#333" strokeWidth="1.5" opacity="0.6" />
-          <line x1="80" y1="148" x2="115" y2="150" stroke="#333" strokeWidth="1.5" opacity="0.6" />
-          <line x1="145" y1="145" x2="180" y2="140" stroke="#333" strokeWidth="1.5" opacity="0.6" />
-          <line x1="145" y1="150" x2="180" y2="148" stroke="#333" strokeWidth="1.5" opacity="0.6" />
-          {/* Rabo */}
-          <path d="M 200 190 Q 260 160 280 130 Q 295 105 270 100 Q 255 98 250 120 Q 240 150 210 175" stroke="#1a1a1a" strokeWidth="14" fill="none" strokeLinecap="round" />
-          {/* Patas */}
-          <ellipse cx="95" cy="228" rx="22" ry="12" fill="#1a1a1a" />
-          <ellipse cx="160" cy="230" rx="22" ry="12" fill="#1a1a1a" />
-        </svg>
-
-        {/* Panda laranja — lado direito */}
-        <svg
-          className="absolute bottom-0 right-0 z-10 opacity-80"
-          width="160" height="200"
-          viewBox="0 0 160 200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* Corpo */}
-          <ellipse cx="80" cy="155" rx="55" ry="45" fill="#ff6b00" />
-          {/* Cabeça */}
-          <circle cx="80" cy="95" r="48" fill="#ff7c1a" />
-          {/* Manchas escuras nos olhos — estilo panda */}
-          <ellipse cx="62" cy="90" rx="14" ry="12" fill="#c44a00" />
-          <ellipse cx="98" cy="90" rx="14" ry="12" fill="#c44a00" />
-          {/* Olhos */}
-          <circle cx="62" cy="90" r="7" fill="white" />
-          <circle cx="98" cy="90" r="7" fill="white" />
-          <circle cx="63" cy="90" r="4" fill="#111" />
-          <circle cx="99" cy="90" r="4" fill="#111" />
-          <circle cx="64" cy="88" r="1.5" fill="white" />
-          <circle cx="100" cy="88" r="1.5" fill="white" />
-          {/* Orelhas redondas — panda */}
-          <circle cx="42" cy="55" r="18" fill="#c44a00" />
-          <circle cx="118" cy="55" r="18" fill="#c44a00" />
-          <circle cx="42" cy="55" r="10" fill="#ff6b00" />
-          <circle cx="118" cy="55" r="10" fill="#ff6b00" />
-          {/* Focinho */}
-          <ellipse cx="80" cy="108" rx="16" ry="12" fill="#e55a00" />
-          <ellipse cx="80" cy="110" rx="7" ry="5" fill="#c44a00" />
-          {/* Nariz */}
-          <ellipse cx="80" cy="105" rx="5" ry="3" fill="#8b2e00" />
-          {/* Braços */}
-          <ellipse cx="30" cy="155" rx="16" ry="30" fill="#e55a00" transform="rotate(-20 30 155)" />
-          <ellipse cx="130" cy="155" rx="16" ry="30" fill="#e55a00" transform="rotate(20 130 155)" />
-          {/* Patas */}
-          <ellipse cx="60" cy="192" rx="20" ry="12" fill="#c44a00" />
-          <ellipse cx="100" cy="192" rx="20" ry="12" fill="#c44a00" />
-        </svg>
-
-        {/* Brilho laranja atrás do panda */}
-        <div className="absolute bottom-0 right-0 w-48 h-48 rounded-full z-0 opacity-20" style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }} />
-
-        {/* Conteúdo do header sobre tudo */}
-        <div className="relative z-20 p-5 pt-6">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Sistema Ativo</span>
-              </div>
-              <h1 className="text-3xl font-black text-white leading-none tracking-tight">CRM NR22</h1>
-              <p className="text-orange-300 text-xs font-medium mt-0.5">29 IAs • Seamaty Brasil</p>
-            </div>
-            <Link to={createPageUrl('NotificationSettings')}>
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
-                  <Bell className="w-5 h-5 text-orange-400" />
-                </div>
-                {alerts.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full text-xs flex items-center justify-center font-black text-white">
-                    {alerts.length}
-                  </span>
-                )}
-              </div>
-            </Link>
+        {/* Badge sistema ativo + notificação sobrepostos */}
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,107,0,0.5)', backdropFilter: 'blur(8px)' }}>
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Sistema Ativo • 29 IAs</span>
           </div>
+        </div>
 
-          {/* VAMOS DOMINAR — texto principal */}
-          <div className="mt-2 mb-4">
-            <div className="inline-flex items-center gap-2">
-              <span className="text-4xl font-black uppercase tracking-wider" style={{
-                background: 'linear-gradient(90deg, #ff6b00, #ff9500, #ffb347)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: 'none',
-                filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.5))',
-              }}>
-                VAMOS
-              </span>
+        <Link to={createPageUrl('NotificationSettings')} className="absolute top-3 right-3 z-20">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,107,0,0.4)', backdropFilter: 'blur(8px)' }}>
+              <Bell className="w-5 h-5 text-orange-400" />
             </div>
-            <div>
-              <span className="text-4xl font-black uppercase tracking-wider" style={{
-                background: 'linear-gradient(90deg, #ffb347, #ff9500, #ff6b00)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.6))',
-              }}>
-                DOMINAR 🐾
+            {alerts.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full text-xs flex items-center justify-center font-black text-white">
+                {alerts.length}
               </span>
-            </div>
+            )}
           </div>
+        </Link>
 
-          {/* Métricas rápidas — dark glassmorphism */}
-          <div className="grid grid-cols-4 gap-2">
+        {/* Métricas sobrepostas na parte inferior do banner */}
+        <div className="absolute bottom-3 left-3 right-3 z-20">
+          <div className="grid grid-cols-4 gap-1.5">
             {[
               { val: `${clients.length}+`, label: 'Clientes' },
               { val: tasks.length, label: 'Tarefas' },
               { val: pendingMessages.length, label: 'Msgs' },
               { val: alerts.length, label: 'Alertas' },
             ].map(({ val, label }) => (
-              <div key={label} className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}>
-                <p className="text-xl font-black text-orange-400">{val}</p>
-                <p className="text-[10px] text-orange-200 font-medium">{label}</p>
+              <div key={label} className="rounded-xl p-2 text-center" style={{ background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255,107,0,0.3)', backdropFilter: 'blur(8px)' }}>
+                <p className="text-lg font-black text-orange-400 leading-none">{val}</p>
+                <p className="text-[9px] text-orange-300 font-medium mt-0.5">{label}</p>
               </div>
             ))}
           </div>
