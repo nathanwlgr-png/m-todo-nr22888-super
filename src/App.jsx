@@ -37,7 +37,7 @@ import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
 import Home from './pages/Home';
-import Layout from './layout.jsx';
+import Layout from './layout';
 
 const LayoutWrapper = ({ children, currentPageName }) => 
   <Layout currentPageName={currentPageName}>{children}</Layout>;
