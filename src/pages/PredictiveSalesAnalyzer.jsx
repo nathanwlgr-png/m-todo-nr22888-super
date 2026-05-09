@@ -13,12 +13,14 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Pie, PieChart
 } from 'recharts';
 import { toast } from 'sonner';
+import { useModuleProtection } from '@/hooks/useModuleProtection';
 
 export default function PredictiveSalesAnalyzer() {
   const [activeMode, setActiveMode] = useState('preditivo'); // preditivo | funil
   const [showDetails, setShowDetails] = useState(true);
   const [monthlyGoal, setMonthlyGoal] = useState(360000); // R$360k default
   const [isEnabled, setIsEnabled] = useState(true);
+  const { safeInvoke, moduleStates } = useModuleProtection();
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-predictive'],
@@ -41,22 +43,31 @@ export default function PredictiveSalesAnalyzer() {
     enabled: isEnabled,
   });
 
-  // Calcular probabilidade de fechamento
+  // Calcular probabilidade de fechamento com proteção
   const computePredictions = useMutation({
     mutationFn: async () => {
       toast.info('🧠 Analisando probabilidades...');
-      const result = await base44.functions.invoke('predictiveSalesAnalysis', {
-        clients: clients.slice(0, 100),
-        sales: sales.slice(0, 50),
-        leads: leads.slice(0, 50),
-        monthlyGoal,
-      });
+      const result = await safeInvoke(
+        (fn, p) => base44.functions.invoke(fn, p),
+        'predictiveSalesAnalysis',
+        {
+          clients: clients.slice(0, 100),
+          sales: sales.slice(0, 50),
+          leads: leads.slice(0, 50),
+          monthlyGoal,
+        }
+      );
       return result.data;
     },
     onSuccess: (data) => {
       toast.success('✅ Análise completa!');
     },
-    onError: (err) => toast.error('Erro: ' + err.message),
+    onError: (err) => {
+      // Erro já foi tratado pelo safeInvoke
+      if (!err.message.includes('desativado')) {
+        toast.error('Erro: ' + err.message);
+      }
+    },
   });
 
   // Dados do funil (simulação se sem função)
@@ -219,15 +230,22 @@ export default function PredictiveSalesAnalyzer() {
               </div>
               <Button
                 onClick={() => computePredictions.mutate()}
-                disabled={computePredictions.isPending}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                disabled={computePredictions.isPending || !moduleStates.predictive}
+                title={!moduleStates.predictive ? 'Ative em Configurações de Consumo' : ''}
+                className={`gap-2 ${
+                  !moduleStates.predictive 
+                    ? 'bg-slate-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                {computePredictions.isPending ? (
+                {!moduleStates.predictive ? (
+                  <>❌ Módulo Desativado</>
+                ) : computePredictions.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Zap className="w-4 h-4" />
                 )}
-                Calcular Probabilidades
+                {!moduleStates.predictive ? 'Ativar em Configs' : 'Calcular Probabilidades'}
               </Button>
               <Button
                 variant="outline"
