@@ -10,6 +10,7 @@ import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
 import CRMManualPDF from '@/components/CRMManualPDF';
 import SniperDoDia from '@/components/SniperDoDia';
 import CRMStatsBar from '@/components/CRMStatsBar';
+import SuperMasterHunterButton from '@/components/SuperMasterHunterButton';
 import ComodatoAlertMonitor from '@/components/ComodatoAlertMonitor';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
@@ -305,6 +306,11 @@ export default function Home() {
 
         {/* Stats do CRM — clientes, equipamentos, mês, quentes */}
         <CRMStatsBar />
+
+        {/* ⚠️ SUPER MASTER HUNTER */}
+        <div className="mb-4">
+          <SuperMasterHunterButton />
+        </div>
 
         {/* 🔴 Monitor de Oportunidades de Comodato (40-60 exames/mês) */}
         <ComodatoAlertMonitor />
