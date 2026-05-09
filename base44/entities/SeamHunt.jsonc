@@ -1,0 +1,135 @@
+{
+  "name": "SeamHunt",
+  "type": "object",
+  "description": "Registros de buscas Super Master Hunter com cache inteligente",
+  "properties": {
+    "city": {
+      "type": "string",
+      "description": "Cidade alvo"
+    },
+    "radius_km": {
+      "type": "number",
+      "description": "Raio de busca em km"
+    },
+    "depth": {
+      "type": "string",
+      "enum": [
+        "rapida",
+        "completa",
+        "suprema"
+      ],
+      "description": "Profundidade de investiga\u00e7\u00e3o"
+    },
+    "segment": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "clinica",
+          "hospital",
+          "laboratorio",
+          "centro_diagnostico",
+          "universidade"
+        ]
+      },
+      "description": "Segmentos buscados"
+    },
+    "results_count": {
+      "type": "number",
+      "description": "Quantidade de leads encontrados"
+    },
+    "execution_time_ms": {
+      "type": "number",
+      "description": "Tempo de execu\u00e7\u00e3o em ms"
+    },
+    "credits_spent": {
+      "type": "number",
+      "description": "Cr\u00e9ditos consumidos"
+    },
+    "search_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "segment": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          },
+          "maps_url": {
+            "type": "string"
+          },
+          "distance_km": {
+            "type": "number"
+          },
+          "seamaty_score": {
+            "type": "number"
+          },
+          "seamaty_priority": {
+            "type": "string"
+          },
+          "potential_product": {
+            "type": "string"
+          },
+          "potential_supplies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "next_action": {
+            "type": "string"
+          },
+          "data_source": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmed_in_crm": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Resultados da busca"
+    },
+    "cached_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Validade do cache (30 dias)"
+    },
+    "search_status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "in_progress",
+        "error"
+      ],
+      "default": "completed",
+      "description": "Status da busca"
+    }
+  },
+  "required": [
+    "city",
+    "depth",
+    "segment"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

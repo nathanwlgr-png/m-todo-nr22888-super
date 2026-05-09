@@ -1,202 +1,187 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
-  const startTime = Date.now();
-  
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { city, radius_km, segment, max_leads, depth, economic_mode } = await req.json();
-
-    // Validações
-    if (!city || !segment) return Response.json({ error: 'city and segment required' }, { status: 400 });
-    
-    const maxLeads = Math.min(max_leads || 15, 25); // máximo 25
-    const timeout = 120000; // 2 minutos
-    
-    // TIMEOUT PROTECTION
-    let timedOut = false;
-    const timeoutHandle = setTimeout(() => { timedOut = true; }, timeout);
-
-    // ANTI-LOOP: Verificar se há investigação em andamento
-    const ongoingInvestigations = await base44.asServiceRole.entities.AuditLog?.filter({
-      action: 'super_master_hunter',
-      user_email: user.email
-    }).catch(() => []);
-
-    const recentInvestigation = ongoingInvestigations?.find(log => {
-      const minuteAgo = new Date(Date.now() - 60000);
-      return new Date(log.created_date) > minuteAgo;
-    });
-
-    if (recentInvestigation) {
-      clearTimeout(timeoutHandle);
-      return Response.json({
-        error: 'Investigação em andamento. Aguarde 1 minuto antes de iniciar outra.',
-        status: 'busy'
-      }, { status: 429 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 1. BUSCAR LEADS EXISTENTES NO CRM
-    const existingLeads = await base44.asServiceRole.entities.LeadHunter
-      .filter({ city, segment }, '-created_date', maxLeads * 2)
-      .catch(() => []);
+    const body = await req.json();
+    let {
+      city,
+      radius_km = 15,
+      depth = 'rapida',
+      segments = ['clinica'],
+      quantity = 10,
+      timeout_seconds = 30
+    } = body;
 
-    if (timedOut) {
-      clearTimeout(timeoutHandle);
-      return Response.json({ error: 'Timeout' }, { status: 504 });
-    }
+    if (!city) throw new Error('Cidade obrigatória');
+    
+    // Limpar nome da cidade
+    city = city.replace('á', 'a').replace('ú', 'u').toUpperCase();
 
-    // 2. ENRIQUECER COM IA (cache 30 dias)
-    const enrichedLeads = [];
-    const creditsUsed = [];
+    // Converter para número de resultado máx
+    quantity = Math.min(Math.max(quantity, 1), 25);
 
-    for (const lead of existingLeads.slice(0, maxLeads)) {
-      if (timedOut) break;
-      if (enrichedLeads.length >= maxLeads) break;
+    // Normalizar profundidade
+    const depthConfig = {
+      rapida: { credits: 3, max_results: 10, timeout: 30 },
+      completa: { credits: 8, max_results: 20, timeout: 90 },
+      suprema: { credits: 15, max_results: 25, timeout: 120 }
+    };
 
-      // Verificar se já foi investigado nos últimos 30 dias
-      if (lead.ia_analysis_expires_at) {
-        const expiry = new Date(lead.ia_analysis_expires_at);
-        if (expiry > new Date()) {
-          // Usar cache
-          enrichedLeads.push({
-            ...lead,
-            cached: true,
-            analysis: lead.ia_analysis_cache
-          });
-          continue;
-        }
-      }
+    const config = depthConfig[depth] || depthConfig.rapida;
+    quantity = Math.min(quantity, config.max_results);
 
-      try {
-        // Determinar profundidade de análise
-        const depthPrompt = depth === 'suprema' ? 'Análise PROFUNDA com risco assessment, oportunidades ocultas, análise de saturation local.'
-          : depth === 'profunda' ? 'Análise DETALHADA com sinais de crescimento, concorrência e oportunidades de venda.'
-          : depth === 'media' ? 'Análise MODERADA com sinais principais e oportunidades básicas.'
-          : 'Análise LEVE com sinais essenciais apenas.';
+    // Criar prompt para busca pública
+    const prompt = `Você é especialista em pesquisa comercial PÚBLICA e ÉTICA.
 
-        const analysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Você é especialista em vendas B2B veterinária.
+BUSCAR em ${city}, raio ${radius_km}km:
+${segments.includes('clinica') ? '- Clínicas Veterinárias\n' : ''}
+${segments.includes('hospital') ? '- Hospitais Veterinários\n' : ''}
+${segments.includes('laboratorio') ? '- Laboratórios\n' : ''}
+${segments.includes('centro_diagnostico') ? '- Centros de Diagnóstico\n' : ''}
+${segments.includes('universidade') ? '- Universidades com Medicina Veterinária\n' : ''}
 
-LEAD:
-Nome: ${lead.company_name}
-Segmento: ${segment}
-Cidade: ${city}
-Website: ${lead.website || 'N/A'}
-Instagram: ${lead.instagram || 'N/A'}
-Google Rating: ${lead.google_rating || 'N/A'}
-Reviews: ${lead.google_reviews_count || 'N/A'}
-Sinais conhecidos: ${lead.signals?.map(s => s.evidence).join(', ') || 'Nenhum'}
+USAR APENAS DADOS PÚBLICOS:
+- Google Maps (nome, endereço, telefone, website, avaliações)
+- Websites públicos
+- Redes sociais públicas (Instagram, Facebook)
+- Diretórios públicos
 
-TAREFA: ${depthPrompt}
+NUNCA:
+- Scraping ilegal
+- Dados privados
+- Inventar informações
+- Usar dados de login
 
-Retorne em JSON:
+RETORNAR JSON:
 {
-  "score": 0-100,
-  "chance_fechamento": "baixa|media|alta|muito_alta",
-  "produto_ideal": "VG2|Hematologia|Bioquimica|Outro",
-  "urgencia": "normal|media|alta|critica",
-  "potencial_recompra": 0-100,
-  "abordagem_ideal": "email|whatsapp|ligacao|visita",
-  "roi_resumido": "estimativa em 6 meses",
-  "proxima_acao": "acao concreta"
-}`,
-          model: economic_mode ? undefined : 'gemini_3_flash',
-          response_json_schema: {
-            type: "object",
-            properties: {
-              score: { type: "number" },
-              chance_fechamento: { type: "string" },
-              produto_ideal: { type: "string" },
-              urgencia: { type: "string" },
-              potencial_recompra: { type: "number" },
-              abordagem_ideal: { type: "string" },
-              roi_resumido: { type: "string" },
-              proxima_acao: { type: "string" }
+  "leads": [
+    {
+      "name": "Nome Clínica",
+      "segment": "clinica/hospital/laboratorio",
+      "city": "${city}",
+      "phone": "+55 XX XXXXX-XXXX (se público)",
+      "website": "URL",
+      "instagram": "@handle (se público)",
+      "maps_url": "Google Maps link",
+      "distance_km": 2.5,
+      "seamaty_score": 75,
+      "seamaty_priority": "quente",
+      "potential_product": "VG2",
+      "potential_supplies": ["reagentes hematologia", "rotor"],
+      "next_action": "Ligar segunda manhã",
+      "data_source": ["Google Maps", "Instagram"],
+      "notes": "Clínica moderna, muito movimento",
+      "confirmed_in_crm": false
+    }
+  ]
+}
+
+RETORNE MÁXIMO ${quantity} LEADS.
+SCORING SEAMATY (0-100):
+- +20 emergência/pressa
+- +15 envia exame fora
+- +15 cliente parado
+- +15 cidade estratégica  
+- +10 crescimento visível
+- +10 forte digital
+- +10 comodato
+- +10 gap equipamento
+- +5 influência regional
+- +5 potencial insumo
+
+Mínimo 3 fontes públicas por lead.`;
+
+    // Chamar LLM para busca inteligente
+    const startTime = Date.now();
+    
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          leads: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                segment: { type: 'string' },
+                city: { type: 'string' },
+                phone: { type: 'string' },
+                website: { type: 'string' },
+                instagram: { type: 'string' },
+                maps_url: { type: 'string' },
+                distance_km: { type: 'number' },
+                seamaty_score: { type: 'number' },
+                seamaty_priority: { type: 'string' },
+                potential_product: { type: 'string' },
+                potential_supplies: { type: 'array', items: { type: 'string' } },
+                next_action: { type: 'string' },
+                data_source: { type: 'array', items: { type: 'string' } },
+                notes: { type: 'string' },
+                confirmed_in_crm: { type: 'boolean' }
+              }
             }
           }
-        });
+        }
+      }
+    });
 
-        // Atualizar lead com análise
-        const updated = await base44.asServiceRole.entities.LeadHunter.update(lead.id, {
-          ia_analysis_cache: analysis,
-          ia_analysis_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        }).catch(() => lead);
+    const executionTime = Date.now() - startTime;
+    const leads = result.leads || [];
 
-        enrichedLeads.push({
-          ...updated,
-          cached: false,
-          analysis
-        });
+    // Validar limites rígidos
+    if (executionTime > (timeout_seconds * 1000)) {
+      throw new Error(`Timeout excedido (${executionTime}ms > ${timeout_seconds}s)`);
+    }
 
-        creditsUsed.push(economic_mode ? 1 : 3);
-      } catch (e) {
-        console.error('Erro ao enriquecer lead:', e);
+    if (leads.length > 25) {
+      leads.length = 25;
+    }
+
+    // Remover duplicados por telefone/website
+    const unique = [];
+    const seen = new Set();
+    for (const lead of leads) {
+      const key = `${lead.phone}-${lead.website}`;
+      if (!seen.has(key)) {
+        unique.push(lead);
+        seen.add(key);
       }
     }
 
-    clearTimeout(timeoutHandle);
-
-    // 3. CLASSIFICAR POR PRIORIDADE
-    const scored = enrichedLeads.sort((a, b) => {
-      const scoreA = a.analysis?.score || a.score_opportunity || 50;
-      const scoreB = b.analysis?.score || b.score_opportunity || 50;
-      return scoreB - scoreA;
-    });
-
-    const hotLeads = scored.filter(l => (l.analysis?.score || 0) > 75).length;
-    const urgentLeads = scored.filter(l => l.analysis?.urgencia === 'critica' || l.analysis?.urgencia === 'alta').length;
-
-    // 4. LOG DE AUDITORIA
-    try {
-      await base44.asServiceRole.entities.AuditLog.create({
-        action: 'super_master_hunter',
-        module: 'SuperMasterHunter',
-        user_email: user.email,
-        duration_ms: Date.now() - startTime,
-        cost_credits: creditsUsed.reduce((a, b) => a + b, 0),
-        success: true,
-        input_size: JSON.stringify({ city, segment, radius_km, max_leads, depth }).length,
-        output_size: JSON.stringify(scored).length
-      });
-    } catch (e) {
-      console.error('Auditoria falhou (non-critical):', e);
-    }
-
-    // 5. RETORNO
-    return Response.json({
-      success: true,
+    // Salvar resultado no cache
+    await base44.asServiceRole.entities.SeamHunt?.create({
       city,
-      segment,
+      radius_km,
       depth,
-      leads_found: scored.length,
-      hot_leads: hotLeads,
-      urgent_leads: urgentLeads,
-      potential_revenue: scored.length > 0 
-        ? `R$ ${(scored.length * 30000).toLocaleString('pt-BR')}`
-        : 'N/A',
-      leads: scored.slice(0, maxLeads).map(lead => ({
-        name: lead.company_name,
-        city: lead.city,
-        distance_km: radius_km, // simplificado
-        score: lead.analysis?.score || lead.score_opportunity || 75,
-        signals: [
-          lead.analysis?.urgencia && `Urgência: ${lead.analysis.urgencia}`,
-          lead.analysis?.chance_fechamento && `Fechamento: ${lead.analysis.chance_fechamento}`,
-          lead.analysis?.produto_ideal && `Produto: ${lead.analysis.produto_ideal}`
-        ].filter(Boolean),
-        whatsapp: lead.phone,
-        maps_url: lead.google_maps_url || `https://maps.google.com/?q=${encodeURIComponent(lead.company_name + ' ' + lead.city)}`,
-        instagram: lead.instagram,
-        analysis: lead.analysis
-      }))
+      segment: segments,
+      results_count: unique.length,
+      execution_time_ms: executionTime,
+      credits_spent: config.credits,
+      search_results: unique,
+      cached_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      search_status: 'completed'
+    }).catch(() => {});
+
+    return Response.json({
+      city,
+      radius_km,
+      depth,
+      results_count: unique.length,
+      execution_time_ms: executionTime,
+      credits_spent: config.credits,
+      leads: unique
     });
 
   } catch (error) {
-    console.error('Erro Super Master Hunter:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
