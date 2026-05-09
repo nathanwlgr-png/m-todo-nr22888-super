@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Search, MapPin, Globe, MessageCircle, TrendingUp, AlertTriangle,
   Zap, Eye, Clock, DollarSign, Users, Loader2, Download, RefreshCw,
-  Smartphone, MapPinned, Copy, ExternalLink, Target, Sparkles
+  Smartphone, MapPinned, Copy, ExternalLink, Target, Sparkles, Plus, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,6 +37,10 @@ export default function DeepHunter() {
   const [filterPriority, setFilterPriority] = useState('quente');
   const [selectedLead, setSelectedLead] = useState(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualCompanyName, setManualCompanyName] = useState('');
+  const [manualPhone, setManualPhone] = useState('');
+  const [manualCity, setManualCity] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -61,6 +65,8 @@ export default function DeepHunter() {
     mutationFn: async (lead_id) => {
       const lead = leads.find(l => l.id === lead_id);
       
+      if (!lead) throw new Error('Lead não encontrado');
+
       // Se tem cache válido, retorna
       if (lead?.ia_analysis_cache && lead?.ia_analysis_expires_at) {
         const expiry = new Date(lead.ia_analysis_expires_at);
@@ -89,6 +95,36 @@ export default function DeepHunter() {
     onError: (err) => toast.error('Erro: ' + err.message),
   });
 
+  // Manual input enrichment
+  const manualInputMutation = useMutation({
+    mutationFn: async () => {
+      if (!manualCompanyName.trim()) { throw new Error('Nome da empresa é obrigatório'); }
+      
+      toast.info('📊 Enriquecendo com IA...');
+      const result = await base44.functions.invoke('investigateLeadPublicData', {
+        manual_data: [{
+          company_name: manualCompanyName,
+          phone: manualPhone,
+          city: manualCity,
+          extra_info: 'Entrada manual do usuário'
+        }]
+      });
+
+      return result.data;
+    },
+    onSuccess: (data) => {
+      if (data.leads?.[0]) {
+        queryClient.invalidateQueries({ queryKey: ['leadhunter'] });
+        toast.success('✅ Empresa adicionada e analisada!');
+        setShowManualInput(false);
+        setManualCompanyName('');
+        setManualPhone('');
+        setManualCity('');
+      }
+    },
+    onError: (err) => toast.error('Erro: ' + err.message),
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 pb-20">
       <div className="max-w-7xl mx-auto">
@@ -100,6 +136,17 @@ export default function DeepHunter() {
             Deep Hunter 🔍
           </h1>
           <p className="text-slate-400 text-sm">Investigação comercial + financeira inteligente • Dados públicos apenas</p>
+        </div>
+
+        {/* ─── BOTÃO ADICIONAR MANUAL ─── */}
+        <div className="mb-4">
+          <Button
+            onClick={() => setShowManualInput(true)}
+            className="bg-amber-600 hover:bg-amber-700 gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar Empresa Manualmente
+          </Button>
         </div>
 
         {/* ─── FILTROS ─── */}
@@ -236,6 +283,61 @@ export default function DeepHunter() {
           </div>
         )}
 
+        {/* ─── MODAL INPUT MANUAL ─── */}
+        {showManualInput && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <Card className="bg-slate-800 border-amber-500 max-w-md w-full">
+              <CardHeader className="flex justify-between items-center">
+                <CardTitle className="text-white">Adicionar Empresa</CardTitle>
+                <button onClick={() => setShowManualInput(false)} className="text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-2">Nome da Empresa *</label>
+                  <Input
+                    placeholder="Ex: Clínica Veterinária PetCare"
+                    value={manualCompanyName}
+                    onChange={(e) => setManualCompanyName(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-2">Telefone (opcional)</label>
+                  <Input
+                    placeholder="(11) 99999-9999"
+                    value={manualPhone}
+                    onChange={(e) => setManualPhone(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-2">Cidade (opcional)</label>
+                  <Input
+                    placeholder="São Paulo"
+                    value={manualCity}
+                    onChange={(e) => setManualCity(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <Button
+                  className="w-full bg-amber-600 hover:bg-amber-700 gap-2"
+                  disabled={manualInputMutation.isPending}
+                  onClick={() => manualInputMutation.mutate()}
+                >
+                  {manualInputMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                  Analisar com IA
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* ─── ANÁLISE MODAL ─── */}
         {showAnalysis && selectedLead && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
@@ -246,7 +348,7 @@ export default function DeepHunter() {
                   onClick={() => setShowAnalysis(false)}
                   className="text-slate-400 hover:text-white"
                 >
-                  ✕
+                  <X className="w-5 h-5" />
                 </button>
               </CardHeader>
 

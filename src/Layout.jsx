@@ -9,7 +9,7 @@ import EconomicModeToggle from '@/components/EconomicModeToggle';
 import DataSecurityMonitor from '@/components/DataSecurityMonitor';
 import FloatingCNPJScore from '@/components/FloatingCNPJScore';
 import { useOfflineSync } from '@/components/hooks/useOfflineSync';
-import { Menu, X, Bell, ChevronRight } from 'lucide-react';
+import { Menu, X, Bell, ChevronRight, Zap } from 'lucide-react';
 import SidebarMenu from '@/components/SidebarMenu';
 import QuickVisitButton from '@/components/QuickVisitButton';
 import BugFixerButton from '@/components/BugFixerButton';

@@ -10,7 +10,13 @@ Deno.serve(async (req) => {
     if (!lead_id) return Response.json({ error: 'lead_id required' }, { status: 400 });
 
     // Buscar lead
-    const lead = await base44.asServiceRole.entities.LeadHunter.get(lead_id);
+    let lead;
+    try {
+      lead = await base44.asServiceRole.entities.LeadHunter.get(lead_id);
+    } catch (e) {
+      return Response.json({ error: 'Lead not found' }, { status: 404 });
+    }
+    
     if (!lead) return Response.json({ error: 'Lead not found' }, { status: 404 });
 
     // Log auditoria
@@ -64,16 +70,20 @@ Responda em JSON com:
     const duration = Date.now() - startTime;
 
     // Log auditoria (fire-and-forget)
-    base44.asServiceRole.entities.AuditLog.create({
-      action: 'ia_analysis',
-      module: 'DeepHunter',
-      user_email: user.email,
-      duration_ms: duration,
-      cost_credits: 1, // simplificado
-      success: true,
-      input_size: JSON.stringify(lead).length,
-      output_size: JSON.stringify(analysis).length
-    }).catch(() => {});
+    try {
+      await base44.asServiceRole.entities.AuditLog.create({
+        action: 'ia_analysis',
+        module: 'DeepHunter',
+        user_email: user.email,
+        duration_ms: duration,
+        cost_credits: 1, // simplificado
+        success: true,
+        input_size: JSON.stringify(lead).length,
+        output_size: JSON.stringify(analysis).length
+      });
+    } catch (e) {
+      console.error('Auditoria falhou (non-critical):', e);
+    }
 
     return Response.json({
       success: true,

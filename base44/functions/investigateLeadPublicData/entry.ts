@@ -6,106 +6,114 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { query, city, segment } = await req.json();
-    if (!query) return Response.json({ error: 'query required' }, { status: 400 });
+    const { query, city, segment, manual_data } = await req.json();
 
-    // Investigação via LLM (web search)
-    const investigation = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Você é um investigador comercial. Pesquise empresas públicas/comerciais.
+    // MODE 1: Manual data enrichment (RECOMENDADO - sem web search)
+    if (manual_data && Array.isArray(manual_data)) {
+      const enrichedLeads = [];
+      
+      for (const item of manual_data) {
+        try {
+          // Enriquecer cada lead com IA
+          const enrichment = await base44.asServiceRole.integrations.Core.InvokeLLM({
+            prompt: `Você é especialista em análise de oportunidades comerciais veterinárias.
 
-BUSCA: ${query}
-CIDADE: ${city || 'Brasil inteiro'}
-SEGMENTO: ${segment || 'Qualquer'}
+EMPRESA FORNECIDA:
+- Nome: ${item.company_name || 'N/A'}
+- Cidade: ${item.city || city || 'N/A'}
+- Telefone: ${item.phone || 'N/A'}
+- Website: ${item.website || 'N/A'}
+- Informações adicionais: ${item.extra_info || 'Nenhuma'}
 
-Use apenas DADOS PÚBLICOS de:
-- Google Search
-- Google Maps
-- Instagram público
-- Facebook público
-- Sites públicos
-- Reviews públicos
+TAREFA: Baseado APENAS nos dados fornecidos, gere:
+1. Score de expansão (0-100)
+2. Score de pressão financeira (0-100)
+3. Score de maturidade digital (0-100)
+4. Sinais provável identificáveis nesses dados
+5. Prioridade (normal/potencial/quente/urgente/raro)
 
-Encontre até 5 empresas com:
-- Nome
-- CNPJ (se disponível)
-- Endereço comercial
-- Telefone público
-- Website
-- Instagram/Facebook
-- Sinais de expansão/pressão/crescimento
-- Rating Google
-
-Responda em JSON.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          leads: {
-            type: "array",
-            items: {
+Responda em JSON estruturado.`,
+            response_json_schema: {
               type: "object",
               properties: {
-                company_name: { type: "string" },
-                cnpj: { type: "string" },
-                address: { type: "string" },
-                city: { type: "string" },
-                phone: { type: "string" },
-                website: { type: "string" },
-                instagram: { type: "string" },
-                facebook: { type: "string" },
-                google_rating: { type: "number" },
-                signals: {
-                  type: "array",
-                  items: { type: "string" }
-                }
+                score_expansion: { type: "number" },
+                score_financial_pressure: { type: "number" },
+                score_digital: { type: "number" },
+                signals: { type: "array", items: { type: "string" } },
+                priority: { type: "string" }
               }
             }
-          }
-        }
-      },
-      add_context_from_internet: true, // Usa web search
-      model: 'gemini_3_1_pro' // Melhor para pesquisa web
-    });
+          });
 
-    // Criar leads no CRM
-    const createdLeads = [];
-    for (const lead of investigation.leads) {
-      try {
-        const created = await base44.asServiceRole.entities.LeadHunter.create({
-          company_name: lead.company_name,
-          cnpj: lead.cnpj || '',
-          address: lead.address || '',
-          city: lead.city || city || '',
-          state: lead.state || 'SP', // default
-          phone: lead.phone || '',
-          website: lead.website || '',
-          instagram: lead.instagram || '',
-          facebook: lead.facebook || '',
-          google_rating: lead.google_rating || 0,
-          segment: segment || 'outro',
-          signals: lead.signals?.map(s => ({
-            type: 'novo',
-            detected_at: new Date().toISOString(),
-            source: 'public_data',
-            evidence: s
-          })) || [],
-          score_expansion: 50,
-          score_opportunity: 50,
-          priority: 'potencial',
-          status: 'novo',
-          data_sources: ['Google', 'Instagram', 'Facebook', 'Website', 'Reviews']
-        });
-        createdLeads.push(created);
-      } catch (e) {
-        console.error(`Erro ao criar lead ${lead.company_name}:`, e);
+          // Criar lead enriquecido
+          const created = await base44.asServiceRole.entities.LeadHunter.create({
+            company_name: item.company_name || 'Empresa desconhecida',
+            cnpj: item.cnpj || '',
+            address: item.address || '',
+            city: item.city || city || 'SP',
+            state: item.state || 'SP',
+            phone: item.phone || '',
+            website: item.website || '',
+            instagram: item.instagram || '',
+            facebook: item.facebook || '',
+            google_rating: item.google_rating || 0,
+            google_reviews_count: item.google_reviews_count || 0,
+            segment: segment || 'outro',
+            signals: enrichment.signals?.map(s => ({
+              type: 'novo',
+              detected_at: new Date().toISOString(),
+              source: 'manual_input',
+              evidence: s
+            })) || [],
+            score_expansion: enrichment.score_expansion || 50,
+            score_financial_pressure: enrichment.score_financial_pressure || 50,
+            score_digital: enrichment.score_digital || 50,
+            score_opportunity: Math.round(
+              (enrichment.score_expansion + enrichment.score_digital) / 2
+            ),
+            priority: enrichment.priority || 'potencial',
+            status: 'novo',
+            data_sources: ['manual_input']
+          });
+
+          enrichedLeads.push(created);
+        } catch (e) {
+          console.error(`Erro ao enriquecer ${item.company_name}:`, e);
+        }
       }
+
+      return Response.json({
+        success: true,
+        mode: 'manual_enrichment',
+        created_leads: enrichedLeads.length,
+        leads: enrichedLeads
+      });
     }
 
-    return Response.json({
-      success: true,
-      investigation_results: investigation.leads,
-      created_leads: createdLeads.length,
-      leads: createdLeads
-    });
+    // MODE 2: Query search (usa dados públicos já na DB ou cache)
+    if (query) {
+      // Busca local primeiro
+      const filters = {
+        ...(city && { city }),
+        ...(segment && { segment })
+      };
+      
+      const existingLeads = await base44.asServiceRole.entities.LeadHunter.filter(filters, '-created_date', 100);
+      
+      // Filtrar por query
+      const matchingLeads = existingLeads.filter(l =>
+        l.company_name?.toLowerCase().includes(query.toLowerCase())
+      );
+
+      return Response.json({
+        success: true,
+        mode: 'local_search',
+        results: matchingLeads.length,
+        leads: matchingLeads
+      });
+    }
+
+    return Response.json({ error: 'query or manual_data required' }, { status: 400 });
 
   } catch (error) {
     console.error('Erro:', error);
