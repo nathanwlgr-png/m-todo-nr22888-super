@@ -321,10 +321,10 @@ export default function Home() {
         {/* Stats do CRM — clientes, equipamentos, mês, quentes */}
         <CRMStatsBar />
 
-        {/* ⚠️ SUPER MASTER HUNTER */}
-        <div className="mb-4">
+        {/* ⚠️ SUPER MASTER HUNTER — DESABILITADO */}
+        {/* <div className="mb-4">
           <SuperMasterHunterButton />
-        </div>
+        </div> */}
 
         {/* 🔴 Monitor de Oportunidades de Comodato (40-60 exames/mês) */}
         <ComodatoAlertMonitor />

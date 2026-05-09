@@ -9,14 +9,16 @@ export default function SuperMasterHunterButton() {
   return (
     <>
       <Button
+        disabled
         onClick={() => setShowModal(true)}
-        className="bg-red-600 hover:bg-red-700 gap-2 animate-pulse shadow-lg shadow-red-600/50"
+        className="bg-slate-400 hover:bg-slate-400 gap-2 cursor-not-allowed opacity-50 shadow-lg shadow-slate-400/20"
       >
         <AlertTriangle className="w-5 h-5" />
-        ⚠️ SUPER MASTER HUNTER
+        ⚠️ SUPER MASTER HUNTER (Desabilitado)
       </Button>
 
-      <SuperMasterHunterModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      {/* Modal desabilitada */}
+      {/* <SuperMasterHunterModal isOpen={showModal} onClose={() => setShowModal(false)} /> */}
     </>
   );
 }
