@@ -1,0 +1,56 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "description": "Auditoria de uso de IA e recursos",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "ia_analysis",
+        "lead_investigation",
+        "score_calculation",
+        "report_export",
+        "api_call"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o"
+    },
+    "module": {
+      "type": "string",
+      "description": "M\u00f3dulo usado: LeadHunter, Analytics, etc"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "E-mail do usu\u00e1rio"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o em milissegundos"
+    },
+    "cost_credits": {
+      "type": "number",
+      "description": "Cr\u00e9ditos consumidos"
+    },
+    "success": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se foi bem-sucedido"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Mensagem de erro se falhou"
+    },
+    "input_size": {
+      "type": "number",
+      "description": "Bytes de entrada"
+    },
+    "output_size": {
+      "type": "number",
+      "description": "Bytes de sa\u00edda"
+    }
+  },
+  "required": [
+    "action",
+    "module",
+    "user_email"
+  ]
+}

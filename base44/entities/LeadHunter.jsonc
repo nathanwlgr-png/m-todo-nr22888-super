@@ -1,0 +1,187 @@
+{
+  "name": "LeadHunter",
+  "type": "object",
+  "description": "Oportunidades investigadas automaticamente via dados p\u00fablicos",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Nome da empresa"
+    },
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ validado da Receita Federal"
+    },
+    "segment": {
+      "type": "string",
+      "enum": [
+        "veterinario",
+        "farmacia",
+        "laboratorio",
+        "hospital",
+        "clinica",
+        "estetica",
+        "dental",
+        "outro"
+      ],
+      "description": "Segmento de neg\u00f3cio"
+    },
+    "address": {
+      "type": "string",
+      "description": "Endere\u00e7o comercial p\u00fablico"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade"
+    },
+    "state": {
+      "type": "string",
+      "description": "UF"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefone p\u00fablico (WhatsApp permitido)"
+    },
+    "website": {
+      "type": "string",
+      "description": "Site p\u00fablico"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "@handle Instagram p\u00fablico"
+    },
+    "facebook": {
+      "type": "string",
+      "description": "URL Facebook p\u00fablico"
+    },
+    "google_maps_url": {
+      "type": "string",
+      "description": "Google Maps link"
+    },
+    "google_rating": {
+      "type": "number",
+      "description": "Rating Google Maps (0-5)"
+    },
+    "google_reviews_count": {
+      "type": "number",
+      "description": "N\u00famero de reviews Google"
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "novo",
+              "contratando",
+              "expansao",
+              "reinauguracao",
+              "pressao_financeira",
+              "crescimento",
+              "novo_lab",
+              "novo_equipamento"
+            ]
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "description": "Onde foi detectado: Google, Instagram, LinkedIn, Site, Reviews"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Descri\u00e7\u00e3o do sinal"
+          }
+        }
+      },
+      "description": "Sinais comerciais detectados"
+    },
+    "score_expansion": {
+      "type": "number",
+      "description": "Score de expans\u00e3o (0-100)"
+    },
+    "score_financial_pressure": {
+      "type": "number",
+      "description": "Score de press\u00e3o financeira (0-100)"
+    },
+    "score_digital": {
+      "type": "number",
+      "description": "Score de maturidade digital (0-100)"
+    },
+    "score_opportunity": {
+      "type": "number",
+      "description": "Score geral de oportunidade (0-100)"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "potencial",
+        "quente",
+        "urgente",
+        "raro"
+      ],
+      "description": "Classifica\u00e7\u00e3o de prioridade"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "novo",
+        "em_analise",
+        "contatado",
+        "qualificado",
+        "convertido",
+        "perdido",
+        "pausado"
+      ],
+      "default": "novo",
+      "description": "Status da oportunidade"
+    },
+    "converted_to_client_id": {
+      "type": "string",
+      "description": "ID do cliente se convertido"
+    },
+    "ia_analysis_cache": {
+      "type": "object",
+      "description": "Cache da an\u00e1lise IA (30 dias)"
+    },
+    "ia_analysis_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando o cache expira"
+    },
+    "last_contacted": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "Pr\u00f3xima a\u00e7\u00e3o sugerida"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas internas"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fontes de dados: Google, Instagram, Facebook, Website, Reviews, LinkedIn, CNPJ"
+    }
+  },
+  "required": [
+    "company_name",
+    "segment",
+    "city",
+    "state"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
