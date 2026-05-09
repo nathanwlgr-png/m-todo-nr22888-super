@@ -1,157 +1,166 @@
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CentralControl from '@/components/CentralControl';
-import SuperMasterHunter from '@/components/SuperMasterHunter';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Settings, Search, Target } from 'lucide-react';
+import SeamtyNR22888CoreControl from '@/components/SeamtyNR22888CoreControl';
+import { AlertTriangle, BookOpen, Shield } from 'lucide-react';
+
+/**
+ * SEAMATY NR22888 — Página Principal
+ * Central de investigação + vendas + marketing veterinário
+ */
 
 export default function SeamtyNR22888() {
-  const [activeTab, setActiveTab] = useState('central');
+  const [showGuide, setShowGuide] = useState(true);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-24 pt-4">
-      <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-
-        {/* HEADER ÉPICO */}
-        <div className="mb-8">
-          <div className="text-center mb-6">
-            <div className="text-5xl font-black text-white mb-2 drop-shadow-lg">
-              🐼 SEAMATY NR22888
-            </div>
-            <div className="text-2xl font-bold text-orange-400 mb-2">
-              DEEPTHUNTER SUPREMO
-            </div>
-            <p className="text-slate-300 max-w-2xl mx-auto">
-              Central premium de vendas veterinárias. Venda 12+ máquinas/mês com máximo aproveitamento de recursos.
-            </p>
-          </div>
-
-          {/* STATUS BOX */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <Card className="bg-slate-800 border-orange-500">
-              <CardContent className="p-4 text-center">
-                <p className="text-xs text-slate-400">🎯 META MENSAL</p>
-                <p className="text-2xl font-black text-orange-400">12+</p>
-                <p className="text-xs text-slate-500">Máquinas Seamaty</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-slate-800 border-green-500">
-              <CardContent className="p-4 text-center">
-                <p className="text-xs text-slate-400">🧠 MÓDULOS IA</p>
-                <p className="text-2xl font-black text-green-400">8+</p>
-                <p className="text-xs text-slate-500">Operacionais</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-slate-800 border-blue-500">
-              <CardContent className="p-4 text-center">
-                <p className="text-xs text-slate-400">🌍 CIDADES</p>
-                <p className="text-2xl font-black text-blue-400">10+</p>
-                <p className="text-xs text-slate-500">Interior SP</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-slate-800 border-purple-500">
-              <CardContent className="p-4 text-center">
-                <p className="text-xs text-slate-400">📱 DISPOSITIVOS</p>
-                <p className="text-2xl font-black text-purple-400">∞</p>
-                <p className="text-xs text-slate-500">Mobile-First</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* AVISO MODO VERDADE */}
-          <Card className="bg-blue-900 border-blue-500 mb-6">
-            <CardContent className="p-4 flex gap-3">
-              <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-100">
-                <p className="font-bold">🔒 MODO VERDADE ABSOLUTA ATIVO</p>
-                <p className="text-xs mt-1">Nunca inventar clientes, telefones, dados. Toda IA sob demanda. Cache 30 dias. Máx 25 leads.</p>
+    <div className="min-h-screen bg-slate-950">
+      {/* GUIA DE VERDADE ABSOLUTA */}
+      {showGuide && (
+        <div className="fixed top-4 right-4 z-50 max-w-sm">
+          <Card className="bg-orange-950 border-orange-600 shadow-2xl">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-orange-100 text-sm flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  ⚠️ Regra Ouro
+                </CardTitle>
+                <button 
+                  onClick={() => setShowGuide(false)}
+                  className="text-orange-300 hover:text-orange-100"
+                >
+                  ✕
+                </button>
               </div>
+            </CardHeader>
+            <CardContent className="text-xs text-orange-200 space-y-1">
+              <p>🟢 <strong>Confirmado:</strong> Verificado no CRM</p>
+              <p>🟡 <strong>Provável:</strong> Sinal forte</p>
+              <p>🔴 <strong>Não confirmado:</strong> Hipótese</p>
+              <p className="text-orange-300 font-bold mt-2">NUNCA inventar dados, telefones, cidades ou resultados.</p>
             </CardContent>
           </Card>
         </div>
+      )}
 
-        {/* TABS */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-8 bg-slate-800 border border-slate-700">
-            <TabsTrigger value="central" className="gap-2">
-              <Settings className="w-4 h-4" />
-              Central ON/OFF
-            </TabsTrigger>
-            <TabsTrigger value="super_hunter" className="gap-2">
-              <Search className="w-4 h-4" />
-              Super Master
-            </TabsTrigger>
-            <TabsTrigger value="docs" className="gap-2">
-              <AlertCircle className="w-4 h-4" />
-              Docs
-            </TabsTrigger>
-          </TabsList>
+      {/* CONTEÚDO PRINCIPAL */}
+      <SeamtyNR22888CoreControl />
 
-          {/* CENTRAL */}
-          <TabsContent value="central" className="mt-0">
-            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
-              <CentralControl />
+      {/* DOCUMENTAÇÃO E GUIAS */}
+      <div className="max-w-7xl mx-auto p-4 md:p-6 mt-8 mb-20 space-y-6">
+        
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              📖 Guia Rápido — Seamaty NR22888
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-slate-300 text-sm">
+            
+            <div>
+              <h4 className="font-bold text-white mb-2">🎯 Super Master Hunter</h4>
+              <p>⚠️ Clicar em "Super Master Hunter" abre modal:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>Selecionar cidade (Botucatu, Marília, Garça, Bauru...)</li>
+                <li>Raio de busca (5, 10, 20, 30 km)</li>
+                <li>Profundidade (rápida, completa, suprema)</li>
+                <li>Segmento (clínica, hospital, laboratório, centro diagnóstico)</li>
+                <li>Confirmar antes de executar</li>
+                <li>Sistema mostra estimativa de créditos</li>
+                <li>Máximo 25 leads · Timeout 2 min</li>
+              </ul>
             </div>
-          </TabsContent>
 
-          {/* SUPER MASTER HUNTER */}
-          <TabsContent value="super_hunter" className="mt-0">
-            <div className="bg-slate-800 rounded-lg p-6 shadow-xl">
-              <SuperMasterHunter />
+            <div>
+              <h4 className="font-bold text-white mb-2">🏆 Ranking do Dia</h4>
+              <p>Mostra TOP 10 oportunidades:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>Fechamento rápido (score 80+)</li>
+                <li>Insumos (clientes com equipamento confirmado)</li>
+                <li>Hospitais (potencial alto)</li>
+                <li>Laboratórios (recorrência)</li>
+                <li>Clientes parados (re-engajamento)</li>
+                <li>Distância (próximos hoje)</li>
+              </ul>
             </div>
-          </TabsContent>
 
-          {/* DOCS */}
-          <TabsContent value="docs" className="mt-0">
-            <Card className="bg-slate-800 border-slate-700">
-              <CardContent className="p-6 text-slate-300 space-y-4">
-                <div>
-                  <p className="font-bold text-orange-400 mb-2">🎯 OBJETIVO PRINCIPAL</p>
-                  <p className="text-sm">Vender 12+ máquinas Seamaty/mês com máximo aproveitamento de créditos IA.</p>
-                </div>
+            <div>
+              <h4 className="font-bold text-white mb-2">📞 Follow-up Inteligente</h4>
+              <p>Nunca enviar sozinho. Sempre:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>✅ Pedir aprovação antes de enviar</li>
+                <li>✅ Mostrar mensagem pronta</li>
+                <li>✅ Permitir editar antes publicar</li>
+                <li>✅ Registrar no histórico</li>
+              </ul>
+            </div>
 
-                <div>
-                  <p className="font-bold text-orange-400 mb-2">✅ PRINCÍPIOS</p>
-                  <ul className="text-sm space-y-1">
-                    <li>✓ Nunca inventar clientes, dados, telefones</li>
-                    <li>✓ Toda IA sob demanda (zero automático)</li>
-                    <li>✓ Cache inteligente 30 dias</li>
-                    <li>✓ Máx 25 leads por busca</li>
-                    <li>✓ Timeout 2 minutos</li>
-                    <li>✓ Modo Verdade Absoluta obrigatório</li>
-                    <li>✓ Mobile-first, tablet-friendly</li>
-                  </ul>
-                </div>
+            <div>
+              <h4 className="font-bold text-white mb-2">🎚️ Intensidade Comercial (1-5)</h4>
+              <p>Controla tom em todas as plataformas:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>1 = Técnico (fatos, dados)</li>
+                <li>2 = Consultivo (dor + oportunidade)</li>
+                <li>3 = Equilibrado (técnico + comercial)</li>
+                <li>4 = Persuasivo (urgência, ação)</li>
+                <li>5 = Fechamento (AGORA, limitado)</li>
+                <li>⚠️ Regra: Persuasivo SIM · Mentira NUNCA</li>
+              </ul>
+            </div>
 
-                <div>
-                  <p className="font-bold text-orange-400 mb-2">📊 SCORING SEAMATY (0-100)</p>
-                  <ul className="text-xs space-y-1 bg-slate-900 p-3 rounded">
-                    <li>+20: Emergência / Pressa</li>
-                    <li>+15: Envia exame para fora</li>
-                    <li>+15: Cliente parado</li>
-                    <li>+15: Cidade estratégica</li>
-                    <li>+10: Crescimento visível</li>
-                    <li>+10: Forte digital</li>
-                    <li>+10: Comodato</li>
-                    <li>+10: Gap equipamento</li>
-                    <li>+5: Influência regional</li>
-                    <li>+5: Potencial insumo</li>
-                  </ul>
-                </div>
+            <div>
+              <h4 className="font-bold text-white mb-2">📸 Instagram Studio</h4>
+              <p>Publicação segura:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>✅ Gerar conteúdo (posts, reels, stories)</li>
+                <li>✅ Agendar (não publicar agora)</li>
+                <li>✅ Aprovar antes de ir ao ar</li>
+                <li>✅ Se OAuth não aprovada: modo manual</li>
+                <li>✅ Sempre copiar legenda para Instagram Web</li>
+              </ul>
+            </div>
 
-                <div>
-                  <p className="font-bold text-orange-400 mb-2">📍 CIDADES ATIVAS</p>
-                  <p className="text-xs">Botucatu • Marília • Garça • Bauru • Ourinhos • Jaú • Assis • Lins • Tupã • Avaré</p>
-                </div>
+            <div>
+              <h4 className="font-bold text-white mb-2">💾 Mob Vendedor Import</h4>
+              <p>Importar com segurança:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                <li>✅ Pré-visualizar antes de importar</li>
+                <li>✅ Mapear colunas (CRM ↔ arquivo)</li>
+                <li>✅ Evitar duplicados (comparar CNPJ)</li>
+                <li>✅ Auditoria completa (log de importação)</li>
+                <li>✅ Permitir desfazer se errado</li>
+              </ul>
+            </div>
 
-                <div>
-                  <p className="font-bold text-orange-400 mb-2">🚫 BLOQUEADAS</p>
-                  <p className="text-xs">Ribeirão Preto • Presidente Prudente</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            <div className="bg-slate-700 p-3 rounded-lg border-l-4 border-orange-500">
+              <h4 className="font-bold text-orange-300 mb-1">🔐 Segurança</h4>
+              <p className="text-xs">Senha admin obrigatória para: Modo Supremo, Instagram, Auditoria, Exclusões, APIs</p>
+            </div>
+
+          </CardContent>
+        </Card>
+
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              🎯 Princípios Absolutos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-slate-300 text-sm">
+            <p>✅ Nunca inventar clientes, dados, telefones, equipamentos</p>
+            <p>✅ Nunca afirmar algo sem confirmação (usar 🟢🟡🔴)</p>
+            <p>✅ Toda IA é sob demanda (clique, não background)</p>
+            <p>✅ Nenhum crédito gasto sem aprovação</p>
+            <p>✅ Nenhuma mensagem enviada sozinha</p>
+            <p>✅ Nenhuma publicação automática</p>
+            <p>✅ Cache 30 dias (evitar reprocessar)</p>
+            <p>✅ Usar apenas dados públicos + CRM + planilhas do usuário</p>
+            <p>✅ Mobile-first · Tablet-first · Rápido</p>
+            <p>✅ Modo offline para dados críticos</p>
+          </CardContent>
+        </Card>
 
       </div>
     </div>

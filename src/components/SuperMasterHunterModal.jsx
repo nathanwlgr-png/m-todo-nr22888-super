@@ -1,262 +1,298 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { AlertTriangle, Loader2, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Loader2, MapPin, Users, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { base44 } from '@/api/base44Client';
 
-export default function SuperMasterHunterModal({ isOpen, onClose }) {
-  const [step, setStep] = useState(1); // 1 = aviso, 2 = configuração, 3 = resultados
-  const [city, setCity] = useState('');
-  const [radius, setRadius] = useState(5);
-  const [segment, setSegment] = useState('veterinario');
-  const [maxLeads, setMaxLeads] = useState(10);
-  const [depth, setDepth] = useState('profunda');
-  const [results, setResults] = useState(null);
+/**
+ * Super Master Hunter Modal — Busca investigativa suprema
+ * Score Seamaty (0-100) + GPS + Potencial Insumo
+ */
 
-  const queryClient = useQueryClient();
+const CITIES = [
+  'Botucatu', 'Marília', 'Garça', 'Bauru', 'Ourinhos', 'Jaú', 
+  'Assis', 'Lins', 'Tupã', 'Avaré', 'Tietê', 'Agudos', 'Pederneiras',
+  'Iacanga', 'Igaraçu do Tietê', 'Novo Horizonte', 'São Manuel',
+];
 
-  const scanMutation = useMutation({
-    mutationFn: async () => {
-      if (!city.trim()) {
-        toast.error('Cidade é obrigatória');
-        throw new Error('City required');
-      }
+const SEGMENTS = [
+  { id: 'clinic', label: '🏥 Clínica Veterinária', emoji: '🏥' },
+  { id: 'hospital', label: '🏨 Hospital Veterinário', emoji: '🏨' },
+  { id: 'lab', label: '🧪 Laboratório', emoji: '🧪' },
+  { id: 'diagnostic', label: '🔬 Centro Diagnóstico', emoji: '🔬' },
+  { id: 'university', label: '🎓 Universidade', emoji: '🎓' },
+];
 
-      toast.info('🔍 Iniciando Super Master Hunter...');
-      const res = await base44.functions.invoke('superMasterHunterScan', {
-        city: city.trim(),
-        radius: parseInt(radius),
-        segment,
-        max_leads: parseInt(maxLeads),
-        depth
+const DEPTHS = [
+  { id: 'rapid', label: '⚡ Rápida (30s)', cost: 25, params: 'Google + CRM' },
+  { id: 'complete', label: '🔍 Completa (90s)', cost: 50, params: 'Google + Maps + Instagram' },
+  { id: 'supreme', label: '👑 Suprema (2min)', cost: 100, params: 'Tudo + análise profunda' },
+];
+
+const RADIUSES = [5, 10, 20, 30, 50];
+
+export default function SuperMasterHunterModal({ onClose, onSearch }) {
+  const [city, setCity] = useState('Marília');
+  const [radius, setRadius] = useState(10);
+  const [depth, setDepth] = useState('complete');
+  const [segments, setSegments] = useState(['clinic']);
+  const [leadCount, setLeadCount] = useState(25);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const currentDepth = DEPTHS.find(d => d.id === depth);
+  const totalCost = currentDepth.cost;
+
+  const toggleSegment = (segmentId) => {
+    setSegments(prev => 
+      prev.includes(segmentId)
+        ? prev.filter(s => s !== segmentId)
+        : [...prev, segmentId]
+    );
+  };
+
+  const handleSearch = async () => {
+    if (!city) {
+      toast.error('Selecione uma cidade');
+      return;
+    }
+
+    if (segments.length === 0) {
+      toast.error('Selecione pelo menos um segmento');
+      return;
+    }
+
+    setIsSearching(true);
+
+    try {
+      toast.info(`🔍 Buscando ${segments.length} segmento(s) em ${city}...`);
+
+      const result = await base44.functions.invoke('superMasterHunter', {
+        city,
+        radius_km: radius,
+        depth,
+        segments,
+        quantity: Math.min(leadCount, 25),
       });
 
-      return res.data;
-    },
-    onSuccess: (data) => {
-      setResults(data);
-      setStep(3);
-      toast.success(`✅ ${data.summary.message}`);
-      queryClient.invalidateQueries({ queryKey: ['leadhunter'] });
-    },
-    onError: (err) => {
-      toast.error('Erro: ' + err.message);
-    }
-  });
+      if (onSearch) {
+        onSearch(result.data);
+      }
 
-  if (!isOpen) return null;
+      toast.success(`✅ Encontrados ${result.data.results_count || 0} leads!`);
+      
+      // Registrar busca na auditoria
+      await base44.functions.invoke('auditTracker', {
+        action: 'super_master_hunter_search',
+        city,
+        radius,
+        depth,
+        segments_count: segments.length,
+        results_count: result.data.results_count || 0,
+        credits_spent: totalCost,
+      }).catch(() => {});
+
+    } catch (error) {
+      toast.error(`Erro: ${error.message}`);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-      <Card className="bg-slate-800 border-red-500/50 max-w-lg w-full shadow-2xl">
-        {/* STEP 1: Aviso */}
-        {step === 1 && (
-          <>
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-white flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-                Modo Investigativo Supremo
-              </CardTitle>
-              <button onClick={onClose} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-xl p-4" style={{ background: '#1a0000', border: '1px solid rgba(239,68,68,0.3)' }}>
-                <p className="text-sm text-red-300 leading-relaxed">
-                  ⚠️ Esse modo realiza investigação aprofundada de prospects e <strong>pode consumir mais créditos</strong>.
-                </p>
-                <p className="text-xs text-red-600 mt-2">
-                  Estimado: 1-3 créditos dependendo da profundidade.
-                </p>
-              </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
+        <CardHeader className="sticky top-0 bg-slate-800 border-b border-slate-700">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Zap className="w-5 h-5 text-yellow-400" />
+              ⚠️ Super Master Hunter
+            </CardTitle>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-200"
+            >
+              ✕
+            </button>
+          </div>
+        </CardHeader>
 
-              <div className="space-y-2 text-sm text-slate-300">
-                <p>✅ Procura clínicas, hospitais, labs, universidades</p>
-                <p>✅ Detecta sinais de crescimento e oportunidade</p>
-                <p>✅ Gera scores de urgência e potencial</p>
-                <p>✅ Salva automaticamente como leads no CRM</p>
-              </div>
+        <CardContent className="space-y-6 pt-6">
 
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={onClose}
+          {/* ALERTA */}
+          <div className="bg-orange-950 border-2 border-orange-600 rounded-lg p-4 flex gap-3">
+            <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-bold text-orange-200">⚠️ Confirmação Necessária</p>
+              <p className="text-orange-300 text-xs mt-1">Esta operação custará <strong>{totalCost} créditos</strong> e processará dados públicos de <strong>{city}</strong>.</p>
+              <p className="text-orange-400 text-xs mt-1">✅ Dados são públicos (Google, Maps, Instagram)</p>
+              <p className="text-orange-400 text-xs">✅ Cruzamento com CRM (sem dados privados de terceiros)</p>
+            </div>
+          </div>
+
+          {/* CIDADE */}
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              <MapPin className="w-4 h-4 inline mr-1" />
+              Cidade
+            </label>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white font-bold"
+            >
+              {CITIES.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* RAIO */}
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              📍 Raio de Busca
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              {RADIUSES.map(r => (
+                <button
+                  key={r}
+                  onClick={() => setRadius(r)}
+                  className={`py-2 rounded-lg font-bold text-sm transition-all ${
+                    radius === r
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
                 >
-                  Cancelar
-                </Button>
-                <Button
-                  className="flex-1 bg-red-600 hover:bg-red-700 gap-2"
-                  onClick={() => setStep(2)}
+                  {r}km
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* PROFUNDIDADE */}
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              🔍 Profundidade de Busca
+            </label>
+            <div className="space-y-2">
+              {DEPTHS.map(d => (
+                <button
+                  key={d.id}
+                  onClick={() => setDepth(d.id)}
+                  className={`w-full p-3 rounded-lg text-left transition-all border-2 ${
+                    depth === d.id
+                      ? 'bg-slate-700 border-yellow-500'
+                      : 'bg-slate-800 border-slate-600 hover:border-slate-500'
+                  }`}
                 >
-                  <AlertTriangle className="w-4 h-4" />
-                  Continuar
-                </Button>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`font-bold ${depth === d.id ? 'text-yellow-400' : 'text-white'}`}>
+                        {d.label}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">{d.params}</p>
+                    </div>
+                    <Badge className={depth === d.id ? 'bg-yellow-600' : 'bg-slate-600'}>
+                      {d.cost} 💰
+                    </Badge>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SEGMENTOS */}
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              <Users className="w-4 h-4 inline mr-1" />
+              Segmentos (mín. 1)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {SEGMENTS.map(seg => (
+                <button
+                  key={seg.id}
+                  onClick={() => toggleSegment(seg.id)}
+                  className={`p-3 rounded-lg font-bold text-sm transition-all border-2 ${
+                    segments.includes(seg.id)
+                      ? 'bg-green-600 border-green-400 text-white'
+                      : 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  {seg.emoji} {seg.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* QUANTIDADE DE LEADS */}
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              Máximo de Leads (1-25)
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="25"
+              value={leadCount}
+              onChange={(e) => setLeadCount(parseInt(e.target.value))}
+              className="w-full"
+            />
+            <p className="text-center text-yellow-400 font-bold mt-2">
+              {leadCount} leads
+            </p>
+          </div>
+
+          {/* RESUMO DE CUSTOS */}
+          <Card className="bg-slate-800 border-slate-600">
+            <CardContent className="pt-4">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-300">Profundidade:</span>
+                  <span className="font-bold text-white">{currentDepth.label}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-300">Custo Estimado:</span>
+                  <span className="font-bold text-yellow-400">{totalCost} créditos</span>
+                </div>
+                <div className="h-px bg-slate-600 my-2"></div>
+                <div className="flex justify-between">
+                  <span className="text-white font-bold">TOTAL:</span>
+                  <span className="font-black text-yellow-300">{totalCost} 💰</span>
+                </div>
               </div>
             </CardContent>
-          </>
-        )}
+          </Card>
 
-        {/* STEP 2: Configuração */}
-        {step === 2 && (
-          <>
-            <CardHeader>
-              <CardTitle className="text-white">Configurar Busca</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-2">Cidade *</label>
-                <Input
-                  placeholder="São Paulo"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-              </div>
+          {/* BOTÕES AÇÃO */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="flex-1 text-slate-300 border-slate-600 hover:bg-slate-800"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSearch}
+              disabled={isSearching || segments.length === 0}
+              className="flex-1 gap-2 font-bold bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white"
+            >
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Buscando...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  Buscar {leadCount} Leads
+                </>
+              )}
+            </Button>
+          </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-2">Raio (km)</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={radius}
-                    onChange={(e) => setRadius(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-2">Máx Leads</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="25"
-                    value={maxLeads}
-                    onChange={(e) => setMaxLeads(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-2">Segmento</label>
-                <select
-                  value={segment}
-                  onChange={(e) => setSegment(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white text-sm"
-                >
-                  <option value="veterinario">Veterinário</option>
-                  <option value="laboratorio">Laboratório</option>
-                  <option value="hospital">Hospital</option>
-                  <option value="clinica">Clínica</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-2">Profundidade</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['leve', 'media', 'profunda', 'suprema'].map(opt => (
-                    <button
-                      key={opt}
-                      onClick={() => setDepth(opt)}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all capitalize ${
-                        depth === opt
-                          ? 'bg-red-600 text-white border border-red-500'
-                          : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setStep(1)}
-                >
-                  Voltar
-                </Button>
-                <Button
-                  className="flex-1 bg-red-600 hover:bg-red-700 gap-2"
-                  disabled={scanMutation.isPending || !city.trim()}
-                  onClick={() => scanMutation.mutate()}
-                >
-                  {scanMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4" />
-                  )}
-                  Iniciar Busca
-                </Button>
-              </div>
-            </CardContent>
-          </>
-        )}
-
-        {/* STEP 3: Resultados */}
-        {step === 3 && results && (
-          <>
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle className="text-white">✅ Busca Concluída</CardTitle>
-              <button onClick={onClose} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-xl p-4" style={{ background: '#001a00', border: '1px solid rgba(34,197,94,0.3)' }}>
-                <p className="text-sm font-bold text-green-400 mb-2">{results.summary.message}</p>
-                <p className="text-xs text-green-600">ROI Estimado: {results.summary.estimated_roi}</p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-lg p-3" style={{ background: '#1a0a00' }}>
-                  <p className="text-2xl font-black text-orange-400">{results.total_found}</p>
-                  <p className="text-xs text-orange-600">Encontrados</p>
-                </div>
-                <div className="rounded-lg p-3" style={{ background: '#1a0000' }}>
-                  <p className="text-2xl font-black text-red-400">{results.urgentes_count}</p>
-                  <p className="text-xs text-red-600">Urgentes</p>
-                </div>
-                <div className="rounded-lg p-3" style={{ background: '#0a1a00' }}>
-                  <p className="text-2xl font-black text-green-400">{results.quentes_count}</p>
-                  <p className="text-xs text-green-600">Quentes</p>
-                </div>
-              </div>
-
-              <div className="rounded-lg p-3 text-xs text-slate-400 space-y-1" style={{ background: '#0a0a0a' }}>
-                <p>📊 Profundidade: <span className="text-slate-300 font-bold capitalize">{results.scan_depth}</span></p>
-                <p>⏱️ Duração: {(results.duration_ms / 1000).toFixed(1)}s</p>
-                <p>📍 Cidade: <span className="text-slate-300 font-bold">{results.city}</span></p>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={onClose}
-                >
-                  Fechar
-                </Button>
-                <Button
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
-                  onClick={() => {
-                    window.location.href = '/DeepHunter';
-                  }}
-                >
-                  Ver Leads
-                </Button>
-              </div>
-            </CardContent>
-          </>
-        )}
+        </CardContent>
       </Card>
     </div>
   );

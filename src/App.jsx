@@ -23,6 +23,7 @@ import SalesCallAnalysis from './pages/SalesCallAnalysis';
 import ClientSegmentation from './pages/ClientSegmentation';
 import SystemGuide from './pages/SystemGuide';
 import ConsumptionSettings from './pages/ConsumptionSettings';
+import SeamtyNR22888 from './pages/SeamtyNR22888';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
