@@ -32,6 +32,9 @@ import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 import NRControlCenter from './pages/NRControlCenter';
 import SeamatyHunter from './pages/SeamatyHunter';
 import WhatsAppMasterAssistantLapidado from './pages/WhatsAppMasterAssistantLapidado';
+import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
+import SalesFunnelKanban from './pages/SalesFunnelKanban';
+import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
 import Home from './pages/Home';
 import Layout from './layout';
 
@@ -115,6 +118,9 @@ const AuthenticatedApp = () => {
       <Route path="/NRControlCenter" element={<LayoutWrapper currentPageName="NRControlCenter"><NRControlCenter /></LayoutWrapper>} />
       <Route path="/SeamatyHunter" element={<LayoutWrapper currentPageName="SeamatyHunter"><SeamatyHunter /></LayoutWrapper>} />
       <Route path="/WhatsAppMasterAssistantLapidado" element={<LayoutWrapper currentPageName="WhatsAppMasterAssistantLapidado"><WhatsAppMasterAssistantLapidado /></LayoutWrapper>} />
+      <Route path="/ExecutiveSalesAnalysis" element={<LayoutWrapper currentPageName="ExecutiveSalesAnalysis"><ExecutiveSalesAnalysis /></LayoutWrapper>} />
+      <Route path="/SalesFunnelKanban" element={<LayoutWrapper currentPageName="SalesFunnelKanban"><SalesFunnelKanban /></LayoutWrapper>} />
+      <Route path="/WhatsAppAutomationTriggers" element={<LayoutWrapper currentPageName="WhatsAppAutomationTriggers"><WhatsAppAutomationTriggers /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -36,6 +36,11 @@ import {
 
 
 const ALL_PAGES = [
+  // Dashboards Executivos
+  { page: 'ExecutiveSalesAnalysis', label: '📊 Análise Executiva', icon: BarChart3, color: 'bg-cyan-500', category: 'Executivo' },
+  { page: 'SalesFunnelKanban', label: '🎯 Funil Kanban', icon: LayoutDashboard, color: 'bg-orange-500', category: 'Executivo' },
+  { page: 'WhatsAppAutomationTriggers', label: '💬 Automação WhatsApp', icon: MessageSquare, color: 'bg-green-600', category: 'Executivo' },
+
   // CRM Principal
   { page: 'Clients', label: 'Clientes', icon: Users, color: 'bg-indigo-500', category: 'CRM' },
   { page: 'ClientProfile', label: 'Perfil Cliente', icon: Eye, color: 'bg-indigo-400', category: 'CRM' },
@@ -103,7 +108,7 @@ const ALL_PAGES = [
   { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigativo', icon: Target, color: 'bg-red-900', category: 'IA' },
 ];
 
-const CATEGORIES = ['Todos', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];
+const CATEGORIES = ['Todos', 'Executivo', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];
 
 export default function Home() {
   const [search, setSearch] = useState('');
@@ -162,6 +167,7 @@ export default function Home() {
   const now = new Date();
   const isMaio2026 = now.getMonth() === 4 && now.getFullYear() === 2026; // maio = índice 4
 
+  // Nova meta de maio 2026: 2 equipamentos → 3 + comissão R$15k
   // Meta: maio = histórica (encerrada); junho+ = nova meta 12 equip
   const META_EQUIPAMENTOS = isMaio2026 ? 7 : 12;
   const META_VALOR = isMaio2026 ? 210000 : 360000;
