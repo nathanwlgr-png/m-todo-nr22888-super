@@ -118,7 +118,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <AILimitProtection>
       <OfflineBanner />
-      {/* Fundo global NR2288 — Seamaty Vamos Dominar */}
+      {/* Fundo global NR22888 — Seamaty Vamos Dominar */}
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         style={{

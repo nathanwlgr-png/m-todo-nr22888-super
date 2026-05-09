@@ -340,7 +340,7 @@ export default function Home() {
 
         {/* Quick Links */}
         <div className="grid grid-cols-3 gap-2 mb-4">
-          {quickLinks.map(({ page, label, icon: Icon, color, bg }) => (
+          {quickLinks.map(({ page, label, icon: Icon }) => (
             <Link key={page} to={createPageUrl(page)}>
               <div className="rounded-xl p-3 flex flex-col items-center gap-2 hover:opacity-80 transition-opacity" style={{ background: '#161616', border: '1px solid rgba(255,107,0,0.15)' }}>
                 <Icon className="w-6 h-6 text-orange-400" />
