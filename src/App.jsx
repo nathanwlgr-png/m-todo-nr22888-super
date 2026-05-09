@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import PasswordGate from '@/components/PasswordGate';
 import { useState, useEffect } from 'react';
@@ -36,7 +37,7 @@ import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
 import Home from './pages/Home';
-import Layout from './layout';
+import Layout from './layout.jsx';
 
 const LayoutWrapper = ({ children, currentPageName }) => 
   <Layout currentPageName={currentPageName}>{children}</Layout>;
@@ -135,6 +136,7 @@ function App() {
           <OfflineIndicator />
           <AuthenticatedApp />
           <PWAInstallPrompt />
+          <PWAInstallButtonFloating />
         </Router>
         <Toaster />
       </QueryClientProvider>
