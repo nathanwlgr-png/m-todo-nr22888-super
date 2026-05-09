@@ -23,6 +23,8 @@ import SalesCallAnalysis from './pages/SalesCallAnalysis';
 import ClientSegmentation from './pages/ClientSegmentation';
 import SystemGuide from './pages/SystemGuide';
 import ConsumptionSettings from './pages/ConsumptionSettings';
+import WhatsAppMaster from './pages/WhatsAppMaster';
+import MobVendedorSecureImport from './pages/MobVendedorSecureImport';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -84,6 +86,8 @@ const AuthenticatedApp = () => {
       <Route path="/ClientSegmentation" element={<LayoutWrapper currentPageName="ClientSegmentation"><ClientSegmentation /></LayoutWrapper>} />
       <Route path="/SystemGuide" element={<LayoutWrapper currentPageName="SystemGuide"><SystemGuide /></LayoutWrapper>} />
       <Route path="/ConsumptionSettings" element={<LayoutWrapper currentPageName="ConsumptionSettings"><ConsumptionSettings /></LayoutWrapper>} />
+      <Route path="/WhatsAppMaster" element={<LayoutWrapper currentPageName="WhatsAppMaster"><WhatsAppMaster /></LayoutWrapper>} />
+      <Route path="/MobVendedorSecureImport" element={<LayoutWrapper currentPageName="MobVendedorSecureImport"><MobVendedorSecureImport /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
