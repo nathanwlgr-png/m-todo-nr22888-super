@@ -18,6 +18,7 @@ import VisitBriefing from './pages/VisitBriefing';
 import MarketingConfig from './pages/MarketingConfig';
 import SeamtyNR22888 from './pages/SeamtyNR22888';
 import RankingAndConsumables from './pages/RankingAndConsumables';
+import PredictiveSalesAnalyzer from './pages/PredictiveSalesAnalyzer';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
       <Route path="/MarketingConfig" element={<LayoutWrapper currentPageName="MarketingConfig"><MarketingConfig /></LayoutWrapper>} />
       <Route path="/SeamtyNR22888" element={<LayoutWrapper currentPageName="SeamtyNR22888"><SeamtyNR22888 /></LayoutWrapper>} />
       <Route path="/RankingAndConsumables" element={<LayoutWrapper currentPageName="RankingAndConsumables"><RankingAndConsumables /></LayoutWrapper>} />
+      <Route path="/PredictiveSalesAnalyzer" element={<LayoutWrapper currentPageName="PredictiveSalesAnalyzer"><PredictiveSalesAnalyzer /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

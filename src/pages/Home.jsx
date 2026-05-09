@@ -20,14 +20,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
-  Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
-  FileText, Search, Bell, Sparkles, Database, ChevronRight,
-  Activity, DollarSign, Map, Bot, Workflow,
-  BookOpen, Shield, LayoutDashboard, Hash,
-  Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
-  Trash2, RefreshCw
-} from 'lucide-react';
+    Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
+    Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
+    FileText, Search, Bell, Sparkles, Database, ChevronRight,
+    Activity, DollarSign, Map, Bot, Workflow,
+    BookOpen, Shield, LayoutDashboard, Hash,
+    Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
+    Trash2, RefreshCw
+  } from 'lucide-react';
 
 
 const ALL_PAGES = [
@@ -201,11 +201,11 @@ export default function Home() {
 
   const quickLinks = [
     { page: 'Clients', label: 'Clientes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { page: 'MarketingAIStudio', label: 'Marketing IA', icon: Sparkles, color: 'text-pink-600', bg: 'bg-pink-50' },
-    { page: 'DeepHunter', label: 'DeepHunter', icon: Target, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { page: 'PredictiveSalesAnalyzer', label: '📊 Preditivo', icon: TrendingUp, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    { page: 'RankingAndConsumables', label: '🏆 Ranking', icon: Target, color: 'text-red-600', bg: 'bg-red-50' },
     { page: 'WhatsAppHub', label: 'WhatsApp', icon: MessageSquare, color: 'text-green-600', bg: 'bg-green-50' },
-    { page: 'TasksUnified', label: 'Tarefas', icon: CheckSquare, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { page: 'ProposalGenerator', label: 'Proposta', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { page: 'MarketingAIStudio', label: 'Marketing IA', icon: Sparkles, color: 'text-pink-600', bg: 'bg-pink-50' },
+    { page: 'DeepHunter', label: 'DeepHunter', icon: Search, color: 'text-amber-600', bg: 'bg-amber-50' },
   ];
 
   return (
