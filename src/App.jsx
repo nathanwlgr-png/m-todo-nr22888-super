@@ -26,6 +26,8 @@ import ConsumptionSettings from './pages/ConsumptionSettings';
 import WhatsAppMaster from './pages/WhatsAppMaster';
 import MobVendedorSecureImport from './pages/MobVendedorSecureImport';
 import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
+import NRControlCenter from './pages/NRControlCenter';
+import SeamatyHunter from './pages/SeamatyHunter';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -90,6 +92,8 @@ const AuthenticatedApp = () => {
       <Route path="/WhatsAppMaster" element={<LayoutWrapper currentPageName="WhatsAppMaster"><WhatsAppMaster /></LayoutWrapper>} />
       <Route path="/MobVendedorSecureImport" element={<LayoutWrapper currentPageName="MobVendedorSecureImport"><MobVendedorSecureImport /></LayoutWrapper>} />
       <Route path="/AutoFollowUpDashboard" element={<LayoutWrapper currentPageName="AutoFollowUpDashboard"><AutoFollowUpDashboard /></LayoutWrapper>} />
+      <Route path="/NRControlCenter" element={<LayoutWrapper currentPageName="NRControlCenter"><NRControlCenter /></LayoutWrapper>} />
+      <Route path="/SeamatyHunter" element={<LayoutWrapper currentPageName="SeamatyHunter"><SeamatyHunter /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
