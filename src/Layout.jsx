@@ -16,6 +16,7 @@ import BugFixerButton from '@/components/BugFixerButton';
 import DarkModeToggle from '@/components/DarkModeToggle';
 import OfflineBanner from '@/components/OfflineBanner';
 import PhoneSearch from '@/components/PhoneSearch';
+import ControlCenter from '@/components/ControlCenter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
@@ -219,6 +220,7 @@ export default function Layout({ children, currentPageName }) {
       <DataSecurityMonitor />
       <FloatingCNPJScore />
       <QuickVisitButton />
+      <ControlCenter />
     </AILimitProtection>
   );
 }
