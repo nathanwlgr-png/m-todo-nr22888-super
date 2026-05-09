@@ -1,0 +1,105 @@
+{
+  "name": "SeamatyImage",
+  "type": "object",
+  "description": "Galeria de imagens Seamaty com metadados e regras de uso",
+  "properties": {
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem hospedada"
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo da imagem"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "logo",
+        "produto",
+        "equipamento",
+        "case_sucesso",
+        "tecnico",
+        "marketing"
+      ],
+      "description": "Categoria da imagem"
+    },
+    "product_related": {
+      "type": "string",
+      "description": "Produto relacionado (SMT-120VP, VG2, etc)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da imagem"
+    },
+    "rights_owner": {
+      "type": "string",
+      "description": "Propriet\u00e1rio dos direitos (Seamaty, Nosso Neg\u00f3cio, etc)"
+    },
+    "usage_restrictions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "comercial",
+          "educativo",
+          "interno",
+          "sem_restricao",
+          "sob_demanda"
+        ]
+      },
+      "description": "Restri\u00e7\u00f5es de uso"
+    },
+    "required_credit": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se precisa mencionar cr\u00e9dito/fonte"
+    },
+    "credit_text": {
+      "type": "string",
+      "description": "Texto obrigat\u00f3rio de cr\u00e9dito"
+    },
+    "can_modify": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se permite modifica\u00e7\u00e3o/edi\u00e7\u00e3o"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de expira\u00e7\u00e3o (se houver)"
+    },
+    "approved_for_marketing_ai": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se Marketing AI Studio pode usar automaticamente"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para busca (hematologia, diagnostico, rapido)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se est\u00e1 ativa na galeria"
+    },
+    "upload_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data do upload"
+    }
+  },
+  "required": [
+    "image_url",
+    "title",
+    "category",
+    "rights_owner"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

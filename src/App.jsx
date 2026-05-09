@@ -14,6 +14,8 @@ import DeepHunter from './pages/DeepHunter';
 import ExecutiveAudit from './pages/ExecutiveAudit';
 import AuditDashboard from './pages/AuditDashboard';
 import MarketingAIStudio from './pages/MarketingAIStudio';
+import VisitBriefing from './pages/VisitBriefing';
+import MarketingConfig from './pages/MarketingConfig';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -66,6 +68,8 @@ const AuthenticatedApp = () => {
       <Route path="/ExecutiveAudit" element={<LayoutWrapper currentPageName="ExecutiveAudit"><ExecutiveAudit /></LayoutWrapper>} />
       <Route path="/AuditDashboard" element={<LayoutWrapper currentPageName="AuditDashboard"><AuditDashboard /></LayoutWrapper>} />
       <Route path="/MarketingAIStudio" element={<LayoutWrapper currentPageName="MarketingAIStudio"><MarketingAIStudio /></LayoutWrapper>} />
+      <Route path="/VisitBriefing" element={<LayoutWrapper currentPageName="VisitBriefing"><VisitBriefing /></LayoutWrapper>} />
+      <Route path="/MarketingConfig" element={<LayoutWrapper currentPageName="MarketingConfig"><MarketingConfig /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
