@@ -161,8 +161,7 @@ export default function CentralControl() {
         {/* Desligar Tudo */}
         <Button
           onClick={handleAllOff}
-          variant="destructive"
-          className="w-full gap-2 h-12 text-base"
+          className="w-full gap-2 h-12 text-base bg-red-600 hover:bg-red-700 text-white font-bold"
         >
           <Power className="w-5 h-5" />
           🔴 Desligar Tudo Pesado

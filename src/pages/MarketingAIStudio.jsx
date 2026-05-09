@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InstagramPoster from '@/components/InstagramPoster';
 import { useMutation } from '@tanstack/react-query';
 import { Sparkles, Copy, Download, Share2, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,8 +39,8 @@ export default function MarketingAIStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 pb-20">
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 pb-24 pt-4">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
         {/* HEADER */}
         <div className="mb-8">
@@ -98,11 +99,30 @@ export default function MarketingAIStudio() {
 
           {/* Instagram */}
           <TabsContent value="instagram">
-            <InstagramContentGenerator
-              intensity={intensity}
-              onGenerate={(params) => generateContentMutation.mutate(params)}
-              loading={generateContentMutation.isPending}
-            />
+            <div className="space-y-6">
+              <InstagramContentGenerator
+                intensity={intensity}
+                onGenerate={(params) => generateContentMutation.mutate(params)}
+                loading={generateContentMutation.isPending}
+              />
+              {generatedContent && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      🌐 Publicar no Instagram
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <InstagramPoster
+                      content={generatedContent.content}
+                      hashtags={generatedContent.hashtags?.split(' ')}
+                      imageUrl={generatedContent.design_prompt ? 'https://images.unsplash.com/photo-1587854692152-cbe660dbde0e?w=500' : ''}
+                      campaign="Marketing Studio"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           {/* Seamaty */}

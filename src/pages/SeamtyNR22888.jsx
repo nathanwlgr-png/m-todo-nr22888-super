@@ -9,8 +9,8 @@ export default function SeamtyNR22888() {
   const [activeTab, setActiveTab] = useState('central');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-20">
-      <div className="max-w-6xl mx-auto p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-24 pt-4">
+      <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
 
         {/* HEADER ÉPICO */}
         <div className="mb-8">

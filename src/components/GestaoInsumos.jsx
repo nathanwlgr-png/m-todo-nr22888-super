@@ -128,20 +128,20 @@ export default function GestaoInsumos() {
               ⚠️ REPOSIÇÃO URGENTE ({alertas.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3 max-h-64 overflow-y-auto">
             {alertas.map(item => (
-              <div key={item.id} className="p-3 rounded-lg bg-white border-2 border-red-200">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-bold text-slate-900">{item.client_name}</p>
+              <div key={item.id} className="p-4 rounded-lg bg-white border-2 border-red-300">
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 truncate">{item.client_name}</p>
                     <p className="text-xs text-slate-600">{CONSUMABLE_TYPES[item.consumable_type]}</p>
                   </div>
-                  <Badge className="bg-red-600">
+                  <Badge className="bg-red-600 text-white flex-shrink-0">
                     {item.equipment_model}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs mb-2">
-                  <p><span className="font-bold">Próximo pedido:</span> {item.next_reorder_date}</p>
+                <div className="space-y-1 text-xs">
+                  <p><span className="font-bold">Próximo:</span> {item.next_reorder_date}</p>
                   <p><span className="font-bold">Potencial:</span> R$ {item.monthly_revenue_potential?.toLocaleString('pt-BR') || 0}</p>
                 </div>
               </div>
@@ -159,12 +159,12 @@ export default function GestaoInsumos() {
               📅 Próximas Reposições
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+          <CardContent className="space-y-2 max-h-64 overflow-y-auto pr-2">
             {proximosVencimentos.slice(0, 10).map(item => (
-              <div key={item.id} className="p-2 rounded bg-slate-50 border border-slate-200 text-sm">
-                <div className="flex justify-between mb-1">
-                  <p className="font-bold">{item.client_name}</p>
-                  <p className="text-xs text-slate-600">{item.next_reorder_date}</p>
+              <div key={item.id} className="p-3 rounded bg-slate-50 border border-slate-300">
+                <div className="flex justify-between mb-1 gap-2">
+                  <p className="font-bold text-sm truncate">{item.client_name}</p>
+                  <p className="text-xs text-slate-600 flex-shrink-0">{item.next_reorder_date}</p>
                 </div>
                 <p className="text-xs text-slate-600">{CONSUMABLE_TYPES[item.consumable_type]}</p>
               </div>

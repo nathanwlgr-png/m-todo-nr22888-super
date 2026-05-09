@@ -6,8 +6,8 @@ import { Trophy, Package } from 'lucide-react';
 
 export default function RankingAndConsumables() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-20">
-      <div className="max-w-6xl mx-auto p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-24 pt-4">
+      <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
 
         {/* HEADER */}
         <div className="mb-8">

@@ -153,28 +153,28 @@ export default function RankingDoDia() {
         <CardHeader>
           <CardTitle className="text-lg">Ações Prioritárias</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 max-h-96 overflow-y-auto">
-          {ranking.priorities?.map((item, idx) => (
-            <div
-              key={idx}
-              className={`p-3 rounded-lg border-2 ${PRIORITY_COLORS[item.priority] || PRIORITY_COLORS.frio}`}
-            >
-              
-              {/* Posição */}
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center font-black text-white bg-slate-600">
-                    {idx + 1}
+        <CardContent className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+            {ranking.priorities?.map((item, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-lg border-2 ${PRIORITY_COLORS[item.priority] || PRIORITY_COLORS.frio}`}
+              >
+
+                {/* Posição */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-white bg-slate-700 flex-shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-base truncate">{item.name}</p>
+                      <p className="text-xs opacity-75">{item.city}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold">{item.name}</p>
-                    <p className="text-xs">{item.city}</p>
-                  </div>
+                  <Badge className="bg-slate-700 text-white ml-2 flex-shrink-0">
+                    {item.score}%
+                  </Badge>
                 </div>
-                <Badge className="bg-slate-600 text-white">
-                  {item.score}%
-                </Badge>
-              </div>
 
               {/* Tipo de ação */}
               <div className="flex flex-wrap gap-1 mb-2">

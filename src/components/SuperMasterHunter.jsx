@@ -88,11 +88,11 @@ export default function SuperMasterHunter() {
     <div className="space-y-6">
       
       {/* CONFIGURAÇÃO */}
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-red-300 bg-gradient-to-r from-red-50 to-orange-50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-900">
-            <AlertTriangle className="w-5 h-5" />
-            Super Master Hunter
+          <CardTitle className="flex items-center gap-2 text-red-900 text-lg">
+            <AlertTriangle className="w-6 h-6" />
+            ⚠️ Super Master Hunter
           </CardTitle>
         </CardHeader>
 
