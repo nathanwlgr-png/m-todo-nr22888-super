@@ -15,6 +15,10 @@ import ComodatoAlertMonitor from '@/components/ComodatoAlertMonitor';
 import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
 import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
 import SmartRouteMap from '@/components/SmartRouteMap';
+import InsumoPatternAlert from '@/components/InsumoPatternAlert';
+import { useAIConsumption } from '@/hooks/useAIConsumption';
+import AIConsumptionBar from '@/components/AIConsumptionBar';
+import FloatingCreditsButton from '@/components/FloatingCreditsButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -105,6 +109,7 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [dedupeStatus, setDedupeStatus] = useState(null);
   const [dedupeLoading, setDedupeLoading] = useState(false);
+  const { consumption } = useAIConsumption();
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-count'],
@@ -139,6 +144,12 @@ export default function Home() {
   const { data: sales = [] } = useQuery({
     queryKey: ['home-sales'],
     queryFn: () => base44.entities.Sale.list('-sale_date', 50),
+    staleTime: 60000,
+  });
+
+  const { data: consumables = [] } = useQuery({
+    queryKey: ['home-consumables'],
+    queryFn: () => base44.entities.ConsumableOrder?.list('-next_reorder_date', 100).catch(() => []),
     staleTime: 60000,
   });
 
@@ -266,6 +277,9 @@ export default function Home() {
       <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #ff6b00, transparent)' }} />
 
       <div className="px-4 pt-4" style={{ background: '#0a0a0a' }}>
+        {/* Barra de Consumo de IA */}
+        <AIConsumptionBar consumption={consumption} />
+
         {/* Manual PDF */}
         <CRMManualPDF />
 
@@ -434,6 +448,12 @@ export default function Home() {
 
         <WeeklyHealthReport clients={clients} />
 
+        {/* Alertas de Padrão de Insumo */}
+        <div className="mb-4">
+          <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2 px-1">📦 Padrões de Compra de Insumos</p>
+          <InsumoPatternAlert clients={clients} consumables={consumables || []} />
+        </div>
+
         {/* Dashboard Consolidado com Recharts */}
         <ConsolidatedDashboard />
 
@@ -507,6 +527,7 @@ export default function Home() {
           </div>
         )}
       </div>
+      <FloatingCreditsButton />
     </div>
   );
 }
