@@ -9,6 +9,12 @@ module.exports = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		spacing: {
+  			safe: 'max(1rem, env(safe-area-inset-left))',
+  		},
+  		fontSize: {
+  			touch: 'clamp(0.875rem, 2vw, 1rem)',
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -86,4 +92,11 @@ module.exports = {
   	}
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+    'touch-manipulation',
+    'select-none',
+    'sm:ml-64',
+    'sm:w-64',
+    'lg:w-64',
+  ],
 }

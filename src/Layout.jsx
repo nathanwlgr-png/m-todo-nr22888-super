@@ -129,11 +129,11 @@ export default function Layout({ children, currentPageName }) {
           opacity: 0.07,
         }}
       />
-      <div className="flex min-h-screen bg-slate-50/90 dark:bg-slate-900/90" data-layout="root" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="flex min-h-screen bg-slate-50/90 dark:bg-slate-900/90 touch-manipulation" data-layout="root" style={{ position: 'relative', zIndex: 1, WebkitUserSelect: 'none' }}>
         {/* Sidebar */}
-        <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col ${
-          sidebarOpen ? 'w-64' : 'w-0'
-        } overflow-hidden`}>
+        <aside className={`fixed left-0 top-0 h-full bg-white border-r transition-all duration-300 z-40 flex flex-col overflow-hidden lg:w-64 ${
+          sidebarOpen ? 'w-full sm:w-64' : 'w-0'
+        }`}>
           <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg" />
@@ -154,7 +154,7 @@ export default function Layout({ children, currentPageName }) {
         </aside>
 
         {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'} min-h-screen overflow-y-auto`}>
+        <div className={`flex-1 transition-all duration-300 min-h-screen overflow-y-auto ${sidebarOpen ? 'ml-0 sm:ml-64' : 'ml-0'}`}>
           {/* Top Bar with Breadcrumbs */}
           <header className="sticky top-0 z-30 bg-white border-b px-6 py-3">
             <div className="flex items-center justify-between">
@@ -207,8 +207,8 @@ export default function Layout({ children, currentPageName }) {
           </header>
 
           {/* Page Content */}
-          <main className="p-6 pb-32 min-h-screen overflow-y-auto">
-            {children}
+          <main className="p-4 sm:p-6 pb-40 min-h-screen overflow-y-auto">
+           {children}
           </main>
         </div>
       </div>

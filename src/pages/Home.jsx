@@ -19,6 +19,7 @@ import InsumoPatternAlert from '@/components/InsumoPatternAlert';
 import { useAIConsumption } from '@/hooks/useAIConsumption';
 import AIConsumptionBar from '@/components/AIConsumptionBar';
 import FloatingCreditsButton from '@/components/FloatingCreditsButton';
+import PWAStatusChecklist from '@/components/PWAStatusChecklist';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -303,6 +304,11 @@ export default function Home() {
             <ChevronRight className="w-6 h-6 text-orange-400" />
           </div>
         </a>
+
+        {/* PWA Status Checklist */}
+        <div className="mb-4">
+          <PWAStatusChecklist />
+        </div>
 
         {/* Guia rápido do agente */}
         <div className="rounded-xl p-3 mb-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>

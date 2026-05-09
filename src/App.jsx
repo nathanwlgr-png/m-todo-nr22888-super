@@ -6,6 +6,10 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import OfflineIndicator from '@/components/OfflineIndicator';
+import PasswordGate from '@/components/PasswordGate';
+import { useState, useEffect } from 'react';
 
 import VisitRouteManager from './pages/VisitRouteManager';
 import InstagramStudio from './pages/InstagramStudio';
@@ -36,6 +40,35 @@ const LayoutWrapper = ({ children, currentPageName }) =>
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const [passwordUnlocked, setPasswordUnlocked] = useState(() => {
+    // Verificação 1: Checar localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('seamaty_authenticated') === 'true';
+    }
+    return false;
+  });
+
+  // Verificação 2: Checar se sessionStorage também confirma
+  useEffect(() => {
+    if (passwordUnlocked) {
+      sessionStorage.setItem('seamaty_session_active', 'true');
+    }
+  }, [passwordUnlocked]);
+
+  // Verificação 3: Se não desbloqueado, mostrar gate
+  if (!passwordUnlocked) {
+    return (
+      <PasswordGate
+        onUnlock={() => {
+          setPasswordUnlocked(true);
+          // Verificação 4: Double check
+          if (localStorage.getItem('seamaty_authenticated') === 'true') {
+            console.log('✅ Sistema desbloqueado com sucesso');
+          }
+        }}
+      />
+    );
+  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -93,7 +126,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
+          <OfflineIndicator />
           <AuthenticatedApp />
+          <PWAInstallPrompt />
         </Router>
         <Toaster />
       </QueryClientProvider>
