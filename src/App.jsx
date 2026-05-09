@@ -33,7 +33,7 @@ import NRControlCenter from './pages/NRControlCenter';
 import SeamatyHunter from './pages/SeamatyHunter';
 import WhatsAppMasterAssistantLapidado from './pages/WhatsAppMasterAssistantLapidado';
 import Home from './pages/Home';
-import Layout from './layout.jsx';
+import Layout from './layout';
 
 const LayoutWrapper = ({ children, currentPageName }) => 
   <Layout currentPageName={currentPageName}>{children}</Layout>;
@@ -135,5 +135,12 @@ function App() {
     </AuthProvider>
   )
 }
+
+// Logout helper (para sair da sessão)
+window.logoutSeamaty = () => {
+  localStorage.removeItem('seamaty_authenticated');
+  sessionStorage.removeItem('seamaty_session_active');
+  window.location.reload();
+};
 
 export default App
