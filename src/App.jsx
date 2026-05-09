@@ -25,6 +25,7 @@ import SystemGuide from './pages/SystemGuide';
 import ConsumptionSettings from './pages/ConsumptionSettings';
 import WhatsAppMaster from './pages/WhatsAppMaster';
 import MobVendedorSecureImport from './pages/MobVendedorSecureImport';
+import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
       <Route path="/ConsumptionSettings" element={<LayoutWrapper currentPageName="ConsumptionSettings"><ConsumptionSettings /></LayoutWrapper>} />
       <Route path="/WhatsAppMaster" element={<LayoutWrapper currentPageName="WhatsAppMaster"><WhatsAppMaster /></LayoutWrapper>} />
       <Route path="/MobVendedorSecureImport" element={<LayoutWrapper currentPageName="MobVendedorSecureImport"><MobVendedorSecureImport /></LayoutWrapper>} />
+      <Route path="/AutoFollowUpDashboard" element={<LayoutWrapper currentPageName="AutoFollowUpDashboard"><AutoFollowUpDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
