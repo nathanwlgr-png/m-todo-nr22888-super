@@ -19,6 +19,9 @@ import MarketingConfig from './pages/MarketingConfig';
 import SeamtyNR22888 from './pages/SeamtyNR22888';
 import RankingAndConsumables from './pages/RankingAndConsumables';
 import PredictiveSalesAnalyzer from './pages/PredictiveSalesAnalyzer';
+import SalesCallAnalysis from './pages/SalesCallAnalysis';
+import ClientSegmentation from './pages/ClientSegmentation';
+import SystemGuide from './pages/SystemGuide';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -76,6 +79,9 @@ const AuthenticatedApp = () => {
       <Route path="/SeamtyNR22888" element={<LayoutWrapper currentPageName="SeamtyNR22888"><SeamtyNR22888 /></LayoutWrapper>} />
       <Route path="/RankingAndConsumables" element={<LayoutWrapper currentPageName="RankingAndConsumables"><RankingAndConsumables /></LayoutWrapper>} />
       <Route path="/PredictiveSalesAnalyzer" element={<LayoutWrapper currentPageName="PredictiveSalesAnalyzer"><PredictiveSalesAnalyzer /></LayoutWrapper>} />
+      <Route path="/SalesCallAnalysis" element={<LayoutWrapper currentPageName="SalesCallAnalysis"><SalesCallAnalysis /></LayoutWrapper>} />
+      <Route path="/ClientSegmentation" element={<LayoutWrapper currentPageName="ClientSegmentation"><ClientSegmentation /></LayoutWrapper>} />
+      <Route path="/SystemGuide" element={<LayoutWrapper currentPageName="SystemGuide"><SystemGuide /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

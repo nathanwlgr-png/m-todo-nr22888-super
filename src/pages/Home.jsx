@@ -26,7 +26,7 @@ import {
     Activity, DollarSign, Map, Bot, Workflow,
     BookOpen, Shield, LayoutDashboard, Hash,
     Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
-    Trash2, RefreshCw
+    Trash2, RefreshCw, Mic
   } from 'lucide-react';
 
 
@@ -200,12 +200,12 @@ export default function Home() {
   };
 
   const quickLinks = [
-    { page: 'Clients', label: 'Clientes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { page: 'PredictiveSalesAnalyzer', label: '📊 Preditivo', icon: TrendingUp, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    { page: 'SystemGuide', label: '📖 Manual', icon: BookOpen, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { page: 'PredictiveSalesAnalyzer', label: '📈 Preditivo', icon: TrendingUp, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    { page: 'SalesCallAnalysis', label: '🎙️ Chamadas', icon: Mic, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { page: 'ClientSegmentation', label: '👥 Segmentos', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
     { page: 'RankingAndConsumables', label: '🏆 Ranking', icon: Target, color: 'text-red-600', bg: 'bg-red-50' },
-    { page: 'WhatsAppHub', label: 'WhatsApp', icon: MessageSquare, color: 'text-green-600', bg: 'bg-green-50' },
-    { page: 'MarketingAIStudio', label: 'Marketing IA', icon: Sparkles, color: 'text-pink-600', bg: 'bg-pink-50' },
-    { page: 'DeepHunter', label: 'DeepHunter', icon: Search, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { page: 'WhatsAppHub', label: '💬 WhatsApp', icon: MessageSquare, color: 'text-green-600', bg: 'bg-green-50' },
   ];
 
   return (
