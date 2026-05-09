@@ -1,0 +1,106 @@
+{
+  "name": "ConsumableOrder",
+  "type": "object",
+  "description": "Rastreamento de pedidos e recorr\u00eancia de insumos (reagentes, rotores, etc)",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "consumable_type": {
+      "type": "string",
+      "enum": [
+        "reagentes_hematologia",
+        "rotor_hematologia",
+        "reagentes_bioquimica",
+        "rotor_bioquimica",
+        "calibrador",
+        "controle",
+        "eletrodos",
+        "outro"
+      ],
+      "description": "Tipo de consum\u00edvel"
+    },
+    "equipment_model": {
+      "type": "string",
+      "description": "Modelo do equipamento (VG2, SMT-120VP, etc)"
+    },
+    "last_order_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do \u00faltimo pedido"
+    },
+    "order_quantity_units": {
+      "type": "number",
+      "description": "Unidades no \u00faltimo pedido"
+    },
+    "estimated_consumption_per_day": {
+      "type": "number",
+      "description": "Consumo estimado por dia (unidades)"
+    },
+    "reorder_interval_days": {
+      "type": "number",
+      "description": "Intervalo ideal de reposi\u00e7\u00e3o em dias (calculado automaticamente)"
+    },
+    "next_reorder_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data prevista para pr\u00f3ximo pedido (calculado)"
+    },
+    "alert_days_before": {
+      "type": "number",
+      "default": 7,
+      "description": "Gerar alerta quantos dias antes de vencer"
+    },
+    "alert_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se alerta foi gerado"
+    },
+    "alert_generated_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando o alerta foi gerado"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Fornecedor (Seamaty, outro)"
+    },
+    "unit_price": {
+      "type": "number",
+      "description": "Pre\u00e7o unit\u00e1rio em R$"
+    },
+    "monthly_revenue_potential": {
+      "type": "number",
+      "description": "Receita mensal potencial com esse consum\u00edvel"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "pausado",
+        "cancelado"
+      ],
+      "default": "ativo",
+      "description": "Status do consum\u00edvel"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es"
+    }
+  },
+  "required": [
+    "client_id",
+    "consumable_type",
+    "equipment_model"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
