@@ -201,11 +201,11 @@ export default function Home() {
 
   const quickLinks = [
     { page: 'Clients', label: 'Clientes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { page: 'MarketingAIStudio', label: 'Marketing IA', icon: Sparkles, color: 'text-pink-600', bg: 'bg-pink-50' },
+    { page: 'DeepHunter', label: 'DeepHunter', icon: Target, color: 'text-amber-600', bg: 'bg-amber-50' },
     { page: 'WhatsAppHub', label: 'WhatsApp', icon: MessageSquare, color: 'text-green-600', bg: 'bg-green-50' },
-    { page: 'AIAssistant', label: 'IA Primori', icon: Brain, color: 'text-purple-600', bg: 'bg-purple-50' },
     { page: 'TasksUnified', label: 'Tarefas', icon: CheckSquare, color: 'text-orange-600', bg: 'bg-orange-50' },
     { page: 'ProposalGenerator', label: 'Proposta', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { page: 'SalesFunnel', label: 'Pipeline', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ];
 
   return (

@@ -13,6 +13,7 @@ import InstagramStudio from './pages/InstagramStudio';
 import DeepHunter from './pages/DeepHunter';
 import ExecutiveAudit from './pages/ExecutiveAudit';
 import AuditDashboard from './pages/AuditDashboard';
+import MarketingAIStudio from './pages/MarketingAIStudio';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       <Route path="/DeepHunter" element={<LayoutWrapper currentPageName="DeepHunter"><DeepHunter /></LayoutWrapper>} />
       <Route path="/ExecutiveAudit" element={<LayoutWrapper currentPageName="ExecutiveAudit"><ExecutiveAudit /></LayoutWrapper>} />
       <Route path="/AuditDashboard" element={<LayoutWrapper currentPageName="AuditDashboard"><AuditDashboard /></LayoutWrapper>} />
+      <Route path="/MarketingAIStudio" element={<LayoutWrapper currentPageName="MarketingAIStudio"><MarketingAIStudio /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
