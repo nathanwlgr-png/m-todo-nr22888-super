@@ -36,6 +36,7 @@ import WhatsAppMasterAssistantLapidado from './pages/WhatsAppMasterAssistantLapi
 import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
+import PrescriptiveAnalytics from './pages/PrescriptiveAnalytics';
 import Home from './pages/Home';
 import Layout from '@/components/AppLayout';
 
@@ -122,6 +123,7 @@ const AuthenticatedApp = () => {
       <Route path="/ExecutiveSalesAnalysis" element={<LayoutWrapper currentPageName="ExecutiveSalesAnalysis"><ExecutiveSalesAnalysis /></LayoutWrapper>} />
       <Route path="/SalesFunnelKanban" element={<LayoutWrapper currentPageName="SalesFunnelKanban"><SalesFunnelKanban /></LayoutWrapper>} />
       <Route path="/WhatsAppAutomationTriggers" element={<LayoutWrapper currentPageName="WhatsAppAutomationTriggers"><WhatsAppAutomationTriggers /></LayoutWrapper>} />
+      <Route path="/PrescriptiveAnalytics" element={<LayoutWrapper currentPageName="PrescriptiveAnalytics"><PrescriptiveAnalytics /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
