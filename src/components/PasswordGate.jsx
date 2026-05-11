@@ -6,7 +6,7 @@ import { Lock, AlertCircle } from 'lucide-react';
 // NÃO uma proteção criptográfica real — o app já requer login Base44 para funcionar.
 // O hash abaixo corresponde a SHA-256 de "sofia" (sem o texto da senha em código).
 // Hash gerado em: https://emn178.github.io/online-tools/sha256.html
-const CORRECT_SHA256 = '6a69d0ce4d9baea84a92024ac2f70f0ec50dd7dbc2b89de1c90fca64f8e0ef30';
+const CORRECT_SHA256 = '58229c071d0d6015d888433122aaa1d71ad4af2b1ea9454150aebeddd6842d6f';
 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
