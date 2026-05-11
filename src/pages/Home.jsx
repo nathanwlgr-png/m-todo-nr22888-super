@@ -107,6 +107,7 @@ const ALL_PAGES = [
   { page: 'SystemAudit', label: 'Auditoria', icon: Shield, color: 'bg-red-700', category: 'Sistema' },
   { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigativo', icon: Target, color: 'bg-red-900', category: 'IA' },
   { page: 'PrescriptiveAnalytics', label: '🧠 Analytics Prescritivo', icon: Brain, color: 'bg-violet-700', category: 'IA' },
+  { page: 'CompetitiveIntelligenceDashboard', label: '🏥 Radar Competitivo', icon: TrendingUp, color: 'bg-emerald-700', category: 'IA' },
 ];
 
 const CATEGORIES = ['Todos', 'Executivo', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];

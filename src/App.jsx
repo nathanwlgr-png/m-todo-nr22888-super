@@ -37,6 +37,7 @@ import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
 import SalesFunnelKanban from './pages/SalesFunnelKanban';
 import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
 import PrescriptiveAnalytics from './pages/PrescriptiveAnalytics';
+import CompetitiveIntelligenceDashboard from './pages/CompetitiveIntelligenceDashboard';
 import Home from './pages/Home';
 import Layout from '@/components/AppLayout';
 
@@ -124,6 +125,7 @@ const AuthenticatedApp = () => {
       <Route path="/SalesFunnelKanban" element={<LayoutWrapper currentPageName="SalesFunnelKanban"><SalesFunnelKanban /></LayoutWrapper>} />
       <Route path="/WhatsAppAutomationTriggers" element={<LayoutWrapper currentPageName="WhatsAppAutomationTriggers"><WhatsAppAutomationTriggers /></LayoutWrapper>} />
       <Route path="/PrescriptiveAnalytics" element={<LayoutWrapper currentPageName="PrescriptiveAnalytics"><PrescriptiveAnalytics /></LayoutWrapper>} />
+      <Route path="/CompetitiveIntelligenceDashboard" element={<LayoutWrapper currentPageName="CompetitiveIntelligenceDashboard"><CompetitiveIntelligenceDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
