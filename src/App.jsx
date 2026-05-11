@@ -11,6 +11,7 @@ import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import PasswordGate from '@/components/PasswordGate';
 import { useState, lazy, Suspense } from 'react';
+import Layout from '@/components/AppLayout';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
@@ -44,7 +45,16 @@ const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics')
 const CompetitiveIntelligenceDashboard = lazy(() => import('./pages/CompetitiveIntelligenceDashboard'));
 const ActiveProspecting = lazy(() => import('./pages/ActiveProspecting'));
 const SmartRouteOptimizer = lazy(() => import('./pages/SmartRouteOptimizer'));
-import Layout from '@/components/AppLayout';
+
+// Spinner fora do componente — evita re-criação a cada render
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-2 border-orange-800 border-t-orange-500 rounded-full animate-spin" />
+      <p className="text-xs text-orange-700 font-bold">Carregando...</p>
+    </div>
+  </div>
+);
 
 const LayoutWrapper = ({ children, currentPageName }) => 
   <Layout currentPageName={currentPageName}>{children}</Layout>;
@@ -86,16 +96,6 @@ const AuthenticatedApp = () => {
       return null;
     }
   }
-
-  // Spinner leve para carregamento de páginas lazy
-  const PageLoader = () => (
-    <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-orange-800 border-t-orange-500 rounded-full animate-spin" />
-        <p className="text-xs text-orange-700 font-bold">Carregando...</p>
-      </div>
-    </div>
-  );
 
   return (
     <Suspense fallback={<PageLoader />}>
