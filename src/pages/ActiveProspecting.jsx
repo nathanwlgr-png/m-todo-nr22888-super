@@ -51,7 +51,6 @@ export default function ActiveProspecting() {
     setSelectedClient(client);
     setTab('sequencia');
     setSelectedSequence(null);
-    // Verifica se já existe sequência ativa para esse cliente
     const existing = sequences.find(s => s.client_id === client.id && s.funnel_status !== 'descartado');
     if (existing) {
       setSelectedSequence(existing);
