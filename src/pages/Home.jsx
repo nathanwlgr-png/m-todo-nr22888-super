@@ -108,6 +108,7 @@ const ALL_PAGES = [
   { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigativo', icon: Target, color: 'bg-red-900', category: 'IA' },
   { page: 'PrescriptiveAnalytics', label: '🧠 Analytics Prescritivo', icon: Brain, color: 'bg-violet-700', category: 'IA' },
   { page: 'CompetitiveIntelligenceDashboard', label: '🏥 Radar Competitivo', icon: TrendingUp, color: 'bg-emerald-700', category: 'IA' },
+  { page: 'ActiveProspecting', label: '🎯 Prospecção Ativa', icon: Zap, color: 'bg-green-700', category: 'CRM' },
 ];
 
 const CATEGORIES = ['Todos', 'Executivo', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];

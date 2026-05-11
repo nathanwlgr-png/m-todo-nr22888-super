@@ -1,0 +1,117 @@
+{
+  "name": "RescueSequence",
+  "type": "object",
+  "description": "Sequ\u00eancias de resgate de clientes inativos via WhatsApp",
+  "properties": {
+    "client_id": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "inactive_days": {
+      "type": "number",
+      "description": "Dias sem contato"
+    },
+    "funnel_status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "mensagem_enviada",
+        "resposta_recebida",
+        "agendado",
+        "convertido",
+        "sem_resposta",
+        "descartado"
+      ],
+      "default": "pendente"
+    },
+    "current_step": {
+      "type": "number",
+      "default": 0,
+      "description": "Passo atual da sequ\u00eancia (0=nenhum)"
+    },
+    "total_steps": {
+      "type": "number",
+      "default": 3
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "enviada",
+              "visualizada",
+              "respondida"
+            ]
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "ai_approach": {
+      "type": "string",
+      "description": "Estrat\u00e9gia de abordagem sugerida pela IA"
+    },
+    "ai_score": {
+      "type": "number",
+      "description": "Score de probabilidade de resgate (0-100)"
+    },
+    "next_followup_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_message_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_text": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "equipment_interest": {
+      "type": "string"
+    },
+    "last_purchase_value": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "client_id",
+    "client_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
