@@ -10,37 +10,40 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import PasswordGate from '@/components/PasswordGate';
-import { useState, useEffect } from 'react';
+import { useState, lazy, Suspense } from 'react';
 
-import VisitRouteManager from './pages/VisitRouteManager';
-import InstagramStudio from './pages/InstagramStudio';
-import DeepHunter from './pages/DeepHunter';
-import ExecutiveAudit from './pages/ExecutiveAudit';
-import AuditDashboard from './pages/AuditDashboard';
-import MarketingAIStudio from './pages/MarketingAIStudio';
-import VisitBriefing from './pages/VisitBriefing';
-import MarketingConfig from './pages/MarketingConfig';
-import SeamtyNR22888 from './pages/SeamtyNR22888';
-import RankingAndConsumables from './pages/RankingAndConsumables';
-import PredictiveSalesAnalyzer from './pages/PredictiveSalesAnalyzer';
-import SalesCallAnalysis from './pages/SalesCallAnalysis';
-import ClientSegmentation from './pages/ClientSegmentation';
-import SystemGuide from './pages/SystemGuide';
-import ConsumptionSettings from './pages/ConsumptionSettings';
-import WhatsAppMaster from './pages/WhatsAppMaster';
-import MobVendedorSecureImport from './pages/MobVendedorSecureImport';
-import AutoFollowUpDashboard from './pages/AutoFollowUpDashboard';
-import NRControlCenter from './pages/NRControlCenter';
-import SeamatyHunter from './pages/SeamatyHunter';
-import WhatsAppMasterAssistantLapidado from './pages/WhatsAppMasterAssistantLapidado';
-import ExecutiveSalesAnalysis from './pages/ExecutiveSalesAnalysis';
-import SalesFunnelKanban from './pages/SalesFunnelKanban';
-import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
-import PrescriptiveAnalytics from './pages/PrescriptiveAnalytics';
-import CompetitiveIntelligenceDashboard from './pages/CompetitiveIntelligenceDashboard';
-import ActiveProspecting from './pages/ActiveProspecting';
-import SmartRouteOptimizer from './pages/SmartRouteOptimizer';
+// Home carrega imediatamente (página principal)
 import Home from './pages/Home';
+
+// Todas as outras páginas carregam sob demanda (code splitting)
+const VisitRouteManager = lazy(() => import('./pages/VisitRouteManager'));
+const InstagramStudio = lazy(() => import('./pages/InstagramStudio'));
+const DeepHunter = lazy(() => import('./pages/DeepHunter'));
+const ExecutiveAudit = lazy(() => import('./pages/ExecutiveAudit'));
+const AuditDashboard = lazy(() => import('./pages/AuditDashboard'));
+const MarketingAIStudio = lazy(() => import('./pages/MarketingAIStudio'));
+const VisitBriefing = lazy(() => import('./pages/VisitBriefing'));
+const MarketingConfig = lazy(() => import('./pages/MarketingConfig'));
+const SeamtyNR22888 = lazy(() => import('./pages/SeamtyNR22888'));
+const RankingAndConsumables = lazy(() => import('./pages/RankingAndConsumables'));
+const PredictiveSalesAnalyzer = lazy(() => import('./pages/PredictiveSalesAnalyzer'));
+const SalesCallAnalysis = lazy(() => import('./pages/SalesCallAnalysis'));
+const ClientSegmentation = lazy(() => import('./pages/ClientSegmentation'));
+const SystemGuide = lazy(() => import('./pages/SystemGuide'));
+const ConsumptionSettings = lazy(() => import('./pages/ConsumptionSettings'));
+const WhatsAppMaster = lazy(() => import('./pages/WhatsAppMaster'));
+const MobVendedorSecureImport = lazy(() => import('./pages/MobVendedorSecureImport'));
+const AutoFollowUpDashboard = lazy(() => import('./pages/AutoFollowUpDashboard'));
+const NRControlCenter = lazy(() => import('./pages/NRControlCenter'));
+const SeamatyHunter = lazy(() => import('./pages/SeamatyHunter'));
+const WhatsAppMasterAssistantLapidado = lazy(() => import('./pages/WhatsAppMasterAssistantLapidado'));
+const ExecutiveSalesAnalysis = lazy(() => import('./pages/ExecutiveSalesAnalysis'));
+const SalesFunnelKanban = lazy(() => import('./pages/SalesFunnelKanban'));
+const WhatsAppAutomationTriggers = lazy(() => import('./pages/WhatsAppAutomationTriggers'));
+const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics'));
+const CompetitiveIntelligenceDashboard = lazy(() => import('./pages/CompetitiveIntelligenceDashboard'));
+const ActiveProspecting = lazy(() => import('./pages/ActiveProspecting'));
+const SmartRouteOptimizer = lazy(() => import('./pages/SmartRouteOptimizer'));
 import Layout from '@/components/AppLayout';
 
 const LayoutWrapper = ({ children, currentPageName }) => 
@@ -49,19 +52,12 @@ const LayoutWrapper = ({ children, currentPageName }) =>
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const [passwordUnlocked, setPasswordUnlocked] = useState(() => {
-    // Verificação 1: Checar localStorage
+    // Usar sessionStorage — expira quando o navegador fecha (mais seguro que localStorage)
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('seamaty_authenticated') === 'true';
+      return sessionStorage.getItem('seamaty_authenticated') === 'true';
     }
     return false;
   });
-
-  // Verificação 2: Checar se sessionStorage também confirma
-  useEffect(() => {
-    if (passwordUnlocked) {
-      sessionStorage.setItem('seamaty_session_active', 'true');
-    }
-  }, [passwordUnlocked]);
 
   // Verificação 3: Se não desbloqueado, mostrar gate
   if (!passwordUnlocked) {
@@ -69,10 +65,6 @@ const AuthenticatedApp = () => {
       <PasswordGate
         onUnlock={() => {
           setPasswordUnlocked(true);
-          // Verificação 4: Double check
-          if (localStorage.getItem('seamaty_authenticated') === 'true') {
-            console.log('✅ Sistema desbloqueado com sucesso');
-          }
         }}
       />
     );
@@ -95,7 +87,18 @@ const AuthenticatedApp = () => {
     }
   }
 
+  // Spinner leve para carregamento de páginas lazy
+  const PageLoader = () => (
+    <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-orange-800 border-t-orange-500 rounded-full animate-spin" />
+        <p className="text-xs text-orange-700 font-bold">Carregando...</p>
+      </div>
+    </div>
+  );
+
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName="Home">
@@ -132,6 +135,7 @@ const AuthenticatedApp = () => {
       <Route path="/SmartRouteOptimizer" element={<LayoutWrapper currentPageName="SmartRouteOptimizer"><SmartRouteOptimizer /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 
@@ -152,11 +156,10 @@ function App() {
   )
 }
 
-// Logout helper (para sair da sessão)
-window.logoutSeamaty = () => {
-  localStorage.removeItem('seamaty_authenticated');
-  sessionStorage.removeItem('seamaty_session_active');
+// Logout helper — mantido como função exportável (não no escopo window)
+export function logoutSeamaty() {
+  sessionStorage.removeItem('seamaty_authenticated');
   window.location.reload();
-};
+}
 
 export default App

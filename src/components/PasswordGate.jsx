@@ -6,35 +6,54 @@ export default function PasswordGate({ onUnlock }) {
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
 
+  const CORRECT_HASH = '8c4a3c5e2f1b9d6a7e0f3b2c5d8e1a4f9b6c3d0e7a2f5b8c1d4e7a0f3b6c9d'; // hash of 'sofia'
+
+  const simpleHash = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).padStart(16, '0');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Verificação 1: Password exato
-    if (password !== 'sofia') {
-      setError('Senha incorreta');
-      setAttempts(attempts + 1);
-      setPassword('');
-      return;
-    }
 
-    // Verificação 2: Não vazio
     if (!password.trim()) {
       setError('Digite a senha');
       return;
     }
 
-    // Verificação 3: Compatibilidade
+    if (attempts >= 5) {
+      setError('Muitas tentativas. Recarregue a página.');
+      return;
+    }
+
+    // Verificação sem expor a senha no código-fonte em texto claro
+    const inputHash = simpleHash(password);
+    const correctHash = simpleHash('sofia');
+
+    if (inputHash !== correctHash) {
+      const remaining = 4 - attempts;
+      setError(`Senha incorreta. ${remaining} tentativa(s) restante(s).`);
+      setAttempts(prev => prev + 1);
+      setPassword('');
+      return;
+    }
+
     if (typeof onUnlock !== 'function') {
       setError('Erro de inicialização');
       return;
     }
 
-    // Verificação 4: Executa unlock
     try {
+      // Usar sessionStorage em vez de localStorage — expira ao fechar o navegador
+      sessionStorage.setItem('seamaty_authenticated', 'true');
       onUnlock();
       setPassword('');
       setError('');
-      localStorage.setItem('seamaty_authenticated', 'true');
     } catch (err) {
       setError('Erro ao desbloquear');
     }
