@@ -107,6 +107,7 @@ const ALL_PAGES = [
   { page: 'CompetitiveIntelligenceDashboard', label: '🏥 Radar Competitivo', icon: TrendingUp, color: 'bg-emerald-700', category: 'IA' },
   { page: 'ActiveProspecting', label: '🎯 Prospecção Ativa', icon: Zap, color: 'bg-green-700', category: 'CRM' },
   { page: 'SmartRouteOptimizer', label: '🗺️ Rotas Inteligentes', icon: Route, color: 'bg-orange-700', category: 'Automação' },
+  { page: 'SalesCommandCenter', label: '⚡ Command Center', icon: Zap, color: 'bg-orange-600', category: 'Executivo' },
 ];
 
 const CATEGORIES = ['Todos', 'Executivo', 'CRM', 'WhatsApp', 'IA', 'Vendas', 'Relatórios', 'Produtos', 'Automação', 'Sistema'];
@@ -219,7 +220,7 @@ export default function Home() {
   };
 
   const quickLinks = [
-    { page: 'SystemGuide', label: '📖 Manual', icon: BookOpen, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { page: 'SalesCommandCenter', label: '⚡ Command Center', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-950' },
     { page: 'PredictiveSalesAnalyzer', label: '📈 Preditivo', icon: TrendingUp, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     { page: 'SalesCallAnalysis', label: '🎙️ Chamadas', icon: Mic, color: 'text-purple-600', bg: 'bg-purple-50' },
     { page: 'ClientSegmentation', label: '👥 Segmentos', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },

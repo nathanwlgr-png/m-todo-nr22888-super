@@ -45,6 +45,7 @@ const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics')
 const CompetitiveIntelligenceDashboard = lazy(() => import('./pages/CompetitiveIntelligenceDashboard'));
 const ActiveProspecting = lazy(() => import('./pages/ActiveProspecting'));
 const SmartRouteOptimizer = lazy(() => import('./pages/SmartRouteOptimizer'));
+const SalesCommandCenter = lazy(() => import('./pages/SalesCommandCenter'));
 
 // Spinner fora do componente — evita re-criação a cada render
 const PageLoader = () => (
@@ -133,6 +134,7 @@ const AuthenticatedApp = () => {
       <Route path="/CompetitiveIntelligenceDashboard" element={<LayoutWrapper currentPageName="CompetitiveIntelligenceDashboard"><CompetitiveIntelligenceDashboard /></LayoutWrapper>} />
       <Route path="/ActiveProspecting" element={<LayoutWrapper currentPageName="ActiveProspecting"><ActiveProspecting /></LayoutWrapper>} />
       <Route path="/SmartRouteOptimizer" element={<LayoutWrapper currentPageName="SmartRouteOptimizer"><SmartRouteOptimizer /></LayoutWrapper>} />
+      <Route path="/SalesCommandCenter" element={<LayoutWrapper currentPageName="SalesCommandCenter"><SalesCommandCenter /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     </Suspense>
