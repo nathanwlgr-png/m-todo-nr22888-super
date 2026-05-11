@@ -3,8 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { MoreVertical, Trash2, Eye, RefreshCw } from 'lucide-react';
 
 const STAGES = ['lead', 'qualificado', 'proposta', 'negociacao', 'fechado', 'perdido'];
@@ -98,7 +97,7 @@ export default function SalesFunnelKanban() {
         </div>
 
         {/* Kanban Board */}
-        <Draggable onDragEnd={handleDragEnd}>
+        <DragDropContext onDragEnd={handleDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             {STAGES.map(stage => (
               <div key={stage} className="min-h-[600px]">
@@ -181,7 +180,7 @@ export default function SalesFunnelKanban() {
               </div>
             ))}
           </div>
-        </Draggable>
+        </DragDropContext>
 
         {/* Pipeline Summary */}
         <Card className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border-slate-200">
