@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, Clock, TrendingDown, Phone, ChevronRight, RefreshCw } from 'lucide-react';
+import { Search, Clock, Phone, ChevronRight, RefreshCw } from 'lucide-react';
 
 const STATUS_COLORS = {
   quente: '#ff4444', morno: '#ff9500', frio: '#00bfff'

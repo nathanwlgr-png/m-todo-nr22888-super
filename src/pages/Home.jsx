@@ -20,10 +20,7 @@ import { useAIConsumption } from '@/hooks/useAIConsumption';
 import AIConsumptionBar from '@/components/AIConsumptionBar';
 import FloatingCreditsButton from '@/components/FloatingCreditsButton';
 import PWAStatusChecklist from '@/components/PWAStatusChecklist';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
     Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,

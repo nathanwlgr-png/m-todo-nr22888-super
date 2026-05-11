@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Phone, Star, Zap, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, Zap, ChevronRight, CheckCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const DETECTION_LABELS = {

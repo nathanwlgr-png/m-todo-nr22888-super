@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
         return daysSince >= inactive_days_threshold;
       }).slice(0, limit).map(c => ({
         id: c.id,
-        name: c.first_name + (c.full_name ? ` ${c.full_name}` : ''),
+        name: c.clinic_name || c.full_name || c.first_name || 'Cliente',
         clinic_name: c.clinic_name || '',
         phone: c.phone,
         city: c.city || '',
@@ -48,7 +48,9 @@ Deno.serve(async (req) => {
       const now = Date.now();
       const lastContact = client.last_contact_date || client.created_date;
       const inactiveDays = Math.floor((now - new Date(lastContact).getTime()) / 86400000);
-      const firstName = client.first_name || client.full_name?.split(' ')[0] || 'Doutor(a)';
+      const firstName = client.first_name && client.first_name !== client.full_name?.split(' ')[0]
+        ? client.first_name
+        : (client.full_name?.split(' ')[0] || 'Doutor(a)');
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é o assistente de vendas da Seamaty, especialista em reativar clientes veterinários inativos.
@@ -118,7 +120,7 @@ Gere as 3 mensagens e a análise estratégica.`,
       // Criar registro no banco
       const sequence = await base44.entities.RescueSequence.create({
         client_id: client.id,
-        client_name: `${firstName} ${client.full_name || ''}`.trim(),
+        client_name: client.clinic_name || client.full_name || firstName,
         client_phone: client.phone,
         inactive_days: inactiveDays,
         funnel_status: 'pendente',

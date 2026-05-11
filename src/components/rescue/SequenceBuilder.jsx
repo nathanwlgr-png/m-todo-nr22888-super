@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Zap, Send, Clock, CheckCircle, Copy, Phone, ArrowRight, RefreshCw } from 'lucide-react';
+import { Zap, Clock, CheckCircle, Copy, Phone, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 
