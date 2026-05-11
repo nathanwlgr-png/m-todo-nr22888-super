@@ -39,6 +39,7 @@ import WhatsAppAutomationTriggers from './pages/WhatsAppAutomationTriggers';
 import PrescriptiveAnalytics from './pages/PrescriptiveAnalytics';
 import CompetitiveIntelligenceDashboard from './pages/CompetitiveIntelligenceDashboard';
 import ActiveProspecting from './pages/ActiveProspecting';
+import SmartRouteOptimizer from './pages/SmartRouteOptimizer';
 import Home from './pages/Home';
 import Layout from '@/components/AppLayout';
 
@@ -128,6 +129,7 @@ const AuthenticatedApp = () => {
       <Route path="/PrescriptiveAnalytics" element={<LayoutWrapper currentPageName="PrescriptiveAnalytics"><PrescriptiveAnalytics /></LayoutWrapper>} />
       <Route path="/CompetitiveIntelligenceDashboard" element={<LayoutWrapper currentPageName="CompetitiveIntelligenceDashboard"><CompetitiveIntelligenceDashboard /></LayoutWrapper>} />
       <Route path="/ActiveProspecting" element={<LayoutWrapper currentPageName="ActiveProspecting"><ActiveProspecting /></LayoutWrapper>} />
+      <Route path="/SmartRouteOptimizer" element={<LayoutWrapper currentPageName="SmartRouteOptimizer"><SmartRouteOptimizer /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
