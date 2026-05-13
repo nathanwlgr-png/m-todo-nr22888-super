@@ -33,6 +33,42 @@
     <link rel="apple-touch-startup-image" href="/splash-1536x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
     
     <title>Seamaty NR22888 — CRM Veterinário Supremo</title>
+    <script>
+      // Gera ícone PWA em PNG via canvas e injeta no manifest
+      (function() {
+        try {
+          var canvas = document.createElement('canvas');
+          canvas.width = 512; canvas.height = 512;
+          var ctx = canvas.getContext('2d');
+          // Fundo preto
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillRect(0, 0, 512, 512);
+          // Círculo laranja de fundo
+          ctx.fillStyle = '#ff6b00';
+          ctx.beginPath(); ctx.arc(256, 256, 220, 0, Math.PI*2); ctx.fill();
+          // Círculo interno escuro
+          ctx.fillStyle = '#0a0a0a';
+          ctx.beginPath(); ctx.arc(256, 256, 180, 0, Math.PI*2); ctx.fill();
+          // Letra S laranja
+          ctx.fillStyle = '#ff6b00';
+          ctx.font = 'bold 220px Arial Black';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('S', 256, 240);
+          // Texto NR22
+          ctx.font = 'bold 72px Arial Black';
+          ctx.fillText('NR22', 256, 400);
+          var dataUrl = canvas.toDataURL('image/png');
+          // Cria link apple-touch-icon
+          var link192 = document.createElement('link');
+          link192.rel = 'apple-touch-icon';
+          link192.href = dataUrl;
+          document.head.appendChild(link192);
+          // Salva no sessionStorage para o manifest dinâmico
+          try { sessionStorage.setItem('pwa_icon', dataUrl); } catch(e) {}
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

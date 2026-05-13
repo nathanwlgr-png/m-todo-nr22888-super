@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Gerar Ícone PWA</title></head>
+<body>
+<canvas id="c" width="512" height="512"></canvas>
+<a id="dl" download="icon-pwa.png">Baixar PNG</a>
+<script>
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+ctx.fillStyle = '#0a0a0a';
+ctx.fillRect(0, 0, 512, 512);
+ctx.fillStyle = '#ff6b00';
+ctx.beginPath(); ctx.arc(256, 256, 230, 0, Math.PI*2); ctx.fill();
+ctx.fillStyle = '#0a0a0a';
+ctx.beginPath(); ctx.arc(256, 256, 185, 0, Math.PI*2); ctx.fill();
+ctx.fillStyle = '#ff6b00';
+ctx.font = 'bold 210px Arial Black';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('S', 256, 235);
+ctx.font = 'bold 68px Arial Black';
+ctx.fillText('NR22', 256, 410);
+document.getElementById('dl').href = canvas.toDataURL('image/png');
+document.getElementById('dl').click();
+</script>
+</body>
+</html>
