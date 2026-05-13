@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { ToastProvider } from '@/components/ui/use-toast';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -217,19 +218,21 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
-      <Router>
-        <AuthProvider>
-          <AIGlobalProvider>
-            <NavigationTracker />
-            <OfflineIndicator />
-            <OfflineBanner />
-            <AuthenticatedApp />
-            <PWAInstallPrompt />
-            <PWAInstallButtonFloating />
-            <ToasterComponent />
-          </AIGlobalProvider>
-        </AuthProvider>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AuthProvider>
+            <AIGlobalProvider>
+              <NavigationTracker />
+              <OfflineIndicator />
+              <OfflineBanner />
+              <AuthenticatedApp />
+              <PWAInstallPrompt />
+              <PWAInstallButtonFloating />
+              <ToasterComponent />
+            </AIGlobalProvider>
+          </AuthProvider>
+        </Router>
+      </ToastProvider>
     </QueryClientProvider>
   )
 }
