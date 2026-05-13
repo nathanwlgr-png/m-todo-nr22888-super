@@ -34,15 +34,36 @@ Deno.serve(async (req) => {
       // Marcar clínicas já no CRM sem carregar todos — filtrar só por cidade
       const cityClients = await base44.asServiceRole.entities.Client.filter({ city: cityNorm }).catch(() => []);
 
-      // Dados encapsulados no primeiro item do array
-      const cacheData = validCache.search_results?.[0] || {};
-      const cachedClinics = (cacheData.__clinicas || []).map(c => ({
-        ...c,
-        ja_no_crm: cityClients.some(existing =>
-          existing.clinic_name?.toLowerCase().includes(c.nome?.toLowerCase?.()) ||
-          existing.first_name?.toLowerCase().includes(c.responsavel?.toLowerCase?.())
-        )
-      }));
+      // Reconstruir clínicas a partir do schema do SeamHunt
+      const cachedClinics = (validCache.search_results || []).map(sr => {
+        let extra = {};
+        try { extra = JSON.parse(sr.potential_supplies?.[0] || '{}'); } catch {}
+        const nome = sr.name || '';
+        return {
+          nome,
+          responsavel: extra.responsavel || 'Não especificado',
+          telefone: sr.phone || '',
+          whatsapp: sr.phone || '',
+          endereco: extra.endereco || '',
+          site: sr.website || '',
+          instagram: sr.instagram || '',
+          especialidades: extra.especialidades || [],
+          avaliacao_google: extra.avaliacao_google || null,
+          num_avaliacoes: extra.num_avaliacoes || null,
+          porte: extra.porte || '',
+          volume_mensal_estimado: extra.volume_mensal_estimado || '',
+          tem_lab_proprio: extra.tem_lab_proprio || false,
+          equipamento_atual: extra.equipamento_atual || '',
+          score_oportunidade: sr.seamaty_score || 0,
+          equipamento_recomendado: sr.potential_product || '',
+          abordagem_sugerida: sr.next_action || '',
+          prioridade: sr.seamaty_priority || '',
+          ja_no_crm: cityClients.some(existing =>
+            existing.clinic_name?.toLowerCase().includes(nome.toLowerCase()) ||
+            existing.first_name?.toLowerCase().includes(nome.toLowerCase())
+          ),
+        };
+      });
 
       return Response.json({
         success: true,
@@ -52,9 +73,9 @@ Deno.serve(async (req) => {
         existing_in_crm: cityClients.length,
         search_results: {
           clinicas: cachedClinics,
-          city_summary: cacheData.__city_summary || null,
-          top_oportunidades: cacheData.__top_oportunidades || [],
-          estrategia_cidade: cacheData.__estrategia_cidade || '',
+          city_summary: null,
+          top_oportunidades: [],
+          estrategia_cidade: '',
         },
         auto_created_leads: 0,
         leads_created: [],
@@ -144,15 +165,39 @@ Clínicas que terceirizam hemogramas ou têm volume >40/mês são nossos cliente
       )
     }));
 
-    // ── 5. SALVAR NO CACHE (SeamHunt) — dados encapsulados em objeto único ───
+    // ── 5. SALVAR NO CACHE (SeamHunt) — dados como search_results com nome no campo name ───
     const cachedUntil = new Date(Date.now() + CACHE_DAYS * 24 * 60 * 60 * 1000).toISOString();
-    // Usar um único item no array com todos os dados encapsulados
-    const cachePayload = [{
-      __clinicas: clinicas,
-      __city_summary: searchResult?.city_summary,
-      __top_oportunidades: searchResult?.top_oportunidades,
-      __estrategia_cidade: searchResult?.estrategia_cidade,
-    }];
+    // Mapear clinicas para o schema do SeamHunt.search_results
+    // E guardar o payload completo serializado no primeiro item via seamaty_score=-1 como marcador
+    const cachePayload = clinicas.map(c => ({
+      name: c.nome || '',
+      phone: c.telefone || c.whatsapp || '',
+      website: c.site || '',
+      instagram: c.instagram || '',
+      city: cityNorm,
+      segment: 'clinica',
+      seamaty_score: c.score_oportunidade || 0,
+      seamaty_priority: c.prioridade || '',
+      potential_product: c.equipamento_recomendado || '',
+      maps_url: '',
+      data_source: ['IA'],
+      confirmed_in_crm: c.ja_no_crm || false,
+      next_action: c.abordagem_sugerida || '',
+      // campos extras serializados no potential_supplies (array de string)
+      potential_supplies: [
+        JSON.stringify({
+          responsavel: c.responsavel,
+          endereco: c.endereco,
+          especialidades: c.especialidades,
+          porte: c.porte,
+          volume_mensal_estimado: c.volume_mensal_estimado,
+          tem_lab_proprio: c.tem_lab_proprio,
+          equipamento_atual: c.equipamento_atual,
+          avaliacao_google: c.avaliacao_google,
+          num_avaliacoes: c.num_avaliacoes,
+        })
+      ],
+    }));
 
     await base44.asServiceRole.entities.SeamHunt.create({
       city: cityNorm,
