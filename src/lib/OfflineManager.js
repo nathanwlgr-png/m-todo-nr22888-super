@@ -82,6 +82,18 @@ export class OfflineManager {
   static async queueOperation(operation) {
     // operation: { entity, action, data, description }
     const db = await this.initDB();
+    
+    // Proteger contra crescimento infinito (máx 200 operações)
+    const pending = await this.getPendingOperations();
+    if (pending.length >= 200) {
+      // Se limite atingido, manter as 150 mais recentes
+      const sorted = pending.sort((a, b) => b._queued_at - a._queued_at);
+      const toDelete = sorted.slice(150);
+      const tx = db.transaction('SyncQueue', 'readwrite');
+      await Promise.all(toDelete.map(op => tx.store.delete(op.id)));
+      await tx.done;
+    }
+    
     await db.add('SyncQueue', {
       ...operation,
       _queued_at: Date.now(),

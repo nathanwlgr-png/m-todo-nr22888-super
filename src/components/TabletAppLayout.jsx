@@ -27,7 +27,6 @@ const settingsItems = [
 ];
 
 export default function TabletAppLayout({ children, currentPageName }) {
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showQuickActions, setShowQuickActions] = useState(false);
 
@@ -48,7 +47,7 @@ export default function TabletAppLayout({ children, currentPageName }) {
   };
 
   // Em landscape, sidebar sempre visível
-  const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+  const isLandscape = typeof window !== 'undefined' ? window.matchMedia('(orientation: landscape)').matches : false;
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">

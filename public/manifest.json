@@ -1,99 +1,95 @@
 {
-  "name": "SEAMATY NR22888 - CRM Veterinário",
-  "short_name": "SEAMATY",
-  "description": "Sistema de CRM inteligente para consultores de equipamentos veterinários",
+  "name": "SEAMATY NR22888",
+  "short_name": "SEAMATY NR22",
+  "description": "CRM Veterinário Premium com IA, Dashboard Executivo, Rotas Otimizadas, WhatsApp Master",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
-  "categories": ["productivity", "business"],
+  "background_color": "#0f172a",
+  "theme_color": "#ff8c00",
+  "categories": ["business", "productivity"],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'><rect fill='%23f8fafc' width='1200' height='800'/><text x='600' y='400' font-size='48' text-anchor='middle' fill='%234f46e5' dominant-baseline='middle'>SEAMATY</text></svg>",
-      "sizes": "1200x800",
-      "type": "image/svg+xml",
-      "form_factor": "wide"
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f8fafc' width='540' height='720'/><text x='270' y='360' font-size='48' text-anchor='middle' fill='%234f46e5' dominant-baseline='middle'>SEAMATY</text></svg>",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>S</text></svg>",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><circle cx='96' cy='96' r='88' fill='none' stroke='white' stroke-width='8'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>S</text></svg>",
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192-maskable.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234f46e5' width='512' height='512' rx='128'/><text x='256' y='290' font-size='360' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>S</text></svg>",
+      "src": "/icon-512x512-maskable.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Abrir Cliente",
-      "short_name": "Cliente",
-      "description": "Acesso rápido para gerenciar clientes",
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Abrir lista de clientes",
       "url": "/Clients",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>👤</text></svg>",
-          "sizes": "192x192"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
     {
-      "name": "Registrar Visita",
-      "short_name": "Visita",
-      "description": "Agendar e registrar visitas",
-      "url": "/VisitManager",
+      "name": "Tarefas",
+      "short_name": "Tarefas",
+      "description": "Abrir tarefas unificadas",
+      "url": "/TasksUnified",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>✓</text></svg>",
-          "sizes": "192x192"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
     {
-      "name": "WhatsApp",
-      "short_name": "Chat",
-      "description": "Enviar mensagens via WhatsApp",
-      "url": "/WhatsAppHub",
+      "name": "Busca Global",
+      "short_name": "Busca",
+      "description": "Busca rápida em todo o sistema",
+      "url": "/GlobalSearch",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>💬</text></svg>",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Otimizar Rota",
-      "short_name": "Rota",
-      "description": "Planejar rota do dia",
-      "url": "/RouteOptimization",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234f46e5' width='192' height='192' rx='48'/><text x='96' y='110' font-size='120' font-weight='bold' text-anchor='middle' fill='white' dominant-baseline='middle'>🗺️</text></svg>",
-          "sizes": "192x192"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }
   ],
-  "prefer_related_applications": false,
   "share_target": {
     "action": "/share",
     "method": "POST",
@@ -104,13 +100,10 @@
       "url": "url",
       "files": [
         {
-          "name": "file",
-          "accept": ["image/*", "application/pdf"]
+          "name": "media",
+          "accept": ["image/*", "video/*"]
         }
       ]
     }
-  },
-  "note_taking": {
-    "new_note_url": "/TasksUnified?new=true"
   }
 }

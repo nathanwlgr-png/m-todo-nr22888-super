@@ -22,22 +22,51 @@ export const AICache = {
   },
 
   /**
-   * Salva resultado de IA no localStorage
-   */
+    * Salva resultado de IA no localStorage
+    */
   set(type, params, result) {
+    const k = this.key(type, params);
+    const entry = {
+      result,
+      cached_at: Date.now(),
+      expires_at: Date.now() + CACHE_TTL_MS,
+      type,
+      params_preview: JSON.stringify(params).slice(0, 100),
+    };
+    
     try {
-      const k = this.key(type, params);
-      const entry = {
-        result,
-        cached_at: Date.now(),
-        expires_at: Date.now() + CACHE_TTL_MS,
-        type,
-        params_preview: JSON.stringify(params).slice(0, 100),
-      };
       localStorage.setItem(k, JSON.stringify(entry));
       return true;
     } catch (e) {
-      console.warn('[AICache] Falha ao salvar cache:', e);
+      // Se localStorage cheio, limpar expirados e tentar novamente
+      if (e.name === 'QuotaExceededError') {
+        const removed = this.purgeExpired();
+        if (removed > 0) {
+          try {
+            localStorage.setItem(k, JSON.stringify(entry));
+            return true;
+          } catch (e2) {
+            console.warn('[AICache] Storage cheio mesmo após cleanup:', e2);
+          }
+        } else {
+          // Se não há expirados, remover os 10 mais antigos
+          const all = this.listAll();
+          if (all.length > 0) {
+            const sorted = all.sort((a, b) => new Date(a.cached_at) - new Date(b.cached_at));
+            for (let i = 0; i < Math.min(10, sorted.length); i++) {
+              localStorage.removeItem(sorted[i].key);
+            }
+            try {
+              localStorage.setItem(k, JSON.stringify(entry));
+              return true;
+            } catch (e3) {
+              console.warn('[AICache] Falha mesmo após remoção manual:', e3);
+            }
+          }
+        }
+      } else {
+        console.warn('[AICache] Falha ao salvar cache:', e);
+      }
       return false;
     }
   },
