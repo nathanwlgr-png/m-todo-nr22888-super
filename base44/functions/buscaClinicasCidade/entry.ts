@@ -13,9 +13,10 @@ Deno.serve(async (req) => {
     const { city, state = 'SP', auto_create_leads = false, limit = 20 } = await req.json();
     if (!city) return Response.json({ error: 'city obrigatório' }, { status: 400 });
 
-    const cityNorm = city.trim().toLowerCase();
+    const normalizeCity = (s) => s.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cityNorm = normalizeCity(city);
     const stateNorm = state.trim().toUpperCase();
-    const cacheKey = `${cityNorm}-${stateNorm}-clinica`;
 
     // ── 1. VERIFICAR CACHE no SeamHunt ──────────────────────────────────────
     const cached = await base44.asServiceRole.entities.SeamHunt.filter({
