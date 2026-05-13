@@ -221,10 +221,10 @@ export default function Home() {
 
   const quickLinks = [
     { page: 'SalesCommandCenter', label: '⚡ Command Center', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-950' },
+    { page: 'RankingDoDia', label: '🏆 Ranking do Dia', icon: Target, color: 'text-orange-400', bg: 'bg-orange-950' },
     { page: 'PredictiveSalesAnalyzer', label: '📈 Preditivo', icon: TrendingUp, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     { page: 'SalesCallAnalysis', label: '🎙️ Chamadas', icon: Mic, color: 'text-purple-600', bg: 'bg-purple-50' },
     { page: 'ClientSegmentation', label: '👥 Segmentos', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { page: 'RankingAndConsumables', label: '🏆 Ranking', icon: Target, color: 'text-red-600', bg: 'bg-red-50' },
     { page: 'WhatsAppHub', label: '💬 WhatsApp', icon: MessageSquare, color: 'text-green-600', bg: 'bg-green-50' },
   ];
 
