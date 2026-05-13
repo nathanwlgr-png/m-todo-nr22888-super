@@ -13,10 +13,14 @@ import OfflineBanner from '@/components/OfflineBanner';
 import PasswordGate from '@/components/PasswordGate';
 import { useState, lazy, Suspense } from 'react';
 import Layout from '@/components/AppLayout';
+import TabletAppLayout from '@/components/TabletAppLayout';
 import ComingSoonPage from '@/components/ComingSoonPage';
+import HomePageWithLayout from '@/components/HomePageWithLayout';
+import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
+import HomeTablet from './pages/HomeTablet';
 
 // Páginas com lazy loading
 const VisitRouteManager = lazy(() => import('./pages/VisitRouteManager'));
@@ -81,8 +85,11 @@ const PageLoader = () => (
   </div>
 );
 
-const LayoutWrapper = ({ children, currentPageName }) => 
-  <Layout currentPageName={currentPageName}>{children}</Layout>;
+const LayoutWrapper = ({ children, currentPageName }) => {
+  const { isTablet } = useTabletOptimizations();
+  const LayoutComponent = isTablet ? TabletAppLayout : Layout;
+  return <LayoutComponent currentPageName={currentPageName}>{children}</LayoutComponent>;
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -122,7 +129,7 @@ const AuthenticatedApp = () => {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* ── HOME ── */}
-        <Route path="/" element={<LayoutWrapper currentPageName="Home"><Home /></LayoutWrapper>} />
+        <Route path="/" element={<HomePageWithLayout />} />
 
         {/* ── MÓDULOS EXISTENTES (originais) ── */}
         <Route path="/VisitRouteManager" element={<LayoutWrapper currentPageName="VisitRouteManager"><VisitRouteManager /></LayoutWrapper>} />

@@ -2,14 +2,16 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no, minimal-ui" />
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#ff6b00" />
+    <meta name="theme-color" content="#4f46e5" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Seamaty NR22" />
+    <meta name="apple-mobile-web-app-title" content="SEAMATY" />
+    <meta name="display-mode" content="standalone" />
+    <meta name="screen-orientation" content="landscape" />
     <meta name="application-name" content="Seamaty NR22888" />
     <meta name="msapplication-TileColor" content="#ff6b00" />
     <meta name="msapplication-TileImage" content="/icon-192x192.png" />
@@ -72,6 +74,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <script src="/tablet-config.js"></script>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
