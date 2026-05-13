@@ -3,14 +3,13 @@ import {
   Toast,
   ToastClose,
   ToastDescription,
-  ToastProvider,
-  ToastTitle,
   ToastViewport,
+  ToastTitle,
 } from "@/components/ui/toast";
 
-function ToastContent() {
+export function Toaster() {
   const { toasts } = useToast();
-  
+
   return (
     <>
       {toasts.map(function ({ id, title, description, action, ...props }) {
@@ -29,13 +28,5 @@ function ToastContent() {
       })}
       <ToastViewport />
     </>
-  );
-}
-
-export function Toaster() {
-  return (
-    <ToastProvider>
-      <ToastContent />
-    </ToastProvider>
   );
 }

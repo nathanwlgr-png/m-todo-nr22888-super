@@ -232,8 +232,8 @@ function App() {
           <AuthenticatedApp />
           <PWAInstallPrompt />
           <PWAInstallButtonFloating />
+          <Toaster />
         </Router>
-        <Toaster />
       </QueryClientProvider>
     </AuthProvider>
   )
