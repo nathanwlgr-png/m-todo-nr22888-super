@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Zap, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -56,14 +56,11 @@ const PAGE_LABELS = {
 };
 
 export default function ComingSoonPage({ moduleName }) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [dots, setDots] = useState('');
   const [pulse, setPulse] = useState(false);
 
-  // Deriva o nome do módulo a partir da URL se não passado como prop
-  const rawPage = moduleName || location.pathname.replace('/', '');
-  const label = PAGE_LABELS[rawPage] || rawPage || 'Módulo';
+  // Usa moduleName se passado como prop, senão padrão
+  const label = PAGE_LABELS[moduleName] || moduleName || 'Módulo';
 
   useEffect(() => {
     const t = setInterval(() => setDots(d => d.length >= 3 ? '' : d + '.'), 500);
@@ -176,27 +173,28 @@ export default function ComingSoonPage({ moduleName }) {
         </div>
 
         {/* Botão voltar */}
-        <button
-          onClick={() => navigate('/')}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-95"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.1))',
-            border: '1px solid rgba(255,107,0,0.35)',
-            color: '#ff9500',
-            boxShadow: '0 4px 20px rgba(255,107,0,0.1)',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,0,0.3), rgba(255,107,0,0.15))';
-            e.currentTarget.style.boxShadow = '0 4px 24px rgba(255,107,0,0.25)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.1))';
-            e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,0,0.1)';
-          }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar ao Dashboard
-        </button>
+        <Link to="/" className="w-full">
+          <button
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-95"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.1))',
+              border: '1px solid rgba(255,107,0,0.35)',
+              color: '#ff9500',
+              boxShadow: '0 4px 20px rgba(255,107,0,0.1)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,0,0.3), rgba(255,107,0,0.15))';
+              e.currentTarget.style.boxShadow = '0 4px 24px rgba(255,107,0,0.25)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,0,0.2), rgba(255,107,0,0.1))';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,0,0.1)';
+            }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar ao Dashboard
+          </button>
+        </Link>
       </div>
 
       <style>{`
