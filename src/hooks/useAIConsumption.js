@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import React from 'react';
+const { useState, useEffect, useCallback } = React;
 
 const MONTHLY_LIMIT = 1000; // R$1.000,00
 
