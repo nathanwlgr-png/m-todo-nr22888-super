@@ -19,10 +19,14 @@ if (navigator.onLine) {
   });
 }
 
+const AppWrapper = () => (
+  <AIGlobalProvider>
+    <App />
+  </AIGlobalProvider>
+);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AIGlobalProvider>
-      <App />
-    </AIGlobalProvider>
+    <AppWrapper />
   </StrictMode>,
 )
