@@ -1,0 +1,49 @@
+{
+  "name": "Consumable",
+  "type": "object",
+  "description": "Insumos, produtos e equipamentos do CRM",
+  "properties": {
+    "sku": {
+      "type": "string",
+      "description": "Código SKU do produto"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome do produto/insumo"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria do insumo"
+    },
+    "type": {
+      "type": "string",
+      "description": "Tipo de insumo"
+    },
+    "unit_type": {
+      "type": "string",
+      "description": "Tipo de unidade (cx, unidade, rotor)"
+    },
+    "price_1_unit": {
+      "type": "number",
+      "description": "Preço para 1 unidade (R$)"
+    },
+    "price_2_units": {
+      "type": "number",
+      "description": "Preço para 2 unidades (R$)"
+    },
+    "price_3_units": {
+      "type": "number",
+      "description": "Preço para 3 unidades (R$)"
+    },
+    "price_above_4": {
+      "type": "number",
+      "description": "Preço para acima de 4 unidades (R$)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o produto está ativo"
+    }
+  },
+  "required": ["sku", "name", "category"]
+}

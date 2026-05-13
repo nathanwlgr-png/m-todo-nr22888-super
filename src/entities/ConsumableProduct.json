@@ -1,0 +1,90 @@
+{
+  "name": "ConsumableProduct",
+  "type": "object",
+  "description": "Insumos e produtos para equipamentos veterinários",
+  "properties": {
+    "sku": {
+      "type": "string",
+      "description": "Código SKU do produto"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome do produto/insumo"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "hemogasio",
+        "imunologia",
+        "pcr",
+        "bioquimica",
+        "outros"
+      ],
+      "description": "Categoria do insumo"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "cartuchos",
+        "cassetes",
+        "rotores",
+        "rotor",
+        "painel",
+        "kit",
+        "parametro"
+      ],
+      "description": "Tipo de insumo"
+    },
+    "unit_type": {
+      "type": "string",
+      "enum": [
+        "cx",
+        "unidade",
+        "rotor"
+      ],
+      "description": "Tipo de unidade"
+    },
+    "prices": {
+      "type": "object",
+      "properties": {
+        "price_1_unit": {
+          "type": "number",
+          "description": "Preço para 1 unidade"
+        },
+        "price_2_units": {
+          "type": "number",
+          "description": "Preço para 2 unidades"
+        },
+        "price_3_units": {
+          "type": "number",
+          "description": "Preço para 3 unidades"
+        },
+        "price_above_4": {
+          "type": "number",
+          "description": "Preço para acima de 4 unidades"
+        }
+      },
+      "description": "Tabela de preços escalonados (em R$)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o produto está ativo para venda"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descrição técnica do produto"
+    }
+  },
+  "required": [
+    "sku",
+    "name",
+    "category",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
