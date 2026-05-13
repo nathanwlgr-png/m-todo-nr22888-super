@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import InactiveClientSelector from '@/components/rescue/InactiveClientSelector';
 import SequenceBuilder from '@/components/rescue/SequenceBuilder';
 import RescueFunnelBoard from '@/components/rescue/RescueFunnelBoard';
-import { Zap, Users, TrendingUp, RefreshCw, ChevronLeft, Calendar, CheckCircle, MessageSquare, AlertCircle } from 'lucide-react';
+import CityProspectingSearch from '@/components/prospecting/CityProspectingSearch';
+import { Zap, Users, TrendingUp, RefreshCw, ChevronLeft, Calendar, CheckCircle, MessageSquare, AlertCircle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const TABS = ['funil', 'inativos', 'sequencia'];
+const TABS = ['prospectar', 'funil', 'inativos', 'sequencia'];
 
 export default function ActiveProspecting() {
-  const [tab, setTab] = useState('funil');
+  const [tab, setTab] = useState('prospectar');
   const [threshold, setThreshold] = useState(30);
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedSequence, setSelectedSequence] = useState(null);
@@ -109,7 +110,7 @@ export default function ActiveProspecting() {
           </div>
           <div>
             <h1 className="text-xl font-black text-white">Prospecção Ativa</h1>
-            <p className="text-xs text-green-700">Resgatar inativos • Sequências IA • Funil WhatsApp</p>
+            <p className="text-xs text-green-700">Buscar por cidade • Resgatar inativos • Funil WhatsApp</p>
           </div>
         </div>
 
@@ -131,8 +132,9 @@ export default function ActiveProspecting() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 px-4 mb-4">
+      <div className="flex gap-1 px-4 mb-4 overflow-x-auto">
         {[
+          { key: 'prospectar', label: '🔍 Prospectar' },
           { key: 'funil', label: '🎯 Funil' },
           { key: 'inativos', label: '💤 Inativos' },
           { key: 'sequencia', label: '✉️ Sequência' },
@@ -148,6 +150,11 @@ export default function ActiveProspecting() {
       </div>
 
       <div className="px-4">
+
+        {/* ── TAB: PROSPECTAR ─────────────────────────────────────────────────── */}
+        {tab === 'prospectar' && (
+          <CityProspectingSearch />
+        )}
 
         {/* ── TAB: FUNIL ─────────────────────────────────────────────────────── */}
         {tab === 'funil' && (
