@@ -1,4 +1,4 @@
-import React from 'react'
+import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
@@ -20,9 +20,9 @@ if (navigator.onLine) {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  <StrictMode>
     <AIGlobalProvider>
       <App />
     </AIGlobalProvider>
-  </React.StrictMode>,
+  </StrictMode>,
 )
