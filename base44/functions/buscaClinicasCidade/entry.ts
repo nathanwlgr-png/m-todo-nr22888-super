@@ -34,8 +34,9 @@ Deno.serve(async (req) => {
       // Marcar clínicas já no CRM sem carregar todos — filtrar só por cidade
       const cityClients = await base44.asServiceRole.entities.Client.filter({ city: cityNorm }).catch(() => []);
 
-      const searchResults = validCache.search_results || [];
-      const clinicsWithCRM = searchResults.map(c => ({
+      // Dados encapsulados no primeiro item do array
+      const cacheData = validCache.search_results?.[0] || {};
+      const cachedClinics = (cacheData.__clinicas || []).map(c => ({
         ...c,
         ja_no_crm: cityClients.some(existing =>
           existing.clinic_name?.toLowerCase().includes(c.nome?.toLowerCase?.()) ||
@@ -50,10 +51,10 @@ Deno.serve(async (req) => {
         cache_expires: validCache.cached_until,
         existing_in_crm: cityClients.length,
         search_results: {
-          clinicas: clinicsWithCRM,
-          city_summary: validCache.search_results?.[0]?.__city_summary || null,
-          top_oportunidades: validCache.search_results?.[0]?.__top_oportunidades || [],
-          estrategia_cidade: validCache.search_results?.[0]?.__estrategia_cidade || '',
+          clinicas: cachedClinics,
+          city_summary: cacheData.__city_summary || null,
+          top_oportunidades: cacheData.__top_oportunidades || [],
+          estrategia_cidade: cacheData.__estrategia_cidade || '',
         },
         auto_created_leads: 0,
         leads_created: [],
@@ -143,17 +144,15 @@ Clínicas que terceirizam hemogramas ou têm volume >40/mês são nossos cliente
       )
     }));
 
-    // ── 5. SALVAR NO CACHE (SeamHunt) ───────────────────────────────────────
+    // ── 5. SALVAR NO CACHE (SeamHunt) — dados encapsulados em objeto único ───
     const cachedUntil = new Date(Date.now() + CACHE_DAYS * 24 * 60 * 60 * 1000).toISOString();
-    const cachePayload = clinicas.map((c, idx) => ({
-      ...c,
-      // Guardar metadados de cidade no primeiro item para recuperação posterior
-      ...(idx === 0 ? {
-        __city_summary: searchResult?.city_summary,
-        __top_oportunidades: searchResult?.top_oportunidades,
-        __estrategia_cidade: searchResult?.estrategia_cidade,
-      } : {})
-    }));
+    // Usar um único item no array com todos os dados encapsulados
+    const cachePayload = [{
+      __clinicas: clinicas,
+      __city_summary: searchResult?.city_summary,
+      __top_oportunidades: searchResult?.top_oportunidades,
+      __estrategia_cidade: searchResult?.estrategia_cidade,
+    }];
 
     await base44.asServiceRole.entities.SeamHunt.create({
       city: cityNorm,

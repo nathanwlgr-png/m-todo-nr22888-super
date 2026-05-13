@@ -45,16 +45,16 @@ export default function RescueFunnelBoard({ sequences, onSelect, selectedId }) {
                       background: selectedId === seq.id ? `${stage.color}22` : '#1a1a1a',
                       border: `1px solid ${selectedId === seq.id ? stage.color : 'rgba(255,255,255,0.06)'}`,
                     }}>
-                    <p className="text-[11px] font-black text-white truncate">{seq.client_name}</p>
+                    <p className="text-xs font-black text-white truncate">{seq.client_name}</p>
                     {seq.inactive_days > 0 && (
-                      <p className="text-[9px] text-slate-600 mt-0.5">{seq.inactive_days}d inativo</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{seq.inactive_days}d inativo</p>
                     )}
                     {seq.ai_score > 0 && (
                       <div className="mt-1 flex items-center gap-1">
                         <div className="flex-1 h-1 rounded-full bg-slate-800">
                           <div className="h-1 rounded-full" style={{ width: `${seq.ai_score}%`, background: stage.color }} />
                         </div>
-                        <span className="text-[9px]" style={{ color: stage.color }}>{seq.ai_score}</span>
+                        <span className="text-[11px] font-bold" style={{ color: stage.color }}>{seq.ai_score}</span>
                       </div>
                     )}
                   </button>

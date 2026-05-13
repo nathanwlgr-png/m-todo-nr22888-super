@@ -150,7 +150,7 @@ export default function SalesCommandCenter() {
             <div key={label} className="rounded-2xl p-3" style={{ background: bg, border: `1px solid ${color}33` }}>
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-[10px] font-bold" style={{ color: color + 'cc' }}>{label}</span>
+                <span className="text-xs font-bold" style={{ color: color + 'cc' }}>{label}</span>
               </div>
               <p className="text-lg font-black text-white">{val}</p>
             </div>
@@ -300,12 +300,12 @@ export default function SalesCommandCenter() {
                     <p className="text-xs font-black text-white">{c.first_name} {c.full_name?.split(' ').slice(1).join(' ')}</p>
                     {c.clinic_name && <p className="text-[10px] text-slate-500">{c.clinic_name}</p>}
                     <div className="flex gap-2 mt-1">
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-full font-bold"
                         style={{ background: 'rgba(255,68,68,0.15)', color: '#ff4444' }}>
                         Score {c.purchase_score || 0}
                       </span>
                       {c.pipeline_stage && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full"
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-full"
                           style={{ background: 'rgba(255,107,0,0.1)', color: '#ff9500' }}>
                           {c.pipeline_stage}
                         </span>
@@ -349,7 +349,7 @@ export default function SalesCommandCenter() {
                       {c.projected_revenue && (
                         <p className="text-xs font-black text-purple-400">{formatCurrency(c.projected_revenue)}</p>
                       )}
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full"
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-full"
                         style={{ background: 'rgba(124,58,237,0.15)', color: '#a855f7' }}>
                         {c.pipeline_stage}
                       </span>
@@ -400,11 +400,11 @@ export default function SalesCommandCenter() {
                 <div key={t.id} className="flex items-center gap-2 py-1.5 border-b border-slate-900 last:border-0">
                   <Clock className={`w-3 h-3 shrink-0 ${t.due_date && new Date(t.due_date) < new Date() ? 'text-red-500' : 'text-orange-600'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-white truncate">{t.title}</p>
-                    {t.client_name && <p className="text-[9px] text-slate-600">{t.client_name}</p>}
+                    <p className="text-xs font-bold text-white truncate">{t.title}</p>
+                    {t.client_name && <p className="text-[11px] text-slate-500">{t.client_name}</p>}
                   </div>
                   {t.due_date && (
-                    <span className="text-[9px] text-slate-500 shrink-0">
+                    <span className="text-[11px] text-slate-500 shrink-0">
                       {new Date(t.due_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                     </span>
                   )}

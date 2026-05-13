@@ -52,17 +52,17 @@ export default function InactiveClientSelector({ clients, loading, onSelect, onR
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="text-xs font-black text-white truncate">{c.name}</p>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold shrink-0"
+                  <span className="text-[11px] px-1.5 py-0.5 rounded-full font-bold shrink-0"
                     style={{ color: STATUS_COLORS[c.status] || '#888', background: `${STATUS_COLORS[c.status] || '#888'}22` }}>
                     {c.status}
                   </span>
                 </div>
                 {c.clinic_name && <p className="text-[10px] text-slate-500 truncate">{c.clinic_name}</p>}
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[10px] text-orange-500 flex items-center gap-1">
+                  <span className="text-[11px] text-orange-500 flex items-center gap-1">
                     <Clock className="w-2.5 h-2.5" /> {c.inactive_days}d sem contato
                   </span>
-                  {c.city && <span className="text-[10px] text-slate-600">{c.city}</span>}
+                  {c.city && <span className="text-[11px] text-slate-500">{c.city}</span>}
                   {c.phone && <Phone className="w-2.5 h-2.5 text-green-500" />}
                 </div>
               </div>

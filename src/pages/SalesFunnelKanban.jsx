@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { RefreshCw, Eye, DollarSign, TrendingUp, Users, Zap } from 'lucide-react';
+import { RefreshCw, TrendingUp, Users, Zap } from 'lucide-react';
 
 const STAGES = ['lead', 'qualificado', 'proposta', 'negociacao', 'fechado', 'perdido'];
 
@@ -113,17 +113,14 @@ export default function SalesFunnelKanban() {
         {/* KPI row */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           {[
-            { label: 'Total', val: allLeads.length, icon: Users, color: '#ff9500' },
-            { label: 'Em Proposta', val: (leads.proposta?.length || 0) + (leads.negociacao?.length || 0), icon: TrendingUp, color: '#00bfff' },
-            { label: 'Fechados', val: leads.fechado?.length || 0, icon: Zap, color: '#00ff88' },
-          ].map(({ label, val, icon: Icon, color }) => (
-            <div key={label} className="rounded-xl p-2.5 flex items-center gap-2"
+            { label: 'Total', val: allLeads.length, color: '#ff9500' },
+            { label: 'Em Proposta', val: (leads.proposta?.length || 0) + (leads.negociacao?.length || 0), color: '#00bfff' },
+            { label: 'Fechados', val: leads.fechado?.length || 0, color: '#00ff88' },
+          ].map(({ label, val, color }) => (
+            <div key={label} className="rounded-xl p-2.5 text-center"
               style={{ background: '#141414', border: `1px solid ${color}33` }}>
-              <Icon className="w-4 h-4 shrink-0" style={{ color }} />
-              <div>
-                <p className="text-sm font-black text-white">{val}</p>
-                <p className="text-[10px]" style={{ color: color + 'aa' }}>{label}</p>
-              </div>
+              <p className="text-sm font-black text-white">{val}</p>
+              <p className="text-[10px]" style={{ color: color + 'aa' }}>{label}</p>
             </div>
           ))}
         </div>
