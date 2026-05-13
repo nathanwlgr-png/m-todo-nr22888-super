@@ -11,7 +11,7 @@ import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineBanner from '@/components/OfflineBanner';
 import AppLoadingScreen from '@/components/AppLoadingScreen';
-import { ToastProvider } from '@/components/ui/use-toast';
+import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 
 import { lazy, Suspense } from 'react';
 import Layout from '@/components/AppLayout';
@@ -219,17 +219,15 @@ function App() {
     <QueryClientProvider client={queryClientInstance}>
       <AIGlobalProvider>
         <AuthProvider>
-          <ToastProvider>
-            <Router>
-              <NavigationTracker />
-              <OfflineIndicator />
-              <OfflineBanner />
-              <AuthenticatedApp />
-              <PWAInstallPrompt />
-              <PWAInstallButtonFloating />
-              <Toaster />
-            </Router>
-          </ToastProvider>
+          <Router>
+            <NavigationTracker />
+            <OfflineIndicator />
+            <OfflineBanner />
+            <AuthenticatedApp />
+            <PWAInstallPrompt />
+            <PWAInstallButtonFloating />
+            <ToasterComponent />
+          </Router>
         </AuthProvider>
       </AIGlobalProvider>
     </QueryClientProvider>
