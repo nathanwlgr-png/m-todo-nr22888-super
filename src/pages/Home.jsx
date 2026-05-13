@@ -21,6 +21,7 @@ import AIConsumptionBar from '@/components/AIConsumptionBar';
 import FloatingCreditsButton from '@/components/FloatingCreditsButton';
 import PWAStatusChecklist from '@/components/PWAStatusChecklist';
 import PWAForceUpdate from '@/components/PWAForceUpdate';
+import OfflineSyncButton from '@/components/OfflineSyncButton';
 import { Button } from '@/components/ui/button';
 import {
     Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
@@ -29,7 +30,7 @@ import {
     Activity, DollarSign, Map, Bot, Workflow,
     BookOpen, Shield, LayoutDashboard, Hash,
     Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
-    Trash2, RefreshCw, Mic
+    Trash2, RefreshCw, Mic, WifiOff, Download
   } from 'lucide-react';
 
 
@@ -314,11 +315,21 @@ export default function Home() {
           </div>
         </a>
 
-        {/* PWA Status Checklist + Forçar Atualização */}
-        <div className="mb-4">
+        {/* PWA Status + Offline Sync */}
+        <div className="mb-4 space-y-2">
           <PWAStatusChecklist />
-          <div className="mt-2 flex justify-end">
+          <div className="flex items-center gap-2 flex-wrap">
             <PWAForceUpdate />
+            <OfflineSyncButton compact />
+            <Link to="/OfflineMode">
+              <button
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+                style={{ background: 'rgba(80,80,80,0.15)', border: '1px solid rgba(150,150,150,0.25)', color: '#aaa' }}
+              >
+                <WifiOff className="w-3 h-3" />
+                Modo offline
+              </button>
+            </Link>
           </div>
         </div>
 

@@ -1,93 +1,109 @@
-// ── Seamaty NR22888 Service Worker ──────────────────────────────────────────
-// CACHE VERSION — bumpe este valor a cada deploy para forçar atualização
-const CACHE_VERSION = 'seamaty-v7-' + new Date().toISOString().slice(0, 10);
-const STATIC_CACHE  = CACHE_VERSION + '-static';
-const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
+/**
+ * Seamaty NR22888 — Service Worker v3
+ * - Cache-first para assets estáticos
+ * - Network-first para API calls
+ * - Offline fallback para navegação
+ * - Sem IA automática
+ */
 
-// Assets estáticos para pré-cache
-const PRECACHE_URLS = [
+const CACHE_NAME = 'seamaty-nr22-v3';
+const OFFLINE_URL = '/';
+
+const STATIC_ASSETS = [
   '/',
-  '/index.html',
+  '/manifest.json',
 ];
 
-// ── Install: pré-cache assets críticos ──────────────────────────────────────
-self.addEventListener('install', event => {
-  // Ativa imediatamente sem esperar abas antigas fecharem
-  self.skipWaiting();
+// ── Install ──────────────────────────────────────────────────────
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(cache => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Cache básico — apenas shell do app
+      for (const url of STATIC_ASSETS) {
+        try {
+          await cache.add(url);
+        } catch {}
+      }
+      return self.skipWaiting();
+    })
   );
 });
 
-// ── Activate: apaga todos os caches antigos ──────────────────────────────────
-self.addEventListener('activate', event => {
+// ── Activate ─────────────────────────────────────────────────────
+self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== STATIC_CACHE && key !== RUNTIME_CACHE)
-          .map(key => {
-            console.log('[SW] Deletando cache antigo:', key);
-            return caches.delete(key);
-          })
+          .filter(k => k !== CACHE_NAME)
+          .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ── Fetch: Network-first para navegação, Cache-first para assets ─────────────
-self.addEventListener('fetch', event => {
+// ── Fetch ─────────────────────────────────────────────────────────
+self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignora requests não-GET e cross-origin fora do escopo
+  // Ignora não-GET e extensões de browser
   if (request.method !== 'GET') return;
-  if (!url.origin.includes(self.location.origin) && !url.hostname.includes('base44')) return;
+  if (url.protocol === 'chrome-extension:') return;
 
-  // Navegação (HTML) → Network-first com fallback para /index.html (SPA)
+  // API calls → Network first, sem cache
+  if (url.pathname.startsWith('/api/') || url.hostname !== self.location.hostname) {
+    event.respondWith(
+      fetch(request).catch(() =>
+        new Response(JSON.stringify({ error: 'offline', message: 'Sem conexão' }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 503,
+        })
+      )
+    );
+    return;
+  }
+
+  // Navegação (HTML) → Network first, fallback para /
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then(response => {
-          // Armazena cópia fresca no runtime cache
-          const clone = response.clone();
-          caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          }
           return response;
         })
-        .catch(() =>
-          caches.match('/index.html').then(cached => cached || caches.match('/'))
-        )
+        .catch(async () => {
+          const cached = await caches.match(request) || await caches.match(OFFLINE_URL);
+          return cached || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
+        })
     );
     return;
   }
 
-  // Assets estáticos (JS, CSS, imagens) → Cache-first
-  if (
-    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico)(\?.*)?$/)
-  ) {
-    event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
+  // Assets estáticos (JS, CSS, imagens) → Cache first
+  event.respondWith(
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+      return fetch(request).then(response => {
+        if (response.ok && response.type === 'basic') {
           const clone = response.clone();
-          caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // API / demais requests → Network-only (sem cache)
-  // (deixa passar sem interceptar)
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+        }
+        return response;
+      }).catch(() => cached || new Response('', { status: 404 }));
+    })
+  );
 });
 
-// ── Mensagem: forçar atualização a partir da UI ──────────────────────────────
-self.addEventListener('message', event => {
+// ── Message Handler ───────────────────────────────────────────────
+self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  if (event.data === 'CLEAR_CACHE') {
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+  if (event.data === 'GET_VERSION') {
+    event.ports[0]?.postMessage({ version: CACHE_NAME });
   }
 });

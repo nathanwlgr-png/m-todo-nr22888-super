@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
+import OfflineBanner from '@/components/OfflineBanner';
 import PasswordGate from '@/components/PasswordGate';
 import { useState, lazy, Suspense } from 'react';
 import Layout from '@/components/AppLayout';
@@ -46,6 +47,7 @@ const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics')
 const CompetitiveIntelligenceDashboard = lazy(() => import('./pages/CompetitiveIntelligenceDashboard'));
 const ActiveProspecting = lazy(() => import('./pages/ActiveProspecting'));
 const SmartRouteOptimizer = lazy(() => import('./pages/SmartRouteOptimizer'));
+const OfflineModePage = lazy(() => import('./pages/OfflineMode'));
 const SalesCommandCenter = lazy(() => import('./pages/SalesCommandCenter'));
 const RouteAuditReport = lazy(() => import('./pages/RouteAuditReport'));
 
@@ -152,6 +154,8 @@ const AuthenticatedApp = () => {
         <Route path="/SmartRouteOptimizer" element={<LayoutWrapper currentPageName="SmartRouteOptimizer"><SmartRouteOptimizer /></LayoutWrapper>} />
         <Route path="/SalesCommandCenter" element={<LayoutWrapper currentPageName="SalesCommandCenter"><SalesCommandCenter /></LayoutWrapper>} />
         <Route path="/RouteAuditReport" element={<LayoutWrapper currentPageName="RouteAuditReport"><RouteAuditReport /></LayoutWrapper>} />
+        <Route path="/OfflineMode" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
+        <Route path="/offline" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
 
         {/* ── PÁGINAS REAIS CONECTADAS ── */}
         <Route path="/Clients" element={<LayoutWrapper currentPageName="Clients"><Clients /></LayoutWrapper>} />
@@ -224,6 +228,7 @@ function App() {
         <Router>
           <NavigationTracker />
           <OfflineIndicator />
+          <OfflineBanner />
           <AuthenticatedApp />
           <PWAInstallPrompt />
           <PWAInstallButtonFloating />
