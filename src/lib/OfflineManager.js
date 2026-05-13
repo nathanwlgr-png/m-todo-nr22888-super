@@ -1,34 +1,60 @@
-// Offline Manager — IndexedDB + Service Worker + Sync Queue
+// OfflineManager v2 — IndexedDB + SyncQueue + AICache
 import { openDB } from 'idb';
 
 const DB_NAME = 'SeamtyOfflineDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+export const OFFLINE_ENTITIES = [
+  'Client',
+  'Lead',
+  'Task',
+  'Visit',
+  'Sale',
+  'Equipment',
+  'ConsumableOrder',
+];
 
 export class OfflineManager {
   static async initDB() {
     return openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
         // Entities
-        ['Client', 'Lead', 'Sale', 'Equipment', 'ConsumableOrder', 'Visit', 'Task'].forEach(entity => {
+        OFFLINE_ENTITIES.forEach(entity => {
           if (!db.objectStoreNames.contains(entity)) {
             db.createObjectStore(entity, { keyPath: 'id' });
           }
         });
-        // Sync Queue
+        // SyncQueue — operações pendentes
         if (!db.objectStoreNames.contains('SyncQueue')) {
-          db.createObjectStore('SyncQueue', { keyPath: 'id', autoIncrement: true });
+          const sq = db.createObjectStore('SyncQueue', { keyPath: 'id', autoIncrement: true });
+          sq.createIndex('entity', 'entity');
+          sq.createIndex('synced', '_synced');
         }
-        // Cache
+        // CacheStore — cache de dados online
         if (!db.objectStoreNames.contains('CacheStore')) {
           db.createObjectStore('CacheStore', { keyPath: 'key' });
+        }
+        // Metadata
+        if (!db.objectStoreNames.contains('Meta')) {
+          db.createObjectStore('Meta', { keyPath: 'key' });
         }
       }
     });
   }
 
+  // ─── ENTITY OPERATIONS ───────────────────────────────────────────
+
+  static async bulkSaveEntity(entityName, records) {
+    const db = await this.initDB();
+    const tx = db.transaction(entityName, 'readwrite');
+    await Promise.all(records.map(r => tx.store.put({ ...r, _cached_at: Date.now() })));
+    await tx.done;
+    return records.length;
+  }
+
   static async saveEntity(entityName, data) {
     const db = await this.initDB();
-    await db.put(entityName, { ...data, _cached_at: new Date() });
+    await db.put(entityName, { ...data, _cached_at: Date.now() });
   }
 
   static async getEntity(entityName, id) {
@@ -41,56 +67,115 @@ export class OfflineManager {
     return db.getAll(entityName);
   }
 
-  static async queueSync(operation) {
+  static async countEntities(entityName) {
     const db = await this.initDB();
-    await db.add('SyncQueue', { ...operation, _queued_at: new Date(), _synced: false });
+    return db.count(entityName);
   }
 
-  static async getSyncQueue() {
+  static async clearEntity(entityName) {
     const db = await this.initDB();
-    return db.getAll('SyncQueue');
+    await db.clear(entityName);
   }
 
-  static async markSynced(id) {
+  // ─── SYNC QUEUE ───────────────────────────────────────────────────
+
+  static async queueOperation(operation) {
+    // operation: { entity, action, data, description }
     const db = await this.initDB();
-    const queue = await db.get('SyncQueue', id);
-    if (queue) await db.put('SyncQueue', { ...queue, _synced: true });
+    await db.add('SyncQueue', {
+      ...operation,
+      _queued_at: Date.now(),
+      _synced: false,
+      _retry_count: 0,
+    });
   }
 
-  static async cacheData(key, data, ttl = 2592000000) { // 30 dias
+  static async getPendingOperations() {
+    const db = await this.initDB();
+    const all = await db.getAll('SyncQueue');
+    return all.filter(op => !op._synced);
+  }
+
+  static async markOperationSynced(id) {
+    const db = await this.initDB();
+    const op = await db.get('SyncQueue', id);
+    if (op) await db.put('SyncQueue', { ...op, _synced: true, _synced_at: Date.now() });
+  }
+
+  static async clearSyncedOperations() {
+    const db = await this.initDB();
+    const all = await db.getAll('SyncQueue');
+    const synced = all.filter(op => op._synced);
+    await Promise.all(synced.map(op => db.delete('SyncQueue', op.id)));
+    return synced.length;
+  }
+
+  // ─── CACHE STORE ─────────────────────────────────────────────────
+
+  static async cacheData(key, data, ttlMs = 30 * 24 * 60 * 60 * 1000) {
     const db = await this.initDB();
     await db.put('CacheStore', {
       key,
       value: data,
-      _cached_at: new Date(),
-      _expires_at: new Date(Date.now() + ttl)
+      _cached_at: Date.now(),
+      _expires_at: Date.now() + ttlMs,
     });
   }
 
   static async getCachedData(key) {
     const db = await this.initDB();
     const cached = await db.get('CacheStore', key);
-    if (cached && new Date() < new Date(cached._expires_at)) {
-      return cached.value;
+    if (!cached) return null;
+    if (Date.now() > cached._expires_at) {
+      await db.delete('CacheStore', key);
+      return null;
     }
-    if (cached) await db.delete('CacheStore', key);
-    return null;
+    return cached.value;
   }
 
-  static async clearExpiredCache() {
+  // ─── METADATA ─────────────────────────────────────────────────────
+
+  static async setMeta(key, value) {
     const db = await this.initDB();
-    const all = await db.getAll('CacheStore');
-    const now = new Date();
-    for (const item of all) {
-      if (now > new Date(item._expires_at)) {
-        await db.delete('CacheStore', item.key);
-      }
-    }
+    await db.put('Meta', { key, value, _at: Date.now() });
   }
+
+  static async getMeta(key) {
+    const db = await this.initDB();
+    const r = await db.get('Meta', key);
+    return r ? r.value : null;
+  }
+
+  // ─── STATUS ───────────────────────────────────────────────────────
+
+  static async getOfflineStatus() {
+    const counts = {};
+    for (const entity of OFFLINE_ENTITIES) {
+      counts[entity] = await this.countEntities(entity);
+    }
+    const lastSync = await this.getMeta('last_full_sync');
+    const pending = (await this.getPendingOperations()).length;
+    return { counts, lastSync, pending };
+  }
+
+  // ─── SERVICE WORKER ───────────────────────────────────────────────
 
   static registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then(reg => {
+          console.log('[SW] Registered:', reg.scope);
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker?.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[SW] Nova versão disponível');
+              }
+            });
+          });
+        })
+        .catch(err => console.warn('[SW] Error:', err));
     }
   }
 }

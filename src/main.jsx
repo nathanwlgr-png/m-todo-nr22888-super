@@ -7,7 +7,6 @@ import { OfflineManager } from './lib/OfflineManager'
 
 // Initialize offline support
 OfflineManager.registerServiceWorker();
-OfflineManager.clearExpiredCache();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

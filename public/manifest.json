@@ -1,28 +1,88 @@
 {
-  "name": "Seamaty NR22888 — CRM Veterinário",
+  "name": "Seamaty NR22888 — Master de Vendas",
   "short_name": "Seamaty NR22",
-  "description": "CRM Veterinário Premium com IA — Dashboard, Rotas, WhatsApp Master, Offline First",
+  "description": "CRM e Automação de Vendas Seamaty — Modo offline incluso",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0a0a0a",
   "theme_color": "#ff6b00",
-  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["business", "productivity"],
-  "lang": "pt-BR",
-  "dir": "ltr"
+  "shortcuts": [
+    {
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Abrir lista de clientes",
+      "url": "/Clients",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Leads",
+      "short_name": "Leads",
+      "description": "Abrir pipeline de leads",
+      "url": "/Leads",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "WhatsApp Master",
+      "short_name": "WA Master",
+      "description": "Abrir assistente de vendas",
+      "url": "/WhatsAppMasterAssistantLapidado",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }
