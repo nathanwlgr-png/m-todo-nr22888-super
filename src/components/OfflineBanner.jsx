@@ -8,7 +8,9 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
 export default function OfflineBanner() {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  );
   const [syncing, setSyncing] = useState(false);
   const [pending, setPending] = useState(0);
 
