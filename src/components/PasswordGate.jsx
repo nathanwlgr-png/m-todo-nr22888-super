@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Lock, AlertCircle } from 'lucide-react';
 
 // Senha validada por hash SHA-256 no lado do cliente.
