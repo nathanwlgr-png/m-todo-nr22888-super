@@ -217,8 +217,8 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
-      <AIGlobalProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <AIGlobalProvider>
           <Router>
             <NavigationTracker />
             <OfflineIndicator />
@@ -228,8 +228,8 @@ function App() {
             <PWAInstallButtonFloating />
             <ToasterComponent />
           </Router>
-        </AuthProvider>
-      </AIGlobalProvider>
+        </AIGlobalProvider>
+      </AuthProvider>
     </QueryClientProvider>
   )
 }
