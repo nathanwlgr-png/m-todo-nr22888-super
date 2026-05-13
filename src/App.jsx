@@ -10,8 +10,9 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineBanner from '@/components/OfflineBanner';
-import PasswordGate from '@/components/PasswordGate';
-import { useState, lazy, Suspense } from 'react';
+import AppLoadingScreen from '@/components/AppLoadingScreen';
+
+import { lazy, Suspense } from 'react';
 import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';
 import ComingSoonPage from '@/components/ComingSoonPage';
@@ -76,14 +77,7 @@ const Integrations = lazy(() => import('./pages/Integrations'));
 const SystemManual = lazy(() => import('./pages/SystemManual'));
 const GlobalSearch = lazy(() => import('./pages/GlobalSearch'));
 
-const PageLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-8 h-8 border-2 border-orange-800 border-t-orange-500 rounded-full animate-spin" />
-      <p className="text-xs text-orange-700 font-bold">Carregando...</p>
-    </div>
-  </div>
-);
+const PageLoader = () => <AppLoadingScreen />;
 
 const LayoutWrapper = ({ children, currentPageName }) => {
   const { isTablet } = useTabletOptimizations();
@@ -93,27 +87,9 @@ const LayoutWrapper = ({ children, currentPageName }) => {
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const [passwordUnlocked, setPasswordUnlocked] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('seamaty_authenticated') === 'true';
-    }
-    return false;
-  });
-
-  if (!passwordUnlocked) {
-    return (
-      <PasswordGate
-        onUnlock={() => setPasswordUnlocked(true)}
-      />
-    );
-  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (authError) {
@@ -246,11 +222,6 @@ function App() {
       </QueryClientProvider>
     </AuthProvider>
   )
-}
-
-export function logoutSeamaty() {
-  sessionStorage.removeItem('seamaty_authenticated');
-  window.location.reload();
 }
 
 export default App
