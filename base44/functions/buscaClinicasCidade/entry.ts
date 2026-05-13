@@ -199,18 +199,21 @@ Clínicas que terceirizam hemogramas ou têm volume >40/mês são nossos cliente
       ],
     }));
 
-    await base44.asServiceRole.entities.SeamHunt.create({
-      city: cityNorm,
-      radius_km: 50,
-      depth: 'completa',
-      segment: ['clinica', 'hospital', 'laboratorio'],
-      results_count: clinicas.length,
-      execution_time_ms: Date.now() - startTime,
-      credits_spent: 1,
-      search_results: cachePayload,
-      cached_until: cachedUntil,
-      search_status: 'completed',
-    }).catch(e => console.warn('Falha ao salvar cache:', e.message));
+    // Só salvar cache se tiver resultados válidos
+    if (clinicas.length > 0) {
+      await base44.asServiceRole.entities.SeamHunt.create({
+        city: cityNorm,
+        radius_km: 50,
+        depth: 'completa',
+        segment: ['clinica', 'hospital', 'laboratorio'],
+        results_count: clinicas.length,
+        execution_time_ms: Date.now() - startTime,
+        credits_spent: 1,
+        search_results: cachePayload,
+        cached_until: cachedUntil,
+        search_status: 'completed',
+      }).catch(e => console.warn('Falha ao salvar cache:', e.message));
+    }
 
     // ── 6. REGISTRAR NO AUDIT LOG ───────────────────────────────────────────
     await base44.asServiceRole.entities.AuditLog.create({
