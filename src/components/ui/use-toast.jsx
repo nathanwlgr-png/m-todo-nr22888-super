@@ -1,8 +1,10 @@
 // Inspired by react-hot-toast library
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 
 const TOAST_LIMIT = 20;
 const TOAST_REMOVE_DELAY = 1000000;
+
+const ToastContext = createContext(null);
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -142,6 +144,14 @@ function toast({ ...props }) {
 }
 
 function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within ToastProvider");
+  }
+  return context;
+}
+
+function ToastProvider({ children }) {
   const [state, setState] = useState(memoryState);
 
   useEffect(() => {
@@ -152,13 +162,19 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+  }, []);
 
-  return {
+  const value = {
     ...state,
     toast,
     dismiss: (toastId) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
   };
+
+  return (
+    <ToastContext.Provider value={value}>
+      {children}
+    </ToastContext.Provider>
+  );
 }
 
-export { useToast, toast }; 
+export { useToast, toast, ToastProvider };
