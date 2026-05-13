@@ -11,7 +11,7 @@ import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineBanner from '@/components/OfflineBanner';
 import AppLoadingScreen from '@/components/AppLoadingScreen';
-import { ToastProvider } from '@/components/ui/use-toast';
+import { useToast, ToastProvider } from '@/components/ui/use-toast';
 
 import { lazy, Suspense } from 'react';
 import Layout from '@/components/AppLayout';

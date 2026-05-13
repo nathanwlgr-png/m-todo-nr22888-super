@@ -1,32 +1,35 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
 export const AIGlobalContext = createContext(null);
 
 export function AIGlobalProvider({ children }) {
-  const [aiEnabled, setAiEnabled] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('seamty_ai_enabled') ?? 'true');
-    } catch {
-      return true;
-    }
-  });
+  const [aiEnabled, setAiEnabled] = useState(true);
+  const [powerMode, setPowerMode] = useState('profissional');
+  const [creditsEstimate, setCreditsEstimate] = useState({ daily: 0, monthly: 0, remaining: 0 });
 
-  const [powerMode, setPowerMode] = useState(() => {
+  // Inicializa do localStorage uma vez quando o componente monta
+  useEffect(() => {
     try {
-      return localStorage.getItem('seamty_power_mode') ?? 'profissional';
-    } catch {
-      return 'profissional';
-    }
-  });
+      const stored = localStorage.getItem('seamty_ai_enabled');
+      if (stored !== null) setAiEnabled(JSON.parse(stored));
+    } catch (e) {}
+  }, []);
 
-  const [creditsEstimate, setCreditsEstimate] = useState(() => {
+  useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem('seamty_credits_estimate') ?? '{"daily":0,"monthly":0,"remaining":0}');
-    } catch {
-      return { daily: 0, monthly: 0, remaining: 0 };
-    }
-  });
+      const stored = localStorage.getItem('seamty_power_mode');
+      if (stored) setPowerMode(stored);
+    } catch (e) {}
+  }, []);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('seamty_credits_estimate');
+      if (stored) setCreditsEstimate(JSON.parse(stored));
+    } catch (e) {}
+  }, []);
+
+  // Persiste mudanças
   useEffect(() => {
     localStorage.setItem('seamty_ai_enabled', JSON.stringify(aiEnabled));
   }, [aiEnabled]);
