@@ -61,6 +61,7 @@ const SalesFunnel = lazy(() => import('./pages/SalesFunnel'));
 const ProposalGenerator = lazy(() => import('./pages/ProposalGenerator'));
 const EquipmentCatalog = lazy(() => import('./pages/EquipmentCatalog'));
 const ProductManager = lazy(() => import('./pages/ProductManager'));
+const RouteOptimization = lazy(() => import('./pages/RouteOptimization'));
 const RouteOptimizer = lazy(() => import('./pages/RouteOptimizer'));
 const WhatsAppHub = lazy(() => import('./pages/WhatsAppHub'));
 const WhatsAppInbox = lazy(() => import('./pages/WhatsAppInbox'));
@@ -169,6 +170,7 @@ const AuthenticatedApp = () => {
         <Route path="/ProposalGenerator" element={<LayoutWrapper currentPageName="ProposalGenerator"><ProposalGenerator /></LayoutWrapper>} />
         <Route path="/EquipmentCatalog" element={<LayoutWrapper currentPageName="EquipmentCatalog"><EquipmentCatalog /></LayoutWrapper>} />
         <Route path="/ProductManager" element={<LayoutWrapper currentPageName="ProductManager"><ProductManager /></LayoutWrapper>} />
+        <Route path="/RouteOptimization" element={<LayoutWrapper currentPageName="RouteOptimization"><RouteOptimization /></LayoutWrapper>} />
         <Route path="/RouteOptimizer" element={<LayoutWrapper currentPageName="RouteOptimizer"><RouteOptimizer /></LayoutWrapper>} />
         <Route path="/WhatsAppHub" element={<LayoutWrapper currentPageName="WhatsAppHub"><WhatsAppHub /></LayoutWrapper>} />
         <Route path="/WhatsAppInbox" element={<LayoutWrapper currentPageName="WhatsAppInbox"><WhatsAppInbox /></LayoutWrapper>} />
