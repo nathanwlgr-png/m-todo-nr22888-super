@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +10,14 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   MessageSquare, Send, Search, Phone, User, Clock,
   Bot, ChevronRight, CheckCircle2, AlertCircle, Loader2,
-  Zap, Copy, Check, ExternalLink, RefreshCw
+  Zap, Copy, Check, ExternalLink, RefreshCw, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AgentStatusBar from '@/components/whatsapp/AgentStatusBar';
 import PushNotificationManager from '@/components/whatsapp/PushNotificationManager';
 import ConversationLog from '@/components/whatsapp/ConversationLog';
+import WhatsAppMaterialsIntegration from '@/components/WhatsAppMaterialsIntegration';
+import { OfflineDataSync } from '@/lib/OfflineDataSync';
 
 export default function WhatsAppHub() {
   const [search, setSearch] = useState('');
@@ -23,7 +25,20 @@ export default function WhatsAppHub() {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState(null);
+  const [syncing, setSyncing] = useState(false);
   const queryClient = useQueryClient();
+
+  // Auto-sync on mount
+  useEffect(() => {
+    const syncData = async () => {
+      try {
+        await OfflineDataSync.cacheForOffline();
+      } catch (error) {
+        console.warn('Auto-sync error:', error);
+      }
+    };
+    syncData();
+  }, []);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ['clients-whatsapp'],
@@ -154,15 +169,19 @@ export default function WhatsAppHub() {
       </div>
 
       <Tabs defaultValue="enviar">
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="enviar">Enviar Mensagem</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-4">
+          <TabsTrigger value="enviar">Mensagem</TabsTrigger>
+          <TabsTrigger value="materiais" className="flex items-center gap-1">
+            <FileText className="w-3 h-3" />
+            <span className="hidden sm:inline">Materiais</span>
+          </TabsTrigger>
           <TabsTrigger value="contatos">
             Contatos
-            <Badge className="ml-2 bg-green-600">{filteredClients.length}</Badge>
+            <Badge className="ml-2 bg-green-600 text-xs">{filteredClients.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="historico">
             Histórico
-            {messages.length > 0 && <Badge className="ml-2">{messages.length}</Badge>}
+            {messages.length > 0 && <Badge className="ml-2 text-xs">{messages.length}</Badge>}
           </TabsTrigger>
         </TabsList>
 
@@ -354,13 +373,67 @@ export default function WhatsAppHub() {
           )}
         </TabsContent>
 
+        {/* Tab: Materiais */}
+        <TabsContent value="materiais" className="mt-4">
+          <div className="space-y-4">
+            {selectedClient ? (
+              <WhatsAppMaterialsIntegration client={selectedClient} />
+            ) : (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <p className="text-slate-500 text-sm mb-4">
+                    Selecione um cliente na aba "Contatos" para acessar seus materiais
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => document.querySelector('[data-state="contatos"]')?.click()}
+                  >
+                    Ir para Contatos
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
         {/* Tab: Histórico */}
         <TabsContent value="historico" className="mt-4">
-          <ConversationLog
-            messages={messages}
-            loading={loadingMessages}
-            onRefresh={() => queryClient.invalidateQueries(['whatsapp-messages'])}
-          />
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setSyncing(true);
+                try {
+                  const result = await OfflineDataSync.syncAllEntities();
+                  toast.success(`Sincronizado: ${result.synced} registros`);
+                  queryClient.invalidateQueries(['whatsapp-messages']);
+                } catch (error) {
+                  toast.error('Erro ao sincronizar');
+                } finally {
+                  setSyncing(false);
+                }
+              }}
+              disabled={syncing}
+              className="w-full"
+            >
+              {syncing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Sincronizar Offline
+                </>
+              )}
+            </Button>
+            <ConversationLog
+              messages={messages}
+              loading={loadingMessages}
+              onRefresh={() => queryClient.invalidateQueries(['whatsapp-messages'])}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
