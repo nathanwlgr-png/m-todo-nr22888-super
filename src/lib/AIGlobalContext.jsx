@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 export const AIGlobalContext = createContext(null);
 
-export function AIGlobalProvider({ children }) {
+export const AIGlobalProvider = ({ children }) => {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [powerMode, setPowerMode] = useState('profissional');
   const [creditsEstimate, setCreditsEstimate] = useState({ daily: 0, monthly: 0, remaining: 0 });
@@ -73,9 +73,9 @@ export function AIGlobalProvider({ children }) {
       {children}
     </AIGlobalContext.Provider>
   );
-}
+};
 
-export function useAIGlobal() {
+export const useAIGlobal = () => {
   const context = useContext(AIGlobalContext);
   if (!context) {
     // Retorna valores padrão em vez de lançar erro para evitar crashes
@@ -90,4 +90,4 @@ export function useAIGlobal() {
     };
   }
   return context;
-}
+};
