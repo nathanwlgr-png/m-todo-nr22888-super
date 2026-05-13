@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" fill="#0a0a0a"/>
+  <!-- Panda ears -->
+  <circle cx="52" cy="45" r="28" fill="#1a1a1a"/>
+  <circle cx="140" cy="45" r="28" fill="#1a1a1a"/>
+  <circle cx="52" cy="45" r="18" fill="#ff6b00"/>
+  <circle cx="140" cy="45" r="18" fill="#ff6b00"/>
+  <!-- Panda face -->
+  <ellipse cx="96" cy="105" rx="65" ry="60" fill="#1a1a1a"/>
+  <!-- Eye patches -->
+  <ellipse cx="72" cy="90" rx="22" ry="20" fill="#ff6b00"/>
+  <ellipse cx="120" cy="90" rx="22" ry="20" fill="#ff6b00"/>
+  <!-- Eyes -->
+  <circle cx="72" cy="90" r="10" fill="#0a0a0a"/>
+  <circle cx="120" cy="90" r="10" fill="#0a0a0a"/>
+  <circle cx="75" cy="87" r="4" fill="white"/>
+  <circle cx="123" cy="87" r="4" fill="white"/>
+  <!-- Nose -->
+  <ellipse cx="96" cy="112" rx="10" ry="7" fill="#ff6b00"/>
+  <!-- Mouth -->
+  <path d="M 80 122 Q 96 135 112 122" stroke="#ff6b00" stroke-width="3" fill="none"/>
+  <!-- NR22 text -->
+  <text x="96" y="168" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#ff6b00">NR22</text>
+</svg>
