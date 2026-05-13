@@ -139,6 +139,12 @@ const AuthenticatedApp = () => {
       <Route path="/SalesCommandCenter" element={<LayoutWrapper currentPageName="SalesCommandCenter"><SalesCommandCenter /></LayoutWrapper>} />
 
       {/* ── ROTAS COMING SOON — páginas referenciadas no menu/sidebar mas ainda não implementadas ── */}
+      {/* Variações minúsculo / alternativas para segurança no PWA */}
+      <Route path="/clients" element={<LayoutWrapper currentPageName="Clients"><ComingSoonPage /></LayoutWrapper>} />
+      <Route path="/leads" element={<LayoutWrapper currentPageName="Leads"><ComingSoonPage /></LayoutWrapper>} />
+      <Route path="/notifications" element={<LayoutWrapper currentPageName="NotificationSettings"><ComingSoonPage /></LayoutWrapper>} />
+      <Route path="/notification-settings" element={<LayoutWrapper currentPageName="NotificationSettings"><ComingSoonPage /></LayoutWrapper>} />
+
       <Route path="/Clients" element={<LayoutWrapper currentPageName="Clients"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/Leads" element={<LayoutWrapper currentPageName="Leads"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/TasksUnified" element={<LayoutWrapper currentPageName="TasksUnified"><ComingSoonPage /></LayoutWrapper>} />
@@ -178,6 +184,7 @@ const AuthenticatedApp = () => {
       <Route path="/AIContentStudio" element={<LayoutWrapper currentPageName="AIContentStudio"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/ContactSettings" element={<LayoutWrapper currentPageName="ContactSettings"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/NotificationSettings" element={<LayoutWrapper currentPageName="NotificationSettings"><ComingSoonPage /></LayoutWrapper>} />
+      <Route path="/notificationSettings" element={<LayoutWrapper currentPageName="NotificationSettings"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/WorkflowAutomation" element={<LayoutWrapper currentPageName="WorkflowAutomation"><ComingSoonPage /></LayoutWrapper>} />
       <Route path="/AIKnowledgeUploader" element={<LayoutWrapper currentPageName="AIKnowledgeUploader"><ComingSoonPage /></LayoutWrapper>} />

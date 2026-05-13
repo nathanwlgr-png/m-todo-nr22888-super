@@ -20,6 +20,7 @@ import { useAIConsumption } from '@/hooks/useAIConsumption';
 import AIConsumptionBar from '@/components/AIConsumptionBar';
 import FloatingCreditsButton from '@/components/FloatingCreditsButton';
 import PWAStatusChecklist from '@/components/PWAStatusChecklist';
+import PWAForceUpdate from '@/components/PWAForceUpdate';
 import { Button } from '@/components/ui/button';
 import {
     Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
@@ -313,9 +314,12 @@ export default function Home() {
           </div>
         </a>
 
-        {/* PWA Status Checklist */}
+        {/* PWA Status Checklist + Forçar Atualização */}
         <div className="mb-4">
           <PWAStatusChecklist />
+          <div className="mt-2 flex justify-end">
+            <PWAForceUpdate />
+          </div>
         </div>
 
         {/* Guia rápido do agente */}

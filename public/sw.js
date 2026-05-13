@@ -1,104 +1,93 @@
-const CACHE_NAME = 'seamaty-nr22-v1';
-const ASSETS_TO_CACHE = [
+// ── Seamaty NR22888 Service Worker ──────────────────────────────────────────
+// CACHE VERSION — bumpe este valor a cada deploy para forçar atualização
+const CACHE_VERSION = 'seamaty-v7-' + new Date().toISOString().slice(0, 10);
+const STATIC_CACHE  = CACHE_VERSION + '-static';
+const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
+
+// Assets estáticos para pré-cache
+const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/favicon.svg',
 ];
 
-// Install event
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Service Worker: Cache opened');
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        console.log('Service Worker: Some assets failed to cache', err);
-      });
-    })
-  );
+// ── Install: pré-cache assets críticos ──────────────────────────────────────
+self.addEventListener('install', event => {
+  // Ativa imediatamente sem esperar abas antigas fecharem
   self.skipWaiting();
-});
-
-// Activate event
-self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: Deleting old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(PRECACHE_URLS))
   );
-  self.clients.claim();
 });
 
-// Fetch event - Network First, fallback to Cache
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
-  
-  // Skip API calls from fetch (let them fail gracefully in app)
-  if (event.request.url.includes('/api/') || event.request.url.includes('.base44.com')) {
+// ── Activate: apaga todos os caches antigos ──────────────────────────────────
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== STATIC_CACHE && key !== RUNTIME_CACHE)
+          .map(key => {
+            console.log('[SW] Deletando cache antigo:', key);
+            return caches.delete(key);
+          })
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ── Fetch: Network-first para navegação, Cache-first para assets ─────────────
+self.addEventListener('fetch', event => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Ignora requests não-GET e cross-origin fora do escopo
+  if (request.method !== 'GET') return;
+  if (!url.origin.includes(self.location.origin) && !url.hostname.includes('base44')) return;
+
+  // Navegação (HTML) → Network-first com fallback para /index.html (SPA)
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => new Response('Offline', { status: 503 }))
+      fetch(request)
+        .then(response => {
+          // Armazena cópia fresca no runtime cache
+          const clone = response.clone();
+          caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
+          return response;
+        })
+        .catch(() =>
+          caches.match('/index.html').then(cached => cached || caches.match('/'))
+        )
     );
     return;
   }
 
-  // Network first for HTML, JS, CSS
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (!response || response.status !== 200 || response.type === 'error') {
+  // Assets estáticos (JS, CSS, imagens) → Cache-first
+  if (
+    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico)(\?.*)?$/)
+  ) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+          const clone = response.clone();
+          caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
           return response;
-        }
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((response) => {
-          return response || new Response('Offline - Resource not cached', { status: 503 });
         });
       })
-  );
-});
-
-// Background sync placeholder
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-data') {
-    event.waitUntil(
-      (async () => {
-        try {
-          const response = await fetch('/api/sync');
-          if (response.ok) {
-            console.log('Service Worker: Sync successful');
-          }
-        } catch (error) {
-          console.log('Service Worker: Sync failed, will retry');
-        }
-      })()
     );
+    return;
   }
+
+  // API / demais requests → Network-only (sem cache)
+  // (deixa passar sem interceptar)
 });
 
-// Push notification placeholder
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {};
-  const title = data.title || 'Seamaty Notification';
-  const options = {
-    body: data.body || 'Você tem uma nova notificação',
-    icon: '/icon-192x192.png',
-    badge: '/icon-96x96.png',
-    tag: 'seamaty-notification',
-    requireInteraction: false,
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
+// ── Mensagem: forçar atualização a partir da UI ──────────────────────────────
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  if (event.data === 'CLEAR_CACHE') {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+  }
 });
