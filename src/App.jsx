@@ -19,6 +19,7 @@ import TabletAppLayout from '@/components/TabletAppLayout';
 import ComingSoonPage from '@/components/ComingSoonPage';
 import HomePageWithLayout from '@/components/HomePageWithLayout';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
+import { AIGlobalProvider } from '@/lib/AIGlobalContext';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
@@ -209,21 +210,23 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <ToastProvider>
-          <Router>
-            <NavigationTracker />
-            <OfflineIndicator />
-            <OfflineBanner />
-            <AuthenticatedApp />
-            <PWAInstallPrompt />
-            <PWAInstallButtonFloating />
-            <Toaster />
-          </Router>
-        </ToastProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <AIGlobalProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <ToastProvider>
+            <Router>
+              <NavigationTracker />
+              <OfflineIndicator />
+              <OfflineBanner />
+              <AuthenticatedApp />
+              <PWAInstallPrompt />
+              <PWAInstallButtonFloating />
+              <Toaster />
+            </Router>
+          </ToastProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </AIGlobalProvider>
   )
 }
 

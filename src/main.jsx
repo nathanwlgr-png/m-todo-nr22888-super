@@ -1,7 +1,6 @@
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import { AIGlobalProvider } from './lib/AIGlobalContext.jsx'
 import { OfflineManager } from './lib/OfflineManager'
 import { AICache } from './lib/AICache.js'
 
@@ -18,10 +17,4 @@ if (navigator.onLine) {
   });
 }
 
-const AppWrapper = () => (
-  <AIGlobalProvider>
-    <App />
-  </AIGlobalProvider>
-);
-
-ReactDOM.createRoot(document.getElementById('root')).render(<AppWrapper />)
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)
