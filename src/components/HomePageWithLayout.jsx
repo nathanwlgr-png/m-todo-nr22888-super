@@ -3,8 +3,9 @@ import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';
 import Home from '@/pages/Home';
 import HomeTablet from '@/pages/HomeTablet';
+import { useLocation } from 'react-router-dom';
 
-export default function HomePageWithLayout() {
+function HomePageContent() {
   const { isTablet } = useTabletOptimizations();
   const LayoutComponent = isTablet ? TabletAppLayout : Layout;
   const PageComponent = isTablet ? HomeTablet : Home;
@@ -14,4 +15,8 @@ export default function HomePageWithLayout() {
       <PageComponent />
     </LayoutComponent>
   );
+}
+
+export default function HomePageWithLayout() {
+  return <HomePageContent />;
 }
