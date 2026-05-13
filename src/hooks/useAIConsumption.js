@@ -1,5 +1,4 @@
-import React from 'react';
-const { useState, useEffect, useCallback } = React;
+import { useState, useEffect, useCallback } from 'react';
 
 const MONTHLY_LIMIT = 1000; // R$1.000,00
 
