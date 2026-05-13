@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 
-export const AIGlobalContext = createContext();
+export const AIGlobalContext = createContext(null);
 
 export function AIGlobalProvider({ children }) {
   const [aiEnabled, setAiEnabled] = useState(() => {
@@ -21,7 +21,7 @@ export function AIGlobalProvider({ children }) {
 
   const [creditsEstimate, setCreditsEstimate] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('seamty_credits_estimate') ?? '{"daily": 0, "monthly": 0, "remaining": 0}');
+      return JSON.parse(localStorage.getItem('seamty_credits_estimate') ?? '{"daily":0,"monthly":0,"remaining":0}');
     } catch {
       return { daily: 0, monthly: 0, remaining: 0 };
     }
@@ -41,16 +41,10 @@ export function AIGlobalProvider({ children }) {
 
   const toggleAI = (enabled) => {
     setAiEnabled(enabled);
-    if (!enabled) {
-      console.log('[AI] Desativada globalmente');
-    } else {
-      console.log('[AI] Ativada globalmente');
-    }
   };
 
   const setPowerModeValue = (mode) => {
     setPowerMode(mode);
-    console.log(`[POWER] Modo: ${mode}`);
   };
 
   const updateCreditsEstimate = (daily, monthly, remaining) => {
@@ -67,7 +61,7 @@ export function AIGlobalProvider({ children }) {
     shouldUseAI: (requiredMode = 'profissional') => {
       if (!aiEnabled) return false;
       const modePriority = { economico: 0, profissional: 1, supremo: 2, absoluto: 3 };
-      return (modePriority[powerMode] ?? 1) >= modePriority[requiredMode];
+      return (modePriority[powerMode] ?? 1) >= (modePriority[requiredMode] ?? 1);
     }
   };
 
@@ -79,9 +73,18 @@ export function AIGlobalProvider({ children }) {
 }
 
 export function useAIGlobal() {
-  const context = React.useContext(AIGlobalContext);
+  const context = useContext(AIGlobalContext);
   if (!context) {
-    throw new Error('useAIGlobal deve ser usado dentro de AIGlobalProvider');
+    // Retorna valores padrão em vez de lançar erro para evitar crashes
+    return {
+      aiEnabled: true,
+      toggleAI: () => {},
+      powerMode: 'profissional',
+      setPowerMode: () => {},
+      creditsEstimate: { daily: 0, monthly: 0, remaining: 0 },
+      updateCreditsEstimate: () => {},
+      shouldUseAI: () => true,
+    };
   }
   return context;
 }
