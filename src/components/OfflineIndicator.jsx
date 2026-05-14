@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export default function OfflineIndicator() {
