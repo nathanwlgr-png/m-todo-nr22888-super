@@ -1,7 +1,8 @@
 /**
  * OfflineBanner — Aviso fixo de modo offline com status de sincronização
  */
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+const { useState, useEffect } = React;
 import { WifiOff, RefreshCw, Loader2 } from 'lucide-react';
 import { OfflineManager } from '@/lib/OfflineManager';
 import { base44 } from '@/api/base44Client';
