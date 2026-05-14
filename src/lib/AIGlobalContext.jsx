@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import * as React from 'react';
+const { createContext, useState, useEffect, useContext } = React;
 
 export const AIGlobalContext = createContext(null);
 
