@@ -1,7 +1,6 @@
 import * as React from 'react';
 const { lazy, Suspense } = React;
 import { Toaster } from "@/components/ui/toaster";
-import { ToastProvider } from '@/components/ui/use-toast';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -219,23 +218,21 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <ToastProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthProvider>
-            <AIGlobalProvider>
-              <NavigationTracker />
-              <OfflineIndicator />
-              <OfflineBanner />
-              <AuthenticatedApp />
-              <PWAInstallPrompt />
-              <PWAInstallButtonFloating />
-              <ToasterComponent />
-            </AIGlobalProvider>
-          </AuthProvider>
-        </Router>
-      </QueryClientProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClientInstance}>
+      <Router>
+        <AuthProvider>
+          <AIGlobalProvider>
+            <NavigationTracker />
+            <OfflineIndicator />
+            <OfflineBanner />
+            <AuthenticatedApp />
+            <PWAInstallPrompt />
+            <PWAInstallButtonFloating />
+            <ToasterComponent />
+          </AIGlobalProvider>
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   )
 }
 
