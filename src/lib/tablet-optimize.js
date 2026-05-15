@@ -112,13 +112,15 @@ export const tabletCSS = `
   }
 `;
 
-// Aplicar otimizações
+// Aplicar otimizações (idempotente — nunca duplica a tag)
 export const applyTabletOptimizations = () => {
-  if (typeof document !== 'undefined') {
-    const style = document.createElement('style');
-    style.textContent = tabletCSS;
-    document.head.appendChild(style);
-  }
+  if (typeof document === 'undefined') return;
+  const STYLE_ID = 'tablet-optimizations-style';
+  if (document.getElementById(STYLE_ID)) return; // já aplicado, não duplicar
+  const style = document.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = tabletCSS;
+  document.head.appendChild(style);
 };
 
 // Throttle para eventos

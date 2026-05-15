@@ -1,15 +1,19 @@
 import * as React from 'react';
 const { useState, useEffect, useCallback } = React;
+import { base44 } from '@/api/base44Client';
 
-const MONTHLY_LIMIT = 1000; // R$1.000,00
+const MONTHLY_LIMIT = 1000; // R$1.000,00 referência
 
 export const useAIConsumption = () => {
   const [consumption, setConsumption] = useState({
-    monthlySpent: 0,
-    percentageUsed: 0,
-    creditsRemaining: MONTHLY_LIMIT,
-    status: 'safe', // safe | warning | critical
-    lastUpdated: new Date(),
+    monthlySpent: null,       // null = ainda carregando
+    percentageUsed: null,
+    creditsRemaining: null,
+    status: 'unknown',        // unknown | safe | warning | critical
+    callsToday: null,
+    callsThisWeek: null,
+    lastUpdated: null,
+    dataAvailable: false,     // false = fonte real não disponível
   });
 
   const [moduleStates, setModuleStates] = useState({
@@ -28,47 +32,81 @@ export const useAIConsumption = () => {
     proactiveAlerts: false,
   });
 
-  // Simular consumo (em produção, viria de audit log)
-  const calculateConsumption = useCallback(() => {
-    const simulatedCost = Math.random() * 950; // Simula gasto entre 0-950
-    const percentage = (simulatedCost / MONTHLY_LIMIT) * 100;
-    let status = 'safe';
+  const fetchRealConsumption = useCallback(async () => {
+    try {
+      // Tentar ler AuditLog para consumo real
+      const logs = await base44.entities.AuditLog?.list('-created_date', 200).catch(() => null);
 
-    if (percentage >= 90) status = 'critical';
-    else if (percentage >= 70) status = 'warning';
+      if (!logs || logs.length === 0) {
+        // Sem dados reais disponíveis — não inventar número
+        setConsumption(prev => ({
+          ...prev,
+          dataAvailable: false,
+          status: 'unknown',
+          lastUpdated: new Date(),
+        }));
+        return;
+      }
 
-    setConsumption({
-      monthlySpent: Math.round(simulatedCost * 100) / 100,
-      percentageUsed: Math.round(percentage * 10) / 10,
-      creditsRemaining: Math.round((MONTHLY_LIMIT - simulatedCost) * 100) / 100,
-      status,
-      lastUpdated: new Date(),
-    });
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const monthLogs = logs.filter(l => new Date(l.created_date) >= startOfMonth);
+      const weekLogs  = logs.filter(l => new Date(l.created_date) >= startOfWeek);
+      const dayLogs   = logs.filter(l => new Date(l.created_date) >= startOfDay);
+
+      // Somar créditos reais quando disponíveis
+      const monthlySpent = monthLogs.reduce((acc, l) => acc + (l.cost_credits || 0), 0);
+      const percentage = MONTHLY_LIMIT > 0 ? (monthlySpent / MONTHLY_LIMIT) * 100 : 0;
+
+      let status = 'safe';
+      if (percentage >= 90) status = 'critical';
+      else if (percentage >= 70) status = 'warning';
+
+      setConsumption({
+        monthlySpent: Math.round(monthlySpent * 100) / 100,
+        percentageUsed: Math.round(percentage * 10) / 10,
+        creditsRemaining: Math.round((MONTHLY_LIMIT - monthlySpent) * 100) / 100,
+        status,
+        callsToday: dayLogs.length,
+        callsThisWeek: weekLogs.length,
+        lastUpdated: new Date(),
+        dataAvailable: true,
+      });
+    } catch {
+      // Falha silenciosa — não quebrar a UI
+      setConsumption(prev => ({
+        ...prev,
+        dataAvailable: false,
+        status: 'unknown',
+        lastUpdated: new Date(),
+      }));
+    }
   }, []);
 
-  // Atualizar consumo a cada 5 minutos
+  // Carregar consumo real ao montar e atualizar a cada 10 minutos
   useEffect(() => {
-    calculateConsumption();
-    const interval = setInterval(calculateConsumption, 5 * 60 * 1000);
+    fetchRealConsumption();
+    const interval = setInterval(fetchRealConsumption, 10 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [calculateConsumption]);
+  }, [fetchRealConsumption]);
 
-  // Toggle module state
   const toggleModule = useCallback((moduleName) => {
-    setModuleStates((prev) => ({
-      ...prev,
-      [moduleName]: !prev[moduleName],
-    }));
+    setModuleStates(prev => ({ ...prev, [moduleName]: !prev[moduleName] }));
   }, []);
 
-  // Ativar módulo apenas se houver crédito
   const activateModule = useCallback((moduleName, estimatedCost) => {
-    if (consumption.creditsRemaining < estimatedCost) {
+    // Se não há dados reais, permitir ativação mas avisar
+    if (consumption.dataAvailable && consumption.creditsRemaining !== null && consumption.creditsRemaining < estimatedCost) {
       return { success: false, message: 'Crédito insuficiente' };
     }
     toggleModule(moduleName);
     return { success: true, message: 'Módulo ativado' };
-  }, [toggleModule, consumption.creditsRemaining]);
+  }, [toggleModule, consumption.creditsRemaining, consumption.dataAvailable]);
 
   return {
     consumption,
@@ -76,5 +114,6 @@ export const useAIConsumption = () => {
     toggleModule,
     activateModule,
     MONTHLY_LIMIT,
+    refresh: fetchRealConsumption,
   };
 };

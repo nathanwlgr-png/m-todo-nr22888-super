@@ -10,6 +10,21 @@ Deno.serve(async (req) => {
     // Pode ser chamado por automação de entidade OU manualmente
     const { event, data, entity_id } = body;
 
+    // ─── PROTEÇÃO ANTI-LOOP ──────────────────────────────────────────
+    // A automação dispara em create E update da Visit.
+    // Quando esta função atualiza google_calendar_event_id/synced,
+    // isso gera outro update que re-dispara a automação.
+    // Se os changed_fields contiverem APENAS campos de sync, ignorar para evitar loop.
+    const changedFields = body?.changed_fields || [];
+    const SYNC_ONLY_FIELDS = ['google_calendar_synced', 'google_calendar_event_id'];
+    if (
+      changedFields.length > 0 &&
+      changedFields.every(f => SYNC_ONLY_FIELDS.includes(f))
+    ) {
+      console.log('[SYNC] Ignorando — mudança foi só em campos de sync (loop prevention)');
+      return Response.json({ success: true, action: 'skipped_sync_loop' });
+    }
+
     // Obter token do Google Calendar
     let accessToken;
     try {
@@ -101,13 +116,51 @@ Deno.serve(async (req) => {
     let action;
 
     if (visit.google_calendar_event_id) {
-      // Atualizar evento existente
-      gcalRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, {
-        method: 'PUT', headers, body: JSON.stringify(eventBody),
+      // Verificar se o evento ainda existe no Google Calendar antes de tentar atualizar
+      const checkRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, {
+        method: 'GET', headers
       });
-      action = 'updated';
+
+      if (checkRes.status === 404 || checkRes.status === 410) {
+        // Evento foi deletado externamente — tratar como novo
+        console.log(`[SYNC] Evento ${visit.google_calendar_event_id} não encontrado no GCal — criando novo`);
+        gcalRes = await fetch(`${GCal}/events`, {
+          method: 'POST', headers, body: JSON.stringify(eventBody),
+        });
+        action = 'created_after_missing';
+      } else if (!checkRes.ok) {
+        const errBody = await checkRes.text();
+        console.error(`[SYNC] Erro ao verificar evento existente (${checkRes.status}):`, errBody);
+        return Response.json({ success: false, error: `GCal check failed: ${checkRes.status}` });
+      } else {
+        // Evento existe — atualizar com PUT (idempotente)
+        gcalRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, {
+          method: 'PUT', headers, body: JSON.stringify(eventBody),
+        });
+        action = 'updated';
+      }
     } else {
-      // Criar novo evento
+      // Sem event_id — criar novo evento
+      // Proteção anti-duplicata: buscar por crm_visit_id nas propriedades privadas
+      const searchRes = await fetch(
+        `${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(visit.id)}&maxResults=1`,
+        { method: 'GET', headers }
+      );
+
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        if (searchData.items && searchData.items.length > 0) {
+          // Evento já existe! Salvar o ID e retornar ignorado
+          const existingId = searchData.items[0].id;
+          await base44.asServiceRole.entities.Visit.update(finalVisitId, {
+            google_calendar_synced: true,
+            google_calendar_event_id: existingId,
+          }).catch(() => {});
+          console.log(`[SYNC] Visita ${visit.client_name} — evento já existe (${existingId}), ignorando duplicata`);
+          return Response.json({ success: true, action: 'ignored_duplicate', event_id: existingId });
+        }
+      }
+
       gcalRes = await fetch(`${GCal}/events`, {
         method: 'POST', headers, body: JSON.stringify(eventBody),
       });

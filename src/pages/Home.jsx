@@ -1,29 +1,33 @@
 import * as React from 'react';
-const { useState } = React;
+const { useState, lazy, Suspense } = React;
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import SalesDashboardWidget from '@/components/SalesDashboardWidget';
-import WeeklyHealthReport from '@/components/WeeklyHealthReport';
-import DaySummary from '@/components/DaySummary';
 import { useQuery } from '@tanstack/react-query';
-import GPSAutoDiscovery from '@/components/GPSAutoDiscovery';
-import CRMManualPDF from '@/components/CRMManualPDF';
-import SniperDoDia from '@/components/SniperDoDia';
-import CRMStatsBar from '@/components/CRMStatsBar';
-import SuperMasterHunterButton from '@/components/SuperMasterHunterButton';
-import ComodatoAlertMonitor from '@/components/ComodatoAlertMonitor';
-import CityClinicAnalyzer from '@/components/CityClinicAnalyzer';
-import ConsolidatedDashboard from '@/components/ConsolidatedDashboard';
-import SmartRouteMap from '@/components/SmartRouteMap';
-import InsumoPatternAlert from '@/components/InsumoPatternAlert';
 import { useAIConsumption } from '@/hooks/useAIConsumption';
 import AIConsumptionBar from '@/components/AIConsumptionBar';
 import FloatingCreditsButton from '@/components/FloatingCreditsButton';
+import CRMManualPDF from '@/components/CRMManualPDF';
+import CRMStatsBar from '@/components/CRMStatsBar';
+import DaySummary from '@/components/DaySummary';
 import PWAStatusChecklist from '@/components/PWAStatusChecklist';
 import PWAForceUpdate from '@/components/PWAForceUpdate';
 import OfflineSyncButton from '@/components/OfflineSyncButton';
 import { Button } from '@/components/ui/button';
+
+// Componentes pesados — carregam DEPOIS da UI principal aparecer
+const SniperDoDia        = lazy(() => import('@/components/SniperDoDia'));
+const ComodatoAlertMonitor = lazy(() => import('@/components/ComodatoAlertMonitor'));
+const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
+const InsumoPatternAlert = lazy(() => import('@/components/InsumoPatternAlert'));
+const ConsolidatedDashboard = lazy(() => import('@/components/ConsolidatedDashboard'));
+const SmartRouteMap      = lazy(() => import('@/components/SmartRouteMap'));
+const SalesDashboardWidget = lazy(() => import('@/components/SalesDashboardWidget'));
+const GPSAutoDiscovery   = lazy(() => import('@/components/GPSAutoDiscovery'));
+const CityClinicAnalyzer = lazy(() => import('@/components/CityClinicAnalyzer'));
+
+const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3" style={{ background: '#1a1a1a' }} />;
+
 import {
     Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
     Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
@@ -351,16 +355,15 @@ export default function Home() {
         {/* Stats do CRM — clientes, equipamentos, mês, quentes */}
         <CRMStatsBar />
 
-        {/* ⚠️ SUPER MASTER HUNTER — DESABILITADO */}
-        {/* <div className="mb-4">
-          <SuperMasterHunterButton />
-        </div> */}
+        {/* 🔴 Monitor de Oportunidades de Comodato — carrega lazy */}
+        <Suspense fallback={<HeavyFallback />}>
+          <ComodatoAlertMonitor />
+        </Suspense>
 
-        {/* 🔴 Monitor de Oportunidades de Comodato (40-60 exames/mês) */}
-        <ComodatoAlertMonitor />
-
-        {/* Sniper do Dia — Top 10 para contatar */}
-        <SniperDoDia />
+        {/* Sniper do Dia — carrega lazy */}
+        <Suspense fallback={<HeavyFallback />}>
+          <SniperDoDia />
+        </Suspense>
 
         {/* Resumo do Dia */}
         <div className="mb-3">
@@ -476,28 +479,42 @@ export default function Home() {
           )}
         </div>
 
-        <WeeklyHealthReport clients={clients} />
+        <Suspense fallback={<HeavyFallback />}>
+          <WeeklyHealthReport clients={clients} />
+        </Suspense>
 
         {/* Alertas de Padrão de Insumo */}
-        <div className="mb-4">
-          <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2 px-1">📦 Padrões de Compra de Insumos</p>
-          <InsumoPatternAlert clients={clients} consumables={consumables || []} />
-        </div>
+        <Suspense fallback={<HeavyFallback />}>
+          <div className="mb-4">
+            <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2 px-1">📦 Padrões de Compra de Insumos</p>
+            <InsumoPatternAlert clients={clients} consumables={consumables || []} />
+          </div>
+        </Suspense>
 
         {/* Dashboard Consolidado com Recharts */}
-        <ConsolidatedDashboard />
+        <Suspense fallback={<HeavyFallback />}>
+          <ConsolidatedDashboard />
+        </Suspense>
 
         {/* Mapa de Rotas Inteligente */}
-        <SmartRouteMap />
+        <Suspense fallback={<HeavyFallback />}>
+          <SmartRouteMap />
+        </Suspense>
 
         {/* Sales Dashboard */}
-        <SalesDashboardWidget />
+        <Suspense fallback={<HeavyFallback />}>
+          <SalesDashboardWidget />
+        </Suspense>
 
         {/* GPS Auto-Discovery */}
-        <GPSAutoDiscovery />
+        <Suspense fallback={<HeavyFallback />}>
+          <GPSAutoDiscovery />
+        </Suspense>
 
         {/* Análise de Clínicas por Cidade */}
-        <CityClinicAnalyzer />
+        <Suspense fallback={<HeavyFallback />}>
+          <CityClinicAnalyzer />
+        </Suspense>
 
         {/* Busca de páginas */}
         <div className="rounded-2xl mb-4 p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>

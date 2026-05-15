@@ -12,13 +12,16 @@ export const AICache = {
    */
   key(type, params = {}) {
     const normalized = JSON.stringify({ type, ...params });
-    // hash simples para chave curta
-    let hash = 0;
+    // Hash djb2 melhorado — menor probabilidade de colisão que o hash original
+    let h1 = 5381;
+    let h2 = 52711;
     for (let i = 0; i < normalized.length; i++) {
-      hash = ((hash << 5) - hash) + normalized.charCodeAt(i);
-      hash |= 0;
+      const c = normalized.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 0x9e3779b9) >>> 0;
+      h2 = Math.imul(h2 ^ c, 0x6c62272e) >>> 0;
     }
-    return CACHE_PREFIX + type + '_' + Math.abs(hash);
+    // Chave composta: tipo + hash duplo em hex (mais único, sem ambiguidade de sinal)
+    return CACHE_PREFIX + type + '_' + h1.toString(16) + h2.toString(16);
   },
 
   /**
