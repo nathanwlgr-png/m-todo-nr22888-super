@@ -191,15 +191,13 @@ function buildUserMessage(action, message, ctx) {
 Deno.serve(async (req) => {
   const startMs = Date.now();
 
+  try {
+
   if (!OPENAI_API_KEY) {
     return Response.json({ error: 'OPENAI_API_KEY não configurada. Acesse Dashboard → Settings → Environment Variables.' }, { status: 500 });
   }
 
   const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me().catch(() => null);
-  if (!user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const body = await req.json();
   const { action = 'general', message = '', client_id, location } = body;
@@ -249,4 +247,8 @@ Deno.serve(async (req) => {
     tokens_used: tokensUsed,
     duration_ms: durationMs,
   });
+
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
