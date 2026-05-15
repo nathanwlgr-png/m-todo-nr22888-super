@@ -305,6 +305,41 @@ export default function Home() {
         {/* Manual PDF */}
         <CRMManualPDF />
 
+        {/* ════ NOVO FOCO: MODO CAÇA COMERCIAL + MODO INSUMOS ════ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          {/* 🎯 MODO CAÇA COMERCIAL */}
+          <Link to={createPageUrl('ModoCacaComercial')} className="block">
+            <div className="rounded-2xl p-4 flex flex-col gap-2 text-white shadow-xl" style={{ background: 'linear-gradient(135deg, #1a0a00, #4a0000)', border: '2px solid rgba(255,107,0,0.8)' }}>
+              <div className="flex items-center gap-2">
+                <Target className="w-6 h-6 text-orange-400" />
+                <p className="font-black text-orange-400">🎯 MODO CAÇA</p>
+              </div>
+              <p className="text-orange-100 text-xs">GPS → Investigar → Perfil → SPIN → Ranking</p>
+              <div className="flex items-center gap-1 text-orange-300 text-[10px] font-bold mt-1">
+                <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                Inteligência Comercial em Tempo Real
+              </div>
+              <ChevronRight className="w-5 h-5 text-orange-400 ml-auto mt-2" />
+            </div>
+          </Link>
+
+          {/* 📦 MODO INSUMOS */}
+          <Link to={createPageUrl('ModoInsumos')} className="block">
+            <div className="rounded-2xl p-4 flex flex-col gap-2 text-white shadow-xl" style={{ background: 'linear-gradient(135deg, #0a1a00, #004a0a)', border: '2px solid rgba(34,197,94,0.8)' }}>
+              <div className="flex items-center gap-2">
+                <Package className="w-6 h-6 text-green-400" />
+                <p className="font-black text-green-400">📦 MODO INSUMOS</p>
+              </div>
+              <p className="text-green-100 text-xs">Recompra • Esfriando • Declínio • Upsell</p>
+              <div className="flex items-center gap-1 text-green-300 text-[10px] font-bold mt-1">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                Recorrência Inteligente de Vendas
+              </div>
+              <ChevronRight className="w-5 h-5 text-green-400 ml-auto mt-2" />
+            </div>
+          </Link>
+        </div>
+
         {/* 🧠 Central IA Master */}
         <Link to={createPageUrl('CentralIAMaster')} className="block mb-3">
           <div className="rounded-2xl p-4 flex items-center justify-between text-white shadow-xl" style={{ background: 'linear-gradient(135deg, #0a0a1a, #1a0050)', border: '1px solid rgba(139,92,246,0.5)' }}>
@@ -314,7 +349,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="font-black text-base text-purple-400">🧠 Central IA Master</p>
-                <p className="text-purple-200 text-xs">GPT-4o • Briefing • Ranking • WhatsApp • Marketing</p>
+                <p className="text-purple-200 text-xs">Comandos / Manuais • Briefing • Investigação</p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6 text-purple-400" />

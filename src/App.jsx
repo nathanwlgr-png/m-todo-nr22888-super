@@ -51,6 +51,8 @@ const WhatsAppMasterAssistantLapidado = lazy(() => import('./pages/WhatsAppMaste
 const ExecutiveSalesAnalysis = lazy(() => import('./pages/ExecutiveSalesAnalysis'));
 const SalesFunnelKanban = lazy(() => import('./pages/SalesFunnelKanban'));
 const WhatsAppAutomationTriggers = lazy(() => import('./pages/WhatsAppAutomationTriggers'));
+const ModoCacaComercial = lazy(() => import('./pages/ModoCacaComercial'));
+const ModoInsumos = lazy(() => import('./pages/ModoInsumos'));
 const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics'));
 const CompetitiveIntelligenceDashboard = lazy(() => import('./pages/CompetitiveIntelligenceDashboard'));
 const ActiveProspecting = lazy(() => import('./pages/ActiveProspecting'));
@@ -148,6 +150,8 @@ const AuthenticatedApp = () => {
         <Route path="/SalesCommandCenter" element={<LayoutWrapper currentPageName="SalesCommandCenter"><SalesCommandCenter /></LayoutWrapper>} />
         <Route path="/RouteAuditReport" element={<LayoutWrapper currentPageName="RouteAuditReport"><RouteAuditReport /></LayoutWrapper>} />
         <Route path="/CentralIAMaster" element={<LayoutWrapper currentPageName="CentralIAMaster"><CentralIAMaster /></LayoutWrapper>} />
+        <Route path="/ModoCacaComercial" element={<LayoutWrapper currentPageName="ModoCacaComercial"><ModoCacaComercial /></LayoutWrapper>} />
+        <Route path="/ModoInsumos" element={<LayoutWrapper currentPageName="ModoInsumos"><ModoInsumos /></LayoutWrapper>} />
         <Route path="/OfflineMode" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
         <Route path="/offline" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
 
