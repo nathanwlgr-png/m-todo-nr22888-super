@@ -215,6 +215,7 @@ const AuthenticatedApp = () => {
   );
 };
 
+// ── REBUILD TRIGGER: 2026-05-15T13:27 ──
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
