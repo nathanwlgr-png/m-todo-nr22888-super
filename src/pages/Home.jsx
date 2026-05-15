@@ -167,11 +167,11 @@ export default function Home() {
     staleTime: 60000,
   });
 
-  const hotLeads = Math.max(0, clients.filter(c => (c.purchase_score || 0) > 70).length);
-  const noContact7d = Math.max(0, clients.filter(c => {
+  const hotLeads = clients.filter(c => (c.purchase_score || 0) > 70).length;
+  const noContact7d = clients.filter(c => {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
-  }).length);
+  }).length;
   const now = new Date();
   const isMaio2026 = now.getMonth() === 4 && now.getFullYear() === 2026; // maio = índice 4
 
@@ -190,7 +190,7 @@ export default function Home() {
   });
 
   const metaQtd = isMaio2026 ? MAIO_EQUIP_REAL : salesThisMonth.length;
-  const metaValor = isMaio2026 ? MAIO_VALOR_REAL : (salesThisMonth.reduce((a, s) => a + (s.sale_value || 0), 0) || 0);
+  const metaValor = isMaio2026 ? MAIO_VALOR_REAL : salesThisMonth.reduce((a, s) => a + (s.sale_value || 0), 0);
   const metaPct = isMaio2026 ? 100 : Math.min(100, Math.round((salesThisMonth.length / META_EQUIPAMENTOS) * 100));
   const nextVisits = visits
     .filter(v => { const d = new Date(v.scheduled_date); const diff = (d - Date.now()) / 86400000; return diff >= 0 && diff <= 7; })
