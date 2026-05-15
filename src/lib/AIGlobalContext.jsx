@@ -1,10 +1,8 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 
 const AIGlobalContext = createContext(null);
 
-export { AIGlobalContext };
-
-export const AIGlobalProvider = ({ children }) => {
+export function AIGlobalProvider({ children }) {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [powerMode, setPowerMode] = useState('profissional');
   const [creditsEstimate, setCreditsEstimate] = useState({ daily: 0, monthly: 0, remaining: 0 });
@@ -61,9 +59,9 @@ export const AIGlobalProvider = ({ children }) => {
       {children}
     </AIGlobalContext.Provider>
   );
-};
+}
 
-export const useAIGlobal = () => {
+export function useAIGlobal() {
   const context = useContext(AIGlobalContext);
   if (!context) {
     return {
@@ -77,4 +75,4 @@ export const useAIGlobal = () => {
     };
   }
   return context;
-};
+}
