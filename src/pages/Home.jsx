@@ -1,5 +1,8 @@
 import * as React from 'react';
 const { useState, lazy, Suspense } = React;
+import QuickActionsBar from '@/components/QuickActionsBar';
+import VendedorMenu from '@/components/VendedorMenu';
+import { getModo } from '@/lib/ModoVendedor';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -293,6 +296,13 @@ export default function Home() {
       <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #ff6b00, transparent)' }} />
 
       <div className="px-4 pt-4" style={{ background: '#0a0a0a' }}>
+
+        {/* ⚡ Ações Rápidas — Modo Vendedor */}
+        <div className="mb-4">
+          <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">⚡ Ações Rápidas</p>
+          <QuickActionsBar />
+        </div>
+
         {/* Barra de Consumo de IA */}
         <AIConsumptionBar consumption={consumption} />
 
