@@ -5,7 +5,8 @@
  * - Mostra quantidade salva
  * - ZERO IA / ZERO crédito
  */
-import { useState } from 'react';
+import * as React from 'react';
+const { useState } = React;
 import { CloudDownload, CheckCircle2, WifiOff, Loader2, Database } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { OfflineManager, OFFLINE_ENTITIES } from '@/lib/OfflineManager';

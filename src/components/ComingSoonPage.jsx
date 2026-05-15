@@ -1,6 +1,7 @@
+import * as React from 'react';
+const { useEffect, useState } = React;
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Zap, Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 // Mapa de nomes legíveis por página
 const PAGE_LABELS = {

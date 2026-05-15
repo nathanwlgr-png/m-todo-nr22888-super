@@ -1,4 +1,5 @@
-import React, { lazy, Suspense } from 'react';
+import * as React from 'react';
+const { lazy, Suspense } = React;
 import { Toaster } from "@/components/ui/toaster";
 import { ToastProvider } from '@/components/ui/use-toast';
 import { QueryClientProvider } from '@tanstack/react-query'
