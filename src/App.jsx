@@ -113,10 +113,13 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* ── HOME ── */}
-        <Route path="/" element={<HomePageWithLayout />} />
+    <>
+      <EconomicModeControl />
+      <EconomicModeControlPanel />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* ── HOME ── */}
+          <Route path="/" element={<HomePageWithLayout />} />
 
         {/* ── MÓDULOS EXISTENTES (originais) ── */}
         <Route path="/VisitRouteManager" element={<LayoutWrapper currentPageName="VisitRouteManager"><VisitRouteManager /></LayoutWrapper>} />
@@ -220,8 +223,9 @@ const AuthenticatedApp = () => {
         <Route path="/MasterControlPanel" element={<LayoutWrapper currentPageName="MasterControlPanel"><ComingSoonPage /></LayoutWrapper>} />
 
         <Route path="*" element={<LayoutWrapper currentPageName="404"><ComingSoonPage moduleName="404" /></LayoutWrapper>} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 };
 
@@ -242,8 +246,6 @@ function App() {
         </Router>
       </AIGlobalProvider>
       <ToasterComponent />
-      <EconomicModeControl />
-      <EconomicModeControlPanel />
     </QueryClientProvider>
   )
 }
