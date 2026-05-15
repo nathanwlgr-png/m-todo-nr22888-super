@@ -7,7 +7,9 @@ import { useAIConsumption } from '@/hooks/useAIConsumption';
 
 export default function FloatingCreditsButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const { consumption } = useAIConsumption();
+  const { consumption = {} } = useAIConsumption() || {};
+
+  if (!consumption?.percentageUsed) return null;
 
   const creditBreakdown = [
     { label: 'Análise Preditiva', used: 120, limit: 200 },
