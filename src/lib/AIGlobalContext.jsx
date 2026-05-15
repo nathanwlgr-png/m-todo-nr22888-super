@@ -1,44 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
-const AIGlobalContext = React.createContext(null);
+const AIGlobalContext = createContext(null);
 
 export { AIGlobalContext };
 
 export const AIGlobalProvider = ({ children }) => {
-  const [aiEnabled, setAiEnabled] = React.useState(true);
-  const [powerMode, setPowerMode] = React.useState('profissional');
-  const [creditsEstimate, setCreditsEstimate] = React.useState({ daily: 0, monthly: 0, remaining: 0 });
+  const [aiEnabled, setAiEnabled] = useState(true);
+  const [powerMode, setPowerMode] = useState('profissional');
+  const [creditsEstimate, setCreditsEstimate] = useState({ daily: 0, monthly: 0, remaining: 0 });
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_ai_enabled');
       if (stored !== null) setAiEnabled(JSON.parse(stored));
     } catch (e) {}
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_power_mode');
       if (stored) setPowerMode(stored);
     } catch (e) {}
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_credits_estimate');
       if (stored) setCreditsEstimate(JSON.parse(stored));
     } catch (e) {}
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('seamty_ai_enabled', JSON.stringify(aiEnabled));
   }, [aiEnabled]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('seamty_power_mode', powerMode);
   }, [powerMode]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('seamty_credits_estimate', JSON.stringify(creditsEstimate));
   }, [creditsEstimate]);
 
@@ -64,7 +64,7 @@ export const AIGlobalProvider = ({ children }) => {
 };
 
 export const useAIGlobal = () => {
-  const context = React.useContext(AIGlobalContext);
+  const context = useContext(AIGlobalContext);
   if (!context) {
     return {
       aiEnabled: true,
