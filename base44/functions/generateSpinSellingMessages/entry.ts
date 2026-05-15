@@ -9,6 +9,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    // Validação de API key
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!apiKey) {
+      return Response.json({
+        error: 'IA temporariamente indisponível',
+        message: 'Configure OPENAI_API_KEY nos secrets',
+      }, { status: 503 });
+    }
+
     const payload = await req.json();
     const { 
       client_id, 
@@ -28,15 +37,16 @@ Deno.serve(async (req) => {
     const recentContact = daysLastContact < 7;
     const coldProspect = daysLastContact > 90;
 
-    // Chamada ao OpenAI para gerar mensagens SPIN
+    // Chamada ao OpenAI para gerar mensagens SPIN (usando mini para economizar)
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o-mini', // Modelo econômico
+        max_tokens: 300, // Limita resposta
         messages: [
           {
             role: 'system',
@@ -76,7 +86,18 @@ Gere 3 mensagens SPIN diferentes, cada uma explorando um ângulo diferente de ve
 
     if (!response.ok) {
       const err = await response.json();
-      return Response.json({ error: `OpenAI: ${err.error?.message}` }, { status: 400 });
+      const errorMsg = err.error?.message || 'Erro ao chamar OpenAI';
+      
+      // Detecta se é problema de saldo
+      if (errorMsg.includes('insufficient_quota') || errorMsg.includes('rate_limit')) {
+        return Response.json({
+          error: 'IA temporariamente indisponível',
+          hint: 'Sem créditos ou rate limit atingido',
+          code: 'API_QUOTA_EXCEEDED',
+        }, { status: 429 });
+      }
+      
+      return Response.json({ error: `OpenAI: ${errorMsg}` }, { status: 400 });
     }
 
     const data = await response.json();

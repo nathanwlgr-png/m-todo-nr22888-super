@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Copy, Send, CheckCircle2, X, Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import EconomicMode from '@/lib/EconomicMode';
+import AIUnavailableNotice from '@/components/AIUnavailableNotice';
 
 export default function GenerateWhatsAppIntegrated() {
   const [clientId, setClientId] = useState('');
@@ -12,6 +14,7 @@ export default function GenerateWhatsAppIntegrated() {
   const [selectedMessageIdx, setSelectedMessageIdx] = useState(null);
   const [showApproval, setShowApproval] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [economicStatus, setEconomicStatus] = useState(EconomicMode.getStatus());
   const messagesEndRef = useRef(null);
 
   // Busca dados do cliente
@@ -46,6 +49,12 @@ export default function GenerateWhatsAppIntegrated() {
       return;
     }
 
+    // Valida modo econômico
+    if (!EconomicMode.canMakeAICall()) {
+      toast.error('Limite de créditos atingido. Desative Modo Econômico para continuar.');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await base44.functions.invoke('generateSpinSellingMessages', {
@@ -65,6 +74,8 @@ export default function GenerateWhatsAppIntegrated() {
       toast.error(`Erro ao gerar mensagens: ${err.message}`);
     } finally {
       setLoading(false);
+      EconomicMode.addCreditUsage(1);
+      setEconomicStatus(EconomicMode.getStatus());
     }
   };
 
@@ -117,6 +128,13 @@ export default function GenerateWhatsAppIntegrated() {
         <div className="mb-6">
           <h1 className="text-3xl font-black text-orange-400 mb-2">💬 WhatsApp SPIN Selling</h1>
           <p className="text-orange-200 text-sm">Gere mensagens personalizadas baseadas no perfil do cliente</p>
+          
+          {/* Status Econômico */}
+          {economicStatus.enabled && (
+            <div className="mt-3 p-2 rounded bg-green-950/30 border border-green-500/30 text-[10px] text-green-400">
+              💚 Modo Econômico Ativo · {economicStatus.remainingCalls} chamadas restantes
+            </div>
+          )}
         </div>
 
         {/* Busca Cliente */}
