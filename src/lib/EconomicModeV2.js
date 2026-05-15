@@ -11,6 +11,12 @@ class EconomicModeV2 {
     this.DAILY_LIMIT = this.MONTHLY_BUDGET / 30; // ~0.67/dia
     this.TOKEN_PRICE = 0.00002; // preço estimado por token (modelo mini)
     
+    // Inicializar valores como números (não undefined)
+    this.monthlySpent = 0;
+    this.dailySpent = 0;
+    this.callsUsedToday = 0;
+    this.enabled = true;
+    
     // Estado
     this.state = {
       enabled: true,
@@ -153,20 +159,24 @@ class EconomicModeV2 {
   getStatus() {
     this.resetDailyIfNeeded();
     
-    const percentageUsed = (this.monthlySpent / this.MONTHLY_BUDGET) * 100;
+    // Garantir números válidos
+    const spent = typeof this.monthlySpent === 'number' ? this.monthlySpent : 0;
+    const dailySpent = typeof this.dailySpent === 'number' ? this.dailySpent : 0;
+    
+    const percentageUsed = (spent / this.MONTHLY_BUDGET) * 100;
     const modeLevel = percentageUsed >= 80 ? 'ECONOMICO' : 'NORMAL';
     const gptMode = percentageUsed >= 95 ? 'gpt-4.1-mini' : 'gpt-4o-mini';
 
     return {
-      enabled: this.enabled,
+      enabled: this.enabled || true,
       monthlyBudget: this.MONTHLY_BUDGET,
-      monthlySpent: parseFloat(this.monthlySpent.toFixed(2)),
-      dailySpent: parseFloat(this.dailySpent.toFixed(2)),
+      monthlySpent: parseFloat(spent.toFixed(2)),
+      dailySpent: parseFloat(dailySpent.toFixed(2)),
       dailyLimit: this.DAILY_LIMIT,
-      remainingMonthly: parseFloat((this.MONTHLY_BUDGET - this.monthlySpent).toFixed(2)),
+      remainingMonthly: parseFloat((this.MONTHLY_BUDGET - spent).toFixed(2)),
       percentageUsed: Math.round(percentageUsed),
-      callsUsedToday: this.callsUsedToday,
-      maxCallsPerDay: this.maxCallsPerDay,
+      callsUsedToday: this.callsUsedToday || 0,
+      maxCallsPerDay: this.maxCallsPerDay || 50,
       modeLevel,
       gptModel: gptMode,
       daysRemaining: this.getDaysRemainingInMonth(),
@@ -299,6 +309,12 @@ class EconomicModeV2 {
    * Salva estado no localStorage
    */
   save() {
+    // Sincronizar valores principais no state
+    this.state.monthlySpent = this.monthlySpent;
+    this.state.dailySpent = this.dailySpent;
+    this.state.callsUsedToday = this.callsUsedToday;
+    this.state.enabled = this.enabled;
+    
     const data = {
       state: this.state,
       consumptionLog: this.consumptionLog
@@ -316,6 +332,12 @@ class EconomicModeV2 {
         const parsed = JSON.parse(data);
         this.state = { ...this.state, ...parsed.state };
         this.consumptionLog = parsed.consumptionLog || [];
+        
+        // Sincronizar valores principais do state
+        this.monthlySpent = this.state.monthlySpent || 0;
+        this.dailySpent = this.state.dailySpent || 0;
+        this.callsUsedToday = this.state.callsUsedToday || 0;
+        this.enabled = this.state.enabled !== false;
         
         // Verifica se é novo mês
         const now = new Date();
