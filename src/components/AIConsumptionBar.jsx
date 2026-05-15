@@ -53,7 +53,7 @@ export default function AIConsumptionBar({ consumption }) {
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <p className="text-xs text-slate-600">{pct.toFixed(1)}% utilizado</p>
+           <p className="text-xs text-slate-600">{(pct || 0).toFixed(1)}% utilizado</p>
           <p className={`text-xs font-bold ${status === 'critical' ? 'text-red-600' : status === 'warning' ? 'text-yellow-600' : 'text-green-600'}`}>
             {remaining > 0 ? `R$ ${remaining.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} restantes` : '⚠️ Limite atingido'}
           </p>

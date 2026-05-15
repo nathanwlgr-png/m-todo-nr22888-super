@@ -25,8 +25,8 @@ export default function CRMStatsBar() {
     return d.getMonth() === mesAtual.getMonth() && d.getFullYear() === mesAtual.getFullYear();
   });
   const equipMes = vendsMes.length;
-  const valorMes = vendsMes.reduce((a, s) => a + (s.sale_value || 0), 0);
-  const valorMesStr = valorMes >= 1000 ? `R$${(valorMes / 1000).toFixed(0)}k` : `R$${valorMes}`;
+  const valorMes = vendsMes.reduce((a, s) => a + (s.sale_value || 0), 0) || 0;
+  const valorMesStr = valorMes >= 1000 ? `R$${(valorMes / 1000).toFixed(0)}k` : `R$${valorMes.toFixed(0)}`;
 
   const stats = [
     { label: 'Clientes CRM', value: clients.length, Icon: Users, color: '#6366f1', link: 'Clients' },
