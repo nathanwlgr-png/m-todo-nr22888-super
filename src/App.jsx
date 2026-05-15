@@ -19,6 +19,7 @@ import ComingSoonPage from '@/components/ComingSoonPage';
 import HomePageWithLayout from '@/components/HomePageWithLayout';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';
+import { ToastProvider } from '@/components/ui/use-toast';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
@@ -221,13 +222,15 @@ function App() {
       <Router>
         <AuthProvider>
           <AIGlobalProvider>
-            <NavigationTracker />
-            <OfflineIndicator />
-            <OfflineBanner />
-            <AuthenticatedApp />
-            <PWAInstallPrompt />
-            <PWAInstallButtonFloating />
-            <ToasterComponent />
+            <ToastProvider>
+              <NavigationTracker />
+              <OfflineIndicator />
+              <OfflineBanner />
+              <AuthenticatedApp />
+              <PWAInstallPrompt />
+              <PWAInstallButtonFloating />
+              <ToasterComponent />
+            </ToastProvider>
           </AIGlobalProvider>
         </AuthProvider>
       </Router>
