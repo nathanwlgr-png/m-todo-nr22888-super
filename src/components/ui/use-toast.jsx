@@ -144,14 +144,6 @@ function toast({ ...props }) {
 }
 
 function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within ToastProvider");
-  }
-  return context;
-}
-
-function ToastProvider({ children }) {
   const [state, setState] = useState(memoryState);
 
   useEffect(() => {
@@ -164,17 +156,15 @@ function ToastProvider({ children }) {
     };
   }, []);
 
-  const value = {
+  return {
     ...state,
     toast,
     dismiss: (toastId) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
   };
+}
 
-  return (
-    <ToastContext.Provider value={value}>
-      {children}
-    </ToastContext.Provider>
-  );
+function ToastProvider({ children }) {
+  return children;
 }
 
 export { useToast, toast, ToastProvider };
