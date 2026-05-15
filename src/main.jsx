@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-// REBUILD CACHE BUSTER: 2026-05-15T13:37:15Z
+// REBUILD CACHE BUSTER: 2026-05-15T13:42:30Z
 import { OfflineManager } from './lib/OfflineManager'
 import { AICache } from './lib/AICache.js'
 
