@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';

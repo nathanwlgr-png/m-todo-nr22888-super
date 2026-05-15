@@ -1,8 +1,4 @@
-import * as React from 'react';
-const { useState, lazy, Suspense } = React;
-import QuickActionsBar from '@/components/QuickActionsBar';
-import VendedorMenu from '@/components/VendedorMenu';
-import { getModo } from '@/lib/ModoVendedor';
+import React, { useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -17,6 +13,16 @@ import PWAStatusChecklist from '@/components/PWAStatusChecklist';
 import PWAForceUpdate from '@/components/PWAForceUpdate';
 import OfflineSyncButton from '@/components/OfflineSyncButton';
 import { Button } from '@/components/ui/button';
+import QuickActionsBar from '@/components/QuickActionsBar';
+import {
+  Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
+  Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
+  FileText, Search, Bell, Sparkles, Database, ChevronRight,
+  Activity, DollarSign, Map, Bot, Workflow,
+  BookOpen, Shield, LayoutDashboard, Hash,
+  Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
+  Trash2, RefreshCw, Mic, WifiOff
+} from 'lucide-react';
 
 // Componentes pesados — carregam DEPOIS da UI principal aparecer
 const SniperDoDia        = lazy(() => import('@/components/SniperDoDia'));
@@ -30,16 +36,6 @@ const GPSAutoDiscovery   = lazy(() => import('@/components/GPSAutoDiscovery'));
 const CityClinicAnalyzer = lazy(() => import('@/components/CityClinicAnalyzer'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3" style={{ background: '#1a1a1a' }} />;
-
-import {
-    Users, UserPlus, CheckSquare, Calendar, BarChart3, MessageSquare,
-    Zap, Route, Settings, Brain, Target, TrendingUp, Award, Package,
-    FileText, Search, Bell, Sparkles, Database, ChevronRight,
-    Activity, DollarSign, Map, Bot, Workflow,
-    BookOpen, Shield, LayoutDashboard, Hash,
-    Globe, AreaChart, PieChart, ClipboardList, X, Eye, AlertTriangle,
-    Trash2, RefreshCw, Mic, WifiOff, Download
-  } from 'lucide-react';
 
 
 const ALL_PAGES = [
