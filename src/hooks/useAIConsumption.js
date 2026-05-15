@@ -1,5 +1,4 @@
-import * as React from 'react';
-const { useState, useEffect, useCallback } = React;
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 
 const MONTHLY_LIMIT = 1000; // R$1.000,00 referência
