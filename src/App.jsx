@@ -19,8 +19,6 @@ import ComingSoonPage from '@/components/ComingSoonPage';
 import HomePageWithLayout from '@/components/HomePageWithLayout';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';
-import EconomicModeControl from '@/components/EconomicModeControl';
-import EconomicModeControlPanel from '@/components/EconomicModeControlPanel';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
@@ -113,10 +111,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <>
-      <EconomicModeControl />
-      <EconomicModeControlPanel />
-      <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ── HOME ── */}
           <Route path="/" element={<HomePageWithLayout />} />
@@ -223,9 +218,8 @@ const AuthenticatedApp = () => {
         <Route path="/MasterControlPanel" element={<LayoutWrapper currentPageName="MasterControlPanel"><ComingSoonPage /></LayoutWrapper>} />
 
         <Route path="*" element={<LayoutWrapper currentPageName="404"><ComingSoonPage moduleName="404" /></LayoutWrapper>} />
-        </Routes>
-      </Suspense>
-    </>
+      </Routes>
+    </Suspense>
   );
 };
 
