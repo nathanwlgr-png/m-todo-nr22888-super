@@ -299,6 +299,22 @@ export default function Home() {
         {/* Manual PDF */}
         <CRMManualPDF />
 
+        {/* 🧠 Central IA Master */}
+        <Link to={createPageUrl('CentralIAMaster')} className="block mb-3">
+          <div className="rounded-2xl p-4 flex items-center justify-between text-white shadow-xl" style={{ background: 'linear-gradient(135deg, #0a0a1a, #1a0050)', border: '1px solid rgba(139,92,246,0.5)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.5)' }}>
+                <Brain className="w-6 h-6 text-purple-400" />
+              </div>
+              <div>
+                <p className="font-black text-base text-purple-400">🧠 Central IA Master</p>
+                <p className="text-purple-200 text-xs">GPT-4o • Briefing • Ranking • WhatsApp • Marketing</p>
+              </div>
+            </div>
+            <ChevronRight className="w-6 h-6 text-purple-400" />
+          </div>
+        </Link>
+
         {/* Acesso Rápido WhatsApp Master — AGENTE ÚNICO */}
         <a
           href={base44.agents.getWhatsAppConnectURL('whatsapp_master_agent')}

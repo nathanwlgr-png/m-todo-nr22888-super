@@ -58,6 +58,7 @@ const SmartRouteOptimizer = lazy(() => import('./pages/SmartRouteOptimizer'));
 const OfflineModePage = lazy(() => import('./pages/OfflineMode'));
 const SalesCommandCenter = lazy(() => import('./pages/SalesCommandCenter'));
 const RouteAuditReport = lazy(() => import('./pages/RouteAuditReport'));
+const CentralIAMaster = lazy(() => import('./pages/CentralIAMaster'));
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -144,6 +145,7 @@ const AuthenticatedApp = () => {
         <Route path="/SmartRouteOptimizer" element={<LayoutWrapper currentPageName="SmartRouteOptimizer"><SmartRouteOptimizer /></LayoutWrapper>} />
         <Route path="/SalesCommandCenter" element={<LayoutWrapper currentPageName="SalesCommandCenter"><SalesCommandCenter /></LayoutWrapper>} />
         <Route path="/RouteAuditReport" element={<LayoutWrapper currentPageName="RouteAuditReport"><RouteAuditReport /></LayoutWrapper>} />
+        <Route path="/CentralIAMaster" element={<LayoutWrapper currentPageName="CentralIAMaster"><CentralIAMaster /></LayoutWrapper>} />
         <Route path="/OfflineMode" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
         <Route path="/offline" element={<LayoutWrapper currentPageName="OfflineMode"><OfflineModePage /></LayoutWrapper>} />
 
