@@ -20,6 +20,7 @@ import HomePageWithLayout from '@/components/HomePageWithLayout';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';
 import EconomicModeControl from '@/components/EconomicModeControl';
+import EconomicModeControlPanel from '@/components/EconomicModeControlPanel';
 
 // Home carrega imediatamente (página principal)
 import Home from './pages/Home';
@@ -238,6 +239,7 @@ function App() {
       </AIGlobalProvider>
       <ToasterComponent />
       <EconomicModeControl />
+      <EconomicModeControlPanel />
     </QueryClientProvider>
   )
 }
