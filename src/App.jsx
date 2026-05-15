@@ -81,6 +81,7 @@ const GlobalSearch = lazy(() => import('./pages/GlobalSearch'));
 const GlobalCommandCenter = lazy(() => import('./pages/GlobalCommandCenter'));
 const NotificationsCenter = lazy(() => import('./pages/NotificationsCenter'));
 const PipelineView = lazy(() => import('./pages/PipelineView'));
+const GenerateWhatsAppIntegrated = lazy(() => import('./pages/GenerateWhatsAppIntegrated'));
 
 const PageLoader = () => <AppLoadingScreen />;
 
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
         <Route path="/GlobalCommandCenter" element={<LayoutWrapper currentPageName="GlobalCommandCenter"><GlobalCommandCenter /></LayoutWrapper>} />
         <Route path="/NotificationsCenter" element={<LayoutWrapper currentPageName="NotificationsCenter"><NotificationsCenter /></LayoutWrapper>} />
         <Route path="/PipelineView" element={<LayoutWrapper currentPageName="PipelineView"><PipelineView /></LayoutWrapper>} />
+        <Route path="/GenerateWhatsAppIntegrated" element={<LayoutWrapper currentPageName="GenerateWhatsAppIntegrated"><GenerateWhatsAppIntegrated /></LayoutWrapper>} />
 
         {/* ── COMING SOON — ainda não implementadas ── */}
         <Route path="/PossibleSales" element={<LayoutWrapper currentPageName="PossibleSales"><ComingSoonPage /></LayoutWrapper>} />
