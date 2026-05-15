@@ -1,67 +1,54 @@
-import * as React from 'react';
-const { createContext, useState, useEffect, useContext } = React;
+import React from 'react';
 
-export const AIGlobalContext = createContext(null);
+const AIGlobalContext = React.createContext(null);
+
+export { AIGlobalContext };
 
 export const AIGlobalProvider = ({ children }) => {
-  const [aiEnabled, setAiEnabled] = useState(true);
-  const [powerMode, setPowerMode] = useState('profissional');
-  const [creditsEstimate, setCreditsEstimate] = useState({ daily: 0, monthly: 0, remaining: 0 });
+  const [aiEnabled, setAiEnabled] = React.useState(true);
+  const [powerMode, setPowerMode] = React.useState('profissional');
+  const [creditsEstimate, setCreditsEstimate] = React.useState({ daily: 0, monthly: 0, remaining: 0 });
 
-  // Inicializa do localStorage uma vez quando o componente monta
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_ai_enabled');
       if (stored !== null) setAiEnabled(JSON.parse(stored));
     } catch (e) {}
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_power_mode');
       if (stored) setPowerMode(stored);
     } catch (e) {}
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       const stored = localStorage.getItem('seamty_credits_estimate');
       if (stored) setCreditsEstimate(JSON.parse(stored));
     } catch (e) {}
   }, []);
 
-  // Persiste mudanças
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('seamty_ai_enabled', JSON.stringify(aiEnabled));
   }, [aiEnabled]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('seamty_power_mode', powerMode);
   }, [powerMode]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('seamty_credits_estimate', JSON.stringify(creditsEstimate));
   }, [creditsEstimate]);
 
-  const toggleAI = (enabled) => {
-    setAiEnabled(enabled);
-  };
-
-  const setPowerModeValue = (mode) => {
-    setPowerMode(mode);
-  };
-
-  const updateCreditsEstimate = (daily, monthly, remaining) => {
-    setCreditsEstimate({ daily, monthly, remaining });
-  };
-
   const value = {
     aiEnabled,
-    toggleAI,
+    toggleAI: (enabled) => setAiEnabled(enabled),
     powerMode,
-    setPowerMode: setPowerModeValue,
+    setPowerMode: (mode) => setPowerMode(mode),
     creditsEstimate,
-    updateCreditsEstimate,
+    updateCreditsEstimate: (daily, monthly, remaining) => setCreditsEstimate({ daily, monthly, remaining }),
     shouldUseAI: (requiredMode = 'profissional') => {
       if (!aiEnabled) return false;
       const modePriority = { economico: 0, profissional: 1, supremo: 2, absoluto: 3 };
@@ -77,9 +64,8 @@ export const AIGlobalProvider = ({ children }) => {
 };
 
 export const useAIGlobal = () => {
-  const context = useContext(AIGlobalContext);
+  const context = React.useContext(AIGlobalContext);
   if (!context) {
-    // Retorna valores padrão em vez de lançar erro para evitar crashes
     return {
       aiEnabled: true,
       toggleAI: () => {},
