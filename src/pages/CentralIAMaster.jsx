@@ -1,5 +1,4 @@
-import * as React from 'react';
-const { useState, useCallback } = React;
+import React, { useState, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import {

@@ -31,9 +31,9 @@ export default function AIConsumptionBar({ consumption }) {
     return <TrendingDown className="w-5 h-5 text-green-600" />;
   };
 
-  const pct = percentageUsed ?? 0;
-  const spent = monthlySpent ?? 0;
-  const remaining = creditsRemaining ?? 0;
+  const pct = Number(percentageUsed || 0);
+  const spent = Number(monthlySpent || 0);
+  const remaining = Number(creditsRemaining || 0);
 
   return (
     <Card className="border-2 bg-slate-50 mb-3">
@@ -53,7 +53,7 @@ export default function AIConsumptionBar({ consumption }) {
         </div>
 
         <div className="flex items-center justify-between mt-2">
-           <p className="text-xs text-slate-600">{(pct || 0).toFixed(1)}% utilizado</p>
+           <p className="text-xs text-slate-600">{pct.toFixed(1)}% utilizado</p>
           <p className={`text-xs font-bold ${status === 'critical' ? 'text-red-600' : status === 'warning' ? 'text-yellow-600' : 'text-green-600'}`}>
             {remaining > 0 ? `R$ ${remaining.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} restantes` : '⚠️ Limite atingido'}
           </p>
