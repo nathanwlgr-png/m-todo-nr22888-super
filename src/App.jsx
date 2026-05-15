@@ -215,13 +215,13 @@ const AuthenticatedApp = () => {
   );
 };
 
-// ── REBUILD TRIGGER: 2026-05-15T13:27 ──
+// ── REBUILD TRIGGER: 2026-05-15T13:38 ──
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
-      <Router>
-        <AuthProvider>
-          <AIGlobalProvider>
+      <AIGlobalProvider>
+        <Router>
+          <AuthProvider>
             <NavigationTracker />
             <OfflineIndicator />
             <OfflineBanner />
@@ -229,9 +229,9 @@ function App() {
             <PWAInstallPrompt />
             <PWAInstallButtonFloating />
             <ToasterComponent />
-          </AIGlobalProvider>
-        </AuthProvider>
-      </Router>
+          </AuthProvider>
+        </Router>
+      </AIGlobalProvider>
     </QueryClientProvider>
   )
 }
