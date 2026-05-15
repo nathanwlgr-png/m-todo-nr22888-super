@@ -28,16 +28,28 @@ export class OfflineDataSync {
             // Fetch online
             const onlineData = await base44.entities[entity].list('-updated_date', 1000).catch(() => []);
             
-            // Merge inteligente - resolver conflitos por timestamp
+            // Merge inteligente — resolver conflitos por timestamp (ambos em ms)
             for (const local of batch) {
               const online = onlineData.find(o => o.id === local.id);
-              if (!online || local._cached_at > online.updated_date) {
-                // Enviar para server
+              // Converter updated_date do servidor para ms para comparação correta
+              const onlineTs = online?.updated_date ? new Date(online.updated_date).getTime() : 0;
+              const localTs = local._cached_at || 0;
+              
+              if (!online) {
+                // Registro existe localmente mas não no servidor — não enviar update (pode ter sido deletado)
+                console.log(`[SYNC] ${entity}/${local.id} não encontrado online — ignorando`);
+              } else if (localTs > onlineTs) {
+                // Local é MAIS RECENTE que o servidor → enviar
                 if (local.id) {
-                  await base44.entities[entity].update(local.id, local).catch(() => {
+                  const { _cached_at, ...cleanData } = local; // não enviar campo interno ao servidor
+                  await base44.entities[entity].update(local.id, cleanData).catch((err) => {
+                    console.warn(`[SYNC] Falha ao atualizar ${entity}/${local.id}:`, err);
                     failed++;
                   });
                 }
+              } else {
+                // Servidor é mais recente — preservar dado do servidor, não sobrescrever
+                console.log(`[SYNC] ${entity}/${local.id} — servidor é mais recente, preservando online`);
               }
             }
             synced += batch.length - failed;

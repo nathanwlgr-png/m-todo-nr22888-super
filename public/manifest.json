@@ -1,109 +1,29 @@
 {
-  "name": "SEAMATY NR22888",
-  "short_name": "SEAMATY NR22",
-  "description": "CRM Veterinário Premium com IA, Dashboard Executivo, Rotas Otimizadas, WhatsApp Master",
+  "name": "NR22888 — CRM Seamaty",
+  "short_name": "NR22888",
+  "description": "CRM Veterinário Seamaty Brasil — NR22888 Master IA",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#0f172a",
-  "theme_color": "#ff8c00",
-  "categories": ["business", "productivity"],
-  "screenshots": [
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
+  "orientation": "any",
+  "theme_color": "#ff6b00",
+  "background_color": "#ffffff",
+  "lang": "pt-BR",
+  "scope": "/",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "https://media.base44.com/images/public/6997e09fd222346f10842c38/253b40388_file_00000000151071fbb26c5abe25068f16.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "https://media.base44.com/images/public/6997e09fd222346f10842c38/253b40388_file_00000000151071fbb26c5abe25068f16.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192x192-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icon-512x512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "shortcuts": [
-    {
-      "name": "Clientes",
-      "short_name": "Clientes",
-      "description": "Abrir lista de clientes",
-      "url": "/Clients",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Tarefas",
-      "short_name": "Tarefas",
-      "description": "Abrir tarefas unificadas",
-      "url": "/TasksUnified",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Busca Global",
-      "short_name": "Busca",
-      "description": "Busca rápida em todo o sistema",
-      "url": "/GlobalSearch",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "share_target": {
-    "action": "/share",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url",
-      "files": [
-        {
-          "name": "media",
-          "accept": ["image/*", "video/*"]
-        }
-      ]
-    }
-  }
+  "categories": ["business", "productivity"],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

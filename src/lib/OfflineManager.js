@@ -79,19 +79,48 @@ export class OfflineManager {
 
   // ─── SYNC QUEUE ───────────────────────────────────────────────────
 
+  // Entidades críticas que NUNCA devem ser descartadas da fila
+  static CRITICAL_ENTITIES = ['Client', 'Lead', 'Visit', 'Sale', 'Task'];
+  static QUEUE_HARD_LIMIT = 500;   // limite aumentado de 200 → 500
+  static QUEUE_TRIM_TO    = 400;   // ao limpar, manter as 400 mais recentes
+
   static async queueOperation(operation) {
     // operation: { entity, action, data, description }
     const db = await this.initDB();
     
-    // Proteger contra crescimento infinito (máx 200 operações)
     const pending = await this.getPendingOperations();
-    if (pending.length >= 200) {
-      // Se limite atingido, manter as 150 mais recentes
-      const sorted = pending.sort((a, b) => b._queued_at - a._queued_at);
-      const toDelete = sorted.slice(150);
-      const tx = db.transaction('SyncQueue', 'readwrite');
-      await Promise.all(toDelete.map(op => tx.store.delete(op.id)));
-      await tx.done;
+    if (pending.length >= this.QUEUE_HARD_LIMIT) {
+      // Separar críticas e não-críticas
+      const critical = pending.filter(op => this.CRITICAL_ENTITIES.includes(op.entity));
+      const nonCritical = pending.filter(op => !this.CRITICAL_ENTITIES.includes(op.entity));
+
+      // Calcular quantas não-críticas precisamos remover para voltar ao limite
+      const removeCount = pending.length - this.QUEUE_TRIM_TO;
+      
+      if (removeCount > 0) {
+        // Só descartar não-críticas, ordenadas pelas mais antigas
+        const sorted = nonCritical.sort((a, b) => a._queued_at - b._queued_at);
+        const toDelete = sorted.slice(0, removeCount);
+
+        if (toDelete.length > 0) {
+          console.warn(`[OFFLINE] SyncQueue: descartando ${toDelete.length} ops não-críticas antigas (limite ${this.QUEUE_HARD_LIMIT} atingido)`);
+          const tx = db.transaction('SyncQueue', 'readwrite');
+          await Promise.all(toDelete.map(op => tx.store.delete(op.id)));
+          await tx.done;
+        }
+
+        // Se ainda lotado (só críticas), registrar aviso mas NÃO descartar
+        const remaining = await this.getPendingOperations();
+        if (remaining.length >= this.QUEUE_HARD_LIMIT) {
+          console.error(`[OFFLINE] SyncQueue CHEIO com ${remaining.length} ops críticas — não descartando. Sincronize o dispositivo!`);
+          // Salvar alerta no Meta para UI exibir
+          await this.setMeta('sync_queue_overflow', {
+            count: remaining.length,
+            at: Date.now(),
+            message: 'Fila offline cheia! Conecte-se à internet para sincronizar dados críticos.'
+          });
+        }
+      }
     }
     
     await db.add('SyncQueue', {
