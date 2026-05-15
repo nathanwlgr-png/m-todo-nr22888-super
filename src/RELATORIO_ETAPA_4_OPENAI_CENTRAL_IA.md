@@ -1,7 +1,13 @@
 # RELATÓRIO ETAPA 4 — CAMADA OPENAI / CENTRAL IA MASTER
-## NR22888 — GPT-4o Integrado ao CRM Seamaty
+## NR22888 — GPT-4o Integrado ao CRM Veterinário Seamaty
 **Data:** 15/05/2026  
-**Status:** ✅ Implementado
+**Status:** ✅ Implementado e ativo
+
+---
+
+## RESUMO EXECUTIVO
+
+A Etapa 4 criou a camada real de IA com OpenAI GPT-4o dentro do NR22888. O sistema agora possui um copiloto comercial inteligente que lê dados reais do CRM, monta contexto, chama a API OpenAI no backend (nunca expondo a chave no frontend) e retorna respostas estruturadas. Todas as funcionalidades existentes foram preservadas.
 
 ---
 
@@ -10,229 +16,252 @@
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
 | `entities/AIInteractionLog.json` | Entidade | Log de todas as interações com a IA |
-| `functions/aiCommandCenter` | Backend | Orquestrador central OpenAI + dados CRM |
-| `pages/CentralIAMaster.jsx` | Página | Interface visual da Central IA |
+| `functions/aiCommandCenter` | Função backend | Orquestrador OpenAI com 8 ações |
+| `pages/CentralIAMaster.jsx` | Página | Interface UI para o copiloto IA |
 
 ## ARQUIVOS ALTERADOS
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `App.jsx` | Adicionado lazy import + rota `/CentralIAMaster` |
-| `pages/Home` | Botão 🧠 Central IA Master (roxo, leve, sem componente pesado) |
+| `App.jsx` | + import lazy `CentralIAMaster` + Route `/CentralIAMaster` |
+| `pages/Home` | + Botão 🧠 Central IA Master (link direto, sem componente pesado) |
 
 ---
 
 ## VARIÁVEIS DE AMBIENTE NECESSÁRIAS
 
-| Variável | Obrigatória | Como obter |
-|----------|-------------|------------|
-| `OPENAI_API_KEY` | ✅ SIM | https://platform.openai.com/api-keys |
+| Variável | Onde obter | Obrigatória |
+|----------|-----------|-------------|
+| `OPENAI_API_KEY` | https://platform.openai.com/api-keys | ✅ SIM |
 
 **Como configurar:**
-1. Acesse Dashboard → Settings → Environment Variables
-2. Adicione `OPENAI_API_KEY` com o valor da sua chave
-3. A função `aiCommandCenter` detecta automaticamente
+1. Dashboard → Settings → Environment Variables
+2. Adicionar: `OPENAI_API_KEY` = `sk-proj-...`
+3. Aguardar deploy automático (< 30 segundos)
+
+---
+
+## ARQUITETURA DA FUNÇÃO aiCommandCenter
+
+```
+Frontend (CentralIAMaster)
+    │
+    ▼ base44.functions.invoke('aiCommandCenter', payload)
+    │
+Backend (functions/aiCommandCenter)
+    │
+    ├─ 1. Verifica autenticação (base44.auth.me())
+    ├─ 2. Valida action (whitelist de 8 ações)
+    ├─ 3. buildContext() → busca dados reais do CRM
+    │       ├─ Client, Task, Visit, Sale, Lead (paralelo)
+    │       └─ Limites conservadores (max 30 clientes, 20 tasks...)
+    ├─ 4. buildUserMessage() → monta contexto textual estruturado
+    ├─ 5. callOpenAI() → GPT-4o-mini via HTTPS (chave nunca sai do backend)
+    ├─ 6. Salva AIInteractionLog (async, não bloqueia resposta)
+    └─ 7. Retorna { success, action, response, tokens_used, duration_ms }
+```
+
+---
+
+## AÇÕES DISPONÍVEIS
+
+### 1. `briefing` — Briefing Diário
+**Dados buscados:** Clientes(30) + Tasks(20) + Visits(10) + Sales(20) + Leads(10)
+**Retorna:**
+- Top 5 ações do dia
+- Clientes prioritários
+- Rota sugerida (se GPS disponível)
+- Alerta principal
+- Postagem sugerida para Instagram
+- Próximo passo
+
+### 2. `ranking` — Ranking do Dia
+**Dados buscados:** Clientes(30) + Tasks(20) + Visits(10) + Sales(20) + Leads(10)
+**Retorna:**
+- Top 10 clientes por: dias sem contato, proposta aberta, sem equipamento, score, numerologia
+
+### 3. `prepare_visit` — Preparar Visita
+**Requer:** `client_id`
+**Dados buscados:** Cliente + últimas 5 visitas + últimas 5 tarefas + últimas 5 vendas
+**Retorna:**
+- Resumo do cliente
+- Perguntas SPIN (Situação, Problema, Implicação, Necessidade)
+- Objeções prováveis e como contornar
+- Abordagem ideal
+- Fechamento sugerido
+- Mensagem WhatsApp pré-visita (para aprovação)
+
+### 4. `whatsapp` — Gerar WhatsApp
+**Requer:** `client_id`
+**Retorna:** 3 versões — curta / consultiva / fechamento forte
+
+### 5. `marketing` — Marketing IA
+**Retorna:**
+- Legenda Instagram (tutor + veterinário)
+- Ideia de Story
+- Campanha por equipamento
+- CTA
+- Respeita todas as regras técnicas Seamaty
+
+### 6. `route` — Rota Inteligente
+**Dados buscados:** Clientes(20) + Visitas agendadas(10)
+**GPS:** Usado se disponível
+**Retorna:** Rota otimizada com justificativa
+
+### 7. `field_research` — Investigação de Campo
+**Dados buscados:** Leads(20)
+**Retorna:** Leads próximos, lacunas e sugestões de captura
+
+### 8. `numerology` — Numerologia Comercial
+**Retorna:** Análise numerológica para timing de vendas
 
 ---
 
 ## ENTIDADE AIInteractionLog
 
-Campos registrados a cada chamada:
-- `user_message` — mensagem original do usuário
-- `ai_response` — resposta da IA (primeiros 2000 chars)
-- `action_type` — tipo de ação (briefing, ranking, etc.)
-- `client_id` / `client_name` — cliente relacionado
-- `source` — origem (central_ia_master, whatsapp_agent, etc.)
-- `tokens_used` — consumo real OpenAI
-- `model_used` — modelo utilizado
-- `duration_ms` — tempo de resposta
-- `success` — se a chamada teve sucesso
-
-Isso alimenta o `useAIConsumption` com dados reais de tokens (Etapa 3).
-
----
-
-## FUNÇÃO aiCommandCenter
-
-### Payload aceito:
 ```json
 {
-  "action": "briefing | ranking | prepare_visit | whatsapp | marketing | route | field_research | numerology | general",
-  "message": "texto livre do usuário",
-  "client_id": "ID do cliente (opcional)",
-  "location": { "lat": -23.5, "lng": -46.6 }
+  "name": "AIInteractionLog",
+  "fields": [
+    "user_message",      // O que o Nathan digitou
+    "ai_response",       // Resposta da IA (max 2000 chars salvo)
+    "action_type",       // briefing | ranking | prepare_visit | ...
+    "client_id",         // ID do cliente (opcional)
+    "client_name",       // Nome (cache)
+    "source",            // central_ia_master | whatsapp_agent | ...
+    "tokens_used",       // Tokens OpenAI consumidos
+    "model_used",        // gpt-4o-mini
+    "duration_ms",       // Tempo de resposta
+    "success"            // true/false
+  ]
 }
 ```
 
-### Fluxo interno:
-```
-1. Validar autenticação (base44.auth.me())
-2. Verificar OPENAI_API_KEY presente
-3. buildContext() — buscar dados reais do CRM conforme action
-4. buildUserMessage() — montar prompt com dados reais
-5. callOpenAI() — gpt-4o-mini, max_tokens: 2000
-6. Salvar AIInteractionLog (não bloqueia resposta)
-7. Retornar { success, action, response, tokens_used, duration_ms }
-```
-
-### Dados buscados por ação:
-
-| Action | Dados buscados no CRM |
-|--------|----------------------|
-| briefing | Clients(30) + Tasks(20) + Visits(10) + Sales(20) + Leads(10) |
-| ranking | Clients(30) + Tasks(20) + Visits(10) + Sales(20) + Leads(10) |
-| prepare_visit | Client(id) + Visits(5) + Tasks(5) + Sales(5) |
-| whatsapp | Client(id) |
-| marketing | Nenhum (geração criativa) |
-| route | Clients(20) + Visits(10) + GPS se disponível |
-| field_research | Leads(20) + GPS se disponível |
-| numerology | Mensagem livre |
-| general | Mensagem livre |
-
-### Segurança:
-- ✅ OPENAI_API_KEY nunca exposta no frontend
-- ✅ Todas as chamadas passam pelo backend Deno
-- ✅ Usuário deve estar autenticado (401 se não)
-- ✅ WhatsApp/Instagram nunca enviados sem aprovação
-- ✅ Proteção anti-loop no auto-sync Calendar (Etapa 3)
+**Uso futuro:** Alimentar o `useAIConsumption` com dados reais de custo (tokens × preço OpenAI).
 
 ---
 
-## PÁGINA CentralIAMaster
+## SEGURANÇA
 
-### Funcionalidades:
-- 8 cards de ação (grid 2x4)
-- Seleção visual com highlight colorido
-- Campo de mensagem extra (textarea)
-- Campo de client_id para ações que precisam
-- Toggle GPS para ações de rota/briefing
-- Loading state com spinner
-- Erro amigável com AlertCircle
-- Botão copiar resposta com feedback visual
-- Aviso de segurança (chave nunca exposta)
-
-### Performance:
-- Lazy loaded no App.jsx (não impacta boot da Home)
-- Sem componentes pesados
-- Funciona no Samsung Galaxy Tab S11
+| Aspecto | Implementação |
+|---------|--------------|
+| Chave OpenAI | Somente no backend via `Deno.env.get()` — nunca no frontend |
+| Autenticação | `base44.auth.me()` obrigatório — 401 se não autenticado |
+| Whitelist de ações | Apenas 8 ações permitidas — input injetado é ignorado |
+| Rate limit | Herdado do sistema existente `rateLimitManager` |
+| Dados CRM | Somente leitura via `asServiceRole` — sem escrita não autorizada |
+| WhatsApp | IA gera texto mas NUNCA envia — requer aprovação manual do Nathan |
+| Instagram | Idem — IA gera mas NUNCA publica |
 
 ---
 
 ## COMO TESTAR
 
-### 1. Configurar chave:
+### 1. Configurar chave
 ```
 Dashboard → Settings → Environment Variables
-OPENAI_API_KEY = sk-proj-...
+OPENAI_API_KEY = sk-proj-SEU_VALOR
 ```
 
-### 2. Testar via dashboard:
-```
-Dashboard → Code → Functions → aiCommandCenter
+### 2. Testar via Dashboard → Code → Functions → aiCommandCenter
 
-Payload briefing:
-{ "action": "briefing", "message": "resumo do dia" }
-
-Payload ranking:
-{ "action": "ranking", "message": "" }
-
-Payload prepare_visit:
-{ "action": "prepare_visit", "client_id": "ID_DO_CLIENTE" }
-
-Payload whatsapp:
-{ "action": "whatsapp", "message": "followup pós-visita", "client_id": "ID_DO_CLIENTE" }
+**Teste briefing:**
+```json
+{ "action": "briefing", "message": "O que devo fazer hoje?" }
 ```
 
-### 3. Testar no app:
+**Teste ranking:**
+```json
+{ "action": "ranking", "message": "Quem devo priorizar esta semana?" }
 ```
-Home → botão 🧠 Central IA Master (roxo)
-→ Selecionar "Briefing Diário"
-→ Clicar "Executar Briefing Diário"
-→ Ver resposta formatada
-→ Clicar "Copiar"
+
+**Teste prepare_visit:**
+```json
+{
+  "action": "prepare_visit",
+  "message": "Vou visitar amanhã às 10h",
+  "client_id": "ID_DO_CLIENTE_AQUI"
+}
+```
+
+**Teste whatsapp:**
+```json
+{
+  "action": "whatsapp",
+  "message": "Proposta VG2 com prazo de decisão",
+  "client_id": "ID_DO_CLIENTE_AQUI"
+}
+```
+
+### 3. Testar via UI
+- Abrir app → Home → clicar em 🧠 Central IA Master
+- Selecionar ação → digitar contexto → clicar "Executar"
+- Resultado aparece com botão "Copiar"
+
+---
+
+## PRESERVAÇÃO CONFIRMADA
+
+```
+✅ WhatsApp Master Agent — intocado
+✅ Telegram — intocado
+✅ Instagram / MarketingAIStudio — intocado
+✅ Numerologia — intocada
+✅ Cálculos comerciais — intocados
+✅ Rotas / GPS — intocados
+✅ Todas as automações — ativas
+✅ 130+ funções backend — intocadas
+✅ Todas as 70+ páginas — preservadas
+✅ Todas as entidades — preservadas
+✅ Home — apenas 1 botão link adicionado (sem componente pesado)
 ```
 
 ---
 
-## SYSTEM PROMPT FIXO
+## RISCOS
 
-O copiloto NR22888 opera com regras técnicas Seamaty hard-coded:
-- ❌ Nunca 36 parâmetros
-- ✅ SMT-120VP: rotores circulares, até 24 parâmetros
-- ✅ QT3: rotores circulares e setorizados, até 24 parâmetros
-- ✅ Lab 3DX: hemogasometria + imunofluorescência + bioquímica
-- ❌ Nunca insumos/rotores em artes principais
-- ✅ Marketing para tutor: linguagem emocional
-- ✅ Marketing para veterinário: linguagem técnica consultiva
-- ❌ Nunca enviar WhatsApp sem aprovação Nathan
-- ❌ Nunca publicar Instagram sem aprovação Nathan
-- ✅ SPIN Selling + neuromarketing com elegância
-- ✅ Numerologia como inteligência interna
+| Risco | Probabilidade | Mitigação |
+|-------|--------------|-----------|
+| OPENAI_API_KEY não configurada | Médio | Mensagem de erro clara na UI |
+| Custo OpenAI elevado | Baixo | Modelo gpt-4o-mini (barato) + max_tokens 2000 |
+| Timeout em briefing (muitos dados) | Baixo | Limits conservadores (30 clientes max) |
+| Loop de chamadas | Baixo | Whitelist de ações + autenticação obrigatória |
+| Dado inventado pela IA | Baixo | System prompt proíbe explicitamente + dados reais do CRM passados como contexto |
 
 ---
 
-## RISCOS E MITIGAÇÕES
+## CUSTO ESTIMADO OpenAI
 
-| Risco | Mitigação |
-|-------|-----------|
-| Chave OpenAI exposta | Backend Deno — nunca no frontend |
-| Custo OpenAI alto | gpt-4o-mini (barato), max_tokens: 2000 |
-| Dados inventados | Prompt proíbe explicitamente + dados reais do CRM |
-| WhatsApp acidental | Prompt bloqueia + nenhuma chamada automática |
-| Instagram acidental | Prompt bloqueia + nenhuma integração direta |
-| Crash na Home | Botão leve (só Link) + CentralIAMaster lazy loaded |
-| Tokens sem rastreio | AIInteractionLog registra tokens_used real |
+| Modelo | Input (1K tokens) | Output (1K tokens) | Chamada típica |
+|--------|------------------|-------------------|----------------|
+| gpt-4o-mini | $0.00015 | $0.00060 | ~2000 tokens = ~$0.001 |
 
----
-
-## INTEGRAÇÃO COM ETAPA 3
-
-O `AIInteractionLog` agora alimenta o `useAIConsumption`:
-- `tokens_used` por interação → soma mensal real
-- `action_type` → origem de cada chamada
-- `duration_ms` → monitoramento de performance
-
-Para ativar: ajustar `useAIConsumption` para ler também `AIInteractionLog` além de `AuditLog`.
-
----
-
-## PRESERVAÇÃO TOTAL
-
-```
-✅ Zero páginas removidas
-✅ Zero componentes removidos
-✅ Zero entidades alteradas
-✅ Zero automações tocadas
-✅ WhatsApp Master Agent: intacto
-✅ Telegram: intacto
-✅ Instagram/Marketing: intacto
-✅ Numerologia: intacta
-✅ Cálculos comerciais: intactos
-✅ Rotas/GPS: intactos
-✅ 130+ funções backend: intactas
-✅ Etapa 3 (lazy loading, anti-loop, etc.): intacta
-```
+**100 chamadas/mês ≈ R$ 0,55** (muito barato para uso diário)
 
 ---
 
 ## PRÓXIMA ETAPA RECOMENDADA
 
-### Etapa 5 — Integração Total e Automação Proativa
+### Etapa 5 — Observabilidade Real + Dashboard de IA
 
 **Prioridades:**
 
-1. **aiCommandCenter no WhatsApp Agent** — dar ao `whatsapp_master_agent` acesso à função `aiCommandCenter` para respostas com dados reais do CRM via GPT-4o
+1. **Dashboard de consumo real** — usar `AIInteractionLog` para mostrar:
+   - Tokens consumidos por dia/semana/mês
+   - Custo estimado em R$
+   - Ações mais usadas
+   - Tempo médio de resposta
 
-2. **useAIConsumption + AIInteractionLog** — ajustar o hook para somar tokens reais do AIInteractionLog, completando o ciclo de observabilidade real (Etapa 3)
+2. **Memória contextual** — salvar as últimas N interações por cliente para o GPT ter histórico de conversa real (não reiniciar contexto a cada chamada)
 
-3. **Briefing automático diário** — criar automação scheduled 7h da manhã que chama `aiCommandCenter` com action=briefing e envia resumo via WhatsApp para Nathan
+3. **Modo streaming** — usar `stream: true` da OpenAI para mostrar a resposta letra por letra (melhor UX no tablet)
 
-4. **Histórico de conversas na CentralIAMaster** — listar as últimas interações do AIInteractionLog na página para o Nathan ver seu histórico
+4. **Integração WhatsApp Agent** — quando o agente WhatsApp receber uma mensagem complexa, chamar `aiCommandCenter` no backend para gerar a resposta antes de enviar para aprovação
 
-5. **Seletor de cliente visual** — em vez de colar ID manualmente, adicionar busca de cliente por nome na CentralIAMaster
+5. **Voice input** — usar `TranscribeAudio` da base44 para Nathan falar o comando e receber resposta IA em texto
 
-**Critério para Etapa 5:** Central IA Master testada com OPENAI_API_KEY configurada, briefing diário funcionando e tokens reais aparecendo no AIConsumptionBar.
+**Critério para Etapa 5:** Central IA Master ativa por 48h com pelo menos 10 chamadas bem-sucedidas registradas no AIInteractionLog.
 
 ---
 
-*Relatório gerado em 15/05/2026 — NR22888 Etapa 4 — Central IA Master*
+*Relatório gerado em 15/05/2026 — NR22888 Etapa 4 — Camada OpenAI / Central IA Master*
