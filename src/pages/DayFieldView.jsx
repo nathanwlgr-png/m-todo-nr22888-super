@@ -266,7 +266,6 @@ export default function DayFieldView() {
             💬 Conectar ao Agente WhatsApp
           </Link>
           <div className="mt-3 text-[10px] text-slate-500 space-y-1 px-2">
-          <div className="text-[10px] text-slate-500 space-y-1 px-2">
             <p>✓ Qualifica leads em tempo real</p>
             <p>✓ Gera propostas personalizadas</p>
             <p>✓ Detecta objeções automaticamente</p>

@@ -37,7 +37,14 @@ export default function HomePageWithLayout() {
           <p className="text-[8px] text-slate-600 uppercase tracking-widest">Seamaty Brasil</p>
         </div>
 
-        <Link to="/NotificationSettings">
+        <div className="flex items-center gap-2">
+          <Link to="/ExecutiveLayerCEO">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-black"
+              style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
+              👑
+            </div>
+          </Link>
+          <Link to="/NotificationSettings">
           <div className="relative">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -51,7 +58,8 @@ export default function HomePageWithLayout() {
               </span>
             )}
           </div>
-        </Link>
+          </Link>
+        </div>
       </header>
 
       {/* Conteúdo principal — SalesCommandCenter como home */}

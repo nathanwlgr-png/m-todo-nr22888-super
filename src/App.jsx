@@ -87,6 +87,7 @@ const GenerateWhatsAppIntegrated = lazy(() => import('./pages/GenerateWhatsAppIn
 const InvestigacaoDeCampoReal = lazy(() => import('./pages/InvestigacaoDeCampoReal'));
 const ClientProfile = lazy(() => import('./pages/ClientProfile.jsx'));
 const DayFieldView = lazy(() => import('./pages/DayFieldView.jsx'));
+const ExecutiveLayerCEO = lazy(() => import('./pages/ExecutiveLayerCEO.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -188,6 +189,7 @@ const AuthenticatedApp = () => {
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
         <Route path="/ClientProfile" element={<LayoutWrapper currentPageName="ClientProfile"><ClientProfile /></LayoutWrapper>} />
         <Route path="/DayFieldView" element={<DayFieldView />} />
+        <Route path="/ExecutiveLayerCEO" element={<LayoutWrapper currentPageName="ExecutiveLayerCEO"><ExecutiveLayerCEO /></LayoutWrapper>} />
 
         {/* ── ROTAS NÃO IMPLEMENTADAS → redirect para Command Center ── */}
         <Route path="/PossibleSales" element={<Navigate to="/SalesCommandCenter" replace />} />
