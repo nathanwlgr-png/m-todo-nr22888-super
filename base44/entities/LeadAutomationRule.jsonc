@@ -1,0 +1,54 @@
+{
+  "name": "LeadAutomationRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da regra"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "lead_created",
+        "lead_status_change",
+        "lead_score_threshold",
+        "lead_inactive_days",
+        "client_status_change"
+      ],
+      "description": "Tipo de gatilho"
+    },
+    "trigger_condition": {
+      "type": "object",
+      "description": "Condi\u00e7\u00f5es espec\u00edficas do gatilho"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "create_task",
+        "send_whatsapp",
+        "send_alert",
+        "assign_to_user"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o"
+    },
+    "action_config": {
+      "type": "object",
+      "description": "Configura\u00e7\u00e3o da a\u00e7\u00e3o"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Regra ativa"
+    },
+    "last_execution": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima execu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_type",
+    "action_type"
+  ]
+}

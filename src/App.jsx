@@ -85,6 +85,7 @@ const NotificationsCenter = lazy(() => import('./pages/NotificationsCenter'));
 const PipelineView = lazy(() => import('./pages/PipelineView'));
 const GenerateWhatsAppIntegrated = lazy(() => import('./pages/GenerateWhatsAppIntegrated'));
 const InvestigacaoDeCampoReal = lazy(() => import('./pages/InvestigacaoDeCampoReal'));
+const ModoInvestigacaoSuprema = lazy(() => import('./pages/ModoInvestigacaoSuprema'));
 
 const PageLoader = () => <AppLoadingScreen />;
 
@@ -183,6 +184,7 @@ const AuthenticatedApp = () => {
         <Route path="/PipelineView" element={<LayoutWrapper currentPageName="PipelineView"><PipelineView /></LayoutWrapper>} />
         <Route path="/GenerateWhatsAppIntegrated" element={<LayoutWrapper currentPageName="GenerateWhatsAppIntegrated"><GenerateWhatsAppIntegrated /></LayoutWrapper>} />
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
+        <Route path="/ModoInvestigacaoSuprema" element={<LayoutWrapper currentPageName="ModoInvestigacaoSuprema"><ModoInvestigacaoSuprema /></LayoutWrapper>} />
 
         {/* ── COMING SOON — ainda não implementadas ── */}
         <Route path="/PossibleSales" element={<LayoutWrapper currentPageName="PossibleSales"><ComingSoonPage /></LayoutWrapper>} />

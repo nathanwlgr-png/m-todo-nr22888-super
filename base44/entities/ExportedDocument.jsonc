@@ -1,0 +1,79 @@
+{
+  "name": "ExportedDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do documento"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "word",
+        "excel",
+        "image",
+        "powerpoint",
+        "text"
+      ],
+      "description": "Tipo de documento"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo gerado"
+    },
+    "file_size_kb": {
+      "type": "number",
+      "description": "Tamanho do arquivo em KB"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente relacionado (se houver)"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente relacionado"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "proposta",
+        "analise",
+        "relatorio",
+        "contrato",
+        "apresentacao",
+        "outro"
+      ],
+      "default": "outro",
+      "description": "Categoria do documento"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do documento"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadados adicionais do documento"
+    },
+    "whatsapp_ready": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se est\u00e1 pronto para exportar via WhatsApp"
+    },
+    "export_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi exportado"
+    },
+    "last_exported": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que foi exportado"
+    }
+  },
+  "required": [
+    "title",
+    "document_type",
+    "file_url"
+  ]
+}

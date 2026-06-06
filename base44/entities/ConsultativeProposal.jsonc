@@ -1,0 +1,181 @@
+{
+  "name": "ConsultativeProposal",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "proposal_content": {
+      "type": "string",
+      "description": "Conte\u00fado completo da proposta (Markdown/HTML)"
+    },
+    "proposal_type": {
+      "type": "string",
+      "enum": [
+        "consultiva",
+        "t\u00e9cnica",
+        "comercial",
+        "executiva"
+      ],
+      "default": "consultiva",
+      "description": "Tipo de proposta"
+    },
+    "equipment_code": {
+      "type": "string",
+      "description": "C\u00f3digo do equipamento proposto"
+    },
+    "equipment_name": {
+      "type": "string",
+      "description": "Nome do equipamento"
+    },
+    "total_value": {
+      "type": "number",
+      "description": "Valor total da proposta"
+    },
+    "numerology_analysis": {
+      "type": "object",
+      "properties": {
+        "numerology_number": {
+          "type": "number"
+        },
+        "decision_style": {
+          "type": "string"
+        },
+        "approach_used": {
+          "type": "string"
+        },
+        "key_triggers_used": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "An\u00e1lise numerol\u00f3gica aplicada"
+    },
+    "methodologies_applied": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Metodologias de vendas aplicadas (SPIN, Cialdini, etc)"
+    },
+    "unique_identifier": {
+      "type": "string",
+      "description": "ID \u00fanico para rastreamento (URL tracking)"
+    },
+    "whatsapp_link": {
+      "type": "string",
+      "description": "Link para compartilhar no WhatsApp com tracking"
+    },
+    "pdf_url": {
+      "type": "string",
+      "description": "URL do PDF da proposta"
+    },
+    "sent_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de envio"
+    },
+    "validity_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de validade da proposta"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "viewed",
+        "shared",
+        "accepted",
+        "rejected",
+        "expired"
+      ],
+      "default": "draft",
+      "description": "Status da proposta"
+    },
+    "engagement_metrics": {
+      "type": "object",
+      "properties": {
+        "total_views": {
+          "type": "number",
+          "default": 0
+        },
+        "unique_viewers": {
+          "type": "number",
+          "default": 0
+        },
+        "total_time_viewed": {
+          "type": "number",
+          "description": "Tempo total visualizado em segundos"
+        },
+        "shares_count": {
+          "type": "number",
+          "default": 0
+        },
+        "clicks_count": {
+          "type": "number",
+          "default": 0
+        },
+        "last_viewed_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "conversion": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "M\u00e9tricas de engajamento da proposta"
+    },
+    "shared_with": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shared_to_email": {
+            "type": "string"
+          },
+          "shared_to_phone": {
+            "type": "string"
+          },
+          "share_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "share_channel": {
+            "type": "string",
+            "enum": [
+              "whatsapp",
+              "email",
+              "facebook",
+              "linkedin"
+            ]
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de compartilhamentos"
+    },
+    "follow_up_scheduled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Follow-up autom\u00e1tico agendado"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data agendada para follow-up"
+    }
+  },
+  "required": [
+    "client_id",
+    "proposal_content"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "name": "NumerologyKnowledge",
+  "type": "object",
+  "properties": {
+    "numerology_number": {
+      "type": "number",
+      "description": "N\u00famero numerol\u00f3gico (1-9)"
+    },
+    "personality_profile": {
+      "type": "string",
+      "description": "Perfil de personalidade completo"
+    },
+    "decision_style": {
+      "type": "string",
+      "description": "Estilo de decis\u00e3o caracter\u00edstico"
+    },
+    "common_pains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dores e desafios comuns deste n\u00famero"
+    },
+    "buying_motivators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "O que motiva a compra"
+    },
+    "ethical_triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string"
+          },
+          "script": {
+            "type": "string"
+          },
+          "when_to_use": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Gatilhos \u00e9ticos para vendas"
+    },
+    "closing_strategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "strategy_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "script_example": {
+            "type": "string"
+          },
+          "success_rate": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Estrat\u00e9gias de fechamento espec\u00edficas"
+    },
+    "objection_handling": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "objection": {
+            "type": "string"
+          },
+          "response": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Como lidar com obje\u00e7\u00f5es"
+    },
+    "communication_style": {
+      "type": "string",
+      "description": "Melhor estilo de comunica\u00e7\u00e3o"
+    },
+    "best_approach": {
+      "type": "string",
+      "description": "Melhor abordagem inicial"
+    },
+    "red_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Sinais de alerta (o que evitar)"
+    },
+    "ideal_timing": {
+      "type": "string",
+      "description": "Melhor momento para contato"
+    }
+  },
+  "required": [
+    "numerology_number"
+  ]
+}

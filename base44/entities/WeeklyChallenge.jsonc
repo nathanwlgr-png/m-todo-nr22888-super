@@ -1,0 +1,74 @@
+{
+  "name": "WeeklyChallenge",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do desafio"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "F\u00e1cil",
+        "M\u00e9dio",
+        "Dif\u00edcil"
+      ],
+      "default": "M\u00e9dio",
+      "description": "N\u00edvel de dificuldade"
+    },
+    "target_metric": {
+      "type": "string",
+      "description": "M\u00e9trica alvo do desafio"
+    },
+    "success_criteria": {
+      "type": "string",
+      "description": "Crit\u00e9rios de sucesso"
+    },
+    "points": {
+      "type": "number",
+      "default": 100,
+      "description": "Pontos ao completar"
+    },
+    "tips": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dicas para completar o desafio"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi completado"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de conclus\u00e3o"
+    },
+    "week_number": {
+      "type": "number",
+      "description": "N\u00famero da semana do ano"
+    },
+    "improvement_area": {
+      "type": "string",
+      "enum": [
+        "SPIN Selling",
+        "Obje\u00e7\u00f5es",
+        "Intelig\u00eancia Emocional",
+        "Gatilhos de Persuas\u00e3o",
+        "Fechamento"
+      ],
+      "description": "\u00c1rea de melhoria foco"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "difficulty"
+  ]
+}

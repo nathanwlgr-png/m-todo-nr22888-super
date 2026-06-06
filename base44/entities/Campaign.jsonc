@@ -1,0 +1,195 @@
+{
+  "name": "Campaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da campanha"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Objetivo da campanha"
+    },
+    "target_audience": {
+      "type": "object",
+      "properties": {
+        "client_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "min_score": {
+          "type": "number"
+        },
+        "equipment_interest": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Defini\u00e7\u00e3o do p\u00fablico-alvo"
+    },
+    "budget": {
+      "type": "number",
+      "description": "Or\u00e7amento da campanha em R$"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de t\u00e9rmino"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "ativa",
+        "pausada",
+        "concluida",
+        "cancelada"
+      ],
+      "default": "rascunho",
+      "description": "Status da campanha"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "whatsapp",
+          "email",
+          "telefone",
+          "visita"
+        ]
+      },
+      "description": "Canais de comunica\u00e7\u00e3o"
+    },
+    "equipment_focus": {
+      "type": "string",
+      "description": "Equipamento foco da campanha"
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "target_leads": {
+          "type": "number"
+        },
+        "target_meetings": {
+          "type": "number"
+        },
+        "target_sales": {
+          "type": "number"
+        },
+        "target_revenue": {
+          "type": "number"
+        },
+        "current_leads": {
+          "type": "number",
+          "default": 0
+        },
+        "current_meetings": {
+          "type": "number",
+          "default": 0
+        },
+        "current_sales": {
+          "type": "number",
+          "default": 0
+        },
+        "current_revenue": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "description": "M\u00e9tricas de sucesso"
+    },
+    "automated_content": {
+      "type": "object",
+      "properties": {
+        "whatsapp_message": {
+          "type": "string"
+        },
+        "email_subject": {
+          "type": "string"
+        },
+        "email_body": {
+          "type": "string"
+        },
+        "catchphrases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "technical_material_url": {
+          "type": "string"
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Conte\u00fado automatizado gerado pela IA"
+    },
+    "target_clients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos clientes alvos"
+    },
+    "sent_to": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "sent_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enviado",
+              "aberto",
+              "respondido",
+              "convertido"
+            ]
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de envios"
+    }
+  },
+  "required": [
+    "name",
+    "objective",
+    "start_date",
+    "end_date"
+  ]
+}

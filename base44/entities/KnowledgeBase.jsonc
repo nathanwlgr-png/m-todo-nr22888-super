@@ -1,0 +1,102 @@
+{
+  "name": "KnowledgeBase",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do conte\u00fado (livro, t\u00e9cnica, gatilho)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Conte\u00fado completo: resumo, t\u00e9cnica, estrat\u00e9gia, scripts"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Resumo r\u00e1pido para consulta"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "book",
+        "technique",
+        "trigger",
+        "client_profile",
+        "objection_handling",
+        "closing",
+        "script"
+      ],
+      "description": "Categoria do conhecimento"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para busca r\u00e1pida"
+    },
+    "sales_technique": {
+      "type": "string",
+      "enum": [
+        "SPIN_Selling",
+        "Cialdini_Persuasao",
+        "Challenger_Sale",
+        "Never_Split_Difference",
+        "Gap_Selling",
+        "Pitch_Anything",
+        "Sandler_System",
+        "Ziglar_Closing",
+        "Sandler_Selling",
+        "Solution_Selling",
+        "Consultive_Selling",
+        "Other"
+      ],
+      "description": "T\u00e9cnica espec\u00edfica de vendas"
+    },
+    "related_profiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Perfis comportamentais relacionados (L\u00edder, Anal\u00edtico, Diplomata, etc)"
+    },
+    "numerology_numbers": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "N\u00fameros numerol\u00f3gicos aos quais se aplica (1-9)"
+    },
+    "approach_tips": {
+      "type": "string",
+      "description": "Dicas pr\u00e1ticas de abordagem"
+    },
+    "example_scripts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Scripts e frases exemplo"
+    },
+    "when_to_use": {
+      "type": "string",
+      "description": "Quando usar esta t\u00e9cnica/gatilho"
+    },
+    "book_author": {
+      "type": "string",
+      "description": "Autor do livro (se aplic\u00e1vel)"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "URL da fonte"
+    },
+    "effectiveness_score": {
+      "type": "number",
+      "description": "Score de efetividade (0-100)"
+    }
+  },
+  "required": [
+    "title",
+    "content",
+    "category"
+  ]
+}

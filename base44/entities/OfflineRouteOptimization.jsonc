@@ -1,0 +1,90 @@
+{
+  "name": "OfflineRouteOptimization",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da rota"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade"
+    },
+    "route_order": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "number"
+          },
+          "clinic_id": {
+            "type": "string"
+          },
+          "clinic_name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "estimated_travel_time": {
+            "type": "number",
+            "description": "Tempo de viagem em minutos"
+          },
+          "estimated_visit_duration": {
+            "type": "number",
+            "description": "Dura\u00e7\u00e3o estimada em minutos"
+          },
+          "priority_level": {
+            "type": "number",
+            "description": "1-6 sendo 1 mais priorit\u00e1rio"
+          },
+          "days_since_last_visit": {
+            "type": "number"
+          },
+          "last_visit_result": {
+            "type": "string",
+            "enum": [
+              "visitada",
+              "cancelada",
+              "agendada",
+              "nao_encontrada"
+            ]
+          }
+        }
+      },
+      "description": "Sequ\u00eancia otimizada de cl\u00ednicas"
+    },
+    "total_distance_km": {
+      "type": "number",
+      "description": "Dist\u00e2ncia total da rota"
+    },
+    "total_time_minutes": {
+      "type": "number",
+      "description": "Tempo total estimado"
+    },
+    "optimization_score": {
+      "type": "number",
+      "description": "Score de otimiza\u00e7\u00e3o (0-100)"
+    },
+    "method_used": {
+      "type": "string",
+      "enum": [
+        "distancia",
+        "prioridade",
+        "tempo_disponivel"
+      ]
+    }
+  },
+  "required": [
+    "date",
+    "city"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "MarketIntelligenceReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do relat\u00f3rio"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do relat\u00f3rio"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "competitor",
+        "price_benchmark",
+        "trend",
+        "custom"
+      ],
+      "default": "weekly",
+      "description": "Tipo de relat\u00f3rio"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Resumo executivo"
+    },
+    "full_content": {
+      "type": "string",
+      "description": "Conte\u00fado completo em JSON stringificado"
+    },
+    "key_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A\u00e7\u00f5es-chave recomendadas"
+    },
+    "competitors_mentioned": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Concorrentes mencionados"
+    },
+    "opportunities_count": {
+      "type": "number",
+      "description": "N\u00famero de oportunidades identificadas"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "Usu\u00e1rio que gerou"
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Relat\u00f3rio fixado"
+    }
+  },
+  "required": [
+    "title",
+    "report_date",
+    "report_type"
+  ]
+}

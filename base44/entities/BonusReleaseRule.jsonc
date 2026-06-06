@@ -1,0 +1,116 @@
+{
+  "name": "BonusReleaseRule",
+  "type": "object",
+  "properties": {
+    "campaign_name": {
+      "type": "string",
+      "description": "Nome da campanha de bonifica\u00e7\u00e3o"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "equipment_sold": {
+      "type": "string",
+      "description": "Equipamento vendido"
+    },
+    "total_bonus_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Total de itens da bonifica\u00e7\u00e3o (ex: 5 caixas de rotor)"
+    },
+    "release_strategy": {
+      "type": "string",
+      "enum": [
+        "progressive",
+        "fixed_percentage"
+      ],
+      "default": "progressive",
+      "description": "Estrat\u00e9gia de libera\u00e7\u00e3o"
+    },
+    "first_contact_percentage": {
+      "type": "number",
+      "default": 20,
+      "description": "% liberado no primeiro contato"
+    },
+    "per_usage_percentage": {
+      "type": "number",
+      "default": 20,
+      "description": "% liberado a cada uso/reposi\u00e7\u00e3o"
+    },
+    "releases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "release_number": {
+            "type": "number"
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items_released": {
+            "type": "array"
+          },
+          "percentage_released": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "released",
+              "delivered"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de libera\u00e7\u00f5es"
+    },
+    "total_released_percentage": {
+      "type": "number",
+      "default": 0,
+      "description": "% total j\u00e1 liberado"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Campanha ativa"
+    },
+    "release_mode": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "automatic"
+      ],
+      "default": "manual",
+      "description": "Modo de libera\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "campaign_name",
+    "client_id",
+    "total_bonus_items"
+  ]
+}

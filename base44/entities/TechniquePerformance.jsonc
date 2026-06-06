@@ -1,0 +1,53 @@
+{
+  "name": "TechniquePerformance",
+  "type": "object",
+  "properties": {
+    "technique_name": {
+      "type": "string",
+      "description": "Nome da t\u00e9cnica ou gatilho"
+    },
+    "client_profile": {
+      "type": "string",
+      "description": "Perfil numerol\u00f3gico do cliente"
+    },
+    "client_type": {
+      "type": "string",
+      "description": "Tipo de neg\u00f3cio"
+    },
+    "total_uses": {
+      "type": "number",
+      "default": 0,
+      "description": "Vezes que foi usada"
+    },
+    "success_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Vezes que resultou em fechamento"
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxa de sucesso %"
+    },
+    "avg_interest_level": {
+      "type": "number",
+      "description": "N\u00edvel m\u00e9dio de interesse gerado"
+    },
+    "avg_score_increase": {
+      "type": "number",
+      "description": "Aumento m\u00e9dio de score"
+    },
+    "salesperson_email": {
+      "type": "string",
+      "description": "Email do vendedor (para compara\u00e7\u00e3o individual)"
+    },
+    "month_year": {
+      "type": "string",
+      "description": "M\u00eas/Ano dos dados (MM/YYYY)"
+    }
+  },
+  "required": [
+    "technique_name",
+    "client_profile"
+  ]
+}

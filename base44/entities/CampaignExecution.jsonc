@@ -1,0 +1,66 @@
+{
+  "name": "CampaignExecution",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "description": "ID da campanha"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "current_step": {
+      "type": "number",
+      "default": 0,
+      "description": "Passo atual na sequ\u00eancia"
+    },
+    "next_action_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Pr\u00f3xima data de a\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "completed",
+        "dropped"
+      ],
+      "default": "active"
+    },
+    "messages_sent": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "number"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "opened": {
+            "type": "boolean"
+          },
+          "replied": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "converted": {
+      "type": "boolean",
+      "default": false
+    },
+    "conversion_value": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "client_id"
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "name": "CoachingSession",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente da conversa"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "conversation_type": {
+      "type": "string",
+      "enum": [
+        "telefone",
+        "presencial",
+        "whatsapp",
+        "email",
+        "chat"
+      ],
+      "description": "Tipo de conversa"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Transcri\u00e7\u00e3o completa da conversa"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o da conversa"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Score geral da performance (0-100)"
+    },
+    "technique_scores": {
+      "type": "object",
+      "properties": {
+        "spin_selling": {
+          "type": "number",
+          "description": "Ader\u00eancia ao SPIN Selling (0-10)"
+        },
+        "numerology_adaptation": {
+          "type": "number",
+          "description": "Adapta\u00e7\u00e3o ao perfil numerol\u00f3gico (0-10)"
+        },
+        "cialdini_triggers": {
+          "type": "number",
+          "description": "Uso de gatilhos de persuas\u00e3o (0-10)"
+        },
+        "emotional_intelligence": {
+          "type": "number",
+          "description": "Intelig\u00eancia emocional (0-10)"
+        },
+        "objection_handling": {
+          "type": "number",
+          "description": "Controle de obje\u00e7\u00f5es (0-10)"
+        }
+      }
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Pontos fortes identificados"
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u00c1reas de melhoria"
+    },
+    "tone_analysis": {
+      "type": "object",
+      "properties": {
+        "detected_tone": {
+          "type": "string"
+        },
+        "ideal_tone": {
+          "type": "string"
+        },
+        "tone_match_score": {
+          "type": "number"
+        },
+        "adjustments_needed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "moments_analysis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "what_happened": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "string",
+            "enum": [
+              "excellent",
+              "good",
+              "needs_improvement",
+              "critical_error"
+            ]
+          },
+          "feedback": {
+            "type": "string"
+          },
+          "better_approach": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "An\u00e1lise momento a momento"
+    },
+    "missed_opportunities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Oportunidades perdidas"
+    },
+    "next_conversation_tips": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dicas para pr\u00f3xima conversa"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "venda_fechada",
+        "agendou_proxima",
+        "enviou_proposta",
+        "perdeu_venda",
+        "neutro"
+      ],
+      "description": "Resultado da conversa"
+    },
+    "ai_detailed_feedback": {
+      "type": "string",
+      "description": "Feedback detalhado da IA"
+    }
+  },
+  "required": [
+    "transcript",
+    "overall_score"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

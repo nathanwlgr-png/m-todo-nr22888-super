@@ -1,0 +1,128 @@
+{
+  "name": "ScheduledReport",
+  "type": "object",
+  "properties": {
+    "report_name": {
+      "type": "string",
+      "description": "Nome do relat\u00f3rio"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "diario",
+        "semanal",
+        "mensal",
+        "trimestral",
+        "anual",
+        "custom"
+      ],
+      "default": "mensal",
+      "description": "Frequ\u00eancia do relat\u00f3rio"
+    },
+    "period": {
+      "type": "string",
+      "enum": [
+        "ultimo_mes",
+        "ultimo_trimestre",
+        "ultimo_semestre",
+        "ultimo_ano",
+        "mes_atual",
+        "trimestre_atual",
+        "ano_atual",
+        "custom"
+      ],
+      "default": "ultimo_mes",
+      "description": "Per\u00edodo de an\u00e1lise dos dados"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Data in\u00edcio (para per\u00edodo custom)"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "Data fim (para per\u00edodo custom)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "recipients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Emails dos destinat\u00e1rios"
+    },
+    "metrics_included": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "KPIs inclu\u00eddos no relat\u00f3rio"
+    },
+    "chart_types": {
+      "type": "object",
+      "description": "Tipo de gr\u00e1fico por KPI (ex: {'vendas': 'bar', 'conversao': 'line'})"
+    },
+    "schedule_time": {
+      "type": "string",
+      "description": "Hor\u00e1rio de envio (HH:MM)"
+    },
+    "schedule_day": {
+      "type": "string",
+      "enum": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ],
+      "description": "Dia da semana"
+    },
+    "schedule_day_of_month": {
+      "type": "number",
+      "description": "Dia do m\u00eas (para mensal/trimestral)"
+    },
+    "last_sent_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_sent_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "pending"
+      ]
+    },
+    "include_charts": {
+      "type": "boolean",
+      "default": true
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "html",
+        "pdf"
+      ],
+      "default": "html"
+    },
+    "automation_id": {
+      "type": "string"
+    },
+    "last_report_data": {
+      "type": "string",
+      "description": "JSON do \u00faltimo relat\u00f3rio gerado"
+    }
+  },
+  "required": [
+    "report_name",
+    "report_type",
+    "recipients",
+    "metrics_included"
+  ]
+}

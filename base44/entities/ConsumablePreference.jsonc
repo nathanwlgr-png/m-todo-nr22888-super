@@ -1,0 +1,50 @@
+{
+  "name": "ConsumablePreference",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "consumable_id": {
+      "type": "string",
+      "description": "ID do insumo"
+    },
+    "consumable_name": {
+      "type": "string",
+      "description": "Nome do insumo"
+    },
+    "custom_frequency_days": {
+      "type": "number",
+      "description": "Frequ\u00eancia personalizada em dias"
+    },
+    "preferred_quantity": {
+      "type": "number",
+      "description": "Quantidade preferida por pedido"
+    },
+    "auto_order_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Pedido autom\u00e1tico habilitado"
+    },
+    "alert_days_before": {
+      "type": "number",
+      "default": 7,
+      "description": "Alertar X dias antes da pr\u00f3xima compra"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre prefer\u00eancia"
+    }
+  },
+  "required": [
+    "client_id",
+    "client_name",
+    "consumable_id",
+    "consumable_name"
+  ]
+}

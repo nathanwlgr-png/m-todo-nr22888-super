@@ -1,0 +1,45 @@
+{
+  "name": "UserActivity",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "campaign",
+        "client"
+      ],
+      "description": "Tipo de contexto"
+    },
+    "context_id": {
+      "type": "string",
+      "description": "ID do contexto"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "viewing",
+        "editing"
+      ],
+      "description": "A\u00e7\u00e3o atual"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez visto"
+    }
+  },
+  "required": [
+    "user_email",
+    "context_type",
+    "context_id",
+    "action"
+  ]
+}

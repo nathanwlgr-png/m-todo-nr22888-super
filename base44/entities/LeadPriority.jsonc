@@ -1,0 +1,75 @@
+{
+  "name": "LeadPriority",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "ID do lead ou cliente"
+    },
+    "lead_name": {
+      "type": "string",
+      "description": "Nome do lead"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email do vendedor"
+    },
+    "priority_score": {
+      "type": "number",
+      "description": "Score de prioridade (0-100)"
+    },
+    "priority_level": {
+      "type": "string",
+      "enum": [
+        "urgente",
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "description": "N\u00edvel de prioridade"
+    },
+    "ai_reasoning": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Raz\u00f5es da IA para a prioriza\u00e7\u00e3o"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "A\u00e7\u00e3o recomendada"
+    },
+    "best_contact_time": {
+      "type": "string",
+      "description": "Melhor hor\u00e1rio para contato"
+    },
+    "conversion_probability": {
+      "type": "number",
+      "description": "Probabilidade de convers\u00e3o (0-100)"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Valor estimado da oportunidade"
+    },
+    "urgency_factors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fatores de urg\u00eancia"
+    },
+    "last_interaction": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima intera\u00e7\u00e3o"
+    },
+    "days_without_contact": {
+      "type": "number",
+      "description": "Dias sem contato"
+    }
+  },
+  "required": [
+    "lead_id",
+    "priority_score"
+  ]
+}

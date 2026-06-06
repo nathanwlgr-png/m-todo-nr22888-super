@@ -1,0 +1,201 @@
+{
+  "name": "EquipmentMaterial",
+  "type": "object",
+  "properties": {
+    "equipment_name": {
+      "type": "string",
+      "description": "Nome do equipamento"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria do equipamento"
+    },
+    "price": {
+      "type": "number",
+      "description": "Pre\u00e7o do equipamento em R$"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Resumo das caracter\u00edsticas"
+    },
+    "technical_specs": {
+      "type": "object",
+      "description": "Especifica\u00e7\u00f5es t\u00e9cnicas detalhadas"
+    },
+    "image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs das imagens do equipamento"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "URL do v\u00eddeo demonstrativo"
+    },
+    "benefits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Principais benef\u00edcios"
+    },
+    "target_profile": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Perfil de cliente ideal"
+    },
+    "price_range": {
+      "type": "string",
+      "description": "Faixa de pre\u00e7o"
+    },
+    "catchphrases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frases de efeito para vendas"
+    },
+    "whatsapp_templates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Templates de mensagem WhatsApp"
+    },
+    "email_templates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Templates de email"
+    },
+    "differentiators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Diferenciais competitivos \u00fanicos no mercado"
+    },
+    "competitive_advantages": {
+      "type": "object",
+      "properties": {
+        "vs_competitor": {
+          "type": "string"
+        },
+        "unique_features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cost_benefit": {
+          "type": "string"
+        },
+        "exclusivity": {
+          "type": "string"
+        }
+      },
+      "description": "Vantagens competitivas detalhadas"
+    },
+    "persuasion_triggers": {
+      "type": "object",
+      "properties": {
+        "scarcity": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "social_proof": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "urgency": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reciprocity": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Gatilhos de persuas\u00e3o por princ\u00edpio de Cialdini"
+    },
+    "clinical_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "case_title": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "solution": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Casos cl\u00ednicos que demonstram valor"
+    },
+    "roi_calculator": {
+      "type": "object",
+      "properties": {
+        "monthly_tests_estimate": {
+          "type": "number"
+        },
+        "cost_per_test": {
+          "type": "number"
+        },
+        "revenue_per_test": {
+          "type": "number"
+        },
+        "payback_months": {
+          "type": "number"
+        }
+      },
+      "description": "Calculadora de ROI estimado"
+    },
+    "objection_handling": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "objection": {
+            "type": "string"
+          },
+          "response": {
+            "type": "string"
+          },
+          "proof_point": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Respostas para obje\u00e7\u00f5es comuns"
+    }
+  },
+  "required": [
+    "equipment_name",
+    "summary"
+  ]
+}

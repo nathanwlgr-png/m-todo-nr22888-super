@@ -1,0 +1,96 @@
+{
+  "name": "Integration",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da integra\u00e7\u00e3o"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email_marketing",
+        "scheduling",
+        "erp",
+        "analytics",
+        "communication"
+      ],
+      "description": "Tipo de integra\u00e7\u00e3o"
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "mailchimp",
+        "sendinblue",
+        "calendly",
+        "sap",
+        "oracle_netsuite",
+        "google_analytics",
+        "slack",
+        "microsoft_teams"
+      ],
+      "description": "Provedor da integra\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "error"
+      ],
+      "default": "inactive",
+      "description": "Status da integra\u00e7\u00e3o"
+    },
+    "config": {
+      "type": "object",
+      "description": "Configura\u00e7\u00f5es espec\u00edficas da integra\u00e7\u00e3o (API keys, webhooks, etc)"
+    },
+    "last_sync": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima sincroniza\u00e7\u00e3o"
+    },
+    "sync_frequency": {
+      "type": "string",
+      "enum": [
+        "realtime",
+        "hourly",
+        "daily",
+        "weekly",
+        "manual"
+      ],
+      "default": "daily",
+      "description": "Frequ\u00eancia de sincroniza\u00e7\u00e3o"
+    },
+    "features_enabled": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Features habilitadas (ex: campaigns, contacts_sync, events)"
+    },
+    "sync_stats": {
+      "type": "object",
+      "properties": {
+        "total_syncs": {
+          "type": "number"
+        },
+        "last_success": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_error": {
+          "type": "string"
+        },
+        "records_synced": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "provider"
+  ]
+}

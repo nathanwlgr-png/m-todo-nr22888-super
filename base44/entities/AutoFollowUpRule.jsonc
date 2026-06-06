@@ -1,0 +1,160 @@
+{
+  "name": "AutoFollowUpRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da regra de follow-up"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da regra"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "inactivity_days",
+        "after_visit",
+        "after_material_download",
+        "pipeline_stage_change",
+        "score_drop",
+        "status_change",
+        "no_response_to_proposal",
+        "approaching_deadline"
+      ],
+      "description": "Tipo de gatilho que dispara o follow-up"
+    },
+    "trigger_config": {
+      "type": "object",
+      "properties": {
+        "days_threshold": {
+          "type": "number",
+          "description": "N\u00famero de dias de inatividade"
+        },
+        "target_status": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Status de clientes alvo"
+        },
+        "target_pipeline_stage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Est\u00e1gios do pipeline alvo"
+        },
+        "min_score": {
+          "type": "number",
+          "description": "Score m\u00ednimo para aplicar a regra"
+        },
+        "max_score": {
+          "type": "number",
+          "description": "Score m\u00e1ximo para aplicar a regra"
+        },
+        "target_segments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Segmentos IA alvo"
+        }
+      },
+      "description": "Configura\u00e7\u00e3o do gatilho"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "email",
+          "whatsapp",
+          "notification"
+        ]
+      },
+      "description": "Canais de envio da mensagem"
+    },
+    "use_ai_personalization": {
+      "type": "boolean",
+      "default": true,
+      "description": "Usar IA para personalizar mensagem"
+    },
+    "message_template": {
+      "type": "string",
+      "description": "Template base da mensagem (ser\u00e1 personalizado pela IA)"
+    },
+    "email_subject_template": {
+      "type": "string",
+      "description": "Template do assunto do email"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media",
+      "description": "Prioridade do follow-up"
+    },
+    "create_task": {
+      "type": "boolean",
+      "default": false,
+      "description": "Criar tarefa automaticamente ao enviar"
+    },
+    "task_config": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string"
+        },
+        "days_offset": {
+          "type": "number"
+        }
+      },
+      "description": "Configura\u00e7\u00e3o da tarefa a criar"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Regra ativa"
+    },
+    "max_executions_per_client": {
+      "type": "number",
+      "default": 3,
+      "description": "M\u00e1ximo de execu\u00e7\u00f5es por cliente"
+    },
+    "cooldown_days": {
+      "type": "number",
+      "default": 7,
+      "description": "Dias de espera entre execu\u00e7\u00f5es para o mesmo cliente"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de execu\u00e7\u00f5es"
+    },
+    "success_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Execu\u00e7\u00f5es bem-sucedidas"
+    },
+    "last_execution": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima execu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_type",
+    "channels"
+  ]
+}

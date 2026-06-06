@@ -1,0 +1,90 @@
+{
+  "name": "MonthlyVisitRecord",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente visitado"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "clinic_name": {
+      "type": "string",
+      "description": "Nome da cl\u00ednica"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade"
+    },
+    "visit_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da visita"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Avalia\u00e7\u00e3o 1-5"
+    },
+    "visit_objective": {
+      "type": "string",
+      "enum": [
+        "diagnosticar_necessidades",
+        "apresentar_equipamento",
+        "demonstracao_tecnica",
+        "negociar_proposta",
+        "fechar_venda",
+        "follow_up",
+        "pos_venda"
+      ],
+      "description": "Objetivo da visita"
+    },
+    "visit_result": {
+      "type": "string",
+      "enum": [
+        "excelente",
+        "bom",
+        "regular",
+        "ruim",
+        "sem_resposta"
+      ],
+      "description": "Resultado da visita"
+    },
+    "equipment_presented": {
+      "type": "string",
+      "description": "Equipamento apresentado"
+    },
+    "next_steps": {
+      "type": "string",
+      "description": "Pr\u00f3ximos passos"
+    },
+    "client_feedback": {
+      "type": "string",
+      "description": "Feedback do cliente"
+    },
+    "obstacles": {
+      "type": "string",
+      "description": "Obst\u00e1culos encontrados"
+    },
+    "opportunities": {
+      "type": "string",
+      "description": "Oportunidades identificadas"
+    },
+    "month": {
+      "type": "string",
+      "description": "M\u00eas refer\u00eancia (YYYY-MM)"
+    },
+    "included_in_report": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi inclu\u00eddo em relat\u00f3rio mensal"
+    }
+  },
+  "required": [
+    "client_name",
+    "visit_date",
+    "rating",
+    "month"
+  ]
+}

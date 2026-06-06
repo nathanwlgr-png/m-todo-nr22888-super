@@ -1,0 +1,69 @@
+{
+  "name": "UserOnboarding",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Onboarding completo"
+    },
+    "current_step": {
+      "type": "number",
+      "default": 0,
+      "description": "Passo atual do tour"
+    },
+    "steps_completed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Passos completados"
+    },
+    "checklist": {
+      "type": "object",
+      "properties": {
+        "profile_setup": {
+          "type": "boolean",
+          "default": false
+        },
+        "first_client": {
+          "type": "boolean",
+          "default": false
+        },
+        "first_task": {
+          "type": "boolean",
+          "default": false
+        },
+        "integration_setup": {
+          "type": "boolean",
+          "default": false
+        },
+        "tour_completed": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "user_role": {
+      "type": "string",
+      "enum": [
+        "vendedor",
+        "gerente",
+        "admin"
+      ],
+      "description": "Perfil do usu\u00e1rio"
+    },
+    "skipped": {
+      "type": "boolean",
+      "default": false,
+      "description": "Usu\u00e1rio pulou o onboarding"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

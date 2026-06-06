@@ -1,0 +1,57 @@
+{
+  "name": "FunnelStage",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da etapa do funil"
+    },
+    "order": {
+      "type": "number",
+      "description": "Ordem da etapa (1, 2, 3...)"
+    },
+    "color": {
+      "type": "string",
+      "description": "Cor da etapa (hex code)"
+    },
+    "icon": {
+      "type": "string",
+      "description": "\u00cdcone da etapa"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da etapa"
+    },
+    "expected_days": {
+      "type": "number",
+      "description": "Dias esperados nesta etapa"
+    },
+    "automation_trigger": {
+      "type": "string",
+      "description": "ID da regra de automa\u00e7\u00e3o a disparar"
+    },
+    "probability": {
+      "type": "number",
+      "description": "Probabilidade de convers\u00e3o (0-100)"
+    },
+    "min_contacts": {
+      "type": "number",
+      "description": "M\u00ednimo de contatos recomendados"
+    },
+    "is_custom": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 uma etapa customizada"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se est\u00e1 ativa"
+    }
+  },
+  "required": [
+    "name",
+    "order",
+    "color"
+  ]
+}

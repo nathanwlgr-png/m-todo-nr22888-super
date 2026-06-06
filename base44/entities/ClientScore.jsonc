@@ -1,0 +1,64 @@
+{
+  "name": "ClientScore",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "purchase_history_score": {
+      "type": "number",
+      "description": "Score baseado em hist\u00f3rico de compras (0-100)"
+    },
+    "interaction_score": {
+      "type": "number",
+      "description": "Score baseado em frequ\u00eancia e qualidade de intera\u00e7\u00f5es (0-100)"
+    },
+    "numerology_score": {
+      "type": "number",
+      "description": "Score baseado em perfil numerol\u00f3gico (0-100)"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Score consolidado (m\u00e9dia ponderada 0-100)"
+    },
+    "engagement_level": {
+      "type": "string",
+      "enum": [
+        "very_high",
+        "high",
+        "medium",
+        "low",
+        "very_low"
+      ],
+      "description": "N\u00edvel de engajamento"
+    },
+    "conversion_probability": {
+      "type": "number",
+      "description": "Probabilidade de convers\u00e3o (%)"
+    },
+    "churn_risk": {
+      "type": "number",
+      "description": "Risco de perda do cliente (%)"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recomenda\u00e7\u00f5es de a\u00e7\u00e3o"
+    },
+    "score_breakdown": {
+      "type": "object",
+      "description": "Detalhamento dos componentes do score"
+    },
+    "last_calculated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima atualiza\u00e7\u00e3o do score"
+    }
+  },
+  "required": [
+    "client_id"
+  ]
+}

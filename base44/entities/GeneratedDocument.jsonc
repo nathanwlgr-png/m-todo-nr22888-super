@@ -1,0 +1,46 @@
+{
+  "name": "GeneratedDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do documento"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "pesquisa_cientifica",
+        "hemogasometria",
+        "relatorio",
+        "manual",
+        "outro"
+      ],
+      "description": "Tipo de documento"
+    },
+    "content": {
+      "type": "string",
+      "description": "Conte\u00fado completo do documento"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Resumo do documento"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para busca"
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

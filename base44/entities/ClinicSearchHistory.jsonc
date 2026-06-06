@@ -1,0 +1,47 @@
+{
+  "name": "ClinicSearchHistory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio que fez a busca"
+    },
+    "search_mode": {
+      "type": "string",
+      "enum": [
+        "gps",
+        "city"
+      ],
+      "description": "Modo de busca utilizado"
+    },
+    "origin_location": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o de origem (cidade ou coordenadas GPS)"
+    },
+    "radius_km": {
+      "type": "number",
+      "description": "Raio de busca em quil\u00f4metros"
+    },
+    "clinics_found": {
+      "type": "number",
+      "description": "Quantidade de cl\u00ednicas encontradas"
+    },
+    "clinics_data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Dados completos das cl\u00ednicas encontradas"
+    },
+    "search_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora da busca"
+    }
+  },
+  "required": [
+    "user_email",
+    "search_mode",
+    "radius_km"
+  ]
+}

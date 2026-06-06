@@ -13,19 +13,18 @@ export const setModo = (modo) => {
 
 // Páginas do MODO VENDEDOR — o que Nathan usa em campo
 export const VENDEDOR_PAGES = [
+  { page: 'ModoInvestigacaoSuprema', label: '🕵️ Investigar', category: 'IA' },
   { page: 'CentralIAMaster', label: '🧠 Central IA', category: 'IA' },
+  { page: 'ModoCacaComercial', label: '🎯 Modo Caça', category: 'IA' },
   { page: 'Clients', label: '👥 Clientes', category: 'CRM' },
   { page: 'Leads', label: '🎯 Leads', category: 'CRM' },
   { page: 'TasksUnified', label: '✅ Tarefas', category: 'CRM' },
   { page: 'VisitManager', label: '📍 Visitas', category: 'CRM' },
-  { page: 'SalesFunnel', label: '📈 Funil', category: 'Vendas' },
-  { page: 'WhatsAppHub', label: '💬 WhatsApp', category: 'Comunicação' },
-  { page: 'RouteOptimizer', label: '🗺️ Rotas', category: 'Campo' },
-  { page: 'SmartRouteOptimizer', label: '🧭 Rota Smart', category: 'Campo' },
-  { page: 'MarketingAIStudio', label: '📣 Marketing IA', category: 'Marketing' },
-  { page: 'InstagramStudio', label: '📸 Instagram', category: 'Marketing' },
+  { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN', category: 'Vendas' },
   { page: 'ProposalGenerator', label: '📄 Propostas', category: 'Vendas' },
   { page: 'EquipmentCatalog', label: '🔬 Catálogo', category: 'Vendas' },
+  { page: 'WhatsAppHub', label: '💬 WhatsApp', category: 'Comunicação' },
+  { page: 'SmartRouteOptimizer', label: '🗺️ Rota Smart', category: 'Campo' },
   { page: 'OfflineMode', label: '📴 Offline', category: 'Sistema' },
 ];
 

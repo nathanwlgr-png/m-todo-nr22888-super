@@ -1,0 +1,78 @@
+{
+  "name": "SalesGoal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo da meta"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da meta"
+    },
+    "goal_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "team"
+      ],
+      "description": "Tipo da meta"
+    },
+    "metric_type": {
+      "type": "string",
+      "enum": [
+        "sales_value",
+        "sales_count",
+        "visits_count",
+        "tasks_count",
+        "conversion_rate"
+      ],
+      "description": "M\u00e9trica a ser medida"
+    },
+    "target_value": {
+      "type": "number",
+      "description": "Valor alvo"
+    },
+    "current_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor atual"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email do vendedor (para metas individuais)"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de t\u00e9rmino"
+    },
+    "reward_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Pontos ao completar a meta"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "failed"
+      ],
+      "default": "active",
+      "description": "Status da meta"
+    }
+  },
+  "required": [
+    "title",
+    "goal_type",
+    "metric_type",
+    "target_value",
+    "end_date"
+  ]
+}

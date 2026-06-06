@@ -1,0 +1,41 @@
+{
+  "name": "FinancialTable",
+  "type": "object",
+  "properties": {
+    "table_type": {
+      "type": "string",
+      "enum": [
+        "simulacao_santander",
+        "retorno_financeiro",
+        "custom"
+      ],
+      "description": "Tipo de tabela financeira"
+    },
+    "table_name": {
+      "type": "string",
+      "description": "Nome da tabela"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo original (.xlsx, .xls)"
+    },
+    "preview_url": {
+      "type": "string",
+      "description": "URL do preview/PDF convertido"
+    },
+    "locked": {
+      "type": "boolean",
+      "default": true,
+      "description": "Tabela bloqueada (n\u00e3o pode alterar f\u00f3rmulas)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da tabela"
+    }
+  },
+  "required": [
+    "table_type",
+    "table_name",
+    "file_url"
+  ]
+}

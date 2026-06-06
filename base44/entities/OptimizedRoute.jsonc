@@ -1,0 +1,113 @@
+{
+  "name": "OptimizedRoute",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da rota"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data planejada para as visitas"
+    },
+    "client_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos clientes na ordem otimizada"
+    },
+    "route_data": {
+      "type": "object",
+      "properties": {
+        "total_distance_km": {
+          "type": "number"
+        },
+        "total_duration_minutes": {
+          "type": "number"
+        },
+        "waypoints": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "polyline": {
+          "type": "string"
+        }
+      },
+      "description": "Dados da rota otimizada"
+    },
+    "start_location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "Ponto de partida"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "planned",
+      "description": "Status da rota"
+    },
+    "visits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "estimated_arrival": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estimated_duration_minutes": {
+            "type": "number"
+          },
+          "actual_arrival": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Lista de visitas na ordem"
+    },
+    "google_maps_url": {
+      "type": "string",
+      "description": "URL para abrir no Google Maps"
+    }
+  },
+  "required": [
+    "name",
+    "date",
+    "client_ids"
+  ]
+}

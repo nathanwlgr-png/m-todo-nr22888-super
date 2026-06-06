@@ -1,0 +1,192 @@
+{
+  "name": "AutomationRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da regra de automa\u00e7\u00e3o"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada da regra"
+    },
+    "rule_type": {
+      "type": "string",
+      "enum": [
+        "task_creation",
+        "alert_notification",
+        "data_sync",
+        "workflow_trigger"
+      ],
+      "description": "Tipo de automa\u00e7\u00e3o"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "low_stock",
+        "low_score",
+        "sales_goal",
+        "campaign_expiring",
+        "client_status_change",
+        "new_interaction",
+        "task_overdue",
+        "equipment_issue",
+        "revenue_threshold",
+        "custom_event"
+      ],
+      "description": "Tipo de gatilho para disparar a regra"
+    },
+    "trigger_conditions": {
+      "type": "object",
+      "description": "Condi\u00e7\u00f5es espec\u00edficas do gatilho (ex: stock_threshold: 5, score_below: 30)"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "create_task",
+        "send_notification",
+        "update_client",
+        "send_email",
+        "webhook_call"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o a executar"
+    },
+    "action_config": {
+      "type": "object",
+      "properties": {
+        "task_template": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "follow_up",
+                "ligacao",
+                "email",
+                "visita",
+                "outro"
+              ]
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "baixa",
+                "media",
+                "alta"
+              ]
+            },
+            "due_days_offset": {
+              "type": "number",
+              "description": "Dias a partir do disparo"
+            }
+          }
+        },
+        "notification_config": {
+          "type": "object",
+          "properties": {
+            "channels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "in_app",
+                  "email",
+                  "whatsapp"
+                ]
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "message_template": {
+              "type": "string"
+            },
+            "assign_to_emails": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "email_config": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "body_template": {
+              "type": "string"
+            },
+            "recipients": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "description": "Configura\u00e7\u00e3o da a\u00e7\u00e3o a ser tomada"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a regra est\u00e1 ativa"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "once",
+        "daily",
+        "weekly",
+        "on_each_event"
+      ],
+      "default": "on_each_event",
+      "description": "Frequ\u00eancia de execu\u00e7\u00e3o"
+    },
+    "last_triggered": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltimo disparo da regra"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi executada"
+    },
+    "success_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes completou com sucesso"
+    },
+    "failure_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes falhou"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para organiza\u00e7\u00e3o"
+    },
+    "created_by_name": {
+      "type": "string",
+      "description": "Nome de quem criou"
+    }
+  },
+  "required": [
+    "name",
+    "rule_type",
+    "trigger_type",
+    "action_type"
+  ]
+}

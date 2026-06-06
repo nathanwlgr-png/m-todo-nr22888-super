@@ -1,0 +1,61 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "fabia_id": {
+      "type": "string",
+      "description": "ID original do produto na base Fabia"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome do produto"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do produto"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria do produto"
+    },
+    "sku": {
+      "type": "string",
+      "description": "SKU/C\u00f3digo do produto"
+    },
+    "price": {
+      "type": "number",
+      "description": "Pre\u00e7o em R$"
+    },
+    "stock": {
+      "type": "number",
+      "description": "Quantidade em estoque"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Fornecedor"
+    },
+    "specifications": {
+      "type": "object",
+      "description": "Especifica\u00e7\u00f5es t\u00e9cnicas"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "descontinuado"
+      ],
+      "default": "ativo",
+      "description": "Status do produto"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Produto ativo"
+    }
+  },
+  "required": [
+    "name",
+    "fabia_id"
+  ]
+}

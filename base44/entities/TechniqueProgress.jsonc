@@ -1,0 +1,59 @@
+{
+  "name": "TechniqueProgress",
+  "type": "object",
+  "properties": {
+    "technique_name": {
+      "type": "string",
+      "enum": [
+        "SPIN_Selling",
+        "Cialdini_Persuasao",
+        "Challenger_Sale",
+        "Never_Split_Difference",
+        "Gap_Selling",
+        "Pitch_Anything",
+        "Sandler_System",
+        "Ziglar_Closing"
+      ],
+      "description": "Nome da t\u00e9cnica/framework"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o de role-play"
+    },
+    "score": {
+      "type": "number",
+      "description": "Score 0-100 nesta t\u00e9cnica"
+    },
+    "successes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "O que foi bem executado"
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "O que precisa melhorar"
+    },
+    "book_chapter_recommended": {
+      "type": "string",
+      "description": "Cap\u00edtulo espec\u00edfico recomendado"
+    },
+    "practice_exercise": {
+      "type": "string",
+      "description": "Exerc\u00edcio pr\u00e1tico sugerido"
+    },
+    "improvement_rate": {
+      "type": "number",
+      "description": "Taxa de melhoria vs sess\u00e3o anterior (%)"
+    }
+  },
+  "required": [
+    "technique_name",
+    "session_id",
+    "score"
+  ]
+}

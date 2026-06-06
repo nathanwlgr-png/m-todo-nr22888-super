@@ -1,0 +1,67 @@
+{
+  "name": "Sale",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "equipment_id": {
+      "type": "string",
+      "description": "ID do equipamento vendido"
+    },
+    "equipment_name": {
+      "type": "string",
+      "description": "Nome do equipamento"
+    },
+    "sale_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da venda"
+    },
+    "sale_value": {
+      "type": "number",
+      "description": "Valor da venda em R$"
+    },
+    "payment_terms": {
+      "type": "string",
+      "description": "Condi\u00e7\u00f5es de pagamento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposta",
+        "aguardando_assinatura",
+        "fechada",
+        "entregue",
+        "cancelada"
+      ],
+      "default": "proposta",
+      "description": "Status da venda"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es"
+    },
+    "salesperson": {
+      "type": "string",
+      "description": "Vendedor respons\u00e1vel"
+    }
+  },
+  "required": [
+    "client_id",
+    "client_name",
+    "equipment_name",
+    "sale_value",
+    "sale_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "master_whatsapp_numbers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "N\u00fameros de WhatsApp com acesso Master ao assistente NR22888"
+    }
+  },
+  "required": [
+    "master_whatsapp_numbers"
+  ]
+}

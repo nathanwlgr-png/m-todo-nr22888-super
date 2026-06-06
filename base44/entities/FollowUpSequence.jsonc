@@ -1,0 +1,85 @@
+{
+  "name": "FollowUpSequence",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da sequ\u00eancia"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "no_response_days",
+        "proposal_sent",
+        "first_visit_done",
+        "status_change",
+        "manual"
+      ],
+      "description": "Tipo de gatilho para ativar a sequ\u00eancia"
+    },
+    "trigger_days": {
+      "type": "number",
+      "description": "Dias ap\u00f3s \u00faltimo contato para disparar"
+    },
+    "target_status": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "quente",
+          "morno",
+          "frio"
+        ]
+      },
+      "description": "Status de clientes que recebem essa sequ\u00eancia"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Sequ\u00eancia ativa"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "day_offset": {
+            "type": "number",
+            "description": "Dias ap\u00f3s o gatilho"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "notification"
+            ],
+            "description": "Canal de envio"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Assunto do email"
+          },
+          "message_template": {
+            "type": "string",
+            "description": "Template da mensagem com vari\u00e1veis"
+          },
+          "use_numerology": {
+            "type": "boolean",
+            "description": "Personalizar com numerologia"
+          }
+        }
+      },
+      "description": "Passos da sequ\u00eancia"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_type",
+    "target_status"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

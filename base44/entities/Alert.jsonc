@@ -1,0 +1,58 @@
+{
+  "name": "Alert",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio que deve ver o alerta"
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do alerta"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensagem do alerta"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "high_score_lead",
+        "lead_inactive",
+        "task_overdue",
+        "client_cold"
+      ],
+      "description": "Tipo de alerta"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta"
+      ],
+      "default": "media",
+      "description": "Prioridade"
+    },
+    "link_to": {
+      "type": "string",
+      "description": "Link de navega\u00e7\u00e3o (ex: LeadProfile?id=123)"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Alerta lido"
+    },
+    "dismissed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Alerta dispensado"
+    }
+  },
+  "required": [
+    "user_email",
+    "title",
+    "message",
+    "type"
+  ]
+}

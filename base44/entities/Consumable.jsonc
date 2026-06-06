@@ -1,0 +1,121 @@
+{
+  "name": "Consumable",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do insumo/consum\u00edvel"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "reagente",
+        "kit_analise",
+        "calibrador",
+        "controle_qualidade",
+        "consumivel_geral"
+      ],
+      "description": "Categoria do insumo"
+    },
+    "unit_price": {
+      "type": "number",
+      "description": "Pre\u00e7o unit\u00e1rio em R$"
+    },
+    "unit_type": {
+      "type": "string",
+      "enum": [
+        "unidade",
+        "caixa",
+        "litro",
+        "ml",
+        "kit"
+      ],
+      "default": "unidade",
+      "description": "Tipo de unidade"
+    },
+    "stock_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade em estoque"
+    },
+    "min_stock": {
+      "type": "number",
+      "default": 0,
+      "description": "Estoque m\u00ednimo"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Fornecedor"
+    },
+    "compatible_equipment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de equipamentos compat\u00edveis"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do produto"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Produto ativo"
+    },
+    "seasonal_demand": {
+      "type": "object",
+      "properties": {
+        "peak_months": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Meses de pico (1-12)"
+        },
+        "low_months": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Meses de baixa (1-12)"
+        },
+        "peak_multiplier": {
+          "type": "number",
+          "default": 1.3,
+          "description": "Multiplicador para meses de pico"
+        },
+        "low_multiplier": {
+          "type": "number",
+          "default": 0.7,
+          "description": "Multiplicador para meses de baixa"
+        }
+      },
+      "description": "Dados de sazonalidade"
+    },
+    "equipment_lifecycle_usage": {
+      "type": "object",
+      "properties": {
+        "initial_months": {
+          "type": "number",
+          "description": "Primeiros X meses p\u00f3s-instala\u00e7\u00e3o"
+        },
+        "initial_multiplier": {
+          "type": "number",
+          "default": 1.5,
+          "description": "Consumo aumentado nos primeiros meses"
+        },
+        "maintenance_interval_days": {
+          "type": "number",
+          "description": "Intervalo de manuten\u00e7\u00e3o em dias"
+        }
+      },
+      "description": "Padr\u00e3o de uso baseado no ciclo de vida do equipamento"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "unit_price"
+  ]
+}

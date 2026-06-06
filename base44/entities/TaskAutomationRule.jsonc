@@ -1,0 +1,74 @@
+{
+  "name": "TaskAutomationRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da regra"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "status_change",
+        "days_without_contact",
+        "visit_completed",
+        "proposal_sent",
+        "score_drop",
+        "new_client"
+      ],
+      "description": "Tipo de evento que dispara a regra"
+    },
+    "trigger_condition": {
+      "type": "object",
+      "description": "Condi\u00e7\u00f5es espec\u00edficas (ex: status='frio', days=7)"
+    },
+    "task_template": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "baixa",
+            "media",
+            "alta"
+          ]
+        },
+        "days_offset": {
+          "type": "number",
+          "description": "Dias ap\u00f3s o gatilho para criar a tarefa"
+        }
+      }
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Regra ativa"
+    },
+    "target_client_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tipos de cliente que se aplicam"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_type",
+    "task_template"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

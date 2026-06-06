@@ -1,0 +1,193 @@
+{
+  "name": "ProposalEngagement",
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "ID da proposta"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Email do cliente"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Telefone do cliente"
+    },
+    "viewer_email": {
+      "type": "string",
+      "description": "Email de quem visualizou (pode ser diferente do cliente)"
+    },
+    "viewer_name": {
+      "type": "string",
+      "description": "Nome de quem visualizou"
+    },
+    "view_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora da visualiza\u00e7\u00e3o"
+    },
+    "view_duration_seconds": {
+      "type": "number",
+      "description": "Tempo de visualiza\u00e7\u00e3o em segundos"
+    },
+    "pages_viewed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "page_number": {
+            "type": "number"
+          },
+          "time_on_page": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "P\u00e1ginas visualizadas com tempo de perman\u00eancia"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP de quem visualizou"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "mobile",
+        "tablet",
+        "desktop"
+      ],
+      "description": "Tipo de dispositivo"
+    },
+    "browser": {
+      "type": "string",
+      "description": "Navegador utilizado"
+    },
+    "location": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o aproximada"
+    },
+    "shared_with": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shared_to_email": {
+            "type": "string"
+          },
+          "shared_to_phone": {
+            "type": "string"
+          },
+          "shared_to_name": {
+            "type": "string"
+          },
+          "share_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "share_channel": {
+            "type": "string",
+            "enum": [
+              "whatsapp",
+              "email",
+              "facebook",
+              "linkedin",
+              "copy_link"
+            ]
+          }
+        }
+      },
+      "description": "Com quem foi compartilhado"
+    },
+    "clicks_on_cta": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cta_text": {
+            "type": "string"
+          },
+          "cta_link": {
+            "type": "string"
+          },
+          "click_date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Cliques em call-to-action"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "muito_positivo",
+        "positivo",
+        "neutro",
+        "negativo",
+        "muito_negativo",
+        "indeterminado"
+      ],
+      "default": "indeterminado",
+      "description": "Sentimento deduzido da intera\u00e7\u00e3o"
+    },
+    "engagement_score": {
+      "type": "number",
+      "description": "Score de engajamento (0-100) baseado em visualiza\u00e7\u00f5es, tempo, compartilhamentos"
+    },
+    "likelihood_to_convert": {
+      "type": "number",
+      "description": "Probabilidade de convers\u00e3o (0-100)"
+    },
+    "action_taken": {
+      "type": "string",
+      "enum": [
+        "visualizou",
+        "compartilhou",
+        "clicou_cta",
+        "respondeu",
+        "ignorou",
+        "rejeitou"
+      ],
+      "description": "A\u00e7\u00e3o tomada pelo cliente"
+    },
+    "response_content": {
+      "type": "string",
+      "description": "Resposta do cliente se houver"
+    },
+    "response_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da resposta"
+    },
+    "follow_up_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Follow-up necess\u00e1rio"
+    },
+    "follow_up_type": {
+      "type": "string",
+      "enum": [
+        "chamada",
+        "mensagem",
+        "email",
+        "visita",
+        "outra_proposta"
+      ],
+      "description": "Tipo de follow-up recomendado"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Anota\u00e7\u00f5es sobre o engajamento"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "client_id",
+    "view_timestamp"
+  ]
+}

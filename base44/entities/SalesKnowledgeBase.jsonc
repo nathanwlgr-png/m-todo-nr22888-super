@@ -1,0 +1,172 @@
+{
+  "name": "SalesKnowledgeBase",
+  "type": "object",
+  "properties": {
+    "book_name": {
+      "type": "string",
+      "description": "Nome do livro/metodologia"
+    },
+    "author": {
+      "type": "string",
+      "description": "Autor do livro"
+    },
+    "methodology": {
+      "type": "string",
+      "enum": [
+        "SPIN_Selling",
+        "Influencia_Cialdini",
+        "Como_Fazer_Amigos",
+        "Gatilhos_Mentais",
+        "Arte_da_Guerra",
+        "Receita_Previsivelv",
+        "Challenger_Sale",
+        "Never_Split_Difference",
+        "Gap_Selling",
+        "Neuromarketing",
+        "Persuasao_Avancada"
+      ],
+      "description": "Metodologia de vendas"
+    },
+    "key_concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "numerology_numbers": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "behavioral_profiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Conceitos principais do livro"
+    },
+    "trigger_types": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trigger_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "example_script": {
+            "type": "string"
+          },
+          "when_to_use": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Gatilhos mentais espec\u00edficos"
+    },
+    "questions_framework": {
+      "type": "object",
+      "properties": {
+        "investigative": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "clarification": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "demonstrating_capability": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "securing_commitment": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Perguntas por tipo (SPIN Selling)"
+    },
+    "objection_handling": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "objection": {
+            "type": "string"
+          },
+          "response_framework": {
+            "type": "string"
+          },
+          "counter_strategies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Como lidar com obje\u00e7\u00f5es"
+    },
+    "persuasion_principles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Princ\u00edpios de persuas\u00e3o (Cialdini)"
+    },
+    "scripts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "situation": {
+            "type": "string"
+          },
+          "script": {
+            "type": "string"
+          },
+          "best_for_numerology": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "description": "Scripts prontos para usar"
+    },
+    "effectiveness_score": {
+      "type": "number",
+      "description": "Score de efetividade (0-100)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Metodologia ativa"
+    }
+  },
+  "required": [
+    "book_name",
+    "methodology",
+    "key_concepts"
+  ]
+}

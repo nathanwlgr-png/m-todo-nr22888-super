@@ -1,0 +1,89 @@
+{
+  "name": "WorkflowRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da regra de workflow"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Workflow ativo"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "status_change",
+        "segment_added",
+        "interaction_created",
+        "sentiment_negative",
+        "visit_scheduled",
+        "no_contact_days"
+      ],
+      "description": "Tipo de gatilho"
+    },
+    "trigger_conditions": {
+      "type": "object",
+      "properties": {
+        "from_status": {
+          "type": "string"
+        },
+        "to_status": {
+          "type": "string"
+        },
+        "segment_id": {
+          "type": "string"
+        },
+        "days_without_contact": {
+          "type": "number"
+        }
+      },
+      "description": "Condi\u00e7\u00f5es do gatilho"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "create_task",
+              "send_message",
+              "create_alert",
+              "add_to_campaign",
+              "update_client",
+              "create_visit",
+              "notify_user"
+            ]
+          },
+          "action_data": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "A\u00e7\u00f5es a executar"
+    },
+    "delay_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Delay em minutos antes de executar"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi executado"
+    },
+    "last_execution": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima execu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_type",
+    "actions"
+  ]
+}

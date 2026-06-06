@@ -1,0 +1,149 @@
+{
+  "name": "SalesCoaching",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do vendedor"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nome do vendedor"
+    },
+    "analysis_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da an\u00e1lise"
+    },
+    "period_analyzed": {
+      "type": "string",
+      "description": "Per\u00edodo analisado (\u00faltima semana, m\u00eas, etc)"
+    },
+    "interactions_analyzed": {
+      "type": "number",
+      "description": "N\u00famero de intera\u00e7\u00f5es analisadas"
+    },
+    "performance_score": {
+      "type": "number",
+      "description": "Score de performance (0-100)"
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Pontos fortes identificados"
+    },
+    "areas_for_improvement": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "alta",
+              "media",
+              "baixa"
+            ]
+          },
+          "actionable_tips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "\u00c1reas para melhoria"
+    },
+    "successful_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string"
+          },
+          "success_rate": {
+            "type": "number"
+          },
+          "recommendation": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Padr\u00f5es de vendas bem-sucedidas"
+    },
+    "training_suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Sugest\u00f5es de treinamento"
+    },
+    "conversion_rate": {
+      "type": "number",
+      "description": "Taxa de convers\u00e3o do per\u00edodo"
+    },
+    "avg_response_time": {
+      "type": "number",
+      "description": "Tempo m\u00e9dio de resposta em minutos"
+    },
+    "key_metrics": {
+      "type": "object",
+      "properties": {
+        "leads_contacted": {
+          "type": "number"
+        },
+        "meetings_scheduled": {
+          "type": "number"
+        },
+        "proposals_sent": {
+          "type": "number"
+        },
+        "deals_closed": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "user_email",
+    "analysis_date"
+  ]
+}

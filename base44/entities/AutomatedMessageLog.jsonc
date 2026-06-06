@@ -1,0 +1,83 @@
+{
+  "name": "AutomatedMessageLog",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente que recebeu a mensagem"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "WhatsApp do cliente"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "turbo_venda",
+        "follow_up",
+        "conquistar",
+        "reativacao",
+        "proposta",
+        "lembranca_visita",
+        "feedback_post_venda"
+      ],
+      "description": "Tipo de mensagem autom\u00e1tica"
+    },
+    "message_content": {
+      "type": "string",
+      "description": "Conte\u00fado da mensagem enviada"
+    },
+    "trigger_reason": {
+      "type": "string",
+      "description": "Motivo que acionou o envio autom\u00e1tico"
+    },
+    "sent_status": {
+      "type": "string",
+      "enum": [
+        "enviada",
+        "pendente",
+        "falha",
+        "bloqueado"
+      ],
+      "default": "pendente",
+      "description": "Status do envio"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do envio"
+    },
+    "response_received": {
+      "type": "boolean",
+      "default": false,
+      "description": "Cliente respondeu"
+    },
+    "response_content": {
+      "type": "string",
+      "description": "Conte\u00fado da resposta do cliente"
+    },
+    "response_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora da resposta"
+    },
+    "automation_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se automa\u00e7\u00e3o estava ativada quando foi enviado"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Se a mensagem surtiu efeito (resposta positiva)"
+    }
+  },
+  "required": [
+    "client_id",
+    "message_type",
+    "message_content"
+  ]
+}

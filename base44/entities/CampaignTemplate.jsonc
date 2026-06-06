@@ -1,0 +1,55 @@
+{
+  "name": "CampaignTemplate",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "description": "ID da campanha"
+    },
+    "template_type": {
+      "type": "string",
+      "enum": [
+        "proposta",
+        "contrato",
+        "retorno_financeiro"
+      ],
+      "description": "Tipo de template"
+    },
+    "template_name": {
+      "type": "string",
+      "description": "Nome do template"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo template"
+    },
+    "payment_conditions": {
+      "type": "object",
+      "properties": {
+        "a_vista": {
+          "type": "boolean",
+          "default": true
+        },
+        "pics_36x": {
+          "type": "boolean",
+          "default": true,
+          "description": "PICS em at\u00e9 36x"
+        },
+        "santander_financiamento": {
+          "type": "boolean",
+          "default": true,
+          "description": "Financiamento Santander at\u00e9 36x"
+        },
+        "observacoes": {
+          "type": "string",
+          "description": "Observa\u00e7\u00f5es sobre condi\u00e7\u00f5es"
+        }
+      }
+    }
+  },
+  "required": [
+    "campaign_id",
+    "template_type",
+    "template_name"
+  ]
+}

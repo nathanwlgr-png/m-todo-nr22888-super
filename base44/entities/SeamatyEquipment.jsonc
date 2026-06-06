@@ -1,0 +1,78 @@
+{
+  "name": "SeamatyEquipment",
+  "type": "object",
+  "properties": {
+    "equipment_name": {
+      "type": "string",
+      "enum": [
+        "SMT-120VP",
+        "QT3",
+        "3Dx"
+      ],
+      "description": "Nome do equipamento Seamaty"
+    },
+    "equipment_type": {
+      "type": "string",
+      "enum": [
+        "analisador_automatico",
+        "sistema_modular",
+        "imunofluorescencia"
+      ],
+      "description": "Tipo de equipamento"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem do equipamento"
+    },
+    "technology": {
+      "type": "string",
+      "description": "Tecnologia utilizada (espectrofotometria, turbidimetria, etc)"
+    },
+    "sample_volume": {
+      "type": "string",
+      "description": "Volume de amostra necess\u00e1rio (ex: 100\u00b5L)"
+    },
+    "processing_time": {
+      "type": "string",
+      "description": "Tempo de processamento"
+    },
+    "compatible_rotors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos rotores compat\u00edveis"
+    },
+    "specifications": {
+      "type": "object",
+      "properties": {
+        "voltage": {
+          "type": "string"
+        },
+        "temperature_range": {
+          "type": "string"
+        },
+        "humidity_range": {
+          "type": "string"
+        },
+        "nobreak_min": {
+          "type": "string"
+        }
+      },
+      "description": "Especifica\u00e7\u00f5es t\u00e9cnicas"
+    },
+    "installation_guide": {
+      "type": "string",
+      "description": "Guia completo de instala\u00e7\u00e3o e configura\u00e7\u00e3o"
+    },
+    "offline_data": {
+      "type": "boolean",
+      "default": true,
+      "description": "Dispon\u00edvel offline"
+    }
+  },
+  "required": [
+    "equipment_name",
+    "equipment_type"
+  ]
+}

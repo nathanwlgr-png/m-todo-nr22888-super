@@ -1,0 +1,72 @@
+{
+  "name": "Visit",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora agendada"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 60,
+      "description": "Dura\u00e7\u00e3o em minutos"
+    },
+    "visit_type": {
+      "type": "string",
+      "enum": [
+        "primeira_visita",
+        "demonstracao",
+        "followup",
+        "fechamento"
+      ],
+      "description": "Tipo de visita"
+    },
+    "location": {
+      "type": "string",
+      "description": "Endere\u00e7o da visita"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas da visita"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "agendada",
+        "realizada",
+        "cancelada",
+        "remarcada"
+      ],
+      "default": "agendada",
+      "description": "Status da visita"
+    },
+    "result_notes": {
+      "type": "string",
+      "description": "Notas do resultado da visita"
+    },
+    "google_calendar_synced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi sincronizado com Google Calendar"
+    },
+    "google_calendar_event_id": {
+      "type": "string",
+      "description": "ID do evento no Google Calendar"
+    }
+  },
+  "required": [
+    "client_id",
+    "client_name",
+    "scheduled_date"
+  ],
+  "rls": {}
+}

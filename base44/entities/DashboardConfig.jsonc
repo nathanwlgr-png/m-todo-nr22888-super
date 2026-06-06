@@ -1,0 +1,90 @@
+{
+  "name": "DashboardConfig",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "dashboard_name": {
+      "type": "string",
+      "description": "Nome do dashboard"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Dashboard padr\u00e3o do usu\u00e1rio"
+    },
+    "layout": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "widget_id": {
+            "type": "string"
+          },
+          "widget_type": {
+            "type": "string"
+          },
+          "position": {
+            "type": "object"
+          },
+          "size": {
+            "type": "object"
+          },
+          "config": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Layout dos widgets"
+    },
+    "widgets_enabled": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sales_funnel",
+          "revenue_chart",
+          "client_status",
+          "tasks_summary",
+          "goals_progress",
+          "top_clients",
+          "upcoming_visits",
+          "conversion_rate",
+          "activity_timeline",
+          "kpi_cards",
+          "priority_leads",
+          "coaching_score"
+        ]
+      },
+      "description": "Widgets habilitados"
+    },
+    "filters": {
+      "type": "object",
+      "properties": {
+        "date_range": {
+          "type": "string"
+        },
+        "team_member": {
+          "type": "string"
+        },
+        "client_status": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "refresh_interval": {
+      "type": "number",
+      "default": 300,
+      "description": "Intervalo de atualiza\u00e7\u00e3o em segundos"
+    }
+  },
+  "required": [
+    "user_email",
+    "dashboard_name"
+  ]
+}

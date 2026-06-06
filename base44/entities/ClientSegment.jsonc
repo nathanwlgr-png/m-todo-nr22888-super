@@ -1,0 +1,84 @@
+{
+  "name": "ClientSegment",
+  "type": "object",
+  "properties": {
+    "segment_name": {
+      "type": "string",
+      "description": "Nome do segmento"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do segmento"
+    },
+    "criteria": {
+      "type": "object",
+      "properties": {
+        "purchase_history": {
+          "type": "string"
+        },
+        "engagement_level": {
+          "type": "string"
+        },
+        "behavioral_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ltv_range": {
+          "type": "object"
+        },
+        "churn_risk": {
+          "type": "string"
+        }
+      },
+      "description": "Crit\u00e9rios de segmenta\u00e7\u00e3o"
+    },
+    "client_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos clientes neste segmento"
+    },
+    "client_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de clientes"
+    },
+    "avg_ltv": {
+      "type": "number",
+      "description": "LTV m\u00e9dio do segmento"
+    },
+    "avg_engagement_score": {
+      "type": "number",
+      "description": "Score m\u00e9dio de engajamento"
+    },
+    "priority_level": {
+      "type": "string",
+      "enum": [
+        "vip",
+        "high",
+        "medium",
+        "low",
+        "at_risk"
+      ],
+      "description": "N\u00edvel de prioridade"
+    },
+    "recommended_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A\u00e7\u00f5es recomendadas pela IA"
+    },
+    "last_ai_analysis": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima an\u00e1lise de IA"
+    }
+  },
+  "required": [
+    "segment_name"
+  ]
+}

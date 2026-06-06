@@ -1,0 +1,117 @@
+{
+  "name": "NurturingCampaign",
+  "type": "object",
+  "properties": {
+    "campaign_name": {
+      "type": "string",
+      "description": "Nome da campanha"
+    },
+    "segment_id": {
+      "type": "string",
+      "description": "ID do segmento alvo"
+    },
+    "campaign_type": {
+      "type": "string",
+      "enum": [
+        "onboarding",
+        "engagement",
+        "reactivation",
+        "loyalty",
+        "upsell",
+        "retention"
+      ],
+      "description": "Tipo de campanha"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "paused",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "number"
+          },
+          "delay_days": {
+            "type": "number"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "whatsapp",
+              "email"
+            ]
+          },
+          "content_template": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "trigger_condition": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Sequ\u00eancia de passos da campanha"
+    },
+    "personalization_rules": {
+      "type": "object",
+      "properties": {
+        "use_numerology": {
+          "type": "boolean"
+        },
+        "adapt_tone": {
+          "type": "boolean"
+        },
+        "include_specific_offers": {
+          "type": "boolean"
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "sent": {
+          "type": "number"
+        },
+        "opened": {
+          "type": "number"
+        },
+        "replied": {
+          "type": "number"
+        },
+        "converted": {
+          "type": "number"
+        },
+        "open_rate": {
+          "type": "number"
+        },
+        "conversion_rate": {
+          "type": "number"
+        }
+      }
+    },
+    "active_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active_until": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "campaign_name",
+    "segment_id",
+    "campaign_type"
+  ]
+}

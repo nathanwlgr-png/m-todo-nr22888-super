@@ -1,0 +1,114 @@
+{
+  "name": "AutomationTask",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da automa\u00e7\u00e3o"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "email_followup",
+        "monthly_report",
+        "stock_alert",
+        "consumable_reorder_reminder",
+        "client_birthday",
+        "visit_reminder"
+      ],
+      "description": "Tipo de automa\u00e7\u00e3o"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "on_trigger"
+      ],
+      "description": "Frequ\u00eancia de execu\u00e7\u00e3o"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automa\u00e7\u00e3o ativa"
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "trigger_conditions": {
+          "type": "object",
+          "description": "Condi\u00e7\u00f5es para disparar (ex: status='fechada', days_since_order>30)"
+        },
+        "email_template": {
+          "type": "string",
+          "description": "Template do e-mail"
+        },
+        "email_subject": {
+          "type": "string",
+          "description": "Assunto do e-mail"
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Destinat\u00e1rios fixos (para relat\u00f3rios)"
+        },
+        "report_type": {
+          "type": "string",
+          "description": "Tipo de relat\u00f3rio a gerar"
+        },
+        "stock_threshold": {
+          "type": "number",
+          "description": "Threshold de estoque para alertar"
+        }
+      },
+      "description": "Configura\u00e7\u00e3o espec\u00edfica da automa\u00e7\u00e3o"
+    },
+    "last_execution": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima execu\u00e7\u00e3o"
+    },
+    "next_execution": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Pr\u00f3xima execu\u00e7\u00e3o programada"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi executada"
+    },
+    "last_result": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "error"
+          ]
+        },
+        "details": {
+          "type": "string"
+        },
+        "affected_records": {
+          "type": "number"
+        }
+      },
+      "description": "Resultado da \u00faltima execu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "name",
+    "task_type",
+    "frequency"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

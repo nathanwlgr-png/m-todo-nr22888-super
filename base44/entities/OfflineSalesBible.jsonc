@@ -1,0 +1,64 @@
+{
+  "name": "OfflineSalesBible",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "tecnica_venda",
+        "gatilho_mental",
+        "framework",
+        "script_pronto",
+        "caso_sucesso",
+        "objecao_comum",
+        "frase_efeito",
+        "estatistica",
+        "estudo_cientifico"
+      ],
+      "description": "Categoria do conhecimento"
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do conte\u00fado"
+    },
+    "content": {
+      "type": "string",
+      "description": "Conte\u00fado completo"
+    },
+    "when_to_use": {
+      "type": "string",
+      "description": "Quando usar esta t\u00e9cnica"
+    },
+    "example_script": {
+      "type": "string",
+      "description": "Script exemplo"
+    },
+    "related_numbers": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "N\u00fameros numerol\u00f3gicos relacionados"
+    },
+    "equipment_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Equipamentos para os quais se aplica"
+    },
+    "source": {
+      "type": "string",
+      "description": "Fonte do conhecimento (livro, estudo, etc)"
+    },
+    "effectiveness_score": {
+      "type": "number",
+      "description": "Efetividade (0-100)"
+    }
+  },
+  "required": [
+    "category",
+    "title",
+    "content"
+  ]
+}

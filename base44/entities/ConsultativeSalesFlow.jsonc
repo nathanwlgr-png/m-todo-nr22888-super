@@ -1,0 +1,214 @@
+{
+  "name": "ConsultativeSalesFlow",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "ID da conversa"
+    },
+    "numerology_number": {
+      "type": "number",
+      "description": "N\u00famero numerol\u00f3gico do cliente (1-9)"
+    },
+    "behavioral_profile": {
+      "type": "string",
+      "enum": [
+        "L\u00edder",
+        "Anal\u00edtico",
+        "Diplomata",
+        "Entusiasmado",
+        "Inovador",
+        "Protetor",
+        "Fil\u00f3sofo",
+        "Realizador",
+        "Humanit\u00e1rio"
+      ],
+      "description": "Perfil comportamental baseado em numerologia"
+    },
+    "current_stage": {
+      "type": "string",
+      "enum": [
+        "descoberta",
+        "qualifica\u00e7\u00e3o",
+        "investiga\u00e7\u00e3o",
+        "apresenta\u00e7\u00e3o",
+        "negocia\u00e7\u00e3o",
+        "fechamento"
+      ],
+      "default": "descoberta",
+      "description": "Est\u00e1gio atual no fluxo consultivo"
+    },
+    "methodology": {
+      "type": "string",
+      "enum": [
+        "SPIN_Selling",
+        "Consultiva_Pura",
+        "Cialdini_Triggers",
+        "Challenger",
+        "Gap_Selling",
+        "Hybrid"
+      ],
+      "description": "Metodologia aplicada"
+    },
+    "questions_asked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "investigative",
+              "clarification",
+              "demonstrating_capability",
+              "securing_commitment"
+            ]
+          },
+          "asked_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "client_response": {
+            "type": "string"
+          },
+          "insights_gained": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Perguntas feitas e respostas"
+    },
+    "triggers_used": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trigger_name": {
+            "type": "string"
+          },
+          "trigger_type": {
+            "type": "string",
+            "enum": [
+              "urg\u00eancia",
+              "escassez",
+              "reciprocidade",
+              "prova_social",
+              "autoridade",
+              "afinidade",
+              "coer\u00eancia",
+              "liking"
+            ]
+          },
+          "used_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveness": {
+            "type": "number",
+            "description": "De 0 a 10 qu\u00e3o efetivo foi"
+          }
+        }
+      },
+      "description": "Gatilhos mentais utilizados"
+    },
+    "objections_raised": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "objection": {
+            "type": "string"
+          },
+          "objection_type": {
+            "type": "string"
+          },
+          "response_used": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Obje\u00e7\u00f5es levantadas e como foram tratadas"
+    },
+    "pain_points_identified": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dores/problemas identificados"
+    },
+    "value_propositions_highlighted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Proposi\u00e7\u00f5es de valor destacadas"
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string"
+          },
+          "scheduled_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "responsible": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Pr\u00f3ximas a\u00e7\u00f5es acordadas"
+    },
+    "recommended_approach": {
+      "type": "string",
+      "description": "Abordagem recomendada para o pr\u00f3ximo contato"
+    },
+    "best_contact_time": {
+      "type": "string",
+      "description": "Melhor hor\u00e1rio para contatar (baseado em numerologia)"
+    },
+    "best_contact_day": {
+      "type": "string",
+      "description": "Melhor dia para contatar"
+    },
+    "likelihood_to_close": {
+      "type": "number",
+      "description": "Probabilidade de fechar (0-100)"
+    },
+    "estimated_close_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data estimada para fechar"
+    },
+    "last_interaction": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da \u00faltima intera\u00e7\u00e3o"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Anota\u00e7\u00f5es gerais da conversa"
+    }
+  },
+  "required": [
+    "client_id",
+    "numerology_number"
+  ]
+}

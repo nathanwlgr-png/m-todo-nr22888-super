@@ -1,0 +1,54 @@
+{
+  "name": "FollowUpLog",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "sequence_id": {
+      "type": "string",
+      "description": "ID da sequ\u00eancia"
+    },
+    "sequence_name": {
+      "type": "string",
+      "description": "Nome da sequ\u00eancia"
+    },
+    "step_number": {
+      "type": "number",
+      "description": "N\u00famero do passo executado"
+    },
+    "sent_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de envio"
+    },
+    "channel": {
+      "type": "string",
+      "description": "Canal usado"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed",
+        "opened"
+      ],
+      "default": "sent",
+      "description": "Status do envio"
+    },
+    "message_content": {
+      "type": "string",
+      "description": "Conte\u00fado enviado"
+    }
+  },
+  "required": [
+    "client_id",
+    "sequence_id",
+    "step_number"
+  ]
+}

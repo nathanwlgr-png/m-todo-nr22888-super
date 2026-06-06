@@ -1,0 +1,45 @@
+{
+  "name": "VisitHistory",
+  "type": "object",
+  "properties": {
+    "city": {
+      "type": "string",
+      "description": "Cidade visitada"
+    },
+    "clinic_id": {
+      "type": "string",
+      "description": "ID da cl\u00ednica"
+    },
+    "clinic_name": {
+      "type": "string",
+      "description": "Nome da cl\u00ednica"
+    },
+    "last_visit_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da \u00faltima visita"
+    },
+    "days_since_visit": {
+      "type": "number",
+      "description": "Dias desde \u00faltima visita"
+    },
+    "visit_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Total de visitas"
+    },
+    "priority_score": {
+      "type": "number",
+      "description": "Score de prioridade (0-100)"
+    },
+    "next_suggested_visit": {
+      "type": "string",
+      "format": "date",
+      "description": "Pr\u00f3xima visita sugerida"
+    }
+  },
+  "required": [
+    "city",
+    "clinic_id"
+  ]
+}

@@ -70,6 +70,15 @@ export default function WhatsAppHub() {
       return;
     }
 
+    // ── APROVAÇÃO OBRIGATÓRIA ANTES DO ENVIO ──
+    const confirmed = window.confirm(
+      `✅ PODE ENVIAR?\n\nDestinatário: ${selectedClient.first_name} (${selectedClient.clinic_name || selectedClient.phone})\n\nMensagem:\n"${message.trim().substring(0, 200)}${message.length > 200 ? '...' : ''}"\n\nClique OK para confirmar e enviar.`
+    );
+    if (!confirmed) {
+      toast.info('Envio cancelado. Mensagem não enviada.');
+      return;
+    }
+
     setSending(true);
     try {
       const result = await base44.functions.invoke('sendWhatsAppMessage', {
@@ -80,7 +89,7 @@ export default function WhatsAppHub() {
       });
 
       if (result.data?.success) {
-        toast.success('Mensagem enviada!');
+        toast.success('✅ Mensagem aprovada e enviada!');
         setMessage('');
         queryClient.invalidateQueries(['whatsapp-messages']);
       }
@@ -192,6 +201,13 @@ export default function WhatsAppHub() {
               <CardTitle className="text-base">Nova Mensagem WhatsApp</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Aviso aprovação obrigatória */}
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-orange-50 border border-orange-200">
+                <AlertCircle className="w-4 h-4 text-orange-500 shrink-0" />
+                <p className="text-xs text-orange-700 font-medium">
+                  Todas as mensagens requerem <strong>aprovação manual</strong> antes do envio. Clique "✅ Pode Enviar" para confirmar.
+                </p>
+              </div>
               {/* Busca de cliente */}
               <div>
                 <label className="text-sm font-medium text-slate-700 block mb-2">Destinatário</label>
@@ -262,7 +278,7 @@ export default function WhatsAppHub() {
                   {sending ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando...</>
                   ) : (
-                    <><Send className="w-4 h-4 mr-2" />Enviar</>
+                    <><CheckCircle2 className="w-4 h-4 mr-2" />✅ Pode Enviar</>
                   )}
                 </Button>
                 {selectedClient && (

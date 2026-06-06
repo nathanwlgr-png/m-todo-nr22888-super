@@ -1,0 +1,107 @@
+{
+  "name": "AIKnowledgeDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do documento"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "catalogo_produtos",
+        "modelo_proposta",
+        "modelo_contrato",
+        "tabela_precos",
+        "manual_tecnico",
+        "case_sucesso",
+        "lista_clientes",
+        "planilha_excel",
+        "apresentacao_ppt",
+        "documento_word",
+        "pdf_generico",
+        "imagem",
+        "relatorio_financeiro",
+        "analise_mercado",
+        "documento_operacional",
+        "outro"
+      ],
+      "description": "Tipo de documento"
+    },
+    "file_format": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "docx",
+        "doc",
+        "xlsx",
+        "xls",
+        "csv",
+        "pptx",
+        "ppt",
+        "txt",
+        "jpg",
+        "jpeg",
+        "png",
+        "outro"
+      ],
+      "description": "Formato original do arquivo"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo original"
+    },
+    "file_size_kb": {
+      "type": "number",
+      "description": "Tamanho do arquivo em KB"
+    },
+    "extracted_text": {
+      "type": "string",
+      "description": "Texto extra\u00eddo do documento para IA usar"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Resumo executivo (2-3 linhas)"
+    },
+    "detailed_summary": {
+      "type": "string",
+      "description": "Resumo detalhado (1 par\u00e1grafo completo)"
+    },
+    "key_data": {
+      "type": "object",
+      "description": "Dados estruturados extra\u00eddos (pre\u00e7os, specs, tabelas, KPIs, insights, etc)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Documento ativo para IA usar"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags autom\u00e1ticas para busca"
+    },
+    "upload_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data do upload"
+    },
+    "last_used_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que foi usado pela IA"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi usado"
+    }
+  },
+  "required": [
+    "title",
+    "document_type",
+    "file_format"
+  ]
+}

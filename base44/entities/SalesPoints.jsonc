@@ -1,0 +1,59 @@
+{
+  "name": "SalesPoints",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do vendedor"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nome do vendedor"
+    },
+    "total_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Pontua\u00e7\u00e3o total acumulada"
+    },
+    "month_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Pontos do m\u00eas atual"
+    },
+    "tasks_completed": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de tarefas conclu\u00eddas"
+    },
+    "sales_closed": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de vendas fechadas"
+    },
+    "visits_completed": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de visitas realizadas"
+    },
+    "level": {
+      "type": "number",
+      "default": 1,
+      "description": "N\u00edvel do vendedor"
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Badges conquistadas"
+    },
+    "streak_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias consecutivos com atividade"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

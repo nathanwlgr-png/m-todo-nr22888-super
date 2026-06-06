@@ -1,0 +1,123 @@
+{
+  "name": "Interaction",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID do cliente/lead"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "ligacao",
+        "email",
+        "whatsapp",
+        "visita",
+        "reuniao"
+      ],
+      "description": "Tipo de intera\u00e7\u00e3o"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound"
+      ],
+      "description": "Dire\u00e7\u00e3o da intera\u00e7\u00e3o"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Assunto/t\u00edtulo"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas detalhadas"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "neutral",
+        "negative"
+      ],
+      "description": "Resultado da intera\u00e7\u00e3o"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "neutral",
+        "negative"
+      ],
+      "description": "Sentimento detectado pela IA"
+    },
+    "sentiment_score": {
+      "type": "number",
+      "description": "Score num\u00e9rico do sentimento (-1 a 1)"
+    },
+    "sentiment_confidence": {
+      "type": "number",
+      "description": "Confian\u00e7a da an\u00e1lise (0-100)"
+    },
+    "sentiment_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Palavras-chave que indicaram o sentimento"
+    },
+    "emotion_detected": {
+      "type": "string",
+      "enum": [
+        "joy",
+        "anger",
+        "fear",
+        "sadness",
+        "surprise",
+        "neutral"
+      ],
+      "description": "Emo\u00e7\u00e3o principal detectada"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "Pr\u00f3xima a\u00e7\u00e3o sugerida"
+    },
+    "ai_category": {
+      "type": "string",
+      "description": "Categoria IA"
+    },
+    "ai_sentiment": {
+      "type": "string",
+      "description": "Sentimento IA (legado)"
+    },
+    "ai_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags autom\u00e1ticas"
+    },
+    "ai_priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "urgente"
+      ],
+      "description": "Prioridade IA"
+    },
+    "ai_summary": {
+      "type": "string",
+      "description": "Resumo gerado por IA"
+    }
+  },
+  "required": [
+    "client_id",
+    "type"
+  ]
+}

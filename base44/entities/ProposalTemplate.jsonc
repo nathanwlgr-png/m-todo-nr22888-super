@@ -1,0 +1,41 @@
+{
+  "name": "ProposalTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do template"
+    },
+    "content_template": {
+      "type": "string",
+      "description": "Template HTML/Markdown com vari\u00e1veis {{cliente}}, {{produtos}}, etc"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Template padr\u00e3o"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Se\u00e7\u00f5es da proposta"
+    }
+  },
+  "required": [
+    "name",
+    "content_template"
+  ]
+}

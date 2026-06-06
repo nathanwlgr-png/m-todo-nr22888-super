@@ -1,0 +1,62 @@
+{
+  "name": "TeamMessage",
+  "type": "object",
+  "properties": {
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "campaign",
+        "client"
+      ],
+      "description": "Tipo de contexto (campanha ou cliente)"
+    },
+    "context_id": {
+      "type": "string",
+      "description": "ID da campanha ou cliente"
+    },
+    "context_name": {
+      "type": "string",
+      "description": "Nome da campanha ou cliente"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensagem da equipe"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email do remetente"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Nome do remetente"
+    },
+    "is_system_message": {
+      "type": "boolean",
+      "default": false,
+      "description": "Mensagem gerada pelo sistema (ex: 'Jo\u00e3o editou a campanha')"
+    },
+    "mentioned_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Emails dos usu\u00e1rios mencionados com @"
+    }
+  },
+  "required": [
+    "context_type",
+    "context_id",
+    "message",
+    "sender_email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {}
+      ]
+    }
+  }
+}
