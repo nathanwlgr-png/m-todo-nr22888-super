@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, MarkerClusterGroup, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { MapPin, AlertTriangle, Navigation, MessageCircle, Search, RefreshCw, Navigation2 } from 'lucide-react';
+import { MapPin, AlertTriangle, Navigation, MessageCircle, Search, RefreshCw, Navigation2, Zap, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -65,15 +65,24 @@ export default function ClientLocationMap() {
     queryKey: ['client-map'],
     queryFn: async () => {
       const items = await base44.entities.Client.list('-updated_date', 500);
-      return items.filter(c => c.latitude && c.longitude);
+      return items;
     },
-    staleTime: 180000,
+    staleTime: 60000,
   });
+
+  // Contar clientes sem localização
+  const clientsNeedingGeocode = useMemo(() => 
+    clients.filter(c => !c.latitude || !c.longitude),
+    [clients]
+  );
 
   const cities = useMemo(() => [...new Set(clients.map(c => c.city).filter(Boolean))].sort(), [clients]);
 
   const filtered = useMemo(() => {
     return clients.filter(c => {
+      // Mostrar apenas clientes com localização válida
+      if (!c.latitude || !c.longitude) return false;
+      
       const matchCity = !searchCity || c.city === searchCity;
       const matchStatus = filterStatus === 'todos' || c.status === filterStatus;
       const matchConfidence = filterConfidence === 'todos' || c.precision_status === filterConfidence;
@@ -81,32 +90,41 @@ export default function ClientLocationMap() {
     });
   }, [clients, searchCity, filterStatus, filterConfidence]);
 
-  const handleGeocodeAll = async () => {
-    const needsGeocode = clients.filter(c => !c.latitude || !c.longitude);
-    if (needsGeocode.length === 0) {
+  const handleGeocodeAll = useCallback(async () => {
+    if (clientsNeedingGeocode.length === 0) {
       toast.success('Todos os clientes já têm localização validada!');
       return;
     }
 
-    toast.loading(`Geocodificando ${needsGeocode.length} clientes...`);
+    const toastId = toast.loading(`Geocodificando ${clientsNeedingGeocode.length} clientes...`);
+    let success = 0;
+    let failed = 0;
     
-    for (const client of needsGeocode) {
-      try {
-        await base44.functions.invoke('geocodeClientLocation', {
-          client_id: client.id,
-          address: client.address,
-          clinic_name: client.clinic_name,
-          city: client.city,
-          state: 'SP',
-        });
-      } catch (err) {
-        console.error(`Erro ao geocodificar ${client.clinic_name}:`, err);
-      }
+    // Processar em paralelo com limite
+    const batchSize = 5;
+    for (let i = 0; i < clientsNeedingGeocode.length; i += batchSize) {
+      const batch = clientsNeedingGeocode.slice(i, i + batchSize);
+      await Promise.all(batch.map(async (client) => {
+        try {
+          await base44.functions.invoke('geocodeClientLocation', {
+            client_id: client.id,
+            address: client.address,
+            clinic_name: client.clinic_name,
+            city: client.city,
+            state: 'SP',
+          });
+          success++;
+        } catch (err) {
+          failed++;
+          console.error(`Erro ao geocodificar ${client.clinic_name}:`, err);
+        }
+      }));
     }
 
-    toast.success(`${needsGeocode.length} clientes geocodificados!`);
+    toast.dismiss(toastId);
+    toast.success(`${success} clientes geocodificados${failed > 0 ? `, ${failed} falharam` : ''}!`);
     refetch();
-  };
+  }, [clientsNeedingGeocode, refetch]);
 
   const getPrecisionColor = (status) => {
     const map = {
@@ -133,6 +151,26 @@ export default function ClientLocationMap() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Alerta de clientes sem geocodificação */}
+          {clientsNeedingGeocode.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2 items-start">
+              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="flex-1 text-sm text-amber-800">
+                <p className="font-semibold">{clientsNeedingGeocode.length} clientes sem localização validada</p>
+                <p className="text-xs mt-1">Clique em "Geocodificar" para validar endereços automaticamente</p>
+              </div>
+              <Button
+                onClick={handleGeocodeAll}
+                size="sm"
+                variant="outline"
+                className="gap-1 shrink-0"
+              >
+                <Zap className="w-4 h-4" />
+                Geocodificar
+              </Button>
+            </div>
+          )}
+
           {/* Filtros */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
             <select
@@ -172,13 +210,13 @@ export default function ClientLocationMap() {
             </select>
 
             <Button
-              onClick={handleGeocodeAll}
+              onClick={refetch}
               variant="outline"
               size="sm"
               className="gap-1"
             >
               <RefreshCw className="w-4 h-4" />
-              Geocodificar
+              Atualizar
             </Button>
           </div>
 

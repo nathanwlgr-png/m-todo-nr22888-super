@@ -34,23 +34,23 @@ Deno.serve(async (req) => {
       { text: `${address}, ${city}, ${state}`, source: 'endereco_completo', precision: 'alta_confianca' },
       { text: `${clinic_name}, ${city}, ${state}`, source: 'clinica_cidade', precision: 'media_confianca' },
       { text: `${city}, ${state}`, source: 'city_only', precision: 'baixa_confianca' },
-    ].filter(c => c.text && c.text !== ', , ' && c.text !== ', ');
+    ].filter(c => c.text && c.text.trim() !== ', , ' && c.text.trim() !== ',');
 
     let result = null;
     let usedSource = null;
 
     // Tentar cada candidato
     for (const candidate of candidates) {
-      const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
       let loc = null;
 
-      if (apiKey) {
-        // Chamada real à API Google Maps
+      // Tentar API Google Maps se disponível (optional)
+      const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+      if (apiKey && apiKey.trim()) {
         try {
           const query = encodeURIComponent(candidate.text);
           const geoRes = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${apiKey}`,
-            { timeout: 5000 }
+            { signal: AbortSignal.timeout(5000) }
           );
 
           if (geoRes.ok) {
