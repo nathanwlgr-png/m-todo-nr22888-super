@@ -1,10 +1,8 @@
 import React, { lazy, Suspense } from 'react';
-import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -15,14 +13,11 @@ import AppLoadingScreen from '@/components/AppLoadingScreen';
 import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';
-import ComingSoonPage from '@/components/ComingSoonPage';
 import HomePageWithLayout from '@/components/HomePageWithLayout';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';
 
-// Home carrega imediatamente (página principal)
-import Home from './pages/Home';
-import HomeTablet from './pages/HomeTablet';
+// Home é gerenciada pelo HomePageWithLayout (lazy via SalesCommandCenter)
 
 // Páginas com lazy loading
 const VisitRouteManager = lazy(() => import('./pages/VisitRouteManager'));
@@ -89,7 +84,7 @@ const NotificationsCenter = lazy(() => import('./pages/NotificationsCenter'));
 const PipelineView = lazy(() => import('./pages/PipelineView'));
 const GenerateWhatsAppIntegrated = lazy(() => import('./pages/GenerateWhatsAppIntegrated'));
 const InvestigacaoDeCampoReal = lazy(() => import('./pages/InvestigacaoDeCampoReal'));
-const ModoInvestigacaoSuprema = lazy(() => import('./pages/ModoInvestigacaoSuprema'));
+
 
 const PageLoader = () => <AppLoadingScreen />;
 
@@ -188,7 +183,7 @@ const AuthenticatedApp = () => {
         <Route path="/PipelineView" element={<LayoutWrapper currentPageName="PipelineView"><PipelineView /></LayoutWrapper>} />
         <Route path="/GenerateWhatsAppIntegrated" element={<LayoutWrapper currentPageName="GenerateWhatsAppIntegrated"><GenerateWhatsAppIntegrated /></LayoutWrapper>} />
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
-        <Route path="/ModoInvestigacaoSuprema" element={<LayoutWrapper currentPageName="ModoInvestigacaoSuprema"><ModoInvestigacaoSuprema /></LayoutWrapper>} />
+
 
         {/* ── ROTAS NÃO IMPLEMENTADAS → redirect para Command Center ── */}
         <Route path="/PossibleSales" element={<Navigate to="/SalesCommandCenter" replace />} />
@@ -223,7 +218,7 @@ const AuthenticatedApp = () => {
         <Route path="/MasterCRM" element={<Navigate to="/Clients" replace />} />
         <Route path="/MasterControlPanel" element={<Navigate to="/SalesCommandCenter" replace />} />
 
-        {/* ── MODO INVESTIGATIVO SUPREMO ── */}
+        {/* ── INTELIGÊNCIA DE CAMPO ── */}
         <Route path="/ModoInvestigativoSupremo" element={<LayoutWrapper currentPageName="ModoInvestigativoSupremo"><ModoInvestigativoSupremo /></LayoutWrapper>} />
 
         <Route path="*" element={<Navigate to="/SalesCommandCenter" replace />} />

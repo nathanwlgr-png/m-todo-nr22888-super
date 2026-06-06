@@ -6,7 +6,7 @@ import {
   TrendingUp, Users, Calendar, Route, DollarSign,
   Zap, Target, ChevronRight, RefreshCw, Clock, Flame,
   Star, MessageSquare, ArrowRight, MapPin,
-  Search, WifiOff, Brain
+  Search, WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 
