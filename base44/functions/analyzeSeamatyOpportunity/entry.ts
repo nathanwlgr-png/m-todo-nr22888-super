@@ -9,17 +9,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'client_id obrigatório' }, { status: 400 });
     }
 
-    // Buscar cliente
-    const clients = await base44.entities.Client.filter({ id: client_id });
+    // Buscar cliente + dados em paralelo (evita rate limit com sequential calls)
+    const [clients, visits, tasks, sales] = await Promise.all([
+      base44.entities.Client.filter({ id: client_id }),
+      base44.entities.Visit.filter({ client_id }).catch(() => []),
+      base44.entities.Task.filter({ client_id, status: 'pendente' }).catch(() => []),
+      base44.entities.Sale.filter({ client_id }).catch(() => []),
+    ]);
+
     if (!clients.length) {
       return Response.json({ error: 'Cliente não encontrado' }, { status: 404 });
     }
     const client = clients[0];
-
-    // Buscar histórico de visitas, tarefas, propostas
-    const visits = await base44.entities.Visit?.filter({ client_id }).catch(() => []);
-    const tasks = await base44.entities.Task?.filter({ client_id }).catch(() => []);
-    const sales = await base44.entities.Sale?.filter({ client_id }).catch(() => []);
 
     // Análise automática (sem criar tela)
     const analysis = {

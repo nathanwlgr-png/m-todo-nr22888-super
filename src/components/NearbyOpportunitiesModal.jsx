@@ -1,57 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { X, MapPin, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function NearbyOpportunitiesModal({ onClose }) {
-  const [userLocation, setUserLocation] = useState(null);
-  const [opportunities, setOpportunities] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [], isLoading } = useQuery({
     queryKey: ['nearby-clients'],
-    queryFn: () => base44.entities.Client.list('-purchase_score', 100),
+    queryFn: () => base44.entities.Client.list('-purchase_score', 20),
+    staleTime: 5 * 60 * 1000,
   });
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      }, () => setUserLocation(null));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!userLocation || clients.length === 0) return;
-
-    const loadNearby = async () => {
-      const nearby = [];
-      
-      for (const client of clients.slice(0, 20)) {
-        if (!client.city) continue;
-        
-        try {
-          const analysis = await base44.functions.invoke('analyzeSeamatyOpportunity', {
-            client_id: client.id,
-          });
-          
-          nearby.push({
-            ...client,
-            analysis: analysis.data,
-            distance: Math.floor(Math.random() * 50) + 1, // Placeholder
-          });
-        } catch (e) {
-          // Silent fail
-        }
-      }
-
-      setOpportunities(nearby.sort((a, b) => (a.distance || 999) - (b.distance || 999)));
-      setLoading(false);
-    };
-
-    loadNearby();
-  }, [userLocation, clients]);
+  const opportunities = clients.map(c => ({
+    ...c,
+    analysis: { score: c.purchase_score || 0, recommended_equipment: c.equipment_interest || 'VG2' },
+  }));
 
   return (
     <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }}>
@@ -63,7 +26,7 @@ export default function NearbyOpportunitiesModal({ onClose }) {
           </button>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-8 text-slate-400">Carregando...</div>
         ) : opportunities.length === 0 ? (
           <div className="text-center py-8 text-slate-400">Nenhuma oportunidade encontrada</div>

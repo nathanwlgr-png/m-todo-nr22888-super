@@ -43,13 +43,6 @@ export default function ClientProfile() {
     staleTime: 60000,
   });
 
-  const { data: singleClient } = useQuery({
-    queryKey: ['client-opp', clientId],
-    queryFn: () => base44.entities.Client.filter({ id: clientId }).then(r => r[0]),
-    enabled: !!clientId,
-    staleTime: 60000,
-  });
-
   const handleSaveNote = async () => {
     if (!noteText.trim() || !client) return;
     await base44.entities.Client.update(client.id, { notes: noteText });
