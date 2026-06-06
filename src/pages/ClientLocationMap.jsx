@@ -1,6 +1,36 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, MarkerClusterGroup, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet.markercluster';
+
+// Componente nativo para markers clusterizados
+function ClusteredMarkers({ clients, onSelect }) {
+  const map = useMap();
+
+  React.useEffect(() => {
+    const mcg = L.markerClusterGroup({ maxClusterRadius: 60 });
+
+    clients.forEach(client => {
+      const marker = L.marker([client.latitude, client.longitude], {
+        icon: createIcon(client.status, client.precision_status),
+      });
+      marker.bindPopup(`
+        <div style="min-width:160px;font-size:13px">
+          <b>${client.clinic_name || client.first_name || '—'}</b><br/>
+          <span style="color:#666">${client.city || ''}</span><br/>
+          <span>Status: ${client.status || '—'}</span>
+        </div>
+      `);
+      marker.on('click', () => onSelect(client));
+      mcg.addLayer(marker);
+    });
+
+    map.addLayer(mcg);
+    return () => { map.removeLayer(mcg); };
+  }, [map, clients, onSelect]);
+
+  return null;
+}
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -232,37 +262,7 @@ export default function ClientLocationMap() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; OpenStreetMap contributors'
                 />
-                <MarkerClusterGroup>
-                  {filtered.map(client => (
-                    <Marker
-                      key={client.id}
-                      position={[client.latitude, client.longitude]}
-                      icon={createIcon(client.status, client.precision_status)}
-                      eventHandlers={{
-                        click: () => setSelectedClient(client),
-                      }}
-                    >
-                      <Popup>
-                        <div className="w-64 p-2 text-sm">
-                          <p className="font-bold text-base">{client.clinic_name || client.first_name}</p>
-                          <p className="text-xs text-slate-600">{client.city}, SP</p>
-                          <div className="flex gap-1 mt-1 flex-wrap">
-                            <Badge className={`text-xs px-1 py-0 ${
-                              client.status === 'quente' ? 'bg-green-500' :
-                              client.status === 'morno' ? 'bg-yellow-500' :
-                              'bg-red-500'
-                            } text-white`}>
-                              {client.status}
-                            </Badge>
-                            <Badge className={`text-xs px-1 py-0 ${getPrecisionColor(client.precision_status)}`}>
-                              {client.precision_status?.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MarkerClusterGroup>
+                <ClusteredMarkers clients={filtered} onSelect={setSelectedClient} />
               </MapContainer>
             )}
           </div>

@@ -5,10 +5,11 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
-  Zap, ChevronRight, Globe, Instagram, Lightbulb
+  Zap, ChevronRight, Globe, Instagram, Lightbulb, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import SeamatyOpportunityCard from '@/components/SeamatyOpportunityCard';
+import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -21,6 +22,9 @@ export default function ClientProfile() {
   const clientId = params.get('id');
   const [editingNote, setEditingNote] = useState(false);
   const [noteText, setNoteText] = useState('');
+  const [showWaModal, setShowWaModal] = useState(false);
+  const [waMessage, setWaMessage] = useState('');
+  const [generatingMsg, setGeneratingMsg] = useState(false);
 
   const { data: client, isLoading, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
@@ -53,8 +57,29 @@ export default function ClientProfile() {
 
   const handleWhatsApp = () => {
     if (!client?.phone) { toast.error('Sem telefone cadastrado'); return; }
-    const phone = client.phone.replace(/\D/g, '');
-    window.open(`https://wa.me/${phone}`, '_blank');
+    setWaMessage('');
+    setShowWaModal(true);
+  };
+
+  const handleGenerateAndSend = async () => {
+    if (!client?.phone) { toast.error('Sem telefone cadastrado'); return; }
+    setGeneratingMsg(true);
+    try {
+      const res = await base44.functions.invoke('generateSpinSellingMessages', {
+        client_id: client.id,
+        client_name: client.first_name,
+        clinic_name: client.clinic_name,
+        equipment_interest: client.equipment_interest,
+      });
+      const msg = res.data?.message || res.data?.spin_message || (typeof res.data === 'string' ? res.data : '');
+      setWaMessage(msg || '');
+      setShowWaModal(true);
+    } catch (e) {
+      toast.error('Erro ao gerar mensagem');
+      setShowWaModal(true);
+    } finally {
+      setGeneratingMsg(false);
+    }
   };
 
   const handleUpdateStage = async (stage) => {
@@ -154,26 +179,10 @@ export default function ClientProfile() {
             <MessageSquare className="w-4 h-4 text-green-400" />
             <span className="text-[10px] font-black text-green-400">WhatsApp</span>
           </button>
-          <button onClick={async () => {
-            try {
-              const res = await base44.functions.invoke('generateSpinSellingMessages', {
-                client_id: client.id,
-                client_name: client.first_name,
-                clinic_name: client.clinic_name,
-                equipment_interest: client.equipment_interest,
-              });
-              const msg = res.data?.message || res.data;
-              if (confirm('Mensagem gerada.\n\n' + msg + '\n\nPode enviar?')) {
-                const phone = client.phone?.replace(/\D/g, '');
-                if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-              }
-            } catch (e) {
-              toast.error('Erro ao gerar mensagem');
-            }
-          }}
-            className="py-2.5 rounded-xl flex flex-col items-center gap-1"
+          <button onClick={handleGenerateAndSend} disabled={generatingMsg}
+            className="py-2.5 rounded-xl flex flex-col items-center gap-1 disabled:opacity-60"
             style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
-            <Lightbulb className="w-4 h-4 text-orange-400" />
+            {generatingMsg ? <Loader2 className="w-4 h-4 text-orange-400 animate-spin" /> : <Lightbulb className="w-4 h-4 text-orange-400" />}
             <span className="text-[10px] font-black text-orange-400">Gerar Msg</span>
           </button>
           <Link to={`/GenerateWhatsAppIntegrated?client_id=${client.id}`}>
@@ -375,6 +384,14 @@ export default function ClientProfile() {
           </Link>
         </div>
       </div>
+
+      {showWaModal && (
+        <WhatsAppSendModal
+          client={client}
+          initialMessage={waMessage}
+          onClose={() => setShowWaModal(false)}
+        />
+      )}
     </div>
   );
 }
