@@ -5,9 +5,10 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
-  Zap, ChevronRight, Globe, Instagram
+  Zap, ChevronRight, Globe, Instagram, Lightbulb
 } from 'lucide-react';
 import { toast } from 'sonner';
+import SeamatyOpportunityCard from '@/components/SeamatyOpportunityCard';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -152,60 +153,57 @@ export default function ClientProfile() {
           </div>
         </div>
 
-        {/* Oportunidade Seamaty */}
-        {client && (
-          <div className="rounded-2xl p-3 mb-4" style={{ background: 'rgba(255,107,0,0.08)', border: '1px solid rgba(255,107,0,0.3)' }}>
-            <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">🎯 OPORTUNIDADE SEAMATY</p>
-            <div className="grid grid-cols-2 gap-2 mb-2">
-              <div className="rounded-xl p-2 text-center" style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.25)' }}>
-                <p className="text-xs font-black text-red-400">{client.purchase_score || 0}</p>
-                <p className="text-[9px] text-slate-500">Score</p>
-              </div>
-              <div className="rounded-xl p-2 text-center" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
-                <p className="text-xs font-black text-green-400">{client.equipment_interest || 'VG2'}</p>
-                <p className="text-[9px] text-slate-500">Equipamento</p>
-              </div>
-            </div>
-            {client.available_budget && (
-              <p className="text-[11px] text-orange-300 mb-1">💰 Potencial: R$ {(client.available_budget).toLocaleString('pt-BR')}</p>
-            )}
-            {client.equipment_sold && (
-              <p className="text-[11px] text-green-400 mb-1">✓ Equipamento: {client.equipment_sold}</p>
-            )}
-            {client.status && (
-              <p className="text-[11px] text-slate-400">
-                Temperatura: <span style={{ color: STATUS_COLORS[client.status] }} className="font-bold">{client.status}</span>
-              </p>
-            )}
-          </div>
-        )}
-
         {/* Ações rápidas */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-4 gap-2 mb-4">
           <button onClick={handleWhatsApp}
             className="py-2.5 rounded-xl flex flex-col items-center gap-1"
             style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)' }}>
             <MessageSquare className="w-4 h-4 text-green-400" />
             <span className="text-[10px] font-black text-green-400">WhatsApp</span>
           </button>
+          <button onClick={async () => {
+            try {
+              const res = await base44.functions.invoke('generateSpinSellingMessages', {
+                client_id: client.id,
+                client_name: client.first_name,
+                clinic_name: client.clinic_name,
+                equipment_interest: client.equipment_interest,
+              });
+              const msg = res.data?.message || res.data;
+              if (confirm('Mensagem gerada.\n\n' + msg + '\n\nPode enviar?')) {
+                const phone = client.phone?.replace(/\D/g, '');
+                if (phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+              }
+            } catch (e) {
+              toast.error('Erro ao gerar mensagem');
+            }
+          }}
+            className="py-2.5 rounded-xl flex flex-col items-center gap-1"
+            style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
+            <Lightbulb className="w-4 h-4 text-orange-400" />
+            <span className="text-[10px] font-black text-orange-400">Gerar Msg</span>
+          </button>
           <Link to={`/GenerateWhatsAppIntegrated?client_id=${client.id}`}>
             <div className="py-2.5 rounded-xl flex flex-col items-center gap-1"
-              style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
-              <Zap className="w-4 h-4 text-orange-400" />
-              <span className="text-[10px] font-black text-orange-400">Gerar SPIN</span>
+              style={{ background: 'rgba(0,191,255,0.1)', border: '1px solid rgba(0,191,255,0.3)' }}>
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span className="text-[10px] font-black text-blue-400">SPIN</span>
             </div>
           </Link>
           <Link to={`/ModoInvestigativoSupremo?query=${encodeURIComponent(client.first_name || '')}`}>
             <div className="py-2.5 rounded-xl flex flex-col items-center gap-1"
               style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
               <Target className="w-4 h-4 text-purple-400" />
-              <span className="text-[10px] font-black text-purple-400">Investigar</span>
+              <span className="text-[10px] font-black text-purple-400">Inv</span>
             </div>
           </Link>
         </div>
       </div>
 
       <div className="px-4 space-y-3">
+        {/* OPORTUNIDADE SEAMATY */}
+        <SeamatyOpportunityCard clientId={clientId} />
+
         {/* Dados básicos */}
         <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
           <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-3">📋 Dados do Cliente</p>

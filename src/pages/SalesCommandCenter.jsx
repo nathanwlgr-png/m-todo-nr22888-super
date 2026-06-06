@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import BestOpportunityCard from '@/components/BestOpportunityCard';
+import NearbyOpportunitiesModal from '@/components/NearbyOpportunitiesModal';
 
 const STALE_5MIN = 5 * 60 * 1000;
 const STALE_2MIN = 2 * 60 * 1000;
@@ -26,6 +27,7 @@ export default function SalesCommandCenter() {
   const [aiResult, setAiResult] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [generatingAction, setGeneratingAction] = useState(null);
+  const [showNearby, setShowNearby] = useState(false);
   const [bestOpp, setBestOpp] = useState(null);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
@@ -361,17 +363,27 @@ export default function SalesCommandCenter() {
               { to: '/GenerateWhatsAppIntegrated', label: '💬 Gerar WhatsApp', color: '#25d366', bg: 'rgba(37,211,102,0.08)' },
               { to: '/ProposalGenerator', label: '📄 Gerar Proposta', color: '#ff9500', bg: 'rgba(255,149,0,0.08)' },
               { to: '/SmartRouteOptimizer', label: '🗺️ Abrir Rota', color: '#00bfff', bg: 'rgba(0,191,255,0.08)' },
-              { to: '/ModoInvestigativoSupremo', label: '🔍 Investigar Clínica', color: '#a855f7', bg: 'rgba(168,85,247,0.08)' },
+              { onClick: () => setShowNearby(true), label: '📍 Oportunidades', color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
               { to: '/ModoCacaComercial', label: '🎯 Modo Caça', color: '#ff4444', bg: 'rgba(255,68,68,0.08)' },
-              { to: '/ModoInsumos', label: '📦 Modo Insumos', color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
-            ].map(({ to, label, color, bg }) => (
-              <Link key={to} to={to}>
-                <div className="py-2.5 px-3 rounded-xl flex items-center justify-between"
-                  style={{ background: bg, border: `1px solid ${color}33` }}>
-                  <span className="text-xs font-black" style={{ color }}>{label}</span>
-                  <ArrowRight className="w-3 h-3" style={{ color }} />
-                </div>
-              </Link>
+              { to: '/ModoInsumos', label: '📦 Modo Insumos', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)' },
+            ].map((item, i) => (
+              item.to ? (
+                <Link key={i} to={item.to}>
+                  <div className="py-2.5 px-3 rounded-xl flex items-center justify-between"
+                    style={{ background: item.bg, border: `1px solid ${item.color}33` }}>
+                    <span className="text-xs font-black" style={{ color: item.color }}>{item.label}</span>
+                    <ArrowRight className="w-3 h-3" style={{ color: item.color }} />
+                  </div>
+                </Link>
+              ) : (
+                <button key={i} onClick={item.onClick}>
+                  <div className="py-2.5 px-3 rounded-xl flex items-center justify-between"
+                    style={{ background: item.bg, border: `1px solid ${item.color}33`, width: '100%' }}>
+                    <span className="text-xs font-black" style={{ color: item.color }}>{item.label}</span>
+                    <ArrowRight className="w-3 h-3" style={{ color: item.color }} />
+                  </div>
+                </button>
+              )
             ))}
           </div>
         </div>
@@ -696,6 +708,9 @@ export default function SalesCommandCenter() {
           </div>
         </div>
       </div>
+
+      {/* Modal Oportunidades Próximas */}
+      {showNearby && <NearbyOpportunitiesModal onClose={() => setShowNearby(false)} />}
     </div>
   );
 }
