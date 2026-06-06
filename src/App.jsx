@@ -86,6 +86,7 @@ const InvestigacaoDeCampoReal = lazy(() => import('./pages/InvestigacaoDeCampoRe
 const ClientProfile = lazy(() => import('./pages/ClientProfile.jsx'));
 const DayFieldView = lazy(() => import('./pages/DayFieldView.jsx'));
 const ExecutiveLayerCEO = lazy(() => import('./pages/ExecutiveLayerCEO.jsx'));
+const ClientLocationMap = lazy(() => import('./pages/ClientLocationMap.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -182,6 +183,7 @@ const AuthenticatedApp = () => {
         <Route path="/ClientProfile" element={<LayoutWrapper currentPageName="ClientProfile"><ClientProfile /></LayoutWrapper>} />
         <Route path="/DayFieldView" element={<LayoutWrapper currentPageName="DayFieldView"><DayFieldView /></LayoutWrapper>} />
         <Route path="/ExecutiveLayerCEO" element={<LayoutWrapper currentPageName="ExecutiveLayerCEO"><ExecutiveLayerCEO /></LayoutWrapper>} />
+        <Route path="/ClientLocationMap" element={<LayoutWrapper currentPageName="ClientLocationMap"><ClientLocationMap /></LayoutWrapper>} />
 
         {/* ── ROTAS LEGACY → Consolidadas ── */}
         <Route path="/PossibleSales" element={<Navigate to="/" replace />} />

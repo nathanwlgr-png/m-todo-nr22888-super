@@ -1,0 +1,761 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "external_code": {
+      "type": "string",
+      "description": "Código externo do cliente (sistema legado)"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "IMPORTANTE: Nome completo do PROPRIETÁRIO ou VETERINÁRIO RESPONSÁVEL (NÃO da clínica). Este é o decisor principal."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "Primeiro nome do PROPRIETÁRIO ou VETERINÁRIO (NÃO da clínica)"
+    },
+    "birthdate": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de nascimento do proprietário/veterinário responsável"
+    },
+    "clinic_opening_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de inauguração da clínica (usado para parabéns se não houver birthdate)"
+    },
+    "cpf": {
+      "type": "string",
+      "description": "CPF do proprietário/veterinário responsável"
+    },
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ da empresa"
+    },
+    "razao_social": {
+      "type": "string",
+      "description": "Razão social da empresa"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email do cliente (proprietário/veterinário)"
+    },
+    "instagram_handle": {
+      "type": "string",
+      "description": "Instagram da clínica/pessoa (@usuario)"
+    },
+    "facebook_url": {
+      "type": "string",
+      "description": "URL da página no Facebook"
+    },
+    "social_media_analysis": {
+      "type": "string",
+      "description": "Análise do perfil de redes sociais (JSON stringificado)"
+    },
+    "ai_website_analysis": {
+      "type": "string",
+      "description": "Análise do website (serviços, especialização, equipamentos) - JSON"
+    },
+    "equipment_interest": {
+      "type": "string",
+      "description": "Equipamento de interesse do cliente (VG2, Hematologia, etc)"
+    },
+    "contract_signature_email": {
+      "type": "string",
+      "description": "Email para envio de contratos e assinaturas eletrônicas"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefone com WhatsApp (formato: 5511999999999) - OPCIONAL - Editável a qualquer momento"
+    },
+    "address": {
+      "type": "string",
+      "description": "Endereço completo"
+    },
+    "cep": {
+      "type": "string",
+      "description": "CEP do endereço"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade do cliente"
+    },
+    "clinic_name": {
+      "type": "string",
+      "description": "Nome da clínica/hospital (separado do nome do proprietário/veterinário)"
+    },
+    "current_equipment": {
+      "type": "string",
+      "description": "Equipamento/máquina atual que o cliente possui"
+    },
+    "equipment_sold": {
+      "type": "string",
+      "description": "Equipamento vendido para o cliente"
+    },
+    "sale_closed": {
+      "type": "boolean",
+      "description": "Venda fechada (aguardando assinatura/entrega)"
+    },
+    "contract_signature_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data agendada para assinatura do contrato"
+    },
+    "contract_renewal_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de renovação do contrato (para alertas automáticos)"
+    },
+    "representante": {
+      "type": "string",
+      "enum": [
+        "Nathan",
+        "Luan",
+        "Gabriel",
+        "Rosa"
+      ],
+      "description": "Representante responsável pelo cliente"
+    },
+    "client_type": {
+      "type": "string",
+      "enum": [
+        "clinica_pequena",
+        "clinica_media",
+        "hospital_veterinario",
+        "laboratorio_terceirizado",
+        "clinica_especializada",
+        "sem_equipamento"
+      ],
+      "description": "Tipo de cliente"
+    },
+    "decision_role": {
+      "type": "string",
+      "enum": [
+        "proprietario",
+        "veterinario_responsavel",
+        "gestor_laboratorio",
+        "coordenador_tecnico",
+        "socio"
+      ],
+      "description": "Papel do decisor"
+    },
+    "current_volume": {
+      "type": "string",
+      "enum": [
+        "menos_40_mes",
+        "40_120_mes",
+        "120_230_mes",
+        "mais_230_mes"
+      ],
+      "description": "Volume mensal de exames de sangue"
+    },
+    "market_time": {
+      "type": "string",
+      "enum": [
+        "menos_1_ano",
+        "1_3_anos",
+        "3_5_anos",
+        "mais_5_anos"
+      ],
+      "description": "Tempo de mercado"
+    },
+    "company_size": {
+      "type": "string",
+      "enum": [
+        "micro",
+        "pequena",
+        "media",
+        "grande"
+      ],
+      "description": "Tamanho da empresa"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Segmento/indústria do cliente"
+    },
+    "website": {
+      "type": "string",
+      "description": "Website da clínica/empresa"
+    },
+    "last_contact_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do último contato realizado"
+    },
+    "last_contact_follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do último follow-up de contato realizado"
+    },
+    "next_contact_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data agendada para próximo contato/follow-up"
+    },
+    "last_purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da última compra realizada pelo cliente"
+    },
+    "average_purchase_value": {
+      "type": "number",
+      "description": "Valor médio de compra do cliente em R$"
+    },
+    "purchased_products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos produtos comprados pelo cliente (relacionamento com entidade Product)"
+    },
+    "lead_source": {
+      "type": "string",
+      "enum": [
+        "indicacao",
+        "google",
+        "redes_sociais",
+        "evento",
+        "telefone",
+        "email",
+        "site",
+        "parceiro",
+        "importacao_planilha",
+        "analise_mercado_ia",
+        "outro"
+      ],
+      "description": "Origem do lead"
+    },
+    "life_path_number": {
+      "type": "number",
+      "description": "Número do caminho de vida (data de nascimento)"
+    },
+    "numerology_number": {
+      "type": "number",
+      "description": "Número numerológico calculado (nome)"
+    },
+    "behavioral_profile": {
+      "type": "string",
+      "description": "Perfil comportamental"
+    },
+    "decision_style": {
+      "type": "string",
+      "description": "Estilo de decisão"
+    },
+    "approach_tips": {
+      "type": "string",
+      "description": "Dicas de abordagem baseadas em numerologia e perfil"
+    },
+    "client_tone": {
+      "type": "string",
+      "enum": [
+        "assertivo",
+        "analitico",
+        "receptivo",
+        "entusiasmado",
+        "cauteloso",
+        "direto",
+        "emocional"
+      ],
+      "description": "Tom de voz e estilo de comunicação observado"
+    },
+    "recommended_communication": {
+      "type": "string",
+      "description": "Sugestão de melhor tipo de comunicação baseado em numerologia e tom"
+    },
+    "purchase_score": {
+      "type": "number",
+      "description": "Score de compra (0-100)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "quente",
+        "morno",
+        "frio"
+      ],
+      "default": "morno",
+      "description": "Status do cliente"
+    },
+    "main_pains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Principais dores identificadas"
+    },
+    "triggers_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Gatilhos utilizados"
+    },
+    "real_objections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Objeções reais levantadas pelo cliente"
+    },
+    "purchase_motivators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Motivadores de compra identificados"
+    },
+    "available_budget": {
+      "type": "number",
+      "description": "Orçamento disponível em reais (0 a 150.000)"
+    },
+    "decision_deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Data limite para tomar decisão de compra"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "Próxima ação sugerida"
+    },
+    "last_visit_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da última visita"
+    },
+    "total_visits_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de visitas realizadas com o cliente"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observações gerais em rich text"
+    },
+    "visit_objective": {
+      "type": "string",
+      "enum": [
+        "diagnosticar_necessidades",
+        "apresentar_equipamento",
+        "demonstracao_tecnica",
+        "negociar_proposta",
+        "fechar_venda"
+      ],
+      "description": "Objetivo da visita"
+    },
+    "projected_revenue": {
+      "type": "number",
+      "description": "Receita projetada da venda"
+    },
+    "priority_level": {
+      "type": "number",
+      "description": "Nível de prioridade (1-5, sendo 1 mais importante)"
+    },
+    "numerology_tip": {
+      "type": "string",
+      "description": "Dica estratégica personalizada baseada em análise numerológica completa"
+    },
+    "equipment_purchase_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "equipment_name": {
+            "type": "string"
+          },
+          "purchase_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "value": {
+            "type": "number"
+          },
+          "supplier": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Histórico completo de compras de equipamentos"
+    },
+    "lab_needs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "hemograma",
+          "bioquimico",
+          "hemogasio",
+          "imunofluorescencia",
+          "urinalise",
+          "pcr"
+        ]
+      },
+      "description": "Necessidades específicas de laboratório"
+    },
+    "lab_needs_priority": {
+      "type": "object",
+      "properties": {
+        "urgente": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "medio_prazo": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "futuro": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Priorização das necessidades de laboratório"
+    },
+    "communication_preferences": {
+      "type": "object",
+      "properties": {
+        "preferred_channel": {
+          "type": "string",
+          "enum": [
+            "whatsapp",
+            "email",
+            "telefone",
+            "presencial"
+          ]
+        },
+        "preferred_time": {
+          "type": "string",
+          "enum": [
+            "manha",
+            "tarde",
+            "noite",
+            "qualquer"
+          ]
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "diaria",
+            "semanal",
+            "quinzenal",
+            "mensal"
+          ]
+        },
+        "avoid_channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Preferências de comunicação do cliente"
+    },
+    "custom_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags personalizáveis para categorização"
+    },
+    "pipeline_stage": {
+      "type": "string",
+      "enum": [
+        "lead",
+        "qualificado",
+        "proposta",
+        "negociacao",
+        "fechado",
+        "perdido"
+      ],
+      "default": "lead",
+      "description": "Estágio atual no funil de vendas"
+    },
+    "lost_reason": {
+      "type": "string",
+      "description": "Motivo da perda (se pipeline_stage = perdido)"
+    },
+    "equipment_suggestion": {
+      "type": "string",
+      "description": "Equipamento sugerido pela IA baseado no perfil"
+    },
+    "equipment_suggestion_reason": {
+      "type": "string",
+      "description": "Razão da sugestão do equipamento"
+    },
+    "equipment_suggestion_alternative": {
+      "type": "string",
+      "description": "Equipamento alternativo sugerido"
+    },
+    "visit_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "triggers_used": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "techniques_used": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "objections_presented": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "equipment_interest": {
+            "type": "string"
+          },
+          "budget_confirmed": {
+            "type": "string"
+          },
+          "next_action": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Histórico completo de visitas com análise"
+    },
+    "valor_real_poder_compra": {
+      "type": "number",
+      "description": "Valor real de poder de compra calculado pela IA (CNPJ + análise de mercado)"
+    },
+    "melhores_dias_venda": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date"
+      },
+      "description": "Melhores dias para fechar venda baseado em numerologia"
+    },
+    "competitor_analysis_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da última análise de concorrentes"
+    },
+    "health_score": {
+      "type": "number",
+      "description": "Score de saúde do cliente (0-100) calculado pela IA"
+    },
+    "health_score_factors": {
+      "type": "object",
+      "properties": {
+        "purchase_history": {
+          "type": "number"
+        },
+        "engagement_level": {
+          "type": "number"
+        },
+        "status_weight": {
+          "type": "number"
+        },
+        "ai_analyses": {
+          "type": "number"
+        },
+        "explanation": {
+          "type": "string"
+        }
+      },
+      "description": "Fatores que influenciam o health score"
+    },
+    "health_score_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da última atualização do health score"
+    },
+    "engagement_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Score de engajamento (0-100)"
+    },
+    "ai_sales_intelligence": {
+      "type": "object",
+      "properties": {
+        "conversion_probability": {
+          "type": "number"
+        },
+        "churn_risk": {
+          "type": "number"
+        },
+        "best_approach": {
+          "type": "string"
+        },
+        "optimal_contact_time": {
+          "type": "string"
+        },
+        "key_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "predicted_objections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommended_content": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_ai_analysis": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "product_adoption_rate": {
+          "type": "number"
+        },
+        "ltv_12_months": {
+          "type": "number"
+        },
+        "ltv_24_months": {
+          "type": "number"
+        },
+        "ltv_36_months": {
+          "type": "number"
+        },
+        "cross_sell_opportunities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "upsell_opportunities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "next_purchase_prediction": {
+          "type": "object"
+        }
+      },
+      "description": "Inteligência de vendas avançada gerada por IA"
+    },
+    "ai_segment": {
+      "type": "string",
+      "enum": [
+        "VIP",
+        "Champions",
+        "Potential",
+        "Nurture",
+        "At Risk",
+        "Cold",
+        "Dormant"
+      ],
+      "description": "Segmento automático gerado por IA"
+    },
+    "ltv_estimate": {
+      "type": "number",
+      "description": "Lifetime Value estimado pela IA (R$)"
+    },
+    "attention_priority": {
+      "type": "number",
+      "description": "Prioridade de atenção calculada por IA (1-10)"
+    },
+    "ai_next_best_action": {
+      "type": "string",
+      "description": "Próxima melhor ação sugerida por IA"
+    },
+    "birthday_greeting_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se mensagem de aniversário foi enviada este ano"
+    },
+    "birthday_greeting_sent_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do último envio de parabéns"
+    },
+    "team_members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Membros da equipe do cliente com datas de aniversário"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude geográfica da clínica"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude geográfica da clínica"
+    },
+    "precision_status": {
+      "type": "string",
+      "enum": [
+        "100_validado",
+        "alta_confianca",
+        "media_confianca",
+        "baixa_confianca",
+        "revisar"
+      ],
+      "default": "revisar",
+      "description": "Nível de confiança da localização"
+    },
+    "geocode_source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "endereco_completo",
+        "clinica_cidade",
+        "city_only",
+        "pending"
+      ],
+      "description": "Fonte da geocodificação"
+    },
+    "geocode_last_checked": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Última verificação de geocodificação"
+    },
+    "location_confidence_score": {
+      "type": "number",
+      "description": "Score de confiança da localização (0-100)"
+    }
+  },
+  "required": [
+    "first_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

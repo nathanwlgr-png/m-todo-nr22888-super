@@ -91,7 +91,7 @@ export default function DashboardSniper() {
         {/* Fluxo Sniper — Botões com Cores Brilhantes e Seguras */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
           <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
-            ⚡ Fluxo de Vendas (6 Etapas)
+            ⚡ Fluxo de Vendas (7 Etapas)
           </h2>
           
           <div className="space-y-2">
@@ -106,56 +106,67 @@ export default function DashboardSniper() {
               </Button>
             </Link>
 
-            {/* 2. Investigação */}
-            <Link to={createPageUrl('ModoInvestigativoSupremo')}>
+            {/* 2. Mapa de Localização */}
+            <Link to={createPageUrl('ClientLocationMap')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-blue-600 to-indigo-500 hover:from-blue-500 hover:to-indigo-400 text-white font-extrabold shadow-[0_4px_15px_rgba(59,130,246,0.2)] rounded-xl border-none">
                 <div className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-white" />
-                  <span>2️⃣ Investigação</span>
+                  <MapPin className="w-5 h-5 text-white" />
+                  <span>2️⃣ Mapa Inteligente</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-white" />
               </Button>
             </Link>
 
-            {/* 3. SPIN */}
+            {/* 3. Investigação */}
+            <Link to={createPageUrl('ModoInvestigativoSupremo')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-extrabold shadow-[0_4px_15px_rgba(6,182,212,0.2)] rounded-xl border-none">
+                <div className="flex items-center gap-2">
+                  <Search className="w-5 h-5 text-white" />
+                  <span>3️⃣ Investigação Suprema</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-white" />
+              </Button>
+            </Link>
+
+            {/* 4. SPIN */}
             <Link to={createPageUrl('GenerateWhatsAppIntegrated')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white font-extrabold shadow-[0_4px_15px_rgba(147,51,234,0.2)] rounded-xl border-none">
                 <div className="flex items-center gap-2">
                   <Zap className="w-5 h-5 text-white" />
-                  <span>3️⃣ Gerar SPIN</span>
+                  <span>4️⃣ Gerar SPIN</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-white" />
               </Button>
             </Link>
 
-            {/* 4. WhatsApp */}
+            {/* 5. WhatsApp */}
             <Link to={createPageUrl('WhatsAppHub')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 text-white font-extrabold shadow-[0_4px_15px_rgba(225,29,72,0.2)] rounded-xl border-none">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-white" />
-                  <span>4️⃣ WhatsApp com Aprovação</span>
+                  <span>5️⃣ WhatsApp com Aprovação</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-white" />
               </Button>
             </Link>
 
-            {/* 5. Proposta */}
+            {/* 6. Proposta */}
             <Link to={createPageUrl('ProposalGenerator')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold shadow-[0_4px_15px_rgba(249,115,22,0.2)] rounded-xl border-none">
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-white" />
-                  <span>5️⃣ Gerar Proposta</span>
+                  <span>6️⃣ Gerar Proposta</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-white" />
               </Button>
             </Link>
 
-            {/* 6. Fechamento */}
+            {/* 7. Fechamento */}
             <Link to={createPageUrl('SalesFunnel')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-500 hover:to-orange-400 text-white font-extrabold shadow-[0_4px_15px_rgba(234,179,8,0.2)] rounded-xl border-none">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-white" />
-                  <span>6️⃣ Funil & Fechamento</span>
+                  <span>7️⃣ Funil & Fechamento</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-white" />
               </Button>
