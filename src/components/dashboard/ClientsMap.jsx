@@ -1,9 +1,27 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Coordenadas aproximadas de cidades brasileiras comuns
 const cityCoordinates = {
+  // Região Laranja — Interior de SP (Nathan)
+  'marília': [-22.2139, -49.9458],
+  'presidente prudente': [-22.1256, -51.3889],
+  'assis': [-22.6617, -50.4111],
+  'tupã': [-21.9347, -50.5117],
+  'adamantina': [-21.6853, -51.0725],
+  'bauru': [-22.3147, -49.0606],
+  'araçatuba': [-21.2081, -50.4328],
+  'ourinhos': [-22.9789, -49.8706],
+  'dracena': [-21.4828, -51.5314],
+  'lins': [-22.2189, -49.7431],
+  'agudos': [-22.4694, -48.9864],
+  'águas de santa bárbara': [-22.8814, -49.2389],
+  'botucatu': [-22.8869, -48.4450],
+  'jaú': [-22.2775, -48.5545],
+  'araraquara': [-21.7930, -48.1763],
+  'ribeirão preto': [-21.1767, -47.8101],
+  // Capitais Brasileiras
   'são paulo': [-23.5505, -46.6333],
   'rio de janeiro': [-22.9068, -43.1729],
   'belo horizonte': [-19.9167, -43.9345],
