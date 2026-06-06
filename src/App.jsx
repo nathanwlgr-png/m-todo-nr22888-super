@@ -56,9 +56,7 @@ const SalesCommandCenter = lazy(() => import('./pages/SalesCommandCenter'));
 const RouteAuditReport = lazy(() => import('./pages/RouteAuditReport'));
 const CentralIAMaster = lazy(() => import('./pages/CentralIAMaster'));
 const ModoInvestigativoSupremo = lazy(() => import('./pages/ModoInvestigativoSupremo'));
-
-// Redirect 404 → SalesCommandCenter
-
+const DashboardSniper = lazy(() => import('./pages/DashboardSniper'));
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -116,9 +114,9 @@ const AuthenticatedApp = () => {
 
   return (
     <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* ── HOME ── */}
-          <Route path="/" element={<HomePageWithLayout />} />
+       <Routes>
+         {/* ── HOME — Dashboard Sniper ── */}
+         <Route path="/" element={<LayoutWrapper currentPageName="DashboardSniper"><DashboardSniper /></LayoutWrapper>} />
 
         {/* ── MÓDULOS EXISTENTES (originais) ── */}
         <Route path="/VisitRouteManager" element={<LayoutWrapper currentPageName="VisitRouteManager"><VisitRouteManager /></LayoutWrapper>} />
@@ -159,9 +157,7 @@ const AuthenticatedApp = () => {
 
         {/* ── PÁGINAS REAIS CONECTADAS ── */}
         <Route path="/Clients" element={<LayoutWrapper currentPageName="Clients"><Clients /></LayoutWrapper>} />
-        <Route path="/clients" element={<LayoutWrapper currentPageName="Clients"><Clients /></LayoutWrapper>} />
         <Route path="/Leads" element={<LayoutWrapper currentPageName="Leads"><Leads /></LayoutWrapper>} />
-        <Route path="/leads" element={<LayoutWrapper currentPageName="Leads"><Leads /></LayoutWrapper>} />
         <Route path="/TasksUnified" element={<LayoutWrapper currentPageName="TasksUnified"><TasksUnified /></LayoutWrapper>} />
         <Route path="/ScheduledAgenda" element={<LayoutWrapper currentPageName="ScheduledAgenda"><ScheduledAgenda /></LayoutWrapper>} />
         <Route path="/VisitManager" element={<LayoutWrapper currentPageName="VisitManager"><VisitManager /></LayoutWrapper>} />
@@ -169,16 +165,12 @@ const AuthenticatedApp = () => {
         <Route path="/ProposalGenerator" element={<LayoutWrapper currentPageName="ProposalGenerator"><ProposalGenerator /></LayoutWrapper>} />
         <Route path="/EquipmentCatalog" element={<LayoutWrapper currentPageName="EquipmentCatalog"><EquipmentCatalog /></LayoutWrapper>} />
         <Route path="/ProductManager" element={<LayoutWrapper currentPageName="ProductManager"><ProductManager /></LayoutWrapper>} />
-        <Route path="/RouteOptimization" element={<LayoutWrapper currentPageName="RouteOptimization"><RouteOptimization /></LayoutWrapper>} />
         <Route path="/RouteOptimizer" element={<LayoutWrapper currentPageName="RouteOptimizer"><RouteOptimizer /></LayoutWrapper>} />
         <Route path="/WhatsAppHub" element={<LayoutWrapper currentPageName="WhatsAppHub"><WhatsAppHub /></LayoutWrapper>} />
         <Route path="/WhatsAppInbox" element={<LayoutWrapper currentPageName="WhatsAppInbox"><WhatsAppInbox /></LayoutWrapper>} />
         <Route path="/AutomationSettings" element={<LayoutWrapper currentPageName="AutomationSettings"><AutomationSettings /></LayoutWrapper>} />
         <Route path="/ContactSettings" element={<LayoutWrapper currentPageName="ContactSettings"><ContactSettings /></LayoutWrapper>} />
         <Route path="/NotificationSettings" element={<LayoutWrapper currentPageName="NotificationSettings"><NotificationSettings /></LayoutWrapper>} />
-        <Route path="/notificationSettings" element={<LayoutWrapper currentPageName="NotificationSettings"><NotificationSettings /></LayoutWrapper>} />
-        <Route path="/notifications" element={<LayoutWrapper currentPageName="NotificationSettings"><NotificationSettings /></LayoutWrapper>} />
-        <Route path="/notification-settings" element={<LayoutWrapper currentPageName="NotificationSettings"><NotificationSettings /></LayoutWrapper>} />
         <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><Integrations /></LayoutWrapper>} />
         <Route path="/SystemManual" element={<LayoutWrapper currentPageName="SystemManual"><SystemManual /></LayoutWrapper>} />
         <Route path="/GlobalSearch" element={<LayoutWrapper currentPageName="GlobalSearch"><GlobalSearch /></LayoutWrapper>} />
@@ -188,41 +180,22 @@ const AuthenticatedApp = () => {
         <Route path="/GenerateWhatsAppIntegrated" element={<LayoutWrapper currentPageName="GenerateWhatsAppIntegrated"><GenerateWhatsAppIntegrated /></LayoutWrapper>} />
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
         <Route path="/ClientProfile" element={<LayoutWrapper currentPageName="ClientProfile"><ClientProfile /></LayoutWrapper>} />
-        <Route path="/DayFieldView" element={<DayFieldView />} />
+        <Route path="/DayFieldView" element={<LayoutWrapper currentPageName="DayFieldView"><DayFieldView /></LayoutWrapper>} />
         <Route path="/ExecutiveLayerCEO" element={<LayoutWrapper currentPageName="ExecutiveLayerCEO"><ExecutiveLayerCEO /></LayoutWrapper>} />
 
-        {/* ── ROTAS NÃO IMPLEMENTADAS → redirect para Command Center ── */}
-        <Route path="/PossibleSales" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/ClosingForecast" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/SalesOptimizationCenter" element={<Navigate to="/SalesCommandCenter" replace />} />
+        {/* ── ROTAS LEGACY → Consolidadas ── */}
+        <Route path="/PossibleSales" element={<Navigate to="/" replace />} />
         <Route path="/AIAssistant" element={<Navigate to="/CentralIAMaster" replace />} />
-        <Route path="/SalesCoachingDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
         <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
         <Route path="/EliteVetClientSearch" element={<Navigate to="/ModoInvestigativoSupremo" replace />} />
-        <Route path="/InteractiveDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/ExecutiveSalesDashboard" element={<Navigate to="/ExecutiveSalesAnalysis" replace />} />
-        <Route path="/CustomDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/AdvancedSalesAnalytics" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/Reports" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/SentimentDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/SentimentAnalysisDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/ProactiveIntelligenceDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/IntelligenceDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/Reports" element={<Navigate to="/" replace />} />
         <Route path="/NumerologyAnalysis" element={<Navigate to="/CentralIAMaster" replace />} />
-        <Route path="/OfflineAnalytics" element={<Navigate to="/OfflineMode" replace />} />
         <Route path="/WhatsAppMasterAssistant" element={<Navigate to="/WhatsAppHub" replace />} />
-        <Route path="/NegociacoesWhatsApp" element={<Navigate to="/WhatsAppHub" replace />} />
-        <Route path="/MessageApproval" element={<Navigate to="/WhatsAppHub" replace />} />
-        <Route path="/MessageHistory" element={<Navigate to="/WhatsAppHub" replace />} />
         <Route path="/FollowUpAutomationModule" element={<Navigate to="/AutoFollowUpDashboard" replace />} />
         <Route path="/AIContentStudio" element={<Navigate to="/CentralIAMaster" replace />} />
-        <Route path="/WorkflowAutomation" element={<Navigate to="/AutomationSettings" replace />} />
         <Route path="/AIKnowledgeUploader" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/ClientImportManager" element={<Navigate to="/Clients" replace />} />
-        <Route path="/MaterialUploadHub" element={<Navigate to="/SalesCommandCenter" replace />} />
-        <Route path="/AgentSetup" element={<Navigate to="/SalesCommandCenter" replace />} />
         <Route path="/MasterCRM" element={<Navigate to="/Clients" replace />} />
-        <Route path="/MasterControlPanel" element={<Navigate to="/SalesCommandCenter" replace />} />
 
         {/* ── INTELIGÊNCIA DE CAMPO ── */}
         <Route path="/ModoInvestigativoSupremo" element={<LayoutWrapper currentPageName="ModoInvestigativoSupremo"><ModoInvestigativoSupremo /></LayoutWrapper>} />
