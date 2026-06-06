@@ -42,6 +42,13 @@ export default function ClientProfile() {
     staleTime: 60000,
   });
 
+  const { data: singleClient } = useQuery({
+    queryKey: ['client-opp', clientId],
+    queryFn: () => base44.entities.Client.filter({ id: clientId }).then(r => r[0]),
+    enabled: !!clientId,
+    staleTime: 60000,
+  });
+
   const handleSaveNote = async () => {
     if (!noteText.trim() || !client) return;
     await base44.entities.Client.update(client.id, { notes: noteText });
@@ -144,6 +151,34 @@ export default function ClientProfile() {
             <p className="text-[9px] text-slate-500 uppercase">Tarefas</p>
           </div>
         </div>
+
+        {/* Oportunidade Seamaty */}
+        {client && (
+          <div className="rounded-2xl p-3 mb-4" style={{ background: 'rgba(255,107,0,0.08)', border: '1px solid rgba(255,107,0,0.3)' }}>
+            <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">🎯 OPORTUNIDADE SEAMATY</p>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="rounded-xl p-2 text-center" style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.25)' }}>
+                <p className="text-xs font-black text-red-400">{client.purchase_score || 0}</p>
+                <p className="text-[9px] text-slate-500">Score</p>
+              </div>
+              <div className="rounded-xl p-2 text-center" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                <p className="text-xs font-black text-green-400">{client.equipment_interest || 'VG2'}</p>
+                <p className="text-[9px] text-slate-500">Equipamento</p>
+              </div>
+            </div>
+            {client.available_budget && (
+              <p className="text-[11px] text-orange-300 mb-1">💰 Potencial: R$ {(client.available_budget).toLocaleString('pt-BR')}</p>
+            )}
+            {client.equipment_sold && (
+              <p className="text-[11px] text-green-400 mb-1">✓ Equipamento: {client.equipment_sold}</p>
+            )}
+            {client.status && (
+              <p className="text-[11px] text-slate-400">
+                Temperatura: <span style={{ color: STATUS_COLORS[client.status] }} className="font-bold">{client.status}</span>
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Ações rápidas */}
         <div className="grid grid-cols-3 gap-2 mb-4">

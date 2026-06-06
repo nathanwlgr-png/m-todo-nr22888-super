@@ -9,6 +9,7 @@ import {
   Search, WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
+import BestOpportunityCard from '@/components/BestOpportunityCard';
 
 const STALE_5MIN = 5 * 60 * 1000;
 const STALE_2MIN = 2 * 60 * 1000;
@@ -25,6 +26,7 @@ export default function SalesCommandCenter() {
   const [aiResult, setAiResult] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [generatingAction, setGeneratingAction] = useState(null);
+  const [bestOpp, setBestOpp] = useState(null);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ['scc-clients'],
@@ -61,6 +63,17 @@ export default function SalesCommandCenter() {
     queryKey: ['scc-pending-msgs'],
     queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
     staleTime: STALE_2MIN,
+  });
+
+  // Melhor oportunidade do dia
+  const { data: oppData } = useQuery({
+    queryKey: ['best-daily-opp'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('bestDailyOpportunity', {});
+      if (res?.data?.opp) setBestOpp(res.data.opp);
+      return res?.data;
+    },
+    staleTime: STALE_5MIN,
   });
 
   const metrics = useMemo(() => {
@@ -204,6 +217,11 @@ export default function SalesCommandCenter() {
         </div>
       </div>
 
+      {/* ── MELHOR OPORTUNIDADE ── */}
+      <div className="px-4 pt-2">
+        <BestOpportunityCard />
+      </div>
+
       {/* ── KPI CARDS ── */}
       <div className="px-4">
         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -251,6 +269,56 @@ export default function SalesCommandCenter() {
                 </div>
               </Link>
             )}
+          </div>
+        )}
+
+        {/* ── MELHOR OPORTUNIDADE DO DIA ── */}
+        {bestOpp && (
+          <div className="rounded-2xl p-3 mb-3" style={{ background: 'rgba(255,107,0,0.06)', border: '2px solid rgba(255,107,0,0.4)' }}>
+            <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">🎯 MELHOR OPORTUNIDADE DE HOJE</p>
+            <div className="space-y-2 mb-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-black text-white">{bestOpp.name}</p>
+                  <p className="text-[11px] text-slate-400">{bestOpp.clinic}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-black text-orange-500">{bestOpp.score}</p>
+                  <p className="text-[9px] text-orange-600 font-bold">Score</p>
+                </div>
+              </div>
+              {bestOpp.city && (
+                <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                  <MapPin className="w-2.5 h-2.5" />{bestOpp.city}
+                </p>
+              )}
+              <div style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)' }} className="rounded-lg p-2">
+                <p className="text-[10px] text-green-400 font-bold">🔬 {bestOpp.equipment}</p>
+                <p className="text-[10px] text-slate-400 mt-1">{bestOpp.potentialReason}</p>
+              </div>
+              <p className="text-[10px] text-slate-500 italic">→ {bestOpp.nextAction}</p>
+            </div>
+            <div className="flex gap-2">
+              {bestOpp.phone && (
+                <a href={`https://wa.me/${bestOpp.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
+                  className="flex-1 py-2 rounded-xl text-xs font-black text-green-400 text-center"
+                  style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.3)' }}>
+                  💬 WhatsApp
+                </a>
+              )}
+              <Link to={`/ClientProfile?id=${bestOpp.id}`} className="flex-1">
+                <div className="py-2 rounded-xl text-xs font-black text-blue-400 text-center"
+                  style={{ background: 'rgba(0,191,255,0.15)', border: '1px solid rgba(0,191,255,0.3)' }}>
+                  📍 Rota
+                </div>
+              </Link>
+              <Link to={`/ClientProfile?id=${bestOpp.id}`} className="flex-1">
+                <div className="py-2 rounded-xl text-xs font-black text-purple-400 text-center"
+                  style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                  ✅ Visita
+                </div>
+              </Link>
+            </div>
           </div>
         )}
 
