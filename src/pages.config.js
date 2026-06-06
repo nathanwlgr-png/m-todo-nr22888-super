@@ -75,7 +75,7 @@ import ChurnAnalysis from './pages/ChurnAnalysis';
 import ClientDashboard from './pages/ClientDashboard';
 import ClientDocumentCenter from './pages/ClientDocumentCenter';
 import ClientImportManager from './pages/ClientImportManager';
-import ClientProfile from './pages/ClientProfile';
+import ClientProfile from './pages/ClientProfile.jsx';
 import ClientSegmentation from './pages/ClientSegmentation';
 import Clients from './pages/Clients';
 import ClientsByCity from './pages/ClientsByCity';

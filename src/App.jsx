@@ -14,10 +14,11 @@ import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';
 import HomePageWithLayout from '@/components/HomePageWithLayout';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';
 
-// Home é gerenciada pelo HomePageWithLayout (lazy via SalesCommandCenter)
+// Páginas carregadas imediatamente (acesso crítico)
 
 // Páginas com lazy loading
 const VisitRouteManager = lazy(() => import('./pages/VisitRouteManager'));
@@ -84,6 +85,7 @@ const NotificationsCenter = lazy(() => import('./pages/NotificationsCenter'));
 const PipelineView = lazy(() => import('./pages/PipelineView'));
 const GenerateWhatsAppIntegrated = lazy(() => import('./pages/GenerateWhatsAppIntegrated'));
 const InvestigacaoDeCampoReal = lazy(() => import('./pages/InvestigacaoDeCampoReal'));
+const ClientProfile = lazy(() => import('./pages/ClientProfile.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -183,7 +185,7 @@ const AuthenticatedApp = () => {
         <Route path="/PipelineView" element={<LayoutWrapper currentPageName="PipelineView"><PipelineView /></LayoutWrapper>} />
         <Route path="/GenerateWhatsAppIntegrated" element={<LayoutWrapper currentPageName="GenerateWhatsAppIntegrated"><GenerateWhatsAppIntegrated /></LayoutWrapper>} />
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
-
+        <Route path="/ClientProfile" element={<LayoutWrapper currentPageName="ClientProfile"><ClientProfile /></LayoutWrapper>} />
 
         {/* ── ROTAS NÃO IMPLEMENTADAS → redirect para Command Center ── */}
         <Route path="/PossibleSales" element={<Navigate to="/SalesCommandCenter" replace />} />
@@ -227,24 +229,26 @@ const AuthenticatedApp = () => {
   );
 };
 
-// ── REBUILD TRIGGER: 2026-05-15T13:40 ──
+// ── REBUILD TRIGGER: 2026-06-06T00:00 ──
 function App() {
   return (
-    <QueryClientProvider client={queryClientInstance}>
-      <AIGlobalProvider>
-        <Router>
-          <AuthProvider>
-            <NavigationTracker />
-            <OfflineIndicator />
-            <OfflineBanner />
-            <AuthenticatedApp />
-            <PWAInstallPrompt />
-            <PWAInstallButtonFloating />
-          </AuthProvider>
-        </Router>
-      </AIGlobalProvider>
-      <ToasterComponent />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClientInstance}>
+        <AIGlobalProvider>
+          <Router>
+            <AuthProvider>
+              <NavigationTracker />
+              <OfflineIndicator />
+              <OfflineBanner />
+              <AuthenticatedApp />
+              <PWAInstallPrompt />
+              <PWAInstallButtonFloating />
+            </AuthProvider>
+          </Router>
+        </AIGlobalProvider>
+        <ToasterComponent />
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }
 

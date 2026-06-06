@@ -282,8 +282,9 @@ export default function ModoInvestigativoSupremo() {
               </button>
               {selectedClient && (
                 <a href={`/ClientProfile?id=${selectedClient.id}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                  style={{ background: 'rgba(255,107,0,0.15)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}>
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold no-underline"
+                  style={{ background: 'rgba(255,107,0,0.15)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}
+                  onClick={(e) => { e.preventDefault(); window.location.href = `/ClientProfile?id=${selectedClient.id}`; }}>
                   <Users className="w-3 h-3" />
                   Ver Perfil
                 </a>

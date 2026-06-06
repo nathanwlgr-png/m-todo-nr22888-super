@@ -13,7 +13,7 @@ export const setModo = (modo) => {
 
 // Páginas do MODO VENDEDOR — o que Nathan usa em campo
 export const VENDEDOR_PAGES = [
-  { page: 'ModoInvestigacaoSuprema', label: '🕵️ Investigar', category: 'IA' },
+  { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigar', category: 'IA' },
   { page: 'CentralIAMaster', label: '🧠 Central IA', category: 'IA' },
   { page: 'ModoCacaComercial', label: '🎯 Modo Caça', category: 'IA' },
   { page: 'Clients', label: '👥 Clientes', category: 'CRM' },
