@@ -256,19 +256,37 @@ export default function DayFieldView() {
           </div>
         )}
 
+        {/* Agente Supremo — Acesso Rápido */}
+        <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(168,85,247,0.08)', border: '2px solid rgba(168,85,247,0.4)' }}>
+          <p className="text-xs font-black text-purple-400 uppercase tracking-widest mb-2">👑 AGENTE SUPREMO DE VENDAS</p>
+          <p className="text-[11px] text-slate-400 mb-3">IA Master 24/7 — SPIN Selling, Propostas, CRM, Objeções</p>
+          <Link to="/WhatsAppHub"
+            className="w-full py-3 px-3 rounded-xl text-center text-sm font-black text-green-400 flex items-center justify-center gap-2"
+            style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.4)' }}>
+            💬 Conectar ao Agente WhatsApp
+          </Link>
+          <div className="mt-3 text-[10px] text-slate-500 space-y-1 px-2">
+          <div className="text-[10px] text-slate-500 space-y-1 px-2">
+            <p>✓ Qualifica leads em tempo real</p>
+            <p>✓ Gera propostas personalizadas</p>
+            <p>✓ Detecta objeções automaticamente</p>
+            <p>✓ Agenda visitas direto</p>
+          </div>
+        </div>
+
         {/* Links rápidos */}
         <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)' }}>
           <p className="text-xs font-black text-green-400 uppercase tracking-widest mb-3">⚡ Ações Rápidas</p>
           <div className="grid grid-cols-2 gap-2">
+            <Link to="/WhatsAppHub"
+              className="py-3 px-3 rounded-xl text-center text-base font-black text-green-400"
+              style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)' }}>
+              💬 WhatsApp Hub
+            </Link>
             <Link to="/TasksUnified"
               className="py-3 px-3 rounded-xl text-center text-base font-black text-orange-400"
               style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
-              📋 Todas as Tarefas
-            </Link>
-            <Link to="/ScheduledAgenda"
-              className="py-3 px-3 rounded-xl text-center text-base font-black text-blue-400"
-              style={{ background: 'rgba(0,191,255,0.1)', border: '1px solid rgba(0,191,255,0.3)' }}>
-              📅 Agenda Completa
+              📋 Tarefas
             </Link>
             <Link to="/Clients"
               className="py-3 px-3 rounded-xl text-center text-base font-black text-purple-400"
@@ -278,7 +296,7 @@ export default function DayFieldView() {
             <Link to="/SalesCommandCenter"
               className="py-3 px-3 rounded-xl text-center text-base font-black text-red-400"
               style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.3)' }}>
-              🎯 Command Center
+              🎯 Command
             </Link>
           </div>
         </div>
