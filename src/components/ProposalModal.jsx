@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, FileText, Share2 } from 'lucide-react';
+import { Copy, FileText, Share2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatPhoneForWhatsApp, isValidWhatsApp } from '@/utils/phoneUtils';
 
 const EQUIPAMENTOS = [
   { id: 'SMT-120VP', nome: 'Analisador Bioquímico Multifuncional SMT-120VP', preco: 23500, preco5x: 25000 },
@@ -101,10 +102,14 @@ Consultor Técnico Seamaty Brasil
 
   const enviarWhatsApp = () => {
     if (!client.phone) {
-      toast.error('Cliente sem número de WhatsApp');
+      toast.error('⚠️ Cliente sem WhatsApp válido — adicione o telefone no cadastro');
       return;
     }
-    const num = client.phone.replace(/\D/g, '');
+    const num = formatPhoneForWhatsApp(client.phone);
+    if (!num || !isValidWhatsApp(client.phone)) {
+      toast.error('⚠️ Número de telefone inválido — verifique o cadastro do cliente');
+      return;
+    }
     window.open(`https://wa.me/${num}?text=${encodeURIComponent(proposta)}`, '_blank');
   };
 

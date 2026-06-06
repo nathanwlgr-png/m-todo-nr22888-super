@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { MapPin, Navigation, ExternalLink, Search, Route, Clock, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { MapPin, Navigation, ExternalLink, Search, Route, Clock, ChevronDown, ChevronUp, X, AlertTriangle } from 'lucide-react';
+import { isValidWhatsApp } from '@/utils/phoneUtils';
 
 export default function SmartRouteMap() {
   const [expanded, setExpanded] = useState(false);
@@ -135,13 +136,20 @@ export default function SmartRouteMap() {
                     {c.address ? `${c.address}, ` : ''}{c.city}
                   </p>
                 </div>
-                <Badge className={
-                  c.status === 'quente' ? 'bg-red-500 text-white text-[9px] px-1 py-0' :
-                  c.status === 'morno' ? 'bg-orange-500 text-white text-[9px] px-1 py-0' :
-                  'bg-blue-400 text-white text-[9px] px-1 py-0'
-                }>
-                  {c.status}
-                </Badge>
+                <div className="flex flex-col gap-0.5 items-end">
+                  <Badge className={
+                    c.status === 'quente' ? 'bg-red-500 text-white text-[9px] px-1 py-0' :
+                    c.status === 'morno' ? 'bg-orange-500 text-white text-[9px] px-1 py-0' :
+                    'bg-blue-400 text-white text-[9px] px-1 py-0'
+                  }>
+                    {c.status}
+                  </Badge>
+                  {!c.phone || !isValidWhatsApp(c.phone) ? (
+                    <span title="Sem WhatsApp válido" className="text-[8px] text-amber-500 flex items-center gap-0.5">
+                      <AlertTriangle className="w-2.5 h-2.5" />sem tel
+                    </span>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>

@@ -1,5 +1,5 @@
-import * as React from 'react';
-const { useState } = React;
+import React, { useState } from 'react';
+import { buildWhatsAppUrl, isValidWhatsApp } from '@/utils/phoneUtils';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
@@ -78,7 +78,7 @@ export default function SniperDoDia() {
           )}
           {top10.map((c, i) => {
             const isDone = done[c.id];
-            const whatsUrl = c.phone ? `https://wa.me/${c.phone.replace(/\D/g, '')}` : null;
+            const whatsUrl = c.phone && isValidWhatsApp(c.phone) ? buildWhatsAppUrl(c.phone) : null;
             return (
               <div key={c.id} className="px-4 py-3 flex items-center gap-3" style={{ background: isDone ? 'rgba(0,255,136,0.03)' : 'transparent', opacity: isDone ? 0.5 : 1 }}>
                 {/* Rank */}

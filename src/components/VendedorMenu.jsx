@@ -3,45 +3,52 @@ import { Link } from 'react-router-dom';
 import { X, ChevronRight, ShieldCheck, Briefcase, Zap } from 'lucide-react';
 import { getModo, setModo, VENDEDOR_PAGES } from '@/lib/ModoVendedor';
 
-// Categorias Admin — apenas rotas que EXISTEM no App.jsx
+// Categorias Admin — apenas rotas VERIFICADAS no App.jsx (zero 404)
 const ADMIN_CATEGORIES = [
   {
-    label: '⚡ Principal',
+    label: '⚡ Fluxo Sniper',
     pages: [
       { page: 'Clients', label: '👥 Clientes' },
-      { page: 'Leads', label: '🎯 Leads' },
+      { page: 'ModoInvestigativoSupremo', label: '🔍 Investigação Suprema' },
+      { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN' },
       { page: 'WhatsAppHub', label: '💬 WhatsApp Hub' },
       { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
-      { page: 'EquipmentCatalog', label: '🔬 Catálogo' },
+      { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
+    ],
+  },
+  {
+    label: '🎯 CRM',
+    pages: [
+      { page: 'Leads', label: '🎯 Leads' },
+      { page: 'TasksUnified', label: '✅ Tarefas' },
+      { page: 'VisitManager', label: '📋 Visitas' },
       { page: 'ScheduledAgenda', label: '📅 Agenda' },
     ],
   },
   {
     label: '🔍 Inteligência',
     pages: [
-      { page: 'ModoInvestigativoSupremo', label: '🔍 Investigação Suprema' },
       { page: 'ModoCacaComercial', label: '🎯 Modo Caça' },
       { page: 'ModoInsumos', label: '📦 Modo Insumos' },
       { page: 'CentralIAMaster', label: '🧠 Central IA' },
-      { page: 'GenerateWhatsAppIntegrated', label: '💬 Gerar WhatsApp' },
+      { page: 'InvestigacaoDeCampoReal', label: '🕵️ Campo Real' },
     ],
   },
   {
     label: '🗺️ Campo',
     pages: [
       { page: 'SmartRouteOptimizer', label: '🗺️ Rota Inteligente' },
-      { page: 'VisitRouteManager', label: '📍 Gestor Visitas' },
-      { page: 'TasksUnified', label: '✅ Tarefas' },
-      { page: 'VisitManager', label: '📋 Visitas' },
+      { page: 'DayFieldView', label: '📍 Visão do Dia' },
+      { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty' },
     ],
   },
   {
     label: '📊 Análise',
     pages: [
-      { page: 'SalesFunnelKanban', label: 'Funil Kanban' },
-      { page: 'ExecutiveSalesAnalysis', label: 'Análise Executiva' },
-      { page: 'RankingAndConsumables', label: 'Ranking & Insumos' },
-      { page: 'ActiveProspecting', label: 'Prospecção Ativa' },
+      { page: 'SalesFunnelKanban', label: '📊 Funil Kanban' },
+      { page: 'ExecutiveSalesAnalysis', label: '📈 Análise Executiva' },
+      { page: 'RankingAndConsumables', label: '🏆 Ranking & Insumos' },
+      { page: 'ActiveProspecting', label: '🎪 Prospecção Ativa' },
     ],
   },
   {
@@ -49,9 +56,8 @@ const ADMIN_CATEGORIES = [
     pages: [
       { page: 'GlobalSearch', label: '🔍 Busca Global' },
       { page: 'OfflineMode', label: '📴 Modo Offline' },
-      { page: 'NotificationSettings', label: 'Notificações' },
-      { page: 'ContactSettings', label: 'Configurações' },
-      { page: 'Integrations', label: 'Integrações' },
+      { page: 'NotificationSettings', label: '🔔 Notificações' },
+      { page: 'Integrations', label: '🔗 Integrações' },
     ],
   },
 ];
