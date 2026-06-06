@@ -202,22 +202,33 @@ export class OfflineManager {
   // ─── SERVICE WORKER ───────────────────────────────────────────────
 
   static registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then(reg => {
-          console.log('[SW] Registered:', reg.scope);
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker?.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[SW] Nova versão disponível');
-              }
-            });
-          });
-        })
-        .catch(err => console.warn('[SW] Error:', err));
+    if (!('serviceWorker' in navigator)) return;
+
+    // Em desenvolvimento, desregistrar qualquer SW existente e limpar caches
+    // para evitar que JS antigo em cache quebre hooks do React.
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+      });
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      return;
     }
+
+    // Produção: registrar normalmente
+    navigator.serviceWorker
+      .register('/sw.js', { scope: '/' })
+      .then(reg => {
+        console.log('[SW] Registered:', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker?.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[SW] Nova versão disponível');
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[SW] Error:', err));
   }
 }
 

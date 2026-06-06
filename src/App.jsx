@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -59,6 +59,10 @@ const OfflineModePage = lazy(() => import('./pages/OfflineMode'));
 const SalesCommandCenter = lazy(() => import('./pages/SalesCommandCenter'));
 const RouteAuditReport = lazy(() => import('./pages/RouteAuditReport'));
 const CentralIAMaster = lazy(() => import('./pages/CentralIAMaster'));
+const ModoInvestigativoSupremo = lazy(() => import('./pages/ModoInvestigativoSupremo'));
+
+// Redirect 404 → SalesCommandCenter
+
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -186,40 +190,43 @@ const AuthenticatedApp = () => {
         <Route path="/InvestigacaoDeCampoReal" element={<LayoutWrapper currentPageName="InvestigacaoDeCampoReal"><InvestigacaoDeCampoReal /></LayoutWrapper>} />
         <Route path="/ModoInvestigacaoSuprema" element={<LayoutWrapper currentPageName="ModoInvestigacaoSuprema"><ModoInvestigacaoSuprema /></LayoutWrapper>} />
 
-        {/* ── COMING SOON — ainda não implementadas ── */}
-        <Route path="/PossibleSales" element={<LayoutWrapper currentPageName="PossibleSales"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/ClosingForecast" element={<LayoutWrapper currentPageName="ClosingForecast"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/SalesOptimizationCenter" element={<LayoutWrapper currentPageName="SalesOptimizationCenter"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/AIAssistant" element={<LayoutWrapper currentPageName="AIAssistant"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/SalesCoachingDashboard" element={<LayoutWrapper currentPageName="SalesCoachingDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/ProposalTemplates" element={<LayoutWrapper currentPageName="ProposalTemplates"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/EliteVetClientSearch" element={<LayoutWrapper currentPageName="EliteVetClientSearch"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/InteractiveDashboard" element={<LayoutWrapper currentPageName="InteractiveDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/ExecutiveSalesDashboard" element={<LayoutWrapper currentPageName="ExecutiveSalesDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/CustomDashboard" element={<LayoutWrapper currentPageName="CustomDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/AdvancedSalesAnalytics" element={<LayoutWrapper currentPageName="AdvancedSalesAnalytics"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/Reports" element={<LayoutWrapper currentPageName="Reports"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/SentimentDashboard" element={<LayoutWrapper currentPageName="SentimentDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/SentimentAnalysisDashboard" element={<LayoutWrapper currentPageName="SentimentAnalysisDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/ProactiveIntelligenceDashboard" element={<LayoutWrapper currentPageName="ProactiveIntelligenceDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/IntelligenceDashboard" element={<LayoutWrapper currentPageName="IntelligenceDashboard"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/NumerologyAnalysis" element={<LayoutWrapper currentPageName="NumerologyAnalysis"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/OfflineAnalytics" element={<LayoutWrapper currentPageName="OfflineAnalytics"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/WhatsAppMasterAssistant" element={<LayoutWrapper currentPageName="WhatsAppMasterAssistant"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/NegociacoesWhatsApp" element={<LayoutWrapper currentPageName="NegociacoesWhatsApp"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/MessageApproval" element={<LayoutWrapper currentPageName="MessageApproval"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/MessageHistory" element={<LayoutWrapper currentPageName="MessageHistory"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/FollowUpAutomationModule" element={<LayoutWrapper currentPageName="FollowUpAutomationModule"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/AIContentStudio" element={<LayoutWrapper currentPageName="AIContentStudio"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/WorkflowAutomation" element={<LayoutWrapper currentPageName="WorkflowAutomation"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/AIKnowledgeUploader" element={<LayoutWrapper currentPageName="AIKnowledgeUploader"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/ClientImportManager" element={<LayoutWrapper currentPageName="ClientImportManager"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/MaterialUploadHub" element={<LayoutWrapper currentPageName="MaterialUploadHub"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/AgentSetup" element={<LayoutWrapper currentPageName="AgentSetup"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/MasterCRM" element={<LayoutWrapper currentPageName="MasterCRM"><ComingSoonPage /></LayoutWrapper>} />
-        <Route path="/MasterControlPanel" element={<LayoutWrapper currentPageName="MasterControlPanel"><ComingSoonPage /></LayoutWrapper>} />
+        {/* ── ROTAS NÃO IMPLEMENTADAS → redirect para Command Center ── */}
+        <Route path="/PossibleSales" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/ClosingForecast" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/SalesOptimizationCenter" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/AIAssistant" element={<Navigate to="/CentralIAMaster" replace />} />
+        <Route path="/SalesCoachingDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
+        <Route path="/EliteVetClientSearch" element={<Navigate to="/ModoInvestigativoSupremo" replace />} />
+        <Route path="/InteractiveDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/ExecutiveSalesDashboard" element={<Navigate to="/ExecutiveSalesAnalysis" replace />} />
+        <Route path="/CustomDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/AdvancedSalesAnalytics" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/Reports" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/SentimentDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/SentimentAnalysisDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/ProactiveIntelligenceDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/IntelligenceDashboard" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/NumerologyAnalysis" element={<Navigate to="/CentralIAMaster" replace />} />
+        <Route path="/OfflineAnalytics" element={<Navigate to="/OfflineMode" replace />} />
+        <Route path="/WhatsAppMasterAssistant" element={<Navigate to="/WhatsAppHub" replace />} />
+        <Route path="/NegociacoesWhatsApp" element={<Navigate to="/WhatsAppHub" replace />} />
+        <Route path="/MessageApproval" element={<Navigate to="/WhatsAppHub" replace />} />
+        <Route path="/MessageHistory" element={<Navigate to="/WhatsAppHub" replace />} />
+        <Route path="/FollowUpAutomationModule" element={<Navigate to="/AutoFollowUpDashboard" replace />} />
+        <Route path="/AIContentStudio" element={<Navigate to="/CentralIAMaster" replace />} />
+        <Route path="/WorkflowAutomation" element={<Navigate to="/AutomationSettings" replace />} />
+        <Route path="/AIKnowledgeUploader" element={<Navigate to="/CentralIAMaster" replace />} />
+        <Route path="/ClientImportManager" element={<Navigate to="/Clients" replace />} />
+        <Route path="/MaterialUploadHub" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/AgentSetup" element={<Navigate to="/SalesCommandCenter" replace />} />
+        <Route path="/MasterCRM" element={<Navigate to="/Clients" replace />} />
+        <Route path="/MasterControlPanel" element={<Navigate to="/SalesCommandCenter" replace />} />
 
-        <Route path="*" element={<LayoutWrapper currentPageName="404"><ComingSoonPage moduleName="404" /></LayoutWrapper>} />
+        {/* ── MODO INVESTIGATIVO SUPREMO ── */}
+        <Route path="/ModoInvestigativoSupremo" element={<LayoutWrapper currentPageName="ModoInvestigativoSupremo"><ModoInvestigativoSupremo /></LayoutWrapper>} />
+
+        <Route path="*" element={<Navigate to="/SalesCommandCenter" replace />} />
       </Routes>
     </Suspense>
   );

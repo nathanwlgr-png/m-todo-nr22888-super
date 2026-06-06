@@ -1,476 +1,419 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, Target, AlertTriangle, CheckCircle, HelpCircle, XCircle, Copy, MessageSquare, Instagram, Save } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Search, Brain, Target, DollarSign, Users, Zap,
+  ChevronRight, RefreshCw, Copy, Check, Star,
+  MapPin, Phone, Globe, TrendingUp, Shield, Award
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-const STATUS_CONFIG = {
-  CONFIRMADO: { color: '#00ff88', icon: CheckCircle, bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.3)' },
-  PROVÁVEL: { color: '#ffb347', icon: HelpCircle, bg: 'rgba(255,179,71,0.1)', border: 'rgba(255,179,71,0.3)' },
-  SUSPEITA: { color: '#ff9500', icon: AlertTriangle, bg: 'rgba(255,149,0,0.1)', border: 'rgba(255,149,0,0.3)' },
-  'NÃO ENCONTRADO': { color: '#888', icon: XCircle, bg: 'rgba(136,136,136,0.1)', border: 'rgba(136,136,136,0.3)' },
+const SCORE_COLORS = {
+  alto: '#00ff88',
+  medio: '#ff9500',
+  baixo: '#ff4444',
 };
-
-const EQUIPMENT_MAP = {
-  hematologia: 'VBC-50A',
-  bioquimica: 'SMT-120VP / QT3',
-  hemogasometria: 'VG1 / VG2',
-  imunofluorescencia: 'Vi1 / VG2',
-  pcr: 'VQ1',
-  multiplo: '3DX (3 em 1)',
-};
-
-function ScoreBar({ value, max = 100, color = '#ff6b00', label }) {
-  const pct = Math.min(100, Math.round((value / max) * 100));
-  return (
-    <div className="mb-2">
-      <div className="flex justify-between text-xs mb-1" style={{ color: '#ccc' }}>
-        <span>{label}</span>
-        <span style={{ color, fontWeight: 'bold' }}>{value}{max === 10 ? '/10' : '/100'}</span>
-      </div>
-      <div className="w-full h-2 rounded-full" style={{ background: '#1a1a1a' }}>
-        <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}88, ${color})` }} />
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['NÃO ENCONTRADO'];
-  const Icon = cfg.icon;
-  return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}>
-      <Icon className="w-3 h-3" />
-      {status}
-    </span>
-  );
-}
 
 export default function ModoInvestigativoSupremo() {
-  const [input, setInput] = useState('');
-  const [city, setCity] = useState('');
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState(null);
-  const [copied, setCopied] = useState('');
-  const [leadTemp, setLeadTemp] = useState('quente');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
-  const handleSaveToLead = async () => {
-    if (!report) return;
-    setSaving(true);
-    const leadData = {
-      full_name: report.nome_clinica,
-      company: report.nome_clinica,
-      city: report.cidade,
-      source: 'analise_mercado_ia',
-      interest: report.equipamento_indicado,
-      stage: 'novo',
-      notes: formatFullReport(report),
-      predictive_score: report.score_oportunidade,
-      next_best_action: report.proximo_passo,
-      buying_signals: report.confirmados || [],
-    };
-    await base44.entities.Lead.create(leadData);
-    setSaved(true);
-    setSaving(false);
-    setTimeout(() => setSaved(false), 3000);
-  };
+  const { data: clients = [] } = useQuery({
+    queryKey: ['inv-clients'],
+    queryFn: () => base44.entities.Client.list('-updated_date', 200),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const handleInvestigate = async () => {
-    if (!input.trim()) return;
+  const filteredClients = query.length >= 2
+    ? clients.filter(c =>
+        c.first_name?.toLowerCase().includes(query.toLowerCase()) ||
+        c.clinic_name?.toLowerCase().includes(query.toLowerCase()) ||
+        c.city?.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 6)
+    : [];
+
+  const handleInvestigate = async (client) => {
+    setSelectedClient(client);
+    setQuery('');
     setLoading(true);
-    setReport(null);
+    setResult(null);
 
-    const depth = leadTemp === 'frio' ? 'rápida' : leadTemp === 'morno' ? 'intermediária' : 'completa';
+    try {
+      const res = await base44.functions.invoke('investigacaoCampoReal', {
+        clinic_name: client.clinic_name || `Clínica ${client.first_name}`,
+        city: client.city,
+        client_name: client.first_name,
+        phone: client.phone,
+        website: client.website,
+        instagram: client.instagram_handle,
+        cnpj: client.cnpj,
+        current_equipment: client.current_equipment,
+        client_type: client.client_type,
+        market_time: client.market_time,
+      });
 
-    const prompt = `Você é o MODO INVESTIGATIVO SUPREMO NR228888 da Seamaty Brasil.
-
-ALVO: "${input}"${city ? ` — Cidade: ${city}` : ''}
-PROFUNDIDADE DE ANÁLISE: ${depth} (lead ${leadTemp})
-DATA ATUAL: ${new Date().toLocaleDateString('pt-BR')}
-
-REGRAS OBRIGATÓRIAS:
-1. Investigue clínicas veterinárias, hospitais, laboratórios e universidades para venda de equipamentos Seamaty.
-2. NUNCA afirme que a clínica possui equipamento, volume ou marca concorrente sem evidência. Use "hipótese investigativa" quando necessário.
-3. Classifique CADA informação como: CONFIRMADO / PROVÁVEL / SUSPEITA / NÃO ENCONTRADO.
-4. Calcule SCORE DE OPORTUNIDADE (0-100) considerando: potencial de compra, recorrência em insumos, volume provável de exames, urgência clínica, estrutura, presença digital, temperatura comercial, comodato (40-60 exames bioquímica/mês).
-5. Calcule SCORE DE VISITA (0-10).
-6. Modo econômico: lead frio = análise rápida, morno = intermediária, quente = investigação completa.
-
-RESPONDA EXATAMENTE neste JSON (sem markdown, sem texto fora do JSON):
-{
-  "nome_clinica": "",
-  "cidade": "",
-  "tipo_negocio": "",
-  "status_informacao": "CONFIRMADO|PROVÁVEL|SUSPEITA|NÃO ENCONTRADO",
-  "confirmados": ["item1","item2"],
-  "hipoteses_comerciais": ["hipotese1","hipotese2"],
-  "equipamento_indicado": "",
-  "razao_equipamento": "",
-  "equipamento_alternativo": "",
-  "potencial_compra": "",
-  "potencial_comodato": "",
-  "score_oportunidade": 0,
-  "score_visita": 0,
-  "nivel_confianca": "",
-  "melhor_abordagem": "",
-  "perguntas_spin": {
-    "situacao": ["",""],
-    "problema": ["",""],
-    "implicacao": ["",""],
-    "necessidade": ["",""]
-  },
-  "objecoes_provaveis": ["",""],
-  "frase_abertura": "",
-  "estrategia_fechamento": "",
-  "proximo_passo": "",
-  "texto_whatsapp": "",
-  "texto_instagram": "",
-  "texto_email": {
-    "assunto": "",
-    "corpo": ""
-  },
-  "calendario_sniper": {
-    "melhor_dia": "",
-    "melhor_horario": "",
-    "tipo_contato": ""
-  }
-}`;
-
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      add_context_from_internet: leadTemp !== 'frio',
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          nome_clinica: { type: 'string' },
-          cidade: { type: 'string' },
-          tipo_negocio: { type: 'string' },
-          status_informacao: { type: 'string' },
-          confirmados: { type: 'array', items: { type: 'string' } },
-          hipoteses_comerciais: { type: 'array', items: { type: 'string' } },
-          equipamento_indicado: { type: 'string' },
-          razao_equipamento: { type: 'string' },
-          equipamento_alternativo: { type: 'string' },
-          potencial_compra: { type: 'string' },
-          potencial_comodato: { type: 'string' },
-          score_oportunidade: { type: 'number' },
-          score_visita: { type: 'number' },
-          nivel_confianca: { type: 'string' },
-          melhor_abordagem: { type: 'string' },
-          perguntas_spin: { type: 'object' },
-          objecoes_provaveis: { type: 'array', items: { type: 'string' } },
-          frase_abertura: { type: 'string' },
-          estrategia_fechamento: { type: 'string' },
-          proximo_passo: { type: 'string' },
-          texto_whatsapp: { type: 'string' },
-          texto_instagram: { type: 'string' },
-          texto_email: { type: 'object' },
-          calendario_sniper: { type: 'object' },
-        }
+      if (res?.data) {
+        setResult(res.data);
+      } else {
+        // Gerar análise via IA se função não retornou
+        const aiRes = await base44.integrations.Core.InvokeLLM({
+          prompt: `Analise este cliente veterinário e gere um perfil comercial completo:
+            Nome: ${client.first_name}
+            Clínica: ${client.clinic_name || 'não informado'}
+            Cidade: ${client.city || 'não informado'}
+            Tipo: ${client.client_type || 'não informado'}
+            Equipamento atual: ${client.current_equipment || 'não informado'}
+            Volume mensal: ${client.current_volume || 'não informado'}
+            Status: ${client.status || 'morno'}
+            Score: ${client.purchase_score || 0}
+            
+            Gere:
+            1. Score comercial (0-100) com justificativa
+            2. Perfil do decisor (estilo, motivações, objeções)
+            3. Potencial de compra de equipamento (VG2 ou SMT-120VP)
+            4. Potencial de comodato estratégico
+            5. Abordagem recomendada SPIN Selling
+            6. Melhor momento para contato
+            7. Produto ideal para oferecer`,
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              commercial_score: { type: 'number' },
+              score_level: { type: 'string', enum: ['alto', 'medio', 'baixo'] },
+              score_justification: { type: 'string' },
+              decision_maker_profile: { type: 'string' },
+              decision_style: { type: 'string' },
+              main_motivations: { type: 'array', items: { type: 'string' } },
+              predicted_objections: { type: 'array', items: { type: 'string' } },
+              equipment_purchase_potential: { type: 'string' },
+              recommended_product: { type: 'string' },
+              comodato_potential: { type: 'string' },
+              comodato_score: { type: 'number' },
+              recommended_approach: { type: 'string' },
+              spin_questions: { type: 'array', items: { type: 'string' } },
+              best_contact_time: { type: 'string' },
+              next_action: { type: 'string' },
+            }
+          }
+        });
+        setResult(aiRes);
       }
-    });
-
-    setReport(result);
-    setLoading(false);
+    } catch (e) {
+      toast.error('Erro na investigação: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const copyText = (text, key) => {
+  const handleManualInvestigate = async () => {
+    if (!query.trim()) return;
+    setLoading(true);
+    setResult(null);
+    setSelectedClient(null);
+    try {
+      const aiRes = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analise esta clínica veterinária e gere um perfil comercial completo para venda de equipamentos Seamaty (SMT-120VP hematologia, VG2 bioquímica):
+          Busca: "${query}"
+          
+          Gere um score comercial, perfil do decisor, potencial de compra e abordagem SPIN Selling recomendada.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            commercial_score: { type: 'number' },
+            score_level: { type: 'string', enum: ['alto', 'medio', 'baixo'] },
+            score_justification: { type: 'string' },
+            decision_maker_profile: { type: 'string' },
+            decision_style: { type: 'string' },
+            main_motivations: { type: 'array', items: { type: 'string' } },
+            predicted_objections: { type: 'array', items: { type: 'string' } },
+            equipment_purchase_potential: { type: 'string' },
+            recommended_product: { type: 'string' },
+            comodato_potential: { type: 'string' },
+            comodato_score: { type: 'number' },
+            recommended_approach: { type: 'string' },
+            spin_questions: { type: 'array', items: { type: 'string' } },
+            best_contact_time: { type: 'string' },
+            next_action: { type: 'string' },
+          }
+        }
+      });
+      setResult(aiRes);
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    const text = result ? JSON.stringify(result, null, 2) : '';
     navigator.clipboard.writeText(text);
-    setCopied(key);
-    setTimeout(() => setCopied(''), 2000);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success('Análise copiada!');
   };
 
-  const formatFullReport = (r) => {
-    if (!r) return '';
-    return `RELATÓRIO INVESTIGATIVO NR228888
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Nome da clínica: ${r.nome_clinica}
-2. Cidade: ${r.cidade}
-3. Tipo de negócio: ${r.tipo_negocio}
-4. Status da informação: ${r.status_informacao}
-5. O que foi confirmado: ${(r.confirmados || []).join(' | ')}
-6. Hipóteses comerciais: ${(r.hipoteses_comerciais || []).join(' | ')}
-7. Equipamento Seamaty mais indicado: ${r.equipamento_indicado}
-8. Potencial de compra: ${r.potencial_compra}
-9. Potencial de comodato: ${r.potencial_comodato}
-10. Score de oportunidade: ${r.score_oportunidade}/100
-11. Score de visita: ${r.score_visita}/10
-12. Melhor abordagem: ${r.melhor_abordagem}
-13. Perguntas SPIN: ${JSON.stringify(r.perguntas_spin, null, 2)}
-14. Objeções prováveis: ${(r.objecoes_provaveis || []).join(' | ')}
-15. Texto sugerido para contato: ${r.texto_whatsapp}
-16. Próxima ação recomendada: ${r.proximo_passo}
-17. Nível de confiança da análise: ${r.nivel_confianca}`;
-  };
+  const scoreColor = result?.score_level ? SCORE_COLORS[result.score_level] : '#ff9500';
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#080808' }}>
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ff6b00, #ff2200)' }}>
-            <Target className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-white">MODO INVESTIGATIVO SUPREMO</h1>
-            <p className="text-xs font-bold" style={{ color: '#ff6b00' }}>NR228888 — Seamaty Brasil</p>
-          </div>
+    <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
+      <div className="px-4 pt-5 pb-3">
+        <h1 className="text-xl font-black text-white mb-0.5">🔍 Modo Investigação Suprema</h1>
+        <p className="text-[10px] text-purple-500 font-bold uppercase tracking-widest mb-4">
+          Score Comercial • Perfil Decisor • Abordagem SPIN
+        </p>
+
+        {/* Busca */}
+        <div className="relative mb-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500" />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleManualInvestigate()}
+            placeholder="Nome do cliente, clínica ou cidade..."
+            className="w-full pl-9 pr-4 h-11 rounded-xl text-sm font-bold focus:outline-none"
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid rgba(168,85,247,0.4)',
+              color: '#e2e8f0',
+            }}
+          />
         </div>
-        <p className="text-xs mt-1" style={{ color: '#888' }}>Análise investigativa de clínicas, hospitais e labs. Relatório 17 pontos com SPIN, Score e Briefing.</p>
-      </div>
 
-      {/* Input */}
-      <div className="px-4 mb-3">
-        <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.25)' }}>
-          <div className="flex gap-2 mb-3">
-            <Input
-              placeholder="Nome da clínica, Dr. Frank, Pet Care Bauru..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleInvestigate()}
-              className="flex-1 text-sm text-white border-0 h-10"
-              style={{ background: '#1a1a1a', borderRadius: 10 }}
-            />
-            <Input
-              placeholder="Cidade"
-              value={city}
-              onChange={e => setCity(e.target.value)}
-              className="w-28 text-sm text-white border-0 h-10"
-              style={{ background: '#1a1a1a', borderRadius: 10 }}
-            />
-          </div>
-
-          {/* Temperatura do Lead */}
-          <div className="flex gap-2 mb-3">
-            <p className="text-xs text-orange-400 font-bold self-center mr-1">Temperatura:</p>
-            {['frio', 'morno', 'quente'].map(t => (
+        {/* Sugestões de clientes */}
+        {filteredClients.length > 0 && !loading && !result && (
+          <div className="rounded-xl overflow-hidden mb-3" style={{ border: '1px solid rgba(168,85,247,0.2)', background: '#111' }}>
+            {filteredClients.map(c => (
               <button
-                key={t}
-                onClick={() => setLeadTemp(t)}
-                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
-                style={leadTemp === t
-                  ? { background: t === 'frio' ? '#3b82f6' : t === 'morno' ? '#f59e0b' : '#ef4444', color: 'white' }
-                  : { background: '#1a1a1a', color: '#888', border: '1px solid #333' }
-                }
+                key={c.id}
+                onClick={() => handleInvestigate(c)}
+                className="w-full flex items-center justify-between px-3 py-2.5 hover:opacity-80 transition-opacity border-b last:border-0"
+                style={{ borderColor: 'rgba(168,85,247,0.1)' }}
               >
-                {t === 'frio' ? '❄️' : t === 'morno' ? '🌡️' : '🔥'} {t}
+                <div className="text-left">
+                  <p className="text-sm font-bold text-white">{c.first_name}</p>
+                  <p className="text-[10px] text-slate-500">{c.clinic_name} {c.city && `• ${c.city}`}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold"
+                    style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7' }}>
+                    Score {c.purchase_score || 0}
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-purple-600" />
+                </div>
               </button>
             ))}
-            <span className="text-xs self-center ml-auto" style={{ color: '#555' }}>
-              {leadTemp === 'frio' ? 'Análise rápida' : leadTemp === 'morno' ? 'Análise intermediária' : 'Investigação completa'}
-            </span>
           </div>
+        )}
 
-          <Button
-            onClick={handleInvestigate}
-            disabled={loading || !input.trim()}
-            className="w-full h-10 font-black text-sm"
-            style={{ background: loading ? '#333' : 'linear-gradient(90deg, #ff6b00, #ff2200)', color: 'white', border: 'none' }}
+        {/* Botão busca manual */}
+        {query.length > 0 && filteredClients.length === 0 && !loading && !result && (
+          <button
+            onClick={handleManualInvestigate}
+            className="w-full py-2.5 rounded-xl text-sm font-black mb-3"
+            style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.4)', color: '#a855f7' }}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Investigando {leadTemp === 'quente' ? '(investigação completa)' : ''}...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2"><Search className="w-4 h-4" /> INVESTIGAR AGORA</span>
-            )}
-          </Button>
-        </div>
+            🔍 Investigar "{query}" com IA
+          </button>
+        )}
       </div>
 
-      {/* Report */}
-      {report && (
-        <div className="px-4 space-y-3">
-          {/* Header do relatório */}
-          <div className="rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #1a0800, #0a0000)', border: '1px solid rgba(255,107,0,0.4)' }}>
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <p className="text-lg font-black text-white">{report.nome_clinica}</p>
-                <p className="text-sm font-bold" style={{ color: '#ff6b00' }}>{report.cidade} · {report.tipo_negocio}</p>
-              </div>
-              <StatusBadge status={report.status_informacao} />
+      {/* Loading */}
+      {loading && (
+        <div className="px-4">
+          <div className="rounded-2xl p-6 flex flex-col items-center gap-3"
+            style={{ background: '#111', border: '1px solid rgba(168,85,247,0.3)' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.4)' }}>
+              <Brain className="w-6 h-6 text-purple-400 animate-pulse" />
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <ScoreBar value={report.score_oportunidade} max={100} color="#ff6b00" label="Score Oportunidade" />
-              <ScoreBar value={report.score_visita} max={10} color="#00ff88" label="Score Visita" />
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs" style={{ color: '#888' }}>Confiança: <strong style={{ color: '#ffb347' }}>{report.nivel_confianca}</strong></span>
-              <Button size="sm" variant="outline" onClick={() => copyText(formatFullReport(report), 'full')} className="text-xs h-7 gap-1" style={{ borderColor: 'rgba(255,107,0,0.3)', color: '#ff9500' }}>
-                <Copy className="w-3 h-3" /> {copied === 'full' ? '✅ Copiado!' : 'Copiar Relatório'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Confirmados e Hipóteses */}
-          <div className="grid grid-cols-1 gap-3">
-            {report.confirmados?.length > 0 && (
-              <div className="rounded-xl p-3" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                <p className="text-xs font-black mb-2" style={{ color: '#00ff88' }}>✅ CONFIRMADO</p>
-                <ul className="space-y-1">
-                  {report.confirmados.map((c, i) => <li key={i} className="text-xs text-white">• {c}</li>)}
-                </ul>
-              </div>
-            )}
-            {report.hipoteses_comerciais?.length > 0 && (
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,149,0,0.05)', border: '1px solid rgba(255,149,0,0.2)' }}>
-                <p className="text-xs font-black mb-2" style={{ color: '#ff9500' }}>💡 HIPÓTESES COMERCIAIS</p>
-                <ul className="space-y-1">
-                  {report.hipoteses_comerciais.map((h, i) => <li key={i} className="text-xs text-white">• {h}</li>)}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Equipamento + Potencial */}
-          <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <p className="text-xs font-black text-orange-400 mb-2">🔬 EQUIPAMENTO & POTENCIAL</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-gray-500">Indicado</p>
-                <p className="text-sm font-black text-white">{report.equipamento_indicado}</p>
-                {report.equipamento_alternativo && <p className="text-xs text-orange-600">Alt: {report.equipamento_alternativo}</p>}
-                <p className="text-xs text-gray-400 mt-1">{report.razao_equipamento}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Potencial Compra</p>
-                <p className="text-xs text-white mb-1">{report.potencial_compra}</p>
-                <p className="text-xs text-gray-500">Comodato</p>
-                <p className="text-xs text-white">{report.potencial_comodato}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* SPIN Selling */}
-          {report.perguntas_spin && (
-            <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
-              <p className="text-xs font-black text-orange-400 mb-3">🎯 PERGUNTAS SPIN</p>
-              {['situacao', 'problema', 'implicacao', 'necessidade'].map(tipo => (
-                report.perguntas_spin[tipo]?.length > 0 && (
-                  <div key={tipo} className="mb-2">
-                    <p className="text-xs font-bold uppercase mb-1" style={{ color: '#ff9500' }}>{tipo === 'situacao' ? 'S — Situação' : tipo === 'problema' ? 'P — Problema' : tipo === 'implicacao' ? 'I — Implicação' : 'N — Necessidade'}</p>
-                    {report.perguntas_spin[tipo].map((q, i) => <p key={i} className="text-xs text-gray-300 mb-0.5">• {q}</p>)}
-                  </div>
-                )
+            <p className="text-sm font-black text-purple-400">Investigando...</p>
+            <p className="text-xs text-slate-500 text-center">Analisando dados públicos, perfil de mercado e potencial comercial</p>
+            <div className="flex gap-1">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="w-2 h-2 rounded-full bg-purple-500 animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }} />
               ))}
             </div>
-          )}
-
-          {/* Objeções + Abordagem */}
-          <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <p className="text-xs font-black text-orange-400 mb-2">⚠️ OBJEÇÕES + ESTRATÉGIA</p>
-            {report.objecoes_provaveis?.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-1">Objeções prováveis:</p>
-                {report.objecoes_provaveis.map((o, i) => <p key={i} className="text-xs text-red-300 mb-0.5">• {o}</p>)}
-              </div>
-            )}
-            <div className="mb-2">
-              <p className="text-xs text-gray-500">Frase de abertura:</p>
-              <p className="text-xs text-white italic">"{report.frase_abertura}"</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Estratégia de fechamento:</p>
-              <p className="text-xs text-white">{report.estrategia_fechamento}</p>
-            </div>
-          </div>
-
-          {/* Textos de contato */}
-          <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <p className="text-xs font-black text-orange-400 mb-3">📤 TEXTOS PARA CONTATO — AGUARDA APROVAÇÃO DO NATHAN</p>
-            {[
-              { key: 'whatsapp', label: '💬 WhatsApp', text: report.texto_whatsapp, icon: MessageSquare },
-              { key: 'instagram', label: '📸 Instagram DM', text: report.texto_instagram, icon: Instagram },
-            ].map(({ key, label, text, icon: Icon }) => text && (
-              <div key={key} className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-bold text-gray-400">{label}</p>
-                  <Button size="sm" variant="ghost" onClick={() => copyText(text, key)} className="text-xs h-6 px-2" style={{ color: '#ff9500' }}>
-                    <Copy className="w-3 h-3 mr-1" /> {copied === key ? '✅' : 'Copiar'}
-                  </Button>
-                </div>
-                <div className="rounded-lg p-2 text-xs text-gray-300" style={{ background: '#0a0a0a', border: '1px solid #222' }}>{text}</div>
-              </div>
-            ))}
-            {report.texto_email?.corpo && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-bold text-gray-400">📧 E-mail: {report.texto_email.assunto}</p>
-                  <Button size="sm" variant="ghost" onClick={() => copyText(report.texto_email.corpo, 'email')} className="text-xs h-6 px-2" style={{ color: '#ff9500' }}>
-                    <Copy className="w-3 h-3 mr-1" /> {copied === 'email' ? '✅' : 'Copiar'}
-                  </Button>
-                </div>
-                <div className="rounded-lg p-2 text-xs text-gray-300" style={{ background: '#0a0a0a', border: '1px solid #222' }}>{report.texto_email.corpo}</div>
-              </div>
-            )}
-          </div>
-
-          {/* Calendário Sniper + Próximo Passo */}
-          <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, #1a0800, #0a0500)', border: '1px solid rgba(255,107,0,0.35)' }}>
-            <p className="text-xs font-black text-orange-400 mb-2">🎯 SNIPER — PRÓXIMA AÇÃO</p>
-            {report.calendario_sniper && (
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                <div className="text-center rounded-lg p-2" style={{ background: 'rgba(255,107,0,0.1)' }}>
-                  <p className="text-xs text-gray-500">Dia</p>
-                  <p className="text-xs font-bold text-orange-400">{report.calendario_sniper.melhor_dia}</p>
-                </div>
-                <div className="text-center rounded-lg p-2" style={{ background: 'rgba(255,107,0,0.1)' }}>
-                  <p className="text-xs text-gray-500">Horário</p>
-                  <p className="text-xs font-bold text-orange-400">{report.calendario_sniper.melhor_horario}</p>
-                </div>
-                <div className="text-center rounded-lg p-2" style={{ background: 'rgba(255,107,0,0.1)' }}>
-                  <p className="text-xs text-gray-500">Tipo</p>
-                  <p className="text-xs font-bold text-orange-400">{report.calendario_sniper.tipo_contato}</p>
-                </div>
-              </div>
-            )}
-            <p className="text-sm font-bold text-white">→ {report.proximo_passo}</p>
-            <p className="text-xs mt-1" style={{ color: '#888' }}>🔒 Seg-Qui: visitas e contatos | Sex: organização, follow-up e limpeza do CRM</p>
-          </div>
-
-          {/* Botões de ação final */}
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <Button
-              className="h-10 font-black text-sm"
-              style={{ background: 'linear-gradient(90deg, #1a1a1a, #2a1500)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}
-              onClick={() => copyText(formatFullReport(report), 'full')}
-            >
-              <Copy className="w-4 h-4 mr-1" />
-              {copied === 'full' ? '✅ Copiado!' : 'Copiar Relatório'}
-            </Button>
-            <Button
-              className="h-10 font-black text-sm"
-              disabled={saving || saved}
-              style={{ background: saved ? 'rgba(0,255,136,0.15)' : 'linear-gradient(90deg, #1a3300, #0a2000)', color: saved ? '#00ff88' : '#00cc66', border: `1px solid ${saved ? 'rgba(0,255,136,0.4)' : 'rgba(0,200,80,0.3)'}` }}
-              onClick={handleSaveToLead}
-            >
-              <Save className="w-4 h-4 mr-1" />
-              {saving ? 'Salvando...' : saved ? '✅ Salvo no CRM!' : 'Salvar Lead CRM'}
-            </Button>
           </div>
         </div>
       )}
 
-      {/* Empty state */}
-      {!report && !loading && (
-        <div className="px-4 mt-6 text-center">
-          <div className="w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <Target className="w-8 h-8" style={{ color: '#ff6b00' }} />
-          </div>
-          <p className="font-black text-white mb-1">Modo Investigativo Supremo</p>
-          <p className="text-xs mb-4" style={{ color: '#666' }}>Digite o nome de uma clínica, médico ou empresa para gerar o relatório completo de 17 pontos com Score, SPIN, objeções e textos prontos.</p>
-          <div className="grid grid-cols-3 gap-2">
-            {['Dr. Frank Bauru', 'Pet Care Marília', 'UNESP Araçatuba'].map(ex => (
-              <button key={ex} onClick={() => { setInput(ex.split(' ').slice(0, -1).join(' ') || ex); setCity(ex.split(' ').slice(-1)[0]); }}
-                className="rounded-xl p-2 text-xs text-orange-400 font-bold" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
-                {ex}
+      {/* Resultado */}
+      {result && !loading && (
+        <div className="px-4 space-y-3">
+          {/* Header do resultado */}
+          <div className="rounded-2xl p-4" style={{ background: '#111', border: `1px solid ${scoreColor}44` }}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Perfil Analisado</p>
+                <p className="text-base font-black text-white">
+                  {selectedClient ? (selectedClient.clinic_name || selectedClient.first_name) : query}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-black" style={{ color: scoreColor }}>
+                  {result.commercial_score || 0}
+                </p>
+                <p className="text-[10px] font-bold uppercase" style={{ color: scoreColor }}>
+                  {result.score_level || 'médio'}
+                </p>
+              </div>
+            </div>
+
+            {/* Score bar */}
+            <div className="w-full h-2 rounded-full mb-2" style={{ background: '#1a1a1a' }}>
+              <div className="h-2 rounded-full transition-all"
+                style={{ width: `${result.commercial_score || 0}%`, background: scoreColor }} />
+            </div>
+
+            <p className="text-xs text-slate-400">{result.score_justification}</p>
+
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copied ? 'Copiado!' : 'Copiar Análise'}
               </button>
-            ))}
+              {selectedClient && (
+                <a href={`/ClientProfile?id=${selectedClient.id}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                  style={{ background: 'rgba(255,107,0,0.15)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.3)' }}>
+                  <Users className="w-3 h-3" />
+                  Ver Perfil
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Perfil do Decisor */}
+          <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.2)' }}>
+            <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-2">👤 Perfil do Decisor</p>
+            <p className="text-xs text-slate-300 mb-2">{result.decision_maker_profile}</p>
+            {result.decision_style && (
+              <p className="text-[11px] text-blue-300">Estilo: <strong>{result.decision_style}</strong></p>
+            )}
+            {result.main_motivations?.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[10px] text-slate-500 mb-1">Motivações principais:</p>
+                <div className="flex flex-wrap gap-1">
+                  {result.main_motivations.map((m, i) => (
+                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full"
+                      style={{ background: 'rgba(0,191,255,0.1)', color: '#00bfff' }}>{m}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Potencial de Compra */}
+          <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+            <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">💰 Potencial de Compra</p>
+            <p className="text-xs text-slate-300 mb-2">{result.equipment_purchase_potential}</p>
+            {result.recommended_product && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+                style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
+                <Star className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-xs font-black text-orange-400">Produto Ideal: {result.recommended_product}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Potencial de Comodato */}
+          {result.comodato_potential && (
+            <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-black text-green-400 uppercase tracking-widest">🤝 Comodato Estratégico</p>
+                {result.comodato_score && (
+                  <span className="text-sm font-black text-green-400">{result.comodato_score}%</span>
+                )}
+              </div>
+              <p className="text-xs text-slate-300">{result.comodato_potential}</p>
+            </div>
+          )}
+
+          {/* Abordagem SPIN */}
+          {result.recommended_approach && (
+            <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(168,85,247,0.2)' }}>
+              <p className="text-xs font-black text-purple-400 uppercase tracking-widest mb-2">🎯 Abordagem Recomendada</p>
+              <p className="text-xs text-slate-300 mb-3">{result.recommended_approach}</p>
+              {result.spin_questions?.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-slate-500 mb-1.5">Perguntas SPIN para usar:</p>
+                  <div className="space-y-1.5">
+                    {result.spin_questions.map((q, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-[10px] text-purple-500 font-black shrink-0">{i + 1}.</span>
+                        <p className="text-xs text-slate-400">{q}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Objeções previstas */}
+          {result.predicted_objections?.length > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,68,68,0.2)' }}>
+              <p className="text-xs font-black text-red-400 uppercase tracking-widest mb-2">⚠️ Objeções Previstas</p>
+              <div className="space-y-1">
+                {result.predicted_objections.map((o, i) => (
+                  <p key={i} className="text-xs text-slate-400 flex items-start gap-2">
+                    <span className="text-red-600 shrink-0">•</span>{o}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Próxima ação */}
+          {result.next_action && (
+            <div className="rounded-2xl p-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.3)' }}>
+              <p className="text-xs font-black text-green-400 uppercase tracking-widest mb-1">✅ Próxima Ação</p>
+              <p className="text-sm font-bold text-white">{result.next_action}</p>
+              {result.best_contact_time && (
+                <p className="text-xs text-slate-500 mt-1">⏰ Melhor horário: {result.best_contact_time}</p>
+              )}
+            </div>
+          )}
+
+          {/* Botão nova investigação */}
+          <button
+            onClick={() => { setResult(null); setSelectedClient(null); setQuery(''); }}
+            className="w-full py-3 rounded-2xl text-sm font-black"
+            style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}>
+            🔍 Nova Investigação
+          </button>
+        </div>
+      )}
+
+      {/* Estado inicial */}
+      {!result && !loading && !query && (
+        <div className="px-4">
+          <div className="rounded-2xl p-6 text-center" style={{ background: '#111', border: '1px solid rgba(168,85,247,0.15)' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
+              <Brain className="w-8 h-8 text-purple-400" />
+            </div>
+            <p className="text-sm font-black text-purple-400 mb-2">Investigação com IA</p>
+            <p className="text-xs text-slate-500 mb-4">
+              Busque um cliente ou clínica e gere automaticamente o score comercial, perfil do decisor, potencial de compra e abordagem SPIN.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {['Score Comercial', 'Perfil Decisor', 'Pot. Comodato', 'SPIN Questions'].map(item => (
+                <div key={item} className="rounded-xl py-2 px-3 flex items-center gap-2"
+                  style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)' }}>
+                  <Zap className="w-3 h-3 text-purple-500 shrink-0" />
+                  <span className="text-[11px] text-purple-300 font-bold">{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

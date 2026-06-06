@@ -1,37 +1,30 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
-  TrendingUp, Users, AlertCircle, Calendar, Route, DollarSign,
-  Zap, Target, ChevronRight, RefreshCw, Clock, MessageSquare,
-  BarChart3, ArrowRight, MapPin, Flame, Star, Package, FileText,
-  Brain, Search, WifiOff, Bell, Phone, Award, Activity
+  TrendingUp, Users, Calendar, Route, DollarSign,
+  Zap, Target, ChevronRight, RefreshCw, Clock, Flame,
+  Star, MessageSquare, ArrowRight, MapPin,
+  Search, WifiOff, Brain
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STALE_5MIN = 5 * 60 * 1000;
 const STALE_2MIN = 2 * 60 * 1000;
 
-// ─── QUICK ACTION BUTTONS ───
-const QUICK_ACTIONS = [
-  { to: '/Clients', label: '👥 Clientes', color: '#4f8ef7' },
-  { to: '/Leads', label: '🎯 Leads', color: '#00c853' },
-  { to: '/VisitManager', label: '📍 Visitas', color: '#ff9500' },
-  { to: '/TasksUnified', label: '✅ Tarefas', color: '#b44ef7' },
-  { to: '/WhatsAppHub', label: '💬 WhatsApp', color: '#25d366' },
-  { to: '/SmartRouteOptimizer', label: '🗺️ Rota', color: '#ff6b00' },
-  { to: '/ProposalGenerator', label: '📄 Proposta', color: '#f59e0b' },
-  { to: '/EquipmentCatalog', label: '🔬 Catálogo', color: '#06b6d4' },
-  { to: '/ModoInvestigacaoSuprema', label: '🕵️ Investigar', color: '#a855f7' },
-  { to: '/GenerateWhatsAppIntegrated', label: '⚡ SPIN', color: '#ef4444' },
-];
+const HeavyFallback = () => (
+  <div className="h-16 rounded-xl animate-pulse mb-3" style={{ background: '#1a1a1a' }} />
+);
+
+// Lazy load do componente de ranking
+const RankingDoDia = lazy(() => import('@/components/RankingDoDia'));
 
 export default function SalesCommandCenter() {
   const [aiMode, setAiMode] = useState(null);
   const [aiResult, setAiResult] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
-  const queryClient = useQueryClient();
+  const [generatingAction, setGeneratingAction] = useState(null);
 
   const { data: clients = [], isLoading: loadingClients } = useQuery({
     queryKey: ['scc-clients'],
@@ -58,19 +51,18 @@ export default function SalesCommandCenter() {
     staleTime: STALE_5MIN,
   });
 
-  const { data: pendingMsgs = [] } = useQuery({
+  const { data: consumables = [] } = useQuery({
+    queryKey: ['scc-consumables'],
+    queryFn: () => base44.entities.ConsumableOrder?.list('-next_reorder_date', 100).catch(() => []),
+    staleTime: STALE_5MIN,
+  });
+
+  const { data: pendingMessages = [] } = useQuery({
     queryKey: ['scc-pending-msgs'],
     queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
     staleTime: STALE_2MIN,
   });
 
-  const { data: consumables = [] } = useQuery({
-    queryKey: ['scc-consumables'],
-    queryFn: () => base44.entities.ConsumableOrder?.list('-next_reorder_date', 50).catch(() => []),
-    staleTime: STALE_5MIN,
-  });
-
-  // ─── MÉTRICAS ───
   const metrics = useMemo(() => {
     const now = new Date();
     const sevenDaysAgo = new Date(now - 7 * 86400000);
@@ -81,14 +73,16 @@ export default function SalesCommandCenter() {
       if (!c.last_contact_date) return true;
       return new Date(c.last_contact_date) < sevenDaysAgo;
     });
-    const noPurchase = clients.filter(c => {
+    const noPurchaseClients = clients.filter(c => {
       if (!c.last_purchase_date) return true;
       return new Date(c.last_purchase_date) < thirtyDaysAgo;
     });
-    const proposalClients = clients.filter(c => c.pipeline_stage === 'proposta' || c.pipeline_stage === 'negociacao');
-    const comodatoOpp = clients.filter(c =>
-      c.client_type === 'clinica_pequena' || c.client_type === 'sem_equipamento' ||
-      (c.current_volume === 'mais_230_mes' && !c.equipment_sold)
+    const proposalClients = clients.filter(c =>
+      c.pipeline_stage === 'proposta' || c.pipeline_stage === 'negociacao'
+    );
+    // Oportunidades de comodato: clientes com equipamentos mas sem contrato recente
+    const comodatoOpps = clients.filter(c =>
+      c.equipment_sold && !c.sale_closed && (c.status === 'quente' || c.status === 'morno')
     );
 
     const closedSales = sales.filter(s => {
@@ -97,230 +91,263 @@ export default function SalesCommandCenter() {
         && (s.status === 'fechada' || s.status === 'entregue');
     });
     const monthRevenue = closedSales.reduce((a, s) => a + (s.sale_value || 0), 0);
-
+    const nextVisit = visits
+      .filter(v => new Date(v.scheduled_date) >= now)
+      .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))[0];
     const nextVisits = visits
       .filter(v => new Date(v.scheduled_date) >= now)
       .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
       .slice(0, 5);
-
-    const bestNextVisit = nextVisits[0] || null;
-
     const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < now);
-    const projectedRevenue = proposalClients.reduce((a, c) => a + (c.projected_revenue || c.average_purchase_value || 0), 0);
-
-    // Ranking do Dia — top 5 por score
-    const rankingDia = [...clients]
-      .filter(c => c.purchase_score > 0)
-      .sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0))
-      .slice(0, 5);
-
-    // Alertas críticos de consumíveis
-    const consumableAlerts = consumables.filter(c => {
+    const projectedRevenue = proposalClients.reduce(
+      (a, c) => a + (c.projected_revenue || c.average_purchase_value || 0), 0
+    );
+    // Insumos vencendo em 7 dias
+    const insumoAlert = consumables.filter(c => {
       if (!c.next_reorder_date) return false;
-      const diff = (new Date(c.next_reorder_date) - now) / 86400000;
-      return diff <= 7 && c.status === 'ativo';
+      const d = new Date(c.next_reorder_date);
+      return d >= now && d <= new Date(now.getTime() + 7 * 86400000);
     });
 
     return {
-      hotClients, coldClients: coldClients.slice(0, 20), proposalClients,
-      comodatoOpp, noPurchase: noPurchase.slice(0, 20),
-      closedSales, monthRevenue, nextVisits, bestNextVisit,
-      overdueTasks, projectedRevenue, totalClients: clients.length,
-      rankingDia, consumableAlerts,
+      hotClients, coldClients: coldClients.slice(0, 20),
+      noPurchaseClients: noPurchaseClients.slice(0, 15),
+      proposalClients, comodatoOpps: comodatoOpps.slice(0, 10),
+      closedSales, monthRevenue, nextVisit, nextVisits,
+      overdueTasks, projectedRevenue,
+      totalClients: clients.length,
+      insumoAlert,
     };
   }, [clients, tasks, visits, sales, consumables]);
 
-  // ─── IA SOB DEMANDA ───
-  const activatePredatorMode = useCallback(async (action) => {
-    setAiMode('loading');
-    setAiResult(null);
+  const handleQuickAction = useCallback(async (action) => {
+    setGeneratingAction(action);
     try {
-      let res;
-      if (action === 'pipeline') {
-        res = await base44.functions.invoke('analyzeSalesFunnel', {
+      if (action === 'spin') {
+        const topClient = metrics.hotClients[0];
+        if (!topClient) { toast.info('Nenhum lead quente encontrado'); return; }
+        const res = await base44.functions.invoke('generateSpinSellingMessages', {
+          client_id: topClient.id,
+          client_name: topClient.first_name,
+          clinic_name: topClient.clinic_name,
+          equipment_interest: topClient.equipment_interest,
+        });
+        toast.success('SPIN gerado! Copie no WhatsApp Hub.');
+      } else if (action === 'pipeline') {
+        const res = await base44.functions.invoke('analyzeSalesFunnel', {
           clients: metrics.proposalClients.slice(0, 10).map(c => ({
             id: c.id, name: c.first_name, status: c.status,
             score: c.purchase_score, stage: c.pipeline_stage,
           }))
         });
-      } else if (action === 'priority') {
-        res = await base44.functions.invoke('aiPrioritizeTasks', {
-          clients: metrics.hotClients.slice(0, 15).map(c => ({
-            id: c.id, name: c.first_name, score: c.purchase_score,
-            last_contact: c.last_contact_date, stage: c.pipeline_stage,
-          }))
-        });
+        setAiResult(res?.data);
+        setAiMode('done');
       } else if (action === 'forecast') {
-        res = await base44.functions.invoke('generateSalesForecast', {
-          month: new Date().getMonth() + 1, year: new Date().getFullYear(),
+        const res = await base44.functions.invoke('generateSalesForecast', {
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
         });
+        setAiResult(res?.data);
+        setAiMode('done');
       }
-      setAiResult(res?.data || { message: 'Análise concluída.' });
-      setAiMode('done');
     } catch (e) {
-      toast.error('Erro na análise: ' + e.message);
-      setAiMode(null);
+      toast.error('Erro: ' + e.message);
+    } finally {
+      setGeneratingAction(null);
     }
   }, [metrics]);
 
-  const fmt = (v) => `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
-  const isOffline = !navigator.onLine;
+  const formatCurrency = (v) =>
+    `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
+
+  const isOnline = navigator.onLine;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#0a0a0a' }}>
 
       {/* ── HEADER ── */}
-      <div className="px-4 pt-5 pb-2">
-        <div className="flex items-center justify-between mb-3">
+      <div className="px-4 pt-5 pb-3">
+        <div className="flex items-center justify-between mb-1">
           <div>
-            <h1 className="text-xl font-black text-white">⚡ NR22888</h1>
-            <p className="text-[10px] text-orange-600 uppercase tracking-widest">Sales Command Center • Seamaty Brasil</p>
+            <h1 className="text-xl font-black text-white">⚡ NR22888 Command</h1>
+            <p className="text-[10px] text-orange-600 font-bold uppercase tracking-widest">
+              Seamaty Brasil • Sniper Mode
+            </p>
           </div>
           <div className="flex items-center gap-2">
-            {isOffline && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-yellow-400"
-                style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.3)' }}>
-                <WifiOff className="w-3 h-3" />
-                OFFLINE
-              </div>
-            )}
-            <Link to="/NotificationSettings">
-              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}>
-                <Bell className="w-4 h-4 text-orange-400" />
-                {pendingMsgs.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] flex items-center justify-center font-black text-white">
-                    {pendingMsgs.length}
+            {/* Status offline */}
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full"
+              style={{
+                background: isOnline ? 'rgba(0,255,136,0.1)' : 'rgba(255,68,68,0.1)',
+                border: `1px solid ${isOnline ? 'rgba(0,255,136,0.3)' : 'rgba(255,68,68,0.3)'}`,
+              }}>
+              <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+              <span className="text-[9px] font-bold" style={{ color: isOnline ? '#00ff88' : '#ff4444' }}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            {/* Msgs pendentes */}
+            {pendingMessages.length > 0 && (
+              <Link to="/WhatsAppHub">
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                    style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
+                    <MessageSquare className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center font-black text-white">
+                    {pendingMessages.length}
                   </span>
-                )}
-              </div>
-            </Link>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* ── ALERTAS CRÍTICOS TOPO ── */}
-        {(metrics.overdueTasks.length > 0 || metrics.consumableAlerts.length > 0 || pendingMsgs.length > 0) && (
-          <div className="rounded-xl p-3 mb-3 flex flex-wrap gap-2" style={{ background: 'rgba(255,68,68,0.08)', border: '1px solid rgba(255,68,68,0.25)' }}>
-            <span className="text-[10px] font-black text-red-400 uppercase tracking-widest w-full">🚨 Alertas Críticos</span>
-            {metrics.overdueTasks.length > 0 && (
-              <Link to="/TasksUnified">
-                <span className="text-[11px] px-2 py-1 rounded-lg font-bold text-red-300" style={{ background: 'rgba(255,68,68,0.15)' }}>
-                  ⚠️ {metrics.overdueTasks.length} tarefas em atraso
-                </span>
-              </Link>
-            )}
-            {pendingMsgs.length > 0 && (
-              <Link to="/WhatsAppHub">
-                <span className="text-[11px] px-2 py-1 rounded-lg font-bold text-orange-300" style={{ background: 'rgba(255,107,0,0.15)' }}>
-                  💬 {pendingMsgs.length} msgs aguardando aprovação
-                </span>
-              </Link>
-            )}
-            {metrics.consumableAlerts.length > 0 && (
-              <Link to="/ModoInsumos">
-                <span className="text-[11px] px-2 py-1 rounded-lg font-bold text-yellow-300" style={{ background: 'rgba(234,179,8,0.15)' }}>
-                  📦 {metrics.consumableAlerts.length} insumos críticos
-                </span>
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* ── KPI CARDS ── */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
+      {/* ── KPI CARDS ── */}
+      <div className="px-4">
+        <div className="grid grid-cols-2 gap-2 mb-4">
           {[
-            { label: 'Receita Mês', val: fmt(metrics.monthRevenue), icon: DollarSign, color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
-            { label: 'Previsão', val: fmt(metrics.projectedRevenue), icon: TrendingUp, color: '#ff9500', bg: 'rgba(255,149,0,0.08)' },
+            { label: 'Receita Mês', val: formatCurrency(metrics.monthRevenue), icon: DollarSign, color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
+            { label: 'Previsão', val: formatCurrency(metrics.projectedRevenue), icon: TrendingUp, color: '#ff9500', bg: 'rgba(255,149,0,0.08)' },
             { label: 'Leads Quentes', val: metrics.hotClients.length, icon: Flame, color: '#ff4444', bg: 'rgba(255,68,68,0.08)' },
             { label: 'Em Proposta', val: metrics.proposalClients.length, icon: Star, color: '#7c3aed', bg: 'rgba(124,58,237,0.08)' },
           ].map(({ label, val, icon: Icon, color, bg }) => (
             <div key={label} className="rounded-2xl p-3" style={{ background: bg, border: `1px solid ${color}33` }}>
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-[10px] font-bold" style={{ color: color + 'cc' }}>{label}</span>
+                <span className="text-xs font-bold" style={{ color: color + 'cc' }}>{label}</span>
               </div>
               <p className="text-lg font-black text-white">{val}</p>
             </div>
           ))}
         </div>
 
-        {/* ── PRÓXIMA MELHOR VISITA ── */}
-        {metrics.bestNextVisit && (
-          <Link to="/VisitManager">
-            <div className="rounded-xl p-3 mb-3 flex items-center justify-between"
-              style={{ background: 'rgba(0,191,255,0.06)', border: '1px solid rgba(0,191,255,0.2)' }}>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-400 shrink-0" />
-                <div>
-                  <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">Próxima Visita</p>
-                  <p className="text-sm font-black text-white">{metrics.bestNextVisit.client_name}</p>
-                  <p className="text-[11px] text-blue-400">
-                    {new Date(metrics.bestNextVisit.scheduled_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às{' '}
-                    {new Date(metrics.bestNextVisit.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+        {/* ── ALERTAS CRÍTICOS ── */}
+        {(metrics.overdueTasks.length > 0 || metrics.insumoAlert.length > 0 || pendingMessages.length > 0) && (
+          <div className="rounded-2xl p-3 mb-3" style={{ background: '#1a0500', border: '1px solid rgba(255,68,68,0.4)' }}>
+            <p className="text-xs font-black text-red-400 mb-2">🚨 Alertas Críticos</p>
+            {metrics.overdueTasks.length > 0 && (
+              <Link to="/TasksUnified">
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-xs text-red-300">⚠️ {metrics.overdueTasks.length} tarefas em atraso</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-red-600" />
                 </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-blue-600" />
-            </div>
-          </Link>
+              </Link>
+            )}
+            {metrics.insumoAlert.length > 0 && (
+              <Link to="/ModoInsumos">
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-xs text-orange-300">📦 {metrics.insumoAlert.length} insumos vencendo em 7 dias</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-orange-600" />
+                </div>
+              </Link>
+            )}
+            {pendingMessages.length > 0 && (
+              <Link to="/WhatsAppHub">
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-xs text-yellow-300">💬 {pendingMessages.length} msgs aguardando aprovação</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-yellow-600" />
+                </div>
+              </Link>
+            )}
+          </div>
         )}
 
-        {/* ── NAV TABS ── */}
-        <div className="flex gap-1 rounded-xl p-1" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.1)' }}>
+        {/* ── PRÓXIMA MELHOR VISITA ── */}
+        {metrics.nextVisit && (
+          <div className="rounded-2xl p-3 mb-3" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.25)' }}>
+            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5">📍 Próxima Visita</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-black text-white">{metrics.nextVisit.client_name}</p>
+                {metrics.nextVisit.location && (
+                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-2.5 h-2.5" />{metrics.nextVisit.location}
+                  </p>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-black text-blue-400">
+                  {new Date(metrics.nextVisit.scheduled_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  {new Date(metrics.nextVisit.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+            <Link to="/SmartRouteOptimizer">
+              <button className="mt-2 w-full py-1.5 rounded-xl text-xs font-black text-blue-300"
+                style={{ background: 'rgba(0,191,255,0.08)', border: '1px solid rgba(0,191,255,0.2)' }}>
+                🗺️ Abrir Rota Otimizada
+              </button>
+            </Link>
+          </div>
+        )}
+
+        {/* ── AÇÕES RÁPIDAS ELITE ── */}
+        <div className="rounded-2xl p-3 mb-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+          <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">⚡ Ações Rápidas</p>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { to: '/GenerateWhatsAppIntegrated', label: '💬 Gerar WhatsApp', color: '#25d366', bg: 'rgba(37,211,102,0.08)' },
+              { to: '/ProposalGenerator', label: '📄 Gerar Proposta', color: '#ff9500', bg: 'rgba(255,149,0,0.08)' },
+              { to: '/SmartRouteOptimizer', label: '🗺️ Abrir Rota', color: '#00bfff', bg: 'rgba(0,191,255,0.08)' },
+              { to: '/ModoInvestigativoSupremo', label: '🔍 Investigar Clínica', color: '#a855f7', bg: 'rgba(168,85,247,0.08)' },
+              { to: '/ModoCacaComercial', label: '🎯 Modo Caça', color: '#ff4444', bg: 'rgba(255,68,68,0.08)' },
+              { to: '/ModoInsumos', label: '📦 Modo Insumos', color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
+            ].map(({ to, label, color, bg }) => (
+              <Link key={to} to={to}>
+                <div className="py-2.5 px-3 rounded-xl flex items-center justify-between"
+                  style={{ background: bg, border: `1px solid ${color}33` }}>
+                  <span className="text-xs font-black" style={{ color }}>{label}</span>
+                  <ArrowRight className="w-3 h-3" style={{ color }} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ── TABS ── */}
+        <div className="flex gap-1 rounded-xl p-1 mb-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.1)' }}>
           {[
             { key: 'overview', label: '📊 Geral' },
-            { key: 'ranking', label: '🏆 Ranking' },
-            { key: 'comodato', label: '🔬 Comodato' },
+            { key: 'hot', label: '🔥 Quentes' },
+            { key: 'comodato', label: '🤝 Comodato' },
             { key: 'agenda', label: '📅 Agenda' },
           ].map(t => (
             <button key={t.key} onClick={() => setActiveSection(t.key)}
-              className="flex-1 py-2 rounded-lg text-[11px] font-black transition-all"
-              style={activeSection === t.key ? { background: '#ff6b00', color: 'white' } : { color: '#555' }}>
+              className="flex-1 py-2 rounded-lg text-xs font-black transition-all"
+              style={activeSection === t.key
+                ? { background: '#ff6b00', color: 'white' }
+                : { color: '#555' }}>
               {t.label}
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="px-4 space-y-3">
-
-        {/* ── AÇÕES RÁPIDAS ── */}
-        <div className="grid grid-cols-5 gap-1.5">
-          {QUICK_ACTIONS.map(({ to, label, color }) => (
-            <Link key={to} to={to}>
-              <div className="rounded-xl p-2 text-center" style={{ background: '#141414', border: `1px solid ${color}22` }}>
-                <p className="text-[10px] font-black leading-tight" style={{ color }}>{label}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
 
         {/* ── MODO PREDADOR IA ── */}
-        <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.25)' }}>
-          <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-3">⚡ IA Sob Demanda</p>
+        <div className="rounded-2xl p-3 mb-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
+          <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">🧠 IA Sob Demanda</p>
           <div className="grid grid-cols-3 gap-2">
             {[
               { key: 'pipeline', label: '📊 Pipeline', color: '#7c3aed' },
-              { key: 'priority', label: '🎯 Priorizar', color: '#ff6b00' },
+              { key: 'spin', label: '🎯 Gerar SPIN', color: '#ff6b00' },
               { key: 'forecast', label: '📈 Previsão', color: '#00bfff' },
             ].map(({ key, label, color }) => (
-              <button key={key} onClick={() => activatePredatorMode(key)}
-                disabled={aiMode === 'loading'}
+              <button key={key}
+                onClick={() => handleQuickAction(key)}
+                disabled={generatingAction !== null}
                 className="py-2.5 px-2 rounded-xl text-[11px] font-black transition-all disabled:opacity-40"
                 style={{ background: `${color}15`, color, border: `1px solid ${color}33` }}>
-                {aiMode === 'loading' ? '⏳' : label}
+                {generatingAction === key ? <RefreshCw className="w-3 h-3 animate-spin mx-auto" /> : label}
               </button>
             ))}
           </div>
-          {aiMode === 'loading' && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Analisando...
-            </div>
-          )}
           {aiMode === 'done' && aiResult && (
             <div className="mt-3 rounded-xl p-3" style={{ background: '#1a1a1a', border: '1px solid rgba(0,255,136,0.2)' }}>
-              <p className="text-xs font-black text-green-400 mb-1">✅ Resultado:</p>
-              <pre className="text-[10px] text-slate-400 whitespace-pre-wrap max-h-28 overflow-y-auto">
+              <p className="text-xs font-black text-green-400 mb-1">✅ Resultado da IA:</p>
+              <pre className="text-[10px] text-slate-400 whitespace-pre-wrap max-h-32 overflow-y-auto">
                 {typeof aiResult === 'string' ? aiResult : JSON.stringify(aiResult, null, 2)}
               </pre>
               <button onClick={() => { setAiMode(null); setAiResult(null); }}
@@ -329,14 +356,39 @@ export default function SalesCommandCenter() {
           )}
         </div>
 
-        {/* ══════ SECTIONS ══════ */}
-
         {/* ── OVERVIEW ── */}
         {activeSection === 'overview' && (
           <div className="space-y-3">
-            {/* Funil */}
+            {/* Ranking do Dia */}
+            <Suspense fallback={<HeavyFallback />}>
+              <RankingDoDia compact />
+            </Suspense>
+
+            {/* Clientes sem compra */}
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
-              <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-3">🔄 Funil de Vendas</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-black text-orange-400">🛒 Clientes sem Compra +30d</p>
+                <span className="text-[10px] text-orange-600 font-bold">{metrics.noPurchaseClients.length}</span>
+              </div>
+              {metrics.noPurchaseClients.slice(0, 5).map(c => (
+                <Link key={c.id} to={`/ClientProfile?id=${c.id}`}>
+                  <div className="flex items-center justify-between py-1.5 border-b border-slate-900 last:border-0">
+                    <div>
+                      <p className="text-xs font-bold text-white">{c.first_name}</p>
+                      <p className="text-[10px] text-slate-500">{c.clinic_name}</p>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-orange-700" />
+                  </div>
+                </Link>
+              ))}
+              {metrics.noPurchaseClients.length === 0 && (
+                <p className="text-xs text-slate-600">Todos os clientes compraram recentemente! 🎉</p>
+              )}
+            </div>
+
+            {/* Funil rápido */}
+            <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
+              <p className="text-xs font-black text-orange-400 mb-3">🔄 Funil de Vendas</p>
               {[
                 { stage: 'lead', label: 'Leads', color: '#64748b' },
                 { stage: 'qualificado', label: 'Qualificados', color: '#3b82f6' },
@@ -350,173 +402,114 @@ export default function SalesCommandCenter() {
                   <div key={stage} className="flex items-center gap-3 mb-2">
                     <span className="text-[10px] w-20 shrink-0" style={{ color }}>{label}</span>
                     <div className="flex-1 h-1.5 rounded-full" style={{ background: '#1a1a1a' }}>
-                      <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: color }} />
+                      <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
                     </div>
-                    <span className="text-[10px] w-5 text-right font-bold" style={{ color }}>{count}</span>
+                    <span className="text-[10px] w-6 text-right" style={{ color }}>{count}</span>
                   </div>
                 );
               })}
             </div>
 
-            {/* Clientes sem compra +30d */}
-            <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(234,179,8,0.2)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black text-yellow-400 uppercase tracking-widest">
-                  ⏰ Sem Compra +30d ({metrics.noPurchase.length})
-                </p>
-                <Link to="/ActiveProspecting">
-                  <span className="text-[10px] text-yellow-600 underline">Ver todos</span>
-                </Link>
-              </div>
-              {metrics.noPurchase.slice(0, 5).map(c => (
-                <Link key={c.id} to={`/ClientProfile?id=${c.id}`}>
-                  <div className="flex items-center justify-between py-1.5 border-b border-slate-900 last:border-0">
-                    <div>
-                      <p className="text-xs font-bold text-white">{c.first_name || c.full_name}</p>
-                      {c.clinic_name && <p className="text-[10px] text-slate-500">{c.clinic_name}</p>}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {c.phone && (
-                        <a href={`https://wa.me/${c.phone.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}>
-                          <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                            style={{ background: 'rgba(37,211,102,0.1)' }}>
-                            <MessageSquare className="w-3 h-3 text-green-400" />
-                          </div>
-                        </a>
-                      )}
-                      <ChevronRight className="w-3 h-3 text-slate-700" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-              {metrics.noPurchase.length === 0 && (
-                <p className="text-xs text-slate-600 py-2">Todos com compra recente 🎉</p>
-              )}
-            </div>
-
-            {/* Gerar SPIN / WhatsApp / Proposta / Rota */}
+            {/* Links principais */}
             <div className="grid grid-cols-2 gap-2">
               {[
-                { to: '/GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN', color: '#ef4444' },
-                { to: '/WhatsAppHub', label: '💬 Gerar WhatsApp', color: '#25d366' },
-                { to: '/ProposalGenerator', label: '📄 Gerar Proposta', color: '#f59e0b' },
-                { to: '/SmartRouteOptimizer', label: '🗺️ Abrir Rota', color: '#00bfff' },
+                { to: '/Clients', label: '👥 Clientes', color: '#4f8ef7' },
+                { to: '/Leads', label: '🎯 Leads', color: '#00c853' },
+                { to: '/WhatsAppHub', label: '💬 WhatsApp', color: '#25d366' },
+                { to: '/ScheduledAgenda', label: '📅 Agenda', color: '#ff9500' },
+                { to: '/EquipmentCatalog', label: '🔬 Catálogo', color: '#00bfff' },
+                { to: '/GlobalSearch', label: '🔍 Busca Global', color: '#a855f7' },
               ].map(({ to, label, color }) => (
                 <Link key={to} to={to}>
-                  <div className="rounded-xl p-3 flex items-center justify-between"
+                  <div className="rounded-xl p-2.5 flex items-center justify-between"
                     style={{ background: '#141414', border: `1px solid ${color}22` }}>
                     <span className="text-xs font-black" style={{ color }}>{label}</span>
-                    <ArrowRight className="w-3.5 h-3.5" style={{ color }} />
+                    <ArrowRight className="w-3 h-3" style={{ color }} />
                   </div>
                 </Link>
               ))}
             </div>
-
-            {/* Status Offline */}
-            <Link to="/OfflineMode">
-              <div className="rounded-xl p-3 flex items-center justify-between"
-                style={{ background: isOffline ? 'rgba(234,179,8,0.08)' : '#111', border: `1px solid ${isOffline ? 'rgba(234,179,8,0.4)' : 'rgba(255,255,255,0.05)'}` }}>
-                <div className="flex items-center gap-2">
-                  <WifiOff className={`w-4 h-4 ${isOffline ? 'text-yellow-400' : 'text-slate-600'}`} />
-                  <div>
-                    <p className={`text-xs font-black ${isOffline ? 'text-yellow-400' : 'text-slate-500'}`}>
-                      {isOffline ? '⚠️ Modo Offline Ativo' : '✅ Online — Modo Offline disponível'}
-                    </p>
-                    <p className="text-[10px] text-slate-600">Toque para gerenciar sincronização</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-700" />
-              </div>
-            </Link>
           </div>
         )}
 
-        {/* ── RANKING DO DIA ── */}
-        {activeSection === 'ranking' && (
+        {/* ── QUENTES ── */}
+        {activeSection === 'hot' && (
           <div className="space-y-2">
-            <p className="text-[10px] text-slate-600 uppercase tracking-widest">Top clientes por score de compra</p>
-            {metrics.rankingDia.map((c, i) => (
-              <Link key={c.id} to={`/ClientProfile?id=${c.id}`}>
-                <div className="rounded-xl p-3 flex items-center gap-3"
-                  style={{ background: '#141414', border: i === 0 ? '1px solid rgba(255,215,0,0.4)' : '1px solid rgba(255,107,0,0.12)' }}>
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center font-black text-sm shrink-0"
-                    style={{ background: i === 0 ? 'rgba(255,215,0,0.2)' : 'rgba(255,107,0,0.1)', color: i === 0 ? '#ffd700' : '#ff9500' }}>
-                    {i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-white truncate">{c.first_name} {c.full_name?.split(' ').slice(1).join(' ')}</p>
-                    {c.clinic_name && <p className="text-[10px] text-slate-500 truncate">{c.clinic_name}</p>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-black" style={{ color: '#ff4444' }}>{c.purchase_score || 0}</p>
-                    <p className="text-[10px] text-slate-600">score</p>
-                  </div>
-                  {c.phone && (
-                    <a href={`https://wa.me/${c.phone.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}>
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)' }}>
-                        <MessageSquare className="w-3.5 h-3.5 text-green-400" />
-                      </div>
-                    </a>
-                  )}
-                </div>
-              </Link>
-            ))}
-            {metrics.rankingDia.length === 0 && (
-              <div className="text-center py-8 text-slate-600 text-sm">Sem score calculado. Atualize os clientes.</div>
-            )}
-            <Link to="/RankingAndConsumables">
-              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,107,0,0.05)', border: '1px solid rgba(255,107,0,0.2)' }}>
-                <span className="text-xs font-black text-orange-400">🏆 Ver Ranking Completo</span>
-              </div>
-            </Link>
-          </div>
-        )}
-
-        {/* ── OPORTUNIDADES DE COMODATO ── */}
-        {activeSection === 'comodato' && (
-          <div className="space-y-2">
-            <div className="rounded-xl p-3 mb-2" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
-              <p className="text-xs text-cyan-400 font-black mb-1">🔬 O que é Comodato?</p>
-              <p className="text-[11px] text-slate-500">
-                Cliente recebe equipamento Seamaty gratuitamente e paga apenas pelos insumos/reagentes mensalmente.
-                Ideal para clínicas sem budget para compra direta.
-              </p>
-            </div>
-            <p className="text-[10px] text-slate-600 uppercase tracking-widest">
-              {metrics.comodatoOpp.length} oportunidades identificadas
-            </p>
-            {metrics.comodatoOpp.slice(0, 15).map(c => (
+            <p className="text-xs text-slate-600 mb-2">{metrics.hotClients.length} leads quentes • score ≥ 70</p>
+            {metrics.hotClients.slice(0, 15).map(c => (
               <Link key={c.id} to={`/ClientProfile?id=${c.id}`}>
                 <div className="rounded-xl p-3 flex items-center justify-between"
-                  style={{ background: '#141414', border: '1px solid rgba(6,182,212,0.2)' }}>
+                  style={{ background: '#141414', border: '1px solid rgba(255,68,68,0.2)' }}>
                   <div>
                     <p className="text-xs font-black text-white">{c.first_name} {c.full_name?.split(' ').slice(1).join(' ')}</p>
                     {c.clinic_name && <p className="text-[10px] text-slate-500">{c.clinic_name}</p>}
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full mt-1 inline-block"
-                      style={{ background: 'rgba(6,182,212,0.1)', color: '#06b6d4' }}>
-                      {c.client_type?.replace(/_/g, ' ') || 'potencial'}
-                    </span>
+                    <div className="flex gap-2 mt-1">
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-full font-bold"
+                        style={{ background: 'rgba(255,68,68,0.15)', color: '#ff4444' }}>
+                        Score {c.purchase_score || 0}
+                      </span>
+                      {c.pipeline_stage && (
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,107,0,0.1)', color: '#ff9500' }}>
+                          {c.pipeline_stage}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-2">
                     {c.phone && (
-                      <a href={`https://wa.me/${c.phone.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
+                      <a href={`https://wa.me/${c.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}>
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                          style={{ background: 'rgba(37,211,102,0.1)' }}>
+                          style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)' }}>
                           <MessageSquare className="w-3.5 h-3.5 text-green-400" />
                         </div>
                       </a>
                     )}
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-700" />
+                    <ChevronRight className="w-3.5 h-3.5 text-orange-800" />
                   </div>
                 </div>
               </Link>
             ))}
-            {metrics.comodatoOpp.length === 0 && (
-              <div className="text-center py-8 text-slate-600 text-sm">Nenhuma oportunidade de comodato identificada.</div>
+            {metrics.hotClients.length === 0 && (
+              <div className="text-center py-8 text-slate-600 text-sm">Nenhum lead quente no momento.</div>
+            )}
+          </div>
+        )}
+
+        {/* ── COMODATO ── */}
+        {activeSection === 'comodato' && (
+          <div className="space-y-2">
+            <div className="rounded-2xl p-3 mb-2" style={{ background: '#0a1a00', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <p className="text-xs font-black text-green-400 mb-1">🤝 Oportunidades de Comodato</p>
+              <p className="text-[11px] text-slate-500">
+                Clientes com equipamentos Seamaty que podem expandir para comodato estratégico.
+              </p>
+            </div>
+            {metrics.comodatoOpps.map(c => (
+              <Link key={c.id} to={`/ClientProfile?id=${c.id}`}>
+                <div className="rounded-xl p-3" style={{ background: '#141414', border: '1px solid rgba(0,255,136,0.15)' }}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-black text-white">{c.first_name}</p>
+                      <p className="text-[10px] text-slate-500">{c.clinic_name}</p>
+                      <p className="text-[10px] text-green-400 mt-0.5">📦 {c.equipment_sold}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-full"
+                        style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>
+                        {c.status}
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-green-700 mt-1 ml-auto" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            {metrics.comodatoOpps.length === 0 && (
+              <div className="text-center py-8 text-slate-600 text-sm">
+                Nenhuma oportunidade de comodato identificada.
+              </div>
             )}
           </div>
         )}
@@ -525,12 +518,7 @@ export default function SalesCommandCenter() {
         {activeSection === 'agenda' && (
           <div className="space-y-3">
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.2)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">📅 Próximas Visitas</p>
-                <Link to="/VisitManager">
-                  <span className="text-[10px] text-blue-600 underline">+ Agendar</span>
-                </Link>
-              </div>
+              <p className="text-xs font-black text-blue-400 mb-2">📅 Próximas Visitas</p>
               {metrics.nextVisits.length === 0 && (
                 <p className="text-xs text-slate-600">Nenhuma visita agendada.</p>
               )}
@@ -538,7 +526,11 @@ export default function SalesCommandCenter() {
                 <div key={v.id} className="flex items-center justify-between py-2 border-b border-slate-900 last:border-0">
                   <div>
                     <p className="text-xs font-bold text-white">{v.client_name}</p>
-                    {v.location && <p className="text-[10px] text-slate-500 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{v.location}</p>}
+                    {v.location && (
+                      <p className="text-[10px] text-slate-500 flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5" />{v.location}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-bold text-blue-400">
@@ -554,32 +546,87 @@ export default function SalesCommandCenter() {
 
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
-                  ✅ Tarefas ({tasks.length})
-                </p>
-                <Link to="/TasksUnified">
-                  <span className="text-[10px] text-orange-600 underline">Ver todas</span>
-                </Link>
+                <p className="text-xs font-black text-orange-400">✅ Tarefas Pendentes</p>
+                <span className="text-[10px] text-orange-600 font-bold">{tasks.length}</span>
               </div>
-              {tasks.slice(0, 6).map(t => (
+              {tasks.slice(0, 8).map(t => (
                 <div key={t.id} className="flex items-center gap-2 py-1.5 border-b border-slate-900 last:border-0">
                   <Clock className={`w-3 h-3 shrink-0 ${t.due_date && new Date(t.due_date) < new Date() ? 'text-red-500' : 'text-orange-600'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-white truncate">{t.title}</p>
-                    {t.client_name && <p className="text-[11px] text-slate-500 truncate">{t.client_name}</p>}
+                    {t.client_name && <p className="text-[11px] text-slate-500">{t.client_name}</p>}
                   </div>
                   {t.due_date && (
-                    <span className="text-[10px] text-slate-500 shrink-0">
+                    <span className="text-[11px] text-slate-500 shrink-0">
                       {new Date(t.due_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                     </span>
                   )}
                 </div>
               ))}
-              {tasks.length === 0 && <p className="text-xs text-slate-600">Sem tarefas pendentes 🎉</p>}
+              {tasks.length === 0 && <p className="text-xs text-slate-600">Sem tarefas pendentes. 🎉</p>}
+              {tasks.length > 8 && (
+                <Link to="/TasksUnified">
+                  <p className="text-xs text-orange-500 mt-2 underline">Ver todas ({tasks.length})</p>
+                </Link>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Link to="/VisitRouteManager">
+                <div className="rounded-xl p-3 flex items-center gap-2"
+                  style={{ background: '#141414', border: '1px solid rgba(0,191,255,0.2)' }}>
+                  <Route className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs font-black text-blue-400">Gestor de Visitas</span>
+                </div>
+              </Link>
+              <Link to="/ScheduledAgenda">
+                <div className="rounded-xl p-3 flex items-center gap-2"
+                  style={{ background: '#141414', border: '1px solid rgba(255,107,0,0.2)' }}>
+                  <Calendar className="w-4 h-4 text-orange-400" />
+                  <span className="text-xs font-black text-orange-400">Agenda Completa</span>
+                </div>
+              </Link>
             </div>
           </div>
         )}
+      </div>
 
+      {/* ── BOTTOM STATUS BAR ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 py-2"
+        style={{ background: 'rgba(10,10,10,0.98)', borderTop: '1px solid rgba(255,107,0,0.1)' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/OfflineMode">
+              <div className="flex items-center gap-1">
+                <WifiOff className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] text-slate-500">Offline</span>
+              </div>
+            </Link>
+            <Link to="/GlobalSearch">
+              <div className="flex items-center gap-1">
+                <Search className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] text-slate-500">Busca</span>
+              </div>
+            </Link>
+          </div>
+          <p className="text-[9px] text-slate-700 font-bold">NR22888 v2.0 • {new Date().toLocaleDateString('pt-BR')}</p>
+          <div className="flex items-center gap-3">
+            <Link to="/Clients">
+              <div className="flex items-center gap-1">
+                <Users className="w-3.5 h-3.5 text-orange-600" />
+                <span className="text-[10px] text-orange-700">{metrics.totalClients}</span>
+              </div>
+            </Link>
+            <Link to="/WhatsAppHub">
+              <div className="flex items-center gap-1">
+                <MessageSquare className="w-3.5 h-3.5 text-green-600" />
+                {pendingMessages.length > 0 && (
+                  <span className="text-[10px] text-red-400 font-bold">{pendingMessages.length}</span>
+                )}
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
