@@ -9,7 +9,6 @@ import {
   Search, WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
-import BestOpportunityCard from '@/components/BestOpportunityCard';
 import NearbyOpportunitiesModal from '@/components/NearbyOpportunitiesModal';
 
 const STALE_5MIN = 5 * 60 * 1000;
@@ -219,11 +218,6 @@ export default function SalesCommandCenter() {
         </div>
       </div>
 
-      {/* ── MELHOR OPORTUNIDADE ── */}
-      <div className="px-4 pt-2">
-        <BestOpportunityCard />
-      </div>
-
       {/* ── KPI CARDS ── */}
       <div className="px-4">
         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -276,8 +270,9 @@ export default function SalesCommandCenter() {
 
         {/* ── MELHOR OPORTUNIDADE DO DIA ── */}
         {bestOpp && (
-          <div className="rounded-2xl p-3 mb-3" style={{ background: 'rgba(255,107,0,0.06)', border: '2px solid rgba(255,107,0,0.4)' }}>
-            <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">🎯 MELHOR OPORTUNIDADE DE HOJE</p>
+          <div className="px-4 mb-3">
+            <div className="rounded-2xl p-3" style={{ background: 'rgba(255,107,0,0.06)', border: '2px solid rgba(255,107,0,0.4)' }}>
+              <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">🎯 MELHOR OPORTUNIDADE DE HOJE</p>
             <div className="space-y-2 mb-3">
               <div className="flex items-start justify-between">
                 <div>
@@ -318,13 +313,14 @@ export default function SalesCommandCenter() {
                 <div className="py-2 rounded-xl text-xs font-black text-purple-400 text-center"
                   style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
                   ✅ Visita
-                </div>
-              </Link>
-            </div>
-          </div>
-        )}
+                  </div>
+                  </Link>
+                  </div>
+                  </div>
+                  </div>
+                  )}
 
-        {/* ── PRÓXIMA MELHOR VISITA ── */}
+                  {/* ── PRÓXIMA MELHOR VISITA ── */}
         {metrics.nextVisit && (
           <div className="rounded-2xl p-3 mb-3" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.25)' }}>
             <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5">📍 Próxima Visita</p>
