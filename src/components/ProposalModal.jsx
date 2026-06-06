@@ -42,18 +42,27 @@ export default function ProposalModal({ client, open, onOpenChange }) {
   const parcela = calcParcela(equip.preco);
   const roi = Math.ceil(parcela / 120); // ~R$120 por exame
   const hoje = new Date();
+  const horaFormatada = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const dataHoraFormatada = `${hoje.toLocaleDateString('pt-BR')} às ${horaFormatada}`;
+  
   const validade = new Date(hoje);
   validade.setDate(validade.getDate() + 30);
+  const validadeFormatada = validade.toLocaleDateString('pt-BR');
+  
   const primeiroVenc = new Date(hoje);
   primeiroVenc.setDate(primeiroVenc.getDate() + CARENCIA_DIAS);
+  const primeiroVencFormatado = primeiroVenc.toLocaleDateString('pt-BR');
 
-  const proposta = `━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const proposta = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 PROPOSTA COMERCIAL SEAMATY BRASIL
-━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📅 Emitida em: ${dataHoraFormatada}
 
 👤 Cliente: ${client.first_name}${client.clinic_name ? `\n🏥 Clínica: ${client.clinic_name}` : ''}${client.city ? `\n📍 Cidade: ${client.city}` : ''}
 
 🔬 EQUIPAMENTO: ${equip.nome}
+   ID: ${equip.id}
 
 💰 CONDIÇÕES DE PAGAMENTO:
 
@@ -64,25 +73,26 @@ export default function ProposalModal({ client, open, onOpenChange }) {
 • Financiado (Santander):
   ${PARCELAS}x de ${formatCurrency(parcela)}
   Taxa: 2,282% a.m.
-  Carência: ${CARENCIA_DIAS} dias para o 1º vencimento
-  1º vencimento: ${primeiroVenc.toLocaleDateString('pt-BR')}
+  Carência: ${CARENCIA_DIAS} dias
+  1º Vencimento: ${primeiroVencFormatado}
 
 📊 ROI ESTIMADO:
   Apenas ${roi} exames/mês cobrem a parcela!
-  Economia mensal vs laboratório: R$ 2.000 a R$ 8.000
+  Economia mensal: R$ 2.000 a R$ 8.000
 
 ✅ DIFERENCIAIS SEAMATY:
-• 25 meses de garantia (mercado: 12 meses)
-• Manutenção vitalícia inclusa
-• Bonificação mensal em insumos
-• ISO 13485:2016
+  • 25 meses de garantia (vs 12 do mercado)
+  • Manutenção vitalícia
+  • Bonificação mensal em insumos
+  • ISO 13485:2016
 
-📅 Validade desta proposta: ${validade.toLocaleDateString('pt-BR')}
+⏰ Validade: ${validadeFormatada}
 
-📞 Nathan Rosa – Consultor Técnico Seamaty Brasil
+📞 Nathan Rosa
 (14) 99167-6428
+Consultor Técnico Seamaty Brasil
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
   const copiar = () => {
     navigator.clipboard.writeText(proposta);

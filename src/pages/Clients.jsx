@@ -30,7 +30,9 @@ import {
   Edit2,
   FileText,
   Eye,
-  Download
+  Download,
+  Calendar,
+  DollarSign
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import ProposalModal from '@/components/ProposalModal';
@@ -80,6 +82,9 @@ export default function Clients() {
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [equipmentFilter, setEquipmentFilter] = useState('all');
   const [proposalClient, setProposalClient] = useState(null);
+  const [quickSaleClient, setQuickSaleClient] = useState(null);
+  const [selectedEquipment, setSelectedEquipment] = useState('');
+  const [saleValue, setSaleValue] = useState('');
 
   const { clients, isOffline, isLoading: offlineLoading, isCached, cacheAge } = useOfflineClients();
   const isLoading = offlineLoading;
@@ -268,6 +273,81 @@ export default function Clients() {
   const handleQuickEdit = (client) => {
     setEditingClientId(client.id);
     setEditingName(client.first_name || '');
+  };
+
+  const handleQuickFollowUp = async (client) => {
+    try {
+      const today = new Date();
+      const followUpDate = new Date(today);
+      followUpDate.setDate(today.getDate() + 3);
+      const formattedDate = followUpDate.toISOString().split('T')[0];
+
+      await base44.entities.Task.create({
+        client_id: client.id,
+        client_name: client.first_name || client.full_name,
+        title: `📞 Follow-up: ${client.first_name}`,
+        description: 'Follow-up automático de relacionamento',
+        due_date: formattedDate,
+        status: 'pendente',
+        priority: 'media',
+        type: 'follow_up'
+      });
+
+      toast.success(`📅 Follow-up agendado para ${followUpDate.toLocaleDateString('pt-BR')}!`);
+    } catch (error) {
+      toast.error('Erro ao agendar follow-up: ' + error.message);
+    }
+  };
+
+  const handleOpenQuickSale = (client) => {
+    setQuickSaleClient(client);
+    setSelectedEquipment(client.equipment_interest || 'SMT-120VP');
+    
+    const defaultPrices = {
+      'SMT-120VP': 14900,
+      'VG2': 18900,
+      'VBC-50A': 12900,
+      'QT3': 8900,
+      'VG1': 11900,
+      'Vi1': 9500,
+      'VQ1': 24900
+    };
+    setSaleValue((defaultPrices[client.equipment_interest] || 15000).toString());
+  };
+
+  const handleConfirmQuickSale = async () => {
+    if (!quickSaleClient || !selectedEquipment || !saleValue) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      await base44.entities.Sale.create({
+        client_id: quickSaleClient.id,
+        client_name: quickSaleClient.first_name || quickSaleClient.full_name,
+        equipment_name: selectedEquipment,
+        sale_date: today,
+        sale_value: Number(saleValue),
+        status: 'fechada',
+        payment_terms: 'À vista / Boleto',
+        notes: 'Venda rápida de 1-clique'
+      });
+
+      await base44.entities.Client.update(quickSaleClient.id, {
+        pipeline_stage: 'fechado',
+        sale_closed: true,
+        equipment_sold: selectedEquipment,
+        status: 'quente'
+      });
+
+      toast.success(`🤝 Venda de ${selectedEquipment} registrada!`);
+      setQuickSaleClient(null);
+      setSelectedEquipment('');
+      setSaleValue('');
+    } catch (error) {
+      toast.error('Erro ao registrar venda: ' + error.message);
+    }
   };
 
   const saveQuickEdit = async () => {
@@ -911,10 +991,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                         ) : (
                           <>
                             <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                            <div className="flex gap-2 mt-2">
-                              <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="flex-1 h-9"><Edit2 className="w-3 h-3 mr-1" />Editar</Button>
-                              <Button size="sm" onClick={() => setProposalClient(client)} className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"><FileText className="w-3 h-3 mr-1" />Proposta</Button>
-                              <Button size="sm" variant="outline" onClick={() => exportClientDocument(client)} className="h-9"><Download className="w-3 h-3" /></Button>
+                            <div className="grid grid-cols-4 gap-1.5 mt-2">
+                              <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="h-9 text-xs"><Edit2 className="w-3 h-3" /></Button>
+                              <Button size="sm" onClick={() => setProposalClient(client)} className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs"><FileText className="w-3 h-3" /></Button>
+                              <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs" title="Agendar follow-up"><Calendar className="w-3 h-3" /></Button>
+                              <Button size="sm" onClick={() => handleOpenQuickSale(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs" title="Registrar venda"><DollarSign className="w-3 h-3" /></Button>
                             </div>
                           </>
                         )}
@@ -944,10 +1025,11 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                   ) : (
                     <>
                       <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                      <div className="flex gap-2 mt-2">
-                        <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="flex-1 h-9"><Edit2 className="w-3 h-3 mr-1" />Editar</Button>
-                        <Button size="sm" onClick={() => setProposalClient(client)} className="flex-1 h-9 bg-indigo-600 hover:bg-indigo-700 text-white"><FileText className="w-3 h-3 mr-1" />Proposta</Button>
-                        <Button size="sm" variant="outline" onClick={() => exportClientDocument(client)} className="h-9"><Download className="w-3 h-3" /></Button>
+                      <div className="grid grid-cols-4 gap-1.5 mt-2">
+                        <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="h-9 text-xs"><Edit2 className="w-3 h-3" /></Button>
+                        <Button size="sm" onClick={() => setProposalClient(client)} className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs"><FileText className="w-3 h-3" /></Button>
+                        <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs" title="Agendar follow-up"><Calendar className="w-3 h-3" /></Button>
+                        <Button size="sm" onClick={() => handleOpenQuickSale(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs" title="Registrar venda"><DollarSign className="w-3 h-3" /></Button>
                       </div>
                     </>
                   )}
@@ -966,6 +1048,63 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
           onOpenChange={(o) => { if (!o) setProposalClient(null); }}
         />
       )}
+
+      {/* Quick Sale Modal */}
+      <Dialog open={!!quickSaleClient} onOpenChange={(o) => { if (!o) setQuickSaleClient(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>⚡ Registrar Venda Rápida</DialogTitle>
+          </DialogHeader>
+          
+          {quickSaleClient && (
+            <div className="space-y-4">
+              <div className="bg-indigo-50 p-3 rounded-lg">
+                <p className="font-semibold text-slate-800">{quickSaleClient.first_name}</p>
+                <p className="text-xs text-slate-600">{quickSaleClient.clinic_name}</p>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-700 mb-2 block">Equipamento</label>
+                <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SMT-120VP">SMT-120VP — Bioquímico (R$ 14.900)</SelectItem>
+                    <SelectItem value="VG2">VG2 — Gasometria + Imuno (R$ 18.900)</SelectItem>
+                    <SelectItem value="VBC-50A">VBC-50A — Hematológico (R$ 12.900)</SelectItem>
+                    <SelectItem value="QT3">QT3 — Bioquímico Entry (R$ 8.900)</SelectItem>
+                    <SelectItem value="VG1">VG1 — Gasometria (R$ 11.900)</SelectItem>
+                    <SelectItem value="Vi1">Vi1 — Imunofluorescência (R$ 9.500)</SelectItem>
+                    <SelectItem value="VQ1">VQ1 — PCR (R$ 24.900)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-700 mb-2 block">Valor da Venda (R$)</label>
+                <Input 
+                  type="number" 
+                  value={saleValue} 
+                  onChange={(e) => setSaleValue(e.target.value)}
+                  placeholder="15000"
+                  className="h-10"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleConfirmQuickSale} className="flex-1 bg-green-600 hover:bg-green-700">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Confirmar Venda
+                </Button>
+                <Button variant="outline" onClick={() => setQuickSaleClient(null)} className="flex-1">
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
