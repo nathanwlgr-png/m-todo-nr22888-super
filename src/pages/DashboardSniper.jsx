@@ -53,9 +53,17 @@ export default function DashboardSniper() {
   };
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen pb-20 relative" style={{ 
+      backgroundImage: 'url(https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      {/* Overlay semitransparente para readabilidade */}
+      <div className="fixed inset-0 bg-black/60 pointer-events-none" style={{ zIndex: 0 }} />
+      <div className="relative" style={{ zIndex: 1 }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 py-4" style={{ background: 'rgba(10,10,10,0.98)', borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
+      <div className="sticky top-0 px-4 py-4 relative" style={{ background: 'rgba(10,10,10,0.98)', borderBottom: '1px solid rgba(255,107,0,0.15)', zIndex: 50 }}>
         <h1 className="text-2xl font-black text-orange-400 mb-1">🎯 Dashboard Sniper</h1>
         <p className="text-xs text-orange-600">Fluxo comercial otimizado</p>
       </div>
@@ -203,6 +211,7 @@ export default function DashboardSniper() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
