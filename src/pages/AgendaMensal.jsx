@@ -599,7 +599,7 @@ export default function AgendaMensal() {
                           <div key={v.id} className={`p-2 rounded border ${colors.border} ${colors.bg}`}>
                             <p className="text-xs font-bold">{v.client_name}</p>
                             <div className="flex gap-1 mt-1 flex-wrap">
-                              <Badge className={colors.badge} className="text-xs">{colors.icon} {v.visit_type}</Badge>
+                              <Badge className={`${colors.badge} text-xs`}>{colors.icon} {v.visit_type}</Badge>
                               <Badge variant="secondary" className="text-xs">{v.status}</Badge>
                             </div>
                             {v.location && <p className="text-xs text-slate-600 mt-1">📍 {v.location}</p>}
