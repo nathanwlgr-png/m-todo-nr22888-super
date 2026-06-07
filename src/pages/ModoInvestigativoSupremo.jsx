@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -7,6 +7,7 @@ import {
   MapPin, Phone, Globe, TrendingUp, Shield, Award
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Score4x4Display from '@/components/Score4x4Display';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -27,6 +28,23 @@ export default function ModoInvestigativoSupremo() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const [score4x4, setScore4x4] = useState(null);
+  const [loadingScore, setLoadingScore] = useState(false);
+
+  // Carregar score 4x4 quando seleciona cliente
+  const loadScore4x4 = async (clientId) => {
+    setLoadingScore(true);
+    try {
+      const res = await base44.functions.invoke('calculate4x4Score', { clientId });
+      setScore4x4(res.data);
+    } catch (e) {
+      console.error('Erro ao calcular score 4x4:', e);
+      setScore4x4(null);
+    } finally {
+      setLoadingScore(false);
+    }
+  };
+
   const filteredClients = query.length >= 2
     ? clients.filter(c =>
         c.first_name?.toLowerCase().includes(query.toLowerCase()) ||
@@ -40,6 +58,8 @@ export default function ModoInvestigativoSupremo() {
     setQuery('');
     setLoading(true);
     setResult(null);
+    setScore4x4(null);
+    loadScore4x4(client.id);
 
     try {
       const res = await base44.functions.invoke('investigacaoCampoReal', {
@@ -245,6 +265,9 @@ export default function ModoInvestigativoSupremo() {
       {/* Resultado */}
       {result && !loading && (
         <div className="px-4 space-y-3">
+          {/* Motor 4x4 */}
+          {selectedClient && <Score4x4Display score={score4x4} isLoading={loadingScore} />}
+
           {/* Header do resultado */}
           <div className="rounded-2xl p-4" style={{ background: '#111', border: `1px solid ${scoreColor}44` }}>
             <div className="flex items-center justify-between mb-3">

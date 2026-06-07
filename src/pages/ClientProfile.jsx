@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 import WhatsAppRapido from '@/components/WhatsAppRapido';
 import SeamatyEquipmentPanel from '@/components/SeamatyEquipmentPanel';
+import Score4x4Display from '@/components/Score4x4Display';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -46,6 +47,13 @@ export default function ClientProfile() {
     queryFn: () => base44.entities.Visit.filter({ client_id: clientId }),
     enabled: !!clientId,
     staleTime: 60000,
+  });
+
+  const { data: score4x4, isLoading: loadingScore } = useQuery({
+    queryKey: ['client-4x4-score', clientId],
+    queryFn: () => base44.functions.invoke('calculate4x4Score', { clientId }).then(r => r.data),
+    enabled: !!clientId,
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleSaveNote = async () => {
@@ -204,6 +212,9 @@ export default function ClientProfile() {
       </div>
 
       <div className="px-4 space-y-3">
+        {/* Motor 4x4 */}
+        <Score4x4Display score={score4x4} isLoading={loadingScore} />
+
         {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
         <SeamatyEquipmentPanel client={client} />
 
