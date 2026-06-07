@@ -1,149 +1,300 @@
 /**
- * MODO CAÇA COMERCIAL v2 — Rápido, Leve, Prático
- * 
- * Fluxo:
- * 1. GPS → cidade/região
- * 2. Listar clínicas (dados básicos, paginado)
- * 3. Cadastrar lead RÁPIDO (< 3 segundos)
- * 4. Investigação profunda SOMENTE sob demanda
+ * MODO CAÇA COMERCIAL v3 — Validado, Robusto, Rápido
+ * GPS → Listing → Cadastro → Sucesso
+ * - Validação de coordenadas antes de chamar API
+ * - Normalização de cidade
+ * - Cache local 30 dias
+ * - Anti-clique-duplo
+ * - Fallback automático GPS → cidade
+ * - Anti-duplicidade antes de cadastrar
+ * - Log de debug para /debug-caca
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Zap, Target, Search, CheckCircle2, MessageCircle, Map, ChevronDown, ChevronUp, Loader2, AlertCircle, RefreshCw, Mic } from 'lucide-react';
+import { MapPin, Target, Search, ChevronDown, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import CacaClinicCard from '@/components/caca/CacaClinicCard';
 import CacaQuickForm from '@/components/caca/CacaQuickForm';
 import CacaSuccessPanel from '@/components/caca/CacaSuccessPanel';
+import CacaDuplicateDialog from '@/components/caca/CacaDuplicateDialog';
 
-const CACHE_KEY = (city) => `caca_clinics_${city}`;
+// ─── Cache local ───────────────────────────────────────────
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 dias
-const PAGE_SIZE = 10;
+const cacheKey = (city) => `caca_clinics_${city.toLowerCase().trim()}`;
 
-// Cache local por cidade
-const getCachedClinics = (city) => {
+function getCached(city) {
   try {
-    const raw = localStorage.getItem(CACHE_KEY(city));
+    const raw = localStorage.getItem(cacheKey(city));
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(CACHE_KEY(city)); return null; }
+    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(cacheKey(city)); return null; }
     return data;
   } catch { return null; }
-};
-const setCachedClinics = (city, data) => {
-  try { localStorage.setItem(CACHE_KEY(city), JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+function setCache(city, data) {
+  try { localStorage.setItem(cacheKey(city), JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+// ─── Normalização de cidade ─────────────────────────────────
+const CITY_NORMALIZE = {
+  marilia: 'Marília', marília: 'Marília',
+  jau: 'Jaú', jaú: 'Jaú',
+  aracatuba: 'Araçatuba', araçatuba: 'Araçatuba',
+  bauru: 'Bauru', botucatu: 'Botucatu', lins: 'Lins',
+  assis: 'Assis', ourinhos: 'Ourinhos',
+  'ribeirao preto': 'Ribeirão Preto', 'ribeirão preto': 'Ribeirão Preto',
+  'sao paulo': 'São Paulo', 'são paulo': 'São Paulo',
+  'presidente prudente': 'Presidente Prudente',
 };
 
+function normalizeCity(city) {
+  if (!city || city.trim().length < 3) return null;
+  const key = city.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return CITY_NORMALIZE[key] || CITY_NORMALIZE[city.trim().toLowerCase()] || city.trim();
+}
+
+// ─── Validação de coordenadas ───────────────────────────────
+function isValidCoord(lat, lng) {
+  const lt = parseFloat(lat);
+  const lg = parseFloat(lng);
+  return !isNaN(lt) && !isNaN(lg) && lt >= -90 && lt <= 90 && lg >= -180 && lg <= 180;
+}
+
+// ─── Log para /debug-caca ───────────────────────────────────
+function logDebug(entry) {
+  try {
+    const existing = JSON.parse(localStorage.getItem('debug_caca_log') || '[]');
+    existing.unshift({ ...entry, ts: new Date().toISOString() });
+    localStorage.setItem('debug_caca_log', JSON.stringify(existing.slice(0, 20)));
+  } catch {}
+}
+
+// ─── Similaridade de nomes (simples) ────────────────────────
+function isSimilarName(a, b) {
+  if (!a || !b) return false;
+  const clean = (s) => s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+  const ca = clean(a), cb = clean(b);
+  if (ca === cb) return true;
+  if (ca.includes(cb) || cb.includes(ca)) return true;
+  return false;
+}
+
+const PAGE_SIZE = 10;
+
 export default function ModoCacaComercial() {
-  // Etapas: idle → gps → listing → register → success
-  const [step, setStep] = useState('idle');
+  const [step, setStep] = useState('idle'); // idle | gps | listing | register | success
   const [gpsLocation, setGpsLocation] = useState(null);
   const [manualCity, setManualCity] = useState('');
   const [clinics, setClinics] = useState([]);
   const [page, setPage] = useState(0);
-  const [loadingGps, setLoadingGps] = useState(false);
-  const [loadingClinics, setLoadingClinics] = useState(false);
-  const [gpsError, setGpsError] = useState(null);
+  const [loading, setLoading] = useState(false); // loading único para evitar duplo clique
+  const [error, setError] = useState(null);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [savedLead, setSavedLead] = useState(null);
+  const [duplicateCheck, setDuplicateCheck] = useState(null); // { pendingForm, matches }
+  const loadingRef = useRef(false);
 
-  // Clientes existentes para marcar "azul" (cliente ativo)
+  // Clientes existentes
   const { data: existingClients = [] } = useQuery({
     queryKey: ['caca-existing-clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 200),
+    queryFn: () => base44.entities.Client.list('-updated_date', 300),
+    staleTime: 300000,
+  });
+  const { data: existingLeads = [] } = useQuery({
+    queryKey: ['caca-existing-leads'],
+    queryFn: () => base44.entities.Lead.list('-updated_date', 300),
     staleTime: 300000,
   });
 
-  const existingNames = useMemo(() => 
-    new Set(existingClients.map(c => (c.clinic_name || c.first_name || '').toLowerCase().trim())),
+  const existingNames = useMemo(() =>
+    new Set([
+      ...existingClients.map(c => (c.clinic_name || c.first_name || '').toLowerCase().trim()),
+    ]),
     [existingClients]
   );
 
-  // Paginação local
   const pagedClinics = useMemo(() => clinics.slice(0, (page + 1) * PAGE_SIZE), [clinics, page]);
   const hasMore = pagedClinics.length < clinics.length;
 
-  // ETAPA 1: GPS
+  // ─── ETAPA 1: GPS ──────────────────────────────────────────
   const handleGetGPS = useCallback(async () => {
-    setLoadingGps(true);
-    setGpsError(null);
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    setLoading(true);
+    setError(null);
+
     try {
       const pos = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 })
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, maximumAge: 60000 })
       );
-      setGpsLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      setStep('gps');
-    } catch {
-      setGpsError('GPS não disponível. Digite a cidade manualmente.');
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      if (!isValidCoord(lat, lng)) {
+        setError('GPS retornou coordenadas inválidas. Digite a cidade manualmente.');
+        setStep('gps');
+      } else {
+        setGpsLocation({ lat, lng });
+        setStep('gps');
+      }
+    } catch (err) {
+      setError('GPS não disponível neste dispositivo. Digite a cidade manualmente.');
       setStep('gps');
     }
-    setLoadingGps(false);
+
+    loadingRef.current = false;
+    setLoading(false);
   }, []);
 
-  // ETAPA 2: Buscar clínicas (com cache)
-  const handleFetchClinics = useCallback(async (cityName) => {
-    const city = cityName || manualCity;
-    if (!city && !gpsLocation) return;
+  // ─── ETAPA 2: Buscar clínicas ──────────────────────────────
+  const handleFetchClinics = useCallback(async (cityOverride) => {
+    if (loadingRef.current) return;
 
-    // Verificar cache
-    const cached = city ? getCachedClinics(city) : null;
-    if (cached) {
-      setClinics(cached);
-      setPage(0);
-      setStep('listing');
+    const cityRaw = cityOverride || manualCity;
+    const city = normalizeCity(cityRaw);
+    const useGps = !cityRaw && gpsLocation && isValidCoord(gpsLocation.lat, gpsLocation.lng);
+
+    // Validações
+    if (!useGps && (!city || city.length < 3)) {
+      setError('Digite o nome da cidade (mínimo 3 caracteres).');
       return;
     }
 
-    setLoadingClinics(true);
+    // Cache
+    if (city) {
+      const cached = getCached(city);
+      if (cached) {
+        setClinics(cached);
+        setPage(0);
+        setStep('listing');
+        setError(null);
+        return;
+      }
+    }
+
+    loadingRef.current = true;
+    setLoading(true);
+    setError(null);
+    const startTime = Date.now();
+
     try {
-      const res = await base44.functions.invoke('getNearbyVeterinaryClinics', {
-        latitude: gpsLocation?.lat,
-        longitude: gpsLocation?.lng,
-        city: city || undefined,
-        radiusKm: 20,
-      });
+      const payload = useGps
+        ? { latitude: gpsLocation.lat, longitude: gpsLocation.lng, radiusKm: 20 }
+        : { city, radiusKm: 20 };
+
+      const res = await base44.functions.invoke('getNearbyVeterinaryClinics', payload);
       const data = res.data?.clinics || [];
+      const duration = Date.now() - startTime;
+
+      logDebug({
+        mode: useGps ? 'gps' : 'city',
+        city: city || null,
+        lat: gpsLocation?.lat,
+        lng: gpsLocation?.lng,
+        count: data.length,
+        duration_ms: duration,
+        status: 'success',
+      });
+
       setClinics(data);
       setPage(0);
-      if (city) setCachedClinics(city, data);
+      if (city) setCache(city, data);
       setStep('listing');
+
     } catch (err) {
-      setGpsError(`Erro ao buscar clínicas: ${err.message}`);
+      const duration = Date.now() - startTime;
+      const msg = err?.response?.data?.error || err.message || 'Erro desconhecido';
+
+      logDebug({
+        mode: useGps ? 'gps' : 'city',
+        city: city || null,
+        lat: gpsLocation?.lat,
+        lng: gpsLocation?.lng,
+        duration_ms: duration,
+        status: 'error',
+        error: msg,
+      });
+
+      setError(`Não foi possível buscar clínicas. ${msg}`);
     }
-    setLoadingClinics(false);
+
+    loadingRef.current = false;
+    setLoading(false);
   }, [gpsLocation, manualCity]);
 
-  // ETAPA 3: Selecionar clínica → abrir form rápido
+  // ─── ETAPA 3: Selecionar clínica ───────────────────────────
   const handleSelectClinic = useCallback((clinic) => {
     setSelectedClinic(clinic);
     setSavedLead(null);
     setStep('register');
   }, []);
 
-  // ETAPA 3: Salvar lead rápido (sem IA)
-  const handleSaveQuick = useCallback(async (formData) => {
+  // ─── ANTI-DUPLICIDADE ───────────────────────────────────────
+  const checkDuplicates = useCallback((formData) => {
+    const matches = [];
+    const nameToCheck = formData.clinic_name?.toLowerCase().trim();
+    const phoneToCheck = formData.phone?.replace(/\D/g, '');
+    const cityToCheck = formData.city?.toLowerCase().trim();
+
+    for (const c of [...existingClients]) {
+      const sameName = isSimilarName(c.clinic_name || c.first_name, formData.clinic_name);
+      const samePhone = phoneToCheck && c.phone?.replace(/\D/g, '') === phoneToCheck;
+      const sameCnpj = formData.cnpj && c.cnpj && formData.cnpj.replace(/\D/g, '') === c.cnpj.replace(/\D/g, '');
+      const sameCity = c.city?.toLowerCase().trim() === cityToCheck;
+
+      if (samePhone || sameCnpj || (sameName && sameCity)) {
+        matches.push({ type: 'client', record: c });
+      }
+    }
+
+    for (const l of [...existingLeads]) {
+      const sameName = isSimilarName(l.company || l.full_name, formData.clinic_name);
+      const samePhone = phoneToCheck && l.phone?.replace(/\D/g, '') === phoneToCheck;
+      const sameCity = l.city?.toLowerCase().trim() === cityToCheck;
+
+      if (samePhone || (sameName && sameCity)) {
+        matches.push({ type: 'lead', record: l });
+      }
+    }
+
+    return matches;
+  }, [existingClients, existingLeads]);
+
+  // ─── ETAPA 3: Salvar lead ───────────────────────────────────
+  const handleSaveQuick = useCallback(async (formData, forceCreate = false) => {
+    if (!forceCreate) {
+      const matches = checkDuplicates(formData);
+      if (matches.length > 0) {
+        setDuplicateCheck({ pendingForm: formData, matches });
+        return;
+      }
+    }
+
     const lead = await base44.entities.Lead.create({
       full_name: formData.clinic_name,
       company: formData.clinic_name,
       phone: formData.phone || '',
       city: formData.city,
-      source: 'caca_comercial',
+      source: 'outro',
       status: 'novo',
       notes: `Temperatura: ${formData.temperatura}${formData.notes ? '\n' + formData.notes : ''}`,
-      ...formData,
     });
+
     setSavedLead({ ...lead, temperatura: formData.temperatura, clinic_name: formData.clinic_name, phone: formData.phone, city: formData.city });
+    setDuplicateCheck(null);
     setStep('success');
-  }, []);
+  }, [checkDuplicates]);
 
   const handleBack = useCallback(() => {
     setStep('listing');
     setSelectedClinic(null);
     setSavedLead(null);
+    setDuplicateCheck(null);
   }, []);
 
   const handleReset = useCallback(() => {
@@ -153,7 +304,8 @@ export default function ModoCacaComercial() {
     setClinics([]);
     setSelectedClinic(null);
     setSavedLead(null);
-    setGpsError(null);
+    setError(null);
+    setDuplicateCheck(null);
   }, []);
 
   return (
@@ -166,13 +318,11 @@ export default function ModoCacaComercial() {
             <h1 className="text-2xl font-black text-orange-400">🎯 Modo Caça</h1>
             <p className="text-orange-600 text-xs mt-0.5">Cadastro rápido — investigação sob demanda</p>
           </div>
-          <div className="flex gap-2">
-            {step !== 'idle' && (
-              <Button size="sm" variant="outline" onClick={handleReset} className="text-orange-400 border-orange-700 text-xs">
-                <RefreshCw className="w-3 h-3 mr-1" /> Reiniciar
-              </Button>
-            )}
-          </div>
+          {step !== 'idle' && (
+            <Button size="sm" variant="outline" onClick={handleReset} className="text-orange-400 border-orange-700 text-xs">
+              <RefreshCw className="w-3 h-3 mr-1" /> Reiniciar
+            </Button>
+          )}
         </div>
 
         {/* ETAPA BADGES */}
@@ -189,30 +339,30 @@ export default function ModoCacaComercial() {
           })}
         </div>
 
-        {/* ERROS */}
-        {gpsError && (
+        {/* ERRO */}
+        {error && (
           <div className="flex items-start gap-2 p-3 bg-red-950 border border-red-800 rounded-lg">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-            <p className="text-red-300 text-xs">{gpsError}</p>
+            <p className="text-red-300 text-xs">{error}</p>
           </div>
         )}
 
-        {/* ═══ IDLE: Início ═══ */}
+        {/* ═══ IDLE ═══ */}
         {step === 'idle' && (
           <Card className="bg-slate-950 border-orange-500/40">
             <CardContent className="pt-6 space-y-4">
               <div className="text-center space-y-2">
                 <div className="text-5xl">🎯</div>
                 <h2 className="text-orange-300 font-bold text-lg">Iniciar Caça Comercial</h2>
-                <p className="text-orange-700 text-sm">Localize clínicas, cadastre leads em segundos e investigue somente quem vale.</p>
+                <p className="text-orange-700 text-sm">Localize clínicas, cadastre leads em segundos.</p>
               </div>
               <Button
                 className="w-full bg-green-600 hover:bg-green-700 font-bold text-white h-12"
                 onClick={handleGetGPS}
-                disabled={loadingGps}
+                disabled={loading}
               >
-                {loadingGps ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
-                {loadingGps ? 'Obtendo GPS...' : '📍 Usar minha localização'}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
+                {loading ? 'Obtendo GPS...' : '📍 Usar minha localização'}
               </Button>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-px bg-slate-700" />
@@ -221,25 +371,25 @@ export default function ModoCacaComercial() {
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Digite a cidade..."
+                  placeholder="Digite a cidade... (ex: Marília)"
                   value={manualCity}
                   onChange={e => setManualCity(e.target.value)}
                   className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
-                  onKeyDown={e => e.key === 'Enter' && manualCity && handleFetchClinics(manualCity)}
+                  onKeyDown={e => e.key === 'Enter' && manualCity.trim().length >= 3 && handleFetchClinics(manualCity)}
                 />
                 <Button
                   onClick={() => handleFetchClinics(manualCity)}
-                  disabled={!manualCity || loadingClinics}
+                  disabled={!manualCity || manualCity.trim().length < 3 || loading}
                   className="bg-orange-600 hover:bg-orange-700 shrink-0"
                 >
-                  {loadingClinics ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* ═══ GPS OBTIDO: Próximo passo ═══ */}
+        {/* ═══ GPS OBTIDO ═══ */}
         {step === 'gps' && (
           <Card className="bg-slate-950 border-orange-500/40">
             <CardContent className="pt-6 space-y-4">
@@ -249,14 +399,22 @@ export default function ModoCacaComercial() {
                   <p className="text-green-600 text-xs">Lat: {gpsLocation.lat.toFixed(4)} | Lng: {gpsLocation.lng.toFixed(4)}</p>
                 </div>
               )}
-              <Button
-                className="w-full bg-orange-600 hover:bg-orange-700 font-bold h-12"
-                onClick={() => handleFetchClinics()}
-                disabled={loadingClinics}
-              >
-                {loadingClinics ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Target className="w-4 h-4 mr-2" />}
-                {loadingClinics ? 'Buscando clínicas...' : 'Buscar Clínicas Próximas (20km)'}
-              </Button>
+              {!gpsLocation && (
+                <div className="p-3 bg-yellow-950 border border-yellow-700 rounded-lg">
+                  <p className="text-yellow-300 text-sm font-bold">⚠️ GPS não disponível</p>
+                  <p className="text-yellow-600 text-xs">Use a busca por cidade abaixo.</p>
+                </div>
+              )}
+              {gpsLocation && (
+                <Button
+                  className="w-full bg-orange-600 hover:bg-orange-700 font-bold h-12"
+                  onClick={() => handleFetchClinics()}
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Target className="w-4 h-4 mr-2" />}
+                  {loading ? 'Buscando clínicas...' : 'Buscar Clínicas Próximas (20km)'}
+                </Button>
+              )}
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-px bg-slate-700" />
                 <span className="text-slate-500 text-xs">ou buscar por cidade</span>
@@ -264,34 +422,33 @@ export default function ModoCacaComercial() {
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Digitar cidade..."
+                  placeholder="Digitar cidade... (ex: Marília)"
                   value={manualCity}
                   onChange={e => setManualCity(e.target.value)}
                   className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
-                  onKeyDown={e => e.key === 'Enter' && manualCity && handleFetchClinics(manualCity)}
+                  onKeyDown={e => e.key === 'Enter' && manualCity.trim().length >= 3 && handleFetchClinics(manualCity)}
                 />
                 <Button
                   onClick={() => handleFetchClinics(manualCity)}
-                  disabled={!manualCity || loadingClinics}
+                  disabled={!manualCity || manualCity.trim().length < 3 || loading}
                   className="bg-orange-600 hover:bg-orange-700 shrink-0"
                 >
-                  {loadingClinics ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* ═══ LISTING: Clínicas ═══ */}
+        {/* ═══ LISTING ═══ */}
         {step === 'listing' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-orange-400 text-sm font-bold">{clinics.length} clínicas encontradas</p>
               <div className="flex gap-1 text-[10px]">
-                <span className="px-1.5 py-0.5 rounded-full bg-green-900 text-green-300">🟢 Quente</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-yellow-900 text-yellow-300">🟡 Morno</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-red-900 text-red-300">🔴 Frio</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-300">🔵 Ativo</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-green-900 text-green-300">🟢 Quente</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-red-900 text-red-300">🔴 Frio</span>
               </div>
             </div>
 
@@ -322,7 +479,6 @@ export default function ModoCacaComercial() {
               </Button>
             )}
 
-            {/* Cadastrar clínica não listada */}
             <Card className="bg-slate-900 border-dashed border-slate-700">
               <CardContent className="pt-4">
                 <Button
@@ -336,7 +492,7 @@ export default function ModoCacaComercial() {
           </div>
         )}
 
-        {/* ═══ REGISTER: Form rápido ═══ */}
+        {/* ═══ REGISTER ═══ */}
         {step === 'register' && selectedClinic && (
           <CacaQuickForm
             clinic={selectedClinic}
@@ -345,12 +501,21 @@ export default function ModoCacaComercial() {
           />
         )}
 
-        {/* ═══ SUCCESS: Pós-cadastro ═══ */}
+        {/* ═══ SUCCESS ═══ */}
         {step === 'success' && savedLead && (
           <CacaSuccessPanel
             lead={savedLead}
             onBack={handleBack}
             onReset={handleReset}
+          />
+        )}
+
+        {/* ═══ DUPLICIDADE DIALOG ═══ */}
+        {duplicateCheck && (
+          <CacaDuplicateDialog
+            matches={duplicateCheck.matches}
+            onForceCreate={() => handleSaveQuick(duplicateCheck.pendingForm, true)}
+            onCancel={() => setDuplicateCheck(null)}
           />
         )}
 

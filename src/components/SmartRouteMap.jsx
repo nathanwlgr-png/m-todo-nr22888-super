@@ -38,25 +38,55 @@ export default function SmartRouteMap() {
 
   const toggle = (id) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  // Monta URL do Google Maps com waypoints para a rota mais eficiente
+  const MAX_ROUTE_STOPS = 12;
+
+  // Deduplicar selecionados por nome+cidade
+  const deduplicatedSelected = useMemo(() => {
+    const seen = new Set();
+    return selectedClients.filter(c => {
+      const key = `${(c.clinic_name || c.first_name || '').toLowerCase().trim()}|${(c.city || '').toLowerCase().trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, MAX_ROUTE_STOPS);
+  }, [selectedClients]);
+
+  // Validar coordenadas
+  const isValidCoord = (lat, lng) => {
+    const lt = parseFloat(lat); const lg = parseFloat(lng);
+    return !isNaN(lt) && !isNaN(lg) && lt >= -90 && lt <= 90 && lg >= -180 && lg <= 180;
+  };
+
+  const clientsWithCoords = useMemo(() =>
+    deduplicatedSelected.filter(c => isValidCoord(c.latitude, c.longitude)),
+    [deduplicatedSelected]
+  );
+  const clientsWithoutCoords = useMemo(() =>
+    deduplicatedSelected.filter(c => !isValidCoord(c.latitude, c.longitude)),
+    [deduplicatedSelected]
+  );
+
+  // Monta URL do Google Maps (coordenadas válidas → usa lat/lng, fallback → endereço)
   const googleMapsUrl = useMemo(() => {
-    if (selected.length === 0) return null;
-    const waypoints = selectedClients
-      .map(c => {
-        const addr = c.address ? `${c.address}, ${c.city}, SP` : `${c.clinic_name || c.first_name}, ${c.city}, SP`;
-        return encodeURIComponent(addr);
-      });
+    if (deduplicatedSelected.length === 0) return null;
 
     const origin = encodeURIComponent(startAddress);
+    const waypoints = deduplicatedSelected.map(c => {
+      if (isValidCoord(c.latitude, c.longitude)) {
+        return encodeURIComponent(`${parseFloat(c.latitude)},${parseFloat(c.longitude)}`);
+      }
+      const addr = c.address ? `${c.address}, ${c.city}, SP` : `${c.clinic_name || c.first_name}, ${c.city}, SP`;
+      return encodeURIComponent(addr);
+    });
+
     const destination = waypoints[waypoints.length - 1];
     const middle = waypoints.slice(0, -1);
 
     if (waypoints.length === 1) {
       return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
     }
-
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${middle.join('|')}&travelmode=driving&optimize=true`;
-  }, [selected, selectedClients, startAddress]);
+  }, [deduplicatedSelected, startAddress]);
 
   // Estimativa rápida de tempo (15min de deslocamento entre clínicas + 45min por visita)
   const estimativa = useMemo(() => {
@@ -155,10 +185,19 @@ export default function SmartRouteMap() {
           </div>
 
           {/* Selecionados e estimativa */}
-          {selected.length > 0 && (
+          {selected.length > 0 && deduplicatedSelected.length === 0 && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-xs text-amber-700 font-semibold">Não há pontos com localização válida para gerar rota.</p>
+            </div>
+          )}
+
+          {selected.length > 0 && deduplicatedSelected.length > 0 && (
             <div className="bg-emerald-50 rounded-xl p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-emerald-800">Rota selecionada ({selected.length} clínicas)</p>
+                <p className="text-xs font-bold text-emerald-800">
+                  Rota selecionada ({deduplicatedSelected.length} clínicas
+                  {clientsWithoutCoords.length > 0 ? `, ${clientsWithoutCoords.length} sem GPS` : ''})
+                </p>
                 <button onClick={() => setSelected([])} className="text-slate-400 hover:text-red-500">
                   <X className="w-4 h-4" />
                 </button>
@@ -170,7 +209,7 @@ export default function SmartRouteMap() {
                   <div className="w-5 h-5 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-[9px]">S</div>
                   <span className="font-medium">{startAddress}</span>
                 </div>
-                {selectedClients.map((c, i) => (
+                {deduplicatedSelected.map((c, i) => (
                   <div key={c.id} className="flex items-start gap-2 text-[10px]">
                     <div className="flex flex-col items-center">
                       <div className="w-px h-3 bg-emerald-300" />
@@ -220,7 +259,7 @@ export default function SmartRouteMap() {
           )}
 
           {selected.length === 0 && (
-            <p className="text-xs text-slate-400 text-center">Selecione clínicas para calcular a rota mais eficiente</p>
+            <p className="text-xs text-slate-400 text-center">Selecione clínicas para calcular a rota mais eficiente (máx. {MAX_ROUTE_STOPS})</p>
           )}
         </CardContent>
       )}
