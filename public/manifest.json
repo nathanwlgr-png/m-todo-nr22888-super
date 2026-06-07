@@ -1,73 +1,93 @@
 {
-  "name": "NR22888 Seamaty Brasil — CRM Vendas",
-  "short_name": "NR22888 Seamaty",
-  "description": "CRM veterinário para vendas de equipamentos Seamaty Brasil com suporte offline Android",
+  "name": "Seamaty NR22888 — CRM Veterinário",
+  "short_name": "Seamaty",
+  "description": "CRM Veterinário com IA, Dashboard, Rotas, WhatsApp, Offline-First",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#0a0a0a",
-  "theme_color": "#ff6b00",
-  "icons": [
+  "orientation": "landscape",
+  "theme_color": "#4f46e5",
+  "background_color": "#ffffff",
+  "categories": ["productivity", "business"],
+  "screenshots": [
     {
-      "src": "/favicon-192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "narrow"
     },
     {
-      "src": "/favicon-512.png",
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshot-540x720.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "categories": ["business", "productivity"],
   "shortcuts": [
     {
-      "name": "Clientes",
-      "short_name": "Clientes",
-      "description": "Visualizar lista de clientes",
-      "url": "/Clients?utm_source=shortcut",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Acesso rápido ao Dashboard",
+      "url": "/?shortcut=dashboard",
       "icons": [
         {
-          "src": "/icon-96.png",
-          "sizes": "96x96"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
         }
       ]
     },
     {
       "name": "Modo Caça",
       "short_name": "Caça",
-      "description": "Iniciar busca de clínicas por GPS",
-      "url": "/ModoCacaComercial?utm_source=shortcut",
+      "description": "Modo Caça Comercial",
+      "url": "/?shortcut=caca",
       "icons": [
         {
-          "src": "/icon-96.png",
-          "sizes": "96x96"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "Agenda",
-      "short_name": "Agenda",
-      "description": "Visualizar agenda mensal",
-      "url": "/AgendaMensal?utm_source=shortcut",
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Gerenciador de Clientes",
+      "url": "/?shortcut=clients",
       "icons": [
         {
-          "src": "/icon-96.png",
-          "sizes": "96x96"
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
         }
       ]
     }
   ],
-  "prefer_related_applications": false
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
