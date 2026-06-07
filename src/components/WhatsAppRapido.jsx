@@ -8,19 +8,38 @@ import React, { useState } from 'react';
 import { MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
-import { IDENTIDADE, TEMPLATES_WHATSAPP } from '@/lib/SeamatyData';
+import { IDENTIDADE, PRECOS, formatPreco } from '@/lib/SeamatyMaster';
 
 const nome = (c) => c.first_name || c.full_name || 'Dr(a)';
 const clinica = (c) => c.clinic_name || 'clínica';
 
+const gerarMensagem = (tipo, client) => {
+  const n = nome(client);
+  const c = clinica(client);
+  const equip = client.equipment_interest || client.equipment_sold || 'equipamento Seamaty';
+  const preco = PRECOS[equip];
+  
+  const templates = {
+    abordagem_fria: () => `Olá ${n}, tudo bem? 😊\n\nSou Nathan Rosa, Consultor Técnico da Seamaty Brasil.\n\nGostaríamos de conhecer melhor a ${c} e entender suas necessidades laboratoriais.\n\nTeria uns 15 minutos nos próximos dias para uma conversa rápida?\n\n${IDENTIDADE.assinatura}`,
+    followup: () => `Oi ${n}! 👋\n\nTudo bem com você?\n\nGostaría de acompanhar se houve alguma evolução nas necessidades da ${c}.\n\nContinuamos à disposição para ajudar!\n\n${IDENTIDADE.assinatura}`,
+    pos_visita: () => `Ótimo saber que a visita foi produtiva! 🎉\n\nFicamos felizes em ajudar a ${c}.\n\nQualquer dúvida técnica ou comercial, é só chamar!\n\n${IDENTIDADE.assinatura}`,
+    proposta: () => `${n}, a proposta está pronta! 📄\n\nÉ exatamente o que conversamos para a ${c}.\n\nQuando consigo agendar uma chamada para revisar?\n\n${IDENTIDADE.assinatura}`,
+    comodato: () => `${n}, temos uma oportunidade de comodato! 🤝\n\nVale conversar sobre como isso pode beneficiar a ${c}?\n\n${IDENTIDADE.assinatura}`,
+    treinamento: () => `Olá ${n}! 🎓\n\nVamos agendar o treinamento na ${c}?\n\nNosso objetivo é garantir que sua equipe domine 100% o equipamento.\n\n${IDENTIDADE.assinatura}`,
+    reativacao: () => `Oi ${n}! 🔥\n\nHá um tempo não nos falamos. Tudo bem?\n\nGostaria de retomar nossa conversa sobre as oportunidades para a ${c}.\n\n${IDENTIDADE.assinatura}`,
+  };
+  
+  return templates[tipo] ? templates[tipo]() : '';
+};
+
 const TIPOS = [
-  { key: 'abordagem_fria', label: '🧊 Abordagem Fria',       color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',     gerar: TEMPLATES_WHATSAPP.abordagem_fria },
-  { key: 'followup',       label: '🔄 Follow-up',            color: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', gerar: TEMPLATES_WHATSAPP.followup },
-  { key: 'pos_visita',     label: '✅ Pós-visita',            color: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',   gerar: TEMPLATES_WHATSAPP.pos_visita },
-  { key: 'proposta',       label: '📄 Enviar Proposta',      color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', gerar: TEMPLATES_WHATSAPP.proposta },
-  { key: 'comodato',       label: '🤝 Comodato',             color: 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100',       gerar: TEMPLATES_WHATSAPP.comodato },
-  { key: 'treinamento',    label: '🎓 Treinamento/Pós-venda', color: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',  gerar: TEMPLATES_WHATSAPP.treinamento },
-  { key: 'reativacao',     label: '🔥 Reativação',           color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',           gerar: TEMPLATES_WHATSAPP.reativacao },
+  { key: 'abordagem_fria', label: '🧊 Abordagem Fria',       color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
+  { key: 'followup',       label: '🔄 Follow-up',            color: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' },
+  { key: 'pos_visita',     label: '✅ Pós-visita',            color: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' },
+  { key: 'proposta',       label: '📄 Enviar Proposta',      color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100' },
+  { key: 'comodato',       label: '🤝 Comodato',             color: 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100' },
+  { key: 'treinamento',    label: '🎓 Treinamento/Pós-venda', color: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' },
+  { key: 'reativacao',     label: '🔥 Reativação',           color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' },
 ];
 
 export default function WhatsAppRapido({ client }) {
@@ -32,7 +51,7 @@ export default function WhatsAppRapido({ client }) {
     const tipoConfig = TIPOS.find(t => t.key === tipoKey);
     if (!tipoConfig) return;
 
-    const mensagem = tipoConfig.gerar(client);
+    const mensagem = gerarMensagem(tipoKey, client);
     const phone = (client.phone || '').replace(/\D/g, '');
 
     if (!phone) {
