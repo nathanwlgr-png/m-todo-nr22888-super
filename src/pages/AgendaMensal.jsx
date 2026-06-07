@@ -39,12 +39,32 @@ function calcScore(client) {
   return comercial + semContato + semEquip + insumo;
 }
 
+// Mapeamento de cores por visit_type
+const VISIT_TYPE_COLORS = {
+  prospecção: { bg: 'bg-green-50', border: 'border-green-300', badge: 'bg-green-100 text-green-700', icon: '🔍' },
+  'pós-venda': { bg: 'bg-blue-50', border: 'border-blue-300', badge: 'bg-blue-100 text-blue-700', icon: '✅' },
+  treinamento: { bg: 'bg-blue-50', border: 'border-blue-300', badge: 'bg-blue-100 text-blue-700', icon: '📚' },
+  instalação: { bg: 'bg-blue-50', border: 'border-blue-300', badge: 'bg-blue-100 text-blue-700', icon: '⚙️' },
+  'cliente quente': { bg: 'bg-orange-50', border: 'border-orange-300', badge: 'bg-orange-100 text-orange-700', icon: '🔥' },
+  fechamento: { bg: 'bg-orange-50', border: 'border-orange-300', badge: 'bg-orange-100 text-orange-700', icon: '✨' },
+  proposta: { bg: 'bg-orange-50', border: 'border-orange-300', badge: 'bg-orange-100 text-orange-700', icon: '📋' },
+  urgência: { bg: 'bg-red-50', border: 'border-red-300', badge: 'bg-red-100 text-red-700', icon: '⚡' },
+  'proposta em risco': { bg: 'bg-red-50', border: 'border-red-300', badge: 'bg-red-100 text-red-700', icon: '⚠️' },
+  inativo: { bg: 'bg-purple-50', border: 'border-purple-300', badge: 'bg-purple-100 text-purple-700', icon: '😴' },
+  resgate: { bg: 'bg-purple-50', border: 'border-purple-300', badge: 'bg-purple-100 text-purple-700', icon: '🎯' },
+  comodato: { bg: 'bg-yellow-50', border: 'border-yellow-300', badge: 'bg-yellow-100 text-yellow-700', icon: '💎' },
+  administrativo: { bg: 'bg-gray-50', border: 'border-gray-300', badge: 'bg-gray-100 text-gray-700', icon: '📝' },
+  'primeira_visita': { bg: 'bg-indigo-50', border: 'border-indigo-300', badge: 'bg-indigo-100 text-indigo-700', icon: '👋' },
+};
+
 const STATUS_COLORS = {
   agendada: 'bg-blue-100 text-blue-700',
   realizada: 'bg-green-100 text-green-700',
   reagendar: 'bg-yellow-100 text-yellow-700',
   cancelada: 'bg-red-100 text-red-700',
 };
+
+const getVisitColor = (visitType) => VISIT_TYPE_COLORS[visitType] || VISIT_TYPE_COLORS['primeira_visita'];
 
 export default function AgendaMensal() {
   const now = new Date();
@@ -238,7 +258,7 @@ export default function AgendaMensal() {
   const visitasDiaSel = diaSelecionado ? (visitasPorDia[diaSelecionado.toISOString().split('T')[0]] || []) : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-white pb-20">
       <div className="bg-gradient-to-br from-indigo-700 to-purple-700 px-4 pt-4 pb-6">
         <div className="flex items-center gap-3 mb-3">
           <Link to="/"><button className="p-2 rounded-full hover:bg-white/20"><ArrowLeft className="w-5 h-5 text-white" /></button></Link>
@@ -256,8 +276,8 @@ export default function AgendaMensal() {
         </div>
       </div>
 
-      <div className="px-4 -mt-2 space-y-3 pt-2">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="px-2 sm:px-4 -mt-2 space-y-3 pt-2">
+         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Button onClick={gerarAgendaAutomatica} disabled={gerando} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">
             {gerando ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
             Gerar Agenda do Mês
@@ -308,9 +328,28 @@ export default function AgendaMensal() {
                 );
               })}
             </div>
-            <div className="flex flex-wrap gap-3 mt-3 text-[10px] text-slate-400">
+            <div className="flex flex-wrap gap-2 mt-3 text-[10px] text-slate-500">
               <span className="flex items-center gap-1"><span className="w-3 h-1 bg-indigo-400 rounded-full inline-block" /> Visita agendada</span>
               <span className="flex items-center gap-1">📝 Sexta: escritório</span>
+            </div>
+            </CardContent>
+            </Card>
+
+            {/* Legenda de Cores */}
+            <Card className="bg-white border-0 shadow-sm">
+            <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-sm">🎨 Legenda de Cores</CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {Object.entries(VISIT_TYPE_COLORS).map(([type, colors]) => (
+                <div key={type} className="flex items-center gap-2">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-sm ${colors.badge}`}>
+                    {colors.icon}
+                  </div>
+                  <span className="text-xs text-slate-600 capitalize line-clamp-2">{type.replace(/_/g, ' ')}</span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -336,36 +375,44 @@ export default function AgendaMensal() {
                   Nenhuma visita agendada. Clique em "Gerar Agenda" para sugestões automáticas.
                 </p>
               ) : (
-                visitasDiaSel.map(v => (
-                  <Link key={v.id} to={`/ClientProfile?id=${v.client_id}`}>
-                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">{v.client_name}</p>
+                visitasDiaSel.map(v => {
+                    const colors = getVisitColor(v.visit_type);
+                    return (
+                      <Link key={v.id} to={`/ClientProfile?id=${v.client_id}`}>
+                        <div className={`p-3 sm:p-4 rounded-lg border-2 transition-all hover:shadow-md ${colors.bg} ${colors.border}`}>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-slate-800">{v.client_name}</p>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <Badge className={colors.badge}>
+                                  {colors.icon} {v.visit_type || 'Visita'}
+                                </Badge>
+                                <Badge className={STATUS_COLORS[v.status] || 'bg-slate-100 text-slate-600'} variant="secondary">
+                                  {v.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
                           {v.location && (
-                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                              <MapPin className="w-3 h-3" />{v.location}
+                            <p className="text-xs text-slate-600 flex items-center gap-1 mb-2">
+                              <MapPin className="w-3 h-3" /><strong>{v.location}</strong>
                             </p>
                           )}
-                          {v.notes && <p className="text-xs text-slate-400 mt-0.5 truncate max-w-[180px]">{v.notes}</p>}
+                          {v.notes && <p className="text-xs text-slate-500 mb-2 line-clamp-2">{v.notes}</p>}
+                          {v.location && (
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.location)}`}
+                              target="_blank" rel="noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                            >
+                              <ExternalLink className="w-3 h-3" /> Abrir no Maps
+                            </a>
+                          )}
                         </div>
-                        <Badge className={STATUS_COLORS[v.status] || 'bg-slate-100 text-slate-600'}>
-                          {v.status}
-                        </Badge>
-                      </div>
-                      {v.location && (
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.location)}`}
-                          target="_blank" rel="noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs text-indigo-600 mt-2 font-medium"
-                        >
-                          <ExternalLink className="w-3 h-3" /> Abrir no Maps
-                        </a>
-                      )}
-                    </div>
-                  </Link>
-                ))
+                      </Link>
+                    );
+                  })
               )}
             </CardContent>
           </Card>
