@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import SeamatyOpportunityCard from '@/components/SeamatyOpportunityCard';
+import SeamatyEquipmentOpportunity from '@/components/SeamatyEquipmentOpportunity';
 import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 import WhatsAppRapido from '@/components/WhatsAppRapido';
 
@@ -206,6 +207,9 @@ export default function ClientProfile() {
       <div className="px-4 space-y-3">
         {/* OPORTUNIDADE SEAMATY */}
         <SeamatyOpportunityCard clientId={clientId} />
+
+        {/* EQUIPAMENTOS E UPGRADES SEAMATY */}
+        <SeamatyEquipmentOpportunity client={client} />
 
         {/* Dados básicos */}
         <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
