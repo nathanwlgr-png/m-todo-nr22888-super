@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, MapPin, Wifi, Clock, Database, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { cacaDebugStore } from './ModoCacaComercial';
+import { cacaDebugStore } from '@/lib/cacaDebugStore';
 
 export default function DebugCaca() {
   const [data, setData] = useState({});
