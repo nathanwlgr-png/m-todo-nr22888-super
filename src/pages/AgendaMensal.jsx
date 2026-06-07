@@ -6,11 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Calendar, MapPin, Navigation, Download, Loader2,
-  ChevronLeft, ChevronRight, ArrowLeft, RefreshCw, ExternalLink
+  ChevronLeft, ChevronRight, ArrowLeft, RefreshCw, ExternalLink,
+  Search, Copy, Eye, Clock, CheckCircle, Flame, Filter, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
+import VisitCardExpandido from '@/components/VisitCardExpandido';
+import ConfirmModalVisita from '@/components/ConfirmModalVisita';
 
 const MES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -72,6 +75,18 @@ export default function AgendaMensal() {
   const [anoRef, setAnoRef] = useState(now.getFullYear());
   const [diaSelecionado, setDiaSelecionado] = useState(null);
   const [gerando, setGerando] = useState(false);
+  const [viewMode, setViewMode] = useState('mensal'); // 'mensal' | 'semanal'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filtros, setFiltros] = useState({
+    cidade: '',
+    cliente: '',
+    visit_type: '',
+    status: '',
+    prioridade: '',
+    localizacao: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ open: false, acao: null, visitId: null, dados: null });
   const queryClient = useQueryClient();
 
   const { data: clients = [] } = useQuery({
@@ -100,6 +115,27 @@ export default function AgendaMensal() {
     });
     return mapa;
   }, [visitasMes]);
+
+  // Filtrar visitas por busca e filtros
+  const visitasFiltradas = useMemo(() => {
+    return visitasMes.filter(v => {
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || 
+        (v.client_name || '').toLowerCase().includes(q) ||
+        (v.location || '').toLowerCase().includes(q) ||
+        (v.notes || '').toLowerCase().includes(q);
+
+      const matchFiltros = 
+        (!filtros.cidade || (v.location || '').includes(filtros.cidade)) &&
+        (!filtros.cliente || (v.client_name || '').includes(filtros.cliente)) &&
+        (!filtros.visit_type || v.visit_type === filtros.visit_type) &&
+        (!filtros.status || v.status === filtros.status) &&
+        (!filtros.prioridade || v.priority_level === filtros.prioridade) &&
+        (!filtros.localizacao || v.location_status === filtros.localizacao);
+
+      return matchSearch && matchFiltros;
+    });
+  }, [visitasMes, searchQuery, filtros]);
 
   const dias = useMemo(() => getDiasDoMes(anoRef, mesRef), [anoRef, mesRef]);
 
@@ -211,18 +247,18 @@ export default function AgendaMensal() {
 
   const exportarCSV = () => {
     try {
-      const linhas = [['Data','Dia da Semana','Tipo','Cliente','Local','Status','Notas']];
+      const linhas = [['Data','Dia da Semana','Tipo','Cliente','Local','Status','Tipo Ação','Prioridade','Notas']];
       dias.forEach(d => {
         if (isDiaFolga(d)) return;
         const key = d.toISOString().split('T')[0];
-        const vs = visitasPorDia[key] || [];
+        const vs = (visitasPorDia[key] || []).filter(v => visitasFiltradas.find(vf => vf.id === v.id));
         const tipodia = isDiaEscritorio(d) ? 'Escritório' : 'Campo';
         if (vs.length === 0) {
-          linhas.push([d.toLocaleDateString('pt-BR'), DIAS_SEMANA[d.getDay()], tipodia, isDiaEscritorio(d) ? 'Follow-up/Relatório' : 'Livre', '', '', '']);
+          linhas.push([d.toLocaleDateString('pt-BR'), DIAS_SEMANA[d.getDay()], tipodia, isDiaEscritorio(d) ? 'Follow-up/Relatório' : 'Livre', '', '', '', '', '']);
         } else {
           vs.forEach(v => linhas.push([
             d.toLocaleDateString('pt-BR'), DIAS_SEMANA[d.getDay()], tipodia,
-            v.client_name, v.location || '', v.status, v.notes || ''
+            v.client_name, v.location || '', v.status, v.visit_type || '', v.priority_level || '', v.notes || ''
           ]));
         }
       });
@@ -255,7 +291,54 @@ export default function AgendaMensal() {
   const prevMes = () => { if (mesRef === 0) { setMesRef(11); setAnoRef(a => a - 1); } else setMesRef(m => m - 1); setDiaSelecionado(null); };
   const nextMes = () => { if (mesRef === 11) { setMesRef(0); setAnoRef(a => a + 1); } else setMesRef(m => m + 1); setDiaSelecionado(null); };
 
-  const visitasDiaSel = diaSelecionado ? (visitasPorDia[diaSelecionado.toISOString().split('T')[0]] || []) : [];
+  const visitasDiaSel = diaSelecionado ? (visitasPorDia[diaSelecionado.toISOString().split('T')[0]] || []).filter(v => visitasFiltradas.find(vf => vf.id === v.id)) : [];
+
+  // Semana atual (segunda a sexta)
+  const getSemanaAtual = () => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Ajusta para segunda
+    const segunda = new Date(today.setDate(diff));
+    const dias = [];
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(segunda);
+      d.setDate(d.getDate() + i);
+      dias.push(d);
+    }
+    return dias;
+  };
+
+  const diasSemana = viewMode === 'semanal' ? getSemanaAtual() : [];
+
+  // Confirmar alteração de visita
+  const executarAlteracao = async () => {
+    if (!confirmModal.acao || !confirmModal.visitId) return;
+    try {
+      const update = { id: confirmModal.visitId, ...confirmModal.dados };
+      await base44.entities.Visit.update(confirmModal.visitId, confirmModal.dados);
+      
+      // Adicionar histórico nas notes
+      const visitAtual = visitasMes.find(v => v.id === confirmModal.visitId);
+      if (visitAtual) {
+        const data = new Date().toLocaleString('pt-BR');
+        const novasNotes = (visitAtual.notes || '') + `\n[${data}] ${confirmModal.acao}`;
+        await base44.entities.Visit.update(confirmModal.visitId, { notes: novasNotes });
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['agenda-visits', mesRef, anoRef] });
+      toast.success(`Alteração confirmada: ${confirmModal.acao}`);
+      setConfirmModal({ open: false, acao: null, visitId: null, dados: null });
+    } catch (err) {
+      console.error('Erro ao alterar visita:', err);
+      toast.error('Erro ao confirmar alteração.');
+    }
+  };
+
+  // Copiar endereço
+  const copiarEndereco = (location) => {
+    navigator.clipboard.writeText(location || '');
+    toast.success('Endereço copiado!');
+  };
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -277,21 +360,117 @@ export default function AgendaMensal() {
       </div>
 
       <div className="px-2 sm:px-4 -mt-2 space-y-3 pt-2">
-         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <Button onClick={gerarAgendaAutomatica} disabled={gerando} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">
-            {gerando ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
-            Gerar Agenda do Mês
-          </Button>
-          <Button onClick={abrirRotaDoDia} variant="outline" className="font-bold text-xs">
-            <Navigation className="w-3 h-3 mr-1" /> Rota do Dia
-          </Button>
-          <Button onClick={gerarPDF} variant="outline" className="font-bold text-xs">
-            <Download className="w-3 h-3 mr-1" /> PDF
-          </Button>
-          <Button onClick={exportarCSV} variant="outline" className="font-bold text-xs">
-            <Download className="w-3 h-3 mr-1" /> Excel/CSV
-          </Button>
-        </div>
+        {/* BLOCO 2: Busca e Filtros */}
+        <div className="space-y-2">
+         <div className="flex gap-2">
+           <div className="flex-1 relative">
+             <Search className="absolute left-2 top-2 w-4 h-4 text-slate-400" />
+             <input
+               type="text"
+               placeholder="Buscar cliente, cidade, observação…"
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+             />
+           </div>
+           <Button
+             onClick={() => setShowFilters(!showFilters)}
+             variant="outline"
+             size="sm"
+             className="text-xs"
+           >
+             <Filter className="w-3 h-3 mr-1" /> Filtros
+           </Button>
+         </div>
+
+         {showFilters && (
+           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-2 bg-slate-50 rounded-lg">
+             <select
+               value={filtros.cidade}
+               onChange={(e) => setFiltros({ ...filtros, cidade: e.target.value })}
+               className="text-xs p-1 border rounded"
+             >
+               <option value="">Todas cidades</option>
+               {[...new Set(visitasMes.map(v => v.location || ''))].filter(Boolean).map(c => (
+                 <option key={c} value={c}>{c}</option>
+               ))}
+             </select>
+             <select
+               value={filtros.visit_type}
+               onChange={(e) => setFiltros({ ...filtros, visit_type: e.target.value })}
+               className="text-xs p-1 border rounded"
+             >
+               <option value="">Todos tipos</option>
+               {[...new Set(visitasMes.map(v => v.visit_type || ''))].filter(Boolean).map(t => (
+                 <option key={t} value={t}>{t}</option>
+               ))}
+             </select>
+             <select
+               value={filtros.status}
+               onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+               className="text-xs p-1 border rounded"
+             >
+               <option value="">Todos status</option>
+               <option value="agendada">Agendada</option>
+               <option value="realizada">Realizada</option>
+               <option value="cancelada">Cancelada</option>
+             </select>
+             <select
+               value={filtros.localizacao}
+               onChange={(e) => setFiltros({ ...filtros, localizacao: e.target.value })}
+               className="text-xs p-1 border rounded"
+             >
+               <option value="">Loc. não filtrada</option>
+               <option value="confirmado">Confirmada</option>
+               <option value="aproximado">Aproximada</option>
+               <option value="pendente">Pendente</option>
+             </select>
+             <Button
+               onClick={() => setFiltros({ cidade: '', cliente: '', visit_type: '', status: '', prioridade: '', localizacao: '' })}
+               variant="ghost"
+               size="sm"
+               className="text-xs col-span-2 sm:col-span-1"
+             >
+               <X className="w-3 h-3 mr-1" /> Limpar
+             </Button>
+           </div>
+         )}
+       </div>
+
+       {/* Alternância Mensal/Semanal */}
+       <div className="flex gap-2">
+         <Button
+           onClick={() => setViewMode('mensal')}
+           variant={viewMode === 'mensal' ? 'default' : 'outline'}
+           className="text-xs font-bold"
+         >
+           Mensal
+         </Button>
+         <Button
+           onClick={() => setViewMode('semanal')}
+           variant={viewMode === 'semanal' ? 'default' : 'outline'}
+           className="text-xs font-bold"
+         >
+           Semanal
+         </Button>
+       </div>
+
+       {/* Botões principais */}
+       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+         <Button onClick={gerarAgendaAutomatica} disabled={gerando} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">
+           {gerando ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+           Gerar Agenda do Mês
+         </Button>
+         <Button onClick={abrirRotaDoDia} variant="outline" className="font-bold text-xs">
+           <Navigation className="w-3 h-3 mr-1" /> Rota do Dia
+         </Button>
+         <Button onClick={gerarPDF} variant="outline" className="font-bold text-xs">
+           <Download className="w-3 h-3 mr-1" /> PDF
+         </Button>
+         <Button onClick={exportarCSV} variant="outline" className="font-bold text-xs">
+           <Download className="w-3 h-3 mr-1" /> Excel/CSV
+         </Button>
+       </div>
 
         {/* Calendário */}
         <Card>
@@ -378,44 +557,61 @@ export default function AgendaMensal() {
                 visitasDiaSel.map(v => {
                     const colors = getVisitColor(v.visit_type);
                     return (
-                      <Link key={v.id} to={`/ClientProfile?id=${v.client_id}`}>
-                        <div className={`p-3 sm:p-4 rounded-lg border-2 transition-all hover:shadow-md ${colors.bg} ${colors.border}`}>
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-slate-800">{v.client_name}</p>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <Badge className={colors.badge}>
-                                  {colors.icon} {v.visit_type || 'Visita'}
-                                </Badge>
-                                <Badge className={STATUS_COLORS[v.status] || 'bg-slate-100 text-slate-600'} variant="secondary">
-                                  {v.status}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          {v.location && (
-                            <p className="text-xs text-slate-600 flex items-center gap-1 mb-2">
-                              <MapPin className="w-3 h-3" /><strong>{v.location}</strong>
-                            </p>
-                          )}
-                          {v.notes && <p className="text-xs text-slate-500 mb-2 line-clamp-2">{v.notes}</p>}
-                          {v.location && (
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.location)}`}
-                              target="_blank" rel="noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700"
-                            >
-                              <ExternalLink className="w-3 h-3" /> Abrir no Maps
-                            </a>
-                          )}
-                        </div>
-                      </Link>
+                      <VisitCardExpandido
+                        key={v.id}
+                        visit={v}
+                        colors={colors}
+                        statusColors={STATUS_COLORS}
+                        onConfirm={(config) => setConfirmModal({ open: true, ...config })}
+                      />
                     );
                   })
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* BLOCO 2: Visão Semanal */}
+        {viewMode === 'semanal' && (
+          <div className="space-y-2">
+            {diasSemana.map(d => {
+              const key = d.toISOString().split('T')[0];
+              const vs = visitasFiltradas.filter(v => new Date(v.scheduled_date).toISOString().split('T')[0] === key);
+              const tipodia = isDiaEscritorio(d) ? 'Escritório' : 'Campo';
+              const corTipo = isDiaEscritorio(d) ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200';
+              return (
+                <Card key={key} className={corTipo}>
+                  <CardHeader className="pb-2 pt-3">
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      <span>{DIAS_SEMANA[d.getDay()]} — {d.toLocaleDateString('pt-BR')}</span>
+                      <Badge variant="outline" className="text-xs">{tipodia}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-3 space-y-2">
+                    {isDiaEscritorio(d) ? (
+                      <p className="text-xs text-yellow-700">📝 Follow-up, propostas, relatório e organização.</p>
+                    ) : vs.length === 0 ? (
+                      <p className="text-xs text-slate-400">Nenhuma visita agendada neste dia.</p>
+                    ) : (
+                      vs.map(v => {
+                        const colors = getVisitColor(v.visit_type);
+                        return (
+                          <div key={v.id} className={`p-2 rounded border ${colors.border} ${colors.bg}`}>
+                            <p className="text-xs font-bold">{v.client_name}</p>
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              <Badge className={colors.badge} className="text-xs">{colors.icon} {v.visit_type}</Badge>
+                              <Badge variant="secondary" className="text-xs">{v.status}</Badge>
+                            </div>
+                            {v.location && <p className="text-xs text-slate-600 mt-1">📍 {v.location}</p>}
+                          </div>
+                        );
+                      })
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         )}
 
         {/* Resumo do mês */}
@@ -426,11 +622,11 @@ export default function AgendaMensal() {
           <CardContent className="pb-4">
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-2xl font-black text-indigo-600">{visitasMes.length}</p>
-                <p className="text-xs text-slate-500">Agendadas</p>
+                <p className="text-2xl font-black text-indigo-600">{visitasFiltradas.length}</p>
+                <p className="text-xs text-slate-500">Agendadas (filtradas)</p>
               </div>
               <div>
-                <p className="text-2xl font-black text-green-600">{visitasMes.filter(v => v.status === 'realizada').length}</p>
+                <p className="text-2xl font-black text-green-600">{visitasFiltradas.filter(v => v.status === 'realizada').length}</p>
                 <p className="text-xs text-slate-500">Realizadas</p>
               </div>
               <div>
@@ -440,6 +636,14 @@ export default function AgendaMensal() {
             </div>
           </CardContent>
         </Card>
+
+        {/* BLOCO 2: Modal de Confirmação */}
+        <ConfirmModalVisita
+          open={confirmModal.open}
+          acao={confirmModal.acao}
+          onConfirm={executarAlteracao}
+          onCancel={() => setConfirmModal({ open: false, acao: null, visitId: null, dados: null })}
+        />
       </div>
     </div>
   );
