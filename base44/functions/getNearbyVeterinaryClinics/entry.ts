@@ -8,6 +8,14 @@ Deno.serve(async (req) => {
 
         const body = await req.json().catch(() => ({}));
         console.log('[getNearbyVeterinaryClinics] payload recebido:', JSON.stringify(body));
+        console.error('CAÇA COMERCIAL', {
+            cidade: body.city,
+            latitude: body.latitude,
+            longitude: body.longitude,
+            raio: body.radiusKm,
+            endpoint: 'getNearbyVeterinaryClinics',
+            payload: body,
+        });
 
         const { latitude, longitude, city, state, radiusKm = 20 } = body;
 

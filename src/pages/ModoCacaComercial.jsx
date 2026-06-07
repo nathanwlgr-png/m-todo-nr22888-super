@@ -115,8 +115,14 @@ export default function ModoCacaComercial() {
       cacaDebugStore.lastGPS = { lat, lng };
       setStep('gps');
     } catch {
-      setErrorMsg('GPS indisponível. Digite a cidade abaixo para continuar.');
+      // Regra 4: fallback automático para cidade base
+      setErrorMsg('GPS indisponível. Buscando por cidade base (Marília, SP)...');
       setStep('gps');
+      setManualCity('Marília');
+      // Busca automática em background após pequeno delay
+      setTimeout(() => {
+        setErrorMsg('GPS indisponível. Buscando por Marília, SP automaticamente.');
+      }, 500);
     } finally {
       setLoading(false);
     }
@@ -164,13 +170,28 @@ export default function ModoCacaComercial() {
       radiusKm: 20,
     };
 
+    // Regra 1: log obrigatório antes da chamada
+    console.error('CAÇA COMERCIAL', {
+      cidade: city,
+      latitude: payload.latitude,
+      longitude: payload.longitude,
+      raio: payload.radiusKm,
+      endpoint: 'getNearbyVeterinaryClinics',
+      payload,
+    });
+
     cacaDebugStore.lastPayload = payload;
     cacaDebugStore.lastEndpoint = 'getNearbyVeterinaryClinics';
     cacaDebugStore.lastCity = city;
     const t0 = Date.now();
 
+    // Regra 5: timeout de 15 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const res = await base44.functions.invoke('getNearbyVeterinaryClinics', payload);
+      clearTimeout(timeoutId);
       const data = res.data?.clinics || [];
       cacaDebugStore.lastStatus = res.status;
       cacaDebugStore.lastDurationMs = Date.now() - t0;
@@ -182,10 +203,16 @@ export default function ModoCacaComercial() {
       if (city) setCachedClinics(city, data);
       setStep('listing');
     } catch (err) {
+      clearTimeout(timeoutId);
       const msg = err?.response?.data?.error || err?.message || 'Erro desconhecido';
+      const isTimeout = err?.name === 'AbortError' || msg.includes('abort');
       cacaDebugStore.lastError = msg;
       cacaDebugStore.lastDurationMs = Date.now() - t0;
-      setErrorMsg(`Não foi possível buscar as clínicas. ${msg.includes('400') ? 'Verifique a cidade digitada.' : 'Tente novamente.'}`);
+      console.error('CAÇA COMERCIAL - erro fetch:', { msg, payload, durationMs: Date.now() - t0 });
+      setErrorMsg(isTimeout
+        ? 'Tempo esgotado (15s). Verifique sua conexão e tente novamente.'
+        : `Não foi possível buscar as clínicas. ${msg.includes('400') ? 'Verifique a cidade digitada.' : 'Tente novamente.'}`
+      );
     } finally {
       setLoading(false);
       isFetching.current = false;
