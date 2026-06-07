@@ -1,11 +1,20 @@
 {
-  "name": "vendas_supremo",
   "description": "\u26a0\ufe0f DESCONTINUADO \u2014 Use o whatsapp_master_agent_NR22888. Este agente foi unificado e todas as fun\u00e7\u00f5es foram migradas.",
   "instructions": "Este agente foi UNIFICADO no whatsapp_master_agent_NR22888. Por favor, use apenas o agente mestre que cont\u00e9m todas as funcionalidades deste agente e muito mais.\n\nResponda ao usu\u00e1rio:\n'Este agente foi unificado no NR22888 Principal. Vou continuar seu atendimento pelo agente mestre.'",
   "tool_configs": [],
-  "model": "claude_sonnet_4_6",
+  "model": "gpt_5_5",
   "whatsapp_greeting": "\u26a0\ufe0f Este agente foi unificado.\n\nUse o agente principal: *NR22888 Agente Mestre Unificado*\n\nEle cont\u00e9m TUDO que este tinha + muito mais.\n\n\ud83d\udd25 Acesse: whatsapp_master_agent_NR22888",
   "memory_config": {
-    "enabled": false
-  }
+    "enabled": false,
+    "scope": "both",
+    "include_other_conversation_context": false,
+    "instructions": null
+  },
+  "context_files": [],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "telegram_greeting": "",
+  "line_greeting": "",
+  "name": "vendas_supremo"
 }
