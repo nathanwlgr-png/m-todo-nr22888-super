@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   FileText, Download, Loader2, Calendar, Target,
-  TrendingUp, DollarSign, AlertTriangle, CheckCircle, ArrowLeft
+  TrendingUp, DollarSign, AlertTriangle, CheckCircle, ArrowLeft, Users, MapPin
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -14,6 +14,8 @@ import jsPDF from 'jspdf';
 
 const MES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const safeQuery = (fn) => fn().catch(() => []);
 
 export default function RelatorioRicardo() {
   const now = new Date();
@@ -23,22 +25,22 @@ export default function RelatorioRicardo() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['relatorio-clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 300),
+    queryFn: () => safeQuery(() => base44.entities.Client.list('-updated_date', 300)),
     staleTime: 60000,
   });
   const { data: visits = [] } = useQuery({
     queryKey: ['relatorio-visits'],
-    queryFn: () => base44.entities.Visit.list('-scheduled_date', 200),
+    queryFn: () => safeQuery(() => base44.entities.Visit.list('-scheduled_date', 200)),
     staleTime: 60000,
   });
   const { data: sales = [] } = useQuery({
     queryKey: ['relatorio-sales'],
-    queryFn: () => base44.entities.Sale.list('-sale_date', 200),
+    queryFn: () => safeQuery(() => base44.entities.Sale.list('-sale_date', 200)),
     staleTime: 60000,
   });
   const { data: leads = [] } = useQuery({
     queryKey: ['relatorio-leads'],
-    queryFn: () => base44.entities.Lead.list('-created_date', 200),
+    queryFn: () => safeQuery(() => base44.entities.Lead.list('-created_date', 200)),
     staleTime: 60000,
   });
 
@@ -54,14 +56,34 @@ export default function RelatorioRicardo() {
     const receitaMes = fechamentos.reduce((a, s) => a + (s.sale_value || 0), 0);
     const propostasAbertas = clients.filter(c => ['proposta','negociacao'].includes(c.pipeline_stage));
     const clientesQuentes = clients.filter(c => c.status === 'quente');
-    const clientesParados30 = clients.filter(c => {
+
+    const diasSemContato = (c, dias) => {
       if (!c.last_contact_date) return true;
-      return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 30;
-    });
-    const clientesParados60 = clients.filter(c => {
-      if (!c.last_contact_date) return true;
-      return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 60;
-    });
+      return (Date.now() - new Date(c.last_contact_date)) / 86400000 > dias;
+    };
+    const clientesParados30 = clients.filter(c => diasSemContato(c, 30)).slice(0, 10);
+    const clientesParados60 = clients.filter(c => diasSemContato(c, 60)).slice(0, 5);
+    const clientesParados90 = clients.filter(c => diasSemContato(c, 90)).slice(0, 5);
+
+    // Cidades trabalhadas no mês
+    const cidadesMes = [...new Set(visitasMes.map(v => v.location).filter(Boolean))];
+
+    // Próximas cidades sugeridas (por score)
+    const cidadesSugeridas = Object.entries(
+      clients.reduce((acc, c) => {
+        const cidade = c.city || '';
+        if (!cidade) return acc;
+        if (!acc[cidade]) acc[cidade] = 0;
+        acc[cidade] += (c.purchase_score || 0);
+        return acc;
+      }, {})
+    ).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
+
+    const topOportunidades = clients
+      .filter(c => ['proposta','negociacao'].includes(c.pipeline_stage))
+      .sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0))
+      .slice(0, 5);
+
     const proxMes = mesRef === 11 ? 0 : mesRef + 1;
     const proxAno = mesRef === 11 ? anoRef + 1 : anoRef;
 
@@ -75,13 +97,13 @@ export default function RelatorioRicardo() {
       receitaMes,
       propostasAbertas,
       clientesQuentes,
-      clientesParados30: clientesParados30.slice(0, 10),
-      clientesParados60: clientesParados60.slice(0, 5),
+      clientesParados30,
+      clientesParados60,
+      clientesParados90,
+      cidadesMes,
+      cidadesSugeridas,
+      topOportunidades,
       proximoMes: `${MES_NOMES[proxMes]}/${proxAno}`,
-      topOportunidades: clients
-        .filter(c => c.pipeline_stage === 'proposta' || c.pipeline_stage === 'negociacao')
-        .sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0))
-        .slice(0, 5),
     };
   }, [clients, visits, sales, leads, mesRef, anoRef]);
 
@@ -89,83 +111,119 @@ export default function RelatorioRicardo() {
     setGerando(true);
     try {
       const doc = new jsPDF();
-      const lineH = 8;
-      let y = 20;
-      const linha = (txt, size = 11, bold = false) => {
+      let y = 18;
+      const linha = (txt, size = 10, bold = false) => {
         doc.setFontSize(size);
         doc.setFont('helvetica', bold ? 'bold' : 'normal');
-        doc.text(txt, 15, y);
-        y += lineH;
+        const linhas = doc.splitTextToSize(txt, 180);
+        linhas.forEach(l => {
+          if (y > 275) { doc.addPage(); y = 18; }
+          doc.text(l, 15, y);
+          y += size * 0.45;
+        });
+        y += 1;
       };
-      const sep = () => { doc.setDrawColor(200); doc.line(15, y, 195, y); y += 4; };
+      const sep = () => { if (y > 275) { doc.addPage(); y = 18; } doc.setDrawColor(200); doc.line(15, y, 195, y); y += 5; };
 
-      linha('RELATÓRIO MENSAL — NR22888 / SEAMATY', 16, true);
-      linha(`Período: ${dados.periodo}`, 12, true);
-      linha(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10);
+      linha('RELATÓRIO COMERCIAL MENSAL — SEAMATY BRASIL', 15, true);
+      linha(`Período: ${dados.periodo}`, 11, true);
+      linha(`Responsável: Nathan Rosa — Consultor Técnico Comercial`, 10);
+      linha(`Destinatário: Ricardo`, 10);
+      linha(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 9);
       sep();
-      linha('1. RESUMO EXECUTIVO', 13, true);
+
+      linha('1. RESUMO EXECUTIVO', 12, true);
       linha(`Visitas Agendadas: ${dados.visitasAgendadas}`);
       linha(`Visitas Realizadas: ${dados.visitasRealizadas}`);
-      linha(`Prospecções: ${dados.prospeccoes}`);
+      linha(`Prospecções Realizadas: ${dados.prospeccoes}`);
       linha(`Propostas Enviadas: ${dados.propostasEnviadas}`);
       linha(`Fechamentos: ${dados.fechamentos}`);
       linha(`Receita do Mês: R$ ${dados.receitaMes.toLocaleString('pt-BR')}`);
+      linha(`Clientes Quentes: ${dados.clientesQuentes.length}`);
       sep();
-      linha('2. OPORTUNIDADES QUENTES', 13, true);
-      dados.topOportunidades.forEach(c => linha(`  • ${c.first_name || c.full_name} — ${c.clinic_name || ''} — Score: ${c.purchase_score || 0}`));
+
+      linha('2. OPORTUNIDADES ABERTAS', 12, true);
+      dados.topOportunidades.forEach(c => linha(`  • ${c.first_name || c.full_name} — ${c.clinic_name || ''} — Score: ${c.purchase_score || 0} — ${c.pipeline_stage}`));
       if (!dados.topOportunidades.length) linha('  Nenhuma oportunidade em proposta/negociação.');
       sep();
-      linha('3. CLIENTES PARADOS (+30 dias)', 13, true);
-      dados.clientesParados30.slice(0, 8).forEach(c => {
+
+      linha('3. CLIENTES PARADOS', 12, true);
+      linha(`  +30 dias sem contato: ${dados.clientesParados30.length}`, 10, true);
+      dados.clientesParados30.slice(0, 6).forEach(c => {
         const dias = c.last_contact_date ? Math.round((Date.now() - new Date(c.last_contact_date)) / 86400000) : 999;
-        linha(`  • ${c.first_name || c.full_name} — ${c.city || ''} — ${dias}d sem contato`);
+        linha(`    • ${c.first_name || c.full_name} — ${c.city || ''} — ${dias === 999 ? 'Nunca' : dias + 'd'}`);
       });
+      linha(`  +60 dias sem contato: ${dados.clientesParados60.length}`, 10, true);
+      linha(`  +90 dias sem contato: ${dados.clientesParados90.length}`, 10, true);
       sep();
-      linha('4. PRÓXIMAS AÇÕES', 13, true);
-      linha(`  • Ligar para ${dados.clientesParados30.length} clientes parados +30d`);
+
+      linha('4. CIDADES TRABALHADAS NO MÊS', 12, true);
+      linha(dados.cidadesMes.length ? dados.cidadesMes.join(', ') : 'Não registradas');
+      linha('5. PRÓXIMAS CIDADES SUGERIDAS', 12, true);
+      linha(dados.cidadesSugeridas.length ? dados.cidadesSugeridas.join(', ') : 'Analisar base de clientes');
+      sep();
+
+      linha('6. PRÓXIMAS AÇÕES SUGERIDAS', 12, true);
+      linha(`  • Ligar para ${dados.clientesParados30.length} clientes sem contato há +30 dias`);
       linha(`  • Acompanhar ${dados.propostasAbertas.length} propostas abertas`);
-      linha(`  • Retomar ${dados.clientesParados60.length} clientes parados +60d`);
+      linha(`  • Prospectar novas clínicas nas cidades: ${dados.cidadesSugeridas.slice(0, 3).join(', ') || 'Marília, Bauru, Lins'}`);
+      linha(`  • Reativar ${dados.clientesParados60.length} clientes parados há +60 dias`);
       sep();
-      linha(`5. AGENDA — ${dados.proximoMes}`, 13, true);
-      linha('  Seg–Qui: Visitas externas 8h–18h por cidade');
-      linha('  Sexta: Follow-up, propostas e relatório');
-      doc.save(`Relatorio_${MES_NOMES[mesRef]}_${anoRef}.pdf`);
-      toast.success('PDF gerado!');
+
+      linha(`7. AGENDA SUGERIDA — ${dados.proximoMes}`, 12, true);
+      linha('  Seg a Qui: Visitas externas 08h–18h, agrupadas por cidade (máx. 5/dia)');
+      linha('  Sexta: Follow-up, propostas, CRM e relatório interno');
+      linha(`  Prioridade de visita: ${dados.topOportunidades.map(c => c.city).filter(Boolean).join(', ') || 'Definir por score'}`);
+
+      doc.save(`Relatorio_Ricardo_Seamaty_${MES_NOMES[mesRef]}_${anoRef}.pdf`);
+      toast.success('PDF gerado com sucesso!');
     } catch (err) {
       console.error('Erro PDF:', err);
-      toast.error('Erro ao gerar PDF.');
+      toast.error('Erro ao gerar PDF. Tente novamente.');
     } finally {
       setGerando(false);
     }
   };
 
   const exportarCSV = () => {
-    const linhas = [
-      ['Métrica','Valor'],
-      ['Período', dados.periodo],
-      ['Visitas Agendadas', dados.visitasAgendadas],
-      ['Visitas Realizadas', dados.visitasRealizadas],
-      ['Prospecções', dados.prospeccoes],
-      ['Propostas Enviadas', dados.propostasEnviadas],
-      ['Fechamentos', dados.fechamentos],
-      ['Receita Mês (R$)', dados.receitaMes],
-      ['Clientes Quentes', dados.clientesQuentes.length],
-      ['Propostas Abertas', dados.propostasAbertas.length],
-      ['Parados +30d', dados.clientesParados30.length],
-    ];
-    const csv = linhas.map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Relatorio_${MES_NOMES[mesRef]}_${anoRef}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('CSV exportado!');
+    try {
+      const sep = ';';
+      const linhas = [
+        ['Métrica', 'Valor'],
+        ['Período', dados.periodo],
+        ['Responsável', 'Nathan Rosa'],
+        ['Destinatário', 'Ricardo'],
+        ['Visitas Agendadas', dados.visitasAgendadas],
+        ['Visitas Realizadas', dados.visitasRealizadas],
+        ['Prospecções', dados.prospeccoes],
+        ['Propostas Enviadas', dados.propostasEnviadas],
+        ['Fechamentos', dados.fechamentos],
+        ['Receita Mês (R$)', dados.receitaMes],
+        ['Clientes Quentes', dados.clientesQuentes.length],
+        ['Propostas Abertas', dados.propostasAbertas.length],
+        ['Parados +30d', dados.clientesParados30.length],
+        ['Parados +60d', dados.clientesParados60.length],
+        ['Parados +90d', dados.clientesParados90.length],
+        ['Cidades Trabalhadas', dados.cidadesMes.join(', ')],
+        ['Cidades Sugeridas', dados.cidadesSugeridas.join(', ')],
+      ];
+      const csv = '\uFEFF' + linhas.map(r => r.join(sep)).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Relatorio_Ricardo_Seamaty_${MES_NOMES[mesRef]}_${anoRef}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV exportado! Abra com Excel.');
+    } catch (err) {
+      console.error('Erro CSV:', err);
+      toast.error('Erro ao exportar CSV.');
+    }
   };
 
   const kpis = [
-    { label: 'Visitas Realizadas', value: dados.visitasRealizadas, Ic: CheckCircle, color: 'text-green-600' },
+    { label: 'Realizadas', value: dados.visitasRealizadas, Ic: CheckCircle, color: 'text-green-600' },
     { label: 'Fechamentos', value: dados.fechamentos, Ic: Target, color: 'text-blue-600' },
     { label: 'Receita', value: `R$${(dados.receitaMes / 1000).toFixed(0)}k`, Ic: DollarSign, color: 'text-emerald-600' },
   ];
@@ -181,9 +239,9 @@ export default function RelatorioRicardo() {
           </Link>
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-yellow-300" /> Relatório do Ricardo
+              <FileText className="w-5 h-5 text-yellow-300" /> Relatório Comercial Mensal
             </h1>
-            <p className="text-indigo-200 text-xs">Relatório mensal pronto para entregar todo dia 3</p>
+            <p className="text-indigo-200 text-xs">Seamaty Brasil — Nathan Rosa → Ricardo</p>
           </div>
         </div>
         <div className="flex gap-2 items-center bg-white/10 rounded-xl p-2">
@@ -202,10 +260,10 @@ export default function RelatorioRicardo() {
         <div className="flex gap-2 pt-3">
           <Button onClick={gerarPDF} disabled={gerando} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold">
             {gerando ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
-            Exportar PDF
+            PDF
           </Button>
           <Button onClick={exportarCSV} variant="outline" className="flex-1 font-bold">
-            <Download className="w-4 h-4 mr-2" /> Exportar CSV
+            <Download className="w-4 h-4 mr-2" /> CSV/Excel
           </Button>
         </div>
 
@@ -237,12 +295,33 @@ export default function RelatorioRicardo() {
               { label: 'Propostas Abertas', value: dados.propostasAbertas.length },
               { label: 'Clientes Quentes', value: dados.clientesQuentes.length },
               { label: 'Parados +30d', value: dados.clientesParados30.length },
+              { label: 'Parados +60d', value: dados.clientesParados60.length },
+              { label: 'Parados +90d', value: dados.clientesParados90.length },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between items-center py-1 border-b border-slate-100 last:border-0">
                 <span className="text-sm text-slate-600">{label}</span>
                 <Badge variant="outline" className="font-bold">{value}</Badge>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Cidades */}
+        <Card>
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-purple-500" /> Cidades
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4 space-y-2">
+            <div>
+              <p className="text-xs font-bold text-slate-500 mb-1">Trabalhadas em {dados.periodo}:</p>
+              <p className="text-sm text-slate-700">{dados.cidadesMes.join(', ') || 'Não registradas'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 mb-1">Sugeridas para {dados.proximoMes}:</p>
+              <p className="text-sm text-slate-700">{dados.cidadesSugeridas.join(', ') || 'Analisar base'}</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -311,12 +390,17 @@ export default function RelatorioRicardo() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4 space-y-1.5">
-            <p className="text-xs text-indigo-600">• <strong>Seg/Ter/Qua/Qui:</strong> Visitas externas 8h–18h por cidade</p>
-            <p className="text-xs text-indigo-600">• <strong>Sexta:</strong> Follow-up, propostas e relatório</p>
+            <p className="text-xs text-indigo-600">• <strong>Seg–Qui:</strong> Visitas externas 08h–18h, agrupadas por cidade (máx. 5/dia)</p>
+            <p className="text-xs text-indigo-600">• <strong>Sexta:</strong> Follow-up, propostas, CRM e relatório interno</p>
             <p className="text-xs text-indigo-600">• <strong>Prioridade:</strong> {dados.propostasAbertas.length} propostas abertas primeiro</p>
             <p className="text-xs text-indigo-600">• <strong>Reativar:</strong> {dados.clientesParados30.length} clientes parados há +30 dias</p>
+            <p className="text-xs text-indigo-600">• <strong>Cidades alvo:</strong> {dados.cidadesSugeridas.slice(0, 3).join(', ') || 'Definir por score'}</p>
           </CardContent>
         </Card>
+
+        <div className="text-center pb-4">
+          <p className="text-xs text-slate-400">Nathan Rosa · Consultor Técnico Comercial · Seamaty Brasil</p>
+        </div>
       </div>
     </div>
   );
