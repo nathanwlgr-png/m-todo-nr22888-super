@@ -8,10 +8,9 @@ import {
   Zap, ChevronRight, Globe, Instagram, Lightbulb, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import SeamatyOpportunityCard from '@/components/SeamatyOpportunityCard';
-import SeamatyEquipmentOpportunity from '@/components/SeamatyEquipmentOpportunity';
 import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 import WhatsAppRapido from '@/components/WhatsAppRapido';
+import SeamatyEquipmentPanel from '@/components/SeamatyEquipmentPanel';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -205,11 +204,8 @@ export default function ClientProfile() {
       </div>
 
       <div className="px-4 space-y-3">
-        {/* OPORTUNIDADE SEAMATY */}
-        <SeamatyOpportunityCard clientId={clientId} />
-
-        {/* EQUIPAMENTOS E UPGRADES SEAMATY */}
-        <SeamatyEquipmentOpportunity client={client} />
+        {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
+        <SeamatyEquipmentPanel client={client} />
 
         {/* Dados básicos */}
         <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
