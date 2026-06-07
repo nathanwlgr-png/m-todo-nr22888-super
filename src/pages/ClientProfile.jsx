@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner';
 import SeamatyOpportunityCard from '@/components/SeamatyOpportunityCard';
 import WhatsAppSendModal from '@/components/WhatsAppSendModal';
+import WhatsAppRapido from '@/components/WhatsAppRapido';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -365,6 +366,9 @@ export default function ClientProfile() {
             <p className="text-sm font-bold text-white">{client.next_action}</p>
           </div>
         )}
+
+        {/* WhatsApp Rápido */}
+        <WhatsAppRapido client={client} />
 
         {/* Links de ação */}
         <div className="grid grid-cols-2 gap-2">

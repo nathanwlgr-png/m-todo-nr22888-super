@@ -58,6 +58,8 @@ const CentralIAMaster = lazy(() => import('./pages/CentralIAMaster'));
 const ModoInvestigativoSupremo = lazy(() => import('./pages/ModoInvestigativoSupremo'));
 const DashboardSniper = lazy(() => import('./pages/DashboardSniper'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
+const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
+const AgendaMensal = lazy(() => import('./pages/AgendaMensal'));
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -186,6 +188,8 @@ const AuthenticatedApp = () => {
         <Route path="/ExecutiveLayerCEO" element={<LayoutWrapper currentPageName="ExecutiveLayerCEO"><ExecutiveLayerCEO /></LayoutWrapper>} />
         <Route path="/ClientLocationMap" element={<LayoutWrapper currentPageName="ClientLocationMap"><ClientLocationMap /></LayoutWrapper>} />
         <Route path="/debug-caca" element={<DebugCaca />} />
+        <Route path="/RelatorioRicardo" element={<LayoutWrapper currentPageName="RelatorioRicardo"><RelatorioRicardo /></LayoutWrapper>} />
+        <Route path="/AgendaMensal" element={<LayoutWrapper currentPageName="AgendaMensal"><AgendaMensal /></LayoutWrapper>} />
 
         {/* ── ROTAS LEGACY → Consolidadas ── */}
         <Route path="/PossibleSales" element={<Navigate to="/" replace />} />
