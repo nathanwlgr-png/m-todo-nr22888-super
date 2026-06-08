@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
+const ExportClinicReportWithROI = lazy(() => import('@/components/ExportClinicReportWithROI'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3 bg-[#111111]" />;
 
@@ -164,6 +165,14 @@ export default function DashboardSniper() {
               <span className="text-xs font-black text-amber-400">🗺️ Rota do Dia</span>
             </div>
           </Link>
+        </div>
+
+        {/* Exportar Relatório de ROI */}
+        <div className="rounded-xl p-3 bg-[#0f0f11] border border-green-500/30">
+          <p className="text-xs font-black text-green-400 mb-2">💹 Relatório de Clínicas</p>
+          <Suspense fallback={<div className="h-10 animate-pulse rounded" />}>
+            <ExportClinicReportWithROI />
+          </Suspense>
         </div>
 
         {/* Sniper do Dia */}
