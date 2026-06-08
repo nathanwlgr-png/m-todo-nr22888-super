@@ -5,6 +5,8 @@ import {
   Brain, Zap, Users, MessageSquare, Camera, Route,
   Search, Hash, Copy, Check, Loader2, ChevronRight, AlertCircle
 } from 'lucide-react';
+import { getCurrentGPS, openSafeMaps } from '@/utils/locationSafe';
+import { toast } from 'sonner';
 
 const ACTIONS = [
   { id: 'briefing',       label: 'Briefing Diário',       icon: Zap,          color: '#ff6b00', desc: 'Top 5 ações do dia, rota sugerida e postagem Instagram' },
@@ -74,11 +76,23 @@ export default function CentralIAMaster() {
     setCopied(false);
 
     let location = null;
-    if (useGPS && navigator.geolocation) {
+    if (useGPS) {
+      const gpsResult = await getCurrentGPS(8000);
+      if (gpsResult.ok) {
+        location = { lat: gpsResult.lat, lng: gpsResult.lng, accuracy: gpsResult.accuracy };
+      }
+    }
+
+    // Modo Rota Inteligente — fallback seguro
+    if (selectedAction === 'route' && !message.trim()) {
       try {
-        const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
-        location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      } catch { /* GPS indisponível — continuar sem */ }
+        openSafeMaps(location || { city: 'Marília, SP' }, null);
+        setResult('✅ Rota aberta no Google Maps com modo seguro (sem GPS).');
+        setLoading(false);
+        return;
+      } catch (e) {
+        console.warn('Fallback Maps:', e);
+      }
     }
 
     try {
@@ -90,7 +104,20 @@ export default function CentralIAMaster() {
       });
       setResult(res.data?.response || 'Sem resposta.');
     } catch (e) {
-      setError(e?.response?.data?.error || e.message || 'Erro ao chamar a IA. Verifique se OPENAI_API_KEY está configurada.');
+      const errorMsg = e?.response?.data?.error || e.message || 'Erro ao processar';
+      
+      // Se for 503 ou erro de servidor, usar fallback seguro
+      if (errorMsg.includes('503') || errorMsg.includes('servidor')) {
+        toast.warning('Servidor instável. Ativei modo seguro com Google Maps.');
+        if (selectedAction === 'route') {
+          openSafeMaps(location || { city: message || 'Marília, SP' }, null);
+          setResult('✅ Rota segura aberta no Google Maps.');
+        } else {
+          setError('Modo seguro ativado. Tente novamente em alguns momentos.');
+        }
+      } else {
+        setError(errorMsg);
+      }
     }
     setLoading(false);
   }, [selectedAction, message, clientId, useGPS]);
