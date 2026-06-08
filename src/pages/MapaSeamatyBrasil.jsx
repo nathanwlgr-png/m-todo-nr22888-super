@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { jsPDF } from 'jspdf';
 import {
   Map, Settings, Filter, Phone, MessageSquare, MapPin, Zap,
-  Eye, EyeOff, ChevronRight, ArrowUp, BarChart3, Layers
+  Eye, EyeOff, ChevronRight, ArrowUp, BarChart3, Layers, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -156,6 +157,115 @@ const MapaSeamatyBrasil = () => {
       cidadesMax,
     };
   }, [cidadesFiltradas, pontosFiltrados]);
+
+  // Função para exportar dados
+  const handleExportarDados = useCallback((formato) => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const nomeArquivo = `mapa-territorial-nathan-${timestamp}`;
+
+    if (formato === 'csv') {
+      // Preparar dados das cidades
+      const dadosCidades = cidadesFiltradas.map(c => [
+        c.cidade,
+        c.uf,
+        c.total_clientes || 0,
+        c.total_leads || 0,
+        c.total_clientes_com_equipamento || 0,
+        c.total_clientes_sem_equipamento || 0,
+        c.score_cidade || 0,
+        c.prioridade_cidade || '',
+      ]);
+
+      // Preparar dados dos clientes
+      const dadosClientes = pontosFiltrados.map(p => [
+        p.nome_clinica || '',
+        p.cidade || '',
+        p.uf || '',
+        p.tipo || '',
+        p.responsavel || filtroRepresentante,
+        p.equipamentos_atuais?.join(';') || '',
+        p.score_oportunidade || 0,
+        p.prioridade || '',
+        p.status_funil || '',
+      ]);
+
+      // Montar CSV
+      const csvCidades = [
+        ['CIDADES'],
+        ['Cidade', 'UF', 'Clientes', 'Leads', 'Com Eq.', 'Sem Eq.', 'Score', 'Prioridade'],
+        ...dadosCidades,
+        [''],
+        ['CLIENTES / OPORTUNIDADES'],
+        ['Clínica', 'Cidade', 'UF', 'Tipo', 'Responsável', 'Equipamentos', 'Score', 'Prioridade', 'Status'],
+        ...dadosClientes,
+      ]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
+
+      // Download
+      const blob = new Blob([csvCidades], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${nomeArquivo}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV exportado com sucesso');
+    } else if (formato === 'pdf') {
+      const doc = new jsPDF();
+      
+      doc.setFontSize(14);
+      doc.text('Mapa Territorial Seamaty Brasil', 10, 15);
+      doc.setFontSize(10);
+      doc.text(`Representante: ${filtroRepresentante || 'Todos'}`, 10, 22);
+      doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 10, 28);
+
+      // Resumo
+      let y = 38;
+      doc.setFontSize(11);
+      doc.text('RESUMO', 10, y);
+      y += 6;
+      doc.setFontSize(9);
+      doc.text(`Total de Cidades: ${totais.totalCidades}`, 12, y);
+      y += 5;
+      doc.text(`Total de Clientes: ${totais.totalClientes}`, 12, y);
+      y += 5;
+      doc.text(`Com Equipamento: ${totais.comEquipamento}`, 12, y);
+      y += 5;
+      doc.text(`Sem Equipamento: ${totais.semEquipamento}`, 12, y);
+      y += 5;
+      doc.text(`Oportunidades A: ${totais.oportunidadesA}`, 12, y);
+      y += 10;
+
+      // Tabela de cidades (simplificada)
+      doc.setFontSize(10);
+      doc.text('CIDADES (TOP 20)', 10, y);
+      y += 6;
+      
+      const cidadesTop = cidadesFiltradas.slice(0, 20);
+      doc.setFontSize(8);
+      doc.text('Cidade', 12, y);
+      doc.text('Clientes', 60, y);
+      doc.text('Com Eq.', 85, y);
+      doc.text('Score', 110, y);
+      y += 4;
+      
+      cidadesTop.forEach(c => {
+        doc.text(c.cidade?.substring(0, 20) || '', 12, y);
+        doc.text(String(c.total_clientes || 0), 60, y);
+        doc.text(String(c.total_clientes_com_equipamento || 0), 85, y);
+        doc.text(String(c.score_cidade || 0), 110, y);
+        y += 4;
+        if (y > 250) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      doc.save(`${nomeArquivo}.pdf`);
+      toast.success('PDF exportado com sucesso');
+    }
+  }, [cidadesFiltradas, pontosFiltrados, totais, filtroRepresentante]);
 
   // Função para gerar rota sniper
   const handleGerarRotaSniper = useCallback(async () => {
@@ -326,6 +436,30 @@ const MapaSeamatyBrasil = () => {
               <Zap className="w-4 h-4" />
               Rota Sniper
             </button>
+
+            <div className="relative group">
+              <button
+                className="px-4 py-2 text-sm font-bold rounded-lg flex items-center gap-2 text-white"
+                style={{ background: '#2196f3' }}
+              >
+                <Download className="w-4 h-4" />
+                Exportar
+              </button>
+              <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg hidden group-hover:block z-40">
+                <button
+                  onClick={() => handleExportarDados('csv')}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 rounded-t-lg"
+                >
+                  📊 CSV
+                </button>
+                <button
+                  onClick={() => handleExportarDados('pdf')}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 rounded-b-lg"
+                >
+                  📄 PDF
+                </button>
+              </div>
+            </div>
 
             <button
               onClick={() => setShowGeoloc(!showGeoloc)}
