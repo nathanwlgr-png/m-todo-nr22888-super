@@ -1,0 +1,106 @@
+{
+  "name": "CidadeTerritorioSeamaty",
+  "type": "object",
+  "description": "Cidades do território comercial Nathan — Seamaty Brasil",
+  "properties": {
+    "cidade": {
+      "type": "string",
+      "description": "Nome da cidade"
+    },
+    "uf": {
+      "type": "string",
+      "description": "Sigla UF (SP, RJ, MG, etc)"
+    },
+    "regiao": {
+      "type": "string",
+      "enum": ["norte", "nordeste", "centro_oeste", "sudeste", "sul"],
+      "description": "Região do Brasil"
+    },
+    "status_territorio": {
+      "type": "string",
+      "enum": ["territorio_oficial", "cidade_com_clientes", "cidade_com_leads", "cidade_com_oportunidade", "cidade_sem_dados_completos", "pendente_validacao"],
+      "default": "territorio_oficial",
+      "description": "Status da cidade no territorio Nathan"
+    },
+    "total_clientes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de clientes ativos na cidade"
+    },
+    "total_leads": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de leads/prospects na cidade"
+    },
+    "total_clientes_com_equipamento": {
+      "type": "number",
+      "default": 0,
+      "description": "Clientes que já têm equipamento Seamaty"
+    },
+    "total_clientes_sem_equipamento": {
+      "type": "number",
+      "default": 0,
+      "description": "Clientes sem equipamento Seamaty (oportunidade)"
+    },
+    "total_oportunidades": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de oportunidades abertas de venda"
+    },
+    "total_comodato_potencial": {
+      "type": "number",
+      "default": 0,
+      "description": "Clientes com potencial comodato"
+    },
+    "total_recompra_insumos": {
+      "type": "number",
+      "default": 0,
+      "description": "Clientes pendentes de recompra de insumos"
+    },
+    "total_inativos": {
+      "type": "number",
+      "default": 0,
+      "description": "Clientes inativos (sem compra > 120 dias)"
+    },
+    "score_cidade": {
+      "type": "number",
+      "default": 0,
+      "description": "Score de prioridade (0-100): 80+ máxima, 60-79 quente, 40-59 média, 20-39 monitorar, <20 baixa"
+    },
+    "prioridade_cidade": {
+      "type": "string",
+      "enum": ["prioridade_maxima", "cidade_quente", "cidade_media", "monitorar", "baixa_prioridade"],
+      "description": "Classificação por score"
+    },
+    "latitude_centro": {
+      "type": "number",
+      "description": "Latitude do centro da cidade (marcador territorial)"
+    },
+    "longitude_centro": {
+      "type": "number",
+      "description": "Longitude do centro da cidade (marcador territorial)"
+    },
+    "geolocalizacao_status": {
+      "type": "string",
+      "enum": ["geocodificada", "pendente_geocodificacao", "inconsistente"],
+      "default": "geocodificada",
+      "description": "Status da geolocalização da cidade"
+    },
+    "origem_dado": {
+      "type": "string",
+      "enum": ["google_places", "cliente_cadastro", "manual_validacao", "planilha_importada", "crm_seamaty"],
+      "description": "Origem dos dados de localização"
+    },
+    "atualizado_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Última atualização dos dados"
+    }
+  },
+  "required": ["cidade", "uf"],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -90,6 +90,7 @@ const ClientProfile = lazy(() => import('./pages/ClientProfile.jsx'));
 const DayFieldView = lazy(() => import('./pages/DayFieldView.jsx'));
 const ExecutiveLayerCEO = lazy(() => import('./pages/ExecutiveLayerCEO.jsx'));
 const ClientLocationMap = lazy(() => import('./pages/ClientLocationMap.jsx'));
+const MapaSeamatyBrasil = lazy(() => import('./pages/MapaSeamatyBrasil.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -187,6 +188,7 @@ const AuthenticatedApp = () => {
         <Route path="/DayFieldView" element={<LayoutWrapper currentPageName="DayFieldView"><DayFieldView /></LayoutWrapper>} />
         <Route path="/ExecutiveLayerCEO" element={<LayoutWrapper currentPageName="ExecutiveLayerCEO"><ExecutiveLayerCEO /></LayoutWrapper>} />
         <Route path="/ClientLocationMap" element={<LayoutWrapper currentPageName="ClientLocationMap"><ClientLocationMap /></LayoutWrapper>} />
+        <Route path="/MapaSeamatyBrasil" element={<LayoutWrapper currentPageName="MapaSeamatyBrasil"><MapaSeamatyBrasil /></LayoutWrapper>} />
         <Route path="/debug-caca" element={<DebugCaca />} />
         <Route path="/RelatorioRicardo" element={<LayoutWrapper currentPageName="RelatorioRicardo"><RelatorioRicardo /></LayoutWrapper>} />
         <Route path="/AgendaMensal" element={<LayoutWrapper currentPageName="AgendaMensal"><AgendaMensal /></LayoutWrapper>} />
