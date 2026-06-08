@@ -17,6 +17,7 @@ const MapaSeamatyBrasil = () => {
   const [filtroCity, setFiltroCity] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroEquipamento, setFiltroEquipamento] = useState('');
+  const [filtroRepresentante, setFiltroRepresentante] = useState('Nathan');
   const [camadaAtiva, setCamadaAtiva] = useState(new Set(['cidades', 'clientes', 'oportunidades']));
   const [modoPublicacao, setModoPublicacao] = useState(false);
   const [showGeoloc, setShowGeoloc] = useState(true);
@@ -64,6 +65,11 @@ const MapaSeamatyBrasil = () => {
   const pontosFiltrados = useMemo(() => {
     let resultado = pontos;
 
+    // Representante
+    if (filtroRepresentante) {
+      resultado = resultado.filter(p => p.responsavel && p.responsavel.toLowerCase().includes(filtroRepresentante.toLowerCase()));
+    }
+
     // Tipo
     if (filtroAtivo !== 'todos') {
       resultado = resultado.filter(p => p.tipo === filtroAtivo);
@@ -89,18 +95,28 @@ const MapaSeamatyBrasil = () => {
     }
 
     return resultado;
-  }, [pontos, filtroAtivo, filtroCity, filtroStatus, filtroEquipamento]);
+  }, [pontos, filtroAtivo, filtroCity, filtroStatus, filtroEquipamento, filtroRepresentante]);
 
   // Cidades filtradas
   const cidadesFiltradas = useMemo(() => {
     let resultado = cidades;
+    
+    // Filtrar cidades que têm clientes do representante selecionado
+    if (filtroRepresentante) {
+      const clientesRepresentante = pontos.filter(p => 
+        p.responsavel && p.responsavel.toLowerCase().includes(filtroRepresentante.toLowerCase())
+      );
+      const cidadesComClientes = new Set(clientesRepresentante.map(p => p.cidade));
+      resultado = resultado.filter(c => cidadesComClientes.has(c.cidade));
+    }
+    
     if (filtroCity) {
       resultado = resultado.filter(c =>
         c.cidade.toLowerCase().includes(filtroCity.toLowerCase())
       );
     }
     return resultado;
-  }, [cidades, filtroCity]);
+  }, [cidades, filtroCity, filtroRepresentante, pontos]);
 
   // Calcular totais para o painel superior
   const totais = useMemo(() => {
@@ -267,6 +283,19 @@ const MapaSeamatyBrasil = () => {
 
           {/* Filtros e controles */}
           <div className="flex flex-wrap gap-2 items-center">
+            <select
+              value={filtroRepresentante}
+              onChange={(e) => setFiltroRepresentante(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm border font-bold"
+              style={{ borderColor: '#ff6f00', borderWidth: '2px' }}
+            >
+              <option value="">Todos representantes</option>
+              <option value="Nathan">Nathan</option>
+              <option value="Luan">Luan</option>
+              <option value="Gabriel">Gabriel</option>
+              <option value="Rosa">Rosa</option>
+            </select>
+
             <input
               type="text"
               placeholder="Buscar cidade ou clínica..."
