@@ -78,7 +78,7 @@ export default function PhoneSearch() {
             {matchedClients.map(c => (
               <Link
                 key={c.id}
-                to={createPageUrl('ClientProfile') + '?id=' + c.id}
+                to={'/ClientProfile?id=' + c.id}
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 border-b last:border-0"
               >
@@ -93,7 +93,7 @@ export default function PhoneSearch() {
             {matchedLeads.map(l => (
               <Link
                 key={l.id}
-                to={createPageUrl('LeadProfile') + '?id=' + l.id}
+                to={'/Leads?id=' + l.id}
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 border-b last:border-0"
               >

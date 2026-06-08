@@ -28,13 +28,29 @@ const MapaSeamatyBrasil = () => {
   // Buscar cidades do território
   const { data: cidades = [], isLoading: loadingCidades } = useQuery({
     queryKey: ['cidades-territorio'],
-    queryFn: () => base44.entities.CidadeTerritorioSeamaty?.list?.() || [],
+    queryFn: async () => {
+      try {
+        return await base44.entities.CidadeTerritorioSeamaty?.list?.() || [];
+      } catch (e) {
+        console.error('Erro ao carregar cidades:', e);
+        return [];
+      }
+    },
+    staleTime: 300000,
   });
 
   // Buscar pontos do mapa (clientes, leads, oportunidades)
   const { data: pontos = [], isLoading: loadingPontos } = useQuery({
     queryKey: ['location-points-seamaty'],
-    queryFn: () => base44.entities.LocationPointSeamaty?.list?.() || [],
+    queryFn: async () => {
+      try {
+        return await base44.entities.LocationPointSeamaty?.list?.() || [];
+      } catch (e) {
+        console.error('Erro ao carregar pontos:', e);
+        return [];
+      }
+    },
+    staleTime: 300000,
   });
 
   // Agrupar pontos por tipo
@@ -577,9 +593,13 @@ const MapaSeamatyBrasil = () => {
                           <p>Score: {item.score_cidade}</p>
                         </div>
                         <div className="flex gap-1">
-                          <button className="flex-1 px-2 py-1 text-[10px] font-bold rounded text-white" style={{ background: '#1976d2' }}>
+                          <a
+                            href={`/MapaSeamatyBrasil?city=${item.cidade}`}
+                            className="flex-1 px-2 py-1 text-[10px] font-bold rounded text-white text-center"
+                            style={{ background: '#1976d2' }}
+                          >
                             Ver
-                          </button>
+                          </a>
                           <button className="flex-1 px-2 py-1 text-[10px] font-bold rounded text-white" style={{ background: '#ff6f00' }}>
                             Rota
                           </button>
@@ -628,9 +648,13 @@ const MapaSeamatyBrasil = () => {
                               <MapPin className="w-3 h-3" />
                             </a>
                           )}
-                          <button className="flex-1 px-2 py-1 text-[10px] font-bold rounded text-white" style={{ background: '#ff6f00' }}>
+                          <a
+                            href={`/ClientProfile?id=${item.client_id || item.id}`}
+                            className="flex-1 px-2 py-1 text-[10px] font-bold rounded text-white text-center"
+                            style={{ background: '#ff6f00' }}
+                          >
                             Ver
-                          </button>
+                          </a>
                         </div>
                       </div>
                     )}

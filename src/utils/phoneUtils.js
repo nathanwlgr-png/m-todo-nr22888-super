@@ -52,9 +52,9 @@ export function formatPhoneForWhatsApp(raw) {
 export function isValidWhatsApp(phone) {
   const formatted = formatPhoneForWhatsApp(phone);
   if (!formatted) return false;
-  // Celular: 13 dígitos (55 + DDD + 9 + 8 dígitos)
-  // Aceita também 12 dígitos para celulares mais antigos (sem o 9)
-  return formatted.length === 13 || formatted.length === 12;
+  // Celular: 13 dígitos APENAS (55 + DDD(2) + 9 + número(8))
+  // 12 dígitos = FIXO (sem WhatsApp)
+  return formatted.length === 13;
 }
 
 /**
