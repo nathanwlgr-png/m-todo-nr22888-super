@@ -22,6 +22,7 @@ const MapaSeamatyBrasil = () => {
   const [camadaAtiva, setCamadaAtiva] = useState(new Set(['cidades', 'clientes', 'oportunidades']));
   const [modoPublicacao, setModoPublicacao] = useState(false);
   const [showGeoloc, setShowGeoloc] = useState(true);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [abaLateral, setAbaLateral] = useState('cidades');
   const [searchLateral, setSearchLateral] = useState('');
 
@@ -200,9 +201,12 @@ const MapaSeamatyBrasil = () => {
         p.tipo || '',
         p.responsavel || filtroRepresentante,
         p.equipamentos_atuais?.join(';') || '',
+        p.equipamento_sugerido || '',
         p.score_oportunidade || 0,
         p.prioridade || '',
         p.status_funil || '',
+        p.whatsapp || '',
+        p.proxima_acao || '',
       ]);
 
       // Montar CSV
@@ -212,7 +216,7 @@ const MapaSeamatyBrasil = () => {
         ...dadosCidades,
         [''],
         ['CLIENTES / OPORTUNIDADES'],
-        ['Clínica', 'Cidade', 'UF', 'Tipo', 'Responsável', 'Equipamentos', 'Score', 'Prioridade', 'Status'],
+        ['Clínica', 'Cidade', 'UF', 'Tipo', 'Responsável', 'Equipamentos Atuais', 'Eq. Sugerido', 'Score', 'Prioridade', 'Status', 'WhatsApp', 'Próxima Ação'],
         ...dadosClientes,
       ]
         .map(row => row.map(cell => `"${cell}"`).join(','))
@@ -453,28 +457,34 @@ const MapaSeamatyBrasil = () => {
               Rota Sniper
             </button>
 
-            <div className="relative group">
+            <div className="relative">
               <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
                 className="px-4 py-2 text-sm font-bold rounded-lg flex items-center gap-2 text-white"
                 style={{ background: '#2196f3' }}
               >
                 <Download className="w-4 h-4" />
                 Exportar
               </button>
-              <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg hidden group-hover:block z-40">
-                <button
-                  onClick={() => handleExportarDados('csv')}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 rounded-t-lg"
-                >
-                  📊 CSV
-                </button>
-                <button
-                  onClick={() => handleExportarDados('pdf')}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 rounded-b-lg"
-                >
-                  📄 PDF
-                </button>
-              </div>
+              {showExportMenu && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setShowExportMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-xl border z-40">
+                    <button
+                      onClick={() => { handleExportarDados('csv'); setShowExportMenu(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-100 rounded-t-lg font-medium"
+                    >
+                      📊 CSV Completo
+                    </button>
+                    <button
+                      onClick={() => { handleExportarDados('pdf'); setShowExportMenu(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-100 rounded-b-lg font-medium"
+                    >
+                      📄 PDF Resumo
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             <button
