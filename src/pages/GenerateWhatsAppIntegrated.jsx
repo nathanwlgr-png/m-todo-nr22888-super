@@ -10,6 +10,8 @@ import AIUnavailableNotice from '@/components/AIUnavailableNotice';
 
 export default function GenerateWhatsAppIntegrated() {
   const [clientId, setClientId] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [messages, setMessages] = useState([]);
   const [selectedMessageIdx, setSelectedMessageIdx] = useState(null);
   const [showApproval, setShowApproval] = useState(false);
@@ -17,10 +19,38 @@ export default function GenerateWhatsAppIntegrated() {
   const [economicStatus, setEconomicStatus] = useState(EconomicMode.getStatus());
   const messagesEndRef = useRef(null);
 
-  // Busca dados do cliente
+  // Lista de todos os clientes para busca por nome
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['all-clients-spin'],
+    queryFn: () => base44.entities.Client.list('-updated_date', 200),
+    staleTime: 300000,
+  });
+
+  // Sugestões filtradas pelo texto digitado
+  const suggestions = searchText.length >= 2
+    ? allClients.filter(c => {
+        const q = searchText.toLowerCase();
+        return (
+          c.clinic_name?.toLowerCase().includes(q) ||
+          c.full_name?.toLowerCase().includes(q) ||
+          c.first_name?.toLowerCase().includes(q) ||
+          c.city?.toLowerCase().includes(q)
+        );
+      }).slice(0, 8)
+    : [];
+
+  // Selecionar cliente da lista
+  const selectClient = (c) => {
+    setClientId(c.id);
+    setSearchText(c.clinic_name || c.full_name || c.first_name || '');
+    setShowSuggestions(false);
+    setMessages([]);
+  };
+
+  // Busca dados do cliente selecionado
   const { data: client, isLoading: clientLoading } = useQuery({
     queryKey: ['client', clientId],
-    queryFn: () => clientId ? base44.entities.Client.list().then(c => c.find(x => x.id === clientId)) : null,
+    queryFn: () => clientId ? allClients.find(x => x.id === clientId) || null : null,
     enabled: !!clientId,
   });
 
@@ -140,22 +170,47 @@ export default function GenerateWhatsAppIntegrated() {
         {/* Busca Cliente */}
         <Card className="mb-6 border-orange-500/20" style={{ background: '#111' }}>
           <CardContent className="pt-6">
-            <div className="flex gap-3 mb-4">
-              <input
-                placeholder="ID do cliente (Cole ou digite)"
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && generateMessages()}
-                className="flex-1 px-4 py-2 rounded-lg text-sm text-white"
-                style={{ background: '#1a1a1a', border: '1px solid rgba(255,107,0,0.2)' }}
-              />
+            <div className="flex gap-3 mb-4 relative">
+              <div className="flex-1 relative">
+                <input
+                  placeholder="Nome da clínica ou cliente..."
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                    setClientId('');
+                    setShowSuggestions(true);
+                    setMessages([]);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onKeyPress={(e) => e.key === 'Enter' && clientId && generateMessages()}
+                  className="w-full px-4 py-2 rounded-lg text-sm text-white"
+                  style={{ background: '#1a1a1a', border: '1px solid rgba(255,107,0,0.2)' }}
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowSuggestions(false)} />
+                    <div className="absolute left-0 right-0 top-full mt-1 rounded-lg overflow-hidden z-20 shadow-xl" style={{ background: '#1a1a1a', border: '1px solid rgba(255,107,0,0.3)' }}>
+                      {suggestions.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => selectClient(c)}
+                          className="w-full text-left px-4 py-2.5 hover:bg-orange-950/40 border-b border-orange-500/10 last:border-0"
+                        >
+                          <p className="text-sm text-white font-bold">{c.clinic_name || c.full_name || c.first_name}</p>
+                          <p className="text-[11px] text-orange-400">{c.city || ''}{c.pipeline_stage ? ` · ${c.pipeline_stage}` : ''}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
               <Button
                 onClick={generateMessages}
                 disabled={!clientId || clientLoading || loading}
-                className="bg-orange-600 hover:bg-orange-700"
+                className="bg-orange-600 hover:bg-orange-700 shrink-0"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                Buscar & Gerar
+                Gerar SPIN
               </Button>
             </div>
 
