@@ -173,6 +173,12 @@ export default function DashboardSniper() {
               <span className="text-xs font-black text-rose-400">🎯 Modo Caça</span>
             </div>
           </Link>
+          <Link to="/RankingOportunidades">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-yellow-500/30">
+              <TrendingUp className="w-4 h-4 text-yellow-400" />
+              <span className="text-xs font-black text-yellow-400">🏆 Ranking do Dia</span>
+            </div>
+          </Link>
           <Link to="/ScheduledAgenda">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-amber-500/30">
               <ArrowRight className="w-4 h-4 text-amber-400" />
