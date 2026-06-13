@@ -21,7 +21,7 @@ export const PRECOS = {
   'VG2':       { avista: 33000, cartao5x: 35000 },
   '3DX':       { avista: 55000, cartao5x: 58000 },
   'VBC50A':    { avista: 70000, cartao5x: 74000 },
-  'VI1':       { avista: 8500,  cartao5x: 9000  },
+  'VI1':       { avista: 6500,  cartao5x: 7000  },
   'VQ1':       { avista: 45000, cartao5x: 47700 },
   'Maleta VG1':{ avista: 1500,  cartao5x: 1600  },
 };

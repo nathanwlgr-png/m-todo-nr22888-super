@@ -4,7 +4,8 @@
  * Usa SeamatyMaster como fonte central — nunca preço fixo aqui.
  */
 import React, { useState } from 'react';
-import { SPECS, PRECOS, formatPreco, getSugestaoUpgrade, getEquipamentosFaltantes, gerarScriptSPIN, IDENTIDADE } from '@/lib/SeamatyMaster';
+import { base44 } from '@/api/base44Client';
+import { SPECS, PRECOS, formatPreco, getSugestaoUpgrade, getEquipamentosFaltantes, gerarScriptSPIN } from '@/lib/SeamatyMaster';
 import { ChevronDown, ChevronUp, Zap, TrendingUp, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -24,19 +25,23 @@ export default function SeamatyEquipmentPanel({ client }) {
   const specInteresse = equipInteresse ? SPECS[equipInteresse] : null;
   const precoInteresse = equipInteresse ? PRECOS[equipInteresse] : null;
 
-  const abrirWhatsAppOportunidade = (equip) => {
-    const phone = (client.phone || '').replace(/\D/g, '');
-    const nome = client.first_name || client.full_name || 'Dr(a)';
-    const spec = SPECS[equip] || {};
-    const preco = PRECOS[equip];
-    const msg = `Olá, ${nome}. Tudo bem? Sou o Nathan Rosa, Consultor Técnico Comercial da Seamaty Brasil.\n\nOportunidade para a ${client.clinic_name || 'clínica'}: o *${equip}* — ${spec.descricao || ''}.\n\n${spec.parametros ? '📊 ' + spec.parametros : ''}\n${spec.tempo ? '⏱ ' + spec.tempo : ''}\n\n${preco ? '💰 À vista: ' + formatPreco(preco.avista) + ' | 5x cartão: ' + formatPreco(preco.cartao5x) : 'Preço sob validação'}\n\nPosso te mostrar em 10 minutos como isso funciona na rotina da clínica?\n\n${IDENTIDADE.assinatura}`;
-
-    if (!phone) {
-      try { navigator.clipboard.writeText(msg); } catch (_) {}
-      toast.info('Telefone não cadastrado — mensagem copiada!');
-      return;
+  const abrirWhatsAppOportunidade = async (equip) => {
+    try {
+      const spec = SPECS[equip] || {};
+      const preco = PRECOS[equip];
+      const detalhe = `Oportunidade: ${equip} — ${spec.descricao || ''}. ${preco ? 'À vista: ' + formatPreco(preco.avista) : ''}`;
+      const res = await base44.functions.invoke('gerarWhatsApp', {
+        cliente_id: client.id,
+        detalhe,
+      });
+      if (res.data?.wa_me) {
+        window.open(res.data.wa_me, '_blank');
+      } else {
+        toast.warning(res.data?.mensagem || 'Cliente sem telefone/WhatsApp no CRM. Complete o telefone antes de abrir WhatsApp.');
+      }
+    } catch {
+      toast.error('Erro ao gerar link WhatsApp');
     }
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (

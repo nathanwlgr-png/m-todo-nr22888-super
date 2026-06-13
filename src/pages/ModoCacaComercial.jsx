@@ -190,10 +190,15 @@ export default function ModoCacaComercial() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const res = await base44.functions.invoke('getNearbyVeterinaryClinics', payload);
+      const res = await base44.functions.invoke('buscarClinicasProximas', {
+        cidade: city || undefined,
+        lat: byGPS ? payload.latitude : undefined,
+        lng: byGPS ? payload.longitude : undefined,
+        raio_km: 20,
+      });
       clearTimeout(timeoutId);
-      const data = res.data?.clinics || [];
-      cacaDebugStore.lastStatus = res.status;
+      const data = res.data?.clinicas || [];
+      cacaDebugStore.lastStatus = res.data?.status;
       cacaDebugStore.lastDurationMs = Date.now() - t0;
       cacaDebugStore.lastResultCount = data.length;
       cacaDebugStore.lastError = null;
@@ -202,6 +207,11 @@ export default function ModoCacaComercial() {
       setPage(0);
       if (city) setCachedClinics(city, data);
       setStep('listing');
+      // Aviso de fallback CRM
+      if (res.data?.status === 'MODO_CACA_OK_FALLBACK_CRM_MAPS_PENDENTE') {
+        setErrorMsg('Resultado baseado no CRM. Maps externo pendente.');
+        setTimeout(() => setErrorMsg(null), 4000);
+      }
     } catch (err) {
       clearTimeout(timeoutId);
       const msg = err?.response?.data?.error || err?.message || 'Erro desconhecido';
@@ -211,7 +221,7 @@ export default function ModoCacaComercial() {
       console.error('CAÇA COMERCIAL - erro fetch:', { msg, payload, durationMs: Date.now() - t0 });
       setErrorMsg(isTimeout
         ? 'Tempo esgotado (15s). Verifique sua conexão e tente novamente.'
-        : `Não foi possível buscar as clínicas. ${msg.includes('400') ? 'Verifique a cidade digitada.' : 'Tente novamente.'}`
+        : 'Relatório temporariamente indisponível. Tente novamente.'
       );
     } finally {
       setLoading(false);
