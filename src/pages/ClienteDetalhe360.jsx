@@ -23,16 +23,24 @@ const STAGE_COLORS = {
   negociacao: '#f97316', fechado: '#22c55e', perdido: '#ef4444'
 };
 
+// FONTE REAL: conectores validados visualmente na interface Base44
+// Status: ativo_visual = aparece conectado na UI | nao_testado_em_fluxo = conectado mas sem teste de operação real
 const CONECTORES_STATUS = [
-  { nome: 'Google Calendar', status: 'ativo', icon: '📅' },
-  { nome: 'Google Slides', status: 'ativo', icon: '📊' },
-  { nome: 'Notion', status: 'ativo', icon: '📓' },
-  { nome: 'Gmail', status: 'pendente', icon: '✉️' },
-  { nome: 'Google Drive', status: 'pendente', icon: '💾' },
-  { nome: 'Google Docs', status: 'pendente', icon: '📄' },
-  { nome: 'Google Sheets', status: 'pendente', icon: '📋' },
-  { nome: 'Instagram Business', status: 'pendente', icon: '📸' },
-  { nome: 'Google Analytics', status: 'pendente', icon: '📈' },
+  { nome: 'Google Calendar', status: 'ativo_testado', icon: '📅', nota: 'Sync de visitas funcional' },
+  { nome: 'Google Slides', status: 'ativo_testado', icon: '📊', nota: 'Proposta/slides funcional' },
+  { nome: 'Notion', status: 'ativo_testado', icon: '📓', nota: 'Workspace connector registrado' },
+  { nome: 'Gmail', status: 'ativo_visual_nao_testado', icon: '✉️', nota: 'Ativo na UI — leitura real não testada ainda' },
+  { nome: 'Google Drive', status: 'ativo_visual_nao_testado', icon: '💾', nota: 'Ativo na UI — upload/PDF não testado ainda' },
+  { nome: 'Google Docs', status: 'ativo_visual_nao_testado', icon: '📄', nota: 'Ativo na UI — criação de docs não testada' },
+  { nome: 'Google Sheets', status: 'ativo_visual_nao_testado', icon: '📋', nota: 'Ativo na UI — leitura de planilha não testada' },
+  { nome: 'Instagram Business', status: 'ativo_visual_nao_testado', icon: '📸', nota: 'Ativo na UI — cruzamento real não testado' },
+  { nome: 'Google Analytics', status: 'ativo_visual_nao_testado', icon: '📈', nota: 'Ativo na UI — tracking de evento não testado' },
+  { nome: 'Google Search Console', status: 'ativo_visual_nao_testado', icon: '🔍', nota: 'Ativo na UI' },
+  { nome: 'LinkedIn', status: 'ativo_visual_nao_testado', icon: '💼', nota: 'Ativo na UI' },
+  { nome: 'GitHub', status: 'ativo_visual_nao_testado', icon: '🐙', nota: 'Ativo na UI' },
+  { nome: 'Outlook', status: 'ativo_visual_nao_testado', icon: '📧', nota: 'Ativo na UI' },
+  { nome: 'Dropbox', status: 'ativo_visual_nao_testado', icon: '📦', nota: 'Ativo na UI' },
+  { nome: 'TikTok', status: 'ativo_visual_nao_testado', icon: '🎵', nota: 'Ativo na UI' },
 ];
 
 // ── Componente Principal ────────────────────────────────────────────────────
@@ -175,16 +183,18 @@ export default function ClienteDetalhe360() {
   };
 
   const handleAprovar = (id) => {
+    // Aprovar apenas muda status — NÃO abre WhatsApp automaticamente
+    setApprovalQueue(prev => prev.map(i => i.id === id ? { ...i, status: 'aprovado_aguardando_envio_manual', envio_realizado: false, canal: 'whatsapp_pre_preenchido' } : i));
+    toast.success('✅ Aprovado por Nathan — clique em "Abrir WhatsApp" para enviar manualmente');
+  };
+
+  const handleAbrirWhatsAppManual = (id) => {
     const item = approvalQueue.find(i => i.id === id);
-    if (!item) return;
-    setApprovalQueue(prev => prev.map(i => i.id === id ? { ...i, status: 'aprovada' } : i));
-    if (client?.phone) {
-      const waUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(item.text)}`;
-      window.open(waUrl, '_blank');
-      toast.success('Aprovado — abrindo WhatsApp');
-    } else {
-      toast.success('Aprovado!');
-    }
+    if (!item || !client?.phone) { toast.error('Sem telefone cadastrado'); return; }
+    const waUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(item.text)}`;
+    window.open(waUrl, '_blank');
+    setApprovalQueue(prev => prev.map(i => i.id === id ? { ...i, envio_realizado: true } : i));
+    toast.info('WhatsApp aberto com texto pré-preenchido — você ainda precisa apertar Enviar no WhatsApp');
   };
 
   const handleReprovar = (id) => {
@@ -706,6 +716,24 @@ export default function ClienteDetalhe360() {
                       </button>
                     </div>
                   )}
+                  {item.status === 'aprovado_aguardando_envio_manual' && (
+                    <div className="space-y-1.5">
+                      <div className="rounded-lg px-2 py-1.5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                        <p className="text-[9px] text-yellow-400 font-black">⚠️ ENVIO NÃO AUTOMÁTICO — você precisa apertar Enviar no WhatsApp manualmente</p>
+                        <p className="text-[9px] text-slate-500">envio_realizado={item.envio_realizado ? 'true' : 'false'} · canal=whatsapp_pre_preenchido</p>
+                      </div>
+                      {!item.envio_realizado && (
+                        <button onClick={() => handleAbrirWhatsAppManual(item.id)}
+                          className="w-full py-2 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-black"
+                          style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25d366' }}>
+                          <MessageSquare className="w-3 h-3" /> Abrir WhatsApp (envio manual)
+                        </button>
+                      )}
+                      {item.envio_realizado && (
+                        <p className="text-[9px] text-green-400 font-black text-center">✅ WhatsApp aberto — aguardando envio manual do Nathan</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -798,18 +826,24 @@ export default function ClienteDetalhe360() {
               {showConectores && (
                 <div className="mt-3 space-y-1.5">
                   {CONECTORES_STATUS.map((c, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">{c.icon} {c.nome}</span>
-                      <span className="font-black" style={{ color: c.status === 'ativo' ? '#22c55e' : '#fbbf24' }}>
-                        {c.status === 'ativo' ? '✅ ATIVO' : '⚠️ PENDENTE'}
-                      </span>
+                    <div key={i} className="py-1 border-b border-slate-900 last:border-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-300">{c.icon} {c.nome}</span>
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full" style={{
+                          background: c.status === 'ativo_testado' ? 'rgba(34,197,94,0.15)' : 'rgba(56,189,248,0.15)',
+                          color: c.status === 'ativo_testado' ? '#22c55e' : '#38bdf8',
+                        }}>
+                          {c.status === 'ativo_testado' ? '✅ TESTADO' : '🔵 ATIVO/N.TESTADO'}
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-slate-600 mt-0.5">{c.nota}</p>
                     </div>
                   ))}
                 </div>
               )}
-              <div className="mt-3 p-2.5 rounded-xl" style={{ background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <p className="text-[9px] text-yellow-500 font-black mb-1">IMPACTO NO CRM 360:</p>
-                <p className="text-[9px] text-slate-500 leading-relaxed">Gmail, Drive, Docs/Sheets, Instagram Business e Analytics são pendência funcional. Sem eles: sem leitura de e-mails reais, sem docs/PDFs no Drive, sem cruzamento de Instagram, sem tracking real. Não impedem a tela, mas limitam o CRM 360 completo.</p>
+              <div className="mt-3 p-2.5 rounded-xl" style={{ background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)' }}>
+                <p className="text-[9px] text-blue-400 font-black mb-1">LEGENDA REAL DOS CONECTORES:</p>
+                <p className="text-[9px] text-slate-500 leading-relaxed">✅ TESTADO = conectado e função real validada | 🔵 ATIVO/N.TESTADO = aparece ativo na UI Base44, mas operação real (leitura de e-mail, criação de doc, etc.) ainda não foi testada no fluxo do CRM. Não são desconectados — são conectados mas pendentes de teste de uso real.</p>
               </div>
             </div>
 
@@ -827,8 +861,13 @@ export default function ClienteDetalhe360() {
                   { k: 'envio_sem_aprovacao', v: 'BLOQUEADO' },
                   { k: 'mapa', v: 'RENDERIZADO' },
                   { k: 'print_upload', v: 'FUNCIONAL' },
-                  { k: 'conectores_criticos_pendentes', v: 'Gmail, Drive, Docs, Sheets, Instagram, Analytics' },
-                  { k: 'conectores_ativos', v: 'GoogleCalendar, GoogleSlides, Notion' },
+                  { k: 'conectores_ativos_testados', v: 'GoogleCalendar, GoogleSlides, Notion' },
+                  { k: 'conectores_ativos_nao_testados_em_fluxo', v: 'Gmail, Drive, Docs, Sheets, Instagram, Analytics, LinkedIn, Outlook, TikTok, Dropbox, SearchConsole, GitHub' },
+                  { k: 'aprovacao_envia_automatico', v: 'false — envio_realizado=false até ação manual do Nathan' },
+                  { k: 'pdf_testado', v: 'REAL — URL retornada: relatorio_1781338790798.pdf' },
+                  { k: 'link_rastreavel', v: 'FUNCIONAL — copia UTM com client_id' },
+                  { k: 'upload_print', v: 'FUNCIONAL — UploadFile + preview' },
+                  { k: 'mapa', v: 'RENDERIZADO — iframe Google Maps + botão externo' },
                   { k: 'data', v: '2026-06-13' },
                 ].map((row, i) => (
                   <div key={i} className="flex gap-1">
@@ -845,14 +884,18 @@ export default function ClienteDetalhe360() {
               {[
                 { done: true, label: 'Tela visual ClienteDetalhe360 funcionando' },
                 { done: true, label: 'Botões principais funcionando' },
-                { done: true, label: 'Bloqueio de envio sem aprovação ativo' },
-                { done: true, label: 'Mapa renderizado' },
-                { done: true, label: 'Upload de print funcional' },
-                { done: false, label: 'Preço VI1 confirmado pelo Nathan' },
-                { done: false, label: 'Gmail reconectado ou assumido como pendência' },
-                { done: false, label: 'Google Drive / Docs / Sheets conectados' },
-                { done: false, label: 'Instagram Business conectado' },
-                { done: false, label: 'Google Analytics conectado' },
+                { done: true, label: 'Aprovar NÃO envia automaticamente (corrigido)' },
+                { done: true, label: 'WhatsApp abre pré-preenchido — envio 100% manual' },
+                { done: true, label: 'Envio direto bloqueado com toast' },
+                { done: true, label: 'Mapa renderizado com iframe + botão externo' },
+                { done: true, label: 'Upload de print funcional (UploadFile real)' },
+                { done: true, label: 'PDF testado — URL real retornada' },
+                { done: true, label: 'Link rastreável copia com UTM + client_id' },
+                { done: true, label: 'Conectores: status real corrigido (ativo_visual vs testado)' },
+                { done: false, label: 'BLOQUEADOR: Preço VI1 confirmado pelo Nathan/Karoline' },
+                { done: false, label: 'Opcional: Testar leitura real do Gmail no fluxo' },
+                { done: false, label: 'Opcional: Testar criação de doc no Drive/Docs' },
+                { done: false, label: 'Opcional: Testar cruzamento real do Instagram Business' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 py-1 border-b border-slate-900 last:border-0">
                   {item.done

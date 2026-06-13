@@ -139,6 +139,20 @@ export default function DashboardSniper() {
           </div>
         </div>
 
+        {/* Link de teste — ClienteDetalhe360 */}
+        <Link to="/ClienteDetalhe360?id=6a2d109cf3035a700442b501">
+          <div className="rounded-xl p-3 flex items-center justify-between bg-[#0f0f11] border-2 border-orange-500/40">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-orange-400" />
+              <div>
+                <p className="text-xs font-black text-orange-400">🧪 Cliente360 — Teste</p>
+                <p className="text-[9px] text-slate-600">VetPrime Marília · Ricardo · QUENTE</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-orange-500" />
+          </div>
+        </Link>
+
         {/* Atalhos extras */}
         <div className="grid grid-cols-2 gap-2">
           <Link to="/AgendaMensal">
