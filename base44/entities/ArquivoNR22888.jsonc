@@ -1,0 +1,108 @@
+{
+  "name": "ArquivoNR22888",
+  "type": "object",
+  "description": "Invent\u00e1rio de arquivos do Dropbox NR22888 \u2014 FASE 1 READ-ONLY. Nada mover sem aprova\u00e7\u00e3o Nathan.",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do arquivo"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "equipamento",
+        "logo",
+        "arte_aprovada",
+        "arte_rascunho",
+        "proposta",
+        "pdf",
+        "print",
+        "catalogo",
+        "manual",
+        "backup",
+        "cliente",
+        "campanha",
+        "desconhecido"
+      ],
+      "description": "Tipo classificado"
+    },
+    "pasta_atual": {
+      "type": "string",
+      "description": "Caminho atual no Dropbox"
+    },
+    "dropbox_url": {
+      "type": "string",
+      "description": "URL do arquivo no Dropbox"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente relacionado (se houver)"
+    },
+    "campanha_id": {
+      "type": "string",
+      "description": "ID da campanha relacionada (se houver)"
+    },
+    "equipamento": {
+      "type": "string",
+      "description": "Equipamento relacionado (SMT-120VP, VG1, etc.)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "inventariado",
+        "revisado",
+        "aprovado_uso",
+        "pendente_revisao_nathan",
+        "duplicado_provavel",
+        "sem_dono",
+        "importante"
+      ],
+      "default": "inventariado"
+    },
+    "tamanho_kb": {
+      "type": "number",
+      "description": "Tamanho em KB"
+    },
+    "data_modificacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uso_permitido": {
+      "type": "string",
+      "enum": [
+        "comercial",
+        "interno",
+        "sem_restricao",
+        "pendente_aprovacao",
+        "proibido"
+      ],
+      "default": "pendente_aprovacao"
+    },
+    "precisa_revisao_nathan": {
+      "type": "boolean",
+      "default": true,
+      "description": "Nathan precisa revisar antes de usar"
+    },
+    "sugestao_destino": {
+      "type": "string",
+      "description": "Pasta sugerida na nova estrutura (FASE 2) \u2014 n\u00e3o mover ainda"
+    },
+    "mover_autorizado": {
+      "type": "boolean",
+      "default": false,
+      "description": "FALSE por padr\u00e3o \u2014 s\u00f3 true quando Nathan autorizar explicitamente"
+    },
+    "duplicado_de": {
+      "type": "string",
+      "description": "ID do arquivo original se for duplicata"
+    },
+    "observacao": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es do invent\u00e1rio"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo"
+  ]
+}

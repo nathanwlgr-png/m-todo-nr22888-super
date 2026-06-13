@@ -1,0 +1,99 @@
+{
+  "name": "ArteSeamaty",
+  "type": "object",
+  "description": "Artes geradas por IA para Instagram/redes \u2014 fluxo de aprova\u00e7\u00e3o obrigat\u00f3rio Nathan",
+  "properties": {
+    "equipamento": {
+      "type": "string",
+      "description": "Equipamento Seamaty (SMT-120VP, VG1, VI1, VBC50A, QT3, VG2, 3DX, VQ1)"
+    },
+    "objetivo": {
+      "type": "string",
+      "description": "Objetivo da arte (ex: lan\u00e7amento, case, ROI, benef\u00edcio)"
+    },
+    "formato": {
+      "type": "string",
+      "enum": [
+        "story_9x16",
+        "feed_1x1",
+        "carrossel",
+        "banner"
+      ],
+      "description": "Formato da arte"
+    },
+    "publico": {
+      "type": "string",
+      "enum": [
+        "veterinario",
+        "gestor",
+        "tutor"
+      ],
+      "description": "P\u00fablico-alvo separado obrigatoriamente"
+    },
+    "imagem_oficial_url": {
+      "type": "string",
+      "description": "URL da imagem oficial do equipamento (nunca redesenhar)"
+    },
+    "arte_gerada_url": {
+      "type": "string",
+      "description": "URL da arte gerada pela IA"
+    },
+    "legenda": {
+      "type": "string",
+      "description": "Legenda para o post"
+    },
+    "cta": {
+      "type": "string",
+      "description": "Call to action"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "aguardando_aprovacao",
+        "aprovado",
+        "publicado",
+        "reprovado"
+      ],
+      "default": "rascunho",
+      "description": "Status da arte \u2014 NUNCA publicar sem aprovado"
+    },
+    "aprovado_por_nathan": {
+      "type": "boolean",
+      "default": false,
+      "description": "Nathan aprovou explicitamente"
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_publicacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "S\u00f3 preencher ap\u00f3s publica\u00e7\u00e3o real"
+    },
+    "origem_arquivo": {
+      "type": "string",
+      "description": "Fonte do arquivo de imagem usado (Dropbox path, URL oficial)"
+    },
+    "observacao": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es de Nathan na aprova\u00e7\u00e3o/reprova\u00e7\u00e3o"
+    },
+    "dado_tecnico_usado": {
+      "type": "string",
+      "description": "Dado t\u00e9cnico citado na arte \u2014 validar contra dados oficiais"
+    },
+    "logo_compete_presente": {
+      "type": "boolean",
+      "default": false,
+      "description": "SEMPRE false \u2014 logo Compete PROIBIDO em artes Seamaty"
+    }
+  },
+  "required": [
+    "equipamento",
+    "objetivo",
+    "formato",
+    "publico"
+  ]
+}

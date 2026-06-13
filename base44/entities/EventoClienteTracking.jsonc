@@ -1,0 +1,84 @@
+{
+  "name": "EventoClienteTracking",
+  "type": "object",
+  "description": "Tracking real de eventos de clientes \u2014 score s\u00f3 atualiza quando evento est\u00e1 registrado aqui",
+  "properties": {
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Cache do nome"
+    },
+    "evento": {
+      "type": "string",
+      "enum": [
+        "abriu_proposta",
+        "abriu_proposta_2x",
+        "abriu_proposta_3x_mais",
+        "clicou_whatsapp",
+        "abriu_pdf",
+        "pediu_preco",
+        "respondeu",
+        "pediu_visita",
+        "sem_resposta_24h",
+        "abriu_link_rastreavel",
+        "abriu_cliente360"
+      ],
+      "description": "Tipo de evento rastreado"
+    },
+    "pontos_adicionados": {
+      "type": "number",
+      "description": "Pontos adicionados ao score: abriu_proposta=+10, 2x=+20, 3x+=+35, clicou_whatsapp=+40, abriu_pdf=+20, pediu_preco=+50, respondeu=+35, pediu_visita=+60"
+    },
+    "origem": {
+      "type": "string",
+      "description": "Origem do evento"
+    },
+    "utm_source": {
+      "type": "string"
+    },
+    "utm_medium": {
+      "type": "string"
+    },
+    "utm_campaign": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "description": "URL acessada"
+    },
+    "data_evento": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "score_antes": {
+      "type": "number",
+      "description": "Score do cliente antes do evento"
+    },
+    "score_depois": {
+      "type": "number",
+      "description": "Score do cliente depois do evento"
+    },
+    "score_atualizado_no_crm": {
+      "type": "boolean",
+      "default": false,
+      "description": "Score s\u00f3 \u00e9 FUNCIONANDO_REAL quando este campo for true"
+    },
+    "alerta_gerado": {
+      "type": "boolean",
+      "default": false
+    },
+    "follow_up_criado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Sem resposta 24h ap\u00f3s abrir \u2192 criar follow-up"
+    }
+  },
+  "required": [
+    "cliente_id",
+    "evento",
+    "data_evento"
+  ]
+}

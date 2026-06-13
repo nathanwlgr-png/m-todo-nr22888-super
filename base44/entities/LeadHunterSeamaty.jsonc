@@ -1,0 +1,122 @@
+{
+  "name": "LeadHunterSeamaty",
+  "type": "object",
+  "description": "Leads ca\u00e7ados pelo Hunter Investigativo \u2014 dados p\u00fablicos apenas. Nunca coletar dado privado indevido.",
+  "properties": {
+    "nome_clinica": {
+      "type": "string",
+      "description": "Nome da cl\u00ednica/hospital/laborat\u00f3rio"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "clinica_veterinaria",
+        "hospital_veterinario",
+        "laboratorio_veterinario",
+        "pet_shop_com_vet",
+        "clinica_especializada",
+        "universidade"
+      ],
+      "description": "Tipo do estabelecimento"
+    },
+    "cidade": {
+      "type": "string"
+    },
+    "uf": {
+      "type": "string"
+    },
+    "endereco": {
+      "type": "string",
+      "description": "Endere\u00e7o p\u00fablico"
+    },
+    "telefone_publico": {
+      "type": "string",
+      "description": "Telefone p\u00fablico (n\u00e3o coletar dado privado)"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "@handle p\u00fablico do Instagram"
+    },
+    "site": {
+      "type": "string"
+    },
+    "fonte": {
+      "type": "string",
+      "description": "Fonte dos dados: Google Maps, Instagram, Site, etc."
+    },
+    "link_fonte": {
+      "type": "string",
+      "description": "URL da fonte"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "place_id": {
+      "type": "string",
+      "description": "Google Place ID"
+    },
+    "status_validacao": {
+      "type": "string",
+      "enum": [
+        "novo",
+        "validado_nathan",
+        "descartado",
+        "convertido_lead",
+        "convertido_cliente"
+      ],
+      "default": "novo"
+    },
+    "score_potencial": {
+      "type": "number",
+      "description": "Score de potencial Seamaty (0-100) \u2014 hip\u00f3tese investigativa"
+    },
+    "motivo_score": {
+      "type": "string",
+      "description": "Por que recebeu este score"
+    },
+    "equipamento_indicado": {
+      "type": "string",
+      "description": "Equipamento Seamaty mais indicado para este perfil"
+    },
+    "oportunidade": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da oportunidade identificada"
+    },
+    "risco_erro": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto"
+      ],
+      "description": "Risco de dado incorreto ou desatualizado"
+    },
+    "data_captura": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "precisa_aprovacao_nathan": {
+      "type": "boolean",
+      "default": true,
+      "description": "Toda a\u00e7\u00e3o depende de aprova\u00e7\u00e3o do Nathan"
+    },
+    "instagram_sugerido_seguir": {
+      "type": "boolean",
+      "default": false,
+      "description": "Hunter SUGERE para Nathan \u2014 nunca segue sozinho"
+    },
+    "abordagem_sugerida": {
+      "type": "string",
+      "description": "Sugest\u00e3o de abordagem \u2014 Nathan decide se usa"
+    }
+  },
+  "required": [
+    "nome_clinica",
+    "tipo",
+    "cidade",
+    "uf"
+  ]
+}
