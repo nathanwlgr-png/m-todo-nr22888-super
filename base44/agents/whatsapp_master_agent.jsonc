@@ -224,7 +224,12 @@
     }
   ],
   "context_files": [],
-  "app_user_connector_configs": [],
+  "app_user_connector_configs": [
+    {
+      "connector_id": "6a2686433220785c03d4341f",
+      "enabled": true
+    }
+  ],
   "selected_skill_names": [],
   "selected_workspace_skill_ids": [
     "69ccbba6c6ee8d30e186bd71",
