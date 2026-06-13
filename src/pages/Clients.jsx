@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PullToRefresh from '@/components/PullToRefresh';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -86,8 +87,33 @@ export default function Clients() {
   const [selectedEquipment, setSelectedEquipment] = useState('');
   const [saleValue, setSaleValue] = useState('');
 
-  const { clients, isOffline, isLoading: offlineLoading, isCached, cacheAge } = useOfflineClients();
+  const queryClient = useQueryClient();
+
+  const { clients, isOffline, isLoading: offlineLoading, isCached, cacheAge, refetch: refetchClients } = useOfflineClients();
   const isLoading = offlineLoading;
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['clients'] }),
+      queryClient.invalidateQueries({ queryKey: ['sales'] }),
+      queryClient.invalidateQueries({ queryKey: ['all-visits'] }),
+    ]);
+  }, [queryClient]);
+
+  // Optimistic update for quick edit
+  const updateClientMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Client.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['clients'] });
+      const prev = queryClient.getQueryData(['clients']);
+      queryClient.setQueryData(['clients'], (old) =>
+        old ? old.map(c => c.id === id ? { ...c, ...data } : c) : old
+      );
+      return { prev };
+    },
+    onError: (_, __, ctx) => { if (ctx?.prev) queryClient.setQueryData(['clients'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['clients'] }),
+  });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
@@ -355,16 +381,13 @@ export default function Clients() {
       toast.error('Nome não pode estar vazio');
       return;
     }
-    try {
-      await base44.entities.Client.update(editingClientId, {
-        first_name: editingName.trim()
-      });
-      toast.success('Nome atualizado!');
-      setEditingClientId(null);
-      setEditingName('');
-    } catch (error) {
-      toast.error('Erro ao atualizar');
-    }
+    updateClientMutation.mutate(
+      { id: editingClientId, data: { first_name: editingName.trim() } },
+      {
+        onSuccess: () => { toast.success('Nome atualizado!'); setEditingClientId(null); setEditingName(''); },
+        onError: () => toast.error('Erro ao atualizar'),
+      }
+    );
   };
 
   const exportClientDocument = async (client) => {
@@ -611,6 +634,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
   };
 
   return (
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen">
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
@@ -1106,7 +1130,8 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
         </DialogContent>
       </Dialog>
 
-      {/* Import Dialog */}
+    </div>
+    {/* Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1303,6 +1328,6 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
+      </PullToRefresh>
+      );
+      }

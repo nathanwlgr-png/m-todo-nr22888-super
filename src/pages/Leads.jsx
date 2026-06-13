@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PullToRefresh from '@/components/PullToRefresh';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,9 +43,28 @@ export default function Leads() {
     search: ''
   });
 
-  const { data: leads = [], isLoading } = useQuery({
+  const { data: leads = [], isLoading, refetch: refetchLeads } = useQuery({
     queryKey: ['leads'],
     queryFn: () => base44.entities.Lead.list('-created_date', 200)
+  });
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['leads'] });
+  }, [queryClient]);
+
+  // Optimistic update for lead status changes
+  const updateLeadMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Lead.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['leads'] });
+      const prev = queryClient.getQueryData(['leads']);
+      queryClient.setQueryData(['leads'], (old) =>
+        old ? old.map(l => l.id === id ? { ...l, ...data } : l) : old
+      );
+      return { prev };
+    },
+    onError: (_, __, ctx) => { if (ctx?.prev) queryClient.setQueryData(['leads'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
   });
 
   const { data: users = [] } = useQuery({
@@ -124,6 +144,7 @@ export default function Leads() {
   };
 
   return (
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen">
     <div className="min-h-screen bg-slate-50 pb-24">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -345,5 +366,6 @@ export default function Leads() {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }

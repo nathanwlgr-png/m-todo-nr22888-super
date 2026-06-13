@@ -78,8 +78,13 @@ export default function AppLayout({ children, currentPageName }) {
 
       {/* BOTTOM NAV */}
       {!isHome && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 flex"
-          style={{ background: 'rgba(10,10,10,0.97)', borderTop: '1px solid rgba(255,107,0,0.15)', backdropFilter: 'blur(12px)' }}>
+        <nav className="fixed bottom-0 left-0 right-0 z-[100] flex"
+          style={{
+            background: 'rgba(10,10,10,0.97)',
+            borderTop: '1px solid rgba(255,107,0,0.15)',
+            backdropFilter: 'blur(12px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          }}>
           {[
             { to: '/', icon: Home, label: 'Home', color: '#ff9500' },
             { to: createPageUrl('SalesCommandCenter'), icon: Zap, label: 'Command', color: '#00ff88' },
