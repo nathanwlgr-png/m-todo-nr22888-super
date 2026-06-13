@@ -28,6 +28,8 @@ export default function TasksUnified() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [aiPriority, setAiPriority] = useState(true);
+  const [clientSearch, setClientSearch] = useState('');
+  const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const [taskData, setTaskData] = useState({
     title: '',
     description: '',
@@ -125,6 +127,20 @@ export default function TasksUnified() {
     }
   });
 
+  const clientSuggestions = clientSearch.length >= 2
+    ? clients.filter(c => {
+        const q = clientSearch.toLowerCase();
+        return c.clinic_name?.toLowerCase().includes(q) || c.full_name?.toLowerCase().includes(q) || c.first_name?.toLowerCase().includes(q);
+      }).slice(0, 6)
+    : [];
+
+  const selectClientForTask = (c) => {
+    const displayName = c.clinic_name || c.full_name || c.first_name || '';
+    setClientSearch(displayName);
+    setTaskData(prev => ({ ...prev, client_id: c.id, client_name: displayName }));
+    setShowClientSuggestions(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingTask) {
@@ -176,6 +192,7 @@ export default function TasksUnified() {
           onClick={() => {
             setEditingTask(task);
             setTaskData(task);
+            setClientSearch(task.client_name || '');
             setShowForm(true);
           }}
         >
@@ -279,6 +296,7 @@ export default function TasksUnified() {
             <Button onClick={() => {
               setShowForm(true);
               setEditingTask(null);
+              setClientSearch('');
               setTaskData({
                 title: '', description: '', client_id: '', client_name: '',
                 due_date: '', priority: 'media', status: 'pendente', type: 'follow_up'
@@ -359,7 +377,7 @@ export default function TasksUnified() {
                             <CheckCircle2 className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button size="sm" variant="outline" onClick={() => { setEditingTask(task); setTaskData(task); setShowForm(true); }}>
+                        <Button size="sm" variant="outline" onClick={() => { setEditingTask(task); setTaskData(task); setClientSearch(task.client_name || ''); setShowForm(true); }}>
                           Editar
                         </Button>
                       </div>
@@ -408,9 +426,36 @@ export default function TasksUnified() {
                   <Textarea value={taskData.description} onChange={(e) => setTaskData({...taskData, description: e.target.value})} />
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="relative">
                     <Label>Cliente</Label>
-                    <Input value={taskData.client_name} onChange={(e) => setTaskData({...taskData, client_name: e.target.value})} />
+                    <Input
+                      placeholder="Buscar clínica ou cliente..."
+                      value={clientSearch}
+                      onChange={(e) => {
+                        setClientSearch(e.target.value);
+                        setTaskData(prev => ({ ...prev, client_id: '', client_name: e.target.value }));
+                        setShowClientSuggestions(true);
+                      }}
+                      onFocus={() => setShowClientSuggestions(true)}
+                    />
+                    {showClientSuggestions && clientSuggestions.length > 0 && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setShowClientSuggestions(false)} />
+                        <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg border shadow-lg z-20 overflow-hidden">
+                          {clientSuggestions.map(c => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => selectClientForTask(c)}
+                              className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b last:border-0"
+                            >
+                              <p className="text-sm font-semibold text-slate-800">{c.clinic_name || c.full_name || c.first_name}</p>
+                              <p className="text-xs text-slate-500">{c.city || ''}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div>
                     <Label>Prazo</Label>
