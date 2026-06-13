@@ -87,6 +87,27 @@ export default function ClienteDetalhe360() {
     onSuccess: () => qc.invalidateQueries(['c360-client', clientId]),
   });
 
+  // ── Utilitário: URL segura ─────────────────────────────────────────────────
+  const safeOpenUrl = (rawUrl, label = 'site') => {
+    if (!rawUrl || !rawUrl.trim()) {
+      toast.error(`${label} não cadastrado neste cliente`);
+      return;
+    }
+    let url = rawUrl.trim().replace(/\s+/g, '');
+    // Adiciona protocolo se ausente
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+    // Valida formato mínimo de URL
+    try {
+      const parsed = new URL(url);
+      if (!parsed.hostname || !parsed.hostname.includes('.')) throw new Error('domínio inválido');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast.error(`⚠️ Site não validado: "${rawUrl}". Verifique o link no cadastro antes de abrir.`);
+    }
+  };
+
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleUpdateStage = async (stage) => {
     await updateClient.mutateAsync({ id: client.id, data: { pipeline_stage: stage } });
@@ -103,12 +124,13 @@ export default function ClienteDetalhe360() {
 
   const handleVerMapa = () => {
     const addr = encodeURIComponent(client.address || client.city || 'Marília SP');
-    window.open(`https://maps.google.com/?q=${addr}`, '_blank');
+    window.open(`https://maps.google.com/?q=${addr}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleAbrirInstagram = () => {
     if (!client?.instagram_handle) { toast.error('Sem Instagram cadastrado'); return; }
-    window.open(`https://instagram.com/${client.instagram_handle.replace('@', '')}`, '_blank');
+    const handle = client.instagram_handle.replace('@', '').trim();
+    window.open(`https://instagram.com/${handle}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleGerarPDF = async () => {
@@ -468,10 +490,10 @@ export default function ClienteDetalhe360() {
                 ))}
               </div>
               {client.website && (
-                <a href={client.website} target="_blank" rel="noopener noreferrer"
-                  className="mt-2 flex items-center gap-1.5 text-xs text-blue-400">
+                <button onClick={() => safeOpenUrl(client.website, 'Site')}
+                  className="mt-2 flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                   <Globe className="w-3 h-3" />{client.website}
-                </a>
+                </button>
               )}
             </div>
 

@@ -12,75 +12,53 @@ export default function ExportClinicReportWithROI() {
     setError(null);
 
     try {
-      const report = await base44.functions.invoke('generateConsolidatedClinicReportWithROI', {});
+      // Busca clientes diretamente — não depende de função externa inexistente
+      const clients = await base44.entities.Client.list('-purchase_score', 50);
       
-      // Create PDF content
+      if (!clients || clients.length === 0) {
+        setError('Nenhum cliente cadastrado para gerar o relatório.');
+        return;
+      }
+
       const { jsPDF } = await import('jspdf');
       const doc = new jsPDF('l', 'mm', 'a4');
 
-      // Title
-      doc.setFontSize(18);
-      doc.text('Relatório Consolidado de Clínicas - Território Nathan', 20, 20);
+      doc.setFontSize(16);
+      doc.text('Relatório de Clínicas — Território NR22888', 20, 20);
 
-      // Summary section
-      doc.setFontSize(12);
-      doc.text('Resumo Executivo', 20, 35);
-      
       doc.setFontSize(10);
-      const summaryData = [
-        [`Total de Clínicas Mapeadas: ${report.data.summary.totalClinicsMaped}`],
-        [`Valor Anual Estimado: R$ ${report.data.summary.totalEstimatedAnnualValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`],
-        [`ROI Médio: ${report.data.summary.averageROIMonths} meses`],
-        [`Clínicas com Alto Potencial (>R$50k): ${report.data.summary.highPotentialClinics}`],
-      ];
+      doc.text(`Total de clientes: ${clients.length}  |  Gerado em: ${new Date().toLocaleString('pt-BR')}`, 20, 30);
 
-      let yPos = 45;
-      summaryData.forEach(line => {
-        doc.text(line[0], 20, yPos);
-        yPos += 8;
-      });
-
-      // Table header
-      yPos += 5;
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Clínica', 20, yPos);
-      doc.text('Cidade', 70, yPos);
-      doc.text('Valor Anual', 110, yPos);
-      doc.text('ROI (meses)', 150, yPos);
-      doc.text('Status', 190, yPos);
-
-      // Table data
-      doc.setFont(undefined, 'normal');
       doc.setFontSize(9);
-      yPos += 8;
+      doc.setFont(undefined, 'bold');
+      let yPos = 42;
+      doc.text('Nome/Clínica', 20, yPos);
+      doc.text('Cidade', 90, yPos);
+      doc.text('Status', 140, yPos);
+      doc.text('Score', 175, yPos);
+      doc.text('Equipamento', 195, yPos);
+      doc.setFont(undefined, 'normal');
+      yPos += 6;
 
-      report.data.clinics.slice(0, 20).forEach(clinic => {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 20;
-        }
-
-        const clinicName = clinic.clinicName.substring(0, 30);
-        const value = `R$ ${(clinic.estimatedAnnualValue / 1000).toFixed(0)}k`;
-        
-        doc.text(clinicName, 20, yPos);
-        doc.text(clinic.city.substring(0, 15), 70, yPos);
-        doc.text(value, 110, yPos);
-        doc.text(clinic.roiMonths.toString(), 150, yPos);
-        doc.text(clinic.status || 'N/A', 190, yPos);
-
-        yPos += 7;
+      clients.forEach(c => {
+        if (yPos > 195) { doc.addPage(); yPos = 20; }
+        const nome = (c.clinic_name || c.first_name || '—').substring(0, 35);
+        const cidade = (c.city || '—').substring(0, 18);
+        const status = (c.status || '—').substring(0, 8);
+        const score = String(c.purchase_score || 0);
+        const equip = (c.equipment_interest || '—').substring(0, 12);
+        doc.text(nome, 20, yPos);
+        doc.text(cidade, 90, yPos);
+        doc.text(status, 140, yPos);
+        doc.text(score, 175, yPos);
+        doc.text(equip, 195, yPos);
+        yPos += 6;
       });
 
-      // Footer
-      doc.setFontSize(8);
-      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 20, 280);
-
-      doc.save('relatorio_clinicas_roi.pdf');
+      doc.save('relatorio_clinicas_nr22888.pdf');
     } catch (err) {
-      setError(err.message);
-      console.error('Erro ao exportar relatório:', err);
+      setError('Erro ao gerar relatório. Tente novamente.');
+      console.error('Erro ExportClinicReportWithROI:', err);
     } finally {
       setLoading(false);
     }
