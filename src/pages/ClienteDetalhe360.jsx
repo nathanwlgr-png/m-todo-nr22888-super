@@ -193,8 +193,27 @@ export default function ClienteDetalhe360() {
     if (!item || !client?.phone) { toast.error('Sem telefone cadastrado'); return; }
     const waUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(item.text)}`;
     window.open(waUrl, '_blank');
-    setApprovalQueue(prev => prev.map(i => i.id === id ? { ...i, envio_realizado: true } : i));
-    toast.info('WhatsApp aberto com texto pré-preenchido — você ainda precisa apertar Enviar no WhatsApp');
+    // Abre WhatsApp mas NÃO marca envio como realizado — apenas registra que foi aberto
+    setApprovalQueue(prev => prev.map(i => i.id === id ? {
+      ...i,
+      whatsapp_aberto: true,
+      envio_realizado: false,        // permanece false — só muda após confirmação manual
+      envio_confirmado_manual: false,
+      status: 'whatsapp_aberto_aguardando_envio_manual_nathan',
+      canal: 'whatsapp_pre_preenchido',
+    } : i));
+    toast.info('📱 WhatsApp aberto — texto pré-preenchido. Você ainda precisa apertar ENVIAR no WhatsApp.');
+  };
+
+  const handleConfirmarEnvioManual = (id) => {
+    setApprovalQueue(prev => prev.map(i => i.id === id ? {
+      ...i,
+      envio_realizado: true,
+      envio_confirmado_manual: true,
+      status: 'enviado_manual_confirmado_por_nathan',
+      data_confirmacao_envio: new Date().toLocaleString('pt-BR'),
+    } : i));
+    toast.success('✅ Envio confirmado manualmente por Nathan — registrado no log.');
   };
 
   const handleReprovar = (id) => {
@@ -716,22 +735,46 @@ export default function ClienteDetalhe360() {
                       </button>
                     </div>
                   )}
+                  {/* Estado: aprovado mas WhatsApp ainda não aberto */}
                   {item.status === 'aprovado_aguardando_envio_manual' && (
                     <div className="space-y-1.5">
                       <div className="rounded-lg px-2 py-1.5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
-                        <p className="text-[9px] text-yellow-400 font-black">⚠️ ENVIO NÃO AUTOMÁTICO — você precisa apertar Enviar no WhatsApp manualmente</p>
-                        <p className="text-[9px] text-slate-500">envio_realizado={item.envio_realizado ? 'true' : 'false'} · canal=whatsapp_pre_preenchido</p>
+                        <p className="text-[9px] text-yellow-400 font-black">✅ APROVADO — WhatsApp ainda não aberto</p>
+                        <p className="text-[9px] text-slate-500 mt-0.5">whatsapp_aberto=false · envio_realizado=false · envio_confirmado_manual=false</p>
                       </div>
-                      {!item.envio_realizado && (
-                        <button onClick={() => handleAbrirWhatsAppManual(item.id)}
-                          className="w-full py-2 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-black"
-                          style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25d366' }}>
-                          <MessageSquare className="w-3 h-3" /> Abrir WhatsApp (envio manual)
-                        </button>
-                      )}
-                      {item.envio_realizado && (
-                        <p className="text-[9px] text-green-400 font-black text-center">✅ WhatsApp aberto — aguardando envio manual do Nathan</p>
-                      )}
+                      <button onClick={() => handleAbrirWhatsAppManual(item.id)}
+                        className="w-full py-2 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-black"
+                        style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25d366' }}>
+                        <MessageSquare className="w-3 h-3" /> Abrir WhatsApp (pré-preenchido)
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Estado: WhatsApp aberto mas envio ainda não confirmado */}
+                  {item.status === 'whatsapp_aberto_aguardando_envio_manual_nathan' && (
+                    <div className="space-y-1.5">
+                      <div className="rounded-lg px-2 py-1.5" style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.25)' }}>
+                        <p className="text-[9px] text-blue-400 font-black">📱 WhatsApp aberto — aguardando Nathan apertar ENVIAR</p>
+                        <p className="text-[9px] text-slate-500 mt-0.5">whatsapp_aberto=true · envio_realizado=false · canal=whatsapp_pre_preenchido</p>
+                      </div>
+                      <button onClick={() => handleAbrirWhatsAppManual(item.id)}
+                        className="w-full py-2 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-black"
+                        style={{ background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.2)', color: '#6ee7b7' }}>
+                        <MessageSquare className="w-3 h-3" /> Reabrir WhatsApp
+                      </button>
+                      <button onClick={() => handleConfirmarEnvioManual(item.id)}
+                        className="w-full py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-black"
+                        style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.5)', color: '#22c55e' }}>
+                        <CheckCircle className="w-3.5 h-3.5" /> ✔ Confirmar que enviei manualmente
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Estado: envio confirmado manualmente */}
+                  {item.status === 'enviado_manual_confirmado_por_nathan' && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                      <p className="text-[9px] text-green-400 font-black">✅ ENVIADO — confirmado manualmente por Nathan</p>
+                      <p className="text-[9px] text-slate-500 mt-0.5">envio_realizado=true · envio_confirmado_manual=true · {item.data_confirmacao_envio}</p>
                     </div>
                   )}
                 </div>
@@ -852,9 +895,9 @@ export default function ClienteDetalhe360() {
               <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">🤖 SuperAgentLog</p>
               <div className="space-y-1 font-mono text-[10px]">
                 {[
-                  { k: 'modo', v: 'correcao_status_conectores_e_validacao_visual_cliente360' },
+                  { k: 'modo', v: 'fechamento_tecnico_cliente360_skills_seguras' },
                   { k: 'app', v: 'NR22888' },
-                  { k: 'status_publicacao', v: 'NAO_PUBLICAR_AINDA' },
+                  { k: 'status_publicacao', v: 'PUBLICAR_LIBERADO_PARCIAL_SEM_PROPOSTA_VI1' },
                   { k: 'preco_vi1', v: 'PRECO_PENDENTE_VALIDACAO' },
                   { k: 'tela_360', v: 'VALIDADA_VISUALMENTE' },
                   { k: 'botoes', v: 'TODOS_FUNCIONAIS' },
@@ -863,7 +906,10 @@ export default function ClienteDetalhe360() {
                   { k: 'print_upload', v: 'FUNCIONAL' },
                   { k: 'conectores_ativos_testados', v: 'GoogleCalendar, GoogleSlides, Notion' },
                   { k: 'conectores_ativos_nao_testados_em_fluxo', v: 'Gmail, Drive, Docs, Sheets, Instagram, Analytics, LinkedIn, Outlook, TikTok, Dropbox, SearchConsole, GitHub' },
-                  { k: 'aprovacao_envia_automatico', v: 'false — envio_realizado=false até ação manual do Nathan' },
+                  { k: 'whatsapp_aberto_marca_envio', v: 'false — whatsapp_aberto!=envio_realizado' },
+                  { k: 'botao_confirmar_envio_manual', v: 'EXISTE — exige clique separado do Nathan' },
+                  { k: 'aprovacao_envia_automatico', v: 'false — envio_realizado=false até confirmacao_manual=true' },
+                  { k: 'skills_seguras', v: 'NAO_APLICAVEL_VIA_CODIGO — ativar manualmente no painel Base44' },
                   { k: 'pdf_testado', v: 'REAL — URL retornada: relatorio_1781338790798.pdf' },
                   { k: 'link_rastreavel', v: 'FUNCIONAL — copia UTM com client_id' },
                   { k: 'upload_print', v: 'FUNCIONAL — UploadFile + preview' },
@@ -885,7 +931,8 @@ export default function ClienteDetalhe360() {
                 { done: true, label: 'Tela visual ClienteDetalhe360 funcionando' },
                 { done: true, label: 'Botões principais funcionando' },
                 { done: true, label: 'Aprovar NÃO envia automaticamente (corrigido)' },
-                { done: true, label: 'WhatsApp abre pré-preenchido — envio 100% manual' },
+                { done: true, label: 'WhatsApp aberto ≠ envio realizado (campos separados)' },
+                { done: true, label: 'Botão "Confirmar que enviei manualmente" existe' },
                 { done: true, label: 'Envio direto bloqueado com toast' },
                 { done: true, label: 'Mapa renderizado com iframe + botão externo' },
                 { done: true, label: 'Upload de print funcional (UploadFile real)' },
