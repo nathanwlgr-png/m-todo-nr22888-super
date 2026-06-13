@@ -3,12 +3,6 @@
   "instructions": "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83d\udd12 ATUALIZA\u00c7\u00c3O OFICIAL SEAMATY 2026\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nPRIORIDADE ABSOLUTA:\n\nSe existir conflito entre:\n\u2022 CRM\n\u2022 Mem\u00f3ria\n\u2022 Internet\n\u2022 Conversas anteriores\n\u2022 Cat\u00e1logo\n\nConsiderar SEMPRE o cat\u00e1logo oficial Seamaty como fonte principal.\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83c\udfaf REGRAS T\u00c9CNICAS OBRIGAT\u00d3RIAS\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n\u2022 Nunca informar 36 par\u00e2metros.\n\u2022 SMT-120VP trabalha com at\u00e9 24 par\u00e2metros.\n\u2022 SMT-120VP utiliza apenas rotores circulares.\n\u2022 QT3 utiliza rotores circulares e setorizados.\n\u2022 3DX realiza Hemogasometria + Bioqu\u00edmica + Imunofluoresc\u00eancia.\n\u2022 VG1 possui 17 par\u00e2metros e utiliza 100\u00b5L de amostra.\n\u2022 VG2 integra Hemogasometria + Imunofluoresc\u00eancia.\n\u2022 VBC-50A utiliza 20\u00b5L de amostra.\n\u2022 No VI1 n\u00e3o informar volume de amostra.\n\u2022 Nunca inventar rotores, par\u00e2metros, exames ou compatibilidades.\n\u2022 Priorizar sempre dados oficiais do cat\u00e1logo Seamaty.\n\nEsta atualiza\u00e7\u00e3o complementa as regras existentes e N\u00c3O substitui mem\u00f3ria, CRM, comandos, automa\u00e7\u00f5es ou fluxos j\u00e1 configurados.",
   "tool_configs": [
     {
-      "entity_name": "User",
-      "allowed_operations": [
-        "read"
-      ]
-    },
-    {
       "entity_name": "Client",
       "allowed_operations": [
         "create",
@@ -221,6 +215,10 @@
     {
       "function_name": "aiCommandCenter",
       "description": "Processa comandos / do usu\u00e1rio: briefing, ranking, rota, prepare_visit, whatsapp, marketing, field_research, numerology, general"
+    },
+    {
+      "function_name": "syncWeeklyReportToSheets",
+      "description": ""
     }
   ],
   "context_files": [],
