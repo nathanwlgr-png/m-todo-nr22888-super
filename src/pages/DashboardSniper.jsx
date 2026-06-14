@@ -6,9 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import {
   Target, Users, Search, MapPin, MessageSquare, FileText, TrendingUp,
-  ChevronRight, Zap, Bell, AlertTriangle, ArrowRight
+  ChevronRight, Bell, AlertTriangle, ArrowRight, Calendar, Star
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
@@ -54,9 +53,9 @@ export default function DashboardSniper() {
         {/* Header */}
         <div className="px-4 py-4 rounded-2xl bg-[#0f0f11] border border-orange-500/20 shadow-lg">
           <h1 className="text-2xl font-black text-orange-400 mb-1 flex items-center gap-2 justify-center">
-            🎯 Dashboard Sniper
+            🎯 Painel Comercial
           </h1>
-          <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Fluxo Comercial de Elite</p>
+          <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
         </div>
 
         {/* Imagem central */}
@@ -64,14 +63,14 @@ export default function DashboardSniper() {
           <img
             src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png"
             className="w-full h-auto object-contain max-h-[380px]"
-            alt="NR22888 Sniper"
+            alt="Painel Comercial"
           />
         </div>
 
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl p-3 bg-[#0f0f11] border border-emerald-500/30">
-            <p className="text-xs text-emerald-400 font-bold">🔥 Clientes Quentes</p>
+            <p className="text-xs text-emerald-400 font-bold">🔥 Alta Prioridade</p>
             <p className="text-2xl font-black text-emerald-300">{hotClients.length}</p>
           </div>
           <div className="rounded-xl p-3 bg-[#0f0f11] border border-rose-500/30">
@@ -91,7 +90,7 @@ export default function DashboardSniper() {
         {/* Fluxo 7 etapas */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
           <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
-            ⚡ Fluxo de Vendas (7 Etapas)
+            ⚡ Fluxo de Vendas
           </h2>
           <div className="space-y-2">
             <Link to={createPageUrl('Clients')}>
@@ -108,19 +107,19 @@ export default function DashboardSniper() {
             </Link>
             <Link to={createPageUrl('ModoInvestigativoSupremo')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Search className="w-5 h-5" /><span>3️⃣ Investigação Suprema</span></div>
+                <div className="flex items-center gap-2"><Search className="w-5 h-5" /><span>3️⃣ Análise de Cliente</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link to={createPageUrl('GenerateWhatsAppIntegrated')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Zap className="w-5 h-5" /><span>4️⃣ Gerar SPIN</span></div>
+                <div className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /><span>4️⃣ WhatsApp Consultivo</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link to={createPageUrl('WhatsAppHub')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /><span>5️⃣ WhatsApp com Aprovação</span></div>
+                <div className="flex items-center gap-2"><Bell className="w-5 h-5" /><span>5️⃣ Fila de Aprovação</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -139,14 +138,14 @@ export default function DashboardSniper() {
           </div>
         </div>
 
-        {/* Link de teste — ClienteDetalhe360 */}
+        {/* Link Cliente360 */}
         <Link to="/ClienteDetalhe360?id=6a2d109cf3035a700442b501">
           <div className="rounded-xl p-3 flex items-center justify-between bg-[#0f0f11] border-2 border-orange-500/40">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-orange-400" />
               <div>
-                <p className="text-xs font-black text-orange-400">🧪 Cliente360 — Teste</p>
-                <p className="text-[9px] text-slate-600">VetPrime Marília · Ricardo · QUENTE</p>
+                <p className="text-xs font-black text-orange-400">📋 Cliente 360°</p>
+                <p className="text-[9px] text-slate-500">VetPrime Marília · Ricardo · QUENTE</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-orange-500" />
@@ -157,7 +156,7 @@ export default function DashboardSniper() {
         <div className="grid grid-cols-2 gap-2">
           <Link to="/AgendaMensal">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-indigo-500/30">
-              <Bell className="w-4 h-4 text-indigo-400" />
+              <Calendar className="w-4 h-4 text-indigo-400" />
               <span className="text-xs font-black text-indigo-400">📅 Agenda Mensal</span>
             </div>
           </Link>
@@ -170,19 +169,25 @@ export default function DashboardSniper() {
           <Link to="/ModoCacaComercial">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30">
               <Target className="w-4 h-4 text-rose-400" />
-              <span className="text-xs font-black text-rose-400">🎯 Modo Caça</span>
+              <span className="text-xs font-black text-rose-400">🎯 Prospecção</span>
             </div>
           </Link>
           <Link to="/RankingOportunidades">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-yellow-500/30">
               <TrendingUp className="w-4 h-4 text-yellow-400" />
-              <span className="text-xs font-black text-yellow-400">🏆 Ranking do Dia</span>
+              <span className="text-xs font-black text-yellow-400">🏆 Prioridade Comercial</span>
             </div>
           </Link>
           <Link to="/ScheduledAgenda">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-amber-500/30">
               <ArrowRight className="w-4 h-4 text-amber-400" />
               <span className="text-xs font-black text-amber-400">🗺️ Rota do Dia</span>
+            </div>
+          </Link>
+          <Link to="/EventoClienteTracking">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-purple-500/30">
+              <Star className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-black text-purple-400">📍 Interesse do Cliente</span>
             </div>
           </Link>
         </div>
@@ -195,15 +200,15 @@ export default function DashboardSniper() {
           </Suspense>
         </div>
 
-        {/* Sniper do Dia */}
+        {/* Prioridade do Dia */}
         <Suspense fallback={<HeavyFallback />}>
           <SniperDoDia />
         </Suspense>
 
-        {/* Melhores Clientes */}
+        {/* Clientes Prioritários */}
         {hotClients.length > 0 && (
           <div className="rounded-xl p-3 bg-[#0f0f11] border border-orange-500/20 shadow-lg">
-            <h3 className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">🏆 Melhores Clientes</h3>
+            <h3 className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">🏆 Alta Prioridade Comercial</h3>
             <div className="space-y-1 max-h-48 overflow-y-auto">
               {hotClients.slice(0, 5).map(client => (
                 <Link key={client.id} to={`/ClientProfile?id=${client.id}`}>
@@ -222,7 +227,7 @@ export default function DashboardSniper() {
           <SmartRouteMap />
         </Suspense>
 
-        {/* Relatório Semanal de Saúde */}
+        {/* Relatório Semanal */}
         <Suspense fallback={<HeavyFallback />}>
           <WeeklyHealthReport clients={clients} />
         </Suspense>
@@ -233,11 +238,11 @@ export default function DashboardSniper() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-black text-orange-400 mb-1">💡 Próxima Ação Recomendada</p>
-                <p className="text-xs text-orange-200 mb-2">{noContact7d.length} cliente(s) sem contato há +7 dias precisam de follow-up</p>
+                <p className="text-sm font-black text-orange-400 mb-1">💡 Próxima Ação</p>
+                <p className="text-xs text-orange-200 mb-2">{noContact7d.length} cliente(s) sem contato há +7 dias</p>
                 <Link to={createPageUrl('TasksUnified')}>
                   <Button size="sm" className="w-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-extrabold border-none">
-                    Ir para Tarefas
+                    Ver Tarefas
                   </Button>
                 </Link>
               </div>
