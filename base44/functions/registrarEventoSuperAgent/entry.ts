@@ -228,25 +228,31 @@ Deno.serve(async (req) => {
 
     // ── Grava AuditLog (OBRIGATÓRIO) ──────────────────────────
     const auditRecord = await serviceRole.entities.AuditLog.create({
-      module:       payloadModule || 'superagent',
-      action:       payloadAction || 'evento_superagent_registrado',
-      user_message: `[SuperAgent] ${event_type.toUpperCase()}: ${title}`,
-      details:      notesLines,
-      client_id:    finalClientId,
-      client_name:  finalClientName,
-      success:      true,
+      module:        payloadModule || 'superagent',
+      action:        payloadAction || 'evento_superagent_registrado',
+      user_email:    payload.user_email || 'nathan.wlgr@gmail.com',
+      user_message:  `[SuperAgent] ${event_type.toUpperCase()}: ${title}`,
+      details:       notesLines,
+      client_id:     finalClientId,
+      client_name:   finalClientName,
+      success:       true,
       error_message: '',
-      input_size:   'pequeno',
-      output_size:  'pequeno',
-      cost_credits: 0,
-      source:       'api',
+      input_size:    'pequeno',
+      output_size:   'pequeno',
+      cost_credits:  0,
+      duration_ms:   0,
+      source:        'api',
     }).catch(async () => {
-      // Fallback: tenta com campos mínimos se entidade tiver schema diferente
+      // Fallback: campos mínimos obrigatórios
       return await serviceRole.entities.AuditLog.create({
-        module:  payloadModule || 'superagent',
-        action:  payloadAction || 'evento_superagent_registrado',
-        success: true,
-        details: notesLines,
+        module:        payloadModule || 'superagent',
+        action:        payloadAction || 'evento_superagent_registrado',
+        user_email:    payload.user_email || 'nathan.wlgr@gmail.com',
+        success:       true,
+        error_message: '',
+        duration_ms:   0,
+        cost_credits:  0,
+        details:       notesLines,
       });
     });
 
