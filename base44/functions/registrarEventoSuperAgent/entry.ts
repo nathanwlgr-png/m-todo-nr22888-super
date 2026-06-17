@@ -1,29 +1,26 @@
 /**
- * registrarEventoSuperAgent
+ * registrarEventoSuperAgent — v2
  * ─────────────────────────────────────────────────────────────
  * Ponte segura entre o NR22888 SuperAgent (Telegram) e o CRM visual.
- * Registra eventos externos (contratos, visitas, follow-ups, logs)
- * nas entidades ClientDocument e AIInteractionLog.
+ * Registra eventos externos com vínculo automático de cliente.
  *
  * Autenticação: Bearer token via variável de ambiente SUPERAGENT_TOKEN
- * Configure em: Dashboard → Code → Environment Variables → SUPERAGENT_TOKEN
- *
- * FASE 1 (atual): apenas ClientDocument + AIInteractionLog
- * FASE 2 (futura): Sale, Task, Visit — quando autorizado
+ * Entidades lidas:  Client
+ * Entidades gravadas: ClientDocument, AuditLog (obrigatório), AIInteractionLog (complementar)
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// ── Validação do token de acesso ───────────────────────────────
+// ── Validação do token ──────────────────────────────────────────
 function validateToken(req) {
   const authHeader = req.headers.get('Authorization') || '';
   const token = authHeader.replace('Bearer ', '').trim();
   const expected = Deno.env.get('SUPERAGENT_TOKEN');
-  if (!expected) return false; // sem token configurado = bloqueado
+  if (!expected) return false;
   return token === expected;
 }
 
-// ── Tipos permitidos na FASE 1 ─────────────────────────────────
+// ── Tipos permitidos ────────────────────────────────────────────
 const ALLOWED_EVENT_TYPES = ['contrato', 'proposta', 'visita', 'follow_up', 'log', 'documento'];
 const DOC_TYPE_MAP = {
   contrato:  'contrato',
@@ -34,8 +31,78 @@ const DOC_TYPE_MAP = {
   documento: 'outros',
 };
 
+// ── Normaliza telefone (apenas dígitos) ─────────────────────────
+function normalizePhone(p) {
+  return (p || '').replace(/\D/g, '');
+}
+
+// ── Lógica de vínculo automático de cliente ─────────────────────
+async function resolveClient(serviceRole, payload) {
+  const { client_id, cnpj, phone, telefone, client_name, clinic_name, razao_social } = payload;
+
+  // 1. client_id explícito
+  if (client_id && client_id !== 'superagent_externo') {
+    return { id: client_id, name: client_name || razao_social || 'Desconhecido', method: 'manual', confidence: 'alta' };
+  }
+
+  // 2. CNPJ — maior confiança
+  if (cnpj) {
+    const cnpjClean = cnpj.replace(/\D/g, '');
+    const matches = await serviceRole.entities.Client.filter({ cnpj: cnpjClean }).catch(() => []);
+    if (matches.length === 1) {
+      return {
+        id: matches[0].id,
+        name: matches[0].clinic_name || matches[0].first_name || client_name || 'Desconhecido',
+        method: 'cnpj',
+        confidence: 'alta',
+      };
+    }
+    if (matches.length > 1) return null; // ambíguo
+  }
+
+  // Busca geral para os próximos critérios
+  const allClients = await serviceRole.entities.Client.list('-created_date', 300).catch(() => []);
+
+  // 3. Telefone
+  const rawPhone = normalizePhone(phone || telefone);
+  if (rawPhone.length >= 8) {
+    const phoneMatches = allClients.filter(c => normalizePhone(c.phone) === rawPhone);
+    if (phoneMatches.length === 1) {
+      return {
+        id: phoneMatches[0].id,
+        name: phoneMatches[0].clinic_name || phoneMatches[0].first_name || client_name || 'Desconhecido',
+        method: 'phone',
+        confidence: 'media',
+      };
+    }
+    if (phoneMatches.length > 1) return null; // ambíguo
+  }
+
+  // 4. client_name / clinic_name / razao_social — correspondência aproximada
+  const searchNames = [client_name, clinic_name, razao_social].filter(Boolean).map(n => n.toLowerCase().slice(0, 20));
+  if (searchNames.length > 0) {
+    const nameMatches = allClients.filter(c => {
+      const fields = [c.full_name, c.clinic_name, c.razao_social, c.first_name]
+        .filter(Boolean)
+        .map(f => f.toLowerCase());
+      return searchNames.some(sn => fields.some(f => f.includes(sn) || sn.includes(f.slice(0, 15))));
+    });
+    if (nameMatches.length === 1) {
+      return {
+        id: nameMatches[0].id,
+        name: nameMatches[0].clinic_name || nameMatches[0].first_name || client_name || 'Desconhecido',
+        method: 'client_name',
+        confidence: 'baixa',
+      };
+    }
+    // ambíguo ou não encontrado → sem vínculo
+  }
+
+  return null; // nenhum match confiável
+}
+
+// ── Handler principal ───────────────────────────────────────────
 Deno.serve(async (req) => {
-  // ── CORS preflight ───────────────────────────────────────────
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -52,12 +119,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // ── 1. Autenticação ───────────────────────────────────────
+    // ── Autenticação ──────────────────────────────────────────
     if (!validateToken(req)) {
       return Response.json({ error: 'Não autorizado. Token inválido ou ausente.' }, { status: 401 });
     }
 
-    // ── 2. Parse do payload ───────────────────────────────────
+    // ── Parse do payload ──────────────────────────────────────
     let payload;
     try {
       payload = await req.json();
@@ -66,22 +133,28 @@ Deno.serve(async (req) => {
     }
 
     const {
-      event_type,       // 'contrato' | 'proposta' | 'visita' | 'follow_up' | 'log' | 'documento'
-      title,            // Título do evento (obrigatório)
-      client_id,        // ID do cliente no CRM (opcional — buscar por cnpj se ausente)
-      client_name,      // Nome do cliente
-      cnpj,             // CNPJ para tentativa de vínculo
-      razao_social,     // Razão social
-      equipamento,      // Equipamento relacionado
-      valor,            // Valor em R$
-      status,           // Status do documento
-      origem,           // Origem: 'NR22888 SuperAgent Telegram'
-      observacao,       // Notas livres
-      file_url,         // URL de arquivo (opcional)
-      metadata,         // Objeto livre para dados extras
+      event_type,
+      title,
+      client_id,
+      client_name,
+      clinic_name,
+      cnpj,
+      razao_social,
+      phone,
+      telefone,
+      equipamento,
+      valor,
+      status,
+      origem,
+      observacao,
+      summary,
+      file_url,
+      metadata,
+      module: payloadModule,
+      action: payloadAction,
     } = payload;
 
-    // ── 3. Validação de campos obrigatórios ───────────────────
+    // ── Validação obrigatória ─────────────────────────────────
     if (!event_type || !ALLOWED_EVENT_TYPES.includes(event_type)) {
       return Response.json({
         error: `event_type inválido. Permitidos: ${ALLOWED_EVENT_TYPES.join(', ')}`,
@@ -90,99 +163,126 @@ Deno.serve(async (req) => {
     if (!title) {
       return Response.json({ error: 'Campo "title" é obrigatório.' }, { status: 400 });
     }
-    if (!client_name && !cnpj) {
-      return Response.json({ error: 'Informe "client_name" ou "cnpj" para identificar o cliente.' }, { status: 400 });
+    if (!client_name && !cnpj && !clinic_name && !razao_social) {
+      return Response.json({
+        error: 'Informe ao menos um de: client_name, clinic_name, razao_social ou cnpj.',
+      }, { status: 400 });
     }
 
-    // ── 4. SDK no service role (sem autenticação de usuário) ──
     const base44 = createClientFromRequest(req);
+    const serviceRole = base44.asServiceRole;
 
-    // ── 5. Tentativa de vínculo com cliente existente ─────────
-    let resolvedClientId = client_id || null;
-    let resolvedClientName = client_name || razao_social || 'Desconhecido';
+    // ── Vínculo automático de cliente ─────────────────────────
+    const matched = await resolveClient(serviceRole, payload);
 
-    if (!resolvedClientId && cnpj) {
-      // Busca pelo CNPJ nos clientes cadastrados
-      const cnpjClean = cnpj.replace(/\D/g, '');
-      const matches = await base44.asServiceRole.entities.Client.filter({ cnpj: cnpjClean }).catch(() => []);
-      if (matches.length > 0) {
-        resolvedClientId = matches[0].id;
-        resolvedClientName = matches[0].clinic_name || matches[0].first_name || resolvedClientName;
-      }
+    let finalClientId, finalClientName, clientVinculado, matchMethod, matchConfidence;
+
+    if (matched) {
+      finalClientId    = matched.id;
+      finalClientName  = matched.name;
+      clientVinculado  = true;
+      matchMethod      = matched.method;
+      matchConfidence  = matched.confidence;
+    } else {
+      finalClientId    = 'superagent_externo';
+      finalClientName  = client_name || clinic_name || razao_social || 'Desconhecido';
+      clientVinculado  = false;
+      matchMethod      = 'none';
+      matchConfidence  = 'baixa';
     }
-
-    // Se ainda não encontrou, tenta por razão social parcial
-    if (!resolvedClientId && razao_social) {
-      const allClients = await base44.asServiceRole.entities.Client.list('-created_date', 200).catch(() => []);
-      const found = allClients.find(c =>
-        c.razao_social && c.razao_social.toLowerCase().includes(razao_social.toLowerCase().slice(0, 15))
-      );
-      if (found) {
-        resolvedClientId = found.id;
-        resolvedClientName = found.clinic_name || found.first_name || resolvedClientName;
-      }
-    }
-
-    // Se não encontrou cliente, usa ID placeholder
-    const finalClientId = resolvedClientId || 'superagent_externo';
-
-    // ── 6. Monta notes completo ───────────────────────────────
-    const notesLines = [
-      `📌 Origem: ${origem || 'NR22888 SuperAgent Telegram'}`,
-      equipamento ? `🔧 Equipamento: ${equipamento}` : null,
-      valor ? `💰 Valor: R$ ${valor}` : null,
-      razao_social ? `🏢 Razão Social: ${razao_social}` : null,
-      cnpj ? `📄 CNPJ: ${cnpj}` : null,
-      status ? `✅ Status: ${status}` : null,
-      observacao ? `📝 Obs: ${observacao}` : null,
-      metadata ? `📊 Dados extras: ${JSON.stringify(metadata, null, 2)}` : null,
-    ].filter(Boolean).join('\n');
 
     const now = new Date().toISOString();
 
-    // ── 7. Registra em ClientDocument ─────────────────────────
-    const docRecord = await base44.asServiceRole.entities.ClientDocument.create({
-      client_id: finalClientId,
-      client_name: resolvedClientName,
+    // ── Monta notes enriquecido ───────────────────────────────
+    const vinculoInfo = clientVinculado
+      ? `✅ Cliente vinculado automaticamente (método: ${matchMethod}, confiança: ${matchConfidence})`
+      : `⚠️ Registro externo não vinculado automaticamente; revisar manualmente.`;
+
+    const notesLines = [
+      `📌 Origem: ${origem || 'NR22888 SuperAgent Telegram'}`,
+      vinculoInfo,
+      equipamento  ? `🔧 Equipamento: ${equipamento}`         : null,
+      valor        ? `💰 Valor: R$ ${valor}`                  : null,
+      razao_social ? `🏢 Razão Social: ${razao_social}`       : null,
+      cnpj         ? `📄 CNPJ: ${cnpj}`                       : null,
+      status       ? `✅ Status: ${status}`                   : null,
+      summary      ? `📋 Resumo: ${summary}`                  : null,
+      observacao   ? `📝 Obs: ${observacao}`                  : null,
+      metadata     ? `📊 Extras: ${JSON.stringify(metadata)}` : null,
+    ].filter(Boolean).join('\n');
+
+    // ── Grava ClientDocument ──────────────────────────────────
+    const docRecord = await serviceRole.entities.ClientDocument.create({
+      client_id:   finalClientId,
+      client_name: finalClientName,
       title,
-      type: DOC_TYPE_MAP[event_type] || 'outros',
-      notes: notesLines,
-      file_url: file_url || null,
-      is_signed: status === 'validado' || status === 'assinado',
+      type:        DOC_TYPE_MAP[event_type] || 'outros',
+      notes:       notesLines,
+      file_url:    file_url || null,
+      is_signed:   status === 'validado' || status === 'assinado',
       signed_date: (status === 'validado' || status === 'assinado') ? now : null,
-      signers: client_name ? [{ name: client_name, email: '', signed: status === 'validado', signed_at: now }] : [],
+      signers:     client_name
+        ? [{ name: client_name, email: '', signed: status === 'validado', signed_at: now }]
+        : [],
     });
 
-    // ── 8. Registra em AIInteractionLog como log de evento ────
-    const logRecord = await base44.asServiceRole.entities.AIInteractionLog.create({
-      action_type: 'general',
-      source: 'api',
+    // ── Grava AuditLog (OBRIGATÓRIO) ──────────────────────────
+    const auditRecord = await serviceRole.entities.AuditLog.create({
+      module:       payloadModule || 'superagent',
+      action:       payloadAction || 'evento_superagent_registrado',
       user_message: `[SuperAgent] ${event_type.toUpperCase()}: ${title}`,
-      ai_response: notesLines,
-      client_id: finalClientId,
-      client_name: resolvedClientName,
-      success: true,
-      model_used: 'SuperAgent-Telegram',
-      tokens_used: 0,
+      details:      notesLines,
+      client_id:    finalClientId,
+      client_name:  finalClientName,
+      success:      true,
+      error_message: '',
+      input_size:   'pequeno',
+      output_size:  'pequeno',
+      cost_credits: 0,
+      source:       'api',
+    }).catch(async () => {
+      // Fallback: tenta com campos mínimos se entidade tiver schema diferente
+      return await serviceRole.entities.AuditLog.create({
+        module:  payloadModule || 'superagent',
+        action:  payloadAction || 'evento_superagent_registrado',
+        success: true,
+        details: notesLines,
+      });
     });
 
-    // ── 9. Resposta de sucesso ─────────────────────────────────
+    // ── Grava AIInteractionLog (COMPLEMENTAR) ─────────────────
+    const logRecord = await serviceRole.entities.AIInteractionLog.create({
+      action_type:  'general',
+      source:       'api',
+      user_message: `[SuperAgent] ${event_type.toUpperCase()}: ${title}`,
+      ai_response:  notesLines,
+      client_id:    finalClientId,
+      client_name:  finalClientName,
+      success:      true,
+      model_used:   'SuperAgent-Telegram',
+      tokens_used:  0,
+    }).catch(() => ({ id: null })); // não bloqueia se falhar
+
+    // ── Resposta de sucesso ───────────────────────────────────
     return Response.json({
-      success: true,
-      message: 'Evento registrado com sucesso no CRM Método NR22888.',
+      success:           true,
+      message:           'Evento registrado com sucesso no CRM Método NR22888.',
       data: {
-        document_id: docRecord.id,
-        log_id: logRecord.id,
-        client_id: finalClientId,
-        client_name: resolvedClientName,
-        client_vinculado: !!resolvedClientId,
+        document_id:      docRecord.id,
+        audit_log_id:     auditRecord.id,
+        ai_log_id:        logRecord.id,
+        client_id:        finalClientId,
+        client_name:      finalClientName,
+        client_vinculado: clientVinculado,
+        match_method:     matchMethod,
+        match_confidence: matchConfidence,
         event_type,
         title,
-        created_at: now,
+        created_at:       now,
       },
       visualizar: {
         documento: `Painel → Cliente 360° → aba Documentos (client_id: ${finalClientId})`,
-        log: 'Painel → Audit / Logs de Interação',
+        auditlog:  'Painel → SuperAgentWidget / AuditLog',
       },
     }, {
       status: 201,
@@ -192,8 +292,8 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({
       success: false,
-      error: 'Erro interno ao registrar evento.',
-      detail: error.message,
+      error:   'Erro interno ao registrar evento.',
+      detail:  error.message,
     }, { status: 500 });
   }
 });
