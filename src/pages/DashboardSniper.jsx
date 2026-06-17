@@ -13,6 +13,7 @@ const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
 const ExportClinicReportWithROI = lazy(() => import('@/components/ExportClinicReportWithROI'));
+const SuperAgentWidget = lazy(() => import('@/components/SuperAgentWidget'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3 bg-[#111111]" />;
 
@@ -230,6 +231,11 @@ export default function DashboardSniper() {
         {/* Relatório Semanal */}
         <Suspense fallback={<HeavyFallback />}>
           <WeeklyHealthReport clients={clients} />
+        </Suspense>
+
+        {/* SuperAgent Widget */}
+        <Suspense fallback={<HeavyFallback />}>
+          <SuperAgentWidget />
         </Suspense>
 
         {/* Recomendação de Ação */}
