@@ -168,6 +168,12 @@ export default function DashboardSniper() {
               <span className="text-xs font-black text-cyan-400">📊 Relatório</span>
             </div>
           </Link>
+          <Link to="/TesteAgentes">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-cyan-500/30">
+              <Star className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-black text-cyan-400">🤖 Teste Agentes</span>
+            </div>
+          </Link>
           <Link to="/ModoCacaComercial">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30">
               <Target className="w-4 h-4 text-rose-400" />
