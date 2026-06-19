@@ -9,6 +9,7 @@ import {
   ChevronRight, Bell, AlertTriangle, ArrowRight, Calendar, Star
 } from 'lucide-react';
 
+import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
@@ -192,6 +193,9 @@ export default function DashboardSniper() {
             </div>
           </Link>
         </div>
+
+        {/* Limpeza da Base */}
+        <BotaoLimpezaCRM />
 
         {/* Exportar Relatório de ROI */}
         <div className="rounded-xl p-3 bg-[#0f0f11] border border-green-500/30">
