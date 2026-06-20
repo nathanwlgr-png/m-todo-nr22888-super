@@ -3,35 +3,39 @@
 ## Objetivo
 Correção técnica e validação da Fase I antes de avançar para Fase II, sem apagar dados e sem alterar o fluxo antigo.
 
-## IDs de modelos válidos considerados
-Modelos aceitos pelo InvokeLLM neste app/workspace conforme integração Base44 disponível:
-- gpt_5_5
-- gpt_5_4
-- gpt_5_mini
-- claude_opus_4_8
-- claude_opus_4_7
-- claude_opus_4_6
-- claude_sonnet_4_6
-- gemini_3_1_pro
-- gemini_3_flash
-- automatic
+## Atualização real de prioridade_rank
+Registros atualizados em EliteToolConnection:
+- baixa → prioridade_rank 1: 2 registros.
+- media → prioridade_rank 2: 5 registros.
+- alta → prioridade_rank 3: 9 registros.
+- maxima → prioridade_rank 4: 6 registros.
 
-## Fallback de modelos implementado
+## Modelos testados com InvokeLLM real
+Prompt usado: “Responda apenas OK_MODELO_VALIDADO.”
+
+Resultados:
+- comercial / gpt_5_5: sucesso — OK_MODELO_VALIDADO.
+- auditoria / claude_opus_4_8: sucesso — OK_MODELO_VALIDADO.
+- documento / gemini_3_1_pro: sucesso — OK_MODELO_VALIDADO.
+- rotina / claude_sonnet_4_6: sucesso — OK_MODELO_VALIDADO.
+- simples / automatic: sucesso — OK_MODELO_VALIDADO.
+
+## Fallback definitivo mantido
 - Comercial: gpt_5_5 → gpt_5_4 → gpt_5_mini → automatic.
 - Auditoria/arquitetura: claude_opus_4_8 → claude_opus_4_7 → claude_opus_4_6 → claude_sonnet_4_6 → automatic.
 - Documento/visual: gemini_3_1_pro → gemini_3_flash → automatic.
 - Rotina: claude_sonnet_4_6 → gpt_5_mini → automatic.
 - Simples: automatic.
 
-## Arquivos corrigidos
-- lib/EliteAIEngine.js: adicionada escolha por chave, fallback seguro e mensagem amigável se todos os modelos falharem.
-- entities/EliteAIRecommendationLog.json: adicionado modo_operacional.
-- entities/EliteToolConnection.json: adicionado prioridade_rank.
-- components/elite/PlanoEliteStatus.jsx: ordenação por prioridade_rank e filtro local de mensagens pendentes/legadas.
-- pages/DashboardSniper: contadores protegidos com fallback seguro.
+## Regra de internet corrigida
+O EliteAIEngine agora tenta executar com add_context_from_internet usando o modelo recomendado e seus fallbacks. Se todos falharem com internet, executa sem internet e registra o fallback no EliteAIRecommendationLog, sem quebrar a tela.
 
-## Registros atualizados
-- EliteToolConnection recebeu prioridade_rank conforme regra: baixa=1, media=2, alta=3, maxima=4.
+## Arquivos corrigidos
+- lib/EliteAIEngine.js: fallback seguro, tentativa com internet e fallback sem internet registrado.
+- entities/EliteAIRecommendationLog.json: campo modo_operacional adicionado.
+- entities/EliteToolConnection.json: campo prioridade_rank adicionado.
+- components/elite/PlanoEliteStatus.jsx: ordenação por prioridade_rank e filtro local de mensagens pendentes/legadas.
+- pages/DashboardSniper: contadores protegidos contra undefined.
 
 ## Rotas validadas
 - /RankingOportunidades existe no App.jsx.
@@ -39,19 +43,22 @@ Modelos aceitos pelo InvokeLLM neste app/workspace conforme integração Base44 
 Nenhuma página provisória foi criada porque as rotas já existem.
 
 ## Filtros corrigidos
-O bloco Plano Elite agora considera mensagens com status:
+O bloco Plano Elite considera mensagens com status:
 - pending
 - aguardando_aprovacao
 - ready_to_send
 - rascunho
 
-## DashboardSniper
-O bloco Plano Elite foi mantido como camada complementar e protegido contra variáveis undefined.
+## Status real do DashboardSniper
+O DashboardSniper carregou no preview sem tela branca ou erro crítico. A captura mostrou o painel principal renderizando normalmente. O modal de instalação PWA apareceu sobre o conteúdo, então o bloco Plano Elite pode ficar abaixo/oculto no primeiro viewport, mas a página compilou e renderizou.
+
+## Bloco Plano Elite no preview
+O bloco foi inserido logo após o Sniper do Dia. No preview capturado, o app abriu com o modal “Instalar Seamaty NR22”, cobrindo parte da tela; não foi possível confirmar visualmente o bloco inteiro nessa captura sem fechar o modal/rolar, mas não houve erro de importação, rota ou variável.
 
 ## Riscos restantes
-- A validação final visual deve ser feita no preview, principalmente em Samsung Tab/celular.
-- O fallback de modelo só será acionado em chamadas reais de IA nas próximas fases.
+- Validar visualmente o bloco Plano Elite após fechar o modal PWA e rolar abaixo do Sniper do Dia.
 - Gmail, Drive amplo e Docs seguem pendentes até autorização/conexão específica.
+- Próxima fase deve continuar complementar, sem substituir DashboardSniper.
 
-## Status de compilação esperado
-Sem imports novos quebrados, sem rotas pendentes nos botões do bloco e sem filtro incompatível de OR no frontend.
+## Status final Fase I.1
+Finalizada e apta para seguir para Fase II somente após conferência visual do bloco no preview sem o modal PWA.
