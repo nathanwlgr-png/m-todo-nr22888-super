@@ -11,6 +11,7 @@ import {
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
 import PendenciasPara100 from '@/components/elite/PendenciasPara100';
+import ResolverPendencias from '@/components/elite/ResolverPendencias';
 import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
@@ -275,7 +276,10 @@ export default function DashboardSniper() {
           </div>
         </details>
 
-        {/* ── 12. PENDÊNCIAS PARA 100% (compacto/recolhível) ── */}
+        {/* ── 12. RESOLVER PENDÊNCIAS (botões de autorização) ── */}
+        <ResolverPendencias />
+
+        {/* ── 12b. PENDÊNCIAS PARA 100% (compacto/recolhível) ── */}
         <PendenciasPara100 />
 
         {/* ── 13. LIMPEZA DA BASE (rodapé) ── */}
