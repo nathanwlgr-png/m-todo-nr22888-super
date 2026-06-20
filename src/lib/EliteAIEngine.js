@@ -67,20 +67,47 @@ export async function invokeEliteLLM({ category, prompt, response_json_schema, f
   const modelKey = chooseEliteModelKey(category);
   const fallbackModels = ELITE_MODEL_FALLBACKS[modelKey] || ELITE_MODEL_FALLBACKS.automatic;
   let lastError;
+  let internetFailed = false;
 
-  for (const model of fallbackModels) {
-    try {
-      const payload = {
-        prompt,
-        model,
-        add_context_from_internet: add_context_from_internet && model.startsWith('gemini_3'),
-      };
-      if (response_json_schema) payload.response_json_schema = response_json_schema;
-      if (file_urls) payload.file_urls = file_urls;
-      return await base44.integrations.Core.InvokeLLM(payload);
-    } catch (error) {
-      lastError = error;
+  const runWithInternetPreference = async (useInternet) => {
+    for (const model of fallbackModels) {
+      try {
+        const payload = {
+          prompt,
+          model,
+          add_context_from_internet: useInternet,
+        };
+        if (response_json_schema) payload.response_json_schema = response_json_schema;
+        if (file_urls) payload.file_urls = file_urls;
+        return await base44.integrations.Core.InvokeLLM(payload);
+      } catch (error) {
+        lastError = error;
+        if (useInternet) internetFailed = true;
+      }
     }
+    return null;
+  };
+
+  if (add_context_from_internet) {
+    const internetResult = await runWithInternetPreference(true);
+    if (internetResult !== null) return internetResult;
+  }
+
+  const offlineResult = await runWithInternetPreference(false);
+  if (offlineResult !== null) {
+    if (internetFailed) {
+      logEliteRecommendation({
+        contexto: 'Fallback sem internet no EliteAIEngine',
+        categoria_decisao: category,
+        modelo_recomendado: chooseEliteModel(category),
+        motivo_modelo: 'Nenhum fallback aceitou add_context_from_internet; execução refeita sem internet para não quebrar a tela.',
+        impacto_comercial: 'medio',
+        acao: 'invokeEliteLLM_fallback_sem_internet',
+        resultado_resumido: 'executado_sem_internet',
+        observacao: lastError?.message || 'Falha com internet sem mensagem detalhada',
+      }).catch(() => {});
+    }
+    return offlineResult;
   }
 
   throw new Error(`Plano Elite não conseguiu executar a IA nesta categoria. Último erro: ${lastError?.message || 'modelo indisponível'}`);
