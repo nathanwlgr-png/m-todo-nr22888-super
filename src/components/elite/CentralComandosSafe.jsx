@@ -41,6 +41,10 @@ export default function CentralComandosSafe() {
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
+  const telegramConnectUrl = typeof base44?.agents?.getTelegramConnectURL === 'function'
+    ? base44.agents.getTelegramConnectURL('telegram_operacional_nr22888')
+    : '';
+
   return <div className="rounded-2xl p-4 bg-[#0f0f11] border-2 border-cyan-500/30 shadow-xl space-y-3">
     <div className="flex items-center justify-between gap-3">
       <div><p className="text-xs font-black text-cyan-300 uppercase tracking-widest">Fase II-SAFE</p><h2 className="text-lg font-black text-white">Central de Comandos</h2></div>
@@ -87,7 +91,11 @@ export default function CentralComandosSafe() {
 
     <div className="grid grid-cols-3 gap-2">
       <Link to="/WhatsAppHub"><Button size="sm" className="w-full bg-green-700 hover:bg-green-600"><MessageSquare className="w-4 h-4 mr-1" />WhatsApp</Button></Link>
-      <a href={base44.agents.getTelegramConnectURL('telegram_operacional_nr22888')} target="_blank" rel="noopener noreferrer"><Button size="sm" className="w-full bg-sky-700 hover:bg-sky-600">Telegram</Button></a>
+      {telegramConnectUrl ? (
+        <a href={telegramConnectUrl} target="_blank" rel="noopener noreferrer"><Button size="sm" className="w-full bg-sky-700 hover:bg-sky-600">Telegram</Button></a>
+      ) : (
+        <Button size="sm" disabled variant="outline" className="w-full text-[10px] leading-tight">Conectar Telegram no editor do agente</Button>
+      )}
       <Button size="sm" variant="outline" onClick={() => { qc.invalidateQueries({ queryKey: ['crm-update-queue-safe'] }); qc.invalidateQueries({ queryKey: ['telegram-command-log-safe'] }); qc.invalidateQueries({ queryKey: ['pending-message-safe'] }); }}><RefreshCw className="w-4 h-4 mr-1" />Atualizar</Button>
     </div>
   </div>;

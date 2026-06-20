@@ -26,7 +26,7 @@ Criado como agente complementar com regras SAFE:
 - Telegram não altera dados críticos diretamente.
 - Mensagens externas viram PendingMessage.
 - Atualizações de risco médio/alto passam por CRMUpdateQueue.
-- Modelos operacionais definidos: GPT-5.5 para decisão comercial, Sonnet 4.6 para respostas simples/follow-up e Opus 4.8 para erro/auditoria.
+- Modelo operacional SAFE padronizado em logs futuros como `claude_sonnet_4_6` para comandos Telegram, PendingMessage, EliteActionLog e CRMUpdateQueue simples.
 
 ## Comandos preparados
 - `/resumo_dia`
@@ -77,9 +77,43 @@ Criado como agente complementar com regras SAFE:
 - Nenhuma entidade antiga apagada.
 - Nenhuma automação de envio automático criada.
 
-## Próximos passos
-1. Aprovar permissões do agente Telegram Operacional NR22888.
-2. Conectar Telegram no editor do agente, se disponível no workspace.
-3. Testar `/resumo_dia` e `/whatsapp [cliente] [objetivo]`.
-4. Validar uma atualização baixo risco em CRMUpdateQueue.
-5. Manter médio/alto sempre com aprovação manual.
+## Validação final SAFE — 20/06/2026
+
+### Correções feitas
+- Botão Telegram da Central de Comandos ficou protegido: se `base44.agents.getTelegramConnectURL` existir, mostra conexão Telegram; se não existir, mostra botão informativo desativado “Conectar Telegram no editor do agente”.
+- `processTelegramCommandSafe` passou a aceitar separador `|` para nomes compostos e detalhes do comando.
+- `/atualizar` passou a interpretar `cliente | campo | valor` sem quebrar compatibilidade com formato antigo.
+- Logs futuros do Telegram foram padronizados para `claude_sonnet_4_6`.
+- Função passou a usar fallback seguro para entidades: lista vazia, mensagem informativa e log controlado quando algo estiver indisponível.
+- Aplicação segura do CRM ganhou checagens extras para não quebrar se entidade/log estiver indisponível.
+
+### Entidades validadas
+Confirmadas como existentes e legíveis: Client, Lead, EliteLeadScore, PendingMessage, CRMUpdateQueue, TelegramCommandLog, Task, EliteActionLog, Visit, ProposalEngagement e Sale.
+
+### Comandos testados e aprovados
+- `/resumo_dia` — retornou resumo sem erro e sem alterar CRM.
+- `/cliente Center` — retornou dados do cliente sem alterar CRM.
+- `/visita Center | cliente pediu retorno sobre VG2 e quer entender ROI` — criou CRMUpdateQueue de baixo risco.
+- `/followup Center | amanhã 9h` — criou Task de follow-up.
+- `/whatsapp Center | retomar conversa sobre ROI do VG2` — criou PendingMessage com status `aguardando_aprovacao` e modelo `claude_sonnet_4_6`.
+- `/atualizar Center | observacao | cliente pediu retorno sobre VG2 na próxima visita` — criou CRMUpdateQueue de baixo risco.
+- `/atualizar Center | status_funil | negociação` — criou CRMUpdateQueue de alto risco, status pendente e `exige_aprovacao=true`.
+
+### Aplicação segura validada
+- Aplicado somente o item de observação de baixo risco.
+- A observação foi acrescentada com marcador `[SAFE]`, sem substituir o histórico anterior.
+- EliteActionLog registrou antes/depois.
+- CRMUpdateQueue de observação mudou para `aplicado`.
+- Item crítico `status_funil` permaneceu `pendente`, com risco `alto` e exigindo aprovação.
+
+### Confirmações de segurança
+- Nenhum WhatsApp foi enviado automaticamente.
+- Nenhuma automação de disparo automático foi criada.
+- Nenhum dado antigo foi apagado.
+- Campos críticos continuam exigindo aprovação manual.
+- DashboardSniper abriu sem tela branca; captura visual confirmou o painel principal carregado.
+- Central de Comandos permanece integrada ao DashboardSniper.
+- WhatsAppHub permanece como fluxo manual de revisão/envio.
+
+## Status final
+Fase II-SAFE validada para uso diário. Não iniciar Fase II agressiva de Score antes de nova autorização.

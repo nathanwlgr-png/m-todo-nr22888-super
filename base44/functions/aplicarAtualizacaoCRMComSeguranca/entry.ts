@@ -24,9 +24,28 @@ function parseValue(field, raw) {
   return text;
 }
 
+function entityApi(base44, name) {
+  return base44?.asServiceRole?.entities?.[name] || null;
+}
+
+async function safeUpdate(base44, entity, id, data) {
+  const api = entityApi(base44, entity);
+  if (!api?.update) return false;
+  await api.update(id, data);
+  return true;
+}
+
+async function safeLog(base44, data) {
+  const api = entityApi(base44, 'EliteActionLog');
+  if (!api?.create) return null;
+  return await api.create(data);
+}
+
 async function findRecord(base44, entity, id) {
   if (!id) return null;
-  const rows = await base44.asServiceRole.entities[entity].filter({ id });
+  const api = entityApi(base44, entity);
+  if (!api?.filter) return null;
+  const rows = await api.filter({ id });
   return rows?.[0] || null;
 }
 
@@ -39,20 +58,22 @@ Deno.serve(async (req) => {
     const queueId = body.queue_id || body.id;
     if (!queueId) return Response.json({ error: 'queue_id obrigatório' }, { status: 400 });
 
-    const queue = (await base44.asServiceRole.entities.CRMUpdateQueue.filter({ id: queueId }))[0];
+    const queueApi = entityApi(base44, 'CRMUpdateQueue');
+    if (!queueApi?.filter) return Response.json({ applied: false, status: 'erro', reason: 'CRMUpdateQueue indisponível' });
+    const queue = (await queueApi.filter({ id: queueId }))[0];
     if (!queue) return Response.json({ error: 'Atualização não encontrada' }, { status: 404 });
     if (queue.status === 'rejeitado' || queue.status === 'aplicado') return Response.json({ status: queue.status, message: 'Item já finalizado' });
 
     const field = normalizeField(queue.campo_alvo);
     const value = parseValue(field, queue.valor_novo);
     if (value === undefined || value === null || value === '') {
-      await base44.asServiceRole.entities.CRMUpdateQueue.update(queue.id, { status: 'pendente', observacao: `${queue.observacao || ''}\nValor novo vazio ou inválido. Aplicação bloqueada.`.trim() });
+      await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'pendente', observacao: `${queue.observacao || ''}\nValor novo vazio ou inválido. Aplicação bloqueada.`.trim() });
       return Response.json({ applied: false, status: 'pendente', reason: 'valor inválido ou vazio' });
     }
 
     const isCritical = criticalFields.has(queue.campo_alvo) || criticalFields.has(field) || queue.risco !== 'baixo' || queue.exige_aprovacao === true;
     if (isCritical && queue.status !== 'aprovado') {
-      await base44.asServiceRole.entities.CRMUpdateQueue.update(queue.id, { status: 'pendente', exige_aprovacao: true, observacao: `${queue.observacao || ''}\nCampo crítico ou risco médio/alto: exige aprovação antes de aplicar.`.trim() });
+      await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'pendente', exige_aprovacao: true, observacao: `${queue.observacao || ''}\nCampo crítico ou risco médio/alto: exige aprovação antes de aplicar.`.trim() });
       return Response.json({ applied: false, status: 'pendente', requires_approval: true });
     }
 
@@ -64,20 +85,24 @@ Deno.serve(async (req) => {
     else if (queue.oportunidade_id) { entity = 'Sale'; allowed = allowedSaleFields; record = await findRecord(base44, entity, queue.oportunidade_id); }
 
     if (!entity || !record) {
-      await base44.asServiceRole.entities.CRMUpdateQueue.update(queue.id, { status: 'erro', observacao: `${queue.observacao || ''}\nCliente, lead ou oportunidade não encontrado.`.trim() });
+      await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'erro', observacao: `${queue.observacao || ''}\nCliente, lead ou oportunidade não encontrado.`.trim() });
       return Response.json({ applied: false, status: 'erro', reason: 'registro não encontrado' }, { status: 404 });
     }
 
     if (!allowed.has(field)) {
-      await base44.asServiceRole.entities.CRMUpdateQueue.update(queue.id, { status: 'pendente', exige_aprovacao: true, observacao: `${queue.observacao || ''}\nCampo não permitido para aplicação automática: ${field}.` .trim() });
+      await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'pendente', exige_aprovacao: true, observacao: `${queue.observacao || ''}\nCampo não permitido para aplicação automática: ${field}.` .trim() });
       return Response.json({ applied: false, status: 'pendente', reason: 'campo não permitido' });
     }
 
     const before = record[field];
     const finalValue = field === 'notes' && before ? `${before}\n\n[SAFE ${new Date().toLocaleDateString('pt-BR')}] ${value}` : value;
-    await base44.asServiceRole.entities[entity].update(record.id, { [field]: finalValue });
-    await base44.asServiceRole.entities.CRMUpdateQueue.update(queue.id, { status: 'aplicado', data_aplicacao: new Date().toISOString(), observacao: `${queue.observacao || ''}\nAplicado com segurança por ${user.email}.` .trim() });
-    await base44.asServiceRole.entities.EliteActionLog.create({ data_hora: new Date().toISOString(), usuario: user.email, cliente_id: queue.cliente_id || '', lead_id: queue.lead_id || '', oportunidade_id: queue.oportunidade_id || '', agente: queue.agente_origem || 'Fase II-SAFE', ferramenta_usada: 'aplicarAtualizacaoCRMComSeguranca', acao_sugerida: queue.comando_interpretado || queue.tipo_atualizacao || 'atualização CRM segura', acao_executada: `Atualizar ${entity}.${field}`, aprovado_pelo_usuario: true, resultado: `Antes: ${before ?? 'vazio'} | Depois: ${value}`, proxima_acao: 'acompanhar resultado no CRM', observacao: `CRMUpdateQueue ${queue.id}` });
+    const updated = await safeUpdate(base44, entity, record.id, { [field]: finalValue });
+    if (!updated) {
+      await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'erro', observacao: `${queue.observacao || ''}\nEntidade de destino indisponível: ${entity}.`.trim() });
+      return Response.json({ applied: false, status: 'erro', reason: 'entidade de destino indisponível' });
+    }
+    await safeUpdate(base44, 'CRMUpdateQueue', queue.id, { status: 'aplicado', data_aplicacao: new Date().toISOString(), observacao: `${queue.observacao || ''}\nAplicado com segurança por ${user.email}.` .trim() });
+    await safeLog(base44, { data_hora: new Date().toISOString(), usuario: user.email, cliente_id: queue.cliente_id || '', lead_id: queue.lead_id || '', oportunidade_id: queue.oportunidade_id || '', agente: queue.agente_origem || 'Fase II-SAFE', ferramenta_usada: 'aplicarAtualizacaoCRMComSeguranca', acao_sugerida: queue.comando_interpretado || queue.tipo_atualizacao || 'atualização CRM segura', acao_executada: `Atualizar ${entity}.${field}`, aprovado_pelo_usuario: true, resultado: `Antes: ${before ?? 'vazio'} | Depois: ${finalValue}`, proxima_acao: 'acompanhar resultado no CRM', observacao: `CRMUpdateQueue ${queue.id}` });
 
     return Response.json({ applied: true, entity, record_id: record.id, field, before, after: finalValue, status: 'aplicado' });
   } catch (error) {
