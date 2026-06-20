@@ -49,10 +49,14 @@ export default function DashboardSniper() {
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
   });
 
+  // Cliente mais quente real para o link 360
+  const topClient = hotClients[0] || clients[0];
+
   return (
     <div className="min-h-screen bg-black text-white pb-20 flex flex-col items-center p-4">
       <div className="w-full max-w-xl space-y-4">
-        {/* Header */}
+
+        {/* ── HEADER ── */}
         <div className="px-4 py-4 rounded-2xl bg-[#0f0f11] border border-orange-500/20 shadow-lg">
           <h1 className="text-2xl font-black text-orange-400 mb-1 flex items-center gap-2 justify-center">
             🎯 Painel Comercial
@@ -60,16 +64,92 @@ export default function DashboardSniper() {
           <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
         </div>
 
-        {/* Imagem central */}
-        <div className="relative rounded-2xl overflow-hidden border-2 border-orange-500/35 shadow-[0_0_25px_rgba(255,107,0,0.15)] bg-[#050505]">
-          <img
-            src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png"
-            className="w-full h-auto object-contain max-h-[380px]"
-            alt="Painel Comercial"
-          />
+        {/* ── 1. SNIPER DO DIA — O FOGO (topo absoluto) ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <SniperDoDia />
+        </Suspense>
+
+        {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}
+        {noContact7d.length > 0 && (
+          <div className="rounded-xl p-4 bg-orange-500/5 border-2 border-orange-500/35 shadow-lg">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-black text-orange-400 mb-1">🚨 Ação Urgente</p>
+                <p className="text-xs text-orange-200 mb-2">{noContact7d.length} cliente(s) sem contato há +7 dias</p>
+                <Link to={createPageUrl('TasksUnified')}>
+                  <Button size="sm" className="w-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-extrabold border-none">
+                    Ver Tarefas Pendentes
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── 3. ALTA PRIORIDADE COMERCIAL ── */}
+        {hotClients.length > 0 && (
+          <div className="rounded-xl p-3 bg-[#0f0f11] border border-orange-500/20 shadow-lg">
+            <h3 className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">🏆 Alta Prioridade</h3>
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {hotClients.slice(0, 5).map(client => (
+                <Link key={client.id} to={`/ClientProfile?id=${client.id}`}>
+                  <div className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors flex justify-between items-center">
+                    <span className="text-xs font-bold text-orange-200">{client.first_name}</span>
+                    <span className="text-xs font-black text-orange-400">{client.purchase_score}%</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── 4. FLUXO CRONOLÓGICO DE VENDAS ── */}
+        <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
+          <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
+            ⚡ Fluxo de Vendas
+          </h2>
+          <div className="space-y-2">
+            <Link to={createPageUrl('Clients')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><Users className="w-5 h-5" /><span>1️⃣ Clientes</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('ModoInvestigativoSupremo')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><Search className="w-5 h-5" /><span>2️⃣ Investigação</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('GenerateWhatsAppIntegrated')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /><span>3️⃣ SPIN + WhatsApp</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('WhatsAppHub')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><Bell className="w-5 h-5" /><span>4️⃣ Fila de Aprovação</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('ProposalGenerator')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><FileText className="w-5 h-5" /><span>5️⃣ Gerar Proposta</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('SalesFunnel')}>
+              <Button className="w-full justify-between h-14 bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-500 hover:to-orange-400 text-white font-extrabold rounded-xl border-none">
+                <div className="flex items-center gap-2"><TrendingUp className="w-5 h-5" /><span>6️⃣ Fechamento</span></div>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
 
-        {/* KPIs */}
+        {/* ── 5. KPIs ── */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl p-3 bg-[#0f0f11] border border-emerald-500/30">
             <p className="text-xs text-emerald-400 font-bold">🔥 Alta Prioridade</p>
@@ -89,73 +169,32 @@ export default function DashboardSniper() {
           </div>
         </div>
 
-        {/* Fluxo 7 etapas */}
-        <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
-          <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
-            ⚡ Fluxo de Vendas
-          </h2>
-          <div className="space-y-2">
-            <Link to={createPageUrl('Clients')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Users className="w-5 h-5" /><span>1️⃣ Clientes</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('ClientLocationMap')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-blue-600 to-indigo-500 hover:from-blue-500 hover:to-indigo-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><MapPin className="w-5 h-5" /><span>2️⃣ Mapa Inteligente</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('ModoInvestigativoSupremo')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Search className="w-5 h-5" /><span>3️⃣ Análise de Cliente</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('GenerateWhatsAppIntegrated')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /><span>4️⃣ WhatsApp Consultivo</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('WhatsAppHub')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Bell className="w-5 h-5" /><span>5️⃣ Fila de Aprovação</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('ProposalGenerator')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><FileText className="w-5 h-5" /><span>6️⃣ Gerar Proposta</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('SalesFunnel')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-500 hover:to-orange-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><TrendingUp className="w-5 h-5" /><span>7️⃣ Funil & Fechamento</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Link Cliente360 */}
-        <Link to="/ClienteDetalhe360?id=6a2d109cf3035a700442b501">
-          <div className="rounded-xl p-3 flex items-center justify-between bg-[#0f0f11] border-2 border-orange-500/40">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-orange-400" />
-              <div>
-                <p className="text-xs font-black text-orange-400">📋 Cliente 360°</p>
-                <p className="text-[9px] text-slate-500">VetPrime Marília · Ricardo · QUENTE</p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-orange-500" />
-          </div>
-        </Link>
-
-        {/* Atalhos extras */}
+        {/* ── 6. ATALHOS RÁPIDOS ── */}
         <div className="grid grid-cols-2 gap-2">
+          <Link to="/ScheduledAgenda">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-amber-500/30">
+              <ArrowRight className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-black text-amber-400">🗺️ Rota do Dia</span>
+            </div>
+          </Link>
+          <Link to="/RankingOportunidades">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-yellow-500/30">
+              <TrendingUp className="w-4 h-4 text-yellow-400" />
+              <span className="text-xs font-black text-yellow-400">🏆 Prioridade Comercial</span>
+            </div>
+          </Link>
+          <Link to="/ModoCacaComercial">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30">
+              <Target className="w-4 h-4 text-rose-400" />
+              <span className="text-xs font-black text-rose-400">🎯 Prospecção</span>
+            </div>
+          </Link>
+          <Link to="/ClientLocationMap">
+            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-blue-500/30">
+              <MapPin className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-black text-blue-400">📍 Mapa Clientes</span>
+            </div>
+          </Link>
           <Link to="/AgendaMensal">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-indigo-500/30">
               <Calendar className="w-4 h-4 text-indigo-400" />
@@ -174,36 +213,32 @@ export default function DashboardSniper() {
               <span className="text-xs font-black text-cyan-400">🤖 Teste Agentes</span>
             </div>
           </Link>
-          <Link to="/ModoCacaComercial">
-            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30">
-              <Target className="w-4 h-4 text-rose-400" />
-              <span className="text-xs font-black text-rose-400">🎯 Prospecção</span>
-            </div>
-          </Link>
-          <Link to="/RankingOportunidades">
-            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-yellow-500/30">
-              <TrendingUp className="w-4 h-4 text-yellow-400" />
-              <span className="text-xs font-black text-yellow-400">🏆 Prioridade Comercial</span>
-            </div>
-          </Link>
-          <Link to="/ScheduledAgenda">
-            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-amber-500/30">
-              <ArrowRight className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-black text-amber-400">🗺️ Rota do Dia</span>
-            </div>
-          </Link>
-          <Link to="/EventoClienteTracking">
-            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-purple-500/30">
-              <Star className="w-4 h-4 text-purple-400" />
-              <span className="text-xs font-black text-purple-400">📍 Interesse do Cliente</span>
-            </div>
-          </Link>
+          {topClient && (
+            <Link to={`/ClienteDetalhe360?id=${topClient.id}`}>
+              <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-orange-500/30">
+                <Target className="w-4 h-4 text-orange-400" />
+                <span className="text-xs font-black text-orange-400">📋 Cliente 360°</span>
+              </div>
+            </Link>
+          )}
         </div>
 
-        {/* Limpeza da Base */}
-        <BotaoLimpezaCRM />
+        {/* ── 7. ROTA INTELIGENTE ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <SmartRouteMap />
+        </Suspense>
 
-        {/* Exportar Relatório de ROI */}
+        {/* ── 8. RELATÓRIO SEMANAL ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <WeeklyHealthReport clients={clients} />
+        </Suspense>
+
+        {/* ── 9. SUPER AGENT ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <SuperAgentWidget />
+        </Suspense>
+
+        {/* ── 10. EXPORTAR RELATÓRIO ROI ── */}
         <div className="rounded-xl p-3 bg-[#0f0f11] border border-green-500/30">
           <p className="text-xs font-black text-green-400 mb-2">💹 Relatório de Clínicas</p>
           <Suspense fallback={<div className="h-10 animate-pulse rounded" />}>
@@ -211,60 +246,18 @@ export default function DashboardSniper() {
           </Suspense>
         </div>
 
-        {/* Prioridade do Dia */}
-        <Suspense fallback={<HeavyFallback />}>
-          <SniperDoDia />
-        </Suspense>
+        {/* ── 11. IMAGEM INSTITUCIONAL ── */}
+        <div className="relative rounded-2xl overflow-hidden border border-orange-500/20 bg-[#050505]">
+          <img
+            src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png"
+            className="w-full h-auto object-contain max-h-[320px]"
+            alt="Painel Comercial"
+          />
+        </div>
 
-        {/* Clientes Prioritários */}
-        {hotClients.length > 0 && (
-          <div className="rounded-xl p-3 bg-[#0f0f11] border border-orange-500/20 shadow-lg">
-            <h3 className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">🏆 Alta Prioridade Comercial</h3>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {hotClients.slice(0, 5).map(client => (
-                <Link key={client.id} to={`/ClientProfile?id=${client.id}`}>
-                  <div className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors flex justify-between items-center">
-                    <span className="text-xs font-bold text-orange-200">{client.first_name}</span>
-                    <span className="text-xs font-black text-orange-400">{client.purchase_score}%</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* ── 12. LIMPEZA DA BASE (rodapé) ── */}
+        <BotaoLimpezaCRM />
 
-        {/* Rota Inteligente */}
-        <Suspense fallback={<HeavyFallback />}>
-          <SmartRouteMap />
-        </Suspense>
-
-        {/* Relatório Semanal */}
-        <Suspense fallback={<HeavyFallback />}>
-          <WeeklyHealthReport clients={clients} />
-        </Suspense>
-
-        {/* SuperAgent Widget */}
-        <Suspense fallback={<HeavyFallback />}>
-          <SuperAgentWidget />
-        </Suspense>
-
-        {/* Recomendação de Ação */}
-        {noContact7d.length > 0 && (
-          <div className="rounded-xl p-4 bg-orange-500/5 border-2 border-orange-500/35 shadow-lg">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="text-sm font-black text-orange-400 mb-1">💡 Próxima Ação</p>
-                <p className="text-xs text-orange-200 mb-2">{noContact7d.length} cliente(s) sem contato há +7 dias</p>
-                <Link to={createPageUrl('TasksUnified')}>
-                  <Button size="sm" className="w-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-extrabold border-none">
-                    Ver Tarefas
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
