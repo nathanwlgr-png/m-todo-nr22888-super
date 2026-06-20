@@ -64,7 +64,9 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json().catch(() => ({}));
-    const text = body.mensagem || body.text || '';
+    // Aceita: payload real do webhook Telegram (body.message.text / edited_message),
+    // chamada interna ({mensagem}) e teste ({text}).
+    const text = body?.message?.text || body?.edited_message?.text || body.mensagem || body.text || '';
     const cmd = commandOf(text);
     const args = rest(text);
     let resposta = '';

@@ -51,6 +51,7 @@ Todos os critérios de publicação foram atendidos:
 | Bug | Severidade | Correção |
 |---|---|---|
 | `churnSilenciosoAlert` estourava rate limit (429) — N+1 de queries (1 por cliente × pedidos × mensagens) | **CRÍTICO** | Reescrito para buscar pedidos e mensagens em lote (1 query cada) e indexar por client_id em memória. Agora processa 430 clientes em ~5s (antes: timeout em 25s). |
+| `processTelegramCommandSafe` não lia o payload real do webhook Telegram — só `body.mensagem`/`body.text`. Comandos vindos do bot real (`body.message.text`) caíam sempre em "comando não reconhecido". | **CRÍTICO** | Parser passou a aceitar `body.message.text`, `body.edited_message.text`, `body.mensagem` e `body.text`. Validado: `/resumo_dia` e `/quentes` agora retornam dados reais via formato webhook. |
 
 ## 5. Bugs Pendentes
 
@@ -59,9 +60,11 @@ Nenhum bug de código crítico restante.
 ## 6. Telegram
 
 - Bot `@nr22888_campo_bot` válido e integrado · chat ID do Nathan configurado
-- `testTelegramBot` → mensagem de teste entregue com sucesso
-- `/resumo_dia` → "8 oportunidades, 344 visitas, 16 mensagens pendentes, 292 follow-ups" ✅
-- `/quentes` → "1. Marília · VG2 · 75 / 2. Bauru · VG1 · 73" ✅
+- `testTelegramBot` → mensagem de teste entregue com sucesso (200)
+- **Parser do webhook corrigido** — agora lê `body.message.text` (formato real do Telegram)
+- `/resumo_dia` (via webhook) → "8 oportunidades, 344 visitas, 17 mensagens pendentes, 292 follow-ups. Top ação: visitar" ✅
+- `/quentes` (via webhook) → "1. Marília · VG2 · 75 / 2. Bauru · VG1 · 73" ✅
+- Comando aleatório → orienta comandos disponíveis, sem alterar dado ✅
 - `processTelegramCommandSafe` cria CRMUpdateQueue/PendingMessage · envio_automatico=false ✅
 - Token nunca impresso em logs/relatório ✅
 
