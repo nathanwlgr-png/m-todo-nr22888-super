@@ -108,8 +108,9 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
       if (alert) savedAlerts.push(alert);
     }
 
-    // ── 5. Enviar alerta WhatsApp se telefone fornecido ───────────────────────
-    let whatsappResult = null;
+    // ── 5. SAFE: NÃO envia WhatsApp automático e NÃO marca como enviado ───────
+    // Apenas prepara a mensagem como rascunho em PendingMessage para aprovação humana.
+    let whatsappPrepared = false;
     if (notify_phone && newHighFit.length > 0) {
       const topClinics = newHighFit
         .sort((a, b) => b.seamaty_fit_score - a.seamaty_fit_score)
@@ -134,21 +135,24 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
 
       const message = msgLines.join('\n');
 
-      whatsappResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt: `Confirme que a seguinte mensagem WhatsApp está bem formatada para envio a um vendedor veterinário:\n\n${message}\n\nResponda: {"status": "ok", "message_preview": "${message.substring(0, 100)}..."}`
-      }).catch(() => ({ status: 'skipped' }));
+      // Rascunho aguardando aprovação humana — nunca enviado automaticamente
+      await base44.asServiceRole.entities.PendingMessage.create({
+        canal: 'whatsapp',
+        channel: 'whatsapp',
+        destinatario_contato: String(notify_phone),
+        recipient_phone: String(notify_phone),
+        recipient_name: 'Vendedor (radar)',
+        message_content: message,
+        mensagem: message,
+        context: `Radar competitivo ${city}/${state}`,
+        status: 'pending',
+        priority: 'media',
+        criado_por_agente: 'clinicCompetitiveMonitor',
+      }).catch(() => null);
 
-      // Marcar alertas como enviados
-      for (const a of savedAlerts.slice(0, 3)) {
-        if (a?.id) {
-          await base44.asServiceRole.entities.ClinicAlert.update(a.id, {
-            whatsapp_alert_sent: true,
-            whatsapp_alert_sent_at: new Date().toISOString()
-          }).catch(() => null);
-        }
-      }
-
-      console.log(`📲 Alerta WhatsApp preparado para ${notify_phone}`);
+      whatsappPrepared = true;
+      // NÃO marcar whatsapp_alert_sent — só é "enviado" após confirmação humana.
+      console.log(`📝 Alerta WhatsApp preparado (rascunho) para aprovação: ${notify_phone}`);
     }
 
     // ── 6. Criar notificação no sistema ──────────────────────────────────────
@@ -172,7 +176,8 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
       high_fit_new: newHighFit.length,
       saved_alerts: savedAlerts.length,
       market_summary: searchResult.market_summary || '',
-      whatsapp_sent: !!notify_phone && newHighFit.length > 0,
+      whatsapp_sent: false,
+      whatsapp_prepared: whatsappPrepared,
       top_opportunities: newHighFit
         .sort((a, b) => b.seamaty_fit_score - a.seamaty_fit_score)
         .slice(0, 5)

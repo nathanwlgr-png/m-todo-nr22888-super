@@ -119,7 +119,8 @@ export default function Clients() {
     queryKey: ['sales'],
     queryFn: async () => {
       try {
-        const allSales = await base44.entities.Sale.list();
+        // Performance/tablet: teto razoável em vez da base inteira de vendas.
+        const allSales = await base44.entities.Sale.list('-sale_date', 500);
         return allSales.filter(s => s && s.id);
       } catch (error) {
         console.warn('Erro ao carregar vendas:', error);

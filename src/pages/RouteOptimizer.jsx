@@ -23,14 +23,15 @@ export default function RouteOptimizer() {
   const [cityFilter, setCityFilter] = useState('Marília');
   const queryClient = useQueryClient();
 
+  // SAFE/performance: limite razoável para tablet — não carregar base inteira de uma vez.
   const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
+    queryKey: ['clients-route'],
+    queryFn: () => base44.entities.Client.list('-created_date', 500),
   });
 
   const { data: savedRoutes = [] } = useQuery({
     queryKey: ['optimized-routes'],
-    queryFn: () => base44.entities.OptimizedRoute.list(),
+    queryFn: () => base44.entities.OptimizedRoute.list('-created_date', 100),
   });
 
   const filteredClients = useMemo(() => {

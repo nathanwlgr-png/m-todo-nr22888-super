@@ -5,6 +5,8 @@ Regra: nota baseada somente em evidência real.
 
 > ATUALIZAÇÃO 20/06/2026 (pós-Correção Total SAFE): nota subiu de 58% para 70%. Geocode agora via fila de aprovação, RouteOptimizer compatível com fallback, GPSClinicaRadar sem distância aleatória. GPS físico segue NÃO VALIDADO EM DISPOSITIVO REAL. Ver docs/Correcoes_Geo_SAFE_NR22888.md.
 
+> FECHAMENTO 20/06/2026: nota 70% → **75%**. `optimizeRoute` foi reescrito e TESTADO nos 3 cenários (com coordenada via Haversine real / só endereço textual / misto) — todos retornam 200 com o formato que a página espera (total_distance_km, visits[], google_maps_url, optimized_order). RouteOptimizer não quebra mais. Geocode testado com cliente real "Ricardo": retornou `sem_coordenada_validada` sem inventar nem aplicar coordenada — comportamento SAFE confirmado. PENDÊNCIA NATHAN: habilitar a Geocoding API no Google Cloud (a key existe mas a Geocoding API não retorna resultado). Total real: 433 clientes, **423 sem coordenada**.
+
 ## Resultado
 
 **GPS/Mapa/Rotas: 58% — FRACO**

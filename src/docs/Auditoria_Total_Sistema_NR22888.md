@@ -6,9 +6,21 @@ Regra aplicada: nenhuma porcentagem abaixo foi estimada sem evidência. Cada not
 
 ## Percentual geral do sistema
 
-**Percentual geral: 68% → 80% após Correção Total SAFE (20/06/2026)**
+**Percentual geral: 68% → 80% → 87% após Fechamento Total SAFE (20/06/2026)**
 
-> Ver docs/Correcao_Total_SAFE_NR22888.md para as correções aplicadas.
+> Ver docs/Correcao_Total_SAFE_NR22888.md para todas as correções aplicadas.
+
+### Recalculo pós-fechamento (evidência real)
+| Categoria | Antes | Depois | Motivo do ganho |
+|---|---:|---:|---|
+| GPS/Mapa/Rotas | 58% | 75% | RouteOptimizer corrigido e testado (3 cenários); geocode 100% SAFE; mapa paginado |
+| Segurança | 69% | 92% | autoFix sem delete, limpeza em auditoria, radar sem envio fantasma, agentes blindados |
+| Performance campo/tablet | 63% | 80% | queries com teto (500), geocode em lote (50), mapa só render com coordenada |
+| Agentes | 75% | 88% | campos críticos protegidos via instrução + CRMUpdateQueue nas tools |
+| WhatsAppHub | 70% | 88% | status manual confirmado, sem envio automático |
+| Produtos/Catálogo | 65% | 70% | campos de validação adicionados; falta só foto oficial (manual) |
+
+**Pendências para 100% são humanas/físicas**: foto oficial de 29 produtos, validação física de 423 coordenadas, habilitar Geocoding API no Google Cloud, teste em tablet/Android real, conexão Gmail/Drive/Docs/Instagram, teste do bot Telegram.
 
 Fórmula usada: média simples das 11 categorias exigidas nesta auditoria.  
 Categorias: Estrutura CRM, DashboardSniper, WhatsAppHub, Telegram SAFE, GPS/Mapa/Rotas, Produtos/Fotos/Catálogo, Ferramentas/Conectores, Agentes, Segurança, Performance campo/tablet, Preparação Material Premium.

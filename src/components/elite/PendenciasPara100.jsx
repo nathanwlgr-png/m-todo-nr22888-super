@@ -3,14 +3,20 @@ import { ChevronDown, ChevronUp, ListChecks } from 'lucide-react';
 
 const PENDENCIAS = [
   { label: 'GPS físico em tablet/celular', tag: 'DISPOSITIVO REAL' },
-  { label: '433 clientes sem coordenada validada', tag: 'APROVAÇÃO HUMANA' },
-  { label: 'Fotos oficiais dos produtos', tag: 'UPLOAD MANUAL' },
+  { label: '423 clientes sem coordenada validada', tag: 'APROVAÇÃO HUMANA' },
+  { label: 'Geocode depende da Geocoding API (Google Cloud)', tag: 'CONFIG NATHAN' },
+  { label: '29 produtos sem foto oficial', tag: 'UPLOAD MANUAL' },
   { label: 'Gmail / Drive / Docs / Instagram', tag: 'CONEXÃO MANUAL' },
   { label: 'Telegram bot — teste real', tag: 'DISPOSITIVO REAL' },
   { label: 'WhatsApp: status corrigido (aberto ≠ enviado)', tag: 'OK', done: true },
-  { label: 'Geocode SAFE via fila de aprovação', tag: 'OK', done: true },
+  { label: 'Geocode SAFE: nunca aplica coordenada direto', tag: 'OK', done: true },
   { label: 'Limpeza CRM blindada (sem arquivar sozinha)', tag: 'OK', done: true },
   { label: 'Automação de geocode pausada', tag: 'OK', done: true },
+  { label: 'Limpeza automática agora roda só em auditoria', tag: 'OK', done: true },
+  { label: 'RouteOptimizer corrigido (formato + sem coordenada)', tag: 'OK', done: true },
+  { label: 'Radar competitivo não envia WhatsApp automático', tag: 'OK', done: true },
+  { label: 'autoFixSystem não deleta (só dispensa, reversível)', tag: 'OK', done: true },
+  { label: 'Agentes blindados em campos críticos', tag: 'OK', done: true },
 ];
 
 export default function PendenciasPara100() {

@@ -132,19 +132,21 @@ export default function ClientLocationMap() {
 
   const handleGeocodeAll = useCallback(async () => {
     if (clientsNeedingGeocode.length === 0) { toast.success('Todos já têm localização!'); return; }
-    const id = toast.loading(`Geocodificando ${clientsNeedingGeocode.length} clientes...`);
+    // SAFE: geocode não aplica coordenada direto — gera sugestões na fila de aprovação.
+    // Limite por lote para não sobrecarregar o tablet (até 50 por vez).
+    const lote = clientsNeedingGeocode.slice(0, 50);
+    const id = toast.loading(`Buscando coordenadas de ${lote.length} clientes...`);
     let ok = 0;
-    for (let i = 0; i < clientsNeedingGeocode.length; i += 5) {
-      await Promise.all(clientsNeedingGeocode.slice(i, i+5).map(async c => {
+    for (let i = 0; i < lote.length; i += 5) {
+      await Promise.all(lote.slice(i, i+5).map(async c => {
         try {
-          await base44.functions.invoke('geocodeClientLocation', { client_id: c.id, address: c.address, clinic_name: c.clinic_name, city: c.city, state: 'SP' });
-          ok++;
+          const r = await base44.functions.invoke('geocodeClientLocation', { client_id: c.id, address: c.address, clinic_name: c.clinic_name, city: c.city, state: 'SP' });
+          if (r.data?.geocoded) ok++;
         } catch {}
       }));
     }
     toast.dismiss(id);
-    toast.success(`${ok} clientes geocodificados!`);
-    refetch();
+    toast.success(`${ok} coordenadas sugeridas para aprovação (não aplicadas direto). Restam ${clientsNeedingGeocode.length - lote.length}.`);
   }, [clientsNeedingGeocode, refetch]);
 
   const statusLabel = { quente: '🔥 Quente', morno: '⚡ Morno', frio: '❄️ Frio' };
