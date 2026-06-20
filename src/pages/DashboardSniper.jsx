@@ -11,6 +11,7 @@ import {
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
 import PendenciasPara100 from '@/components/elite/PendenciasPara100';
+import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
@@ -281,6 +282,9 @@ export default function DashboardSniper() {
         <BotaoLimpezaCRM />
 
       </div>
+
+      {/* ── Botão flutuante: Aprovação por Voz (1 clique) ── */}
+      <AprovacaoVozFlutuante />
     </div>
   );
 }
