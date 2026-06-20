@@ -7,6 +7,10 @@
       "type": "string",
       "format": "date-time"
     },
+    "modo_operacional": {
+      "type": "string",
+      "description": "Modo operacional ativo, ex: PLANO_ELITE"
+    },
     "contexto": {
       "type": "string"
     },

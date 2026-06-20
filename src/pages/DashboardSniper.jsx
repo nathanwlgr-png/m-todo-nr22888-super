@@ -72,7 +72,7 @@ export default function DashboardSniper() {
 
         {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
         <Suspense fallback={<HeavyFallback />}>
-          <PlanoEliteStatus hotCount={hotClients.length} visitsCount={visits.length} inactiveCount={noContact7d.length} />
+          <PlanoEliteStatus hotCount={hotClients?.length || 0} visitsCount={visits?.length || 0} inactiveCount={noContact7d?.length || 0} />
         </Suspense>
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}

@@ -59,6 +59,10 @@
       ],
       "default": "media"
     },
+    "prioridade_rank": {
+      "type": "number",
+      "description": "baixa=1, media=2, alta=3, maxima=4"
+    },
     "uso_no_campo": {
       "type": "string"
     },

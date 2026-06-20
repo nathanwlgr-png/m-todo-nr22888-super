@@ -13,15 +13,16 @@ export default function PlanoEliteStatus({ hotCount, visitsCount, inactiveCount 
   });
   const { data: tools = [] } = useQuery({
     queryKey: ['elite-tool-connection-preview'],
-    queryFn: () => base44.entities.EliteToolConnection.list('-prioridade_comercial', 50),
+    queryFn: () => base44.entities.EliteToolConnection.list('-prioridade_rank', 50),
     staleTime: 300000,
   });
-  const { data: pending = [] } = useQuery({
+  const { data: pendingMessages = [] } = useQuery({
     queryKey: ['elite-pending-message-preview'],
-    queryFn: () => base44.entities.PendingMessage.filter({ status: 'aguardando_aprovacao' }),
+    queryFn: () => base44.entities.PendingMessage.list('-created_date', 50),
     staleTime: 60000,
   });
 
+  const pending = pendingMessages.filter(message => ['pending', 'aguardando_aprovacao', 'ready_to_send', 'rascunho'].includes(message.status));
   const disconnected = tools.filter(t => ['pendente', 'configuracao_manual', 'parcial'].includes(t.status_conexao));
   const bestScore = scores[0];
 
