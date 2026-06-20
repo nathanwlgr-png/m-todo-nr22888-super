@@ -1,0 +1,86 @@
+{
+  "name": "GeoAuditReport",
+  "type": "object",
+  "description": "Relat\u00f3rio consolidado de auditoria GPS, mapas, rotas e uso em campo do NR22888, sem altera\u00e7\u00e3o autom\u00e1tica de dados antigos.",
+  "properties": {
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_clientes_analisados": {
+      "type": "number"
+    },
+    "total_leads_analisados": {
+      "type": "number"
+    },
+    "total_visitas_analisadas": {
+      "type": "number"
+    },
+    "clientes_com_endereco": {
+      "type": "number"
+    },
+    "clientes_sem_endereco": {
+      "type": "number"
+    },
+    "clientes_com_coordenada": {
+      "type": "number"
+    },
+    "clientes_sem_coordenada": {
+      "type": "number"
+    },
+    "coordenadas_validas": {
+      "type": "number"
+    },
+    "coordenadas_suspeitas": {
+      "type": "number"
+    },
+    "coordenadas_invalidas": {
+      "type": "number"
+    },
+    "mapas_funcionando": {
+      "type": "boolean"
+    },
+    "gps_funcionando": {
+      "type": "boolean"
+    },
+    "rotas_funcionando": {
+      "type": "boolean"
+    },
+    "checkin_funcionando": {
+      "type": "boolean"
+    },
+    "problemas_criticos": {
+      "type": "number"
+    },
+    "problemas_medios": {
+      "type": "number"
+    },
+    "problemas_baixos": {
+      "type": "number"
+    },
+    "percentual_geral": {
+      "type": "number"
+    },
+    "status_geral": {
+      "type": "string",
+      "enum": [
+        "critico",
+        "fraco",
+        "aceitavel",
+        "bom",
+        "nivel_elite"
+      ]
+    },
+    "resumo": {
+      "type": "string"
+    },
+    "proximas_correcoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_hora",
+    "percentual_geral",
+    "status_geral"
+  ]
+}
