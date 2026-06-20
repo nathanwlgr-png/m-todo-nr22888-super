@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
           client_phone: phone,
           message_type: 'whatsapp',
           message_content: message,
-          trigger_reason: 'Enviado manualmente do CRM',
-          sent_status: 'enviada',
-          sent_at: new Date().toISOString(),
+          trigger_reason: 'Link WhatsApp preparado no CRM (envio manual)',
+          sent_status: 'prepared',
+          prepared_at: new Date().toISOString(),
           automation_enabled: false,
           success: true
         });
@@ -68,7 +68,8 @@ Deno.serve(async (req) => {
       phone_formatted: phone,
       timestamp: new Date().toISOString(),
       message_id: Math.random().toString(36).substring(7),
-      note: 'Abrir wa_url no cliente para enviar via WhatsApp Web/App'
+      status: 'prepared',
+      note: 'Link preparado. NÃO marca como enviado. Confirmar envio manualmente após abrir o WhatsApp.'
     });
 
   } catch (error) {

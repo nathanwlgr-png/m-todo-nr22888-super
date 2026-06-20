@@ -125,11 +125,24 @@ export default function GPSClinicaRadar({ clients = [] }) {
       }
     }
 
-    // Mostrar clientes da cidade atual (estimativa)
+    // SAFE: distância real só quando o cliente tem coordenada validada.
+    // Nunca usar distância aleatória/simulada.
     const proximas = clientesGeo
       .filter(c => c.city)
-      .map(c => ({ ...c, dist_estimada: Math.floor(Math.random() * 800 + 100) }))
-      .sort((a, b) => a.dist_estimada - b.dist_estimada)
+      .map(c => {
+        const temCoord = !!(c.latitude && c.longitude);
+        return {
+          ...c,
+          tem_coordenada: temCoord,
+          dist_metros: temCoord ? Math.round(calcDist(latitude, longitude, c.latitude, c.longitude)) : null,
+        };
+      })
+      .sort((a, b) => {
+        if (a.dist_metros == null && b.dist_metros == null) return 0;
+        if (a.dist_metros == null) return 1;
+        if (b.dist_metros == null) return -1;
+        return a.dist_metros - b.dist_metros;
+      })
       .slice(0, 5);
     setClinicasProximas(proximas);
   }, [clientesGeo]);
@@ -322,7 +335,12 @@ export default function GPSClinicaRadar({ clients = [] }) {
                   <div className="flex items-start gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{c.first_name} {c.clinic_name ? `· ${c.clinic_name}` : ''}</p>
-                      <p className="text-xs text-slate-400">{c.city}</p>
+                      <p className="text-xs text-slate-400">
+                        {c.city}
+                        {c.dist_metros != null
+                          ? ` · ${c.dist_metros < 1000 ? `${c.dist_metros}m` : `${(c.dist_metros / 1000).toFixed(1)}km`}`
+                          : ' · sem coordenada validada'}
+                      </p>
                     </div>
                     <Badge className={c.status === 'quente' ? 'bg-red-100 text-red-700 text-xs' : 'bg-slate-100 text-slate-600 text-xs'}>
                       {c.status}

@@ -53,17 +53,49 @@ export default function RouteOptimizer() {
 
   const optimizeRouteMutation = useMutation({
     mutationFn: async () => {
-      const response = await base44.functions.invoke('optimizeRoute', {
-        client_ids: selectedClients,
-        start_address: startAddress,
-        visit_duration_minutes: visitDuration
+      // Transformar client_ids em locations compatíveis com optimizeRoute
+      const selected = clients.filter(c => selectedClients.includes(c.id));
+      const locations = selected.map(c => {
+        const hasCoords = !!(c.latitude && c.longitude);
+        return {
+          id: c.id,
+          name: c.first_name || c.clinic_name,
+          clinic_name: c.clinic_name,
+          lat: hasCoords ? c.latitude : null,
+          lng: hasCoords ? c.longitude : null,
+          address: c.address || [c.cep, c.city].filter(Boolean).join(', '),
+          city: c.city,
+          has_coords: hasCoords,
+        };
       });
-      return response.data;
+
+      const semLocalizacao = locations.filter(l => !l.has_coords && !l.address);
+      if (semLocalizacao.length === locations.length) {
+        // Nenhum cliente tem localização suficiente: não quebrar, abrir Google Maps por cidade
+        const cidades = [...new Set(selected.map(c => c.city).filter(Boolean))];
+        const fallbackUrl = `https://www.google.com/maps/search/${encodeURIComponent('clínicas veterinárias ' + (cidades[0] || ''))}`;
+        return { success: true, fallback: true, fallbackUrl, message: 'Clientes sem localização suficiente — abrindo Google Maps aproximado.' };
+      }
+
+      const aproximada = locations.some(l => !l.has_coords);
+      const response = await base44.functions.invoke('optimizeRoute', {
+        locations,
+        startPoint: startAddress,
+        options: { visit_duration_minutes: visitDuration }
+      });
+      return { ...response.data, aproximada };
     },
     onSuccess: (data) => {
+      if (data.fallback) {
+        window.open(data.fallbackUrl, '_blank');
+        toast.message('Rota aproximada', { description: data.message });
+        return;
+      }
       if (data.success) {
         setOptimizedRoute(data.route);
-        toast.success('Rota otimizada com sucesso!');
+        toast.success(data.aproximada
+          ? 'Rota otimizada (aproximada — alguns clientes sem coordenada)'
+          : 'Rota otimizada com sucesso!');
       } else {
         toast.error(data.error || 'Erro ao otimizar rota');
       }

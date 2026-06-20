@@ -1,0 +1,83 @@
+{
+  "name": "DuplicateReviewQueue",
+  "type": "object",
+  "description": "Fila de revis\u00e3o de duplicatas prov\u00e1veis. N\u00e3o arquiva nada automaticamente. Toda fus\u00e3o/arquivamento exige aprova\u00e7\u00e3o humana individual.",
+  "properties": {
+    "tipo_entidade": {
+      "type": "string",
+      "enum": [
+        "client",
+        "lead"
+      ],
+      "description": "Tipo da entidade duplicada"
+    },
+    "entidade_id_principal": {
+      "type": "string",
+      "description": "ID do registro sugerido como principal (mais completo)"
+    },
+    "entidade_id_duplicada": {
+      "type": "string",
+      "description": "ID do registro sugerido como duplicado"
+    },
+    "nome_principal": {
+      "type": "string"
+    },
+    "nome_duplicada": {
+      "type": "string"
+    },
+    "motivo_suspeita": {
+      "type": "string",
+      "description": "Por que foram considerados duplicados (telefone, cnpj, email, nome+cidade)"
+    },
+    "dados_comparados": {
+      "type": "string",
+      "description": "JSON com os campos comparados entre os dois registros"
+    },
+    "sugestao": {
+      "type": "string",
+      "description": "Sugest\u00e3o de a\u00e7\u00e3o (manter principal, arquivar duplicada)"
+    },
+    "risco": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto"
+      ],
+      "default": "medio"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado_arquivar",
+        "rejeitado",
+        "arquivado",
+        "ignorado"
+      ],
+      "default": "pendente"
+    },
+    "exige_aprovacao": {
+      "type": "boolean",
+      "default": true
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "aprovado_por": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tipo_entidade",
+    "status"
+  ]
+}

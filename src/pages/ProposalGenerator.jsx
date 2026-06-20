@@ -48,7 +48,7 @@ export default function ProposalGenerator() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-simple'],
-    queryFn: () => base44.entities.Client.list('-updated_date'),
+    queryFn: () => base44.entities.Client.list('-updated_date', 500),
   });
 
   const { data: consumables = [] } = useQuery({
@@ -509,7 +509,7 @@ Use as variáveis:
                   <SelectValue placeholder="Usar template padrão IA" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Template padrão IA</SelectItem>
+                  <SelectItem value="none">Template padrão IA</SelectItem>
                   {templates.map(t => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.name}

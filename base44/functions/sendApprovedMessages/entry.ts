@@ -36,17 +36,12 @@ Deno.serve(async (req) => {
             recipient_phone: phoneIntl,
             wa_url: waUrl
           });
-        } else if (msg.channel === 'email') {
-          // Email pode ser enviado pelo sistema
-          await base44.asServiceRole.integrations.Core.SendEmail({
-            to: msg.recipient_id,
-            subject: msg.email_subject || 'Mensagem NR22',
-            body: finalContent
-          });
-
+        } else if (msg.channel === 'email' || msg.channel === 'gmail') {
+          // SAFE: e-mail NÃO é enviado automaticamente. Fica como rascunho aguardando
+          // confirmação humana explícita ("Confirmar envio de e-mail agora").
           await base44.asServiceRole.entities.PendingMessage.update(msg.id, {
-            status: 'sent',
-            sent_at: new Date().toISOString()
+            status: 'ready_to_send',
+            prepared_at: new Date().toISOString()
           });
         }
 
@@ -60,7 +55,7 @@ Deno.serve(async (req) => {
       success: true, 
       sent: sentCount,
       whatsapp_links: whatsappLinks,
-      message: `${sentCount} mensagem(ns) processada(s). WhatsApp fica pronto para envio manual; email é enviado automaticamente.`
+      message: `${sentCount} mensagem(ns) preparada(s). Nenhuma é enviada automaticamente: WhatsApp e e-mail ficam prontos e exigem confirmação humana.`
     });
 
   } catch (error) {

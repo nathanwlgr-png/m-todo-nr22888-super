@@ -16,6 +16,7 @@ export default function WhatsAppHub() {
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [approvedMsg, setApprovedMsg] = useState('');
+  const [openedMsg, setOpenedMsg] = useState(null); // { id, client, text } aguardando confirmação manual
   const [copied, setCopied] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = ['enviar', 'pendentes', 'historico', 'contatos'].includes(urlParams.get('tab')) ? urlParams.get('tab') : 'enviar';
@@ -88,23 +89,24 @@ export default function WhatsAppHub() {
 
     setSending(true);
     try {
-      // Log no banco
-      await base44.entities.WhatsAppMessage?.create({
+      // Registrar apenas que o WhatsApp foi ABERTO (não enviado). Confirmação é manual.
+      const created = await base44.entities.WhatsAppMessage?.create({
         client_id: selectedClient.id,
         client_name: selectedClient.first_name,
         phone: selectedClient.phone,
         message: approvedMsg,
-        status: 'sent',
+        status: 'whatsapp_opened',
         approved: true,
         approved_at: new Date().toISOString(),
-      }).catch(() => {});
+      }).catch(() => null);
 
       // Abre WhatsApp
       const phone = selectedClient.phone.replace(/\D/g, '');
       const encoded = encodeURIComponent(approvedMsg);
       window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
 
-      toast.success('WhatsApp aberto! Mensagem registrada no histórico.');
+      setOpenedMsg({ id: created?.id || null, client: selectedClient, text: approvedMsg });
+      toast.message('WhatsApp aberto', { description: 'Confirme abaixo após enviar de fato.' });
       setMessage('');
       setApprovedMsg('');
       queryClient.invalidateQueries(['wa-messages']);
@@ -112,6 +114,32 @@ export default function WhatsAppHub() {
       toast.error('Erro: ' + e.message);
     } finally {
       setSending(false);
+    }
+  };
+
+  // ─── CONFIRMAR ENVIO MANUAL (única forma de marcar como enviado) ───
+  const handleConfirmSent = async () => {
+    if (!openedMsg) return;
+    try {
+      if (openedMsg.id) {
+        await base44.entities.WhatsAppMessage?.update(openedMsg.id, {
+          status: 'manual_sent_confirmed',
+        }).catch(() => {});
+      }
+      await base44.entities.EliteActionLog?.create({
+        data_hora: new Date().toISOString(),
+        cliente_id: openedMsg.client.id,
+        ferramenta_usada: 'whatsapp_hub',
+        acao_executada: 'whatsapp_envio_confirmado_manual',
+        mensagem_gerada: openedMsg.text,
+        aprovado_pelo_usuario: true,
+        resultado: 'enviado_manual_confirmado',
+      }).catch(() => {});
+      toast.success('Envio confirmado e registrado!');
+      setOpenedMsg(null);
+      queryClient.invalidateQueries(['wa-messages']);
+    } catch (e) {
+      toast.error('Erro: ' + e.message);
     }
   };
 
@@ -319,6 +347,26 @@ export default function WhatsAppHub() {
                 </div>
               )}
             </div>
+
+            {/* Confirmação de envio manual */}
+            {openedMsg && (
+              <div className="rounded-2xl p-3" style={{ background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.4)' }}>
+                <p className="text-xs font-black text-green-400 mb-1">📲 WhatsApp aberto para {openedMsg.client.first_name}</p>
+                <p className="text-[10px] text-slate-400 mb-2">O histórico só marca como ENVIADO depois que você confirmar.</p>
+                <div className="flex gap-2">
+                  <button onClick={handleConfirmSent}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2"
+                    style={{ background: '#25d366', color: 'white' }}>
+                    <CheckCircle className="w-4 h-4" /> Confirmar que enviei
+                  </button>
+                  <button onClick={() => setOpenedMsg(null)}
+                    className="px-3 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Templates */}
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
