@@ -5,7 +5,7 @@ import {
   MessageSquare, Send, Search, Phone,
   ChevronRight, CheckCircle, AlertCircle, Loader2,
   Zap, Copy, Check, ExternalLink, RefreshCw,
-  Shield, X
+  Shield, X, Pencil
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -305,7 +305,7 @@ export default function WhatsAppHub() {
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="w-4 h-4" style={{ color: approvedMsg ? '#00ff88' : '#ff9500' }} />
                 <p className="text-xs font-black" style={{ color: approvedMsg ? '#00ff88' : '#ff9500' }}>
-                  {approvedMsg ? '✅ Mensagem Aprovada — Pronto para Enviar' : '⚠️ Aprovação Obrigatória'}
+                {approvedMsg ? '✅ Texto aprovado — Aprovar texto › Abrir WhatsApp › Confirmar que enviei' : '⚠️ Aprovar texto antes de abrir o WhatsApp'}
                 </p>
               </div>
               {!approvedMsg ? (
@@ -314,7 +314,7 @@ export default function WhatsAppHub() {
                   disabled={!message.trim()}
                   className="w-full py-2.5 rounded-xl text-sm font-black disabled:opacity-40 transition-all"
                   style={{ background: 'rgba(255,107,0,0.2)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.4)' }}>
-                  ✅ Pode Enviar — Aprovar Mensagem
+                  ✅ Aprovar texto
                 </button>
               ) : (
                 <div className="space-y-2">
@@ -328,8 +328,8 @@ export default function WhatsAppHub() {
                       disabled={!selectedClient || sending}
                       className="flex-1 py-2.5 rounded-xl text-sm font-black disabled:opacity-40 flex items-center justify-center gap-2"
                       style={{ background: '#25d366', color: 'white' }}>
-                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      {sending ? 'Enviando...' : 'Abrir WhatsApp e Enviar'}
+                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                      {sending ? 'Abrindo...' : 'Abrir WhatsApp'}
                     </button>
                     <button
                       onClick={() => { handleCopy(approvedMsg); }}
@@ -419,7 +419,7 @@ export default function WhatsAppHub() {
                   <button onClick={() => handleApprovePending(msg)}
                     className="py-3 rounded-xl text-xs font-black"
                     style={{ background: '#25d366', color: 'white' }}>
-                    Aprovar
+                    Aprovar texto
                   </button>
                   <button onClick={() => { handleCopy(msg.message || msg.content || msg.mensagem || msg.message_content || ''); }}
                     className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black"
@@ -429,7 +429,7 @@ export default function WhatsAppHub() {
                   <button onClick={() => openPendingWhatsApp(msg)}
                     className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black"
                     style={{ background: 'rgba(37,211,102,0.18)', color: '#25d366', border: '1px solid rgba(37,211,102,0.35)' }}>
-                    <ExternalLink className="w-4 h-4" /> Abrir
+                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
                   </button>
                 </div>
               </div>
@@ -501,9 +501,10 @@ export default function WhatsAppHub() {
                     </div>
                   </a>
                   <button onClick={() => { setSelectedClient(c); setActiveTab('enviar'); }}
+                    title="Preparar mensagem"
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
                     style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
-                    <Send className="w-3.5 h-3.5" />
+                    <Pencil className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

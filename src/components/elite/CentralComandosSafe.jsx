@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, MessageSquare, RefreshCw, Send, ShieldAlert } from 'lucide-react';
+import { CheckCircle, XCircle, MessageSquare, RefreshCw, ExternalLink, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CentralComandosSafe() {
@@ -78,7 +78,7 @@ export default function CentralComandosSafe() {
       <p className="text-[10px] text-green-300 font-black uppercase">Mensagens pendentes WhatsApp</p>
       {pendingWhats.slice(0, 3).map(msg => <div key={msg.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-black/45 border border-green-500/10">
         <div className="min-w-0"><p className="text-xs text-white font-bold truncate">{msg.destinatario_nome || msg.recipient_name || 'Cliente'}</p><p className="text-[10px] text-slate-500 truncate">{msg.mensagem || msg.message_content}</p></div>
-        <Button size="sm" onClick={() => openWhatsApp(msg)} className="bg-green-700 hover:bg-green-600"><Send className="w-3 h-3" /></Button>
+        <Button size="sm" onClick={() => openWhatsApp(msg)} title="Abrir WhatsApp" className="bg-green-700 hover:bg-green-600 text-[11px] px-2"><ExternalLink className="w-3 h-3 mr-1" />Abrir</Button>
       </div>)}
       {pendingWhats.length === 0 && <p className="text-xs text-slate-500">Nenhuma mensagem externa pendente.</p>}
     </div>

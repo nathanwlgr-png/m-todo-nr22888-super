@@ -259,14 +259,20 @@ export default function DashboardSniper() {
           </Suspense>
         </div>
 
-        {/* ── 11. IMAGEM INSTITUCIONAL ── */}
-        <div className="relative rounded-2xl overflow-hidden border border-orange-500/20 bg-[#050505]">
-          <img
-            src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png"
-            className="w-full h-auto object-contain max-h-[320px]"
-            alt="Painel Comercial"
-          />
-        </div>
+        {/* ── 11. IMAGEM INSTITUCIONAL (recolhível, não compete com vendas) ── */}
+        <details className="rounded-2xl overflow-hidden border border-orange-500/20 bg-[#0f0f11]">
+          <summary className="cursor-pointer list-none px-4 py-3 text-xs font-black text-orange-400 flex items-center justify-between">
+            <span>🖼️ Imagem institucional</span>
+            <ChevronRight className="w-4 h-4" />
+          </summary>
+          <div className="relative bg-[#050505]">
+            <img
+              src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png"
+              className="w-full h-auto object-contain max-h-[320px]"
+              alt="Painel Comercial"
+            />
+          </div>
+        </details>
 
         {/* ── 12. PENDÊNCIAS PARA 100% (compacto/recolhível) ── */}
         <PendenciasPara100 />

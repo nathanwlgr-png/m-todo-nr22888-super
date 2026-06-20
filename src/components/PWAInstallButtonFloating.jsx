@@ -70,13 +70,16 @@ export default function PWAInstallButtonFloating() {
   };
 
   if (!show) {
+    // Ícone pequeno e discreto — não cobre listas, WhatsApp, pendências nem rodapé.
     return (
       <button
         onClick={() => setShow(true)}
-        className="fixed right-4 bottom-24 z-[80] rounded-full px-4 py-3 text-xs font-black text-white shadow-xl"
+        aria-label="Instalar app"
+        title="Instalar app"
+        className="fixed right-3 bottom-[88px] z-[60] w-10 h-10 rounded-full flex items-center justify-center shadow-lg opacity-70 hover:opacity-100 transition-opacity"
         style={{ background: 'linear-gradient(135deg, #ff6b00, #ff9500)', border: '1px solid rgba(255,255,255,0.18)' }}
       >
-        Instalar app
+        <Download className="w-4 h-4 text-white" />
       </button>
     );
   }
@@ -125,12 +128,14 @@ export default function PWAInstallButtonFloating() {
 
             {platform === 'android' && (
               <a
-                href={`intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;end`}
+                href={`${window.location.origin}${window.location.pathname}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-white text-sm"
                 style={{ background: 'linear-gradient(135deg, #ff6b00, #ff9500)' }}
               >
                 <ExternalLink className="w-4 h-4" />
-                Abrir no Chrome
+                Abrir em nova aba
               </a>
             )}
 

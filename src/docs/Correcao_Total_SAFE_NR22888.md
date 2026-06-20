@@ -191,3 +191,47 @@ Observação: os ganhos refletem blindagem real de código/automação. GPS fís
 - ✅ Pendências humanas/físicas continuam marcadas como pendentes.
 
 **Correção Total SAFE encerrada. Nenhuma fase nova iniciada.**
+
+---
+
+# Ajuste Visual Final (pós-SAFE · 20/06/2026)
+
+Apenas UI/campo. Nenhuma lógica crítica alterada (envio, geocode, limpeza e filas intactos).
+
+## 1. Botão "Instalar app"
+- Quando recolhido, virou **ícone pequeno e discreto** (40px, opacidade 70%) no canto inferior direito — não cobre botões, listas, WhatsApp, pendências nem rodapé.
+- Não abre prompt automaticamente; só ao tocar no ícone. Após "Fechar"/"Agora não", fica recolhido (localStorage 24h).
+
+## 2. WhatsAppHub — fluxo seguro claro
+- "Pode Enviar — Aprovar Mensagem" → **"Aprovar texto"**.
+- "Abrir WhatsApp e Enviar" → **"Abrir WhatsApp"**.
+- Aba Pendentes: "Aprovar" → **"Aprovar texto"**, "Abrir" → **"Abrir WhatsApp"**.
+- Cabeçalho da zona aprovada mostra o fluxo: **Aprovar texto › Abrir WhatsApp › Confirmar que enviei**.
+- Botão "Confirmar que enviei" mantido (única forma de marcar como enviado).
+
+## 3. Ícones de envio (sem aparência de disparo automático)
+- Removidos os ícones de aviãozinho (`Send`) dos botões de ação:
+  - WhatsAppHub "Abrir WhatsApp": `Send` → `ExternalLink`.
+  - WhatsAppHub aba Contatos: `Send` → `Pencil` (Preparar mensagem).
+  - Central SAFE (WhatsApp pendente): `Send` → `ExternalLink` "Abrir".
+
+## 4. Link quebrado — "Não é possível acessar esse site"
+- **Origem do clique**: botão "Abrir no Chrome" das instruções de instalação Android (PWAInstallButtonFloating).
+- **URL quebrada**: `intent://<host><path>#Intent;scheme=https;package=com.android.chrome;end` — esquema `intent://` não resolve no desktop nem dentro do preview/iframe, gerando a tela de erro.
+- **Correção**: trocado para `https://<origin><path>` com `target="_blank"`; rótulo "Abrir em nova aba". Funciona em qualquer dispositivo.
+- **Teste pós-correção**: prompt de instalação não dispara mais URL inválida; abertura em nova aba usa URL https válida. ✅
+
+## 5. DashboardSniper
+- Sniper do Dia mantido no topo absoluto (prioridade principal).
+- "Pendências para 100%" continua **recolhido por padrão**.
+- **Imagem institucional** (que era grande no topo da seção final) movida para um bloco **recolhível** (`<details>`), abaixo das prioridades — não compete mais com as ações de venda.
+
+## 6. Central SAFE
+- Mantida compacta, mostrando só o essencial: WhatsApp pendente, CRMUpdateQueue, comandos Telegram, erros e ações aguardando aprovação. Sem alterações de lógica.
+
+## 7. Validação no preview (mobile)
+- DashboardSniper sem sobreposição; imagem recolhida; pendências recolhidas; ícone Instalar discreto. ✅
+- WhatsAppHub: zona "⚠️ Aprovar texto antes de abrir o WhatsApp" + botão "✅ Aprovar texto"; fluxo seguro claro; sem aviãozinho. ✅
+- Botão Instalar app não atrapalha rodapé/listas. ✅
+- Link quebrado corrigido. ✅
+- Nenhum envio automático; nenhum dado apagado. ✅
