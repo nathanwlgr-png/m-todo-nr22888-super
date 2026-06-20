@@ -6,7 +6,7 @@ import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
   Zap, Globe, Instagram, Loader2, ShieldCheck, FileText,
-  Link2, Send, ThumbsUp, ThumbsDown, RefreshCw, Paperclip,
+  Link2, ClipboardCheck, ThumbsUp, ThumbsDown, RefreshCw, Paperclip,
   Flag, AlertTriangle, Bell, Cpu, BarChart2, X, Eye,
   ExternalLink, Download, Image, Lock, CheckSquare, XCircle
 } from 'lucide-react';
@@ -213,7 +213,9 @@ export default function ClienteDetalhe360() {
   const handleAbrirWhatsAppManual = (id) => {
     const item = approvalQueue.find(i => i.id === id);
     if (!item || !client?.phone) { toast.error('Sem telefone cadastrado'); return; }
-    const waUrl = `https://wa.me/${client.phone}?text=${encodeURIComponent(item.text)}`;
+    const phone = client.phone.replace(/\D/g, '');
+    if (!phone) { toast.error('Telefone inválido para WhatsApp'); return; }
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(item.text)}`;
     window.open(waUrl, '_blank');
     // Abre WhatsApp mas NÃO marca envio como realizado — apenas registra que foi aberto
     setApprovalQueue(prev => prev.map(i => i.id === id ? {
@@ -691,7 +693,7 @@ export default function ClienteDetalhe360() {
                 <button onClick={handleEnviarParaAprovacao}
                   className="py-2.5 rounded-xl flex items-center justify-center gap-1.5 font-black text-xs"
                   style={{ background: 'rgba(34,211,102,0.1)', border: '1px solid rgba(34,211,102,0.3)', color: '#22d36a' }}>
-                  <Send className="w-3.5 h-3.5" /> Enviar p/ Aprovação
+                  <ClipboardCheck className="w-3.5 h-3.5" /> Preparar p/ Aprovação
                 </button>
               </div>
             </div>
@@ -743,7 +745,7 @@ export default function ClienteDetalhe360() {
                       <button onClick={() => handleAprovar(item.id)}
                         className="py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"
                         style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e' }}>
-                        <ThumbsUp className="w-3 h-3" /> Aprovar
+                        <ThumbsUp className="w-3 h-3" /> Aprovar texto
                       </button>
                       <button onClick={() => handleReprovar(item.id)}
                         className="py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"

@@ -138,3 +138,77 @@ O arquivo enviado é um **print da interface do editor Base44** (cabeçalho "Pai
 - [ ] Confirmar se o "site indisponível" do vídeo veio de outra tela além do botão PWA.
 
 **Nota visual antes → depois:** 8.0 → **8.4** (após as 2 correções seguras desta rodada).
+
+---
+
+# 🎥 Revisão após vídeo real do Nathan (20/06/2026)
+
+## ⚠️ Limitação de acesso — declaração honesta
+**Não tenho acesso ao conteúdo do vídeo `.mp4`.** Recebo o link do arquivo, mas **não consigo reproduzir vídeo nem extrair frames** — só analiso **imagens estáticas (PNG/JPG)** anexadas e o **código real** das telas.
+
+Portanto, esta revisão é feita por **auditoria de código tela-por-tela, botão-por-botão** (que reflete exatamente o que renderiza no campo) — **não** por leitura do vídeo. Para fechar 100% o lado visual, preciso de **prints estáticos** do vídeo, especialmente o **frame do erro "Não é possível acessar esse site" com a barra de URL visível**.
+
+## Inventário de botões — ClienteDetalhe360 (tela auditada agora a fundo)
+
+| Botão | Tela | Função esperada | Função real | Status | Ação |
+|-------|------|-----------------|-------------|--------|------|
+| Validar ID | C360 topo | Consultar CNPJ/CPF | `consultarCNPJScore` | ✅ funcionando | manter |
+| Ver Mapa | C360 topo | Abrir Google Maps | `maps.google.com/?q=` | ✅ funcionando | manter |
+| Instagram | C360 topo | Abrir perfil | `instagram.com/handle` | ✅ funcionando | manter |
+| SPIN | C360 topo | Ir p/ SPIN | navega GenerateWhatsApp | ✅ funcionando | manter |
+| Proposta | C360 | Abrir gerador | navega ProposalGenerator | ✅ funcionando | manter |
+| Gerar PDF | C360 | PDF do cliente | `generatePDFForWhatsApp` | ✅ funcionando | manter |
+| **Link Trac.** | C360 | Copiar link rastreável | copia `nr22888.base44.app/...` | ⚠️ **suspeito** | **verificar domínio (aprovação)** |
+| Prioridade | C360 | Marcar quente | update cliente | ✅ funcionando | manter |
+| Funil (6 estágios) | C360 Geral | Mudar pipeline | update cliente | ✅ funcionando | manter |
+| Criar Follow-up | C360 Geral | Cria tarefa +3d | `Task.create` | ✅ funcionando | manter |
+| Gerar via SPIN | C360 Mensagens | Gera texto IA | `generateSpinSellingMessages` | ✅ funcionando | manter |
+| **Enviar p/ Aprovação** | C360 Mensagens | Mandar p/ fila | só adiciona à fila local | confuso (aviãozinho) | ✅ **renomeado → "Preparar p/ Aprovação" (ícone revisão)** |
+| Enviar Direto (BLOQUEADO) | C360 Mensagens | — | toast de bloqueio | ✅ proposital | manter |
+| **Aprovar** | C360 Aprovação | Aprovar texto | muda status (não envia) | confuso | ✅ **renomeado → "Aprovar texto"** |
+| Reprovar / Nova Versão | C360 Aprovação | — | muda status | ✅ funcionando | manter |
+| **Abrir WhatsApp (pré-preenchido)** | C360 Aprovação | Abrir wa.me | usava `client.phone` **cru** | ⚠️ **quebrava com telefone mascarado** | ✅ **corrigido — limpa `\D` antes do wa.me** |
+| Confirmar que enviei | C360 Aprovação | Marcar enviado | muda status | ✅ funcionando | manter |
+| Anexar Print Real | C360 Anexos | Upload imagem | `UploadFile` real | ✅ funcionando | manter |
+| Abrir Google Maps / iframe | C360 Mapa | Mapa | iframe embed + link | ✅ funcionando | manter |
+| Incluir na Rota do Dia | C360 Mapa | Ir p/ rota | navega SmartRouteOptimizer | ✅ funcionando | manter |
+| Site (do cadastro) | C360 Geral | Abrir site | `safeOpenUrl` valida domínio | ✅ **já tem fallback seguro** | manter |
+
+## 🔗 Link quebrado — lista de suspeitos (não consegui reproduzir pelo vídeo)
+
+Ordenados por probabilidade de causar "Não é possível acessar esse site":
+
+| # | Origem | URL | Por que pode quebrar | Status |
+|---|--------|-----|----------------------|--------|
+| 1 | **C360 → "Abrir WhatsApp (pré-preenchido)"** | `wa.me/<phone cru>` | Telefone com máscara `(14) 99999-9999` ia direto no wa.me, gerando URL inválida | ✅ **CORRIGIDO agora** (limpa `\D`) |
+| 2 | **C360 → "Link Trac."** | `https://nr22888.base44.app/...` | Domínio **hardcoded**; se o app publicado tiver outro domínio, o link copiado abre "site indisponível" | ⚠️ **Pendente aprovação** (confirmar domínio real) |
+| 3 | PWA → "Abrir no Chrome" | `intent://...` | Não resolve no preview/desktop | ✅ corrigido em rodada anterior |
+| 4 | RouteOptimizer / Mapa | `google.com/maps/...` | Válido | OK |
+| 5 | WhatsAppHub | `wa.me/...` (já limpa `\D`) | Válido | OK |
+
+> **Para confirmar a causa exata:** envie o **print do erro com a URL visível**. Se a URL começar com `nr22888.base44.app`, é o suspeito #2; se for um `wa.me` com parênteses/espaços, era o #1 (já corrigido).
+
+## Botões com aparência de envio automático (varredura completa)
+- ✅ C360 "Enviar p/ Aprovação" (aviãozinho `Send`) → **"Preparar p/ Aprovação"** (ícone `ClipboardCheck`).
+- ✅ Nenhum outro ícone `Send`/aviãozinho restante em DashboardSniper, WhatsAppHub, Central SAFE, ScoreElite, C360.
+
+## Telas auditadas nesta rodada (código real)
+- **PlanoEliteStatus:** botões "Ativar Score Elite", "Ver ranking", "Aprovar mensagens" → todos funcionam e navegam certo. OK.
+- **PendenciasPara100:** ✅ recolhido por padrão (`useState(false)`). OK.
+- **ExportClinicReportWithROI:** gera PDF local (jsPDF), sem função externa. OK.
+- **ClienteDetalhe360:** fluxo de aprovação com 3 estados separados (aprovado → wa aberto → envio confirmado) — **modelo seguro exemplar**. 2 correções de wording + 1 de telefone aplicadas.
+
+## Ajustes aplicados nesta rodada (seguros)
+1. ✅ C360: telefone limpo (`\D`) antes do `wa.me` — corrige link quebrado provável no campo.
+2. ✅ C360: "Enviar p/ Aprovação" → "Preparar p/ Aprovação" (sem aviãozinho).
+3. ✅ C360: "Aprovar" → "Aprovar texto" (fluxo seguro padronizado).
+
+## Ajustes que precisam de aprovação
+1. **"Link Trac." (C360):** confirmar/parametrizar o domínio real publicado em vez de `nr22888.base44.app` hardcoded.
+2. **Unificações** (seção 5): ScoreElite×Ranking · Rotas (Rápida/Otimizador/Mapa) · agrupar atalhos do Dashboard em "Ferramentas".
+3. **"Editar" (Central SAFE):** ligar a edição real ou ocultar.
+
+## Nova nota visual
+**8.4 → 8.6** (após corrigir o link de WhatsApp quebrável e padronizar wording no Cliente 360).
+
+> **Próximo passo para você:** mandar o **print do erro "site indisponível" com a URL** para eu confirmar o suspeito #2 e propor a correção exata do domínio.
