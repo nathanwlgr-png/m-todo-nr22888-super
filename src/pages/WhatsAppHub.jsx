@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  MessageSquare, Send, Search, Phone, Clock,
-  Bot, ChevronRight, CheckCircle, AlertCircle, Loader2,
-  Zap, Copy, Check, ExternalLink, RefreshCw, FileText,
-  Shield, X, User, History
+  MessageSquare, Send, Search, Phone,
+  ChevronRight, CheckCircle, AlertCircle, Loader2,
+  Zap, Copy, Check, ExternalLink, RefreshCw,
+  Shield, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 

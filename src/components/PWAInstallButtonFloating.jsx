@@ -4,9 +4,8 @@
  * - Detecta plataforma e oferece instalação nativa ou instruções
  * - Botão grande e visível no tablet
  */
-import * as React from 'react';
-const { useState, useEffect } = React;
-import { Download, X, ExternalLink, Smartphone, Monitor } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Download, X, ExternalLink, Smartphone } from 'lucide-react';
 
 export default function PWAInstallButtonFloating() {
   const [show, setShow] = useState(false);

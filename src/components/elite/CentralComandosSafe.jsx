@@ -41,9 +41,9 @@ export default function CentralComandosSafe() {
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
-  const telegramConnectUrl = typeof base44?.agents?.getTelegramConnectURL === 'function'
+  const telegramConnectUrl = base44?.agents?.getTelegramConnectURL
     ? base44.agents.getTelegramConnectURL('telegram_operacional_nr22888')
-    : '';
+    : null;
 
   return <div className="rounded-2xl p-4 bg-[#0f0f11] border-2 border-cyan-500/30 shadow-xl space-y-3">
     <div className="flex items-center justify-between gap-3">
