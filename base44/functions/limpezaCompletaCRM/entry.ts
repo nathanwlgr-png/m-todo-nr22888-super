@@ -33,7 +33,8 @@ Deno.serve(async (req) => {
     let defaultsFixed = 0;
     const processed = new Set();
 
-    // ── SANEAMENTO LEVE: telefones + defaults (não destrutivo) ──
+    // ── SANEAMENTO LEVE: telefones + defaults ──
+    // dry_run=true: apenas CONTA o que seria corrigido. NÃO altera nenhum Client.
     for (const c of clients) {
       const upd = {};
       if (c.phone) {
@@ -42,7 +43,7 @@ Deno.serve(async (req) => {
       }
       if (!c.pipeline_stage) { upd.pipeline_stage = 'lead';  defaultsFixed++; }
       if (!c.status)         { upd.status = 'morno';         defaultsFixed++; }
-      if (Object.keys(upd).length) {
+      if (!dry_run && Object.keys(upd).length) {
         await sr.entities.Client.update(c.id, upd).catch(() => null);
       }
     }
@@ -72,12 +73,14 @@ Deno.serve(async (req) => {
       if (group.length > 1) { processed.add(clients[i].id); groups.push({ group, samePhone: true }); }
     }
 
-    // ── CRIAR FILA DE REVISÃO (não arquiva nada) ──
+    // ── FILA DE REVISÃO (nunca arquiva). dry_run=true só conta, não cria fila. ──
     let queued = 0;
     for (const { group } of groups) {
       const keeper = group.reduce((best, cur) => completeness(cur) > completeness(best) ? cur : best);
       for (const dup of group) {
         if (dup.id === keeper.id) continue;
+        if (dry_run) { queued++; continue; }
+
         // Evitar duplicar item já na fila
         const exists = await sr.entities.DuplicateReviewQueue.filter({
           entidade_id_principal: keeper.id, entidade_id_duplicada: dup.id
@@ -105,7 +108,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const summary = `✅ Auditoria SAFE: ${phonesFixed} telefones normalizados, ${defaultsFixed} defaults, ${groups.length} grupos duplicados detectados, ${queued} enviados para revisão humana (nada arquivado).`;
+    const summary = dry_run
+      ? `🔍 Prévia (dry_run): ${phonesFixed} telefones e ${defaultsFixed} defaults SERIAM corrigidos, ${groups.length} grupos duplicados detectados. Nada foi alterado.`
+      : `✅ Auditoria SAFE: ${phonesFixed} telefones normalizados, ${defaultsFixed} defaults, ${groups.length} grupos duplicados detectados, ${queued} enviados para revisão humana (nada arquivado).`;
 
     await sr.entities.AuditLog.create({
       module: 'limpeza_crm', action: 'limpeza_auditoria_safe', user_email: 'sistema_automatico',
@@ -115,10 +120,12 @@ Deno.serve(async (req) => {
     }).catch(() => null);
 
     return Response.json({
-      success: true, mode: 'auditoria_safe', summary,
+      success: true, mode: dry_run ? 'dry_run_preview' : 'auditoria_safe', dry_run, summary,
       phonesFixed, defaultsFixed, groupsFound: groups.length,
       duplicatesQueued: queued, merged: 0,
-      message: 'Modo seguro: duplicatas vão para fila de revisão. Nenhuma duplicata foi arquivada automaticamente.',
+      message: dry_run
+        ? 'Prévia: nenhum dado foi alterado e nenhuma fila foi criada.'
+        : 'Modo seguro: duplicatas vão para fila de revisão. Nenhuma duplicata foi arquivada automaticamente.',
     });
   } catch (err) {
     return Response.json({ success: false, error: err.message }, { status: 500 });

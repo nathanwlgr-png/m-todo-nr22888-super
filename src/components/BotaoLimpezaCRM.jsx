@@ -7,14 +7,26 @@ const CONFIRM_TEXT = 'CONFIRMAR LIMPEZA SEGURA';
 export default function BotaoLimpezaCRM() {
   const [status, setStatus] = useState('idle'); // idle | confirm | loading | success | error
   const [resultado, setResultado] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [confirmInput, setConfirmInput] = useState('');
 
+  // Prévia segura: dry_run=true não altera nada
+  const abrirConfirmacao = async () => {
+    setStatus('confirm');
+    setPreview(null);
+    try {
+      const res = await base44.functions.invoke('limpezaCompletaCRM', { dry_run: true });
+      if (res.data?.success) setPreview(res.data);
+    } catch { /* prévia opcional */ }
+  };
+
+  // Execução real: dry_run=false, só após digitar a frase
   const executarLimpeza = async () => {
     if (confirmInput.trim() !== CONFIRM_TEXT) return;
     setStatus('loading');
     setResultado(null);
     try {
-      const res = await base44.functions.invoke('limpezaCompletaCRM', {});
+      const res = await base44.functions.invoke('limpezaCompletaCRM', { dry_run: false });
       const data = res.data;
       if (data.success) {
         setStatus('success');
@@ -75,7 +87,15 @@ export default function BotaoLimpezaCRM() {
             <X className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[9px] text-slate-500">Para executar, digite exatamente: <span className="font-mono text-purple-400">{CONFIRM_TEXT}</span></p>
+        {preview && (
+          <div className="rounded-lg p-2 bg-cyan-900/20 border border-cyan-500/30">
+            <p className="text-[9px] font-bold text-cyan-300">🔍 Prévia (nada foi alterado):</p>
+            <p className="text-[9px] text-cyan-200 mt-0.5">
+              {preview.phonesFixed} telefones · {preview.defaultsFixed} defaults · {preview.groupsFound} grupos duplicados
+            </p>
+          </div>
+        )}
+        <p className="text-[9px] text-slate-500">Para executar de verdade, digite exatamente: <span className="font-mono text-purple-400">{CONFIRM_TEXT}</span></p>
         <input
           value={confirmInput}
           onChange={(e) => setConfirmInput(e.target.value)}
@@ -97,7 +117,7 @@ export default function BotaoLimpezaCRM() {
 
   return (
     <button
-      onClick={() => setStatus('confirm')}
+      onClick={abrirConfirmacao}
       className="w-full rounded-xl p-3 bg-[#0f0f11] border border-purple-500/30 hover:border-purple-500/60 transition-all flex items-center justify-between group"
     >
       <div className="flex items-center gap-2">

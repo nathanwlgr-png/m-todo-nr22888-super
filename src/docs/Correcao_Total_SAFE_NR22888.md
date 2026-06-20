@@ -60,6 +60,18 @@ Observação: os ganhos refletem blindagem real de código/automação. GPS fís
 - limpezaCompletaCRM: testado, modo auditoria, 0 arquivados. ✅
 - sendWhatsAppMessage / sendApprovedMessages: lógica de status corrigida.
 
+## Correções críticas pós-execução (20/06/2026)
+
+1. **geocodeClientLocation — cliente inexistente**: agora retorna **404** quando o client_id não existe em Client, **sem criar CRMUpdateQueue**. Retorno controlado `{ success:false, applied:false, queued:false, status:'cliente_inexistente' }`. Testado: 404. ✅
+2. **limpezaCompletaCRM — dry_run real**: com `dry_run=true` a função **apenas conta** (telefones/defaults/duplicatas), **não atualiza nenhum Client** e **não cria fila**. Com `dry_run=false` executa o saneamento leve e cria DuplicateReviewQueue (nunca arquiva). Testado em dry_run: 0 alterados, fila não criada. ✅
+3. **BotaoLimpezaCRM**: ao abrir a confirmação, chama `dry_run:true` e mostra prévia ("nada foi alterado"). Só executa `dry_run:false` depois de digitar exatamente `CONFIRMAR LIMPEZA SEGURA`. ✅
+4. **ProductCatalog**: confirmados `status_foto` e `status_auditoria`; adicionados **`fonte_validacao`** e **`data_validacao`**. 29 produtos mantidos, todos `pendente_foto_oficial`. ✅
+5. **GPSClinicaRadar**: `calcDist` (Haversine em metros) já existe e é a única fonte de distância; retorna `null` quando falta coordenada. Nenhum `Math.random` em distância. ✅
+6. **WhatsApp status**: arquivo real da rota é `pages/WhatsAppHub` (App.jsx importa `./pages/WhatsAppHub`). Lógica correta: `whatsapp_opened` ao abrir, `manual_sent_confirmed` só ao clicar "Confirmar que enviei", nunca `sent` automático. ✅
+
+### Duplicidade técnica registrada (para revisão, NÃO apagada)
+- Existem dois arquivos idênticos: `pages/WhatsAppHub` e `pages/WhatsAppHub.jsx`. O import resolve para o `.jsx`. Ambos têm a lógica SAFE correta. Recomendação: consolidar em um só numa próxima revisão controlada (sem apagar agora).
+
 ## Riscos restantes (dependem de Nathan / dispositivo / conexão)
 
 - GPS físico em tablet/celular — NÃO VALIDADO EM DISPOSITIVO REAL.

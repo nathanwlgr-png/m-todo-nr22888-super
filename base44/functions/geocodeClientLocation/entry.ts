@@ -15,12 +15,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'client_id obrigatório' }, { status: 400 });
     }
 
-    // Buscar cliente atual (para comparar antes/depois)
+    // Buscar cliente atual. Se não existir, retornar 404 SEM criar fila.
     let current = null;
     try {
       const found = await sr.entities.Client.filter({ id: client_id });
       current = found && found.length ? found[0] : null;
     } catch (_) { current = null; }
+
+    if (!current) {
+      return Response.json({
+        success: false,
+        applied: false,
+        queued: false,
+        geocoded: false,
+        error: 'Cliente não encontrado',
+        status: 'cliente_inexistente',
+        message: 'client_id não existe em Client. Nenhuma fila foi criada.',
+      }, { status: 404 });
+    }
 
     const candidates = [
       { text: `${address}, ${city}, ${state}`, source: 'endereco_completo', precision: 'alta_confianca', score: 95 },
