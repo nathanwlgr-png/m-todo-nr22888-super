@@ -75,14 +75,28 @@ Deno.serve(async (req) => {
     const clientesMornos = await base44.asServiceRole.entities.Client.filter({ status: 'morno' });
     const todosClientes = [...clientes, ...clientesMornos];
 
+    // SAFE/PERFORMANCE: buscar pedidos e mensagens UMA vez (em lote) e indexar por client_id.
+    // Evita N+1 de queries que estourava o rate limit (429) na execução diária.
+    const [todosPedidos, todasMensagens] = await Promise.all([
+      base44.asServiceRole.entities.ConsumableOrder.list('-created_date', 2000).catch(() => []),
+      base44.asServiceRole.entities.WhatsAppMessage.list('-created_date', 2000).catch(() => []),
+    ]);
+    const pedidosPorCliente = {};
+    for (const p of todosPedidos) {
+      if (p.status !== 'ativo') continue;
+      (pedidosPorCliente[p.client_id] = pedidosPorCliente[p.client_id] || []).push(p);
+    }
+    const mensagensPorCliente = {};
+    for (const m of todasMensagens) {
+      if (m.status !== 'enviado_manual_confirmado_por_nathan') continue;
+      (mensagensPorCliente[m.client_id] = mensagensPorCliente[m.client_id] || []).push(m);
+    }
+
     for (const cliente of todosClientes) {
       const alertas = [];
 
-      // 1. Checar ConsumableOrders paradas
-      const pedidos = await base44.asServiceRole.entities.ConsumableOrder.filter({
-        client_id: cliente.id,
-        status: 'ativo'
-      });
+      // 1. Checar ConsumableOrders paradas (indexado em memória)
+      const pedidos = pedidosPorCliente[cliente.id] || [];
 
       for (const pedido of pedidos) {
         if (!pedido.last_order_date) continue;
@@ -115,11 +129,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // 3. Checar proposta aberta sem resposta em 72h+
-      const mensagensPendentes = await base44.asServiceRole.entities.WhatsAppMessage.filter({
-        client_id: cliente.id,
-        status: 'enviado_manual_confirmado_por_nathan',
-      });
+      // 3. Checar proposta aberta sem resposta em 72h+ (indexado em memória)
+      const mensagensPendentes = mensagensPorCliente[cliente.id] || [];
 
       for (const msg of mensagensPendentes) {
         const dataEnvio = new Date(msg.created_date);
