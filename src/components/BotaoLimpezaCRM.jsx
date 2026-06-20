@@ -8,6 +8,8 @@ export default function BotaoLimpezaCRM() {
 
   const executarLimpeza = async () => {
     if (status === 'loading') return;
+    const confirmado = window.confirm('Confirma executar a limpeza segura? Ela não apaga dados, mas pode normalizar telefones e arquivar duplicatas prováveis.');
+    if (!confirmado) return;
     setStatus('loading');
     setResultado(null);
 
