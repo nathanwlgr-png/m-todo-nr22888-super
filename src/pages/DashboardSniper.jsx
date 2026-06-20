@@ -11,6 +11,7 @@ import {
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
 import CampoTotalNR22888 from '@/components/elite/CampoTotalNR22888';
+import RadarConcorrenciaWidget from '@/components/elite/RadarConcorrenciaWidget';
 import PendenciasPara100 from '@/components/elite/PendenciasPara100';
 import ResolverPendencias from '@/components/elite/ResolverPendencias';
 import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
@@ -77,6 +78,9 @@ export default function DashboardSniper() {
 
         {/* ── CAMPO TOTAL — visão compacta de campo (SAFE) ── */}
         <CampoTotalNR22888 />
+
+        {/* ── RADAR DE CONCORRÊNCIA — monitoramento multicanal (SAFE) ── */}
+        <RadarConcorrenciaWidget />
 
         {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
         <Suspense fallback={<HeavyFallback />}>
