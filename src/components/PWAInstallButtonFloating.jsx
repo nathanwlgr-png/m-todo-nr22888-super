@@ -151,7 +151,7 @@ export default function PWAInstallButtonFloating() {
 
         <div className="px-5 pb-5 space-y-2">
           <div className="grid grid-cols-3 gap-2 mb-3">
-            {['Offline', 'Rápido', 'Tela cheia'].map(f => (
+            {['Acesso rápido', 'Rápido', 'Tela cheia'].map(f => (
               <div key={f} className="text-center py-2 rounded-xl text-[11px] font-bold text-orange-300" style={{ background: 'rgba(255,107,0,0.08)' }}>
                 ✓ {f}
               </div>

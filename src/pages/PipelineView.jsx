@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { TrendingUp, Users, DollarSign, Target, ArrowRight } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
+import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 
 const PIPELINE_STAGES = [
   { id: 'lead', label: 'Lead', color: 'bg-blue-50 border-l-blue-500' },
@@ -56,6 +57,7 @@ export default function PipelineView() {
 
   const totalPipelineValue = clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
   const closedDeals = clients.filter(c => c.pipeline_stage === 'fechado').length;
+  const topOpportunity = clients.filter(c => c.pipeline_stage && c.pipeline_stage !== 'fechado').sort((a, b) => (b.projected_revenue || b.purchase_score || 0) - (a.projected_revenue || a.purchase_score || 0))[0];
 
   return (
     <div className="space-y-6 p-6">
@@ -108,6 +110,8 @@ export default function PipelineView() {
           </CardContent>
         </Card>
       </div>
+
+      {topOpportunity && <ComoVenderAgoraCard target={topOpportunity} type="cliente" />}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid lg:grid-cols-5 gap-4">

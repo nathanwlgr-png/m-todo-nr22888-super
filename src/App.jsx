@@ -67,6 +67,8 @@ const TesteAgentes = lazy(() => import('./pages/TesteAgentes'));
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
 const Leads = lazy(() => import('./pages/Leads'));
+const LeadProfile = lazy(() => import('./pages/LeadProfile'));
+const ScoreElite = lazy(() => import('./pages/ScoreElite.jsx'));
 const TasksUnified = lazy(() => import('./pages/TasksUnified'));
 const ScheduledAgenda = lazy(() => import('./pages/ScheduledAgenda'));
 const VisitManager = lazy(() => import('./pages/VisitManager'));
@@ -167,6 +169,8 @@ const AuthenticatedApp = () => {
         {/* ── PÁGINAS REAIS CONECTADAS ── */}
         <Route path="/Clients" element={<LayoutWrapper currentPageName="Clients"><Clients /></LayoutWrapper>} />
         <Route path="/Leads" element={<LayoutWrapper currentPageName="Leads"><Leads /></LayoutWrapper>} />
+        <Route path="/LeadProfile" element={<LayoutWrapper currentPageName="LeadProfile"><LeadProfile /></LayoutWrapper>} />
+        <Route path="/ScoreElite" element={<LayoutWrapper currentPageName="ScoreElite"><ScoreElite /></LayoutWrapper>} />
         <Route path="/TasksUnified" element={<LayoutWrapper currentPageName="TasksUnified"><TasksUnified /></LayoutWrapper>} />
         <Route path="/ScheduledAgenda" element={<LayoutWrapper currentPageName="ScheduledAgenda"><ScheduledAgenda /></LayoutWrapper>} />
         <Route path="/VisitManager" element={<LayoutWrapper currentPageName="VisitManager"><VisitManager /></LayoutWrapper>} />

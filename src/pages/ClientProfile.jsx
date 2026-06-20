@@ -12,6 +12,7 @@ import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 import WhatsAppRapido from '@/components/WhatsAppRapido';
 import SeamatyEquipmentPanel from '@/components/SeamatyEquipmentPanel';
 import Score4x4Display from '@/components/Score4x4Display';
+import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -214,6 +215,8 @@ export default function ClientProfile() {
       <div className="px-4 space-y-3">
         {/* Motor 4x4 */}
         <Score4x4Display score={score4x4} isLoading={loadingScore} />
+
+        <ComoVenderAgoraCard target={client} type="cliente" />
 
         {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
         <SeamatyEquipmentPanel client={client} />

@@ -39,6 +39,7 @@ import RealtimeCoachingWidget from '@/components/RealtimeCoachingWidget';
 import QuickWhatsAppSend from '@/components/QuickWhatsAppSend';
 import AILeadMessenger from '@/components/AILeadMessenger';
 import WhatsAppMasterIntegration from '@/components/WhatsAppMasterIntegration';
+import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 
 export default function LeadProfile() {
   const navigate = useNavigate();
@@ -169,6 +170,8 @@ export default function LeadProfile() {
       <div className="px-6 -mt-16 space-y-4">
         {/* Score Preditivo */}
         <PredictiveLeadScoreCard lead={lead} />
+
+        <ComoVenderAgoraCard target={lead} type="lead" />
 
         {/* Quick Actions */}
         {lead.status !== 'convertido' && (
