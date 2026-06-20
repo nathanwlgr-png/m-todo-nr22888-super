@@ -15,6 +15,7 @@ const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
 const ExportClinicReportWithROI = lazy(() => import('@/components/ExportClinicReportWithROI'));
 const SuperAgentWidget = lazy(() => import('@/components/SuperAgentWidget'));
+const PlanoEliteStatus = lazy(() => import('@/components/elite/PlanoEliteStatus'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3 bg-[#111111]" />;
 
@@ -67,6 +68,11 @@ export default function DashboardSniper() {
         {/* ── 1. SNIPER DO DIA — O FOGO (topo absoluto) ── */}
         <Suspense fallback={<HeavyFallback />}>
           <SniperDoDia />
+        </Suspense>
+
+        {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <PlanoEliteStatus hotCount={hotClients.length} visitsCount={visits.length} inactiveCount={noContact7d.length} />
         </Suspense>
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}

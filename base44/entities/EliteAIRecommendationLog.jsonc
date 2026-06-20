@@ -1,0 +1,53 @@
+{
+  "name": "EliteAIRecommendationLog",
+  "type": "object",
+  "description": "Log informativo de recomenda\u00e7\u00f5es de IA do Plano Elite, sem bloquear uso por economia de cr\u00e9ditos.",
+  "properties": {
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contexto": {
+      "type": "string"
+    },
+    "categoria_decisao": {
+      "type": "string"
+    },
+    "modelo_recomendado": {
+      "type": "string"
+    },
+    "modelo_usado": {
+      "type": "string"
+    },
+    "motivo_modelo": {
+      "type": "string"
+    },
+    "impacto_comercial": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto",
+        "critico"
+      ]
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "agente": {
+      "type": "string"
+    },
+    "acao": {
+      "type": "string"
+    },
+    "resultado_resumido": {
+      "type": "string"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  }
+}

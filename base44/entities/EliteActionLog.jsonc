@@ -1,0 +1,57 @@
+{
+  "name": "EliteActionLog",
+  "type": "object",
+  "description": "Registro rastre\u00e1vel das a\u00e7\u00f5es sugeridas e executadas pelo Plano Elite.",
+  "properties": {
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "usuario": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "oportunidade_id": {
+      "type": "string"
+    },
+    "agente": {
+      "type": "string"
+    },
+    "ferramenta_usada": {
+      "type": "string"
+    },
+    "modelo_ia_usado": {
+      "type": "string"
+    },
+    "acao_sugerida": {
+      "type": "string"
+    },
+    "acao_executada": {
+      "type": "string"
+    },
+    "mensagem_gerada": {
+      "type": "string"
+    },
+    "aprovado_pelo_usuario": {
+      "type": "boolean",
+      "default": false
+    },
+    "resultado": {
+      "type": "string"
+    },
+    "proxima_acao": {
+      "type": "string"
+    },
+    "valor_potencial": {
+      "type": "number"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  }
+}

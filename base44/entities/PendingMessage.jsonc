@@ -1,42 +1,38 @@
 {
   "name": "PendingMessage",
   "type": "object",
+  "description": "Fila obrigat\u00f3ria de aprova\u00e7\u00e3o humana para WhatsApp, e-mail, Telegram e qualquer comunica\u00e7\u00e3o externa do Plano Elite. Preserva campos legados para n\u00e3o quebrar fluxos existentes.",
   "properties": {
-    "recipient_id": {
-      "type": "string",
-      "description": "ID do cliente/lead destinat\u00e1rio"
-    },
-    "recipient_name": {
-      "type": "string",
-      "description": "Nome do destinat\u00e1rio"
-    },
-    "recipient_phone": {
-      "type": "string",
-      "description": "Telefone do destinat\u00e1rio"
-    },
-    "channel": {
+    "canal": {
       "type": "string",
       "enum": [
         "whatsapp",
-        "email"
-      ],
-      "description": "Canal de envio"
+        "gmail",
+        "email",
+        "telegram",
+        "outro"
+      ]
     },
-    "message_content": {
-      "type": "string",
-      "description": "Conte\u00fado da mensagem preparada pela IA"
+    "destinatario_nome": {
+      "type": "string"
     },
-    "email_subject": {
-      "type": "string",
-      "description": "Assunto (se for email)"
+    "destinatario_contato": {
+      "type": "string"
     },
-    "context": {
-      "type": "string",
-      "description": "Contexto da conversa que gerou essa mensagem"
+    "cliente_id": {
+      "type": "string"
     },
-    "ai_reasoning": {
-      "type": "string",
-      "description": "Por que a IA sugeriu essa mensagem"
+    "lead_id": {
+      "type": "string"
+    },
+    "oportunidade_id": {
+      "type": "string"
+    },
+    "contexto": {
+      "type": "string"
+    },
+    "mensagem": {
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -47,10 +43,80 @@
         "edited",
         "ready_to_send",
         "sent",
-        "manual_sent_confirmed"
+        "manual_sent_confirmed",
+        "rascunho",
+        "aguardando_aprovacao",
+        "aprovado",
+        "editado",
+        "rejeitado",
+        "enviado_manual",
+        "sem_resposta",
+        "respondeu",
+        "convertido"
       ],
-      "default": "pending",
-      "description": "Status da aprova\u00e7\u00e3o e envio manual"
+      "default": "aguardando_aprovacao"
+    },
+    "criado_por_agente": {
+      "type": "string"
+    },
+    "modelo_ia_usado": {
+      "type": "string"
+    },
+    "aprovado_por_nathan": {
+      "type": "boolean",
+      "default": false
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_envio_manual": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resultado": {
+      "type": "string"
+    },
+    "proxima_acao": {
+      "type": "string"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "Campo legado: ID do cliente/lead destinat\u00e1rio"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Campo legado: nome do destinat\u00e1rio"
+    },
+    "recipient_phone": {
+      "type": "string",
+      "description": "Campo legado: telefone do destinat\u00e1rio"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "whatsapp",
+        "email",
+        "gmail",
+        "telegram"
+      ]
+    },
+    "message_content": {
+      "type": "string",
+      "description": "Campo legado: conte\u00fado da mensagem"
+    },
+    "email_subject": {
+      "type": "string"
+    },
+    "context": {
+      "type": "string"
+    },
+    "ai_reasoning": {
+      "type": "string"
     },
     "priority": {
       "type": "string",
@@ -60,50 +126,36 @@
         "alta",
         "urgente"
       ],
-      "default": "media",
-      "description": "Prioridade da mensagem"
+      "default": "media"
     },
     "suggested_send_time": {
       "type": "string",
-      "format": "date-time",
-      "description": "Melhor hor\u00e1rio sugerido para envio"
+      "format": "date-time"
     },
     "approved_by": {
-      "type": "string",
-      "description": "Email do usu\u00e1rio que aprovou"
+      "type": "string"
     },
     "approved_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora da aprova\u00e7\u00e3o"
+      "format": "date-time"
     },
     "edited_content": {
-      "type": "string",
-      "description": "Conte\u00fado editado pelo usu\u00e1rio"
+      "type": "string"
     },
     "wa_url": {
-      "type": "string",
-      "description": "Link seguro do WhatsApp para envio manual"
+      "type": "string"
     },
     "prepared_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora em que o link foi preparado"
+      "format": "date-time"
     },
     "sent_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora do envio efetivo confirmado"
+      "format": "date-time"
     },
     "manual_sent_confirmed_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora em que Nathan confirmou envio manual"
+      "format": "date-time"
     }
-  },
-  "required": [
-    "recipient_id",
-    "channel",
-    "message_content"
-  ]
+  }
 }

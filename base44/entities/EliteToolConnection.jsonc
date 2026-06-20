@@ -1,0 +1,100 @@
+{
+  "name": "EliteToolConnection",
+  "type": "object",
+  "description": "Auditoria das ferramentas, conectores e recursos do Plano Elite com foco comercial e uso em campo.",
+  "properties": {
+    "nome_ferramenta": {
+      "type": "string"
+    },
+    "tipo_conector": {
+      "type": "string",
+      "enum": [
+        "oauth",
+        "api_key",
+        "interno_base44",
+        "navegador",
+        "manual",
+        "pwa",
+        "backend",
+        "agente",
+        "outro"
+      ]
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "comunicacao",
+        "agenda",
+        "documentos",
+        "ia",
+        "campo",
+        "dados",
+        "automacao",
+        "seguranca",
+        "relatorios",
+        "mobile",
+        "auditoria",
+        "vendas"
+      ]
+    },
+    "status_conexao": {
+      "type": "string",
+      "enum": [
+        "conectado",
+        "pendente",
+        "indisponivel",
+        "configuracao_manual",
+        "nativo",
+        "parcial"
+      ],
+      "default": "pendente"
+    },
+    "prioridade_comercial": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "maxima"
+      ],
+      "default": "media"
+    },
+    "uso_no_campo": {
+      "type": "string"
+    },
+    "utilidade_vendas": {
+      "type": "string"
+    },
+    "exige_oauth": {
+      "type": "boolean",
+      "default": false
+    },
+    "exige_api_key": {
+      "type": "boolean",
+      "default": false
+    },
+    "pode_automatizar": {
+      "type": "boolean",
+      "default": false
+    },
+    "precisa_configuracao_manual": {
+      "type": "boolean",
+      "default": false
+    },
+    "proxima_acao": {
+      "type": "string"
+    },
+    "observacao": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nome_ferramenta",
+    "categoria",
+    "status_conexao"
+  ]
+}

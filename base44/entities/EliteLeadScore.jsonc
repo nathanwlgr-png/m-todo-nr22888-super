@@ -1,0 +1,117 @@
+{
+  "name": "EliteLeadScore",
+  "type": "object",
+  "description": "Camada complementar do Plano Elite para prioriza\u00e7\u00e3o comercial sem alterar dados originais de clientes, leads ou oportunidades.",
+  "properties": {
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente relacionado"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "ID do lead relacionado"
+    },
+    "oportunidade_id": {
+      "type": "string",
+      "description": "ID da oportunidade relacionada"
+    },
+    "cidade": {
+      "type": "string"
+    },
+    "segmento": {
+      "type": "string"
+    },
+    "elite_score": {
+      "type": "number",
+      "description": "Score comercial Elite de 0 a 100"
+    },
+    "classificacao_score": {
+      "type": "string",
+      "enum": [
+        "frio",
+        "aquecer",
+        "oportunidade",
+        "quente",
+        "fechamento_imediato"
+      ],
+      "description": "0-30 frio, 31-50 aquecer, 51-70 oportunidade, 71-85 quente, 86-100 fechamento imediato"
+    },
+    "potencial_compra": {
+      "type": "number",
+      "description": "Potencial de compra de 0 a 100"
+    },
+    "urgencia": {
+      "type": "number",
+      "description": "Urg\u00eancia de a\u00e7\u00e3o de 0 a 100"
+    },
+    "capacidade_pagamento": {
+      "type": "number",
+      "description": "Capacidade estimada de pagamento de 0 a 100"
+    },
+    "interesse_detectado": {
+      "type": "number",
+      "description": "Interesse detectado de 0 a 100"
+    },
+    "ultima_interacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dias_sem_resposta": {
+      "type": "number"
+    },
+    "dias_sem_compra": {
+      "type": "number"
+    },
+    "status_funil": {
+      "type": "string"
+    },
+    "chance_fechamento": {
+      "type": "number",
+      "description": "Chance estimada de fechamento de 0 a 100"
+    },
+    "valor_estimado": {
+      "type": "number",
+      "description": "Valor comercial estimado em R$"
+    },
+    "produto_recomendado": {
+      "type": "string"
+    },
+    "proxima_melhor_acao": {
+      "type": "string",
+      "enum": [
+        "ligar",
+        "mandar_whatsapp",
+        "visitar",
+        "enviar_proposta",
+        "reativar",
+        "pedir_decisao",
+        "enviar_material",
+        "mandar_roi",
+        "mandar_prova_social",
+        "agendar_demonstracao",
+        "oferecer_condicao_especial",
+        "aguardar",
+        "encerrar"
+      ]
+    },
+    "motivo_score": {
+      "type": "string"
+    },
+    "prioridade_campo": {
+      "type": "number"
+    },
+    "prioridade_whatsapp": {
+      "type": "number"
+    },
+    "prioridade_visita": {
+      "type": "number"
+    },
+    "modelo_ia_usado": {
+      "type": "string"
+    },
+    "data_atualizacao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
