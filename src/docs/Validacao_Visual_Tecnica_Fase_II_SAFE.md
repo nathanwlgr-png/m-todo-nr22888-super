@@ -243,8 +243,35 @@ Status: **Operacional.**
 - Melhoria futura opcional: criar modo compacto da Central SAFE se o volume de filas crescer muito.
 - Melhoria futura opcional: adicionar filtros na Central SAFE por risco/status, sem criar nova tela.
 
+## Correção final de build/imports
+
+Status: **OK**
+
+Correções e conferências realizadas:
+- `PWAInstallButtonFloating` validado com import direto de `React`, `useEffect` e `useState`.
+- Import não usado `Monitor` removido do PWA para evitar warning.
+- Botão PWA “Instalar app” permanece discreto e não cobre o CRM.
+- App.jsx usa a rota real `./pages/WhatsAppHub`, portanto o arquivo conectado é `pages/WhatsAppHub`.
+- `pages/WhatsAppHub` validado com `ExternalLink` importado de `lucide-react`.
+- `pages/WhatsAppHub.jsx` foi mantido alinhado ao arquivo real para não deixar versões divergentes.
+- Imports não usados do WhatsAppHub foram removidos para reduzir warnings.
+- `CentralComandosSafe` validada com `telegramConnectUrl` seguro antes do uso.
+- A Central SAFE não quebra se `getTelegramConnectURL` não existir.
+- DashboardSniper, Plano Elite, Central de Comandos e WhatsAppHub foram revalidados no preview.
+- Nenhum Score agressivo foi iniciado.
+
+Limpeza/encerramento dos registros de teste:
+- `TelegramCommandLog`: registros de teste marcados com `REGISTRO DE TESTE FASE II-SAFE`.
+- `CRMUpdateQueue`: registros de teste marcados e encerrados como `rejeitado`.
+- `PendingMessage`: mensagens de teste marcadas e encerradas como `rejeitado`.
+- `Task`: tarefas de teste marcadas e encerradas como `cancelada`.
+- `EliteActionLog`: logs de teste marcados com `REGISTRO DE TESTE FASE II-SAFE`.
+- Nenhum dado antigo do CRM foi apagado.
+
+Status final desta etapa: **Fase II-SAFE 100% aprovada para uso diário.**
+
 ## Decisão final
 
-**Aprovado com ajustes aplicados.**
+**Fase II-SAFE 100% aprovada para uso diário.**
 
 A Fase II-SAFE está visual e tecnicamente validada para uso diário em campo, mantendo DashboardSniper, WhatsAppHub, dados antigos e fluxo manual de mensagens preservados.
