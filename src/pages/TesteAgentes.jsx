@@ -68,8 +68,14 @@ export default function TesteAgentes() {
         metadata: { name: 'Teste diagnóstico' },
       });
       await base44.agents.addMessage(conv, { role: 'user', content: PROMPT_TESTE });
-      await new Promise(r => setTimeout(r, 6000));
-      const convAtualizada = await base44.agents.getConversation(conv.id);
+      // Aguarda resposta com retry — modelos grandes podem demorar até 20s
+      let convAtualizada;
+      for (let i = 0; i < 6; i++) {
+        await new Promise(r => setTimeout(r, 4000));
+        convAtualizada = await base44.agents.getConversation(conv.id);
+        const ultimaMsg = convAtualizada.messages?.filter(m => m.role === 'assistant').pop();
+        if (ultimaMsg?.content && ultimaMsg.content.length > 0) break;
+      }
       const ultimaMensagem = convAtualizada.messages?.filter(m => m.role === 'assistant').pop();
       const resposta = ultimaMensagem?.content || '';
       setResultados(prev => ({
