@@ -34,39 +34,43 @@ Deno.serve(async (req) => {
       }, { status: 404 });
     }
 
-    // 3. Extrair dados do arquivo
-    console.log('Extraindo dados do arquivo...');
+    // 3. Extração rápida: imagens seguem direto para análise visual para evitar timeout 503
+    console.log('Preparando análise rápida do material...');
     let extractedData = null;
-    try {
-      const extractResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url: file_url,
-        json_schema: {
-          type: "object",
-          properties: {
-            content: { type: "string", description: "Conteúdo textual extraído" },
-            key_points: { 
-              type: "array", 
-              items: { type: "string" },
-              description: "Pontos-chave identificados"
-            },
-            product_mentions: {
-              type: "array",
-              items: { type: "string" },
-              description: "Menções a produtos ou equipamentos"
+    const shouldExtractText = !file.type?.includes('image');
+
+    if (shouldExtractText) {
+      try {
+        const extractResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
+          file_url: file_url,
+          json_schema: {
+            type: "object",
+            properties: {
+              content: { type: "string", description: "Conteúdo textual extraído" },
+              key_points: { 
+                type: "array", 
+                items: { type: "string" },
+                description: "Pontos-chave identificados"
+              },
+              product_mentions: {
+                type: "array",
+                items: { type: "string" },
+                description: "Menções a produtos ou equipamentos"
+              }
             }
           }
-        }
-      });
+        });
 
-      if (extractResult.status === 'success' && extractResult.output) {
-        extractedData = extractResult.output;
+        if (extractResult.status === 'success' && extractResult.output) {
+          extractedData = extractResult.output;
+        }
+      } catch (error) {
+        console.log('Extração textual indisponível, seguindo com análise visual rápida...');
       }
-    } catch (error) {
-      console.log('Erro na extração, continuando com análise visual...');
     }
 
-    // 4. Análise com IA (usando file_url diretamente para imagens)
-    console.log('Analisando material com IA...');
+    // 4. Análise com IA rápida (usando file_url diretamente para imagens)
+    console.log('Analisando material com IA rápida...');
     const aiPrompt = `
 Você é um especialista em vendas consultivas para o mercado veterinário brasileiro.
 
@@ -103,51 +107,56 @@ FORMATO DE RESPOSTA (JSON):
 }
 `;
 
-    const aiAnalysis = await base44.integrations.Core.InvokeLLM({
-      prompt: aiPrompt,
-      file_urls: [file_url],
-      response_json_schema: {
-        type: "object",
-        properties: {
-          interest_score: { type: "number" },
-          analysis: { type: "string" },
-          whatsapp_message: { type: "string" },
-          key_highlights: { 
-            type: "array",
-            items: { type: "string" }
-          },
-          recommended_action: { type: "string" }
+    let aiAnalysis;
+    try {
+      aiAnalysis = await base44.integrations.Core.InvokeLLM({
+        prompt: aiPrompt,
+        file_urls: [file_url],
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: "object",
+          properties: {
+            interest_score: { type: "number" },
+            analysis: { type: "string" },
+            whatsapp_message: { type: "string" },
+            key_highlights: { 
+              type: "array",
+              items: { type: "string" }
+            },
+            recommended_action: { type: "string" }
+          }
         }
-      }
-    });
+      });
+    } catch (aiError) {
+      console.error('IA rápida indisponível:', aiError);
+      aiAnalysis = {
+        interest_score: 50,
+        analysis: 'Material recebido e salvo. A análise completa ficou pendente para revisão manual, evitando perda do registro por instabilidade temporária da IA.',
+        whatsapp_message: '',
+        key_highlights: ['Material salvo', 'Revisão manual recomendada'],
+        recommended_action: 'Revisar o material no CRM antes de enviar mensagem ao cliente.'
+      };
+    }
 
-    // 5. Enviar mensagem via WhatsApp
-    console.log('Enviando mensagem via WhatsApp...');
+    // 5. Preparar mensagem para aprovação manual — nunca enviar WhatsApp automaticamente
+    console.log('Preparando mensagem sugerida para aprovação...');
     let whatsappSent = false;
+
     if (client.phone && aiAnalysis.whatsapp_message) {
       try {
-        await base44.functions.invoke('sendWhatsAppMessage', {
-          phone: client.phone,
-          message: aiAnalysis.whatsapp_message,
-          client_id: client_id,
-          client_name: client.full_name || client.first_name
-        });
-        whatsappSent = true;
-
-        // Registrar na entidade WhatsAppMessage
-        await base44.entities.WhatsAppMessage.create({
-          contact_id: client_id,
-          contact_name: client.full_name || client.first_name,
-          contact_phone: client.phone,
-          direction: 'sent',
-          message: aiAnalysis.whatsapp_message,
-          status: 'sent',
-          sent_by: user.email,
-          sent_by_name: user.full_name,
-          automated: true
+        await base44.entities.PendingMessage.create({
+          recipient_id: client_id,
+          recipient_name: client.full_name || client.first_name,
+          recipient_phone: client.phone,
+          channel: 'whatsapp',
+          message_content: aiAnalysis.whatsapp_message,
+          context: `Material analisado: ${file.name}`,
+          ai_reasoning: aiAnalysis.analysis,
+          status: 'pending',
+          priority: aiAnalysis.interest_score >= 80 ? 'alta' : 'media'
         });
       } catch (whatsappError) {
-        console.error('Erro ao enviar WhatsApp:', whatsappError);
+        console.error('Erro ao salvar mensagem pendente:', whatsappError);
       }
     }
 
