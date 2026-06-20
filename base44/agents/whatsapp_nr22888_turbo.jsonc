@@ -1,11 +1,20 @@
 {
   "name": "whatsapp_nr22888_turbo",
-  "description": "\u26a0\ufe0f DESCONTINUADO \u2014 Use o whatsapp_master_agent. Este agente foi unificado.",
-  "instructions": "Este agente foi UNIFICADO no whatsapp_master_agent. Por favor, use apenas o whatsapp_master_agent que cont\u00e9m todas as funcionalidades deste agente e muito mais. Responda ao usu\u00e1rio: 'Este agente foi unificado. Use o agente principal NR22888.'",
+  "model": "gpt_5_5",
+  "description": "\u26a0\ufe0f DESCONTINUADO \u2014 Use o whatsapp_master_agent_NR22888 (Investigativo Supremo) ou nr22888_dia_dia (Campo).",
+  "instructions": "Este agente foi UNIFICADO. Use:\n- whatsapp_master_agent_NR22888 para estrat\u00e9gia e intelig\u00eancia (Telegram)\n- nr22888_dia_dia para campo e opera\u00e7\u00e3o (WhatsApp)\n\nResponda: 'Este agente foi unificado. Use o NR22888 Investigativo (Telegram) ou Dia Dia (WhatsApp).'",
   "tool_configs": [],
-  "model": "claude_sonnet_4_6",
-  "whatsapp_greeting": "\u26a0\ufe0f Este agente foi unificado.\n\nUse o agente principal: *NR22888 Master Agent*\n\nEle cont\u00e9m TUDO que este tinha + muito mais.",
   "memory_config": {
-    "enabled": false
-  }
+    "enabled": false,
+    "scope": "both",
+    "include_other_conversation_context": false,
+    "instructions": null
+  },
+  "whatsapp_greeting": "\u26a0\ufe0f Este agente foi unificado.\n\nUse:\n\u2022 *NR22888 Investigativo* \u2192 Telegram\n\u2022 *NR22888 Dia Dia* \u2192 WhatsApp de campo",
+  "telegram_greeting": "",
+  "line_greeting": "",
+  "context_files": [],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": []
 }
