@@ -63,6 +63,7 @@ const AgendaMensal = lazy(() => import('./pages/AgendaMensal'));
 const WeeklyReportSettings = lazy(() => import('./pages/WeeklyReportSettings'));
 const RankingOportunidades = lazy(() => import('./pages/RankingOportunidades'));
 const TesteAgentes = lazy(() => import('./pages/TesteAgentes'));
+const VozCampo = lazy(() => import('./pages/VozCampo'));
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -204,6 +205,7 @@ const AuthenticatedApp = () => {
         <Route path="/WeeklyReportSettings" element={<LayoutWrapper currentPageName="WeeklyReportSettings"><WeeklyReportSettings /></LayoutWrapper>} />
         <Route path="/RankingOportunidades" element={<LayoutWrapper currentPageName="RankingOportunidades"><RankingOportunidades /></LayoutWrapper>} />
         <Route path="/TesteAgentes" element={<LayoutWrapper currentPageName="TesteAgentes"><TesteAgentes /></LayoutWrapper>} />
+        <Route path="/VozCampo" element={<LayoutWrapper currentPageName="VozCampo"><VozCampo /></LayoutWrapper>} />
 
         {/* ── ROTAS LEGACY → Consolidadas ── */}
         <Route path="/PossibleSales" element={<Navigate to="/" replace />} />

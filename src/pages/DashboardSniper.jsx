@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
+import CampoTotalNR22888 from '@/components/elite/CampoTotalNR22888';
 import PendenciasPara100 from '@/components/elite/PendenciasPara100';
 import ResolverPendencias from '@/components/elite/ResolverPendencias';
 import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
@@ -73,6 +74,9 @@ export default function DashboardSniper() {
         <Suspense fallback={<HeavyFallback />}>
           <SniperDoDia />
         </Suspense>
+
+        {/* ── CAMPO TOTAL — visão compacta de campo (SAFE) ── */}
+        <CampoTotalNR22888 />
 
         {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
         <Suspense fallback={<HeavyFallback />}>
