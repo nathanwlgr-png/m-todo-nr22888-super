@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Radar, Plus, Loader2, Instagram, Globe, MapPin, Search, Flame,
-  ShieldAlert, ExternalLink, Building2, Trash2, X
+  ShieldAlert, ExternalLink, Building2, Trash2, X, ScanLine
 } from 'lucide-react';
 
 const MARCAS = ['Idexx', 'Heska', 'Zoetis', 'Mindray', 'Biocom', 'Biobrasil', 'Wiener', 'Bioclin', 'Labtest', 'Kovalent', 'outro'];
@@ -22,6 +22,8 @@ export default function PainelConcorrencia() {
   const [form, setForm] = useState({ nome: '', marca_concorrente: '', instagram_handle: '', website: '', cidade: '', cnpj: '' });
   const [showForm, setShowForm] = useState(false);
   const [investigando, setInvestigando] = useState(null);
+  const [varrendo, setVarrendo] = useState(false);
+  const [resumoVarredura, setResumoVarredura] = useState(null);
 
   const { data: comps = [], isLoading } = useQuery({
     queryKey: ['competitor-tracker'],
@@ -55,6 +57,18 @@ export default function PainelConcorrencia() {
     finally { setInvestigando(null); }
   };
 
+  const varrerSites = async () => {
+    setVarrendo(true);
+    setResumoVarredura(null);
+    try {
+      const res = await base44.functions.invoke('scanConcorrentesCatalogo', {});
+      setResumoVarredura(res?.data?.total_novidades ?? 0);
+      await qc.invalidateQueries({ queryKey: ['competitor-tracker'] });
+      await qc.invalidateQueries({ queryKey: ['competitor-tracker-widget'] });
+    } catch (_e) { setResumoVarredura(0); }
+    finally { setVarrendo(false); }
+  };
+
   const igUrl = (h) => h ? `https://instagram.com/${h.replace('@', '')}` : null;
 
   return (
@@ -69,12 +83,31 @@ export default function PainelConcorrencia() {
           </p>
         </div>
 
-        <Button
-          onClick={() => setShowForm(s => !s)}
-          className="w-full h-12 bg-gradient-to-r from-red-600 to-rose-500 text-white font-black border-none"
-        >
-          <Plus className="w-4 h-4 mr-1" /> Adicionar concorrente / clínica
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            onClick={() => setShowForm(s => !s)}
+            className="h-12 bg-gradient-to-r from-red-600 to-rose-500 text-white font-black border-none"
+          >
+            <Plus className="w-4 h-4 mr-1" /> Adicionar
+          </Button>
+          <Button
+            onClick={varrerSites}
+            disabled={varrendo || comps.length === 0}
+            className="h-12 bg-gradient-to-r from-violet-600 to-indigo-500 text-white font-black border-none"
+          >
+            {varrendo
+              ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Varrendo sites…</>
+              : <><ScanLine className="w-4 h-4 mr-1" /> Varrer sites agora</>}
+          </Button>
+        </div>
+
+        {resumoVarredura !== null && (
+          <div className="rounded-xl p-3 bg-violet-500/10 border border-violet-500/30 text-xs text-violet-200 text-center font-bold">
+            {resumoVarredura > 0
+              ? `🔎 ${resumoVarredura} novidade(s) detectada(s) nos sites concorrentes (instalações / catálogo).`
+              : '✅ Varredura concluída — nenhuma novidade nova encontrada agora.'}
+          </div>
+        )}
 
         {showForm && (
           <div className="rounded-2xl p-4 bg-[#0f0f11] border border-red-500/20 space-y-3">
