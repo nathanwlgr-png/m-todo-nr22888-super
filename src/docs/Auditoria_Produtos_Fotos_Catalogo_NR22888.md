@@ -1,55 +1,32 @@
 # Auditoria Produtos, Fotos e Catálogo — NR22888
 
-Data: 20/06/2026  
-Modo: auditoria e estrutura complementar, sem substituir entidades existentes.
+Data: 20/06/2026
 
-## Resumo executivo
+## Resultado
 
-Percentual Produtos/Fotos/Catálogo: **65%**  
-Classificação: **aceitável**.
+**Produtos/Fotos/Catálogo: 65% — ACEITÁVEL**
 
-Foi criada a entidade complementar `ProductCatalog` para centralizar o catálogo auditável de produtos Seamaty, insumos e materiais futuros. Ela não substitui `Product`, `Equipment` nem `SeamatyPriceTable`.
+Fórmula real usada:
+- 65 pontos = cobertura de cadastro dos 29 produtos obrigatórios.
+- 35 pontos = cobertura de foto oficial validada.
+- Cadastro: 29/29 = 65 pontos.
+- Foto oficial: 0/29 = 0 pontos.
+- Total: 65%.
 
-O catálogo obrigatório foi cadastrado com 29 itens principais, mas **nenhum produto possui foto oficial vinculada ainda**. Portanto, o sistema ainda não está pronto para geração automática de material premium com imagens oficiais.
+## Evidência usada
 
-## Entidades relacionadas encontradas
+Arquivos/entidades lidos ou consultados:
+- `entities/Product.json` existe, mas Product tinha 0 registros na medição.
+- `entities/Equipment.json` existe e tinha 9 registros.
+- `entities/SeamatyEquipment.json` existe, mas tinha 0 registros.
+- `entities/SeamatyPriceTable.json` existe e tinha 120 registros.
+- `entities/SeamatyImage.json` existe, mas tinha 0 registros.
+- `entities/ProductCatalog.json` foi criado como entidade complementar.
+- ProductCatalog consultado: 29 registros.
 
-- Product: existe, mas sem registros medidos no recorte atual.
-- Equipment: existe e possui registros.
-- SeamatyEquipment: existe, mas sem registros medidos no recorte atual.
-- SeamatyPriceTable: existe com 120 registros.
-- SeamatyImage: existe, mas com 0 registros.
-- Consumable: existe.
-- ProductCatalog: criado nesta auditoria, com 29 registros.
+## Produtos obrigatórios cadastrados no ProductCatalog
 
-## ProductCatalog criado
-
-Campos principais:
-- nome_produto
-- categoria
-- linha
-- descricao_curta
-- descricao_comercial
-- especificacoes
-- tempo_resultado
-- parametros
-- volume_amostra
-- tipo_insumo
-- preco_base
-- custo_insumo
-- imagem_url
-- foto_oficial
-- ativo
-- prioridade_comercial
-- indicado_para
-- argumentos_venda
-- objecoes_comuns
-- resposta_objecoes
-- materiais_relacionados
-- observacao
-- status_auditoria
-
-## Produtos obrigatórios cadastrados/auditados
+Todos os 29 itens obrigatórios foram cadastrados como estrutura auditável, sem inventar especificações não confirmadas.
 
 ### Equipamentos
 - VG1 Hemogás
@@ -88,15 +65,11 @@ Campos principais:
 - Ammonia
 - 19 Reptilian
 
-## Produtos sem cadastro
-
-Nenhum dos produtos obrigatórios ficou ausente no `ProductCatalog` complementar.
-
 ## Produtos sem foto oficial
 
-Todos os 29 itens do `ProductCatalog` estão sem foto oficial vinculada.
+Evidência: ProductCatalog tinha 29 registros e 0 registros com `foto_oficial=true` + `imagem_url`.
 
-Lista:
+Sem foto oficial:
 - VG1 Hemogás
 - VG2 Hemogás + Imuno
 - VI1 Imuno
@@ -105,81 +78,59 @@ Lista:
 - 3DX
 - VBC50A Hematologia
 - VQ1 PCR
-- Cartucho Hemogás BG17
-- Cartucho Hemogás BG17-N
-- Cartucho Hemogás BG15
-- Cartucho Hemogás BE5
-- Cassete Imuno cPL
-- Cassete Imuno fPL
-- Cassete Imuno cCRP
-- Cassete Imuno fSAA
-- Cassete Imuno TT4
-- Cassete Imuno Cortisol
-- Cassete Imuno Progesterona
-- Cassete Imuno TSH
-- Cassete Imuno cNT-proBNP
-- Cassete Imuno CysC
-- Rotor Bioquímica 24 Comprehensive
-- Rotor Bioquímica 16 Comprehensive
-- Rotor Bioquímica 10 Pre-Operation
-- Rotor Bioquímica 9 Kidney
-- Rotor Bioquímica 4 Coagulation
-- Rotor Bioquímica Ammonia
-- Rotor Bioquímica 19 Reptilian
-
-## Regras preservadas
-
-- Não foi usada imagem IA para substituir foto oficial.
-- Não foi redesenhado nenhum equipamento.
-- Especificações não confirmadas foram marcadas como pendentes.
-- Produtos foram cadastrados com observação de validação quando necessário.
-- VI1 recebeu preço base de R$ 6.500 porque já estava presente como dado interno oficial dos agentes.
-- Demais preços ficaram pendentes quando não confirmados.
+- BG17
+- BG17-N
+- BG15
+- BE5
+- cPL
+- fPL
+- cCRP
+- fSAA
+- TT4
+- Cortisol
+- Progesterona
+- TSH
+- cNT-proBNP
+- CysC
+- 24 Comprehensive
+- 16 Comprehensive
+- 10 Pre-Operation
+- 9 Kidney
+- 4 Coagulation
+- Ammonia
+- 19 Reptilian
 
 ## O que está funcionando
 
-- Entidade complementar criada.
-- Produtos obrigatórios listados.
-- Status de auditoria por item.
-- Priorização comercial nos equipamentos principais.
-- Estrutura pronta para proposta/material futuro.
+- Existe estrutura complementar ProductCatalog.
+- Produtos obrigatórios estão mapeados.
+- VI1 recebeu preço base interno já documentado no agente: R$ 6.500 à vista.
+- Dados técnicos confirmados foram limitados ao que já estava nos agentes/documentos.
+- Itens sem especificação confirmada foram marcados como pendência.
 
-## O que está parcial
+## Parcial
 
-- Sem fotos oficiais.
-- Sem vínculo completo com `SeamatyPriceTable`.
-- Sem parâmetros técnicos completos nos cartuchos/cassetes/rotores.
-- Sem materiais relacionados vinculados.
-- Sem tela dedicada, porque não foi solicitada nova tela e criar uma agora aumentaria complexidade.
+- SeamatyPriceTable tem 120 registros, mas não foi vinculada automaticamente ao ProductCatalog.
+- Equipment tem 9 registros, mas Product tem 0 e SeamatyImage tem 0.
+- Catálogo ainda não tem foto oficial.
 
-## Riscos
+## Quebrado/risco
 
-- Material premium pode sair sem foto oficial.
-- Proposta pode usar especificação incompleta se não houver validação.
-- Confusão entre Product, Equipment, SeamatyPriceTable e ProductCatalog se não houver regra clara.
+- Proposta/material premium pode sair sem foto oficial.
+- Produto pode ser citado com especificação pendente se o agente não respeitar ProductCatalog.
+- Rotores/cassetes precisam validação técnica final antes de PDF premium.
 
-## Correções sugeridas
+## Falta para 100%
 
-### Precisa aprovação
-1. Subir fotos oficiais para `SeamatyImage`.
-2. Vincular `imagem_url` e `foto_oficial=true` em ProductCatalog.
-3. Validar parâmetros técnicos de cada cartucho/cassete/rotor.
-4. Validar preços por tabela oficial.
-5. Definir regra visual: quando mostrar ou ocultar insumos em peças principais.
+1. Vincular fotos oficiais.
+2. Validar especificações técnicas e parâmetros por fonte oficial.
+3. Ligar ProductCatalog ao gerador de proposta.
+4. Bloquear uso de imagem IA para equipamento.
+5. Marcar produtos com `status_auditoria=ok` só após validação Nathan/Karoline.
 
-### Pode ser feito depois
-- Criar painel simples de revisão do ProductCatalog se isso aumentar conversão.
-- Integrar ProductCatalog ao gerador de proposta.
-- Integrar ProductCatalog ao futuro Material Premium Automático.
+## Precisa aprovação
 
-## Próximos passos
-
-1. Nathan aprovar lista de produtos obrigatórios.
-2. Subir fotos oficiais.
-3. Validar parâmetros técnicos.
-4. Validar preços.
-5. Só depois ativar geração premium com imagens oficiais.
-
-## Decisão
-
-Catálogo estrutural aprovado como base de auditoria. Ainda não usar para material automático sem fotos oficiais e validação técnica.
+- Vincular fotos oficiais.
+- Corrigir preços.
+- Exibir produtos em propostas.
+- Gerar materiais premium automaticamente.

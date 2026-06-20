@@ -2,159 +2,171 @@
 
 Data: 20/06/2026
 
-## Resumo executivo
+## Resultado resumido
 
-Segurança: **66% — aceitável**  
-Performance campo/tablet: **67% — aceitável**  
-Bugs/estabilidade geral: **70% — aceitável**
+- Bugs/build/rotas: 70% — aceitável
+- Segurança: 69% — aceitável
+- Performance campo/tablet: 63% — aceitável
 
-O sistema está operacional, mas possui pontos de risco que impedem uma nova fase agressiva sem revisão: automações que alteram dados, funções com SDK antigo, queries sem paginação, WhatsApp registrado como enviado antes de confirmação, geocode direto e permissões amplas de agentes.
+As notas são baseadas em arquivos lidos, funções testadas, entidades consultadas e automações listadas.
 
-## Bugs e falhas encontrados
+## Evidência usada
 
-### Críticos
+Arquivos lidos:
+- DashboardSniper
+- PlanoEliteStatus
+- CentralComandosSafe
+- WhatsAppHub
+- ScoreElite
+- RankingOportunidades
+- TasksUnified
+- ProposalGenerator
+- Clients
+- Leads
+- SalesFunnel
+- ClientProfile
+- ClientLocationMap
+- MapaSeamatyBrasil
+- RouteOptimizer
+- ScheduledAgenda
+- ClienteDetalhe360
+- SmartRouteMap
+- GPSClinicaRadar
+- BotaoLimpezaCRM
+- WhatsAppSendModal
+- funções críticas listadas abaixo
 
-1. **RouteOptimizer incompatível com optimizeRoute**
-   - Página envia `client_ids`, `start_address`, `visit_duration_minutes`.
-   - Função espera `locations`, `startPoint`.
-   - Risco: botão otimizar rota falhar.
+Funções testadas:
+- `generateOptimizedRoute`: payload vazio retornou 422 “Nenhum cliente fornecido.”
+- `optimizeRoute`: payload vazio retornou 400 “Sem localizações.”
+- `sendWhatsAppMessage`: telefone inválido retornou 422 “Número de telefone inválido”.
 
-2. **geocodeClientLocation altera Client direto**
-   - Usa GOOGLE_MAPS_API_KEY quando disponível.
-   - Se falhar, usa mock por cidade.
-   - Atualiza latitude/longitude diretamente.
-   - Risco: coordenada incorreta no cliente.
+Automações listadas: 22.
 
-3. **Automação ativa de geocode**
-   - “Geocodificar Cliente Novo/Alterado” está ativa.
-   - Deve passar por CRMUpdateQueue antes de produção.
+## Bugs principais encontrados
 
-4. **limpezaCompletaCRM arquiva duplicatas automaticamente**
-   - Não deleta, mas altera status, pipeline_stage e lost_reason.
-   - Risco: arquivamento sem revisão individual.
+### 1. ProposalGenerator — SelectItem com valor null
+Evidência: arquivo lido contém `<SelectItem value={null}>`.  
+Risco: componente Select pode quebrar em runtime.
 
-5. **autoFixSystem pode deletar Alert duplicado**
-   - Não apaga clientes, mas usa delete em Alert.
-   - Em fase SAFE, deve ser revisado.
+### 2. RouteOptimizer incompatível com optimizeRoute
+Evidência: página envia `client_ids/start_address`; função espera `locations/startPoint`.  
+Teste: função retorna 400 sem `locations`.  
+Risco: rota clássica quebrada.
 
-### Altos
+### 3. Geocode direto + automação ativa
+Evidência: `geocodeClientLocation.js` atualiza Client diretamente; automação ativa “Geocodificar Cliente Novo/Alterado”.  
+Risco: coordenada errada sem aprovação.
 
-6. **WhatsAppSendModal tem fallback direto**
-   - Se a função falhar, abre wa.me diretamente.
-   - Não passa por PendingMessage.
+### 4. GPSClinicaRadar distância aleatória
+Evidência: arquivo usa `Math.random()` para distância estimada.  
+Risco: campo recebe informação falsa de proximidade.
 
-7. **WhatsAppHub registra WhatsAppMessage com status `sent` ao abrir WhatsApp**
-   - Abrir WhatsApp não garante envio real.
-   - Precisa separar `whatsapp_aberto` de `envio_confirmado_manual`.
+### 5. WhatsAppHub registra sent sem confirmação real
+Evidência: `WhatsAppMessage.create({status:'sent'})` antes de confirmar envio no app WhatsApp.  
+Risco: histórico comercial falso.
 
-8. **sendWhatsAppMessage registra AutomatedMessageLog como enviada**
-   - A função gera link manual, mas log usa `sent_status: enviada`.
-   - Deve virar `prepared/opened`, não `sent`.
+### 6. WhatsAppSendModal fallback abre WhatsApp direto
+Evidência: catch abre wa.me diretamente.  
+Risco: fora do PendingMessage se usado sem aprovação.
 
-9. **sendApprovedMessages envia e-mail automático**
-   - WhatsApp fica manual, mas e-mail é enviado automaticamente.
-   - Externo crítico deveria passar por aprovação explícita.
+### 7. sendApprovedMessages envia email automático
+Evidência: usa `Core.SendEmail` para canal email.  
+Risco: e-mail automático sem revisão.
 
-10. **Agentes com permissões amplas**
-   - Alguns agentes podem criar/update Client, Lead, Sale, Visit.
-   - Devem ter limites em campos críticos.
+### 8. BotaoLimpezaCRM sem confirmação forte
+Evidência: botão chama `limpezaCompletaCRM` direto.  
+Risco: toque acidental no tablet altera dados.
 
-### Médios
+### 9. autoFixSystem deleta Alert duplicado
+Evidência: função usa `Alert.delete`.  
+Risco: remove log/notificação sem revisão.
 
-11. `TasksUnified` carrega Task, Client e Lead sem limite.
-12. `ProposalGenerator` carrega Client sem limite.
-13. `Clients` tem importação com IA e pode criar clientes direto após extração.
-14. `syncWeeklyReportToSheets` lista Client, Lead e Sale sem limite.
-15. `clinicCompetitiveMonitor` usa internet/LLM em automação semanal.
-16. `AIRouteOptimizer` chama LLM com internet e muitos clientes.
-17. `MapaSeamatyBrasil` depende de entidades/pontos não garantidos.
+### 10. Queries pesadas sem paginação
+Evidência: `TasksUnified` usa `Task.list()`, `Client.list()`, `Lead.list()` sem limite; `Clients` e relatórios também têm listagens grandes.  
+Risco: lentidão em tablet/celular.
 
-## Segurança SAFE
+## Segurança
 
-### Confirmado como positivo
+**Nota: 69%**
 
-- PendingMessage existe.
-- CRMUpdateQueue existe.
-- TelegramCommandLog existe.
-- EliteActionLog existe.
-- CentralComandosSafe existe.
-- WhatsApp API oficial não está configurada; o fluxo principal é manual.
-- `aplicarAtualizacaoCRMComSeguranca` bloqueia campos críticos se não aprovados.
-- `sendApprovedMessages` não marca WhatsApp como enviado automaticamente; prepara link.
+Motivo da nota:
+- Pontos positivos: PendingMessage, CRMUpdateQueue, TelegramCommandLog, EliteActionLog existem e têm registros reais.
+- Pontos negativos: geocode direto, limpeza automática, email automático, WhatsApp status sent sem confirmação, agentes com permissões amplas.
 
-### Ainda precisa ajuste
+Evidência:
+- PendingMessage: 10 registros.
+- CRMUpdateQueue: 7 registros.
+- TelegramCommandLog: 18 registros.
+- EliteActionLog: 55 registros.
+- Funções lidas: `aplicarAtualizacaoCRMComSeguranca`, `sendApprovedMessages`, `limpezaCompletaCRM`, `geocodeClientLocation`, `autoFixSystem`.
 
-- Geocode deve passar por CRMUpdateQueue.
-- WhatsApp aberto deve ser diferente de enviado confirmado.
-- E-mail externo automático deve ser tratado como canal sensível.
-- Venda rápida em Clients altera Sale e Client direto.
-- Agentes precisam menor permissão em dados críticos.
-- Auto-fix/limpeza devem ser protegidos por aprovação ou modo auditoria.
+Falta para 100%:
+1. Toda alteração crítica via CRMUpdateQueue.
+2. Email externo via aprovação.
+3. WhatsApp só confirma envio após confirmação manual.
+4. Geocode sem update direto.
+5. Botões perigosos com confirmação forte.
+6. Agentes sem update crítico direto.
 
-## Performance
+Risco se usar sem corrigir:
+- Dado de produção pode ser alterado por automação/ação rápida sem revisão.
+- Histórico pode indicar envio não realizado.
 
-### Pontos positivos
+## Performance campo/tablet
 
-- App.jsx usa lazy loading em páginas secundárias.
-- DashboardSniper lazy-load em widgets pesados.
+**Nota: 63%**
+
+Motivo da nota:
+- Há lazy loading no App e DashboardSniper.
+- Existem limites em várias queries.
+- Mas há telas com `list()` sem limite e componentes pesados.
+- Preview físico em tablet não foi validado.
+
+Evidência:
+- App.jsx tem lazy loading em páginas.
+- DashboardSniper lazy-loads widgets pesados.
 - WhatsAppHub limita clientes a 150 e mensagens a 100.
-- ScoreElite limita scores a 300.
-- RankingOportunidades limita clientes/vendas/leads em algumas queries.
-- PWA e offline existem.
+- ClientLocationMap lista 500 clientes.
+- TasksUnified usa listas sem limite.
+- ProposalGenerator lista clientes sem limite.
 
-### Pontos de atenção
+Falta para 100%:
+1. Limitar/paginar `list()` pesados.
+2. Clusterizar pins no mapa.
+3. Medir carregamento real no Galaxy Tab.
+4. Validar PWA offline real.
+5. Reduzir LLM em telas de lista.
 
-| Local | Problema | Prioridade |
-|---|---|---|
-| TasksUnified | Task/Client/Lead sem limite | alta |
-| ProposalGenerator | Client sem limite | alta |
-| Clients | importação com IA e Client list grande | média |
-| SalesFunnel | várias listas de 500 + charts | média |
-| syncWeeklyReportToSheets | listas sem limite | média |
-| optimizeDayRoute | 10.000 clientes via service role | alta |
-| ClientLocationMap | pode renderizar 500 pins | média após geocode |
-| AIRouteOptimizer | LLM com internet em massa | alta |
+Risco:
+- Travamento/lentidão em campo.
+- Consumo alto de créditos/IA.
 
-## Layout tablet/celular
+## Duplicidades e testes
 
-### Positivo
-- DashboardSniper é mobile-first e centralizado.
-- WhatsAppHub é mobile-first.
-- Cliente 360 é mobile-first.
-- ScheduledAgenda é mobile-first.
-- PWAInstallButtonFloating está discreto.
+Evidência real:
+- Duplicidade provável cliente por nome+cidade: 4 grupos.
+- Duplicidade provável lead por telefone: 4 grupos.
+- Clientes com tag de teste: 4.
+- PendingMessage com tag de teste: 3.
+- CRMUpdateQueue com tag de teste: 7.
+- Tasks com tag de teste: 8.
 
-### Parcial
-- Páginas antigas/administrativas ainda podem ser desktop-heavy.
-- TasksUnified usa Kanban largo em mobile/tablet.
-- ProposalGenerator pode ficar pesado em tablet.
-- SalesFunnel tem gráficos que podem exigir scroll.
+Ação recomendada:
+- Não apagar.
+- Marcar para revisão.
+- Arquivar somente com aprovação.
 
-## Correção simples feita
+## Agentes
 
-Foi adicionada confirmação no botão `Limpar Base de Dados` antes de executar a função de limpeza. Isso reduz risco de clique acidental sem alterar a lógica interna.
+Agentes lidos:
+- `nr22888_dia_dia`: ativo, útil, mas com permissões amplas de update/create em Client/Lead/Task/Visit/Sale.
+- `telegram_operacional_nr22888`: SAFE, mais controlado.
+- `whatsapp_master_agent_NR22888`: estratégico, permissões amplas.
+- `vendas_supremo`: legado neutralizado, sem tools.
 
-## Itens que precisam aprovação antes de correção
+Risco:
+- Agentes amplos podem alterar dados críticos se não forem contidos por instrução/função SAFE.
 
-1. Pausar automação de geocode.
-2. Alterar geocode para CRMUpdateQueue.
-3. Alterar logs de WhatsApp para `opened/prepared` em vez de `sent`.
-4. Reduzir permissões dos agentes.
-5. Revisar automações de limpeza/auto-fix.
-6. Ajustar venda rápida para confirmação/EliteActionLog.
-7. Padronizar e-mail externo com aprovação.
-8. Corrigir RouteOptimizer.
-
-## Próximos passos
-
-1. Corrigir RouteOptimizer com payload compatível.
-2. Proteger geocode por fila.
-3. Separar status de WhatsApp aberto/enviado.
-4. Paginar TasksUnified e ProposalGenerator.
-5. Revisar permissões dos agentes.
-6. Revisar automações agressivas.
-7. Reexecutar auditoria de build/preview após correções.
-
-## Decisão
-
-O sistema pode continuar operando, mas **não deve entrar em fase agressiva** antes de blindar geocode, WhatsApp, automações e permissões.
+Próximo passo:
+- Reduzir permissões diretas de Sale/Client para agentes estratégicos ou exigir funções SAFE.

@@ -1,109 +1,65 @@
-# Auditoria GPS, Mapas, Rotas e Campo — NR22888
+# Auditoria GPS, Mapa, Rotas e Campo — NR22888
 
 Data: 20/06/2026  
-Modo: auditoria e medição, sem alterar coordenadas/endereço/rotas de clientes.
+Regra: nota baseada somente em evidência real.
 
-## Resumo executivo
+## Resultado
 
-Percentual GPS/Mapa/Rotas: **58%**  
-Classificação: **fraco**.
+**GPS/Mapa/Rotas: 58% — FRACO**
 
-A estrutura de mapa, GPS, agenda e rota existe, mas o sistema ainda não opera como elite de campo porque a base real de clientes não possui coordenadas validadas.
+Evidência principal: `GeoAuditReport` gerado no banco com 58%, `status_geral=fraco`, após leitura de arquivos e consulta real de dados.
 
-## Percentual por categoria
+## Dados reais usados
 
-| Categoria | Percentual | Classificação |
-|---|---:|---|
-| GPS/localização atual | 68% | aceitável |
-| Mapa/pins | 55% | fraco |
-| Rotas/Google Maps | 62% | aceitável |
-| Dados de endereço/coordenadas | 33% | crítico |
-| Visitas/check-in/check-out | 61% | aceitável |
-| Integração com CRM/Score Elite | 78% | bom |
-| Performance em campo | 74% | aceitável |
-| Segurança/logs/aprovação | 72% | aceitável |
+- Clientes analisados: 433
+- Clientes com endereço: 375
+- Clientes com cidade: 423
+- Clientes com CEP: 349
+- Clientes com coordenadas: 0
+- Visitas analisadas: 349
+- Visitas sem local: 46
+- GeoAuditReport: 2 registros
+- GeoAuditItem: 200 registros
+- Funções testadas:
+  - `generateOptimizedRoute` com payload vazio retornou 422: “Nenhum cliente fornecido.”
+  - `optimizeRoute` com payload vazio retornou 400: “Sem localizações.”
+- Preview: tentativa anterior falhou na maioria das telas; uma captura ficou apenas no carregamento.
 
-**Percentual geral GPS/Mapa/Rotas: 58% — fraco.**
+## Notas por categoria GPS
 
-## Dados medidos
+| Categoria | Nota | Motivo | Evidência usada | Falta para 100% | Risco em campo |
+|---|---:|---|---|---|---|
+| GPS/localização atual | 45% | Código usa geolocation, mas não houve validação física | `ClientLocationMap.jsx`, `GPSClinicaRadar.jsx`, `utils/locationSafe.js` lidos | Teste em tablet/celular real com permissão, precisão e fallback | App pode falhar em GPS real ou permissões |
+| Mapa/pins | 40% | Leaflet existe, mas 0 clientes com coordenadas | `ClientLocationMap.jsx`; consulta: 0 coordenadas | Geocodificar com aprovação e validar pins | Mapa abre sem clientes reais |
+| Rotas/Google Maps | 55% | Links existem, mas rota por coordenada não funciona sem coords; função clássica tem payload divergente | `SmartRouteMap.jsx`, `RouteOptimizer.jsx`, `optimizeRoute.js`, teste 400 | Alinhar função/página e usar coordenadas aprovadas | Rota errada ou vazia |
+| Dados endereço/coordenadas | 33% | Muitos endereços, nenhuma coordenada | 375 endereços, 423 cidades, 0 coords | Geocode SAFE com CRMUpdateQueue | Vendedor perde precisão |
+| Visitas/check-in/check-out | 61% | Visitas existem, Calendar sync alto, mas não há check-in/out formal | 349 visitas, 344 agendadas/sincronizadas, 46 sem local; schema Visit lido | Campos formais de check-in/out e distância | Registro de visita não prova presença |
+| Integração CRM/Score Elite | 78% | 110 EliteLeadScore e integração com dashboards | Consulta EliteLeadScore; ScoreElite lido | Ligar score à rota por coordenada real | Priorização sem localização real |
+| Performance campo | 63% | Lazy loading existe, mas mapas/listas podem pesar | Arquivos lidos; ClientLocationMap lista 500; outras telas listam sem limite | Paginação/cluster/offline físico | Lentidão no tablet |
+| Segurança/logs/aprovação | 69% | Logs e filas existem; geocode direto é risco | CRMUpdateQueue, PendingMessage, EliteActionLog; geocode lido | Geocode e check-in via fila/log | Alteração de coordenada sem aprovação |
 
-| Métrica | Valor |
-|---|---:|
-| Clientes analisados | 433 |
-| Clientes com telefone | 385 |
-| Clientes com endereço | 375 |
-| Clientes com cidade | 423 |
-| Clientes com CEP | 349 |
-| Clientes com coordenada | 0 |
-| Clientes sem coordenada | 433 |
-| Visitas analisadas | 349 |
-| Visitas agendadas | 344 |
-| Visitas sem local | 46 |
-| Rotas salvas em OptimizedRoute | 0 |
+## Status “NÃO VALIDADO EM DISPOSITIVO REAL”
 
-## O que está funcionando
+- GPS físico em Samsung Galaxy Tab.
+- GPS físico em celular Android.
+- Precisão em metros no campo.
+- PWA offline real com mapa.
+- Navegação Google Maps/Waze saindo do PWA.
+- Check-in por parada física.
 
-- `ClientLocationMap` usa Leaflet/OpenStreetMap.
-- `ClientLocationMap` solicita localização do usuário.
-- `SmartRouteMap` monta link Google Maps com origin, destination e waypoints.
-- `ClienteDetalhe360` tem aba/botão de mapa por endereço/cidade.
-- `ScheduledAgenda` tem aba GPS e Rota IA.
-- `GPSClinicaRadar` usa watchPosition, cronômetro e registro de visita.
-- `Visit` integra com Google Calendar.
-- `EliteLeadScore` pode priorizar oportunidades.
-- Links Google Maps e Waze existem em múltiplos pontos.
+## Quebrados/parciais
 
-## O que está parcial
+1. `geocodeClientLocation` aplica coordenada direto no Client.  
+2. Automação ativa “Geocodificar Cliente Novo/Alterado” chama essa função.  
+3. `RouteOptimizer` envia payload incompatível com `optimizeRoute`.  
+4. `GPSClinicaRadar` usa distância aleatória.  
+5. `MapaSeamatyBrasil` depende de entidades/pontos que não estavam disponíveis como arquivo lido anteriormente.  
+6. `OptimizedRoute` estava sem rotas salvas na medição anterior.  
 
-- Pins existem no código, mas não aparecem em massa porque 0 clientes têm coordenadas.
-- Distância real só funciona quando latitude/longitude existem.
-- `GPSClinicaRadar` calcula parada, mas lista clínicas próximas por estimativa aleatória enquanto não há coordenadas.
-- `MapaSeamatyBrasil` tem UI/filtros, mas o mapa principal ainda está visualmente simulado e depende de entidades/pontos que podem estar ausentes.
-- `optimizeDayRoute` usa IA e endereço textual, não distância real por coordenada.
+## Próximos passos GPS aprováveis
 
-## O que está quebrado ou de alto risco
-
-1. **Sem coordenadas:** bloqueia pins reais, rota real e proximidade.
-2. **geocodeClientLocation atualiza Client direto:** deve ir para CRMUpdateQueue antes de aplicar.
-3. **Fallback mock de geocode:** pode criar coordenadas aproximadas erradas.
-4. **Automação ativa de geocode:** deve ser revisada antes de qualquer fase agressiva.
-5. **RouteOptimizer incompatível com optimizeRoute:** payload da tela não bate com payload da função.
-6. **Check-in/check-out formal ausente:** Visit não tem campos próprios para latitude/hora de entrada/saída.
-
-## Riscos
-
-- Vendedor abrir mapa e não ver clientes.
-- Google Maps levar para cidade, não endereço exato.
-- Rota do dia parecer inteligente, mas ser baseada em texto/IA, não coordenada real.
-- Coordenada errada sobrescrever cliente sem aprovação.
-- Check-in sem distância real do cliente.
-
-## Correções sugeridas
-
-### Precisa aprovação
-- Pausar ou alterar automação “Geocodificar Cliente Novo/Alterado”.
-- Alterar `geocodeClientLocation` para criar CRMUpdateQueue em vez de atualizar Client direto.
-- Adicionar campos ou entidade complementar para check-in/check-out GPS.
-- Geocodificar clientes em lote com aprovação manual.
-- Salvar rotas reais em OptimizedRoute após aprovação.
-
-### Pode ser correção simples futura
-- Padronizar botão “Abrir mapa”.
-- Padronizar popup de pin com score, próxima ação, WhatsApp, perfil e rota.
-- Exibir “sem coordenada” claramente onde necessário.
-- Consolidar mapa oficial em `ClientLocationMap`.
-
-## Próximos passos
-
-1. Aprovar SAFE-GEO 1.
-2. Transformar geocode em fila de aprovação.
-3. Criar revisão visual de coordenadas sugeridas.
-4. Aplicar coordenadas aprovadas em lote pequeno.
-5. Recalcular nota GPS.
-6. Corrigir RouteOptimizer ou consolidar no SmartRouteMap.
-7. Criar check-in/check-out formal.
-8. Testar no Samsung Galaxy Tab com GPS real.
-
-## Decisão
-
-Não corrigir dados de coordenada automaticamente. Primeiro blindar o fluxo SAFE de geolocalização.
+1. Pausar geocode direto.
+2. Transformar geocode em sugestão para CRMUpdateQueue.
+3. Validar 20 clientes piloto com coordenada aprovada.
+4. Recalcular pins.
+5. Testar em tablet físico.
