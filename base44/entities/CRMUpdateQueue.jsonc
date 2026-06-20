@@ -1,0 +1,92 @@
+{
+  "name": "CRMUpdateQueue",
+  "type": "object",
+  "description": "Fila segura complementar para atualiza\u00e7\u00f5es do CRM vindas de Telegram, WhatsApp, agentes, sistema ou a\u00e7\u00e3o manual. Impede altera\u00e7\u00e3o direta de dados cr\u00edticos sem aprova\u00e7\u00e3o.",
+  "properties": {
+    "origem": {
+      "type": "string",
+      "enum": [
+        "telegram",
+        "whatsapp",
+        "manual",
+        "agente",
+        "sistema"
+      ]
+    },
+    "texto_original": {
+      "type": "string"
+    },
+    "comando_interpretado": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "oportunidade_id": {
+      "type": "string"
+    },
+    "tipo_atualizacao": {
+      "type": "string"
+    },
+    "campo_alvo": {
+      "type": "string"
+    },
+    "valor_novo": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "aplicado",
+        "rejeitado",
+        "erro"
+      ],
+      "default": "pendente"
+    },
+    "risco": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto"
+      ],
+      "default": "medio"
+    },
+    "exige_aprovacao": {
+      "type": "boolean",
+      "default": true
+    },
+    "agente_origem": {
+      "type": "string"
+    },
+    "modelo_ia_usado": {
+      "type": "string"
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_aplicacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "origem",
+    "texto_original",
+    "status",
+    "risco"
+  ]
+}

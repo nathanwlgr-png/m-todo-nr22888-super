@@ -16,6 +16,7 @@ const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'))
 const ExportClinicReportWithROI = lazy(() => import('@/components/ExportClinicReportWithROI'));
 const SuperAgentWidget = lazy(() => import('@/components/SuperAgentWidget'));
 const PlanoEliteStatus = lazy(() => import('@/components/elite/PlanoEliteStatus'));
+const CentralComandosSafe = lazy(() => import('@/components/elite/CentralComandosSafe'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3 bg-[#111111]" />;
 
@@ -73,6 +74,11 @@ export default function DashboardSniper() {
         {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
         <Suspense fallback={<HeavyFallback />}>
           <PlanoEliteStatus hotCount={hotClients?.length || 0} visitsCount={visits?.length || 0} inactiveCount={noContact7d?.length || 0} />
+        </Suspense>
+
+        {/* ── FASE II-SAFE — Telegram, WhatsApp e CRM seguro ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <CentralComandosSafe />
         </Suspense>
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}

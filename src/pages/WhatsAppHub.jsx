@@ -32,11 +32,12 @@ export default function WhatsAppHub() {
     staleTime: 30 * 1000,
   });
 
-  const { data: pendingMessages = [] } = useQuery({
+  const { data: pendingMessagesRaw = [] } = useQuery({
     queryKey: ['wa-pending'],
-    queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
+    queryFn: () => base44.entities.PendingMessage?.list('-created_date', 100).catch(() => []),
     staleTime: 15 * 1000,
   });
+  const pendingMessages = pendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
 
   const filteredClients = clients.filter(c =>
     c.phone && (
@@ -348,14 +349,14 @@ export default function WhatsAppHub() {
               <div key={msg.id} className="rounded-xl p-3" style={{ background: '#111', border: '1px solid rgba(255,149,0,0.25)' }}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="text-xs font-black text-white">{msg.client_name || 'Cliente'}</p>
-                    <p className="text-[10px] text-slate-500">{msg.phone}</p>
+                    <p className="text-xs font-black text-white">{msg.client_name || msg.destinatario_nome || msg.recipient_name || 'Cliente'}</p>
+                    <p className="text-[10px] text-slate-500">{msg.phone || msg.destinatario_contato || msg.recipient_phone}</p>
                   </div>
                   <span className="text-[9px] px-2 py-0.5 rounded-full font-bold"
                     style={{ background: 'rgba(255,149,0,0.15)', color: '#ff9500' }}>pendente</span>
                 </div>
                 <p className="text-xs text-slate-300 mb-3 p-2 rounded-lg" style={{ background: '#1a1a1a' }}>
-                  {msg.message || msg.content}
+                  {msg.message || msg.content || msg.mensagem || msg.message_content}
                 </p>
                 <div className="flex gap-2">
                   <button onClick={() => handleApprovePending(msg)}
@@ -363,7 +364,7 @@ export default function WhatsAppHub() {
                     style={{ background: '#25d366', color: 'white' }}>
                     ✅ Pode Enviar
                   </button>
-                  <button onClick={() => { handleCopy(msg.message || msg.content || ''); }}
+                  <button onClick={() => { handleCopy(msg.message || msg.content || msg.mensagem || msg.message_content || ''); }}
                     className="px-3 py-2 rounded-xl"
                     style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
                     <Copy className="w-3.5 h-3.5" />

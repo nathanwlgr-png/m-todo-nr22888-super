@@ -1,0 +1,57 @@
+{
+  "name": "TelegramCommandLog",
+  "type": "object",
+  "description": "Log complementar de comandos operacionais recebidos pelo Telegram no Plano Elite SAFE.",
+  "properties": {
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "usuario": {
+      "type": "string"
+    },
+    "mensagem_recebida": {
+      "type": "string"
+    },
+    "intencao_detectada": {
+      "type": "string"
+    },
+    "cliente_detectado": {
+      "type": "string"
+    },
+    "acao_sugerida": {
+      "type": "string"
+    },
+    "crm_update_queue_id": {
+      "type": "string"
+    },
+    "pending_message_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "recebido",
+        "interpretado",
+        "pendente_aprovacao",
+        "executado",
+        "erro"
+      ],
+      "default": "recebido"
+    },
+    "resposta_gerada": {
+      "type": "string"
+    },
+    "erro": {
+      "type": "string"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_hora",
+    "mensagem_recebida",
+    "status"
+  ]
+}
