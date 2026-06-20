@@ -3,56 +3,52 @@ import { Link } from 'react-router-dom';
 import { X, ChevronRight, ShieldCheck, Briefcase, Zap } from 'lucide-react';
 import { getModo, setModo, VENDEDOR_PAGES } from '@/lib/ModoVendedor';
 
-// Categorias Admin — apenas rotas VERIFICADAS no App.jsx (zero 404)
+// Categorias Admin — ordenadas pelo FLUXO COMERCIAL. Apenas rotas VERIFICADAS no App.jsx (zero 404)
 const ADMIN_CATEGORIES = [
   {
-    label: '⚡ Fluxo Sniper',
+    label: '1. ⚡ Meu Dia',
     pages: [
       { page: 'Clients', label: '👥 Clientes' },
-      { page: 'ModoInvestigativoSupremo', label: '🔍 Investigação Suprema' },
-      { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN' },
-      { page: 'WhatsAppHub', label: '💬 WhatsApp Hub' },
-      { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
-      { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
-    ],
-  },
-  {
-    label: '🎯 CRM',
-    pages: [
-      { page: 'Leads', label: '🎯 Leads' },
-      { page: 'TasksUnified', label: '✅ Tarefas' },
+      { page: 'SmartRouteOptimizer', label: '🗺️ Rota do Dia' },
       { page: 'VisitManager', label: '📋 Visitas' },
+      { page: 'TasksUnified', label: '✅ Tarefas' },
       { page: 'ScheduledAgenda', label: '📅 Agenda' },
     ],
   },
   {
-    label: '🔍 Inteligência',
+    label: '2. 🔍 Investigar',
     pages: [
+      { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigação Suprema' },
       { page: 'ModoCacaComercial', label: '🎯 Modo Caça' },
-      { page: 'ModoInsumos', label: '📦 Modo Insumos' },
-      { page: 'CentralIAMaster', label: '🧠 Central IA' },
-      { page: 'InvestigacaoDeCampoReal', label: '🕵️ Campo Real' },
+      { page: 'InvestigacaoDeCampoReal', label: '🔎 Campo Real' },
     ],
   },
   {
-    label: '🗺️ Campo',
+    label: '3. 💬 Abordar',
     pages: [
-      { page: 'SmartRouteOptimizer', label: '🗺️ Rota Inteligente' },
-      { page: 'DayFieldView', label: '📍 Visão do Dia' },
+      { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN' },
+      { page: 'WhatsAppHub', label: '💬 WhatsApp Hub' },
+    ],
+  },
+  {
+    label: '4. 🏁 Fechar',
+    pages: [
+      { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
       { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty' },
+      { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
     ],
   },
   {
-    label: '📊 Análise',
+    label: '5. 📊 Análise',
     pages: [
+      { page: 'RankingAndConsumables', label: '🏆 Ranking & Insumos' },
       { page: 'SalesFunnelKanban', label: '📊 Funil Kanban' },
       { page: 'ExecutiveSalesAnalysis', label: '📈 Análise Executiva' },
-      { page: 'RankingAndConsumables', label: '🏆 Ranking & Insumos' },
-      { page: 'ActiveProspecting', label: '🎪 Prospecção Ativa' },
+      { page: 'CentralIAMaster', label: '🧠 Central IA' },
     ],
   },
   {
-    label: '⚙️ Sistema',
+    label: '6. ⚙️ Sistema',
     pages: [
       { page: 'GlobalSearch', label: '🔍 Busca Global' },
       { page: 'OfflineMode', label: '📴 Modo Offline' },
