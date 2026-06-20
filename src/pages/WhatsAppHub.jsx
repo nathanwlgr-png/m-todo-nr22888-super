@@ -17,7 +17,9 @@ export default function WhatsAppHub() {
   const [sending, setSending] = useState(false);
   const [approvedMsg, setApprovedMsg] = useState('');
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState('enviar');
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = ['enviar', 'pendentes', 'historico', 'contatos'].includes(urlParams.get('tab')) ? urlParams.get('tab') : 'enviar';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const queryClient = useQueryClient();
 
   const { data: clients = [] } = useQuery({
@@ -132,6 +134,13 @@ export default function WhatsAppHub() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success('Copiado!');
+  };
+
+  const openPendingWhatsApp = (msg) => {
+    const phone = (msg.phone || msg.destinatario_contato || msg.recipient_phone || '').replace(/\D/g, '');
+    const text = encodeURIComponent(msg.message || msg.content || msg.mensagem || msg.message_content || '');
+    if (!phone || !text) { toast.error('Telefone ou mensagem ausente.'); return; }
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
   // Histórico filtrado por cliente
@@ -353,21 +362,26 @@ export default function WhatsAppHub() {
                     <p className="text-[10px] text-slate-500">{msg.phone || msg.destinatario_contato || msg.recipient_phone}</p>
                   </div>
                   <span className="text-[9px] px-2 py-0.5 rounded-full font-bold"
-                    style={{ background: 'rgba(255,149,0,0.15)', color: '#ff9500' }}>pendente</span>
+                    style={{ background: 'rgba(255,149,0,0.15)', color: '#ff9500' }}>{msg.status || 'aguardando_aprovacao'}</span>
                 </div>
                 <p className="text-xs text-slate-300 mb-3 p-2 rounded-lg" style={{ background: '#1a1a1a' }}>
                   {msg.message || msg.content || msg.mensagem || msg.message_content}
                 </p>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button onClick={() => handleApprovePending(msg)}
-                    className="flex-1 py-2 rounded-xl text-xs font-black"
+                    className="py-3 rounded-xl text-xs font-black"
                     style={{ background: '#25d366', color: 'white' }}>
-                    ✅ Pode Enviar
+                    Aprovar
                   </button>
                   <button onClick={() => { handleCopy(msg.message || msg.content || msg.mensagem || msg.message_content || ''); }}
-                    className="px-3 py-2 rounded-xl"
+                    className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black"
                     style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="w-4 h-4" /> Copiar
+                  </button>
+                  <button onClick={() => openPendingWhatsApp(msg)}
+                    className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black"
+                    style={{ background: 'rgba(37,211,102,0.18)', color: '#25d366', border: '1px solid rgba(37,211,102,0.35)' }}>
+                    <ExternalLink className="w-4 h-4" /> Abrir
                   </button>
                 </div>
               </div>

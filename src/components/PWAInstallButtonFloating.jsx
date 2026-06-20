@@ -42,12 +42,12 @@ export default function PWAInstallButtonFloating() {
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // Fallback após 5s
-    const timer = setTimeout(() => setShow(true), 5000);
+    // Não abrir modal automaticamente: no campo, o aviso PWA não pode cobrir CRM/WhatsApp.
+    const timer = null;
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
     };
   }, []);
 
@@ -70,7 +70,17 @@ export default function PWAInstallButtonFloating() {
     localStorage.setItem('pwa-dismissed-v2', Date.now());
   };
 
-  if (!show) return null;
+  if (!show) {
+    return (
+      <button
+        onClick={() => setShow(true)}
+        className="fixed right-4 bottom-24 z-[80] rounded-full px-4 py-3 text-xs font-black text-white shadow-xl"
+        style={{ background: 'linear-gradient(135deg, #ff6b00, #ff9500)', border: '1px solid rgba(255,255,255,0.18)' }}
+      >
+        Instalar app
+      </button>
+    );
+  }
 
   // ── Instruções manuais ──────────────────────────────────────────
   if (step === 'instructions') {
@@ -89,7 +99,7 @@ export default function PWAInstallButtonFloating() {
         ];
 
     return (
-      <div className="fixed inset-0 z-[9999] flex items-end justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[90] flex items-end justify-center p-4 bg-black/70 backdrop-blur-sm">
         <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.4)' }}>
           <div className="flex items-center justify-between p-5 border-b border-orange-900/30">
             <div className="flex items-center gap-3">
@@ -136,7 +146,7 @@ export default function PWAInstallButtonFloating() {
 
   // ── Prompt inicial ──────────────────────────────────────────────
   return (
-    <div className="fixed bottom-24 left-4 right-4 z-[9998] max-w-sm mx-auto">
+    <div className="fixed bottom-24 left-4 right-4 z-[90] max-w-sm mx-auto">
       <div className="rounded-3xl overflow-hidden shadow-2xl" style={{ background: '#111', border: '2px solid rgba(255,107,0,0.5)' }}>
         <div className="flex items-center gap-3 px-5 pt-5 pb-3">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #ff6b00, #ff9500)' }}>

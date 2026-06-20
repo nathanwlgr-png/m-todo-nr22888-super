@@ -64,11 +64,11 @@ export default function CentralComandosSafe() {
       {pendingQueues.slice(0, 4).map(item => <div key={item.id} className="p-2 rounded-lg bg-black/45 border border-cyan-500/10">
         <div className="flex justify-between gap-2"><b className="text-xs text-white truncate">{item.campo_alvo || item.tipo_atualizacao}</b><Badge className={item.risco === 'alto' ? 'bg-red-600' : item.risco === 'medio' ? 'bg-orange-600' : 'bg-emerald-600'}>{item.risco}</Badge></div>
         <p className="text-[11px] text-slate-400 line-clamp-2">{item.valor_novo || item.texto_original}</p>
-        <div className="grid grid-cols-4 gap-1 mt-2">
-          <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'aprovado', data_aprovacao: new Date().toISOString() })} className="text-[10px] bg-emerald-700 hover:bg-emerald-600"><CheckCircle className="w-3 h-3" /></Button>
-          <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'rejeitado' })} className="text-[10px] bg-red-700 hover:bg-red-600"><XCircle className="w-3 h-3" /></Button>
-          <Button size="sm" disabled={busy === item.id} onClick={() => applyQueue(item)} className="text-[10px] bg-cyan-700 hover:bg-cyan-600">Aplicar</Button>
-          <Button size="sm" disabled={busy === item.id} onClick={() => toast.info('Edite o item na fila antes de aplicar.')} variant="outline" className="text-[10px]">Editar</Button>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+          <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'aprovado', data_aprovacao: new Date().toISOString() })} className="min-h-10 text-[11px] bg-emerald-700 hover:bg-emerald-600"><CheckCircle className="w-4 h-4" />Aprovar</Button>
+          <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'rejeitado' })} className="min-h-10 text-[11px] bg-red-700 hover:bg-red-600"><XCircle className="w-4 h-4" />Rejeitar</Button>
+          <Button size="sm" disabled={busy === item.id} onClick={() => applyQueue(item)} className="min-h-10 text-[11px] bg-cyan-700 hover:bg-cyan-600">Aplicar</Button>
+          <Button size="sm" disabled={busy === item.id} onClick={() => toast.info('Edite o item na fila antes de aplicar.')} className="min-h-10 text-[11px] bg-slate-800 hover:bg-slate-700 text-white border border-slate-600">Editar</Button>
         </div>
       </div>)}
       {pendingQueues.length === 0 && <p className="text-xs text-slate-500">Nenhuma atualização de CRM aguardando ação.</p>}
@@ -89,14 +89,14 @@ export default function CentralComandosSafe() {
       {logs.length === 0 && <p className="text-xs text-slate-500">Telegram ainda depende de conexão do agente.</p>}
     </div>
 
-    <div className="grid grid-cols-3 gap-2">
-      <Link to="/WhatsAppHub"><Button size="sm" className="w-full bg-green-700 hover:bg-green-600"><MessageSquare className="w-4 h-4 mr-1" />WhatsApp</Button></Link>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <Link to="/WhatsAppHub"><Button size="sm" className="min-h-11 w-full bg-green-700 hover:bg-green-600"><MessageSquare className="w-4 h-4 mr-1" />WhatsApp</Button></Link>
       {telegramConnectUrl ? (
-        <a href={telegramConnectUrl} target="_blank" rel="noopener noreferrer"><Button size="sm" className="w-full bg-sky-700 hover:bg-sky-600">Telegram</Button></a>
+        <a href={telegramConnectUrl} target="_blank" rel="noopener noreferrer"><Button size="sm" className="min-h-11 w-full bg-sky-700 hover:bg-sky-600">Telegram</Button></a>
       ) : (
-        <Button size="sm" disabled variant="outline" className="w-full text-[10px] leading-tight">Conectar Telegram no editor do agente</Button>
+        <Button size="sm" disabled className="min-h-11 w-full bg-slate-800 text-slate-300 border border-slate-600 text-[11px] leading-tight">Conectar Telegram no editor do agente</Button>
       )}
-      <Button size="sm" variant="outline" onClick={() => { qc.invalidateQueries({ queryKey: ['crm-update-queue-safe'] }); qc.invalidateQueries({ queryKey: ['telegram-command-log-safe'] }); qc.invalidateQueries({ queryKey: ['pending-message-safe'] }); }}><RefreshCw className="w-4 h-4 mr-1" />Atualizar</Button>
+      <Button size="sm" onClick={() => { qc.invalidateQueries({ queryKey: ['crm-update-queue-safe'] }); qc.invalidateQueries({ queryKey: ['telegram-command-log-safe'] }); qc.invalidateQueries({ queryKey: ['pending-message-safe'] }); }} className="min-h-11 bg-slate-800 hover:bg-slate-700 text-white border border-slate-600"><RefreshCw className="w-4 h-4 mr-1" />Atualizar</Button>
     </div>
   </div>;
 }
