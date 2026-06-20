@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -181,17 +181,27 @@ FORMATO DE RESPOSTA (JSON):
       usage_count: 1
     });
 
-    // 7. Registrar interação
+    // 7. Registrar interação e log central para o Investigativo consultar
     await base44.entities.Interaction.create({
       client_id: client_id,
       client_name: client.full_name || client.first_name,
       type: 'whatsapp',
       direction: 'outbound',
-      subject: `Material enviado: ${file.name}`,
-      notes: `${aiAnalysis.analysis}\n\nMensagem: ${aiAnalysis.whatsapp_message}`,
+      subject: `Material processado: ${file.name}`,
+      notes: `${aiAnalysis.analysis}\n\nMensagem sugerida para aprovação: ${aiAnalysis.whatsapp_message}`,
       outcome: 'positive',
       ai_summary: aiAnalysis.analysis,
       ai_tags: aiAnalysis.key_highlights
+    });
+
+    await base44.entities.AIInteractionLog.create({
+      user_message: `Material de campo processado: ${file.name}`,
+      ai_response: aiAnalysis.analysis,
+      action_type: 'general',
+      client_id: client_id,
+      client_name: client.full_name || client.first_name,
+      source: 'whatsapp_agent',
+      success: true
     });
 
     // 8. Atualizar campo AI do cliente

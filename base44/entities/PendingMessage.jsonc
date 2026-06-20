@@ -45,10 +45,12 @@
         "approved",
         "rejected",
         "edited",
-        "sent"
+        "ready_to_send",
+        "sent",
+        "manual_sent_confirmed"
       ],
       "default": "pending",
-      "description": "Status da aprova\u00e7\u00e3o"
+      "description": "Status da aprova\u00e7\u00e3o e envio manual"
     },
     "priority": {
       "type": "string",
@@ -79,10 +81,24 @@
       "type": "string",
       "description": "Conte\u00fado editado pelo usu\u00e1rio"
     },
+    "wa_url": {
+      "type": "string",
+      "description": "Link seguro do WhatsApp para envio manual"
+    },
+    "prepared_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora em que o link foi preparado"
+    },
     "sent_at": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora do envio efetivo"
+      "description": "Data/hora do envio efetivo confirmado"
+    },
+    "manual_sent_confirmed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora em que Nathan confirmou envio manual"
     }
   },
   "required": [

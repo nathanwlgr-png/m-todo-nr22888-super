@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const TEMPLATES = {
   suave: (nome, equipamento) =>
@@ -64,23 +64,28 @@ Deno.serve(async (req) => {
       const url = `https://api.whatsapp.com/send?phone=${phoneIntl}&text=${encodeURIComponent(mensagem)}`;
       whatsapp_urls.push({ client_id: c.id, client_name: c.clinic_name || c.full_name, url, mensagem });
 
-      // Registrar interação
-      await base44.entities.Interaction.create({
-        client_id: c.id,
-        client_name: c.clinic_name || c.full_name,
-        type: 'whatsapp',
-        direction: 'outbound',
-        subject: `Follow-up automático — ${equipamento}`,
-        notes: mensagem,
-        ai_category: 'followup_automatico',
-        ai_priority: score < 500 ? 'alta' : 'media',
-        outcome: 'neutral',
+      // Preparar mensagem para aprovação manual — não registrar como enviada automaticamente
+      await base44.entities.PendingMessage.create({
+        recipient_id: c.id,
+        recipient_name: c.clinic_name || c.full_name,
+        recipient_phone: phoneIntl,
+        channel: 'whatsapp',
+        message_content: mensagem,
+        context: `Follow-up sugerido para negociação sem resposta há ${dias_sem_resposta}+ dias`,
+        ai_reasoning: `Score CNPJ/risco: ${score || 'não disponível'} | Equipamento: ${equipamento}`,
+        status: 'pending',
+        priority: score !== null && score < 500 ? 'alta' : 'media'
       });
 
-      // Atualizar data do último contato
-      await base44.entities.Client.update(c.id, {
-        last_contact_date: new Date().toISOString().slice(0, 10),
-      });
+      await base44.entities.AIInteractionLog.create({
+        user_message: `Follow-up automático preparado para ${c.clinic_name || c.full_name}`,
+        ai_response: mensagem,
+        action_type: 'whatsapp',
+        client_id: c.id,
+        client_name: c.clinic_name || c.full_name,
+        source: 'automation',
+        success: true
+      }).catch(() => null);
 
       enviados++;
     }
@@ -89,6 +94,7 @@ Deno.serve(async (req) => {
       success: true,
       total_pendentes: pendentes.length,
       enviados,
+      preparados_para_aprovacao: enviados,
       sem_telefone,
       whatsapp_urls,
     });

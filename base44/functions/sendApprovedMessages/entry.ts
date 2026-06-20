@@ -1,8 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Buscar mensagens aprovadas mas não enviadas
     const approvedMessages = await base44.asServiceRole.entities.PendingMessage.filter({
@@ -10,36 +12,43 @@ Deno.serve(async (req) => {
     });
 
     let sentCount = 0;
+    const whatsappLinks = [];
 
     for (const msg of approvedMessages) {
       try {
         const finalContent = msg.edited_content || msg.message_content;
 
         if (msg.channel === 'whatsapp') {
-          // Criar registro de WhatsApp
-          await base44.asServiceRole.entities.WhatsAppMessage.create({
-            contact_id: msg.recipient_id,
-            contact_name: msg.recipient_name,
-            contact_phone: msg.recipient_phone,
-            direction: 'sent',
-            message: finalContent,
-            status: 'sent',
-            automated: true
+          // WhatsApp é envio manual: preparar link seguro e NÃO marcar como enviado
+          const phone = String(msg.recipient_phone || '').replace(/\.0+$/, '').replace(/\D/g, '');
+          const phoneIntl = phone.startsWith('55') ? phone : `55${phone}`;
+          const waUrl = `https://wa.me/${phoneIntl}?text=${encodeURIComponent(finalContent)}`;
+
+          await base44.asServiceRole.entities.PendingMessage.update(msg.id, {
+            status: 'ready_to_send',
+            wa_url: waUrl,
+            prepared_at: new Date().toISOString()
+          });
+
+          whatsappLinks.push({
+            id: msg.id,
+            recipient_name: msg.recipient_name,
+            recipient_phone: phoneIntl,
+            wa_url: waUrl
           });
         } else if (msg.channel === 'email') {
-          // Enviar email
+          // Email pode ser enviado pelo sistema
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: msg.recipient_id,
             subject: msg.email_subject || 'Mensagem NR22',
             body: finalContent
           });
-        }
 
-        // Marcar como enviada
-        await base44.asServiceRole.entities.PendingMessage.update(msg.id, {
-          status: 'sent',
-          sent_at: new Date().toISOString()
-        });
+          await base44.asServiceRole.entities.PendingMessage.update(msg.id, {
+            status: 'sent',
+            sent_at: new Date().toISOString()
+          });
+        }
 
         sentCount++;
       } catch (error) {
@@ -50,7 +59,8 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       sent: sentCount,
-      message: `${sentCount} mensagem(ns) enviada(s) com sucesso!`
+      whatsapp_links: whatsappLinks,
+      message: `${sentCount} mensagem(ns) processada(s). WhatsApp fica pronto para envio manual; email é enviado automaticamente.`
     });
 
   } catch (error) {
