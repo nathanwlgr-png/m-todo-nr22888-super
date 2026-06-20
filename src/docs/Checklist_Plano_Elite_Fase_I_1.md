@@ -50,15 +50,20 @@ O bloco Plano Elite considera mensagens com status:
 - rascunho
 
 ## Status real do DashboardSniper
-O DashboardSniper carregou no preview sem tela branca ou erro crítico. A captura mostrou o painel principal renderizando normalmente. O modal de instalação PWA apareceu sobre o conteúdo, então o bloco Plano Elite pode ficar abaixo/oculto no primeiro viewport, mas a página compilou e renderizou.
+O DashboardSniper carregou no preview sem tela branca ou erro crítico. A validação com rolagem mostrou o bloco Plano Elite logo abaixo do Sniper do Dia.
 
 ## Bloco Plano Elite no preview
-O bloco foi inserido logo após o Sniper do Dia. No preview capturado, o app abriu com o modal “Instalar Seamaty NR22”, cobrindo parte da tela; não foi possível confirmar visualmente o bloco inteiro nessa captura sem fechar o modal/rolar, mas não houve erro de importação, rota ou variável.
+Confirmado visualmente no preview: o bloco “PLANO ELITE ATIVO / Central Elite · Fase I” aparece imediatamente abaixo do Sniper do Dia. O modal “Instalar Seamaty NR22” continuou visível sobre parte da tela, mas foi ignorado e a rolagem confirmou a posição do bloco.
+
+## Validação técnica final
+- EliteToolConnection: 22 registros totais, 22 com prioridade_rank preenchido e 0 inconsistências.
+- Distribuição confirmada: alta 9, maxima 6, media 5, baixa 2.
+- EliteAIRecommendationLog: registros reais de teste encontrados para gpt_5_5, claude_opus_4_8, gemini_3_1_pro, claude_sonnet_4_6 e automatic.
+- Todos os testes retornaram OK_MODELO_VALIDADO e nenhum fallback foi necessário.
 
 ## Riscos restantes
-- Validar visualmente o bloco Plano Elite após fechar o modal PWA e rolar abaixo do Sniper do Dia.
 - Gmail, Drive amplo e Docs seguem pendentes até autorização/conexão específica.
 - Próxima fase deve continuar complementar, sem substituir DashboardSniper.
 
 ## Status final Fase I.1
-Finalizada e apta para seguir para Fase II somente após conferência visual do bloco no preview sem o modal PWA.
+Fase I.1 validada visualmente e tecnicamente. Apto para Fase II.
