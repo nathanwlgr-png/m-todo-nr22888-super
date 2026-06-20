@@ -1,0 +1,94 @@
+{
+  "name": "ButtonAuditItem",
+  "type": "object",
+  "description": "Item de auditoria funcional de bot\u00f5es, telas e rotas do CRM NR22888. Uso exclusivo de auditoria \u2014 nunca altera dados operacionais.",
+  "properties": {
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tela": {
+      "type": "string"
+    },
+    "botao_nome": {
+      "type": "string"
+    },
+    "botao_tipo": {
+      "type": "string",
+      "enum": [
+        "principal",
+        "secundario",
+        "icone",
+        "aba",
+        "filtro",
+        "dropdown",
+        "card",
+        "link_externo",
+        "flutuante",
+        "outro"
+      ]
+    },
+    "localizacao_visual": {
+      "type": "string"
+    },
+    "acao_esperada": {
+      "type": "string"
+    },
+    "acao_real": {
+      "type": "string"
+    },
+    "rota_ou_funcao": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "funcionando",
+        "sem_acao",
+        "quebrado",
+        "confuso",
+        "duplicado",
+        "perigoso",
+        "desnecessario",
+        "ok"
+      ]
+    },
+    "gravidade": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "baixa"
+    },
+    "recomendacao": {
+      "type": "string",
+      "enum": [
+        "manter",
+        "renomear",
+        "recolher",
+        "mover",
+        "unificar",
+        "corrigir",
+        "remover_com_aprovacao"
+      ]
+    },
+    "precisa_aprovacao": {
+      "type": "boolean",
+      "default": false
+    },
+    "evidencia": {
+      "type": "string"
+    },
+    "observacao": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tela",
+    "botao_nome",
+    "status"
+  ]
+}
