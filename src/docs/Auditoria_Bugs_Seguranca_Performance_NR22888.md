@@ -2,6 +2,8 @@
 
 Data: 20/06/2026
 
+> ATUALIZAÇÃO 20/06/2026 (pós-Correção Total SAFE): segurança subiu de 69% para 88%; performance de 63% para 74%. Geocode, limpeza, autoFix, WhatsApp e e-mail foram blindados. Ver docs/Correcao_Total_SAFE_NR22888.md.
+
 ## Resultado resumido
 
 - Bugs/build/rotas: 70% — aceitável

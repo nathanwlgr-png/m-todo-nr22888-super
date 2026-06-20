@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
+import PendenciasPara100 from '@/components/elite/PendenciasPara100';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
@@ -267,7 +268,10 @@ export default function DashboardSniper() {
           />
         </div>
 
-        {/* ── 12. LIMPEZA DA BASE (rodapé) ── */}
+        {/* ── 12. PENDÊNCIAS PARA 100% (compacto/recolhível) ── */}
+        <PendenciasPara100 />
+
+        {/* ── 13. LIMPEZA DA BASE (rodapé) ── */}
         <BotaoLimpezaCRM />
 
       </div>

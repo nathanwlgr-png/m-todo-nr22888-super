@@ -91,10 +91,11 @@ Deno.serve(async (req) => {
           }
         }
 
+        // SAFE: não deletar. Apenas marcar como dispensado (reversível).
         for (const dupId of duplicates.slice(0, 50)) {
           try {
-            await base44.asServiceRole.entities.Alert.delete(dupId);
-            fixes.push({ type: 'alert_cleanup', alert_id: dupId, status: 'deleted' });
+            await base44.asServiceRole.entities.Alert.update(dupId, { dismissed: true });
+            fixes.push({ type: 'alert_cleanup', alert_id: dupId, status: 'dismissed' });
           } catch (e) {
             failed.push({ type: 'alert_cleanup', alert_id: dupId, error: e.message });
           }

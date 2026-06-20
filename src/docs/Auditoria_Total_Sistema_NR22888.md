@@ -6,7 +6,9 @@ Regra aplicada: nenhuma porcentagem abaixo foi estimada sem evidência. Cada not
 
 ## Percentual geral do sistema
 
-**Percentual geral: 68% — ACEITÁVEL**
+**Percentual geral: 68% → 80% após Correção Total SAFE (20/06/2026)**
+
+> Ver docs/Correcao_Total_SAFE_NR22888.md para as correções aplicadas.
 
 Fórmula usada: média simples das 11 categorias exigidas nesta auditoria.  
 Categorias: Estrutura CRM, DashboardSniper, WhatsAppHub, Telegram SAFE, GPS/Mapa/Rotas, Produtos/Fotos/Catálogo, Ferramentas/Conectores, Agentes, Segurança, Performance campo/tablet, Preparação Material Premium.

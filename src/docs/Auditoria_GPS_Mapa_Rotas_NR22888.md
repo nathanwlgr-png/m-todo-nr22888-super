@@ -3,6 +3,8 @@
 Data: 20/06/2026  
 Regra: nota baseada somente em evidência real.
 
+> ATUALIZAÇÃO 20/06/2026 (pós-Correção Total SAFE): nota subiu de 58% para 70%. Geocode agora via fila de aprovação, RouteOptimizer compatível com fallback, GPSClinicaRadar sem distância aleatória. GPS físico segue NÃO VALIDADO EM DISPOSITIVO REAL. Ver docs/Correcoes_Geo_SAFE_NR22888.md.
+
 ## Resultado
 
 **GPS/Mapa/Rotas: 58% — FRACO**

@@ -55,6 +55,16 @@
       "type": "boolean",
       "default": false
     },
+    "status_foto": {
+      "type": "string",
+      "enum": [
+        "pendente_foto_oficial",
+        "foto_vinculada",
+        "precisa_validacao"
+      ],
+      "default": "pendente_foto_oficial",
+      "description": "Estado da foto oficial. Nunca usar imagem IA como foto oficial."
+    },
     "ativo": {
       "type": "boolean",
       "default": true
