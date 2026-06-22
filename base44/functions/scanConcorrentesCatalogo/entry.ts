@@ -21,7 +21,10 @@ Deno.serve(async (req) => {
     const onlyId = body?.competitor_id || null;
 
     const filtro = onlyId ? { id: onlyId } : { ativo: true };
-    const concorrentes = await base44.asServiceRole.entities.CompetitorTracker.filter(filtro, '-ultima_investigacao', 100);
+    // Limite seguro: no máximo 2 por execução. Cada concorrente faz 1 chamada de IA com
+    // contexto da internet, que pode demorar muito. Mais que isso estoura o timeout.
+    // Roda em rodízio semanal: prioriza os menos investigados recentemente (ordem ascendente).
+    const concorrentes = await base44.asServiceRole.entities.CompetitorTracker.filter(filtro, 'ultima_investigacao', onlyId ? 1 : 2);
 
     const resultados = [];
 
@@ -34,7 +37,8 @@ Deno.serve(async (req) => {
         .join(' | ') || 'nenhum registro anterior';
 
       try {
-        const ia = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        // Timeout de 60s por concorrente: se a IA travar, pulamos sem derrubar a função.
+        const iaPromise = base44.asServiceRole.integrations.Core.InvokeLLM({
           add_context_from_internet: true,
           model: 'gemini_3_flash',
           prompt: `Você monitora o concorrente abaixo para a Compet Distribuidora (equipamentos veterinários Seamaty).
@@ -83,6 +87,11 @@ Se nada novo for encontrado, retorne tem_novidade=false e listas vazias.`,
             }
           }
         });
+
+        const ia = await Promise.race([
+          iaPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout 60s')), 60000))
+        ]);
 
         if (!ia?.tem_novidade) {
           await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
