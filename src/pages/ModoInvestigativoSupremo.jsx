@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Score4x4Display from '@/components/Score4x4Display';
+import BattlecardAtaque from '@/components/elite/BattlecardAtaque';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -314,6 +315,15 @@ export default function ModoInvestigativoSupremo() {
               )}
             </div>
           </div>
+
+          {/* Battlecard de Ataque — cruza equipamento concorrente com a Matriz V10 */}
+          {selectedClient && (
+            <BattlecardAtaque
+              currentEquipment={selectedClient.current_equipment}
+              cnpj={selectedClient.cnpj}
+              clinicName={selectedClient.clinic_name}
+            />
+          )}
 
           {/* Perfil do Decisor */}
           <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.2)' }}>
