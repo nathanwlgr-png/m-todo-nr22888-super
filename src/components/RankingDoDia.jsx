@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
-import { Trophy, Zap, AlertTriangle, Loader2, MessageSquare } from 'lucide-react';
+import { Trophy, Zap, Loader2, MessageSquare, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PRIORITY_COLORS = {
@@ -188,17 +188,28 @@ export default function RankingDoDia() {
                 )}
               </div>
 
-              {/* Botão WhatsApp */}
-              {item.phone && (
+              {/* Próximo passo comercial */}
+              <div className={`grid gap-2 ${item.phone ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 <Button
                   size="sm"
-                  className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => window.open(`https://wa.me/${normalizeWhatsAppPhone(item.phone)}`, '_blank')}
+                  variant="outline"
+                  className="w-full gap-2 bg-white/70 hover:bg-white text-slate-900 border-slate-300"
+                  onClick={() => { window.location.href = `/ClientProfile?id=${encodeURIComponent(item.id)}`; }}
                 >
-                  <MessageSquare className="w-3 h-3" />
-                  WhatsApp
+                  <UserRound className="w-3 h-3" />
+                  Abrir Cliente
                 </Button>
-              )}
+                {item.phone && (
+                  <Button
+                    size="sm"
+                    className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => window.open(`https://wa.me/${normalizeWhatsAppPhone(item.phone)}`, '_blank')}
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    WhatsApp
+                  </Button>
+                )}
+              </div>
 
             </div>
           ))}
