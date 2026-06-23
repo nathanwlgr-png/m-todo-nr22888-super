@@ -96,26 +96,26 @@ export default function RankingOportunidades() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['ranking-clients'],
-    queryFn: () => base44.entities.Client.list('-purchase_score', 150),
-    staleTime: 120000,
+    queryFn: () => base44.entities.Client.list('-purchase_score', 50),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: sales = [] } = useQuery({
     queryKey: ['ranking-sales'],
-    queryFn: () => base44.entities.Sale.list('-sale_date', 100),
-    staleTime: 120000,
+    queryFn: () => base44.entities.Sale.list('-sale_date', 50),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: consumables = [] } = useQuery({
     queryKey: ['ranking-consumables'],
-    queryFn: () => base44.entities.ConsumableOrder.filter({ status: 'ativo' }),
-    staleTime: 120000,
+    queryFn: () => base44.entities.ConsumableOrder.filter({ status: 'ativo' }, '-created_date', 30).catch(() => []),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: leads = [] } = useQuery({
     queryKey: ['ranking-leads'],
-    queryFn: () => base44.entities.Lead.filter({ stage: 'qualificado' }),
-    staleTime: 120000,
+    queryFn: () => base44.entities.Lead.filter({ stage: 'qualificado' }, '-created_date', 30).catch(() => []),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: rankingData, isLoading, refetch, isFetching } = useQuery({
@@ -123,15 +123,15 @@ export default function RankingOportunidades() {
     queryFn: async () => {
       if (clients.length === 0) return null;
       const res = await base44.functions.invoke('calculateRankingDoDia', {
-        clients,
-        sales,
-        leads,
-        consumables,
+        clients: clients.slice(0, 30),
+        sales: sales.slice(0, 30),
+        leads: leads.slice(0, 20),
+        consumables: consumables.slice(0, 20),
       });
       return res.data;
     },
     enabled: clients.length > 0,
-    staleTime: 300000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const priorities = rankingData?.priorities || [];

@@ -7,8 +7,8 @@ import {
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
   Zap, Globe, Instagram, Loader2, ShieldCheck, FileText,
   Link2, ClipboardCheck, ThumbsUp, ThumbsDown, RefreshCw, Paperclip,
-  Flag, AlertTriangle, Bell, Cpu, BarChart2, X, Eye,
-  ExternalLink, Download, Image, Lock, CheckSquare, XCircle
+  Flag, Bell, Cpu, X,
+  ExternalLink, Download, Image, Lock, CheckSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -916,55 +916,25 @@ export default function ClienteDetalhe360() {
               </div>
             </div>
 
-            {/* Log interno — visível apenas para admins (substituído por checklist simplificado) */}
+            {/* Status do sistema — resumido */}
             <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(168,85,247,0.2)' }}>
-              <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">🤖 Status do Sistema</p>
+              <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">🔧 Funcionalidades</p>
               <div className="space-y-1.5 text-xs">
                 {[
-                  { label: 'WhatsApp assistido', ok: true },
-                  { label: 'Envio direto bloqueado', ok: true },
-                  { label: 'Fila de aprovação ativa', ok: true },
-                  { label: 'PDF sob demanda', ok: true },
-                  { label: 'Mapa integrado', ok: true },
-                  { label: 'Google Calendar conectado', ok: true },
-                  { label: 'Google Slides conectado', ok: true },
-                  { label: 'Telegram interno ativo', ok: true },
-                ].map((item, i) => (
+                  'WhatsApp assistido',
+                  'Envio direto bloqueado',
+                  'Fila de aprovação ativa',
+                  'PDF sob demanda',
+                  'Mapa integrado',
+                  'Google Calendar',
+                  'Google Slides',
+                ].map((label, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <CheckCircle className="w-3 h-3 text-green-500 shrink-0" />
-                    <span className="text-slate-400">{item.label}</span>
+                    <span className="text-slate-400">{label}</span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Próximos passos para publicação */}
-            <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(239,68,68,0.2)' }}>
-              <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2">🚫 Checklist para PUBLICAR</p>
-              {[
-                { done: true, label: 'Tela visual ClienteDetalhe360 funcionando' },
-                { done: true, label: 'Botões principais funcionando' },
-                { done: true, label: 'Aprovar NÃO envia automaticamente (corrigido)' },
-                { done: true, label: 'WhatsApp aberto ≠ envio realizado (campos separados)' },
-                { done: true, label: 'Botão "Confirmar que enviei manualmente" existe' },
-                { done: true, label: 'Envio direto bloqueado com toast' },
-                { done: true, label: 'Mapa renderizado com iframe + botão externo' },
-                { done: true, label: 'Upload de print funcional (UploadFile real)' },
-                { done: true, label: 'PDF testado — URL real retornada' },
-                { done: true, label: 'Link rastreável copia com UTM + client_id' },
-                { done: true, label: 'Conectores: status real corrigido (ativo_visual vs testado)' },
-                { done: false, label: 'BLOQUEADOR: Preço VI1 confirmado pelo Nathan/Karoline' },
-                { done: false, label: 'Opcional: Testar leitura real do Gmail no fluxo' },
-                { done: false, label: 'Opcional: Testar criação de doc no Drive/Docs' },
-                { done: false, label: 'Opcional: Testar cruzamento real do Instagram Business' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 py-1 border-b border-slate-900 last:border-0">
-                  {item.done
-                    ? <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                    : <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
-                  <span className="text-xs" style={{ color: item.done ? '#94a3b8' : '#fca5a5' }}>{item.label}</span>
-                </div>
-              ))}
             </div>
           </>
         )}

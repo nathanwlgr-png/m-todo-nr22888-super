@@ -59,23 +59,27 @@ export default function SalesFunnel() {
   const [overlayTitle, setOverlayTitle] = useState('');
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-created_date', 500)
+    queryKey: ['funnel-clients'],
+    queryFn: () => base44.entities.Client.list('-created_date', 200),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: sales = [], isLoading: salesLoading } = useQuery({
-    queryKey: ['sales'],
-    queryFn: () => base44.entities.Sale.list('-sale_date', 500)
+    queryKey: ['funnel-sales'],
+    queryFn: () => base44.entities.Sale.list('-sale_date', 200),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: sequences = [], isLoading: sequencesLoading } = useQuery({
-    queryKey: ['followup-sequences'],
-    queryFn: () => base44.entities.FollowUpSequence.list('-created_date', 100)
+    queryKey: ['funnel-sequences'],
+    queryFn: () => base44.entities.FollowUpSequence.list('-created_date', 50).catch(() => []),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: visits = [] } = useQuery({
-    queryKey: ['visits'],
-    queryFn: () => base44.entities.Visit.list('-scheduled_date', 500)
+    queryKey: ['funnel-visits'],
+    queryFn: () => base44.entities.Visit.list('-scheduled_date', 200),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Get unique salespersons

@@ -109,7 +109,7 @@ export default function SniperDoDia() {
       </button>
 
       <div className="px-4 py-1.5 bg-[#111] border-b border-orange-500/15">
-        <p className="text-xs font-bold text-orange-600">{DAY_LABELS[TODAY_TYPE]} · cache 5 min</p>
+        <p className="text-xs font-bold text-orange-600">{DAY_LABELS[TODAY_TYPE]}</p>
       </div>
 
       {expanded && (

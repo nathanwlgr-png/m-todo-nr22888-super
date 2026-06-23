@@ -31,14 +31,14 @@ export default function WhatsAppHub() {
 
   const { data: messages = [] } = useQuery({
     queryKey: ['wa-messages'],
-    queryFn: () => base44.entities.WhatsAppMessage?.list('-created_date', 100).catch(() => []),
-    staleTime: 30 * 1000,
+    queryFn: () => base44.entities.WhatsAppMessage?.list('-created_date', 50).catch(() => []),
+    staleTime: 60 * 1000,
   });
 
   const { data: pendingMessagesRaw = [] } = useQuery({
     queryKey: ['wa-pending'],
-    queryFn: () => base44.entities.PendingMessage?.list('-created_date', 100).catch(() => []),
-    staleTime: 15 * 1000,
+    queryFn: () => base44.entities.PendingMessage?.list('-created_date', 50).catch(() => []),
+    staleTime: 30 * 1000,
   });
   const pendingMessages = pendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
 

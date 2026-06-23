@@ -117,35 +117,16 @@ export default function Clients() {
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales'],
-    queryFn: async () => {
-      try {
-        // Performance/tablet: teto razoável em vez da base inteira de vendas.
-        const allSales = await base44.entities.Sale.list('-sale_date', 500);
-        return allSales.filter(s => s && s.id);
-      } catch (error) {
-        console.warn('Erro ao carregar vendas:', error);
-        return [];
-      }
-    },
+    queryFn: () => base44.entities.Sale.list('-sale_date', 100).catch(() => []),
     enabled: !isOffline && clients.length > 0,
-    retry: 1,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: allVisits = [] } = useQuery({
     queryKey: ['all-visits'],
-    queryFn: async () => {
-      try {
-        const allVisits = await base44.entities.Visit.list('-scheduled_date', 200);
-        return allVisits.filter(v => v && v.id);
-      } catch (error) {
-        console.warn('Erro ao carregar visitas:', error);
-        return [];
-      }
-    },
+    queryFn: () => base44.entities.Visit.list('-scheduled_date', 100).catch(() => []),
     enabled: !isOffline && clients.length > 0,
-    retry: 1,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
   });
 
   // Lista única de cidades
@@ -178,16 +159,17 @@ export default function Clients() {
   // Busca e ordenação
   const filteredClients = useMemo(() => {
     if (!Array.isArray(clients) || clients.length === 0) return [];
+    const searchLower = search.toLowerCase();
     
     let filtered = clients.filter(client => {
       if (!client || !client.id) return false;
       
       // Busca por nome do cliente ou clínica
       const matchesSearch = !search || (
-        client.first_name?.toLowerCase().includes(search.toLowerCase()) ||
-        client.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        client.clinic_name?.toLowerCase().includes(search.toLowerCase()) ||
-        client.city?.toLowerCase().includes(search.toLowerCase())
+        client.first_name?.toLowerCase().includes(searchLower) ||
+        client.full_name?.toLowerCase().includes(searchLower) ||
+        client.clinic_name?.toLowerCase().includes(searchLower) ||
+        client.city?.toLowerCase().includes(searchLower)
       );
       
       // Filtros
@@ -252,7 +234,7 @@ export default function Clients() {
     }
 
     return filtered;
-  }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits, sortBy]);
+  }, [clients, search, statusFilter, scoreFilter, cityFilter, visitFilter, pipelineFilter, allVisits, sortBy, segmentFilter, equipmentFilter]);
 
   // Autocomplete suggestions - busca desde a primeira letra
   const handleSearchChange = (value) => {
@@ -496,6 +478,7 @@ export default function Clients() {
 
       toast.info('Processando com IA...');
 
+      const llmModel = googleSheetsUrl ? 'gemini_3_flash' : undefined;
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Analise ${fileUrl ? 'este arquivo/imagem' : googleSheetsUrl ? 'esta planilha do Google Sheets' : 'esta tabela/lista de clientes'} e extraia as informações estruturadas.
 
@@ -512,17 +495,11 @@ Extraia e retorne um array de clientes com os seguintes campos (se disponíveis)
 - address (endereço)
 - cnpj
 - current_equipment (equipamento/máquina atual que possui)
-- decision_role: Sugira automaticamente baseado no nome da clínica:
-  * Se tiver "Hospital", "Centro" ou "Clínica Grande" → "veterinario_responsavel"
-  * Se tiver "Dr.", "Dra.", nome próprio → "veterinario_responsavel"
-  * Casos simples como "Clínica", "Pet Shop" → "proprietario"
-  * Se não conseguir determinar → "proprietario"
-
-Se o cliente já possui equipamento mencionado, capture em "current_equipment".
-Se não houver informação sobre um campo, deixe vazio ou null.
+- decision_role: proprietario ou veterinario_responsavel
 
 Retorne JSON válido com TODOS os clientes encontrados.`,
         file_urls: fileUrl ? [fileUrl] : undefined,
+        model: llmModel,
         add_context_from_internet: googleSheetsUrl ? true : false,
         response_json_schema: {
           type: "object",
@@ -549,7 +526,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
       });
 
       // Buscar clientes existentes
-      const existingClients = await base44.entities.Client.list('-updated_date');
+      const existingClients = await base44.entities.Client.list('-updated_date', 200);
       
       const createdClients = [];
       const updatedClients = [];
