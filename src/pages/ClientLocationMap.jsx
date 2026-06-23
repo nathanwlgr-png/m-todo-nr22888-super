@@ -55,6 +55,86 @@ function calcDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+const CITY_COORDINATES = {
+  'marilia': [-22.2139, -49.9458],
+  'marília': [-22.2139, -49.9458],
+  'presidente prudente': [-22.1256, -51.3889],
+  'assis': [-22.6617, -50.4111],
+  'tupa': [-21.9347, -50.5117],
+  'tupã': [-21.9347, -50.5117],
+  'adamantina': [-21.6853, -51.0725],
+  'bauru': [-22.3147, -49.0606],
+  'aracatuba': [-21.2081, -50.4328],
+  'araçatuba': [-21.2081, -50.4328],
+  'ourinhos': [-22.9789, -49.8706],
+  'dracena': [-21.4828, -51.5314],
+  'lins': [-22.2189, -49.7431],
+  'garca': [-22.2125, -49.6546],
+  'birigui': [-21.2886, -50.3406],
+  'andradina': [-20.8961, -51.3786],
+  'avare': [-23.0987, -48.9251],
+  'bariri': [-22.0744, -48.7403],
+  'lencois paulista': [-22.5986, -48.8003],
+  'santa cruz do rio pardo': [-22.8989, -49.6354],
+  'piraju': [-23.1936, -49.3839],
+  'vera cruz': [-22.2214, -49.8206],
+  'promissao': [-21.5367, -49.8586],
+  'guararapes': [-21.2608, -50.6428],
+  'paraguacu paulista': [-22.4128, -50.5733],
+  'sao manuel': [-22.7311, -48.5706],
+  'palmital': [-22.7858, -50.2175],
+  'cafelandia': [-21.8033, -49.6092],
+  'candido mota': [-22.7464, -50.3869],
+  'pompeia': [-22.1070, -50.1760],
+  'pirajui': [-21.9986, -49.4572],
+  'pederneiras': [-22.3511, -48.7781],
+  'duartina': [-22.4142, -49.4089],
+  'barra bonita': [-22.4947, -48.5581],
+  'valparaiso': [-21.2278, -50.8697],
+  'mirandopolis': [-21.1331, -51.1031],
+  'agudos': [-22.4694, -48.9864],
+  'ipaussu': [-23.0575, -49.6275],
+  'botucatu': [-22.8869, -48.4450],
+  'jau': [-22.2775, -48.5545],
+  'jaú': [-22.2775, -48.5545],
+  'araraquara': [-21.7930, -48.1763],
+  'ribeirao preto': [-21.1767, -47.8101],
+  'ribeirão preto': [-21.1767, -47.8101],
+  'sao paulo': [-23.5505, -46.6333],
+  'são paulo': [-23.5505, -46.6333],
+  'campinas': [-22.9099, -47.0626],
+};
+
+function normalizeCity(city) {
+  return String(city || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function getExactClientLatLng(client) {
+  const lat = Number(client.latitude ?? client.lat ?? client.google_latitude ?? client.maps_latitude ?? client.location?.lat ?? client.geo?.lat);
+  const lng = Number(client.longitude ?? client.lng ?? client.lon ?? client.google_longitude ?? client.maps_longitude ?? client.location?.lng ?? client.geo?.lng);
+  const validBrazil = lat >= -34 && lat <= 6 && lng >= -74 && lng <= -34;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !validBrazil) return null;
+  return { lat, lng, approximate: false };
+}
+
+function getClientLatLng(client) {
+  const exact = getExactClientLatLng(client);
+  if (exact) return exact;
+  const cityCoords = CITY_COORDINATES[normalizeCity(client.city)] || CITY_COORDINATES[String(client.city || '').trim().toLowerCase()];
+  if (!cityCoords) return null;
+  return { lat: cityCoords[0], lng: cityCoords[1], approximate: true };
+}
+
+function buildGoogleRouteUrl(points, myLocation) {
+  if (!points.length) return null;
+  const selected = points.slice(0, 8);
+  const destination = selected[selected.length - 1];
+  const waypoints = selected.slice(0, -1).map(c => `${c._lat},${c._lng}`).join('|');
+  const origin = myLocation ? `&origin=${myLocation[0]},${myLocation[1]}` : '';
+  const via = waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : '';
+  return `https://www.google.com/maps/dir/?api=1${origin}&destination=${destination._lat},${destination._lng}${via}&travelmode=driving`;
+}
+
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────
 export default function ClientLocationMap() {
   const [filterStatus, setFilterStatus] = useState('todos');
@@ -67,7 +147,7 @@ export default function ClientLocationMap() {
 
   const { data: clients = [], isLoading, refetch } = useQuery({
     queryKey: ['client-map'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 500),
+    queryFn: () => base44.entities.Client.list('-updated_date', 1000),
     staleTime: 60000,
   });
 
@@ -97,16 +177,23 @@ export default function ClientLocationMap() {
   // Pegar localização automaticamente ao abrir
   useEffect(() => { locateMe(); }, []);
 
-  // ── CLIENTES COM LOCALIZAÇÃO + DISTÂNCIA ─────────────────────────────────
+  // ── CLÍNICAS COM LOCALIZAÇÃO + DISTÂNCIA ─────────────────────────────────
   const clientsWithCoords = useMemo(() =>
     clients
-      .filter(c => c.latitude && c.longitude)
-      .map(c => ({
-        ...c,
-        distance: myLocation
-          ? calcDistance(myLocation[0], myLocation[1], c.latitude, c.longitude)
-          : null,
-      }))
+      .map(c => {
+        const coords = getClientLatLng(c);
+        if (!coords) return null;
+        return {
+          ...c,
+          _lat: coords.lat,
+          _lng: coords.lng,
+          _locationApprox: coords.approximate,
+          distance: myLocation
+            ? calcDistance(myLocation[0], myLocation[1], coords.lat, coords.lng)
+            : null,
+        };
+      })
+      .filter(Boolean)
       .sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999)),
     [clients, myLocation]
   );
@@ -126,9 +213,11 @@ export default function ClientLocationMap() {
   );
 
   const clientsNeedingGeocode = useMemo(() =>
-    clients.filter(c => !c.latitude || !c.longitude),
+    clients.filter(c => !getExactClientLatLng(c)),
     [clients]
   );
+
+  const routeUrl = useMemo(() => buildGoogleRouteUrl(nearby.length ? nearby : filtered, myLocation), [nearby, filtered, myLocation]);
 
   const handleGeocodeAll = useCallback(async () => {
     if (clientsNeedingGeocode.length === 0) { toast.success('Todos já têm localização!'); return; }
@@ -167,7 +256,7 @@ export default function ClientLocationMap() {
       <div className="flex items-center justify-between flex-wrap gap-2 px-1">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-blue-600" />
-          <span className="font-black text-slate-800 text-base">Radar de Clientes</span>
+          <span className="font-black text-slate-800 text-base">Mapa de Clínicas da Matriz</span>
           <Badge variant="outline" className="text-xs">{filtered.length} no mapa</Badge>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -191,6 +280,13 @@ export default function ClientLocationMap() {
             <option value={20}>Raio 20 km</option>
             <option value={50}>Raio 50 km</option>
           </select>
+          {routeUrl && (
+            <a href={routeUrl} target="_blank" rel="noreferrer">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1 h-8 text-xs">
+                <Navigation2 className="w-4 h-4" /> Rota Matriz
+              </Button>
+            </a>
+          )}
           <Button onClick={locateMe} disabled={locating} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1 h-8 text-xs">
             <LocateFixed className={`w-4 h-4 ${locating ? 'animate-pulse' : ''}`} />
             {locating ? 'Localizando...' : 'Minha Posição'}
@@ -205,7 +301,7 @@ export default function ClientLocationMap() {
       {clientsNeedingGeocode.length > 0 && (
         <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-800 mx-1">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span><strong>{clientsNeedingGeocode.length}</strong> clientes sem coordenadas.</span>
+          <span><strong>{clientsNeedingGeocode.length}</strong> clientes sem coordenadas exatas — o mapa usa ponto aproximado por cidade enquanto aguarda validação.</span>
           <Button onClick={handleGeocodeAll} size="sm" variant="outline" className="h-6 text-xs ml-auto gap-1 border-amber-400">
             <Zap className="w-3 h-3" />Geocodificar
           </Button>
@@ -238,14 +334,14 @@ export default function ClientLocationMap() {
           {filtered.map(client => (
             <Marker
               key={client.id}
-              position={[client.latitude, client.longitude]}
+              position={[client._lat, client._lng]}
               icon={createClientIcon(client.status)}
               eventHandlers={{ click: () => setSelectedClient(client) }}
             >
               <Popup>
                 <div className="w-52 text-sm">
                   <p className="font-bold leading-tight">{client.clinic_name || client.first_name}</p>
-                  <p className="text-xs text-slate-500 mb-1">{client.city}</p>
+                  <p className="text-xs text-slate-500 mb-1">{client.city}{client._locationApprox ? ' · coordenada aproximada por cidade' : ''}</p>
                   <div className="flex gap-1 flex-wrap">
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${statusBadge[client.status] || 'bg-gray-500'}`}>
                       {statusLabel[client.status] || client.status}
@@ -308,7 +404,7 @@ export default function ClientLocationMap() {
                     key={client.id}
                     onClick={() => {
                       setSelectedClient(client);
-                      setFlyTarget([client.latitude, client.longitude]);
+                      setFlyTarget([client._lat, client._lng]);
                     }}
                     className={`flex items-center gap-3 px-4 py-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition-colors ${selectedClient?.id === client.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
                   >
@@ -322,7 +418,7 @@ export default function ClientLocationMap() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-slate-800 truncate">{client.clinic_name || client.first_name}</p>
-                      <p className="text-xs text-slate-400 truncate">{client.city} {client.address ? `• ${client.address}` : ''}</p>
+                      <p className="text-xs text-slate-400 truncate">{client.city} {client._locationApprox ? '• ponto aproximado' : ''} {client.address ? `• ${client.address}` : ''}</p>
                     </div>
 
                     {/* Status + Score */}
@@ -354,9 +450,9 @@ export default function ClientLocationMap() {
                       >
                         <Search className="w-4 h-4" />
                       </a>
-                      {client.latitude && client.longitude && (
+                      {client._lat && client._lng && (
                         <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${client.latitude},${client.longitude}`}
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${client._lat},${client._lng}`}
                           target="_blank" rel="noreferrer"
                           onClick={e => e.stopPropagation()}
                           className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"

@@ -219,7 +219,7 @@ export default function DashboardSniper() {
           <Link to="/ClientLocationMap">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-blue-500/30">
               <MapPin className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-black text-blue-400">📍 Mapa Clientes</span>
+              <span className="text-xs font-black text-blue-400">📍 Mapa Matriz</span>
             </div>
           </Link>
           <Link to="/AgendaMensal">
