@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,8 @@ import EconomicMode from '@/lib/EconomicMode';
 import AIUnavailableNotice from '@/components/AIUnavailableNotice';
 
 export default function GenerateWhatsAppIntegrated() {
-  const [clientId, setClientId] = useState('');
+  const initialClientId = new URLSearchParams(window.location.search).get('client_id') || '';
+  const [clientId, setClientId] = useState(initialClientId);
   const [searchText, setSearchText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -38,6 +39,13 @@ export default function GenerateWhatsAppIntegrated() {
         );
       }).slice(0, 8)
     : [];
+
+  useEffect(() => {
+    const selected = allClients.find(c => c.id === clientId);
+    if (selected && !searchText) {
+      setSearchText(selected.clinic_name || selected.full_name || selected.first_name || '');
+    }
+  }, [allClients, clientId, searchText]);
 
   // Selecionar cliente da lista
   const selectClient = (c) => {
@@ -121,7 +129,8 @@ export default function GenerateWhatsAppIntegrated() {
       toast.error('Cliente sem WhatsApp registrado');
       return;
     }
-    const phone = client.phone.replace(/\D/g, '');
+    const digits = client.phone.replace(/\D/g, '');
+    const phone = digits.startsWith('55') ? digits : `55${digits}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };

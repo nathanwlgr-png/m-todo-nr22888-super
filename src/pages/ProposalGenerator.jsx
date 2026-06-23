@@ -22,7 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 export default function ProposalGenerator() {
-  const [selectedClientId, setSelectedClientId] = useState('');
+  const initialClientId = new URLSearchParams(window.location.search).get('client_id') || '';
+  const [selectedClientId, setSelectedClientId] = useState(initialClientId);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedConsumables, setSelectedConsumables] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('');
