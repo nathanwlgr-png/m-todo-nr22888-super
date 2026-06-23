@@ -6,7 +6,7 @@ const PENDENCIAS = [
   { label: '423 clientes sem coordenada validada', tag: 'APROVAÇÃO HUMANA' },
   { label: 'Geocode depende da Geocoding API (Google Cloud)', tag: 'CONFIG NATHAN' },
   { label: '29 produtos sem foto oficial', tag: 'UPLOAD MANUAL' },
-  { label: 'Gmail / Drive / Docs / Instagram', tag: 'CONEXÃO MANUAL' },
+  { label: 'Gmail / Drive / Docs / Instagram — aguardam OAuth seguro', tag: 'APROVAR NO CHAT' },
   { label: 'Telegram bot — teste real', tag: 'DISPOSITIVO REAL' },
   { label: 'WhatsApp: status corrigido (aberto ≠ enviado)', tag: 'OK', done: true },
   { label: 'Geocode SAFE: nunca aplica coordenada direto', tag: 'OK', done: true },

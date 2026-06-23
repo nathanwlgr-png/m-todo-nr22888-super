@@ -60,18 +60,11 @@ export default function ResolverPendencias() {
     }
   };
 
-  // 3. Conexões OAuth (Gmail / Drive / Instagram) — abre autorização Base44
-  const conectar = async (integration) => {
-    setBusy(integration);
-    try {
-      const url = await base44.connectors.connectAppUser(integration);
-      window.open(url, '_blank');
-      setRes(integration, { ok: true, msg: 'Janela de autorização aberta. Conclua o login e volte aqui.' });
-    } catch (e) {
-      setRes(integration, { ok: false, msg: 'Não foi possível abrir a autorização. Tente pela tela de Integrações.' });
-    } finally {
-      setBusy(null);
-    }
+  // 3. Conexões OAuth — não abrir conector com slug direto no app.
+  // A autorização real é feita pelo assistente/Base44 para evitar falha no Samsung Browser.
+  const abrirIntegracoes = (integration) => {
+    setRes(integration, { ok: true, msg: 'Conexão preparada. A autorização segura deve ser confirmada pelo cartão de OAuth no chat/Base44.' });
+    window.location.href = '/Integrations';
   };
 
   // 4. Telegram — teste real
@@ -178,9 +171,9 @@ export default function ResolverPendencias() {
             id="gmail"
             icon={Plug}
             titulo="Conectar Gmail"
-            desc="Autoriza o envio/leitura de e-mails."
-            tag="CONEXÃO MANUAL"
-            onClick={() => conectar('gmail')}
+            desc="Envio/leitura de e-mails exige autorização segura fora do navegador mobile."
+            tag="OAUTH SEGURO"
+            onClick={() => abrirIntegracoes('gmail')}
             loading={busy === 'gmail'}
             cor="#ef4444"
           />
@@ -189,9 +182,9 @@ export default function ResolverPendencias() {
             id="googledrive"
             icon={Plug}
             titulo="Conectar Google Drive / Docs"
-            desc="Autoriza acesso a arquivos e documentos."
-            tag="CONEXÃO MANUAL"
-            onClick={() => conectar('googledrive')}
+            desc="Arquivos e documentos usam autorização OAuth segura do Base44."
+            tag="OAUTH SEGURO"
+            onClick={() => abrirIntegracoes('googledrive')}
             loading={busy === 'googledrive'}
             cor="#facc15"
           />
@@ -200,9 +193,9 @@ export default function ResolverPendencias() {
             id="instagram"
             icon={Plug}
             titulo="Conectar Instagram"
-            desc="Autoriza publicação e comentários."
-            tag="CONEXÃO MANUAL"
-            onClick={() => conectar('instagram')}
+            desc="Publicação e comentários exigem autorização segura da conta Business."
+            tag="OAUTH SEGURO"
+            onClick={() => abrirIntegracoes('instagram')}
             loading={busy === 'instagram'}
             cor="#ec4899"
           />
