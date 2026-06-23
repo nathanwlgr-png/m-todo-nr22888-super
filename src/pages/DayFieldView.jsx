@@ -7,6 +7,7 @@ import {
   MessageSquare, Target, ChevronRight, RefreshCw, Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
+import useActionLock from '@/hooks/useActionLock';
 
 export default function DayFieldView() {
   const now = new Date();
@@ -14,6 +15,7 @@ export default function DayFieldView() {
   const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
   const [completedTasks, setCompletedTasks] = useState(new Set());
+  const { locked: actionLocked, runWithLock } = useActionLock();
 
   // Buscar tarefas do dia
   const { data: allTasks = [], refetch: refetchTasks } = useQuery({
@@ -58,18 +60,18 @@ export default function DayFieldView() {
     client: clients.find(c => c.id === v.client_id)
   }));
 
-  const handleCompleteTask = async (taskId) => {
+  const handleCompleteTask = async (taskId) => runWithLock(async () => {
     await base44.entities.Task.update(taskId, { status: 'concluida' });
     setCompletedTasks(prev => new Set([...prev, taskId]));
     toast.success('Tarefa concluída!');
     refetchTasks();
-  };
+  });
 
-  const handleCompleteVisit = async (visitId) => {
+  const handleCompleteVisit = async (visitId) => runWithLock(async () => {
     await base44.entities.Visit.update(visitId, { status: 'realizada' });
     toast.success('Visita marcada como realizada!');
     refetchVisits();
-  };
+  });
 
   const formatTime = (date) => {
     return new Date(date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -161,7 +163,8 @@ export default function DayFieldView() {
                   </div>
 
                   <button onClick={() => handleCompleteTask(task.id)}
-                    className="w-full py-3 rounded-xl text-lg font-black transition-all"
+                    disabled={actionLocked || completedTasks.has(task.id)}
+                    className="w-full py-3 rounded-xl text-lg font-black transition-all disabled:opacity-50"
                     style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '2px solid rgba(34,197,94,0.4)' }}>
                     ✓ CONCLUIR
                   </button>
@@ -233,7 +236,8 @@ export default function DayFieldView() {
 
                   {/* Botão concluir visita */}
                   <button onClick={() => handleCompleteVisit(visit.id)}
-                    className="w-full mt-2 py-3 rounded-xl text-lg font-black text-blue-400 transition-all"
+                    disabled={actionLocked}
+                    className="w-full mt-2 py-3 rounded-xl text-lg font-black text-blue-400 transition-all disabled:opacity-50"
                     style={{ background: 'rgba(0,191,255,0.15)', border: '2px solid rgba(0,191,255,0.4)' }}>
                     ✓ VISITA REALIZADA
                   </button>
@@ -249,10 +253,20 @@ export default function DayFieldView() {
             <p className="text-3xl mb-4">🎉</p>
             <h3 className="text-xl font-black text-white mb-2">Dia livre!</h3>
             <p className="text-slate-400">Nenhuma tarefa ou visita agendada para hoje.</p>
-            <Link to="/Clients" className="mt-6 inline-block px-6 py-3 rounded-xl text-white font-bold"
-              style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
-              Ver clientes
-            </Link>
+            <div className="mt-6 grid grid-cols-1 gap-3 max-w-sm mx-auto">
+              <Link to="/ModoCacaComercial" className="inline-block px-6 py-3 rounded-xl text-white font-black"
+                style={{ background: 'rgba(244,63,94,0.16)', border: '1px solid rgba(244,63,94,0.4)' }}>
+                🎯 Caçar clínicas na região
+              </Link>
+              <Link to="/PainelConcorrencia" className="inline-block px-6 py-3 rounded-xl text-white font-bold"
+                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.35)' }}>
+                🧭 Localizar concorrentes
+              </Link>
+              <Link to="/RankingOportunidades" className="inline-block px-6 py-3 rounded-xl text-white font-bold"
+                style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
+                🏆 Ver oportunidades quentes
+              </Link>
+            </div>
           </div>
         )}
 

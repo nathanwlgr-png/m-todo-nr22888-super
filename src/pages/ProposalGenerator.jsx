@@ -20,6 +20,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import useActionLock from '@/hooks/useActionLock';
 
 export default function ProposalGenerator() {
   const initialClientId = new URLSearchParams(window.location.search).get('client_id') || '';
@@ -41,6 +42,7 @@ export default function ProposalGenerator() {
     release_mode: 'manual'
   });
   const queryClient = useQueryClient();
+  const { locked: actionLocked, runWithLock } = useActionLock();
 
   const { data: documents = [] } = useQuery({
     queryKey: ['ai-knowledge-docs-active'],
@@ -56,6 +58,12 @@ export default function ProposalGenerator() {
   const { data: equipmentCatalog = [] } = useQuery({
     queryKey: ['equipment-catalog-active'],
     queryFn: () => base44.entities.Equipment ? base44.entities.Equipment.filter({ is_active: true }).catch(() => []) : [],
+    staleTime: 300000,
+  });
+
+  const { data: seamatyPrices = [] } = useQuery({
+    queryKey: ['seamaty-price-table-active'],
+    queryFn: () => base44.entities.SeamatyPriceTable ? base44.entities.SeamatyPriceTable.filter({ is_active: true }).catch(() => []) : [],
     staleTime: 300000,
   });
 
@@ -163,10 +171,22 @@ export default function ProposalGenerator() {
   const products = [...documentProducts, ...catalogProducts, ...equipmentProducts]
     .filter((p, index, arr) => p?.nome && arr.findIndex(x => x.nome === p.nome) === index);
 
-  // Extrair preços
-  const prices = documents
+  // Extrair preços oficiais e documentos validados
+  const documentPrices = documents
     .filter(d => d.document_type === 'tabela_precos' && d.key_data?.precos)
     .flatMap(d => d.key_data.precos || []);
+
+  const tablePrices = seamatyPrices.map(p => ({
+    produto: p.product_name,
+    preco_vista: p.price_cash,
+    preco_parcelado: p.price_5x_card ? `5x de R$ ${(p.price_5x_card / 5).toLocaleString('pt-BR')}` : 'Sob consulta',
+    condicoes: p.region ? `Tabela ${p.region}` : 'Tabela oficial Seamaty',
+    bonificacao: 'Conforme campanha comercial vigente',
+    garantia: 'Conforme contrato Seamaty'
+  }));
+
+  const prices = [...documentPrices, ...tablePrices]
+    .filter((p, index, arr) => p?.produto && arr.findIndex(x => x.produto === p.produto) === index);
 
   // Clientes da região Laranja (Marília e 200km)
   const cidadesLaranja = [
@@ -196,7 +216,7 @@ export default function ProposalGenerator() {
     );
   };
 
-  const generateProposal = async () => {
+  const generateProposal = async () => runWithLock(async () => {
     if (!selectedClientId || selectedProducts.length === 0) {
       toast.error('Selecione cliente e pelo menos um produto');
       return;
@@ -210,7 +230,11 @@ export default function ProposalGenerator() {
     setGenerating(true);
     try {
       const selectedProds = selectedProducts.map(prodName => products.find(p => p.nome === prodName));
-      const selectedPrices = selectedProducts.map(prodName => prices.find(p => p.produto?.includes(prodName)));
+      const selectedPrices = selectedProducts.map(prodName => prices.find(p => {
+        const priceName = String(p.produto || '').toLowerCase();
+        const productName = String(prodName || '').toLowerCase();
+        return priceName.includes(productName) || productName.includes(priceName);
+      }));
       const selectedConsums = selectedConsumables.map(id => consumables.find(c => c.id === id));
 
       // Dados do cliente para personalização
@@ -306,12 +330,14 @@ Use as variáveis:
       }
 
       prompt += `\n\nGere uma proposta PROFISSIONAL E PERSUASIVA que:
-1. Aborde especificamente as necessidades do cliente
-2. Conecte os produtos às dores identificadas
-3. Use os dados do histórico para criar rapport
-4. Mostre ROI e benefícios tangíveis
-5. Tenha tom personalizado e consultivo
-6. Inclua próximos passos claros`;
+      1. Aborde especificamente as necessidades do cliente
+      2. Conecte os produtos às dores identificadas
+      3. Use os dados do histórico para criar rapport
+      4. Mostre ROI e benefícios tangíveis, comparando equipamento próprio Seamaty contra terceirização/perda de tempo operacional
+      5. Use os preços oficiais acima quando disponíveis e explique o investimento de forma simples
+      6. Cite o equipamento atual/concorrente do cliente como oportunidade de melhoria, sem atacar marcas de forma antiética
+      7. Tenha tom personalizado e consultivo
+      8. Inclua próximos passos claros para WhatsApp, demonstração ou fechamento`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
 
@@ -322,19 +348,25 @@ Use as variáveis:
     } finally {
       setGenerating(false);
     }
-  };
+  });
 
   const copyProposal = () => {
     navigator.clipboard.writeText(proposal);
     toast.success('Proposta copiada!');
   };
 
-  const sendProposal = async () => {
+  const sendProposal = async () => runWithLock(async () => {
     if (!proposal || !selectedClient) return;
 
     try {
       if (!selectedClient.phone) {
         toast.error('Cliente sem WhatsApp cadastrado');
+        return;
+      }
+
+      const digits = selectedClient.phone.replace(/\D/g, '');
+      if (digits.length < 10) {
+        toast.error('WhatsApp do cliente parece incompleto');
         return;
       }
 
@@ -354,7 +386,7 @@ Use as variáveis:
     } catch (error) {
       toast.error('Erro ao enviar');
     }
-  };
+  });
 
   const createTemplate = () => {
     if (!newTemplate.name || !newTemplate.content_template) {
@@ -571,7 +603,7 @@ Use as variáveis:
           <Button 
             onClick={generateProposal}
             className="w-full bg-indigo-600 hover:bg-indigo-700"
-            disabled={generating || !selectedClientId || selectedProducts.length === 0}
+            disabled={generating || actionLocked || !selectedClientId || selectedProducts.length === 0}
           >
             {generating ? (
               <>
@@ -601,7 +633,7 @@ Use as variáveis:
                   clientName={selectedClient?.first_name}
                   selectedProducts={selectedProducts.map(name => ({ name }))}
                 />
-                <Button size="sm" onClick={sendProposal} className="bg-green-600 hover:bg-green-700">
+                <Button size="sm" onClick={sendProposal} disabled={actionLocked} className="bg-green-600 hover:bg-green-700">
                   <Send className="w-4 h-4 mr-1" />
                   Enviar WhatsApp
                 </Button>

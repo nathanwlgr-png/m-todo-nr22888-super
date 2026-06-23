@@ -72,6 +72,28 @@ export default function DashboardSniper() {
           <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
         </div>
 
+        {/* ── MÁQUINA DE VENDA — foco: vender, concorrência, fechamento ── */}
+        <div className="grid grid-cols-3 gap-2">
+          <Link to="/ModoCacaComercial">
+            <div className="rounded-xl p-3 text-center bg-rose-500/10 border border-rose-500/35">
+              <p className="text-lg">🎯</p>
+              <p className="text-[10px] font-black text-rose-300 uppercase">Caçar</p>
+            </div>
+          </Link>
+          <Link to="/PainelConcorrencia">
+            <div className="rounded-xl p-3 text-center bg-cyan-500/10 border border-cyan-500/35">
+              <p className="text-lg">🧭</p>
+              <p className="text-[10px] font-black text-cyan-300 uppercase">Concorrente</p>
+            </div>
+          </Link>
+          <Link to="/RankingOportunidades">
+            <div className="rounded-xl p-3 text-center bg-orange-500/10 border border-orange-500/35">
+              <p className="text-lg">💰</p>
+              <p className="text-[10px] font-black text-orange-300 uppercase">Fechar</p>
+            </div>
+          </Link>
+        </div>
+
         {/* ── 1. SNIPER DO DIA — O FOGO (topo absoluto) ── */}
         <Suspense fallback={<HeavyFallback />}>
           <SniperDoDia />

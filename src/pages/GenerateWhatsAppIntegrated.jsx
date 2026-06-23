@@ -7,6 +7,7 @@ import { Copy, Send, CheckCircle2, X, Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import EconomicMode from '@/lib/EconomicMode';
 import AIUnavailableNotice from '@/components/AIUnavailableNotice';
+import useActionLock from '@/hooks/useActionLock';
 
 export default function GenerateWhatsAppIntegrated() {
   const initialClientId = new URLSearchParams(window.location.search).get('client_id') || '';
@@ -19,6 +20,7 @@ export default function GenerateWhatsAppIntegrated() {
   const [loading, setLoading] = useState(false);
   const [economicStatus, setEconomicStatus] = useState(EconomicMode.getStatus());
   const messagesEndRef = useRef(null);
+  const { locked: actionLocked, runWithLock } = useActionLock();
 
   // Lista de todos os clientes para busca por nome
   const { data: allClients = [] } = useQuery({
@@ -74,7 +76,7 @@ export default function GenerateWhatsAppIntegrated() {
   });
 
   // Gera mensagens SPIN
-  const generateMessages = async () => {
+  const generateMessages = async () => runWithLock(async () => {
     if (!client) {
       toast.error('Cliente não encontrado');
       return;
@@ -91,6 +93,7 @@ export default function GenerateWhatsAppIntegrated() {
       const res = await base44.functions.invoke('generateSpinSellingMessages', {
         client_id: clientId,
         client_name: client.full_name || client.first_name,
+        clinic_name: client.clinic_name,
         city: client.city,
         last_interaction: client.last_contact_date,
         current_equipment: client.current_equipment,
@@ -108,7 +111,7 @@ export default function GenerateWhatsAppIntegrated() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   // Copiar mensagem
   const copyMessage = (msg) => {
@@ -123,6 +126,10 @@ export default function GenerateWhatsAppIntegrated() {
       return;
     }
     const digits = client.phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      toast.error('WhatsApp do cliente parece incompleto');
+      return;
+    }
     const phone = digits.startsWith('55') ? digits : `55${digits}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -144,11 +151,11 @@ export default function GenerateWhatsAppIntegrated() {
   };
 
   // Aprovar e enviar
-  const approveAndSend = async (msg) => {
+  const approveAndSend = async (msg) => runWithLock(async () => {
     await saveInteraction(msg);
     sendWhatsApp(msg);
     setShowApproval(false);
-  };
+  });
 
   const lastInteraction = interactions[0]?.created_date || client?.last_contact_date;
 
@@ -208,7 +215,7 @@ export default function GenerateWhatsAppIntegrated() {
               </div>
               <Button
                 onClick={generateMessages}
-                disabled={!clientId || clientLoading || loading}
+                disabled={!clientId || clientLoading || loading || actionLocked}
                 className="bg-orange-600 hover:bg-orange-700 shrink-0"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
@@ -332,7 +339,8 @@ export default function GenerateWhatsAppIntegrated() {
                           <Button
                             size="sm"
                             className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
-                            onClick={() => sendWhatsApp(msg.text)}
+                            onClick={() => runWithLock(() => sendWhatsApp(msg.text))}
+                            disabled={actionLocked}
                           >
                             <Send className="w-4 h-4 mr-1" />
                             WhatsApp Direto
@@ -378,6 +386,7 @@ export default function GenerateWhatsAppIntegrated() {
                   <Button
                     className="flex-1 bg-orange-600 hover:bg-orange-700"
                     onClick={() => approveAndSend(messages[showApproval].text)}
+                    disabled={actionLocked}
                   >
                     <Send className="w-4 h-4 mr-1" />
                     Enviar via WhatsApp
