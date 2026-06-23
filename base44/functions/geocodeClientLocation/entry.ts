@@ -9,10 +9,22 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
-    const { client_id, address, clinic_name, city, state = 'SP' } = await req.json();
+    const payload = await req.json().catch(() => ({}));
+    const record = payload.data || payload.client || {};
+    const client_id = payload.client_id || record.id || payload?.event?.entity_id;
+    const address = payload.address || record.address || record.location || '';
+    const clinic_name = payload.clinic_name || record.clinic_name || record.first_name || record.full_name || '';
+    const city = payload.city || record.city || '';
+    const state = payload.state || record.state || record.uf || 'SP';
 
     if (!client_id) {
-      return Response.json({ error: 'client_id obrigatório' }, { status: 400 });
+      return Response.json({
+        success: false,
+        queued: false,
+        geocoded: false,
+        error: 'client_id obrigatório',
+        status: 'payload_incompleto',
+      }, { status: 400 });
     }
 
     // Buscar cliente atual. Se não existir, retornar 404 SEM criar fila.

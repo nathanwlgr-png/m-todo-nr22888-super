@@ -19,12 +19,13 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const onlyId = body?.competitor_id || null;
+    const dryRun = body?.dry_run === true;
+    const limit = Number.isFinite(Number(body?.limit)) ? Math.max(1, Math.min(Number(body.limit), 2)) : 1;
 
     const filtro = onlyId ? { id: onlyId } : { ativo: true };
-    // Limite seguro: no máximo 2 por execução. Cada concorrente faz 1 chamada de IA com
-    // contexto da internet, que pode demorar muito. Mais que isso estoura o timeout.
-    // Roda em rodízio semanal: prioriza os menos investigados recentemente (ordem ascendente).
-    const concorrentes = await base44.asServiceRole.entities.CompetitorTracker.filter(filtro, 'ultima_investigacao', onlyId ? 1 : 2);
+    // Limite seguro: padrão 1 por execução para evitar timeout em automação semanal.
+    // Execução manual pode passar limit=2. Roda em rodízio pelos menos investigados.
+    const concorrentes = await base44.asServiceRole.entities.CompetitorTracker.filter(filtro, 'ultima_investigacao', onlyId ? 1 : limit);
 
     const resultados = [];
 
@@ -94,10 +95,12 @@ Se nada novo for encontrado, retorne tem_novidade=false e listas vazias.`,
         ]);
 
         if (!ia?.tem_novidade) {
-          await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
-            ultima_investigacao: new Date().toISOString()
-          });
-          resultados.push({ nome: c.nome, novidades: 0 });
+          if (!dryRun) {
+            await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
+              ultima_investigacao: new Date().toISOString()
+            });
+          }
+          resultados.push({ nome: c.nome, novidades: 0, dry_run: dryRun });
           continue;
         }
 
@@ -116,32 +119,37 @@ Se nada novo for encontrado, retorne tem_novidade=false e listas vazias.`,
 
         const todasNovas = [...novasInstalacoes, ...novasCatalogo];
         if (todasNovas.length === 0) {
-          await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
-            ultima_investigacao: new Date().toISOString()
-          });
-          resultados.push({ nome: c.nome, novidades: 0 });
+          if (!dryRun) {
+            await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
+              ultima_investigacao: new Date().toISOString()
+            });
+          }
+          resultados.push({ nome: c.nome, novidades: 0, dry_run: dryRun });
           continue;
         }
 
         const publicacoesAtualizadas = [...todasNovas, ...(c.ultimas_publicacoes || [])].slice(0, 20);
         const temInstalacao = novasInstalacoes.length > 0;
 
-        await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
-          ultimas_publicacoes: publicacoesAtualizadas,
-          equipamento_instalado: novasInstalacoes[0]
-            ? (novasInstalacoes[0].resumo).slice(0, 200)
-            : (c.equipamento_instalado || ''),
-          oportunidade_detectada: ia.oportunidade_detectada || c.oportunidade_detectada || '',
-          status_monitoramento: (temInstalacao || ia.oportunidade_detectada) ? 'oportunidade_quente' : (c.status_monitoramento || 'monitorado'),
-          ultima_investigacao: new Date().toISOString()
-        });
+        if (!dryRun) {
+          await base44.asServiceRole.entities.CompetitorTracker.update(c.id, {
+            ultimas_publicacoes: publicacoesAtualizadas,
+            equipamento_instalado: novasInstalacoes[0]
+              ? (novasInstalacoes[0].resumo).slice(0, 200)
+              : (c.equipamento_instalado || ''),
+            oportunidade_detectada: ia.oportunidade_detectada || c.oportunidade_detectada || '',
+            status_monitoramento: (temInstalacao || ia.oportunidade_detectada) ? 'oportunidade_quente' : (c.status_monitoramento || 'monitorado'),
+            ultima_investigacao: new Date().toISOString()
+          });
+        }
 
         resultados.push({
           nome: c.nome,
           novidades: todasNovas.length,
           instalacoes: novasInstalacoes.length,
           catalogo: novasCatalogo.length,
-          oportunidade: !!ia.oportunidade_detectada
+          oportunidade: !!ia.oportunidade_detectada,
+          dry_run: dryRun
         });
       } catch (e) {
         resultados.push({ nome: c.nome, erro: e.message });
@@ -149,7 +157,7 @@ Se nada novo for encontrado, retorne tem_novidade=false e listas vazias.`,
     }
 
     const totalNovidades = resultados.reduce((s, r) => s + (r.novidades || 0), 0);
-    return Response.json({ success: true, auto: isAuto, analisados: concorrentes.length, total_novidades: totalNovidades, resultados });
+    return Response.json({ success: true, auto: isAuto, dry_run: dryRun, analisados: concorrentes.length, total_novidades: totalNovidades, resultados });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
