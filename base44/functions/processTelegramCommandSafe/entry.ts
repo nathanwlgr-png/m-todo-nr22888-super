@@ -51,8 +51,14 @@ async function oneClient(base44, raw) {
 
 function competitorFor(client, competitors) {
   const city = norm(client?.city);
-  const eq = norm(`${client?.current_equipment || ''} ${client?.equipment_interest || ''}`);
-  return competitors.find(c => (city && norm(c.cidade) === city) || (c.marca_concorrente && eq.includes(norm(c.marca_concorrente)))) || null;
+  const eq = norm(`${client?.current_equipment || ''} ${client?.equipment_interest || ''} ${client?.equipment_sold || ''}`);
+  // Verifica vínculo direto (equipamento/marca no perfil do cliente)
+  const direct = competitors.find(c => c.marca_concorrente && eq.includes(norm(c.marca_concorrente)));
+  if (direct) return { ...direct, _match_type: 'cliente' };
+  // Fallback: mesmo cidade
+  const byCity = competitors.find(c => city && norm(c.cidade) === city);
+  if (byCity) return { ...byCity, _match_type: 'cidade' };
+  return null;
 }
 
 async function sniper(base44, limit = 10) {
@@ -65,7 +71,8 @@ async function sniper(base44, limit = 10) {
     const c = await get(base44, 'Client', s.cliente_id);
     if (!c) continue;
     const comp = competitorFor(c, competitors);
-    out.push(`${out.length + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${s.elite_score || c.purchase_score || 0}\nMotivo: ${s.motivo_score || 'prioridade comercial'}\nPróxima ação: ${s.proxima_melhor_acao || c.next_action || 'abrir conversa comercial'}\n${c.phone ? 'WhatsApp disponível' : 'sem WhatsApp'}${comp ? `\nConcorrente: ${comp.nome} · ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : ''}`);
+    const compLabel = comp ? (comp._match_type === 'cliente' ? `Concorrente detectado: ${comp.nome}` : `Concorrente na cidade: ${comp.nome}`) : '';
+    out.push(`${out.length + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${s.elite_score || c.purchase_score || 0}\nMotivo: ${s.motivo_score || 'prioridade comercial'}\nPróxima ação: ${s.proxima_melhor_acao || c.next_action || 'abrir conversa comercial'}\n${c.phone ? 'WhatsApp disponível' : 'sem WhatsApp'}${comp ? `\n${compLabel} · ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : ''}`);
     if (out.length >= limit) break;
   }
   return out;
@@ -74,11 +81,15 @@ async function sniper(base44, limit = 10) {
 async function concorrentes(base44, raw) {
   const q = norm(raw);
   const comps = await filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 50);
+  // Tenta obter cidade a partir de clientes OU usa o termo direto como cidade
   const possibleClients = q ? await findClients(base44, raw, 2) : [];
-  const city = norm(possibleClients[0]?.city || '');
+  const cityFromClient = norm(possibleClients[0]?.city || '');
+  const cityDirect = q; // o próprio termo pode ser o nome da cidade
   return comps.filter(c => {
-    const text = norm(`${c.nome} ${c.marca_concorrente} ${c.cidade} ${c.uf} ${c.equipamento_instalado}`);
-    return !q || text.includes(q) || (city && norm(c.cidade) === city);
+    if (!q) return true;
+    const text = norm(`${c.nome} ${c.marca_concorrente} ${c.cidade} ${c.uf} ${c.equipamento_instalado} ${(c.ultima_localizacao_vista || '')}`);
+    const compCity = norm(c.cidade || '');
+    return text.includes(q) || (cityFromClient && compCity === cityFromClient) || compCity === cityDirect || compCity.includes(q) || q.includes(compCity);
   }).slice(0, 6).map((c, i) => `${i + 1}. ${c.nome}${c.marca_concorrente ? ` · ${c.marca_concorrente}` : ''} · ${c.cidade || 'sem cidade'}\nEquipamento visto: ${c.equipamento_instalado || 'sem evidência'}\nAmeaça: ${c.nivel_ameaca || 'médio'}\nFonte: ${(c.ultimas_publicacoes || [])[0]?.fonte || (c.fontes_consultadas || [])[0] || 'sem fonte'}\nArgumento: ${c.argumento_contra || c.oportunidade_detectada || 'Velocidade, ROI e suporte Seamaty'}\nAção: usar no SPIN e proposta.`);
 }
 
@@ -135,7 +146,8 @@ Deno.serve(async (req) => {
         ]);
         const score = scoreRows[0];
         const comp = competitorFor(client, comps);
-        resposta = `${nameOf(client)}\nCódigo: ${client.external_code || 'sem código'}\nCidade: ${client.city || 'sem cidade'}\nWhatsApp: ${client.phone || 'sem telefone'}\nStatus: ${client.pipeline_stage || client.status || 'sem status'}\nEquipamento atual: ${client.current_equipment || 'não informado'}\nOportunidade: ${score?.produto_recomendado || client.equipment_interest || client.equipment_suggestion || 'avaliar Seamaty'}\nÚltimo contato: ${client.last_contact_date || client.last_contact_follow_up_date || 'sem registro'}\nPróxima ação: ${score?.proxima_melhor_acao || client.next_action || 'abrir conversa consultiva'}\nScore: ${score?.elite_score || client.purchase_score || 'sem score'}\nConcorrente: ${comp ? `${comp.nome} — ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : 'não detectado'}\nSugestão: SPIN → WhatsApp manual → proposta/material.`;
+        const compLabel = comp ? (comp._match_type === 'cliente' ? `Concorrente detectado: ${comp.nome}` : `Concorrente na cidade: ${comp.nome}`) : 'não detectado';
+        resposta = `${nameOf(client)}\nCódigo: ${client.external_code || 'sem código'}\nCidade: ${client.city || 'sem cidade'}\nWhatsApp: ${client.phone || 'sem telefone'}\nStatus: ${client.pipeline_stage || client.status || 'sem status'}\nEquipamento atual: ${client.current_equipment || 'não informado'}\nOportunidade: ${score?.produto_recomendado || client.equipment_interest || client.equipment_suggestion || 'avaliar Seamaty'}\nÚltimo contato: ${client.last_contact_date || client.last_contact_follow_up_date || 'sem registro'}\nPróxima ação: ${score?.proxima_melhor_acao || client.next_action || 'abrir conversa consultiva'}\nScore: ${score?.elite_score || client.purchase_score || 'sem score'}\n${compLabel}${comp ? ` — ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : ''}\nSugestão: SPIN → WhatsApp manual → proposta/material.`;
         acao = 'resumo cliente';
       }
     } else if (cmd === '/inativos') {

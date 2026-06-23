@@ -21,12 +21,18 @@ function writeCache(items) {
 }
 
 function matchCompetitor(client, competitors) {
-  const city = String(client?.city || '').toLowerCase();
-  const equipment = String(client?.current_equipment || client?.equipment_interest || '').toLowerCase();
-  return competitors.find(c =>
-    (city && String(c.cidade || '').toLowerCase() === city) ||
-    (equipment && String(c.marca_concorrente || '').toLowerCase() && equipment.includes(String(c.marca_concorrente).toLowerCase()))
-  );
+  const city = String(client?.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const equipment = String(`${client?.current_equipment || ''} ${client?.equipment_interest || ''} ${client?.equipment_sold || ''}`).toLowerCase();
+  // Vínculo direto por marca no equipamento do cliente
+  const direct = competitors.find(c => c.marca_concorrente && equipment.includes(String(c.marca_concorrente).toLowerCase()));
+  if (direct) return { ...direct, _match_type: 'cliente' };
+  // Fallback: mesma cidade
+  const byCity = competitors.find(c => {
+    const cc = String(c.cidade || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return city && cc === city;
+  });
+  if (byCity) return { ...byCity, _match_type: 'cidade' };
+  return null;
 }
 
 const TODAY_TYPE = (() => {
@@ -78,6 +84,7 @@ export default function SniperDoDia() {
           nextAction: score?.proxima_melhor_acao || client.next_action || 'Abrir conversa comercial',
           equipment: score?.produto_recomendado || client.equipment_interest || client.current_equipment || '',
           competitorName: competitor?.nome || '',
+          competitorMatchType: competitor?._match_type || 'cidade',
           competitorArgument: competitor?.argumento_contra || competitor?.oportunidade_detectada || '',
         };
       });
@@ -133,7 +140,7 @@ export default function SniperDoDia() {
                   <p className="text-[11px] text-slate-300"><b className="text-emerald-300">Próxima ação:</b> {item.nextAction}</p>
                   {item.equipment && <p className="text-[11px] text-slate-300"><b className="text-cyan-300">Oportunidade:</b> {item.equipment}</p>}
                   {item.competitorName && (
-                    <p className="mt-1 text-[11px] text-red-200 flex gap-1"><ShieldAlert className="w-3.5 h-3.5 shrink-0 text-red-300" /> Concorrente detectado: {item.competitorName}. {item.competitorArgument}</p>
+                    <p className="mt-1 text-[11px] text-red-200 flex gap-1"><ShieldAlert className="w-3.5 h-3.5 shrink-0 text-red-300" /> {item.competitorMatchType === 'cliente' ? 'Concorrente detectado' : 'Concorrente na cidade'}: {item.competitorName}. {item.competitorArgument}</p>
                   )}
                 </div>
 
