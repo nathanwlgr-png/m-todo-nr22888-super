@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Navigation, AlertCircle, Zap, Target, TrendingUp, Loader2, RefreshCw, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function InvestigacaoDeCampoReal() {
+  const queryClient = useQueryClient();
   const [city, setCity] = useState('');
   const [radius, setRadius] = useState(15);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -86,6 +87,36 @@ export default function InvestigacaoDeCampoReal() {
     const msg = `Olá! Vimos que vocês estão em ${clinic.city} com ${clinic.name}. Gostaria de conversar sobre soluções para laboratório?`;
     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
+  };
+
+  const addClinicToCRM = async (clinic) => {
+    const alreadyExists = crmClients.find(c => c.clinic_name?.toLowerCase() === clinic.name.toLowerCase());
+    if (alreadyExists) {
+      toast.message('Esta clínica já está no CRM');
+      return;
+    }
+
+    try {
+      await base44.entities.Client.create({
+        first_name: clinic.name,
+        clinic_name: clinic.name,
+        city: clinic.city || city,
+        address: clinic.address,
+        phone: clinic.phone,
+        website: clinic.website,
+        instagram_handle: clinic.instagram,
+        status: 'morno',
+        pipeline_stage: 'lead',
+        lead_source: 'analise_mercado_ia',
+        purchase_score: clinic.potential_score || 50,
+        notes: `Adicionado pela Investigação de Campo. Equipamento detectado: ${clinic.equipment || 'desconhecido'}.`,
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ['crmClients', city] });
+      toast.success('Clínica adicionada ao CRM');
+    } catch (error) {
+      toast.error('Não foi possível adicionar ao CRM');
+    }
   };
 
   // Calcular rota
@@ -329,13 +360,13 @@ export default function InvestigacaoDeCampoReal() {
                           <Button
                             size="sm"
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs"
-                            onClick={() => {
-                              // Poderia abrir modal de criar cliente ou adicionar ao CRM
-                              toast.success('Marcar para CRM');
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addClinicToCRM(clinic);
                             }}
                           >
                             <Zap className="w-3 h-3 mr-1" />
-                            Adicionar CRM
+                            {inCRM ? 'Já no CRM' : 'Adicionar CRM'}
                           </Button>
                         </div>
                       </div>

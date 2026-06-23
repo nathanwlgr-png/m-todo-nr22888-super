@@ -78,10 +78,13 @@ Deno.serve(async (req) => {
     // 4. Ordena por potencial (maior primeiro)
     enrichedClinics.sort((a, b) => b.potential_score - a.potential_score);
 
+    const matchedInCrmCount = enrichedClinics.filter(clinic => clinic.in_crm).length;
+    const opportunitiesCount = enrichedClinics.filter(clinic => !clinic.in_crm).length;
+
     // 5. Log de auditoria
     await base44.asServiceRole.entities.AIInteractionLog?.create({
       user_message: `Investigação de campo em ${city}`,
-      ai_response: `${clinics.length} clínicas encontradas, ${clientsInCity.length} no CRM, ${enrichedClinics.length - clientsInCity.length} oportunidades`,
+      ai_response: `${clinics.length} clínicas encontradas, ${matchedInCrmCount} já no CRM, ${opportunitiesCount} oportunidades`,
       action_type: 'field_investigation',
       client_name: city,
       source: 'investigacao_campo_real',
@@ -90,8 +93,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       total_found: clinics.length,
-      in_crm: clientsInCity.length,
-      opportunities: clinics.length - clientsInCity.length,
+      in_crm: matchedInCrmCount,
+      opportunities: opportunitiesCount,
       clinics: enrichedClinics,
     });
 
