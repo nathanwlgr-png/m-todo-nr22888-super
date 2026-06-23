@@ -129,31 +129,10 @@ export default function Clients() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Lista única de cidades
-  // Cidades da região laranja (Nathan)
-  const ORANGE_REGION_CITIES = [
-    'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
-    'Bauru', 'Araçatuba', 'Ourinhos', 'Dracena', 'Lins'
-  ];
-
   const cities = useMemo(() => {
     if (!Array.isArray(clients)) return [];
     const unique = [...new Set(clients.map(c => c?.city).filter(Boolean))];
     return unique.sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [clients]);
-
-  const cityCoverage = useMemo(() => {
-    if (!Array.isArray(clients)) return { covered: [], missing: ORANGE_REGION_CITIES, clientCities: [] };
-    
-    const clientCities = new Set(clients.map(c => c?.city).filter(Boolean));
-    const covered = ORANGE_REGION_CITIES.filter(city => 
-      Array.from(clientCities).some(clientCity => 
-        clientCity?.toLowerCase().includes(city.toLowerCase())
-      )
-    );
-    const missing = ORANGE_REGION_CITIES.filter(city => !covered.includes(city));
-    
-    return { covered, missing, clientCities: Array.from(clientCities).sort() };
   }, [clients]);
 
   // Busca e ordenação
