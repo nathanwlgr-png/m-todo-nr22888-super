@@ -23,6 +23,7 @@ const ExportClinicReportWithROI = lazy(() => import('@/components/ExportClinicRe
 const SuperAgentWidget = lazy(() => import('@/components/SuperAgentWidget'));
 const PlanoEliteStatus = lazy(() => import('@/components/elite/PlanoEliteStatus'));
 const CentralComandosSafe = lazy(() => import('@/components/elite/CentralComandosSafe'));
+const ComparativoFechamento = lazy(() => import('@/components/elite/ComparativoFechamento'));
 
 const HeavyFallback = () => <div className="h-16 rounded-xl animate-pulse mb-3 bg-[#111111]" />;
 
@@ -184,6 +185,11 @@ export default function DashboardSniper() {
 
         {/* ── RADAR DE CONCORRÊNCIA — monitoramento multicanal (SAFE) ── */}
         <RadarConcorrenciaWidget />
+
+        {/* ── COMPARATIVO DE FECHAMENTO — Seamaty vs concorrentes ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <ComparativoFechamento />
+        </Suspense>
 
         {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
         <Suspense fallback={<HeavyFallback />}>
