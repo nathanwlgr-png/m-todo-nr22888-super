@@ -261,11 +261,11 @@ export default function RouteOptimizer() {
 
               <Button 
                 onClick={handleOptimize}
-                disabled={selectedClients.length < 2 || optimizeRouteMutation.isLoading}
+                disabled={selectedClients.length < 2 || optimizeRouteMutation.isPending}
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 <Navigation className="w-4 h-4 mr-2" />
-                {optimizeRouteMutation.isLoading ? 'Otimizando...' : 'Otimizar Rota'}
+                {optimizeRouteMutation.isPending ? 'Otimizando...' : 'Otimizar Rota'}
               </Button>
             </CardContent>
           </Card>
@@ -366,7 +366,7 @@ export default function RouteOptimizer() {
 
                     <Button 
                       onClick={handleSaveRoute}
-                      disabled={!routeName || saveRouteMutation.isLoading}
+                      disabled={!routeName || saveRouteMutation.isPending}
                       className="w-full bg-green-600 hover:bg-green-700"
                     >
                       <Save className="w-4 h-4 mr-2" />

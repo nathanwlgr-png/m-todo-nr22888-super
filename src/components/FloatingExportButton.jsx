@@ -96,9 +96,9 @@ export default function FloatingExportButton() {
   if (!isOpen && !documentUrl) return null;
 
   return (
-    <div className="fixed top-20 right-4 z-50">
+    <div className="fixed bottom-24 left-3 right-3 sm:left-auto sm:right-4 sm:w-80 z-40 pointer-events-none">
       {isOpen ? (
-        <Card className="w-80 p-4 shadow-2xl bg-white border-2 border-indigo-400">
+        <Card className="w-full p-4 shadow-2xl bg-white border-2 border-indigo-400 pointer-events-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-indigo-600" />
@@ -182,13 +182,16 @@ export default function FloatingExportButton() {
           )}
         </Card>
       ) : (
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 shadow-lg"
-          size="icon"
-        >
-          <FileText className="w-5 h-5" />
-        </Button>
+        <div className="flex justify-end pointer-events-auto">
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 shadow-lg h-11 w-11"
+            size="icon"
+            aria-label="Abrir exportação de documento"
+          >
+            <FileText className="w-5 h-5" />
+          </Button>
+        </div>
       )}
     </div>
   );

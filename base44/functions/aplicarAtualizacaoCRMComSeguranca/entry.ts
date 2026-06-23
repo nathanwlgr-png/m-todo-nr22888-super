@@ -45,8 +45,23 @@ async function findRecord(base44, entity, id) {
   if (!id) return null;
   const api = entityApi(base44, entity);
   if (!api?.filter) return null;
-  const rows = await api.filter({ id });
-  return rows?.[0] || null;
+  try {
+    const rows = await api.filter({ id });
+    return rows?.[0] || null;
+  } catch (_e) {
+    return null;
+  }
+}
+
+async function findQueue(base44, queueId) {
+  const queueApi = entityApi(base44, 'CRMUpdateQueue');
+  if (!queueApi?.filter) return { queue: null, error: 'CRMUpdateQueue indisponível' };
+  try {
+    const rows = await queueApi.filter({ id: queueId });
+    return { queue: rows?.[0] || null, error: '' };
+  } catch (_e) {
+    return { queue: null, error: 'Atualização não encontrada' };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -58,10 +73,9 @@ Deno.serve(async (req) => {
     const queueId = body.queue_id || body.id;
     if (!queueId) return Response.json({ error: 'queue_id obrigatório' }, { status: 400 });
 
-    const queueApi = entityApi(base44, 'CRMUpdateQueue');
-    if (!queueApi?.filter) return Response.json({ applied: false, status: 'erro', reason: 'CRMUpdateQueue indisponível' });
-    const queue = (await queueApi.filter({ id: queueId }))[0];
-    if (!queue) return Response.json({ error: 'Atualização não encontrada' }, { status: 404 });
+    const { queue, error: queueError } = await findQueue(base44, queueId);
+    if (queueError === 'CRMUpdateQueue indisponível') return Response.json({ applied: false, status: 'erro', reason: queueError });
+    if (!queue) return Response.json({ applied: false, status: 'nao_encontrado', reason: queueError || 'Atualização não encontrada' }, { status: 404 });
     if (queue.status === 'rejeitado' || queue.status === 'aplicado') return Response.json({ status: queue.status, message: 'Item já finalizado' });
 
     const field = normalizeField(queue.campo_alvo);
@@ -106,6 +120,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ applied: true, entity, record_id: record.id, field, before, after: finalValue, status: 'aplicado' });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    const message = String(error?.message || 'Erro interno');
+    if (message.includes('Object not found') || message.includes('not found')) {
+      return Response.json({ applied: false, status: 'nao_encontrado', reason: 'Registro não encontrado ou já removido' }, { status: 404 });
+    }
+    return Response.json({ applied: false, status: 'erro', reason: message }, { status: 500 });
   }
 });

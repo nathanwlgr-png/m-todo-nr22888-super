@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Trophy, Zap, AlertTriangle, Loader2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,43 +18,13 @@ export default function RankingDoDia() {
   const [loading, setLoading] = useState(false);
   const [ranking, setRanking] = useState(null);
 
-  // Carregar dados para ranking
-  const { data: clients = [] } = useQuery({
-    queryKey: ['clients-ranking'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 100),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: sales = [] } = useQuery({
-    queryKey: ['sales-recent'],
-    queryFn: () => base44.entities.Sale.filter({ status: 'fechada' }),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: leads = [] } = useQuery({
-    queryKey: ['leads-hot'],
-    queryFn: () => base44.entities.Lead?.filter({ status: 'qualificado' }).catch(() => []),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: consumables = [] } = useQuery({
-    queryKey: ['consumables-alert'],
-    queryFn: () => base44.entities.ConsumableOrder?.filter({ status: 'ativo', alert_generated: false }).catch(() => []),
-    staleTime: 5 * 60 * 1000,
-  });
-
   // Gerar ranking
   const computeRanking = useMutation({
     mutationFn: async () => {
       setLoading(true);
       toast.info('🧠 Processando ranking...');
 
-      const result = await base44.functions.invoke('calculateRankingDoDia', {
-        clients: clients.slice(0, 50),
-        sales: sales.slice(0, 30),
-        leads: leads.slice(0, 20),
-        consumables: consumables.slice(0, 10),
-      });
+      const result = await base44.functions.invoke('calculateRankingDoDia', {});
 
       return result.data;
     },
