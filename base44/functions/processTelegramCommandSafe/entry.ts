@@ -1,61 +1,85 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const dayMs = 86400000;
-const MODEL_SAFE = 'claude_sonnet_4_6';
-const today = () => new Date().toISOString();
-const daysSince = (date) => date ? Math.floor((Date.now() - new Date(date).getTime()) / dayMs) : 999;
+const now = () => new Date().toISOString();
+const today = () => new Date().toISOString().slice(0, 10);
+const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const digits = (s) => String(s || '').replace(/\D/g, '');
+const cmdOf = (t) => (String(t || '').trim().match(/^\/\S+/)?.[0] || '/texto').toLowerCase();
+const argsOf = (t) => String(t || '').replace(/^\/\S+\s*/, '').trim();
+const nameOf = (c) => c?.clinic_name || c?.first_name || c?.full_name || c?.razao_social || 'Cliente';
+const days = (d) => d ? Math.floor((Date.now() - new Date(d).getTime()) / 86400000) : 999;
 
-function commandOf(text) {
-  const t = String(text || '').trim();
-  return (t.match(/^\/\S+/)?.[0] || '/texto').toLowerCase();
+function api(base44, name) { return base44?.asServiceRole?.entities?.[name]; }
+async function list(base44, name, sort, limit) { try { return await api(base44, name).list(sort, limit); } catch (_e) { return []; } }
+async function filter(base44, name, q, sort, limit) { try { return await api(base44, name).filter(q, sort, limit); } catch (_e) { return []; } }
+async function get(base44, name, id) { try { return id ? await api(base44, name).get(id) : null; } catch (_e) { return null; } }
+async function create(base44, name, data) { try { return { record: await api(base44, name).create(data), error: '' }; } catch (e) { return { record: null, error: e.message }; } }
+async function log(base44, user, text, cmd, resposta, extra = {}) {
+  return await create(base44, 'TelegramCommandLog', { data_hora: now(), usuario: user.email, mensagem_recebida: text, intencao_detectada: cmd, resposta_gerada: resposta, status: extra.status || 'interpretado', ...extra });
 }
 
-function rest(text) {
-  return String(text || '').replace(/^\/\S+\s*/, '').trim();
+function splitNameDetail(raw) {
+  const parts = String(raw || '').includes('|') ? String(raw).split('|').map(p => p.trim()) : String(raw || '').trim().split(/\s+/);
+  return String(raw || '').includes('|') ? { name: parts[0], detail: parts.slice(1).join(' | ') } : { name: parts[0] || '', detail: parts.slice(1).join(' ') };
 }
 
-function pipeParts(args) {
-  const raw = String(args || '');
-  return raw.includes('|') ? raw.split('|').map(p => p.trim()) : null;
+async function findClients(base44, raw, limit = 6) {
+  const q = String(raw || '').trim();
+  if (!q) return [];
+  const d = digits(q);
+  const exact = [];
+  if (/^[a-z0-9_-]{3,}$/i.test(q)) exact.push(['external_code', q]);
+  if (d.length >= 10 && d.length <= 11) exact.push(['phone', d], ['phone', `55${d}`], ['cpf', d]);
+  if (d.length === 14) exact.push(['cnpj', d]);
+  for (const [field, value] of exact) {
+    const rows = await filter(base44, 'Client', { [field]: value }, '-purchase_score', limit);
+    if (rows.length) return rows.slice(0, limit);
+  }
+  const cityRows = await filter(base44, 'Client', { city: q }, '-purchase_score', limit);
+  if (cityRows.length) return cityRows.slice(0, limit);
+  const rows = await list(base44, 'Client', '-purchase_score', 80);
+  const nq = norm(q);
+  return rows.filter(c => [c.external_code, c.first_name, c.full_name, c.clinic_name, c.razao_social, c.city, c.phone, c.cnpj].filter(Boolean).some(v => norm(v).includes(nq) || digits(v).includes(d))).slice(0, limit);
 }
 
-function legacyNameAndRest(args) {
-  const [name, ...restParts] = String(args || '').trim().split(/\s+/);
-  return { name: name || '', detail: restParts.join(' ').trim() };
+async function oneClient(base44, raw) {
+  const rows = await findClients(base44, raw, 6);
+  if (rows.length === 1) return { client: rows[0], resposta: '' };
+  if (rows.length > 1) return { client: null, resposta: `Encontrei mais de um cliente. Especifique melhor:\n${rows.map((c, i) => `${i + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · ${c.external_code || c.phone || 'sem código'}`).join('\n')}` };
+  return { client: null, resposta: 'Cliente não encontrado. Tente nome, código, cidade, telefone ou CNPJ.' };
 }
 
-function entityApi(base44, name) {
-  return base44?.asServiceRole?.entities?.[name] || null;
+function competitorFor(client, competitors) {
+  const city = norm(client?.city);
+  const eq = norm(`${client?.current_equipment || ''} ${client?.equipment_interest || ''}`);
+  return competitors.find(c => (city && norm(c.cidade) === city) || (c.marca_concorrente && eq.includes(norm(c.marca_concorrente)))) || null;
 }
 
-async function safeList(base44, name, sort, limit) {
-  const api = entityApi(base44, name);
-  if (!api?.list) return [];
-  try { return await api.list(sort, limit); } catch (_e) { return []; }
+async function sniper(base44, limit = 10) {
+  const [scores, competitors] = await Promise.all([
+    list(base44, 'EliteLeadScore', '-elite_score', limit),
+    filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 30)
+  ]);
+  const out = [];
+  for (const s of scores) {
+    const c = await get(base44, 'Client', s.cliente_id);
+    if (!c) continue;
+    const comp = competitorFor(c, competitors);
+    out.push(`${out.length + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${s.elite_score || c.purchase_score || 0}\nMotivo: ${s.motivo_score || 'prioridade comercial'}\nPróxima ação: ${s.proxima_melhor_acao || c.next_action || 'abrir conversa comercial'}\n${c.phone ? 'WhatsApp disponível' : 'sem WhatsApp'}${comp ? `\nConcorrente: ${comp.nome} · ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : ''}`);
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
-async function safeFilter(base44, name, filter, sort, limit) {
-  const api = entityApi(base44, name);
-  if (!api?.filter) return [];
-  try { return await api.filter(filter, sort, limit); } catch (_e) { return []; }
-}
-
-async function safeCreate(base44, name, data) {
-  const api = entityApi(base44, name);
-  if (!api?.create) return { record: null, error: `${name} indisponível` };
-  try { return { record: await api.create(data), error: '' }; } catch (error) { return { record: null, error: error.message }; }
-}
-
-async function findClient(base44, query) {
-  const q = String(query || '').trim().toLowerCase();
-  if (!q) return null;
-  const clients = await safeList(base44, 'Client', '-updated_date', 120);
-  return clients.find(c => [c.first_name, c.full_name, c.clinic_name, c.razao_social].filter(Boolean).some(v => String(v).toLowerCase().includes(q))) || null;
-}
-
-async function createTelegramLog(base44, data) {
-  const result = await safeCreate(base44, 'TelegramCommandLog', { data_hora: today(), status: 'interpretado', ...data });
-  return result.record;
+async function concorrentes(base44, raw) {
+  const q = norm(raw);
+  const comps = await filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 50);
+  const possibleClients = q ? await findClients(base44, raw, 2) : [];
+  const city = norm(possibleClients[0]?.city || '');
+  return comps.filter(c => {
+    const text = norm(`${c.nome} ${c.marca_concorrente} ${c.cidade} ${c.uf} ${c.equipamento_instalado}`);
+    return !q || text.includes(q) || (city && norm(c.cidade) === city);
+  }).slice(0, 6).map((c, i) => `${i + 1}. ${c.nome}${c.marca_concorrente ? ` · ${c.marca_concorrente}` : ''} · ${c.cidade || 'sem cidade'}\nEquipamento visto: ${c.equipamento_instalado || 'sem evidência'}\nAmeaça: ${c.nivel_ameaca || 'médio'}\nFonte: ${(c.ultimas_publicacoes || [])[0]?.fonte || (c.fontes_consultadas || [])[0] || 'sem fonte'}\nArgumento: ${c.argumento_contra || c.oportunidade_detectada || 'Velocidade, ROI e suporte Seamaty'}\nAção: usar no SPIN e proposta.`);
 }
 
 Deno.serve(async (req) => {
@@ -64,122 +88,99 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json().catch(() => ({}));
-    // Aceita: payload real do webhook Telegram (body.message.text / edited_message),
-    // chamada interna ({mensagem}) e teste ({text}).
     const text = body?.message?.text || body?.edited_message?.text || body.mensagem || body.text || '';
-    const cmd = commandOf(text);
-    const args = rest(text);
-    let resposta = '';
-    let queue = null;
-    let pending = null;
-    let client = null;
-    let status = 'interpretado';
-    let acao = '';
+    const cmd = cmdOf(text);
+    const args = argsOf(text);
+    let resposta = '', status = 'interpretado', client = null, queue = null, pending = null, task = null, acao = '';
 
-    if (cmd === '/resumo_dia') {
-      const [scores, visits, pendingMessages, tasks] = await Promise.all([
-        safeList(base44, 'EliteLeadScore', '-elite_score', 8),
-        safeFilter(base44, 'Visit', { status: 'agendada' }, '-scheduled_date', 20),
-        safeList(base44, 'PendingMessage', '-created_date', 20),
-        safeFilter(base44, 'Task', { status: 'pendente' }, '-due_date', 50)
+    if (cmd === '/sniper' || cmd === '/quentes') {
+      const rows = await sniper(base44, cmd === '/sniper' ? 10 : 8);
+      resposta = rows.length ? `${cmd === '/sniper' ? 'SNIPER DO DIA — Modo Rua' : 'OPORTUNIDADES QUENTES'}\n${rows.join('\n\n')}` : 'Nenhuma oportunidade quente encontrada.';
+      acao = 'listar oportunidades';
+    } else if (cmd === '/hoje' || cmd === '/resumo_dia') {
+      const [visits, tasks, messages, scores, comps] = await Promise.all([
+        filter(base44, 'Visit', { status: 'agendada' }, 'scheduled_date', 30),
+        filter(base44, 'Task', { status: 'pendente' }, '-due_date', 80),
+        list(base44, 'PendingMessage', '-created_date', 40),
+        list(base44, 'EliteLeadScore', '-elite_score', 10),
+        filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 20)
       ]);
-      resposta = `Resumo do dia: ${scores.length} oportunidades ranqueadas, ${visits.length} visitas agendadas, ${pendingMessages.filter(m => ['pending','aguardando_aprovacao','ready_to_send','rascunho'].includes(m.status)).length} mensagens pendentes e ${tasks.length} follow-ups pendentes. Top ação: ${scores[0]?.proxima_melhor_acao || 'ativar Score Elite'}.`;
-      acao = 'mostrar resumo do dia';
-    } else if (cmd === '/quentes') {
-      const scores = await safeList(base44, 'EliteLeadScore', '-elite_score', 20);
-      resposta = scores.filter(s => (s.elite_score || 0) >= 71).slice(0, 8).map((s, i) => `${i + 1}. ${s.cidade || 'Sem cidade'} · ${s.produto_recomendado || 'Produto'} · ${s.elite_score}`).join('\n') || 'Nenhuma oportunidade quente encontrada.';
-      acao = 'listar oportunidades quentes';
-    } else if (cmd === '/propostas_paradas') {
-      const proposals = await safeList(base44, 'ProposalEngagement', '-created_date', 30);
-      resposta = proposals.filter(p => daysSince(p.created_date || p.view_timestamp) > 3).slice(0, 8).map((p, i) => `${i + 1}. ${p.client_name || p.client_id || 'Proposta'} sem resposta há ${daysSince(p.created_date || p.view_timestamp)} dias`).join('\n') || 'Nenhuma proposta parada encontrada.';
-      acao = 'listar propostas paradas';
-    } else if (cmd === '/inativos') {
-      const clients = await safeList(base44, 'Client', '-purchase_score', 80);
-      resposta = clients.filter(c => daysSince(c.last_contact_date || c.last_contact_follow_up_date) > 14 && (c.purchase_score || 0) >= 50).slice(0, 8).map((c, i) => `${i + 1}. ${c.first_name || c.clinic_name} · ${daysSince(c.last_contact_date || c.last_contact_follow_up_date)} dias sem contato`).join('\n') || 'Nenhum inativo com potencial encontrado.';
-      acao = 'listar clientes inativos';
+      const todayStr = today();
+      const visitsToday = visits.filter(v => String(v.scheduled_date || '').startsWith(todayStr));
+      const criticalTasks = tasks.filter(t => t.priority === 'alta' || (t.due_date && t.due_date <= todayStr));
+      const pend = messages.filter(m => ['pending','aguardando_aprovacao','ready_to_send','rascunho','aprovado'].includes(m.status));
+      const criticalComps = comps.filter(c => ['alto','critico'].includes(c.nivel_ameaca) || c.status_monitoramento === 'oportunidade_quente');
+      resposta = `HOJE — Modo Rua\nVisitas: ${visitsToday.length}\nTarefas críticas: ${criticalTasks.length}\nClientes quentes: ${scores.length}\nWhatsApps pendentes/manuais: ${pend.length}\nConcorrentes críticos: ${criticalComps.length}\nPróxima ação: ${scores[0]?.proxima_melhor_acao || criticalTasks[0]?.title || 'abrir Sniper do Dia'}.`;
+      acao = 'mostrar hoje';
+    } else if (cmd === '/rota') {
+      const rows = (await filter(base44, 'Visit', { status: 'agendada' }, 'scheduled_date', 30)).filter(v => String(v.scheduled_date || '').startsWith(today())).slice(0, 10);
+      resposta = rows.length ? rows.map((v, i) => `${i + 1}. ${v.client_name || 'Cliente'} · ${v.location || 'sem local'} · ${v.scheduled_date || ''}`).join('\n') : 'Nenhuma visita de hoje encontrada. Abra Agenda/Rota no Dashboard.';
+      acao = 'listar rota';
+    } else if (cmd === '/cidade') {
+      const rows = await findClients(base44, args, 10);
+      resposta = rows.length ? rows.map((c, i) => `${i + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${c.purchase_score || c.health_score || 0} · ${c.phone ? 'WhatsApp ok' : 'sem WhatsApp'}`).join('\n') : 'Nenhum cliente prioritário encontrado para essa cidade.';
+      acao = 'listar cidade';
+    } else if (cmd === '/concorrente') {
+      const rows = await concorrentes(base44, args);
+      resposta = rows.join('\n\n') || 'Nenhum concorrente encontrado para esse termo/cidade/cliente.';
+      acao = 'consultar concorrente';
     } else if (cmd === '/cliente') {
-      const name = pipeParts(args)?.[0] || args;
-      client = await findClient(base44, name);
-      if (!client) { resposta = 'Cliente não encontrado. Nenhuma alteração foi feita.'; status = 'erro'; acao = 'buscar resumo do cliente'; }
+      const found = await oneClient(base44, args);
+      if (!found.client) { resposta = found.resposta; status = found.resposta.includes('mais de um') ? 'interpretado' : 'erro'; acao = 'buscar cliente'; }
       else {
-        const score = (await safeFilter(base44, 'EliteLeadScore', { cliente_id: client.id }))[0];
-        resposta = `${client.first_name || client.full_name || client.clinic_name}: score ${score?.elite_score || client.purchase_score || 'sem score'}, funil ${client.pipeline_stage || client.status || 'sem status'}, próxima ação ${score?.proxima_melhor_acao || client.next_action || 'mandar WhatsApp manual'}.`;
-        acao = 'buscar resumo do cliente';
+        client = found.client;
+        const [scoreRows, comps] = await Promise.all([
+          filter(base44, 'EliteLeadScore', { cliente_id: client.id }, '-data_atualizacao', 1),
+          filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 30)
+        ]);
+        const score = scoreRows[0];
+        const comp = competitorFor(client, comps);
+        resposta = `${nameOf(client)}\nCódigo: ${client.external_code || 'sem código'}\nCidade: ${client.city || 'sem cidade'}\nWhatsApp: ${client.phone || 'sem telefone'}\nStatus: ${client.pipeline_stage || client.status || 'sem status'}\nEquipamento atual: ${client.current_equipment || 'não informado'}\nOportunidade: ${score?.produto_recomendado || client.equipment_interest || client.equipment_suggestion || 'avaliar Seamaty'}\nÚltimo contato: ${client.last_contact_date || client.last_contact_follow_up_date || 'sem registro'}\nPróxima ação: ${score?.proxima_melhor_acao || client.next_action || 'abrir conversa consultiva'}\nScore: ${score?.elite_score || client.purchase_score || 'sem score'}\nConcorrente: ${comp ? `${comp.nome} — ${comp.argumento_contra || comp.oportunidade_detectada || 'usar ROI Seamaty'}` : 'não detectado'}\nSugestão: SPIN → WhatsApp manual → proposta/material.`;
+        acao = 'resumo cliente';
       }
-    } else if (cmd === '/visita') {
-      const parts = pipeParts(args);
-      const parsed = parts ? { name: parts[0], detail: parts.slice(1).join(' | ') } : legacyNameAndRest(args);
-      client = await findClient(base44, parsed.name);
-      if (!client) { resposta = 'Cliente não encontrado. Nenhuma alteração foi feita.'; status = 'erro'; acao = 'registrar visita via fila segura'; }
-      else {
-        const note = parsed.detail || args;
-        const result = await safeCreate(base44, 'CRMUpdateQueue', { origem: 'telegram', texto_original: text, comando_interpretado: '/visita', cliente_id: client.id, tipo_atualizacao: 'resumo de visita', campo_alvo: 'notes', valor_novo: note, status: 'pendente', risco: 'baixo', exige_aprovacao: false, agente_origem: 'telegram_operacional_nr22888', modelo_ia_usado: MODEL_SAFE, data_criacao: today(), observacao: 'Baixo risco: pronto para aplicar no CRM após conferência.' });
-        queue = result.record;
-        await safeCreate(base44, 'EliteActionLog', { data_hora: today(), usuario: user.email, cliente_id: client.id, agente: 'Telegram Operacional NR22888', ferramenta_usada: 'processTelegramCommandSafe', modelo_ia_usado: MODEL_SAFE, acao_sugerida: 'registrar visita', acao_executada: queue ? 'criar CRMUpdateQueue baixo risco' : 'CRMUpdateQueue indisponível', aprovado_pelo_usuario: false, resultado: note });
-        resposta = queue ? `Anotação de visita preparada para ${client.first_name || client.clinic_name}. Fila criada para aplicar com segurança.` : `Fila segura indisponível: ${result.error}. Nenhum dado foi alterado.`;
-        status = queue ? 'interpretado' : 'erro';
-        acao = 'registrar visita via fila segura';
+    } else if (cmd === '/inativos') {
+      const rows = await list(base44, 'Client', '-purchase_score', 60);
+      resposta = rows.filter(c => days(c.last_contact_date || c.last_contact_follow_up_date) > 14 && (c.purchase_score || 0) >= 50).slice(0, 8).map((c, i) => `${i + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · ${days(c.last_contact_date || c.last_contact_follow_up_date)} dias sem contato · ${c.phone ? 'WhatsApp ok' : 'sem WhatsApp'}`).join('\n') || 'Nenhum inativo com potencial encontrado.';
+      acao = 'listar inativos';
+    } else if (cmd === '/comodato') {
+      const scores = await list(base44, 'EliteLeadScore', '-elite_score', 25);
+      const out = [];
+      for (const s of scores) {
+        const c = await get(base44, 'Client', s.cliente_id);
+        if (c && ((s.elite_score || 0) >= 60 || c.status === 'quente')) out.push(`${out.length + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${s.elite_score || c.purchase_score || 0} · ${s.produto_recomendado || c.equipment_interest || 'avaliar comodato'}`);
+        if (out.length >= 8) break;
       }
-    } else if (cmd === '/followup') {
-      const parts = pipeParts(args);
-      const parsed = parts ? { name: parts[0], detail: parts.slice(1).join(' | ') } : legacyNameAndRest(args);
-      client = await findClient(base44, parsed.name);
-      if (!client) { resposta = 'Cliente não encontrado. Nenhuma tarefa foi criada.'; status = 'erro'; acao = 'criar follow-up'; }
+      resposta = out.join('\n') || 'Nenhum potencial de comodato encontrado sem IA.';
+      acao = 'listar comodato';
+    } else if (['/visita','/tarefa','/followup','/whatsapp','/proposta','/material'].includes(cmd)) {
+      const parsed = splitNameDetail(args);
+      const found = await oneClient(base44, parsed.name);
+      if (!found.client) { resposta = found.resposta; status = found.resposta.includes('mais de um') ? 'interpretado' : 'erro'; acao = `preparar ${cmd}`; }
       else {
-        const due = parsed.detail || 'próximo contato';
-        const result = await safeCreate(base44, 'Task', { client_id: client.id, client_name: client.first_name || client.clinic_name, title: `Follow-up: ${client.first_name || client.clinic_name}`, description: `Criado pelo Telegram: ${due}`, status: 'pendente', priority: 'media', type: 'follow_up', auto_created: true, assigned_to: user.email, assigned_to_name: user.full_name || user.email });
-        resposta = result.record ? `Follow-up criado para ${client.first_name || client.clinic_name}: ${due}.` : `Task indisponível: ${result.error}. Nenhum dado foi alterado.`;
-        status = result.record ? 'interpretado' : 'erro';
-        acao = 'criar follow-up';
-      }
-    } else if (cmd === '/whatsapp') {
-      const parts = pipeParts(args);
-      const parsed = parts ? { name: parts[0], detail: parts.slice(1).join(' | ') } : legacyNameAndRest(args);
-      client = await findClient(base44, parsed.name);
-      if (!client) { resposta = 'Cliente não encontrado. Nenhuma mensagem foi criada.'; status = 'erro'; acao = 'criar PendingMessage WhatsApp'; }
-      else {
-        const objetivo = parsed.detail || 'retomar conversa comercial';
-        const score = (await safeFilter(base44, 'EliteLeadScore', { cliente_id: client.id }))[0];
-        const nome = client.first_name || client.full_name || client.clinic_name || 'cliente';
-        const produto = score?.produto_recomendado || client.equipment_interest || 'Seamaty';
-        const mensagem = `Olá ${nome}, tudo bem? Pensei em te chamar sobre ${objetivo}, principalmente olhando o potencial do ${produto} para sua rotina. Posso te mostrar um caminho simples e objetivo para avaliarmos o próximo passo?`;
-        const result = await safeCreate(base44, 'PendingMessage', { canal: 'whatsapp', channel: 'whatsapp', destinatario_nome: nome, destinatario_contato: client.phone || '', cliente_id: client.id, contexto: 'Telegram Operacional NR22888 — WhatsApp seguro', context: 'Telegram Operacional NR22888 — WhatsApp seguro', mensagem, message_content: mensagem, status: 'aguardando_aprovacao', criado_por_agente: 'telegram_operacional_nr22888', modelo_ia_usado: MODEL_SAFE, aprovado_por_nathan: false, data_criacao: today(), priority: score?.elite_score >= 71 ? 'alta' : 'media', recipient_id: client.id, recipient_name: nome, recipient_phone: client.phone || '', ai_reasoning: objetivo, proxima_acao: 'Nathan revisar e enviar manualmente pelo WhatsApp' });
-        pending = result.record;
-        await safeCreate(base44, 'EliteActionLog', { data_hora: today(), usuario: user.email, cliente_id: client.id, agente: 'Telegram Operacional NR22888', ferramenta_usada: 'processTelegramCommandSafe', modelo_ia_usado: MODEL_SAFE, acao_sugerida: 'gerar WhatsApp seguro', acao_executada: pending ? 'criar PendingMessage aguardando aprovação' : 'PendingMessage indisponível', mensagem_gerada: mensagem, aprovado_pelo_usuario: false, resultado: pending ? 'PendingMessage criado; envio automático bloqueado' : result.error });
-        resposta = pending ? 'Mensagem WhatsApp criada para aprovação. Nada foi enviado automaticamente.' : `PendingMessage indisponível: ${result.error}. Nada foi enviado.`;
-        status = pending ? 'interpretado' : 'erro';
-        acao = 'criar PendingMessage WhatsApp';
-      }
-    } else if (cmd === '/atualizar') {
-      const parts = pipeParts(args);
-      let parsed;
-      if (parts) parsed = { name: parts[0], field: parts[1] || 'notes', value: parts.slice(2).join(' | ') };
-      else {
-        const [name, field, ...valueParts] = String(args || '').trim().split(/\s+/);
-        parsed = { name, field: field || 'notes', value: valueParts.join(' ') };
-      }
-      client = await findClient(base44, parsed.name);
-      if (!client) { resposta = 'Cliente não encontrado. Nenhuma atualização foi criada.'; status = 'erro'; acao = 'criar CRMUpdateQueue'; }
-      else {
-        const critical = ['status_funil','valor_estimado','proposta','fechamento','telefone','phone','email','responsavel','responsável','cidade','classificacao','classificação'].includes(String(parsed.field || '').toLowerCase());
-        const result = await safeCreate(base44, 'CRMUpdateQueue', { origem: 'telegram', texto_original: text, comando_interpretado: '/atualizar', cliente_id: client.id, tipo_atualizacao: 'atualizacao_crm', campo_alvo: parsed.field || 'notes', valor_novo: parsed.value, status: 'pendente', risco: critical ? 'alto' : 'baixo', exige_aprovacao: critical, agente_origem: 'telegram_operacional_nr22888', modelo_ia_usado: MODEL_SAFE, data_criacao: today(), observacao: critical ? 'Campo crítico: exige aprovação de Nathan.' : 'Baixo risco: pode ser aplicado após conferência.' });
-        queue = result.record;
-        resposta = queue ? `Atualização segura criada para ${client.first_name || client.clinic_name}. Risco: ${critical ? 'alto' : 'baixo'}.` : `CRMUpdateQueue indisponível: ${result.error}. Nenhum dado foi alterado.`;
-        acao = 'criar CRMUpdateQueue';
-        status = queue ? (critical ? 'pendente_aprovacao' : 'interpretado') : 'erro';
+        client = found.client;
+        const detail = parsed.detail || 'próximo passo comercial';
+        if (cmd === '/visita') {
+          const r = await create(base44, 'CRMUpdateQueue', { origem: 'telegram', texto_original: text, comando_interpretado: '/visita', cliente_id: client.id, tipo_atualizacao: 'resumo de visita', campo_alvo: 'notes', valor_novo: detail, status: 'pendente', risco: 'baixo', exige_aprovacao: false, agente_origem: 'telegram_operacional_nr22888', modelo_ia_usado: 'claude_sonnet_4_6', data_criacao: now(), observacao: 'Baixo risco: pronto para aplicar no CRM após conferência.' });
+          queue = r.record; resposta = queue ? `Anotação de visita preparada para ${nameOf(client)}. Fila segura criada.` : `Fila indisponível: ${r.error}.`; status = queue ? 'interpretado' : 'erro';
+        } else if (cmd === '/whatsapp') {
+          const msg = `Olá ${nameOf(client)}, tudo bem? Pensei em te chamar sobre ${detail}. Faz sentido avaliarmos um caminho Seamaty com foco em resultado rápido, ROI e menos dependência externa?`;
+          const r = await create(base44, 'PendingMessage', { canal: 'whatsapp', channel: 'whatsapp', destinatario_nome: nameOf(client), destinatario_contato: client.phone || '', cliente_id: client.id, contexto: 'Telegram Modo Rua — WhatsApp manual', context: 'Telegram Modo Rua — WhatsApp manual', mensagem: msg, message_content: msg, status: 'aguardando_aprovacao', criado_por_agente: 'telegram_operacional_nr22888', modelo_ia_usado: 'claude_sonnet_4_6', aprovado_por_nathan: false, data_criacao: now(), priority: 'media', recipient_id: client.id, recipient_name: nameOf(client), recipient_phone: client.phone || '', ai_reasoning: detail, proxima_acao: 'Nathan revisar e abrir WhatsApp manualmente' });
+          pending = r.record; resposta = pending ? 'Mensagem pronta para revisão e envio manual. Nada foi enviado automaticamente.' : `PendingMessage indisponível: ${r.error}.`; status = pending ? 'interpretado' : 'erro';
+        } else {
+          const label = cmd === '/proposta' ? 'Preparar proposta' : cmd === '/material' ? 'Preparar material' : cmd === '/tarefa' ? 'Tarefa' : 'Follow-up';
+          const r = await create(base44, 'Task', { client_id: client.id, client_name: nameOf(client), title: `${label}: ${nameOf(client)}`, description: `Criado pelo Telegram: ${detail}. Nada é enviado automaticamente.`, status: 'pendente', priority: cmd === '/proposta' || cmd === '/material' ? 'alta' : 'media', type: cmd === '/followup' ? 'follow_up' : 'outro', auto_created: true, assigned_to: user.email, assigned_to_name: user.full_name || user.email });
+          task = r.record; resposta = task ? `${label} criado com segurança para ${nameOf(client)}.` : `Task indisponível: ${r.error}.`; status = task ? 'interpretado' : 'erro';
+        }
+        acao = `preparar ${cmd}`;
       }
     } else {
-      resposta = 'Comando não reconhecido. Use /resumo_dia, /cliente, /visita, /followup, /whatsapp, /quentes, /propostas_paradas, /inativos ou /atualizar.';
-      acao = 'orientar comandos disponíveis';
+      resposta = 'Comando não reconhecido. Use /sniper, /hoje, /rota, /cliente, /cidade, /concorrente, /whatsapp, /proposta, /material, /visita, /tarefa, /quentes, /inativos ou /comodato.';
+      acao = 'orientar comandos';
     }
 
-    const log = await createTelegramLog(base44, { usuario: user.email, mensagem_recebida: text, intencao_detectada: cmd, cliente_detectado: client?.first_name || client?.clinic_name || '', acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', status, resposta_gerada: resposta });
-    return Response.json({ resposta, comando: cmd, telegram_log_id: log?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', envio_automatico: false });
+    const lg = await log(base44, user, text, cmd, resposta, { status, cliente_detectado: client ? nameOf(client) : '', acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '' });
+    return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', envio_automatico: false });
   } catch (error) {
-    try {
-      const base44 = createClientFromRequest(req);
-      await safeCreate(base44, 'TelegramCommandLog', { data_hora: today(), mensagem_recebida: '', intencao_detectada: 'erro', status: 'erro', erro: error.message });
-    } catch (_e) {}
     return Response.json({ error: error.message, envio_automatico: false }, { status: 500 });
   }
 });

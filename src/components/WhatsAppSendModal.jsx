@@ -52,7 +52,7 @@ export default function WhatsAppSendModal({ client, initialMessage = '', onClose
               <MessageSquare className="w-4 h-4 text-green-400" />
             </div>
             <div>
-              <p className="text-sm font-black text-white">Enviar WhatsApp</p>
+              <p className="text-sm font-black text-white">Abrir WhatsApp manual</p>
               <p className="text-[10px] text-slate-500">{client?.first_name} · {client?.phone}</p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function WhatsAppSendModal({ client, initialMessage = '', onClose
             className="flex-1 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
             style={{ background: 'rgba(37,211,102,0.2)', color: '#25d366', border: '1px solid rgba(37,211,102,0.4)' }}>
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {sending ? 'Abrindo...' : 'Enviar no WhatsApp'}
+            {sending ? 'Abrindo...' : 'Abrir WhatsApp manual'}
           </button>
         </div>
       </div>

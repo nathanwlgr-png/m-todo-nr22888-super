@@ -10,12 +10,17 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const { competitor_id } = body;
+    const { competitor_id, force_refresh } = body;
     if (!competitor_id) return Response.json({ error: 'competitor_id obrigatório' }, { status: 400 });
 
     const comp = await base44.asServiceRole.entities.CompetitorTracker.filter({ id: competitor_id });
     const alvo = comp?.[0];
     if (!alvo) return Response.json({ error: 'Concorrente não encontrado' }, { status: 404 });
+
+    const investigadoHoje = alvo.ultima_investigacao && String(alvo.ultima_investigacao).slice(0, 10) === new Date().toISOString().slice(0, 10);
+    if (investigadoHoje && alvo.inteligencia_ia && force_refresh !== true) {
+      return Response.json({ success: true, cached: true, competitor: alvo, message: 'Investigação já feita hoje. Cache usado para evitar gasto IA/API.' });
+    }
 
     // Contexto de clientes da Compet para cruzar proximidade (somente nomes/cidades, leitura)
     const clients = await base44.asServiceRole.entities.Client.list('-purchase_score', 200).catch(() => []);

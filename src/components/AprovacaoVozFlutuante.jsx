@@ -10,18 +10,20 @@ export default function AprovacaoVozFlutuante() {
   const [open, setOpen] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
-  // Fila CRM gerada por voz (visita, agendamento) ainda pendente
+  // Fila CRM gerada por voz: carrega só quando Nathan abre o painel.
   const { data: queueItems = [], refetch: refetchQueue } = useQuery({
     queryKey: ['voz-crm-queue'],
     queryFn: () => base44.entities.CRMUpdateQueue.filter({ agente_origem: 'comando_voz_safe', status: 'pendente' }, '-data_criacao', 30).catch(() => []),
-    staleTime: 30000,
+    staleTime: 120000,
+    enabled: open,
   });
 
-  // Rascunhos de WhatsApp gerados por voz aguardando aprovação
+  // Rascunhos de WhatsApp: carrega só quando o painel está aberto.
   const { data: pendingMsgs = [], refetch: refetchMsgs } = useQuery({
     queryKey: ['voz-pending-msgs'],
     queryFn: () => base44.entities.PendingMessage.filter({ criado_por_agente: 'comando_voz_safe', status: 'aguardando_aprovacao' }, '-data_criacao', 30).catch(() => []),
-    staleTime: 30000,
+    staleTime: 120000,
+    enabled: open,
   });
 
   const total = queueItems.length + pendingMsgs.length;

@@ -44,18 +44,23 @@ export default function TasksUnified() {
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: () => base44.entities.Task.list('-created_date', 500),
+    queryKey: ['tasks-rua'],
+    queryFn: () => base44.entities.Task.list('-due_date', 200),
+    staleTime: 120000,
   });
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 500),
+    queryKey: ['clients-task-search', clientSearch],
+    queryFn: () => base44.entities.Client.list('-updated_date', 80),
+    enabled: clientSearch.length >= 2 || showForm || aiPriority,
+    staleTime: 300000,
   });
 
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list('-created_date', 500),
+    queryKey: ['leads-task-priority'],
+    queryFn: () => base44.entities.Lead.list('-created_date', 80),
+    enabled: aiPriority,
+    staleTime: 300000,
   });
 
   const calculateAIPriority = (task) => {

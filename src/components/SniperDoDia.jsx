@@ -3,26 +3,34 @@ import { buildWhatsAppUrl, isValidWhatsApp } from '@/utils/phoneUtils';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { MessageSquare, Target, Phone, ChevronRight, CheckCircle, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageSquare, Target, ChevronRight, CheckCircle, MapPin, Phone, CalendarPlus, ShieldAlert } from 'lucide-react';
 
-function getScore(c) {
-  let s = c.purchase_score || c.health_score || 0;
-  if (c.status === 'quente') s += 30;
-  if (c.status === 'morno') s += 10;
-  if (c.pipeline_stage === 'negociacao') s += 20;
-  if (c.pipeline_stage === 'proposta') s += 10;
-  const dias = c.last_contact_date
-    ? Math.floor((Date.now() - new Date(c.last_contact_date)) / 86400000)
-    : 99;
-  if (dias <= 3) s += 10;
-  if (dias > 14) s -= 10;
-  return Math.min(100, Math.max(0, s));
+const CACHE_KEY = 'nr22888_sniper_cache_v2';
+const CACHE_MS = 5 * 60 * 1000;
+
+function readCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (cached?.created_at && Date.now() - cached.created_at < CACHE_MS) return cached.items || [];
+  } catch (_e) {}
+  return null;
+}
+
+function writeCache(items) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ created_at: Date.now(), items })); } catch (_e) {}
+}
+
+function matchCompetitor(client, competitors) {
+  const city = String(client?.city || '').toLowerCase();
+  const equipment = String(client?.current_equipment || client?.equipment_interest || '').toLowerCase();
+  return competitors.find(c =>
+    (city && String(c.cidade || '').toLowerCase() === city) ||
+    (equipment && String(c.marca_concorrente || '').toLowerCase() && equipment.includes(String(c.marca_concorrente).toLowerCase()))
+  );
 }
 
 const TODAY_TYPE = (() => {
-  const d = new Date().getDay(); // 0=Dom, 5=Sex, 6=Sab
+  const d = new Date().getDay();
   if (d === 5) return 'sexta';
   if (d === 0 || d === 6) return 'fds';
   return 'util';
@@ -34,97 +42,108 @@ export default function SniperDoDia() {
   const [done, setDone] = useState({});
   const [expanded, setExpanded] = useState(true);
 
-  const { data: clients = [] } = useQuery({
-    queryKey: ['sniper-clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 200),
-    staleTime: 60000,
+  const { data: items = [] } = useQuery({
+    queryKey: ['sniper-rua-v2'],
+    staleTime: CACHE_MS,
+    queryFn: async () => {
+      const cached = readCache();
+      if (cached) return cached;
+
+      const [scores, competitors] = await Promise.all([
+        base44.entities.EliteLeadScore.list('-elite_score', 12).catch(() => []),
+        base44.entities.CompetitorTracker.filter({ ativo: true }, '-ultima_investigacao', 20).catch(() => []),
+      ]);
+
+      let clients = [];
+      if (scores.length > 0) {
+        const uniqueIds = [...new Set(scores.map(s => s.cliente_id).filter(Boolean))].slice(0, 10);
+        clients = (await Promise.all(uniqueIds.map(id => base44.entities.Client.get(id).catch(() => null)))).filter(Boolean);
+      }
+
+      if (clients.length === 0) {
+        clients = await base44.entities.Client.list('-purchase_score', 50).catch(() => []);
+      }
+
+      const mapped = clients.slice(0, 10).map((client, index) => {
+        const score = scores.find(s => s.cliente_id === client.id);
+        const competitor = matchCompetitor(client, competitors);
+        return {
+          id: client.id,
+          rank: index + 1,
+          name: client.clinic_name || client.first_name || client.full_name || 'Cliente',
+          city: client.city || 'Sem cidade',
+          phone: client.phone || '',
+          score: score?.elite_score || client.purchase_score || client.health_score || 0,
+          reason: score?.motivo_score || client.next_action || client.pipeline_stage || 'Prioridade comercial',
+          nextAction: score?.proxima_melhor_acao || client.next_action || 'Abrir conversa comercial',
+          equipment: score?.produto_recomendado || client.equipment_interest || client.current_equipment || '',
+          competitorName: competitor?.nome || '',
+          competitorArgument: competitor?.argumento_contra || competitor?.oportunidade_detectada || '',
+        };
+      });
+
+      writeCache(mapped);
+      return mapped;
+    },
   });
 
-  const top10 = [...clients]
-    .map(c => ({ ...c, _score: getScore(c) }))
-    .filter(c => c.phone || c.email)
-    .sort((a, b) => b._score - a._score)
-    .slice(0, 10);
-
   const doneCount = Object.values(done).filter(Boolean).length;
+  const progressBase = Math.max(items.length, 1);
 
   return (
-    <div className="rounded-2xl mb-4 overflow-hidden" style={{ background: '#0d0d0d', border: '1px solid rgba(255,107,0,0.35)' }}>
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(p => !p)}
-        className="w-full flex items-center justify-between px-4 py-3"
-        style={{ background: 'linear-gradient(90deg, #1a0800, #0a0000)' }}
-      >
-        <div className="flex items-center gap-2">
-          <Target className="w-4 h-4 text-orange-400" />
-          <span className="text-sm font-black text-orange-400">SNIPER DO DIA — TOP 10</span>
-          <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(255,107,0,0.2)', color: '#ff9500' }}>
-            {doneCount}/10 feitos
-          </span>
+    <div className="rounded-2xl mb-4 overflow-hidden bg-[#0d0d0d] border border-orange-500/35">
+      <button onClick={() => setExpanded(p => !p)} className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#1a0800] to-[#0a0000]">
+        <div className="flex items-center gap-2 min-w-0">
+          <Target className="w-4 h-4 text-orange-400 shrink-0" />
+          <span className="text-sm font-black text-orange-400 truncate">SNIPER DO DIA — MODO RUA</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-orange-500/20 text-orange-300">{doneCount}/{items.length || 10}</span>
         </div>
         <ChevronRight className={`w-4 h-4 text-orange-400 transition-transform ${expanded ? 'rotate-90' : ''}`} />
       </button>
 
-      {/* Subtítulo dia */}
-      <div className="px-4 py-1.5" style={{ background: '#111', borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
-        <p className="text-xs font-bold text-orange-600">{DAY_LABELS[TODAY_TYPE]}</p>
+      <div className="px-4 py-1.5 bg-[#111] border-b border-orange-500/15">
+        <p className="text-xs font-bold text-orange-600">{DAY_LABELS[TODAY_TYPE]} · cache 5 min</p>
       </div>
 
       {expanded && (
-        <div className="divide-y" style={{ borderColor: 'rgba(255,107,0,0.08)' }}>
-          {top10.length === 0 && (
-            <div className="px-4 py-6 text-center text-xs text-gray-500">Nenhum cliente com contato cadastrado.</div>
-          )}
-          {top10.map((c, i) => {
-            const isDone = done[c.id];
-            const whatsUrl = c.phone && isValidWhatsApp(c.phone) ? buildWhatsAppUrl(c.phone) : null;
+        <div className="divide-y divide-orange-500/10">
+          {items.length === 0 && <div className="px-4 py-6 text-center text-xs text-gray-500">Nenhuma oportunidade carregada.</div>}
+          {items.map((item) => {
+            const isDone = done[item.id];
+            const whatsUrl = item.phone && isValidWhatsApp(item.phone) ? buildWhatsAppUrl(item.phone) : null;
             return (
-              <div key={c.id} className="px-4 py-3 flex items-center gap-3" style={{ background: isDone ? 'rgba(0,255,136,0.03)' : 'transparent', opacity: isDone ? 0.5 : 1 }}>
-                {/* Rank */}
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-                  style={{ background: i < 3 ? 'rgba(255,107,0,0.3)' : '#1a1a1a', color: i < 3 ? '#ff6b00' : '#666' }}>
-                  {i + 1}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-black text-white truncate">{c.first_name} {c.full_name?.split(' ').slice(-1)[0] || ''}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <p className="text-xs truncate" style={{ color: '#ff9500' }}>{c.clinic_name || c.city || '—'}</p>
-                    {c.pipeline_stage === 'negociacao' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>NEGOC.</span>}
-                    {c.pipeline_stage === 'proposta' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>PROP.</span>}
-                    {c.pipeline_stage === 'fechado' && <span className="text-[8px] px-1 rounded font-bold shrink-0" style={{ background: 'rgba(0,200,81,0.2)', color: '#00c851' }}>FECHADO</span>}
+              <div key={item.id} className="px-4 py-3 space-y-2" style={{ background: isDone ? 'rgba(0,255,136,0.03)' : 'transparent', opacity: isDone ? 0.58 : 1 }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 bg-orange-500/25 text-orange-300">{item.rank}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-white truncate">{item.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-orange-300">
+                      <MapPin className="w-3 h-3" /> <span className="truncate">{item.city}</span>
+                      {item.phone && <><Phone className="w-3 h-3" /><span>WhatsApp</span></>}
+                    </div>
+                  </div>
+                  <div className="text-center shrink-0">
+                    <p className="text-sm font-black text-red-300">{Math.round(item.score || 0)}</p>
+                    <p className="text-[9px] text-gray-600">score</p>
                   </div>
                 </div>
 
-                {/* Score */}
-                <div className="text-center flex-shrink-0">
-                  <p className="text-xs font-black" style={{ color: c._score >= 70 ? '#ef4444' : c._score >= 40 ? '#f59e0b' : '#6b7280' }}>{c._score}</p>
-                  <p className="text-[9px] text-gray-600">score</p>
+                <div className="rounded-xl p-2 bg-white/5 border border-white/10">
+                  <p className="text-[11px] text-slate-300"><b className="text-orange-300">Motivo:</b> {item.reason}</p>
+                  <p className="text-[11px] text-slate-300"><b className="text-emerald-300">Próxima ação:</b> {item.nextAction}</p>
+                  {item.equipment && <p className="text-[11px] text-slate-300"><b className="text-cyan-300">Oportunidade:</b> {item.equipment}</p>}
+                  {item.competitorName && (
+                    <p className="mt-1 text-[11px] text-red-200 flex gap-1"><ShieldAlert className="w-3.5 h-3.5 shrink-0 text-red-300" /> Concorrente detectado: {item.competitorName}. {item.competitorArgument}</p>
+                  )}
                 </div>
 
-                {/* Ações */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {whatsUrl && (
-                    <a href={whatsUrl} target="_blank" rel="noopener noreferrer">
-                      <button className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,200,81,0.15)', border: '1px solid rgba(0,200,81,0.3)' }}>
-                        <MessageSquare className="w-3.5 h-3.5 text-green-400" />
-                      </button>
-                    </a>
-                  )}
-                  <Link to={`${createPageUrl('ClientProfile')}?id=${c.id}`}>
-                    <button className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,107,0,0.12)', border: '1px solid rgba(255,107,0,0.25)' }}>
-                      <ChevronRight className="w-3.5 h-3.5 text-orange-400" />
-                    </button>
-                  </Link>
-                  <button
-                    onClick={() => setDone(p => ({ ...p, [c.id]: !p[c.id] }))}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                    style={{ background: isDone ? 'rgba(0,255,136,0.2)' : '#1a1a1a', border: `1px solid ${isDone ? 'rgba(0,255,136,0.4)' : '#333'}` }}
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" style={{ color: isDone ? '#00ff88' : '#444' }} />
-                  </button>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {whatsUrl ? (
+                    <a href={whatsUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg py-2 text-[10px] font-black text-center bg-green-500/15 text-green-300 border border-green-500/30 flex items-center justify-center gap-1"><MessageSquare className="w-3 h-3" /> WhatsApp manual</a>
+                  ) : <span className="rounded-lg py-2 text-[10px] font-black text-center bg-slate-700/30 text-slate-500 border border-slate-700">Sem WhatsApp</span>}
+                  <Link to={`/ClienteDetalhe360?id=${item.id}`} className="rounded-lg py-2 text-[10px] font-black text-center bg-orange-500/15 text-orange-300 border border-orange-500/30">Ver resumo</Link>
+                  <Link to={`/VisitManager?client_id=${item.id}`} className="rounded-lg py-2 text-[10px] font-black text-center bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center justify-center gap-1"><CalendarPlus className="w-3 h-3" /> Visita</Link>
+                  <button onClick={() => setDone(p => ({ ...p, [item.id]: !p[item.id] }))} className="rounded-lg py-2 text-[10px] font-black bg-white/5 text-slate-300 border border-white/10 flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Feito</button>
                 </div>
               </div>
             );
@@ -132,13 +151,10 @@ export default function SniperDoDia() {
         </div>
       )}
 
-      {/* Progresso */}
-      {expanded && top10.length > 0 && (
-        <div className="px-4 py-2" style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,107,0,0.1)' }}>
-          <div className="w-full h-1.5 rounded-full" style={{ background: '#1a1a1a' }}>
-            <div className="h-1.5 rounded-full transition-all" style={{ width: `${(doneCount / 10) * 100}%`, background: 'linear-gradient(90deg, #00c851, #00ff88)' }} />
-          </div>
-          <p className="text-xs text-center mt-1" style={{ color: '#555' }}>{doneCount === 10 ? '🏆 Meta do dia batida!' : `${10 - doneCount} contatos restantes`}</p>
+      {expanded && items.length > 0 && (
+        <div className="px-4 py-2 bg-[#0a0a0a] border-t border-orange-500/10">
+          <div className="w-full h-1.5 rounded-full bg-[#1a1a1a]"><div className="h-1.5 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-green-300" style={{ width: `${Math.min(100, (doneCount / progressBase) * 100)}%` }} /></div>
+          <p className="text-xs text-center mt-1 text-gray-600">{doneCount >= items.length ? 'Meta do dia batida' : `${Math.max(0, items.length - doneCount)} ações restantes`}</p>
         </div>
       )}
     </div>
