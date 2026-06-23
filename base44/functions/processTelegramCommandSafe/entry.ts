@@ -79,9 +79,9 @@ Deno.serve(async (req) => {
     if (cmd === '/resumo_dia') {
       const [scores, visits, pendingMessages, tasks] = await Promise.all([
         safeList(base44, 'EliteLeadScore', '-elite_score', 8),
-        safeFilter(base44, 'Visit', { status: 'agendada' }),
+        safeFilter(base44, 'Visit', { status: 'agendada' }, '-scheduled_date', 20),
         safeList(base44, 'PendingMessage', '-created_date', 20),
-        safeFilter(base44, 'Task', { status: 'pendente' })
+        safeFilter(base44, 'Task', { status: 'pendente' }, '-due_date', 50)
       ]);
       resposta = `Resumo do dia: ${scores.length} oportunidades ranqueadas, ${visits.length} visitas agendadas, ${pendingMessages.filter(m => ['pending','aguardando_aprovacao','ready_to_send','rascunho'].includes(m.status)).length} mensagens pendentes e ${tasks.length} follow-ups pendentes. Top ação: ${scores[0]?.proxima_melhor_acao || 'ativar Score Elite'}.`;
       acao = 'mostrar resumo do dia';

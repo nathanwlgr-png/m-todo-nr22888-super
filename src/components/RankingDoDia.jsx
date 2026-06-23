@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +14,16 @@ const PRIORITY_COLORS = {
   'frio': 'bg-slate-100 text-slate-900 border-slate-300',
 };
 
+function normalizeWhatsAppPhone(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('55') ? digits : `55${digits}`;
+}
+
 export default function RankingDoDia() {
   const [loading, setLoading] = useState(false);
   const [ranking, setRanking] = useState(null);
+  const autoLoaded = useRef(false);
 
   // Gerar ranking
   const computeRanking = useMutation({
@@ -42,6 +49,12 @@ export default function RankingDoDia() {
   const handleGenerateRanking = () => {
     computeRanking.mutate();
   };
+
+  useEffect(() => {
+    if (autoLoaded.current) return;
+    autoLoaded.current = true;
+    computeRanking.mutate();
+  }, []);
 
   if (!ranking) {
     return (
@@ -180,7 +193,7 @@ export default function RankingDoDia() {
                 <Button
                   size="sm"
                   className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => window.open(`https://wa.me/${item.phone.replace(/\D/g, '')}`, '_blank')}
+                  onClick={() => window.open(`https://wa.me/${normalizeWhatsAppPhone(item.phone)}`, '_blank')}
                 >
                   <MessageSquare className="w-3 h-3" />
                   WhatsApp

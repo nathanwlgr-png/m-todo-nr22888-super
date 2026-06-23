@@ -44,7 +44,11 @@ async function safeLog(base44, data) {
 async function findRecord(base44, entity, id) {
   if (!id) return null;
   const api = entityApi(base44, entity);
-  if (!api?.filter) return null;
+  if (!api) return null;
+  try {
+    if (api.get) return await api.get(id);
+  } catch (_e) {}
+  if (!api.filter) return null;
   try {
     const rows = await api.filter({ id });
     return rows?.[0] || null;
