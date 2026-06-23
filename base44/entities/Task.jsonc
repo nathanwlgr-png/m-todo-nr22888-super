@@ -23,6 +23,25 @@
       "format": "date",
       "description": "Data de vencimento"
     },
+    "followup_due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora exata para disparar alerta de follow-up autom\u00e1tico"
+    },
+    "source_visit_id": {
+      "type": "string",
+      "description": "ID da visita que originou automaticamente esta tarefa"
+    },
+    "followup_alert_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o alerta autom\u00e1tico de follow-up j\u00e1 foi enviado"
+    },
+    "followup_alert_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do envio do alerta autom\u00e1tico de follow-up"
+    },
     "status": {
       "type": "string",
       "enum": [
