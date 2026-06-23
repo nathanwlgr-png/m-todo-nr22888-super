@@ -1016,11 +1016,16 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                         ) : (
                           <>
                             <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                            <div className="grid grid-cols-4 gap-1.5 mt-2">
-                              <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="h-9 text-xs"><Edit2 className="w-3 h-3" /></Button>
-                              <Button size="sm" onClick={() => setProposalClient(client)} className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs"><FileText className="w-3 h-3" /></Button>
-                              <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs" title="Agendar follow-up"><Calendar className="w-3 h-3" /></Button>
-                              <Button size="sm" onClick={() => handleOpenQuickSale(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs" title="Registrar venda"><DollarSign className="w-3 h-3" /></Button>
+                            <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                              <Button size="sm" onClick={() => navigate(`/ClienteDetalhe360?id=${client.id}`)} className="h-9 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold">
+                                Abrir 360°
+                              </Button>
+                              <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs font-bold">
+                                Ação rápida
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setProposalClient(client)} className="h-9 text-xs">
+                                Proposta
+                              </Button>
                             </div>
                           </>
                         )}
@@ -1050,11 +1055,10 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                   ) : (
                     <>
                       <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                      <div className="grid grid-cols-4 gap-1.5 mt-2">
-                        <Button size="sm" variant="outline" onClick={() => handleQuickEdit(client)} className="h-9 text-xs"><Edit2 className="w-3 h-3" /></Button>
-                        <Button size="sm" onClick={() => setProposalClient(client)} className="h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs"><FileText className="w-3 h-3" /></Button>
-                        <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs" title="Agendar follow-up"><Calendar className="w-3 h-3" /></Button>
-                        <Button size="sm" onClick={() => handleOpenQuickSale(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs" title="Registrar venda"><DollarSign className="w-3 h-3" /></Button>
+                      <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                        <Button size="sm" onClick={() => navigate(`/ClienteDetalhe360?id=${client.id}`)} className="h-9 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold">Abrir 360°</Button>
+                        <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs font-bold">Ação rápida</Button>
+                        <Button size="sm" variant="outline" onClick={() => setProposalClient(client)} className="h-9 text-xs">Proposta</Button>
                       </div>
                     </>
                   )}

@@ -1,17 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
-import { Trophy, Zap, Loader2, MessageSquare, UserRound } from 'lucide-react';
+import { Trophy, Zap, Loader2, MessageSquare, UserRound, CheckCircle, ChevronRight, Target } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
-const PRIORITY_COLORS = {
-  'urgente': 'bg-red-100 text-red-900 border-red-300',
-  'quente': 'bg-orange-100 text-orange-900 border-orange-300',
-  'potencial': 'bg-blue-100 text-blue-900 border-blue-300',
-  'frio': 'bg-slate-100 text-slate-900 border-slate-300',
+const PRIORITY_STYLES = {
+  'urgente': { bg: 'bg-red-500/10 border-red-500/40', badge: 'bg-red-500/20 text-red-300', label: '🔴 Alta' },
+  'quente':  { bg: 'bg-orange-500/10 border-orange-500/40', badge: 'bg-orange-500/20 text-orange-300', label: '🔥 Quente' },
+  'potencial':{ bg: 'bg-blue-500/10 border-blue-500/35', badge: 'bg-blue-500/20 text-blue-300', label: '💡 Potencial' },
+  'frio':    { bg: 'bg-slate-800/60 border-slate-700/40', badge: 'bg-slate-700/40 text-slate-400', label: '❄️ Frio' },
+};
+
+// Linguagem segura — nunca mostrar termos sensíveis em tela
+const SAFE_ACTION_TYPE = {
+  'venda_equipamento': { label: '🔬 Equipamento', cls: 'bg-amber-600/20 text-amber-300' },
+  'reposicao_insumo':  { label: '📦 Insumo', cls: 'bg-green-600/20 text-green-300' },
+  'follow_up':         { label: '📞 Retomar contato', cls: 'bg-blue-600/20 text-blue-300' },
+  'reativacao':        { label: '🔄 Reengajar', cls: 'bg-purple-600/20 text-purple-300' },
 };
 
 function normalizeWhatsAppPhone(phone) {
@@ -58,178 +65,130 @@ export default function RankingDoDia() {
 
   if (!ranking) {
     return (
-      <Card className="border-orange-200 bg-orange-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-orange-600" />
-            🏆 Ranking do Dia
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-slate-600 mb-4">Clique para processar prioridades do dia</p>
-          <Button
+      <div className="rounded-2xl bg-[#0d0d0d] border border-orange-500/25 overflow-hidden">
+        <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
+          <Trophy className="w-4 h-4 text-orange-400" />
+          <span className="text-sm font-black text-orange-400">RANKING DO DIA</span>
+        </div>
+        <div className="text-center py-8 px-4">
+          <p className="text-xs text-slate-500 mb-4">Top oportunidades por receita esperada</p>
+          <button
             onClick={handleGenerateRanking}
             disabled={loading}
-            className="bg-orange-600 hover:bg-orange-700 gap-2"
+            className="flex items-center gap-2 mx-auto px-5 py-2.5 rounded-xl font-black text-sm bg-orange-500/15 text-orange-300 border border-orange-500/35 hover:bg-orange-500/25 transition-colors disabled:opacity-50"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Zap className="w-4 h-4" />
-            )}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
             Gerar Ranking
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      
+    <div className="rounded-2xl bg-[#0d0d0d] border border-orange-500/25 overflow-hidden">
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-orange-600" />
-          TOP 10 Prioridades
-        </h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleGenerateRanking}
-          disabled={loading}
-        >
-          🔄 Atualizar
-        </Button>
+      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
+        <div className="flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-orange-400" />
+          <span className="text-sm font-black text-orange-400">RANKING DO DIA</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-300 font-bold">{ranking.priorities?.length || 0}</span>
+        </div>
+        <button onClick={handleGenerateRanking} disabled={loading}
+          className="text-[10px] font-bold text-slate-500 hover:text-orange-400 flex items-center gap-1 transition-colors">
+          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : '🔄'} Atualizar
+        </button>
       </div>
 
       {/* RESUMO */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-red-700 font-bold">🔥 URGENTE</p>
-            <p className="text-xl font-black text-red-600">{ranking.summary?.urgente || 0}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-orange-50 border-orange-200">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-orange-700 font-bold">🔥 QUENTE</p>
-            <p className="text-xl font-black text-orange-600">{ranking.summary?.quente || 0}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-blue-700 font-bold">💡 POTENCIAL</p>
-            <p className="text-xl font-black text-blue-600">{ranking.summary?.potencial || 0}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-green-50 border-green-200">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-green-700 font-bold">📦 INSUMOS</p>
-            <p className="text-xl font-black text-green-600">{ranking.summary?.consumables || 0}</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-4 gap-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        {[
+          { label: 'Alta', val: ranking.summary?.urgente || 0, color: 'text-red-400' },
+          { label: 'Quente', val: ranking.summary?.quente || 0, color: 'text-orange-400' },
+          { label: 'Potencial', val: ranking.summary?.potencial || 0, color: 'text-blue-400' },
+          { label: 'Insumo', val: ranking.summary?.consumables || 0, color: 'text-green-400' },
+        ].map(({ label, val, color }) => (
+          <div key={label} className="py-2 text-center" style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+            <p className={`text-lg font-black ${color}`}>{val}</p>
+            <p className="text-[9px] text-slate-600 uppercase">{label}</p>
+          </div>
+        ))}
       </div>
 
       {/* TOP 10 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Ações Prioritárias</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            {ranking.priorities?.map((item, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-lg border-2 ${PRIORITY_COLORS[item.priority] || PRIORITY_COLORS.frio}`}
-              >
-
-                {/* Posição */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-white bg-slate-700 flex-shrink-0">
-                      {idx + 1}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-base truncate">{item.name}</p>
-                      <p className="text-xs opacity-75">{item.city}</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-slate-700 text-white ml-2 flex-shrink-0">
-                    {item.score}%
-                  </Badge>
+      <div className="divide-y divide-white/5 max-h-[520px] overflow-y-auto">
+        {ranking.priorities?.map((item, idx) => {
+          const styles = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.frio;
+          const actionInfo = SAFE_ACTION_TYPE[item.action_type];
+          const waUrl = item.phone ? `https://wa.me/${normalizeWhatsAppPhone(item.phone)}` : null;
+          return (
+            <div key={idx} className={`p-3 border-l-2 ${styles.bg}`}>
+              {/* Linha 1: rank + nome + score */}
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black bg-orange-500/20 text-orange-300 shrink-0">{idx + 1}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-black text-white truncate">{item.name}</p>
+                  <p className="text-[10px] text-slate-500">{item.city}</p>
                 </div>
-
-              {/* Tipo de ação */}
-              <div className="flex flex-wrap gap-1 mb-2">
-                {item.action_type === 'venda_equipamento' && (
-                  <Badge className="bg-amber-600">💾 Equipamento</Badge>
-                )}
-                {item.action_type === 'reposicao_insumo' && (
-                  <Badge className="bg-green-600">📦 Insumo</Badge>
-                )}
-                {item.action_type === 'follow_up' && (
-                  <Badge className="bg-blue-600">📞 Follow-up</Badge>
-                )}
-                {item.action_type === 'reativacao' && (
-                  <Badge className="bg-purple-600">🔄 Reativação</Badge>
-                )}
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-black text-orange-300">{item.score}%</p>
+                  {item.potential_value > 0 && (
+                    <p className="text-[9px] text-green-400">R$ {item.potential_value.toLocaleString('pt-BR')}</p>
+                  )}
+                </div>
               </div>
 
-              {/* Descrição */}
-              <p className="text-sm mb-2">{item.action_description}</p>
-
-              {/* Detalhes */}
-              <div className="grid grid-cols-2 gap-2 text-xs mb-2">
-                {item.last_contact && (
-                  <p><span className="font-bold">Último contato:</span> {item.last_contact}</p>
+              {/* Linha 2: tipo + ação segura */}
+              <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                {actionInfo && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${actionInfo.cls}`}>{actionInfo.label}</span>
                 )}
-                {item.potential_value && (
-                  <p><span className="font-bold">Potencial:</span> R$ {item.potential_value.toLocaleString('pt-BR')}</p>
-                )}
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${styles.badge}`}>{styles.label}</span>
               </div>
 
-              {/* Próximo passo comercial */}
-              <div className={`grid gap-2 ${item.phone ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full gap-2 bg-white/70 hover:bg-white text-slate-900 border-slate-300"
-                  onClick={() => { window.location.href = `/ClientProfile?id=${encodeURIComponent(item.id)}`; }}
+              {/* Próxima ação — linguagem segura */}
+              <p className="text-[11px] text-slate-300 mb-2">
+                <span className="text-orange-400 font-bold">Próxima ação: </span>
+                {item.action_description}
+              </p>
+
+              {/* Botões padronizados */}
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  onClick={() => { window.location.href = `/ClienteDetalhe360?id=${encodeURIComponent(item.id)}`; }}
+                  className="py-2 rounded-lg text-[10px] font-black text-orange-300 bg-orange-500/12 border border-orange-500/25 flex items-center justify-center gap-1"
                 >
-                  <UserRound className="w-3 h-3" />
-                  Abrir Cliente
-                </Button>
-                {item.phone && (
-                  <Button
-                    size="sm"
-                    className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => window.open(`https://wa.me/${normalizeWhatsAppPhone(item.phone)}`, '_blank')}
-                  >
-                    <MessageSquare className="w-3 h-3" />
-                    WhatsApp
-                  </Button>
+                  <Target className="w-3 h-3" /> Ver 360°
+                </button>
+                {waUrl ? (
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                    className="py-2 rounded-lg text-[10px] font-black text-center text-green-300 bg-green-500/12 border border-green-500/25 flex items-center justify-center gap-1">
+                    <MessageSquare className="w-3 h-3" /> WhatsApp
+                  </a>
+                ) : (
+                  <span className="py-2 rounded-lg text-[10px] text-center text-slate-600 bg-slate-800/30 border border-slate-700/30">Sem WA</span>
                 )}
+                <button
+                  onClick={() => { window.location.href = `/ClientProfile?id=${encodeURIComponent(item.id)}`; }}
+                  className="py-2 rounded-lg text-[10px] font-black text-slate-300 bg-white/5 border border-white/10 flex items-center justify-center gap-1"
+                >
+                  <ChevronRight className="w-3 h-3" /> Perfil
+                </button>
               </div>
-
             </div>
+          );
+        })}
+      </div>
+
+      {/* INSIGHTS — linguagem interna segura */}
+      {ranking.insights?.length > 0 && (
+        <div className="px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <p className="text-[10px] font-black text-slate-500 uppercase mb-1.5">Pontos de Atenção</p>
+          {ranking.insights.map((insight, i) => (
+            <p key={i} className="text-[11px] text-slate-400">• {insight}</p>
           ))}
-        </CardContent>
-      </Card>
-
-      {/* RESUMO ESTRATÉGICO */}
-      {ranking.insights && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardHeader>
-            <CardTitle className="text-sm">💡 Insights do Dia</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-slate-700 space-y-1">
-            {ranking.insights.map((insight, i) => (
-              <p key={i}>• {insight}</p>
-            ))}
-          </CardContent>
-        </Card>
+        </div>
       )}
-
     </div>
   );
 }

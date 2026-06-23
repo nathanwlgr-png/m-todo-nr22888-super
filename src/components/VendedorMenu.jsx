@@ -18,8 +18,9 @@ const ADMIN_CATEGORIES = [
   {
     label: '2. 🔍 Investigar',
     pages: [
-      { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigação Suprema' },
-      { page: 'ModoCacaComercial', label: '🎯 Modo Caça' },
+      { page: 'ModoInvestigativoSupremo', label: '🕵️ Análise de Cliente' },
+      { page: 'ModoCacaComercial', label: '🎯 Prospecção' },
+      { page: 'PainelConcorrencia', label: '🧭 Concorrentes' },
       { page: 'InvestigacaoDeCampoReal', label: '🔎 Campo Real' },
     ],
   },
@@ -35,6 +36,7 @@ const ADMIN_CATEGORIES = [
     pages: [
       { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
       { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty' },
+      { page: 'ModoInsumos', label: '📦 Insumos' },
       { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
     ],
   },
@@ -95,7 +97,7 @@ export default function VendedorMenu({ isOpen, onClose }) {
         <div className="flex items-center justify-between px-4 py-4 shrink-0"
           style={{ borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
           <div>
-            <p className="text-sm font-black text-orange-400">NR22888</p>
+            <p className="text-sm font-black text-orange-400">Painel Comercial</p>
             <p className="text-[10px] text-slate-500">Seamaty Brasil</p>
           </div>
           <div className="flex items-center gap-2">

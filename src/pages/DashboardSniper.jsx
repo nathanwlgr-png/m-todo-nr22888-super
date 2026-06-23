@@ -32,8 +32,15 @@ export default function DashboardSniper() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['dashboard-clients-rua'],
-    queryFn: () => base44.entities.Client.list('-purchase_score', 50),
+    queryFn: () => base44.entities.Client.list('-purchase_score', 20),
     staleTime: 300000,
+  });
+
+  // Verificar campanha ativa
+  const { data: campaigns = [] } = useQuery({
+    queryKey: ['dashboard-campaigns'],
+    queryFn: () => base44.entities.Campaign?.filter({ status: 'ativa' }, '-created_date', 1).catch(() => []),
+    staleTime: 600000,
   });
 
   const { data: visits = [] } = useQuery({
@@ -49,6 +56,7 @@ export default function DashboardSniper() {
   });
 
   const hotClients = clients.filter(c => (c.purchase_score || 0) > 70);
+  const activeCampaign = campaigns[0] || null;
   const noContact7d = clients.filter(c => {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
@@ -67,6 +75,11 @@ export default function DashboardSniper() {
             🎯 Painel Comercial
           </h1>
           <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
+        </div>
+
+        {/* ── CAMPANHA ATIVA / INATIVA ── */}
+        <div className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ${activeCampaign ? 'bg-green-500/10 border border-green-500/30 text-green-300' : 'bg-slate-800/60 border border-slate-700 text-slate-500'}`}>
+          {activeCampaign ? `🎯 Campanha ativa: ${activeCampaign.name || activeCampaign.title || 'Campanha'}` : '📭 Nenhuma campanha ativa no momento.'}
         </div>
 
         {/* ── MÁQUINA DE VENDA — foco: vender, concorrência, fechamento ── */}

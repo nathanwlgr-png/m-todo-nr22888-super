@@ -185,8 +185,29 @@ Deno.serve(async (req) => {
         }
         acao = `preparar ${cmd}`;
       }
+    } else if (cmd === '/pedido') {
+      // Registrar pedido de insumo
+      const parsed = splitNameDetail(args);
+      const found = await oneClient(base44, parsed.name);
+      if (!found.client) { resposta = found.resposta; status = 'interpretado'; acao = 'registrar pedido'; }
+      else {
+        client = found.client;
+        const detail = parsed.detail || 'insumo solicitado';
+        const r = await create(base44, 'Task', { client_id: client.id, client_name: nameOf(client), title: `📦 Pedido insumo: ${nameOf(client)}`, description: `Pedido registrado via Telegram: ${detail}. Nada é enviado automaticamente.`, status: 'pendente', priority: 'alta', type: 'outro', auto_created: true, assigned_to: user.email, assigned_to_name: user.full_name || user.email });
+        task = r.record; resposta = task ? `Pedido de insumo registrado para ${nameOf(client)}: ${detail}.` : `Erro ao registrar: ${r.error}.`; status = task ? 'interpretado' : 'erro';
+      }
+      acao = 'registrar pedido';
+    } else if (cmd === '/campanha') {
+      const camps = await filter(base44, 'Campaign', { status: 'ativa' }, '-created_date', 1).catch(() => []);
+      if (camps.length > 0) {
+        const c = camps[0];
+        resposta = `🎯 Campanha ativa: ${c.name || c.title || 'sem nome'}\nStatus: ${c.status}\nDescrição: ${c.description || 'sem descrição'}\nData: ${c.start_date || ''} → ${c.end_date || 'sem prazo'}`;
+      } else {
+        resposta = '📭 Nenhuma campanha ativa no momento. Proposta nova não vincula campanha encerrada.';
+      }
+      acao = 'consultar campanha';
     } else {
-      resposta = 'Comando não reconhecido. Use /sniper, /hoje, /rota, /cliente, /cidade, /concorrente, /whatsapp, /proposta, /material, /visita, /tarefa, /quentes, /inativos ou /comodato.';
+      resposta = 'Comando não reconhecido. Use /sniper, /hoje, /rota, /cliente, /cidade, /concorrente, /campanha, /pedido, /whatsapp, /proposta, /material, /visita, /tarefa, /quentes, /inativos ou /comodato.';
       acao = 'orientar comandos';
     }
 

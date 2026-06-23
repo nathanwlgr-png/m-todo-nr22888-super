@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, MessageCircle, MoreVertical, Tag, Calendar } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import ProposalModal from './ProposalModal';
 import ScheduleVisitModal from './ScheduleVisitModal';
 import { calcHealthScore } from './WeeklyHealthReport';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ClientDetailsModal from './ClientDetailsModal';
-import AIMetricsBadges from './AIMetricsBadges';
 import { toast } from 'sonner';
 
 const statusColors = {
@@ -78,114 +77,63 @@ export default function ClientCard({ client, hasPurchase = false, scheduledVisit
 
   const currentStage = client.visit_objective || client.pipeline_stage;
 
+  // Determinar próxima ação visível (linguagem segura)
+  const nextActionLabel = client.next_action || client.ai_next_best_action || '';
+  const equipFocus = client.equipment_interest || client.current_equipment || '';
+
   return (
     <>
       <div onClick={handleCardClick} className="cursor-pointer">
-        <Card className={`p-4 hover:shadow-lg transition-all duration-200 border-l-4 ${hasPurchase ? 'border-l-green-600 bg-green-50/50' : 'border-l-slate-800'} active:scale-[0.98]`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  {client.first_name?.charAt(0).toUpperCase()}
+        <Card className={`p-3 hover:shadow-md transition-all duration-200 border-l-4 ${hasPurchase ? 'border-l-green-500 bg-green-50/30' : statusColors[client.status] === 'bg-red-500 text-white' ? 'border-l-red-400' : 'border-l-slate-200'} active:scale-[0.99]`}>
+          {/* Linha 1: avatar + info + temperatura + score */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-base">
+                {client.first_name?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-slate-800 truncate">{client.first_name}</h3>
+                <Badge className={`${statusColors[client.status]} text-xs shrink-0`}>
+                  {client.status === 'quente' ? '🔥' : client.status === 'morno' ? '🌡️' : '❄️'}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-slate-500 flex-wrap">
+                {client.clinic_name && <span className="truncate max-w-[120px]">{client.clinic_name}</span>}
+                {client.clinic_name && client.city && <span>·</span>}
+                {client.city && <span>{client.city}</span>}
+                {client.phone && <MessageCircle className="w-3 h-3 text-green-500 ml-1 shrink-0" />}
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              {client.purchase_score > 0 && (
+                <p className="text-sm font-black text-slate-700">{client.purchase_score}%</p>
+              )}
+              {equipFocus && (
+                <p className="text-[9px] text-orange-600 font-bold truncate max-w-[70px]">{equipFocus}</p>
+              )}
+              {currentStage && pipelineStages[currentStage] && (
+                <span className={`text-[9px] px-1.5 py-0.5 rounded ${pipelineStages[currentStage].color} text-white font-bold`}>
+                  {pipelineStages[currentStage].label}
                 </span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800">{client.first_name}</h3>
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    {client.razao_social && <span>{client.razao_social}</span>}
-                    {client.razao_social && client.clinic_name && <span>•</span>}
-                    {client.clinic_name && <span>{client.clinic_name}</span>}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-slate-400">
-                    {client.cnpj && <span>CNPJ: {client.cnpj}</span>}
-                    {client.cnpj && client.city && <span>•</span>}
-                    {client.city && <span>{client.city}</span>}
-                    {client.phone && (
-                      <MessageCircle className="w-3 h-3 text-green-500 ml-1" />
-                    )}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="flex flex-col gap-1 mb-1">
-                  <div className="flex items-center gap-2">
-                    <Badge className={`${statusColors[client.status]} text-xs`}>
-                      {statusLabels[client.status]}
-                    </Badge>
-                    {client.custom_tags?.length > 0 && (
-                      <Badge variant="outline" className="text-xs flex items-center gap-1">
-                        <Tag className="w-3 h-3" />
-                        {client.custom_tags.length}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {/* Indicadores de Visita */}
-                  <div className="flex items-center gap-1">
-                    {scheduledVisit && (
-                      <Badge className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
-                        📅 Agendada
-                      </Badge>
-                    )}
-                    {lastVisit && (
-                      <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
-                        ✓ Visitado
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {/* Fase da Negociação */}
-                  {currentStage && pipelineStages[currentStage] && (
-                    <Badge className={`${pipelineStages[currentStage].color} text-white text-xs px-2 py-0.5`}>
-                      {pipelineStages[currentStage].label}
-                    </Badge>
-                  )}
-                  
-                  {/* Segmento IA */}
-                  {client.ai_segment && (
-                    <Badge className={
-                      client.ai_segment === 'VIP' ? 'bg-purple-500 text-white' :
-                      client.ai_segment === 'Champions' ? 'bg-green-500 text-white' :
-                      client.ai_segment === 'Potential' ? 'bg-blue-500 text-white' :
-                      client.ai_segment === 'At Risk' ? 'bg-red-500 text-white' :
-                      'bg-gray-500 text-white'
-                    } className="text-xs px-2 py-0.5">
-                      {client.ai_segment === 'VIP' ? '👑' : 
-                       client.ai_segment === 'Champions' ? '🏆' :
-                       client.ai_segment === 'Potential' ? '⭐' :
-                       client.ai_segment === 'At Risk' ? '⚠️' : '📊'} {client.ai_segment}
-                    </Badge>
-                  )}
-                  
-                  {/* AI Metrics - Compact */}
-                  <AIMetricsBadges client={client} variant="compact" />
-                </div>
-                {client.purchase_score && (
-                  <div className="text-xs text-slate-400">
-                    Score: {client.purchase_score}%
-                  </div>
-                )}
-                <div className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${healthBadge.cls}`}>
-                  {healthBadge.label} {healthScore}
-                </div>
-              </div>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowVisitModal(true); }}
-                className="p-1 hover:bg-indigo-100 rounded" title="Agendar visita"
-              >
-                <Calendar className="w-4 h-4 text-indigo-400" />
-              </button>
-              <button 
-                onClick={handleMoreClick}
-                className="p-1 hover:bg-slate-100 rounded"
-              >
-                <MoreVertical className="w-4 h-4 text-slate-400" />
-              </button>
-              <ChevronRight className="w-5 h-5 text-slate-300" />
+          </div>
+
+          {/* Linha 2: próxima ação (se existir) */}
+          {nextActionLabel && (
+            <div className="mb-2 px-2 py-1 rounded-lg bg-orange-50 border border-orange-100">
+              <p className="text-[11px] text-orange-700"><span className="font-bold">→ </span>{nextActionLabel}</p>
             </div>
+          )}
+
+          {/* Linha 3: indicadores compactos */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {scheduledVisit && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold">📅 Visita agendada</span>}
+            {lastVisit && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-bold">✓ Visitado</span>}
+            {hasPurchase && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-bold">💰 Comprou</span>}
+            {client.ai_segment && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold">{client.ai_segment}</span>}
           </div>
         </Card>
       </div>
