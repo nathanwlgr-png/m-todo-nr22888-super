@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     }
 
     // Contexto de clientes da Compet para cruzar proximidade (somente nomes/cidades, leitura)
-    const clients = await base44.asServiceRole.entities.Client.list('-purchase_score', 200).catch(() => []);
+    const clients = await base44.asServiceRole.entities.Client.list('-purchase_score', 100).catch(() => []);
     const cidadesClientes = [...new Set(clients.map(c => c.city).filter(Boolean))].slice(0, 40);
 
     const prompt = `Você é o analista de inteligência competitiva da Compet Distribuidora (representa equipamentos veterinários Seamaty: hematologia, bioquímica, hemogasometria, imunofluorescência, PCR).
