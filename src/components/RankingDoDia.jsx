@@ -57,11 +57,8 @@ export default function RankingDoDia() {
     computeRanking.mutate();
   };
 
-  useEffect(() => {
-    if (autoLoaded.current) return;
-    autoLoaded.current = true;
-    computeRanking.mutate();
-  }, []);
+  // Ranking NÃO dispara automaticamente — apenas quando o usuário clicar
+  // useEffect removido para não consumir IA/créditos sem demanda explícita
 
   if (!ranking) {
     return (

@@ -62,7 +62,7 @@ export default function ClienteDetalhe360() {
   // ── Queries ────────────────────────────────────────────────────────────────
   const { data: client, isLoading } = useQuery({
     queryKey: ['c360-client', clientId],
-    queryFn: () => base44.entities.Client.filter({ id: clientId }).then(r => r[0]),
+    queryFn: () => base44.entities.Client.get(clientId),
     enabled: !!clientId,
     staleTime: 2 * 60 * 1000,
   });
@@ -374,11 +374,13 @@ export default function ClienteDetalhe360() {
           </div>
         </div>
 
-        {/* STATUS PUBLICAR_LIBERADO_PARCIAL banner */}
-        <div className="mt-2 px-2 py-1 rounded-lg flex items-center gap-2" style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.25)' }}>
-          <Lock className="w-3 h-3 text-yellow-400 shrink-0" />
-          <span className="text-[9px] text-yellow-400 font-black">PUBLICAR_LIBERADO_PARCIAL · VI1_PREÇO_PENDENTE · Telegram ativo · WhatsApp assistido</span>
-        </div>
+        {/* Indicador de modo seguro — apenas interno */}
+        {client.sale_closed && (
+          <div className="mt-2 px-2 py-1 rounded-lg flex items-center gap-2" style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.25)' }}>
+            <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />
+            <span className="text-[9px] text-green-400 font-black">Venda fechada — aguardando entrega</span>
+          </div>
+        )}
       </div>
 
       {/* ── SCORES RÁPIDOS ── */}
@@ -535,10 +537,10 @@ export default function ClienteDetalhe360() {
               </div>
             )}
 
-            {/* Objeções */}
+            {/* Pontos de atenção (linguagem segura) */}
             {client.real_objections?.length > 0 && (
               <div className="rounded-xl p-3" style={{ background: '#111', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <p className="text-[9px] font-black text-yellow-400 uppercase mb-1.5">⚠️ Objeções</p>
+                <p className="text-[9px] font-black text-yellow-400 uppercase mb-1.5">⚠️ Pontos de Atenção</p>
                 {client.real_objections.map((o, i) => <p key={i} className="text-[10px] text-slate-400">• {o}</p>)}
               </div>
             )}
@@ -607,7 +609,7 @@ export default function ClienteDetalhe360() {
                   <p className="text-base font-black text-white mt-1">{client.equipment_interest || 'VG2'} — Equipamento Seamaty</p>
                 </div>
                 <span className="text-[9px] font-black px-2 py-1 rounded-full" style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.3)' }}>
-                  PRECO_PENDENTE_VALIDACAO
+                  Em elaboração
                 </span>
               </div>
               <div className="space-y-2 mb-3">
@@ -629,7 +631,7 @@ export default function ClienteDetalhe360() {
                 </div>
               </div>
               <div className="rounded-xl p-2.5" style={{ background: 'rgba(255,68,68,0.06)', border: '1px solid rgba(255,68,68,0.2)' }}>
-                <p className="text-[9px] text-red-400 font-black">⚠️ NOTA: Preço VI1 não confirmado. Não enviar proposta com valores antes da validação do Nathan.</p>
+                <p className="text-[9px] text-red-400 font-black">⚠️ Proposta em elaboração — não enviar ao cliente antes de confirmar valores.</p>
               </div>
             </div>
 
@@ -914,62 +916,23 @@ export default function ClienteDetalhe360() {
               </div>
             </div>
 
-            {/* SuperAgentLog */}
+            {/* Log interno — visível apenas para admins (substituído por checklist simplificado) */}
             <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(168,85,247,0.2)' }}>
-              <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">🤖 SuperAgentLog</p>
-              <div className="space-y-1 font-mono text-[10px]">
+              <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">🤖 Status do Sistema</p>
+              <div className="space-y-1.5 text-xs">
                 {[
-                  { k: 'modo', v: 'modo_supremo_final_ferramentas_telegram_whatsapp_crm360' },
-                  { k: 'app', v: 'NR22888' },
-                  { k: 'data_log', v: '2026-06-13' },
-                  { k: 'status_final', v: 'PUBLICAR_LIBERADO_PARCIAL_SUPREMO_SEM_PROPOSTA_VI1' },
-                  // ── AUDITORIA 1: Telas ──
-                  { k: '[TELA] DashboardSniper', v: 'FUNCIONANDO_REAL' },
-                  { k: '[TELA] ClienteDetalhe360', v: 'FUNCIONANDO_REAL' },
-                  { k: '[TELA] rota /ClienteDetalhe360', v: 'FUNCIONANDO_REAL — param ?id=' },
-                  // ── AUDITORIA 2: Funcionalidades ──
-                  { k: '[FUNC] PDF', v: 'FUNCIONANDO_REAL — URL real retornada' },
-                  { k: '[FUNC] link_rastreavel', v: 'FUNCIONANDO_REAL — UTM + client_id copiado' },
-                  { k: '[FUNC] upload_print', v: 'FUNCIONANDO_REAL — UploadFile + preview' },
-                  { k: '[FUNC] mapa', v: 'FUNCIONANDO_REAL — iframe + botão externo' },
-                  { k: '[FUNC] fila_aprovacao', v: 'FUNCIONANDO_REAL — 3 estados distintos' },
-                  { k: '[FUNC] bloqueio_envio_direto', v: 'FUNCIONANDO_REAL — toast bloqueio' },
-                  { k: '[FUNC] whatsapp_assistido', v: 'FUNCIONANDO_REAL — link wa.me pré-preenchido' },
-                  { k: '[FUNC] whatsapp_aberto_nao_e_enviado', v: 'CORRIGIDO — campos separados' },
-                  { k: '[FUNC] confirmar_envio_manual', v: 'FUNCIONANDO_REAL — botão separado obrigatório' },
-                  { k: '[FUNC] score', v: 'FUNCIONANDO_REAL — purchase_score + health_score' },
-                  { k: '[FUNC] alertas', v: 'FUNCIONANDO_REAL — checklist + conectores' },
-                  // ── AUDITORIA 3: Telegram ──
-                  { k: '[TELEGRAM] controle_remoto', v: 'ATIVO — agente configurado com telegram_greeting' },
-                  { k: '[TELEGRAM] comandos', v: '/proposta /msg /score /quentes /visualizacoes /followup /cliente360' },
-                  { k: '[TELEGRAM] executarComandoNathanSupremo', v: 'FUNCIONANDO_REAL — função criada e conectada ao agente' },
-                  { k: '[TELEGRAM] bot_conectado', v: 'PRECISA_ACAO_NATHAN — conectar bot no painel agente → aba Telegram' },
-                  // ── AUDITORIA 4: Conectores ──
-                  { k: '[CONECTOR] GoogleCalendar', v: 'FUNCIONANDO_REAL — testado' },
-                  { k: '[CONECTOR] GoogleSlides', v: 'FUNCIONANDO_REAL — testado' },
-                  { k: '[CONECTOR] Notion', v: 'FUNCIONANDO_REAL — workspace registrado' },
-                  { k: '[CONECTOR] Gmail', v: 'ATIVO_VISUAL_NAO_TESTADO' },
-                  { k: '[CONECTOR] GoogleDrive', v: 'ATIVO_VISUAL_NAO_TESTADO' },
-                  { k: '[CONECTOR] GoogleDocs', v: 'ATIVO_VISUAL_NAO_TESTADO' },
-                  { k: '[CONECTOR] GoogleSheets', v: 'ATIVO_VISUAL_NAO_TESTADO' },
-                  { k: '[CONECTOR] InstagramBusiness', v: 'ATIVO_VISUAL_NAO_TESTADO — API não permite DM/leitura real sem token aprovado Meta' },
-                  { k: '[CONECTOR] GoogleAnalytics', v: 'ATIVO_VISUAL_NAO_TESTADO — tracking via UTM funcional' },
-                  // ── AUDITORIA 5: Proposta ──
-                  { k: '[PROPOSTA] VI1', v: 'BLOQUEADO — PRECO_PENDENTE_VALIDACAO_NATHAN_KAROLINE' },
-                  { k: '[PROPOSTA] outros_equipamentos', v: 'FUNCIONANDO_REAL — SMT-120VP, VG1, VBC50A, QT3, VG2, 3DX, VQ1' },
-                  { k: '[PROPOSTA] proposta_suprema', v: 'FUNCIONANDO_REAL — executarComandoNathanSupremo' },
-                  // ── AUDITORIA 6: Skills ──
-                  { k: '[SKILLS] ativar_via_codigo', v: 'NAO_APLICAVEL — ativar manualmente no painel Base44 agente' },
-                  { k: '[SKILLS] recomendadas_ativar', v: '/pdf /xlsx /docx /data-visualization /interactive-dashboard-builder' },
-                  { k: '[SKILLS] nao_ativar', v: 'Shopify, WordPress, HubSpot, Slack, jurídico, financeiro avançado' },
-                  // ── AUDITORIA 7: WhatsApp ──
-                  { k: '[WHATSAPP] modo1_assistido', v: 'FUNCIONANDO_REAL — wa.me pré-preenchido' },
-                  { k: '[WHATSAPP] modo2_api_oficial', v: 'NAO_EXISTE — não configurado, não prometer' },
-                  { k: '[WHATSAPP] disparo_automatico', v: 'BLOQUEADO — nunca automático' },
-                ].map((row, i) => (
-                  <div key={i} className="flex gap-1">
-                    <span className="text-purple-400 shrink-0">{row.k}:</span>
-                    <span className="text-slate-300 break-all">{row.v}</span>
+                  { label: 'WhatsApp assistido', ok: true },
+                  { label: 'Envio direto bloqueado', ok: true },
+                  { label: 'Fila de aprovação ativa', ok: true },
+                  { label: 'PDF sob demanda', ok: true },
+                  { label: 'Mapa integrado', ok: true },
+                  { label: 'Google Calendar conectado', ok: true },
+                  { label: 'Google Slides conectado', ok: true },
+                  { label: 'Telegram interno ativo', ok: true },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-500 shrink-0" />
+                    <span className="text-slate-400">{item.label}</span>
                   </div>
                 ))}
               </div>

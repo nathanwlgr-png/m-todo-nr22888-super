@@ -67,7 +67,7 @@ export default function SniperDoDia() {
       }
 
       if (clients.length === 0) {
-        clients = await base44.entities.Client.list('-purchase_score', 50).catch(() => []);
+        clients = await base44.entities.Client.list('-purchase_score', 20).catch(() => []);
       }
 
       const mapped = clients.slice(0, 10).map((client, index) => {

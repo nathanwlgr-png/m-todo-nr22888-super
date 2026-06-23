@@ -25,7 +25,7 @@ export default function WhatsAppHub() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['wa-clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 150),
+    queryFn: () => base44.entities.Client.filter({ phone: { $exists: true } }, '-updated_date', 50).catch(() => base44.entities.Client.list('-updated_date', 50)),
     staleTime: 5 * 60 * 1000,
   });
 

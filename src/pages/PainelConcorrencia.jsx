@@ -27,7 +27,8 @@ export default function PainelConcorrencia() {
 
   const { data: comps = [], isLoading } = useQuery({
     queryKey: ['competitor-tracker'],
-    queryFn: () => base44.entities.CompetitorTracker.filter({ ativo: true }, '-ultima_investigacao', 100).catch(() => []),
+    queryFn: () => base44.entities.CompetitorTracker.filter({ ativo: true }, '-ultima_investigacao', 50).catch(() => []),
+    staleTime: 5 * 60 * 1000,
   });
 
   const criar = useMutation({
