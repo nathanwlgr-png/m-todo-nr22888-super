@@ -14,6 +14,7 @@ import CampoTotalNR22888 from '@/components/elite/CampoTotalNR22888';
 import RadarConcorrenciaWidget from '@/components/elite/RadarConcorrenciaWidget';
 import PendenciasPara100 from '@/components/elite/PendenciasPara100';
 import ResolverPendencias from '@/components/elite/ResolverPendencias';
+import SaneamentoConversaoSeguro from '@/components/elite/SaneamentoConversaoSeguro';
 import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
@@ -91,6 +92,9 @@ export default function DashboardSniper() {
         <Suspense fallback={<HeavyFallback />}>
           <CentralComandosSafe />
         </Suspense>
+
+        {/* ── BOTÃO VERDE — saneamento seguro para conversão ── */}
+        <SaneamentoConversaoSeguro />
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}
         {noContact7d.length > 0 && (
