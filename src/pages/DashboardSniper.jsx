@@ -198,10 +198,10 @@ export default function DashboardSniper() {
 
         {/* ── 6. ATALHOS RÁPIDOS ── */}
         <div className="grid grid-cols-2 gap-2">
-          <Link to="/ScheduledAgenda">
+          <Link to="/DayFieldView">
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-amber-500/30">
               <ArrowRight className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-black text-amber-400">🗺️ Rota do Dia</span>
+              <span className="text-xs font-black text-amber-400">🗺️ Campo Hoje</span>
             </div>
           </Link>
           <Link to="/RankingOportunidades">
@@ -232,12 +232,6 @@ export default function DashboardSniper() {
             <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-cyan-500/30">
               <FileText className="w-4 h-4 text-cyan-400" />
               <span className="text-xs font-black text-cyan-400">📊 Relatório</span>
-            </div>
-          </Link>
-          <Link to="/TesteAgentes">
-            <div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-cyan-500/30">
-              <Star className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs font-black text-cyan-400">🤖 Teste Agentes</span>
             </div>
           </Link>
           {topClient && (

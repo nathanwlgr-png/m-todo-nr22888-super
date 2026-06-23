@@ -11,6 +11,14 @@ Deno.serve(async (req) => {
     const sr = base44.asServiceRole;
     const payload = await req.json().catch(() => ({}));
     const record = payload.data || payload.client || {};
+    const eventType = payload?.event?.type || payload.event_type || null;
+    const changedFields = Array.isArray(payload.changed_fields) ? payload.changed_fields : [];
+    const relevantFields = ['address', 'city', 'cep', 'clinic_name', 'first_name', 'full_name'];
+
+    if (eventType === 'update' && changedFields.length > 0 && !changedFields.some(f => relevantFields.includes(f))) {
+      return Response.json({ success: true, skipped: true, status: 'sem_campo_relevante', message: 'Atualização ignorada: endereço/nome/cidade não mudaram.' });
+    }
+
     const client_id = payload.client_id || record.id || payload?.event?.entity_id;
     const address = payload.address || record.address || record.location || '';
     const clinic_name = payload.clinic_name || record.clinic_name || record.first_name || record.full_name || '';
@@ -44,6 +52,23 @@ Deno.serve(async (req) => {
         status: 'cliente_inexistente',
         message: 'client_id não existe em Client. Nenhuma fila foi criada.',
       }, { status: 404 });
+    }
+
+    const pendentes = await sr.entities.CRMUpdateQueue.filter({
+      cliente_id: client_id,
+      tipo_atualizacao: 'geocodificacao',
+      status: 'pendente'
+    }, '-data_criacao', 1);
+
+    if (pendentes.length > 0) {
+      return Response.json({
+        success: true,
+        queued: true,
+        skipped: true,
+        status: 'ja_existe_pendencia',
+        crm_update_queue_id: pendentes[0].id,
+        message: 'Já existe geocodificação pendente para este cliente. Nenhuma fila duplicada foi criada.'
+      });
     }
 
     const candidates = [

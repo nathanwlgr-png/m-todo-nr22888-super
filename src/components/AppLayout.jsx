@@ -33,6 +33,7 @@ const PAGE_TITLES = {
   VisitManager: 'Visitas',
   AgendaMensal: 'Agenda',
   ScheduledAgenda: 'Agenda',
+  DayFieldView: 'Campo Hoje',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
 };
