@@ -123,7 +123,8 @@ export default function ProposalGenerator() {
     mutationFn: async ({ campaignId, releaseData }) => {
       const campaign = bonusCampaigns.find(c => c.id === campaignId);
       const newReleases = [...(campaign.releases || []), releaseData];
-      const newPercentage = campaign.total_released_percentage + releaseData.percentage_released;
+      const currentPercentage = campaign.total_released_percentage || 0;
+      const newPercentage = Math.min(100, currentPercentage + releaseData.percentage_released);
       
       return base44.entities.BonusReleaseRule.update(campaignId, {
         releases: newReleases,
@@ -198,6 +199,11 @@ export default function ProposalGenerator() {
   const generateProposal = async () => {
     if (!selectedClientId || selectedProducts.length === 0) {
       toast.error('Selecione cliente e pelo menos um produto');
+      return;
+    }
+
+    if (!selectedClient) {
+      toast.error('Cliente ainda não carregou. Aguarde alguns segundos e tente novamente.');
       return;
     }
 
@@ -848,7 +854,7 @@ Use as variáveis:
                         ) : (
                           <Sparkles className="w-4 h-4 mr-2" />
                         )}
-                        Liberar Próxima Parte ({campaign.releases?.length === 0 ? campaign.first_contact_percentage : campaign.per_usage_percentage}%)
+                        Liberar Próxima Parte ({(campaign.releases?.length || 0) === 0 ? campaign.first_contact_percentage : campaign.per_usage_percentage}%)
                       </Button>
                     )}
                   </CardContent>

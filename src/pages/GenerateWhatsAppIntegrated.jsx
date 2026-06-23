@@ -73,17 +73,6 @@ export default function GenerateWhatsAppIntegrated() {
     enabled: !!clientId,
   });
 
-  // Busca equipamentos
-  const { data: equipments = [] } = useQuery({
-    queryKey: ['equipments', clientId],
-    queryFn: () => clientId ? 
-      base44.entities.Client.list().then(clients => {
-        const c = clients.find(x => x.id === clientId);
-        return c?.current_equipment ? [{ name: c.current_equipment }] : [];
-      }).catch(() => []) : [],
-    enabled: !!clientId,
-  });
-
   // Gera mensagens SPIN
   const generateMessages = async () => {
     if (!client) {
@@ -112,12 +101,12 @@ export default function GenerateWhatsAppIntegrated() {
       setMessages(res.data?.messages || []);
       setShowApproval(false);
       toast.success('3 mensagens SPIN geradas com sucesso!');
+      EconomicMode.addCreditUsage(1);
+      setEconomicStatus(EconomicMode.getStatus());
     } catch (err) {
       toast.error(`Erro ao gerar mensagens: ${err.message}`);
     } finally {
       setLoading(false);
-      EconomicMode.addCreditUsage(1);
-      setEconomicStatus(EconomicMode.getStatus());
     }
   };
 
@@ -402,7 +391,7 @@ export default function GenerateWhatsAppIntegrated() {
         {/* Estado Vazio */}
         {!messages.length && client && !loading && (
           <div className="text-center py-12 text-orange-600/50">
-            <p className="text-sm">Clique em "Buscar & Gerar" para criar mensagens SPIN</p>
+            <p className="text-sm">Clique em "Gerar SPIN" para criar mensagens consultivas</p>
           </div>
         )}
       </div>

@@ -84,7 +84,7 @@ export default function DayFieldView() {
       {/* Header simples */}
       <div className="sticky top-0 z-40 px-4 py-4" style={{ background: '#111', borderBottom: '1px solid rgba(255,107,0,0.2)' }}>
         <div className="flex items-center justify-between mb-2">
-          <Link to="/SalesCommandCenter">
+          <Link to="/">
             <button className="w-12 h-12 rounded-2xl flex items-center justify-center"
               style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
               <ArrowLeft className="w-6 h-6 text-orange-400" />
