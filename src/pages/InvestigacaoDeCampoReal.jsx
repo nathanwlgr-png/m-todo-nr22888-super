@@ -39,9 +39,8 @@ export default function InvestigacaoDeCampoReal() {
       return;
     }
 
-    if (!currentLocation && !showMap) {
-      toast.error('Ative GPS ou use mapa');
-      return;
+    if (!currentLocation) {
+      toast.warning('Sem GPS ativo: investigação seguirá pela cidade informada.');
     }
 
     setLoading(true);

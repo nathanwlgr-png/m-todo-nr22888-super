@@ -30,7 +30,8 @@ export default function WhatsAppSendModal({ client, initialMessage = '', onClose
       }
     } catch (e) {
       // Fallback direto se função falhar
-      const phone = client.phone.replace(/\D/g, '');
+      const digits = client.phone.replace(/\D/g, '');
+      const phone = digits.startsWith('55') ? digits : `55${digits}`;
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
       toast.success('WhatsApp aberto!');
       onClose();

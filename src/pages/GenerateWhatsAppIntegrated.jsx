@@ -57,8 +57,12 @@ export default function GenerateWhatsAppIntegrated() {
 
   // Busca dados do cliente selecionado
   const { data: client, isLoading: clientLoading } = useQuery({
-    queryKey: ['client', clientId],
-    queryFn: () => clientId ? allClients.find(x => x.id === clientId) || null : null,
+    queryKey: ['client', clientId, allClients.length],
+    queryFn: async () => {
+      if (!clientId) return null;
+      const cached = allClients.find(x => x.id === clientId);
+      return cached || await base44.entities.Client.get(clientId);
+    },
     enabled: !!clientId,
   });
 

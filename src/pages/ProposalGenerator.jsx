@@ -47,6 +47,18 @@ export default function ProposalGenerator() {
     queryFn: () => base44.entities.AIKnowledgeDocument.filter({ is_active: true }),
   });
 
+  const { data: productCatalog = [] } = useQuery({
+    queryKey: ['product-catalog-active'],
+    queryFn: () => base44.entities.ProductCatalog ? base44.entities.ProductCatalog.filter({ ativo: true }).catch(() => []) : [],
+    staleTime: 300000,
+  });
+
+  const { data: equipmentCatalog = [] } = useQuery({
+    queryKey: ['equipment-catalog-active'],
+    queryFn: () => base44.entities.Equipment ? base44.entities.Equipment.filter({ is_active: true }).catch(() => []) : [],
+    staleTime: 300000,
+  });
+
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-simple'],
     queryFn: () => base44.entities.Client.list('-updated_date', 500),
@@ -124,10 +136,31 @@ export default function ProposalGenerator() {
     }
   });
 
-  // Extrair produtos de catálogos
-  const products = documents
+  // Extrair produtos de catálogos, com fallback para entidades comerciais Seamaty já cadastradas
+  const documentProducts = documents
     .filter(d => (d.document_type === 'catalogo_produtos' || d.document_type === 'manual_tecnico') && d.key_data?.produtos)
     .flatMap(d => d.key_data.produtos || []);
+
+  const catalogProducts = productCatalog.map(p => ({
+    nome: p.nome_produto,
+    tempo_processamento: p.tempo_resultado,
+    volume_amostra: p.volume_amostra,
+    parametros_medidos: p.parametros,
+    tecnologia: p.linha,
+    diferenciais: [p.argumentos_venda, p.indicado_para].filter(Boolean),
+  }));
+
+  const equipmentProducts = equipmentCatalog.map(e => ({
+    nome: e.name,
+    tempo_processamento: e.processing_time,
+    volume_amostra: e.sample_volume,
+    parametros_medidos: e.parameters_measured,
+    tecnologia: e.category,
+    diferenciais: String(e.key_benefits || '').split('|').filter(Boolean),
+  }));
+
+  const products = [...documentProducts, ...catalogProducts, ...equipmentProducts]
+    .filter((p, index, arr) => p?.nome && arr.findIndex(x => x.nome === p.nome) === index);
 
   // Extrair preços
   const prices = documents
@@ -963,8 +996,8 @@ NECESSIDADES IDENTIFICADAS:
         <Card className="border-2 border-orange-500 bg-orange-50">
           <CardContent className="pt-6 text-center">
             <p className="text-orange-800">
-              ⚠️ Nenhum catálogo carregado!<br/>
-              Vá em "Base IA" para fazer upload de catálogos.
+              ⚠️ Nenhum produto Seamaty disponível para proposta.<br/>
+              Cadastre produto/equipamento ou carregue catálogo validado.
             </p>
           </CardContent>
         </Card>

@@ -77,25 +77,6 @@ export default function DashboardSniper() {
           <SniperDoDia />
         </Suspense>
 
-        {/* ── CAMPO TOTAL — visão compacta de campo (SAFE) ── */}
-        <CampoTotalNR22888 />
-
-        {/* ── RADAR DE CONCORRÊNCIA — monitoramento multicanal (SAFE) ── */}
-        <RadarConcorrenciaWidget />
-
-        {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
-        <Suspense fallback={<HeavyFallback />}>
-          <PlanoEliteStatus hotCount={hotClients?.length || 0} visitsCount={visits?.length || 0} inactiveCount={noContact7d?.length || 0} />
-        </Suspense>
-
-        {/* ── FASE II-SAFE — Telegram, WhatsApp e CRM seguro ── */}
-        <Suspense fallback={<HeavyFallback />}>
-          <CentralComandosSafe />
-        </Suspense>
-
-        {/* ── BOTÃO VERDE — saneamento seguro para conversão ── */}
-        <SaneamentoConversaoSeguro />
-
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}
         {noContact7d.length > 0 && (
           <div className="rounded-xl p-4 bg-orange-500/5 border-2 border-orange-500/35 shadow-lg">
@@ -175,6 +156,25 @@ export default function DashboardSniper() {
             </Link>
           </div>
         </div>
+
+        {/* ── CAMPO TOTAL — visão compacta de campo (SAFE) ── */}
+        <CampoTotalNR22888 />
+
+        {/* ── RADAR DE CONCORRÊNCIA — monitoramento multicanal (SAFE) ── */}
+        <RadarConcorrenciaWidget />
+
+        {/* ── PLANO ELITE — FASE I (camada complementar) ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <PlanoEliteStatus hotCount={hotClients?.length || 0} visitsCount={visits?.length || 0} inactiveCount={noContact7d?.length || 0} />
+        </Suspense>
+
+        {/* ── FASE II-SAFE — Telegram, WhatsApp e CRM seguro ── */}
+        <Suspense fallback={<HeavyFallback />}>
+          <CentralComandosSafe />
+        </Suspense>
+
+        {/* ── BOTÃO VERDE — saneamento seguro para conversão ── */}
+        <SaneamentoConversaoSeguro />
 
         {/* ── 5. KPIs ── */}
         <div className="grid grid-cols-2 gap-2">
