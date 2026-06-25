@@ -97,46 +97,24 @@ export default function DashboardSniper() {
           {activeCampaign ? `🎯 Campanha ativa: ${activeCampaign.name || activeCampaign.title || 'Campanha'}` : '📭 Nenhuma campanha ativa no momento.'}
         </div>
 
-        {/* ── MÁQUINA DE VENDA — foco: vender, concorrência, fechamento ── */}
-        <div className="grid grid-cols-3 gap-2">
-          <Link to="/ModoCacaComercial">
-            <div className="rounded-xl p-3 text-center bg-rose-500/10 border border-rose-500/35">
-              <p className="text-lg">🎯</p>
-              <p className="text-[10px] font-black text-rose-300 uppercase">Caçar</p>
-            </div>
-          </Link>
-          <Link to="/PainelConcorrencia">
-            <div className="rounded-xl p-3 text-center bg-cyan-500/10 border border-cyan-500/35">
-              <p className="text-lg">🧭</p>
-              <p className="text-[10px] font-black text-cyan-300 uppercase">Concorrente</p>
-            </div>
-          </Link>
-          <Link to="/RankingOportunidades">
-            <div className="rounded-xl p-3 text-center bg-orange-500/10 border border-orange-500/35">
-              <p className="text-lg">💰</p>
-              <p className="text-[10px] font-black text-orange-300 uppercase">Fechar</p>
-            </div>
-          </Link>
-        </div>
-
         {/* ── 1. SNIPER DO DIA — O FOGO (topo absoluto) ── */}
         <Suspense fallback={<HeavyFallback />}>
           <SniperDoDia />
         </Suspense>
 
-        {/* ── MODO RUA — só ações que geram venda imediata ── */}
+        {/* ── AÇÃO RÁPIDA — bloco único consolidado (tablet rápido) ── */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-emerald-500/25 shadow-xl space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-black text-emerald-300 uppercase tracking-widest">⚡ Modo Rua</h2>
+            <h2 className="text-xs font-black text-emerald-300 uppercase tracking-widest">⚡ Ação Rápida</h2>
             <span className="text-[10px] text-slate-400">Tablet rápido</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Link to="/DayFieldView" className="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30"><p className="text-xs font-black text-cyan-300">Agenda/Rota hoje</p><p className="text-[10px] text-slate-400">{visits.length} visitas</p></Link>
-            <Link to="/RankingOportunidades" className="rounded-xl p-3 bg-orange-500/10 border border-orange-500/30"><p className="text-xs font-black text-orange-300">Clientes quentes</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
-            <Link to="/WhatsAppHub" className="rounded-xl p-3 bg-green-500/10 border border-green-500/30"><p className="text-xs font-black text-green-300">WhatsApp manual</p><p className="text-[10px] text-slate-400">Fila/aprovação</p></Link>
-            <Link to="/PainelConcorrencia" className="rounded-xl p-3 bg-red-500/10 border border-red-500/30"><p className="text-xs font-black text-red-300">Concorrente crítico</p><p className="text-[10px] text-slate-400">Argumento de venda</p></Link>
-            <Link to="/ProposalGenerator" className="rounded-xl p-3 bg-amber-500/10 border border-amber-500/30"><p className="text-xs font-black text-amber-300">Proposta/material</p><p className="text-[10px] text-slate-400">Preparar fechamento</p></Link>
-            <Link to="/VisitManager" className="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30"><p className="text-xs font-black text-purple-300">Registrar visita</p><p className="text-[10px] text-slate-400">Sem alterar cliente</p></Link>
+            <Link to="/ModoCacaComercial" className="rounded-xl p-3 bg-rose-500/10 border border-rose-500/30"><p className="text-xs font-black text-rose-300">🎯 Caçar clínicas</p><p className="text-[10px] text-slate-400">Prospecção</p></Link>
+            <Link to="/RankingOportunidades" className="rounded-xl p-3 bg-orange-500/10 border border-orange-500/30"><p className="text-xs font-black text-orange-300">💰 Clientes quentes</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
+            <Link to="/DayFieldView" className="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30"><p className="text-xs font-black text-cyan-300">📅 Agenda/Rota hoje</p><p className="text-[10px] text-slate-400">{visits.length} visitas</p></Link>
+            <Link to="/WhatsAppHub" className="rounded-xl p-3 bg-green-500/10 border border-green-500/30"><p className="text-xs font-black text-green-300">💬 WhatsApp manual</p><p className="text-[10px] text-slate-400">Fila/aprovação</p></Link>
+            <Link to="/PainelConcorrencia" className="rounded-xl p-3 bg-red-500/10 border border-red-500/30"><p className="text-xs font-black text-red-300">🧭 Concorrente</p><p className="text-[10px] text-slate-400">Argumento de venda</p></Link>
+            <Link to="/VisitManager" className="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30"><p className="text-xs font-black text-purple-300">📍 Registrar visita</p><p className="text-[10px] text-slate-400">Sem alterar cliente</p></Link>
           </div>
           <BotaoMaquinaInsumos />
         </div>
@@ -159,24 +137,7 @@ export default function DashboardSniper() {
           </div>
         )}
 
-        {/* ── 3. ALTA PRIORIDADE COMERCIAL ── */}
-        {hotClients.length > 0 && (
-          <div className="rounded-xl p-3 bg-[#0f0f11] border border-orange-500/20 shadow-lg">
-            <h3 className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">🏆 Alta Prioridade</h3>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {hotClients.slice(0, 5).map(client => (
-                <Link key={client.id} to={`/ClientProfile?id=${client.id}`}>
-                  <div className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors flex justify-between items-center">
-                    <span className="text-xs font-bold text-orange-200">{client.first_name}</span>
-                    <span className="text-xs font-black text-orange-400">{client.purchase_score}%</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── 4. FLUXO CRONOLÓGICO DE VENDAS ── */}
+        {/* ── FLUXO CRONOLÓGICO DE VENDAS ── */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
           <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
             ⚡ Fluxo de Vendas
