@@ -16,6 +16,7 @@ export const setModo = (modo) => {
 export const VENDEDOR_PAGES = [
   // 1. COMEÇO DO DIA — para onde ir e quem atacar primeiro
   { page: 'Clients', label: '👥 Clientes', category: '1. Meu Dia' },
+  { page: 'MapaSeamatyBrasil', label: '📍 Mapa de Clientes', category: '1. Meu Dia' },
   { page: 'SmartRouteOptimizer', label: '🗺️ Rota do Dia', category: '1. Meu Dia' },
   { page: 'VisitManager', label: '📍 Visitas', category: '1. Meu Dia' },
   { page: 'TasksUnified', label: '✅ Tarefas', category: '1. Meu Dia' },
