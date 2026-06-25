@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import {
   Target, Users, Search, MapPin, MessageSquare, FileText, TrendingUp,
-  ChevronRight, Bell, AlertTriangle, Calendar
+  ChevronRight, Bell, AlertTriangle, Calendar, UserPlus, Bot
 } from 'lucide-react';
 
 import BotaoLimpezaCRM from '@/components/BotaoLimpezaCRM';
@@ -75,6 +75,20 @@ export default function DashboardSniper() {
             🎯 Painel Comercial
           </h1>
           <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
+        </div>
+
+        {/* ── AÇÃO RÁPIDA — uma mão, durante a visita ── */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/Leads">
+            <Button className="w-full h-16 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl border-none flex items-center justify-center gap-2 text-base shadow-lg">
+              <UserPlus className="w-6 h-6" /> Novo Lead
+            </Button>
+          </Link>
+          <Link to="/CentralIAMaster">
+            <Button className="w-full h-16 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-500 hover:to-fuchsia-400 text-white font-black rounded-2xl border-none flex items-center justify-center gap-2 text-base shadow-lg">
+              <Bot className="w-6 h-6" /> Chat IA
+            </Button>
+          </Link>
         </div>
 
         {/* ── CAMPANHA ATIVA / INATIVA ── */}
