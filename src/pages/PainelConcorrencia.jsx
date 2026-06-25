@@ -24,6 +24,8 @@ export default function PainelConcorrencia() {
   const [investigando, setInvestigando] = useState(null);
   const [varrendo, setVarrendo] = useState(false);
   const [resumoVarredura, setResumoVarredura] = useState(null);
+  const [cacando, setCacando] = useState(false);
+  const [resumoCaca, setResumoCaca] = useState(null);
 
   const { data: comps = [], isLoading } = useQuery({
     queryKey: ['competitor-tracker'],
@@ -70,6 +72,18 @@ export default function PainelConcorrencia() {
     finally { setVarrendo(false); }
   };
 
+  const cacarLancamentos = async () => {
+    setCacando(true);
+    setResumoCaca(null);
+    try {
+      const res = await base44.functions.invoke('cacaConcorrentesFuturos', {});
+      setResumoCaca(res?.data?.novos_registrados ?? 0);
+      await qc.invalidateQueries({ queryKey: ['competitor-tracker'] });
+      await qc.invalidateQueries({ queryKey: ['competitor-tracker-widget'] });
+    } catch (_e) { setResumoCaca(0); }
+    finally { setCacando(false); }
+  };
+
   const igUrl = (h) => h ? `https://instagram.com/${h.replace('@', '')}` : null;
 
   return (
@@ -101,6 +115,24 @@ export default function PainelConcorrencia() {
               : <><ScanLine className="w-4 h-4 mr-1" /> Varrer sites agora</>}
           </Button>
         </div>
+
+        <Button
+          onClick={cacarLancamentos}
+          disabled={cacando}
+          className="w-full h-12 bg-gradient-to-r from-amber-600 to-orange-500 text-white font-black border-none"
+        >
+          {cacando
+            ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Caçando lançamentos na China…</>
+            : <><Radar className="w-4 h-4 mr-1" /> Caçar lançamentos futuros (China + global)</>}
+        </Button>
+
+        {resumoCaca !== null && (
+          <div className="rounded-xl p-3 bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 text-center font-bold">
+            {resumoCaca > 0
+              ? `🎯 ${resumoCaca} novo(s) concorrente(s) futuro(s) capturado(s) e registrado(s). Alerta enviado no Telegram.`
+              : '✅ Caça concluída — nenhum lançamento novo encontrado desta vez.'}
+          </div>
+        )}
 
         {resumoVarredura !== null && (
           <div className="rounded-xl p-3 bg-violet-500/10 border border-violet-500/30 text-xs text-violet-200 text-center font-bold">
