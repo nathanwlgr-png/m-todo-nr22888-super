@@ -7,6 +7,7 @@ import {
   Eye, EyeOff, ChevronRight, ArrowUp, BarChart3, Layers, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
+import BotaoGeocodificarRestantes from '@/components/elite/BotaoGeocodificarRestantes';
 import {
   CORES, calcularScoreCidade, classificarCidade, corCidade,
   calcularScoreCliente, classificarCliente, corPin,
@@ -456,6 +457,8 @@ const MapaSeamatyBrasil = () => {
               <Zap className="w-4 h-4" />
               Rota Sniper
             </button>
+
+            <BotaoGeocodificarRestantes />
 
             <div className="relative">
               <button
