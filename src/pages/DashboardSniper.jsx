@@ -16,6 +16,7 @@ import PendenciasPara100 from '@/components/elite/PendenciasPara100';
 import ResolverPendencias from '@/components/elite/ResolverPendencias';
 import SaneamentoConversaoSeguro from '@/components/elite/SaneamentoConversaoSeguro';
 import AprovacaoVozFlutuante from '@/components/AprovacaoVozFlutuante';
+import BotaoMaquinaInsumos from '@/components/elite/BotaoMaquinaInsumos';
 const SniperDoDia = lazy(() => import('@/components/SniperDoDia'));
 const SmartRouteMap = lazy(() => import('@/components/SmartRouteMap'));
 const WeeklyHealthReport = lazy(() => import('@/components/WeeklyHealthReport'));
@@ -137,6 +138,7 @@ export default function DashboardSniper() {
             <Link to="/ProposalGenerator" className="rounded-xl p-3 bg-amber-500/10 border border-amber-500/30"><p className="text-xs font-black text-amber-300">Proposta/material</p><p className="text-[10px] text-slate-400">Preparar fechamento</p></Link>
             <Link to="/VisitManager" className="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30"><p className="text-xs font-black text-purple-300">Registrar visita</p><p className="text-[10px] text-slate-400">Sem alterar cliente</p></Link>
           </div>
+          <BotaoMaquinaInsumos />
         </div>
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}
