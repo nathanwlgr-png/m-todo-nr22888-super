@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const limite = Math.min(Number(body.limite) || 10, 20);
+    const limite = Math.min(Number(body.limite) || body.limit || 10, 50);
 
     const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
     if (!apiKey || !apiKey.trim()) {
@@ -22,7 +22,16 @@ Deno.serve(async (req) => {
 
     // Busca clientes sem coordenada
     const todos = await sr.entities.Client.list('-created_date', 500).catch(() => []);
-    const semCoord = todos.filter(c => (!c.latitude || !c.longitude) && (c.address || c.city)).slice(0, limite);
+
+    // Clientes que JÁ têm uma sugestão de geocodificação pendente na fila — pular para não duplicar
+    const filaPendente = await sr.entities.CRMUpdateQueue.filter({
+      tipo_atualizacao: 'geocodificacao',
+      status: 'pendente',
+    }).catch(() => []);
+    const jaNaFila = new Set(filaPendente.map(q => q.cliente_id).filter(Boolean));
+
+    const semCoordTodos = todos.filter(c => (!c.latitude || !c.longitude) && (c.address || c.city) && !jaNaFila.has(c.id));
+    const semCoord = semCoordTodos.slice(0, limite);
 
     if (semCoord.length === 0) {
       return Response.json({ success: true, status: 'nada_pendente', processados: 0, sugestoes: 0, restantes: 0, message: 'Nenhum cliente sem coordenada para processar.' });
@@ -99,7 +108,7 @@ Deno.serve(async (req) => {
       detalhes.push({ cliente: c.first_name, status: 'sugestao_criada', precisao: suggestion.precision });
     }
 
-    const restantes = todos.filter(c => (!c.latitude || !c.longitude) && (c.address || c.city)).length - sugestoes;
+    const restantes = semCoordTodos.length - sugestoes;
 
     return Response.json({
       success: true,
@@ -107,6 +116,7 @@ Deno.serve(async (req) => {
       processados: semCoord.length,
       sugestoes,
       restantes: Math.max(0, restantes),
+      na_fila_aguardando_aprovacao: jaNaFila.size + sugestoes,
       detalhes,
       message: `${sugestoes} sugestões criadas na fila de aprovação. Nada foi aplicado automaticamente.`,
     });
