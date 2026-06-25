@@ -44,6 +44,29 @@ const TODAY_TYPE = (() => {
 
 const DAY_LABELS = { util: '🎯 Seg–Qui: VISITAS & CONTATOS', sexta: '🧹 Sexta: Follow-up & Limpeza', fds: '😴 Fim de Semana — Descanse!' };
 
+// Traduz a "próxima melhor ação" do score Elite em ícone + rótulo acionável
+function ACTION_ICON(action) {
+  const a = String(action || '').toLowerCase();
+  if (a.includes('ligar') || a.includes('ligacao') || a.includes('ligação') || a.includes('telefone')) return '📞';
+  if (a.includes('whats') || a.includes('mensagem')) return '💬';
+  if (a.includes('visit')) return '📍';
+  if (a.includes('proposta') || a.includes('roi') || a.includes('material') || a.includes('demonstr')) return '📄';
+  if (a.includes('reativar') || a.includes('aguardar') || a.includes('encerrar')) return '⏰';
+  return '🎯';
+}
+function ACTION_LABEL(action) {
+  const a = String(action || '').toLowerCase();
+  if (a.includes('ligar') || a.includes('ligacao') || a.includes('ligação') || a.includes('telefone')) return 'Ligar agora';
+  if (a.includes('whats') || a.includes('mensagem')) return 'Mandar WhatsApp';
+  if (a.includes('visit')) return 'Agendar visita';
+  if (a.includes('proposta')) return 'Enviar proposta';
+  if (a.includes('roi')) return 'Mandar ROI';
+  if (a.includes('material') || a.includes('prova')) return 'Enviar material';
+  if (a.includes('demonstr')) return 'Agendar demonstração';
+  if (a.includes('reativar')) return 'Reativar contato';
+  return action || 'Abrir conversa comercial';
+}
+
 export default function SniperDoDia() {
   const [done, setDone] = useState({});
   const [expanded, setExpanded] = useState(true);
@@ -137,7 +160,10 @@ export default function SniperDoDia() {
 
                 <div className="rounded-xl p-2 bg-white/5 border border-white/10">
                   <p className="text-[11px] text-slate-300"><b className="text-orange-300">Motivo:</b> {item.reason}</p>
-                  <p className="text-[11px] text-slate-300"><b className="text-emerald-300">Próxima ação:</b> {item.nextAction}</p>
+                  <div className="mt-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 bg-emerald-500/15 border border-emerald-500/30">
+                    <span className="text-base leading-none">{ACTION_ICON(item.nextAction)}</span>
+                    <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wide">{ACTION_LABEL(item.nextAction)}</span>
+                  </div>
                   {item.equipment && <p className="text-[11px] text-slate-300"><b className="text-cyan-300">Oportunidade:</b> {item.equipment}</p>}
                   {item.competitorName && (
                     <p className="mt-1 text-[11px] text-red-200 flex gap-1"><ShieldAlert className="w-3.5 h-3.5 shrink-0 text-red-300" /> {item.competitorMatchType === 'cliente' ? 'Concorrente detectado' : 'Concorrente na cidade'}: {item.competitorName}. {item.competitorArgument}</p>
