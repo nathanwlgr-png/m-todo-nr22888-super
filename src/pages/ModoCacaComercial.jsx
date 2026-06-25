@@ -19,6 +19,7 @@ import CacaClinicCard from '@/components/caca/CacaClinicCard';
 import CacaQuickForm from '@/components/caca/CacaQuickForm';
 import CacaSuccessPanel from '@/components/caca/CacaSuccessPanel';
 import DuplicateCheckModal from '@/components/caca/DuplicateCheckModal';
+import BotaoRadarQuente from '@/components/caca/BotaoRadarQuente';
 
 // ── Cache local por cidade (30 dias) ──
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
@@ -364,6 +365,9 @@ export default function ModoCacaComercial() {
             onCancel={() => setDuplicateData(null)}
           />
         )}
+
+        {/* ═══ RADAR AUTOMÁTICO (sempre visível no início) ═══ */}
+        {step === 'idle' && <BotaoRadarQuente />}
 
         {/* ═══ IDLE ═══ */}
         {step === 'idle' && (
