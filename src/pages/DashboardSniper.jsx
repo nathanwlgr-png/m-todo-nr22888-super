@@ -56,9 +56,9 @@ export default function DashboardSniper() {
     staleTime: 300000,
   });
 
-  const hotClients = clients.filter(c => (c.purchase_score || 0) > 70);
+  const hotClients = (Array.isArray(clients) ? clients : []).filter(c => (c.purchase_score || 0) > 70);
   const activeCampaign = campaigns[0] || null;
-  const noContact7d = clients.filter(c => {
+  const noContact7d = (Array.isArray(clients) ? clients : []).filter(c => {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
   });
