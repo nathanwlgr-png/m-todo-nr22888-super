@@ -18,18 +18,20 @@ function getTemplate(score) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const sr = base44.asServiceRole;
+    const viaAutomacao = (await req.clone().json().catch(() => ({})))?.automatico === true;
+    const user = viaAutomacao ? null : await base44.auth.me().catch(() => null);
+    if (!viaAutomacao && !user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { dias_sem_resposta = 3, client_ids = [] } = await req.json();
+    const { dias_sem_resposta = 3, client_ids = [] } = await req.json().catch(() => ({}));
 
-    // Buscar clientes em negociação
+    // Buscar clientes em negociação (service role para funcionar em automação)
     let clientes;
     if (client_ids.length > 0) {
-      clientes = await Promise.all(client_ids.map(id => base44.entities.Client.get(id).catch(() => null)));
+      clientes = await Promise.all(client_ids.map(id => sr.entities.Client.get(id).catch(() => null)));
       clientes = clientes.filter(Boolean);
     } else {
-      clientes = await base44.entities.Client.filter({ pipeline_stage: 'negociacao' });
+      clientes = await sr.entities.Client.filter({ pipeline_stage: 'negociacao' });
     }
 
     // Filtrar sem resposta há N dias
@@ -41,7 +43,7 @@ Deno.serve(async (req) => {
     });
 
     // Buscar scores CNPJ
-    const consultas = await base44.entities.CNPJConsulta.list('-created_date', 200);
+    const consultas = await sr.entities.CNPJConsulta.list('-created_date', 200);
     const scoreMap = {};
     consultas.forEach(q => { scoreMap[q.cnpj] = q.score_estimado; });
 
@@ -65,7 +67,7 @@ Deno.serve(async (req) => {
       whatsapp_urls.push({ client_id: c.id, client_name: c.clinic_name || c.full_name, url, mensagem });
 
       // Preparar mensagem para aprovação manual — não registrar como enviada automaticamente
-      await base44.entities.PendingMessage.create({
+      await sr.entities.PendingMessage.create({
         recipient_id: c.id,
         recipient_name: c.clinic_name || c.full_name,
         recipient_phone: phoneIntl,
@@ -77,7 +79,7 @@ Deno.serve(async (req) => {
         priority: score !== null && score < 500 ? 'alta' : 'media'
       });
 
-      await base44.entities.AIInteractionLog.create({
+      await sr.entities.AIInteractionLog.create({
         user_message: `Follow-up automático preparado para ${c.clinic_name || c.full_name}`,
         ai_response: mensagem,
         action_type: 'whatsapp',
