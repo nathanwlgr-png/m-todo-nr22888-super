@@ -18,7 +18,31 @@ Deno.serve(async (req) => {
       if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const limite = Math.min(Number(body.limite) || body.limit || 10, 50);
+    // Lote pequeno por execução (5 por padrão) — nunca acima de 50.
+    const limite = Math.min(Number(body.limite) || body.limit || 5, 50);
+
+    // ── TETO DIÁRIO DE SEGURANÇA: máximo 50 geocodificações por dia ──
+    const TETO_DIARIO = 50;
+    const inicioDoDia = new Date();
+    inicioDoDia.setHours(0, 0, 0, 0);
+    const feitasHojeLista = await sr.entities.CRMUpdateQueue.filter({
+      tipo_atualizacao: 'geocodificacao',
+      agente_origem: 'geocodeLoteSafe',
+    }, '-data_criacao', 200).catch(() => []);
+    const feitasHoje = feitasHojeLista.filter(q => q.data_criacao && new Date(q.data_criacao) >= inicioDoDia).length;
+    const restanteHoje = Math.max(0, TETO_DIARIO - feitasHoje);
+    if (restanteHoje === 0) {
+      return Response.json({
+        success: true,
+        status: 'teto_diario_atingido',
+        processados: 0,
+        sugestoes: 0,
+        feitas_hoje: feitasHoje,
+        teto_diario: TETO_DIARIO,
+        message: `Teto diário de ${TETO_DIARIO} geocodificações atingido. Retoma amanhã automaticamente.`,
+      });
+    }
+    const limiteEfetivo = Math.min(limite, restanteHoje);
 
     const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
     if (!apiKey || !apiKey.trim()) {
@@ -36,7 +60,20 @@ Deno.serve(async (req) => {
     const jaNaFila = new Set(filaPendente.map(q => q.cliente_id).filter(Boolean));
 
     const semCoordTodos = todos.filter(c => (!c.latitude || !c.longitude) && (c.address || c.city) && !jaNaFila.has(c.id));
-    const semCoord = semCoordTodos.slice(0, limite);
+
+    // ── PRIORIDADE POR CONVERSÃO: quem está mais perto de fechar vai primeiro ──
+    const prioridadeConversao = (c) => {
+      let p = 0;
+      if (c.pipeline_stage === 'negociacao') p += 100;
+      else if (c.pipeline_stage === 'proposta') p += 80;
+      else if (c.pipeline_stage === 'qualificado') p += 40;
+      if (c.status === 'quente') p += 30;
+      else if (c.status === 'morno') p += 15;
+      p += Math.min(Number(c.purchase_score) || 0, 100) / 2; // até +50
+      return p;
+    };
+    const semCoordPriorizados = [...semCoordTodos].sort((a, b) => prioridadeConversao(b) - prioridadeConversao(a));
+    const semCoord = semCoordPriorizados.slice(0, limiteEfetivo);
 
     if (semCoord.length === 0) {
       return Response.json({ success: true, status: 'nada_pendente', processados: 0, sugestoes: 0, restantes: 0, message: 'Nenhum cliente sem coordenada para processar.' });
@@ -121,9 +158,12 @@ Deno.serve(async (req) => {
       processados: semCoord.length,
       sugestoes,
       restantes: Math.max(0, restantes),
+      feitas_hoje: feitasHoje + sugestoes,
+      teto_diario: TETO_DIARIO,
+      restante_hoje: Math.max(0, restanteHoje - sugestoes),
       na_fila_aguardando_aprovacao: jaNaFila.size + sugestoes,
       detalhes,
-      message: `${sugestoes} sugestões criadas na fila de aprovação. Nada foi aplicado automaticamente.`,
+      message: `${sugestoes} sugestões criadas na fila de aprovação (${feitasHoje + sugestoes}/${TETO_DIARIO} hoje). Nada foi aplicado automaticamente.`,
     });
   } catch (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 });
