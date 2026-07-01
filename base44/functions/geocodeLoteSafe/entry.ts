@@ -9,10 +9,15 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
+    // Automação agendada envia automatico=true (sem usuário logado). Chamada manual exige auth.
+    const viaAutomacao = body.automatico === true || body?.event?.type;
+    if (!viaAutomacao) {
+      const user = await base44.auth.me().catch(() => null);
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const limite = Math.min(Number(body.limite) || body.limit || 10, 50);
 
     const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
