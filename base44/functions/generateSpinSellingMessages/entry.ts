@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     }
 
     const payload = await req.json();
-    const { 
+    let { 
       client_id, 
       client_name, 
       city, 
@@ -28,6 +28,23 @@ Deno.serve(async (req) => {
       pipeline_stage,
       main_pains = []
     } = payload;
+
+    // Se só veio client_id, busca dados do cliente no banco
+    if (client_id && !client_name) {
+      try {
+        const c = await base44.entities.Client.get(client_id);
+        if (c) {
+          client_name = c.clinic_name || c.full_name || c.first_name || client_name;
+          city = city || c.city;
+          last_interaction = last_interaction || c.last_contact_date;
+          current_equipment = current_equipment || c.current_equipment;
+          pipeline_stage = pipeline_stage || c.pipeline_stage;
+          main_pains = (main_pains && main_pains.length) ? main_pains : (c.main_pains || []);
+        }
+      } catch (_e) {}
+    }
+
+    const vendedorNome = user.full_name || user.email || 'Seu consultor Seamaty';
 
     // Calcula dias desde última interação
     const daysLastContact = last_interaction 
@@ -59,6 +76,7 @@ Deno.serve(async (req) => {
             3. Ser personalizada com nome, cidade e contexto
             4. Incluir uma pergunta aberta que desperte interesse
             5. Ser natural e humana, não parecer template
+            6. ASSINAR a mensagem com o nome real do vendedor: "${vendedorNome}". NUNCA use "[Seu Nome]" ou placeholders.
             
             Retorne APENAS um JSON válido com array "messages" contendo 3 objetos com:
             - text: a mensagem
