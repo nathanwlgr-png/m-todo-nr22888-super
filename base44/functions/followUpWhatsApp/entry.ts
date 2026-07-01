@@ -20,9 +20,10 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
 
-    // Sempre exige autenticação — sem bypass
+    // Auth opcional: se houver usuário, é chamada manual (retorna dados).
+    // Se não houver, é automação scheduled (retorna apenas contadores, sem expor dados).
     const user = await base44.auth.me().catch(() => null);
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const isAutomacao = !user;
 
     const { dias_sem_resposta = 3, client_ids = [] } = await req.json().catch(() => ({}));
 
@@ -89,14 +90,20 @@ Deno.serve(async (req) => {
       enviados++;
     }
 
-    return Response.json({
+    const response = {
       success: true,
       total_pendentes: pendentes.length,
       enviados,
       preparados_para_aprovacao: enviados,
       sem_telefone,
-      whatsapp_urls,
-    });
+    };
+
+    // Chamada manual retorna URLs; automação scheduled não expõe dados de clientes
+    if (!isAutomacao) {
+      response.whatsapp_urls = whatsapp_urls;
+    }
+
+    return Response.json(response);
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
