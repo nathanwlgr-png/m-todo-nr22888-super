@@ -1,4 +1,19 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy as reactLazy, Suspense } from 'react';
+
+// Recupera automaticamente de chunk antigo/estale (PWA no tablet cacheia agressivo).
+// Se um módulo dinâmico falhar ao carregar, recarrega UMA vez para buscar o build novo.
+const lazy = (importer) =>
+  reactLazy(() =>
+    importer().catch((err) => {
+      const KEY = 'nr22888_chunk_reloaded';
+      if (!sessionStorage.getItem(KEY)) {
+        sessionStorage.setItem(KEY, '1');
+        window.location.reload();
+        return new Promise(() => {}); // segura o render até o reload
+      }
+      throw err;
+    })
+  );
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
