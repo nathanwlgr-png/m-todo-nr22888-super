@@ -39,7 +39,7 @@ async function findClients(base44, raw, limit = 6) {
   if (cityRows.length) return cityRows.slice(0, limit);
   const rows = await list(base44, 'Client', '-purchase_score', 80);
   const nq = norm(q);
-  return rows.filter(c => [c.external_code, c.first_name, c.full_name, c.clinic_name, c.razao_social, c.city, c.phone, c.cnpj].filter(Boolean).some(v => norm(v).includes(nq) || digits(v).includes(d))).slice(0, limit);
+  return rows.filter(c => [c.external_code, c.first_name, c.full_name, c.clinic_name, c.razao_social, c.city].filter(Boolean).some(v => norm(v).includes(nq))).slice(0, limit);
 }
 
 async function oneClient(base44, raw) {
@@ -99,13 +99,19 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json().catch(() => ({}));
+    // BLINDAGEM: valida TELEGRAM_CHAT_ID se configurado
+    const allowedChatId = Deno.env.get('TELEGRAM_CHAT_ID');
+    const incomingChatId = String(body?.message?.chat?.id || body?.edited_message?.chat?.id || '');
+    if (allowedChatId && incomingChatId && incomingChatId !== allowedChatId) {
+      return Response.json({ error: 'Chat não autorizado', envio_automatico: false }, { status: 403 });
+    }
     const text = body?.message?.text || body?.edited_message?.text || body.mensagem || body.text || '';
     const cmd = cmdOf(text);
     const args = argsOf(text);
     let resposta = '', status = 'interpretado', client = null, queue = null, pending = null, task = null, acao = '';
 
-    if (cmd === '/sniper' || cmd === '/quentes') {
-      const rows = await sniper(base44, cmd === '/sniper' ? 10 : 8);
+    if (cmd === '/sniper' || cmd === '/ranking' || cmd === '/quentes') {
+      const rows = await sniper(base44, cmd === '/sniper' || cmd === '/ranking' ? 10 : 8);
       resposta = rows.length ? `${cmd === '/sniper' ? 'SNIPER DO DIA — Modo Rua' : 'OPORTUNIDADES QUENTES'}\n${rows.join('\n\n')}` : 'Nenhuma oportunidade quente encontrada.';
       acao = 'listar oportunidades';
     } else if (cmd === '/hoje' || cmd === '/resumo_dia') {
@@ -164,7 +170,7 @@ Deno.serve(async (req) => {
       }
       resposta = out.join('\n') || 'Nenhum potencial de comodato encontrado sem IA.';
       acao = 'listar comodato';
-    } else if (['/visita','/tarefa','/followup','/whatsapp','/proposta','/material'].includes(cmd)) {
+    } else if (['/visita','/tarefa','/followup','/whatsapp','/mensagem','/proposta','/material'].includes(cmd)) {
       const parsed = splitNameDetail(args);
       const found = await oneClient(base44, parsed.name);
       if (!found.client) { resposta = found.resposta; status = found.resposta.includes('mais de um') ? 'interpretado' : 'erro'; acao = `preparar ${cmd}`; }
@@ -174,10 +180,15 @@ Deno.serve(async (req) => {
         if (cmd === '/visita') {
           const r = await create(base44, 'CRMUpdateQueue', { origem: 'telegram', texto_original: text, comando_interpretado: '/visita', cliente_id: client.id, tipo_atualizacao: 'resumo de visita', campo_alvo: 'notes', valor_novo: detail, status: 'pendente', risco: 'baixo', exige_aprovacao: false, agente_origem: 'telegram_operacional_nr22888', modelo_ia_usado: 'claude_sonnet_4_6', data_criacao: now(), observacao: 'Baixo risco: pronto para aplicar no CRM após conferência.' });
           queue = r.record; resposta = queue ? `Anotação de visita preparada para ${nameOf(client)}. Fila segura criada.` : `Fila indisponível: ${r.error}.`; status = queue ? 'interpretado' : 'erro';
-        } else if (cmd === '/whatsapp') {
+        } else if (cmd === '/whatsapp' || cmd === '/mensagem') {
           const msg = `Olá ${nameOf(client)}, tudo bem? Pensei em te chamar sobre ${detail}. Faz sentido avaliarmos um caminho Seamaty com foco em resultado rápido, ROI e menos dependência externa?`;
           const r = await create(base44, 'PendingMessage', { canal: 'whatsapp', channel: 'whatsapp', destinatario_nome: nameOf(client), destinatario_contato: client.phone || '', cliente_id: client.id, contexto: 'Telegram Modo Rua — WhatsApp manual', context: 'Telegram Modo Rua — WhatsApp manual', mensagem: msg, message_content: msg, status: 'aguardando_aprovacao', criado_por_agente: 'telegram_operacional_nr22888', modelo_ia_usado: 'claude_sonnet_4_6', aprovado_por_nathan: false, data_criacao: now(), priority: 'media', recipient_id: client.id, recipient_name: nameOf(client), recipient_phone: client.phone || '', ai_reasoning: detail, proxima_acao: 'Nathan revisar e abrir WhatsApp manualmente' });
-          pending = r.record; resposta = pending ? 'Mensagem pronta para revisão e envio manual. Nada foi enviado automaticamente.' : `PendingMessage indisponível: ${r.error}.`; status = pending ? 'interpretado' : 'erro';
+          pending = r.record;
+          resposta = pending ? (cmd === '/mensagem'
+            ? `Cliente: ${nameOf(client)}\nCidade: ${client.city || 'sem cidade'}\nObjetivo: ${detail}\nMensagem pronta para copiar:\n"${msg}"\nAção recomendada: revisar, copiar e enviar via WhatsApp manualmente. Nada foi enviado automaticamente.`
+            : 'Mensagem pronta para revisão e envio manual. Nada foi enviado automaticamente.')
+            : `PendingMessage indisponível: ${r.error}.`;
+          status = pending ? 'interpretado' : 'erro';
         } else {
           const label = cmd === '/proposta' ? 'Preparar proposta' : cmd === '/material' ? 'Preparar material' : cmd === '/tarefa' ? 'Tarefa' : 'Follow-up';
           const r = await create(base44, 'Task', { client_id: client.id, client_name: nameOf(client), title: `${label}: ${nameOf(client)}`, description: `Criado pelo Telegram: ${detail}. Nada é enviado automaticamente.`, status: 'pendente', priority: cmd === '/proposta' || cmd === '/material' ? 'alta' : 'media', type: cmd === '/followup' ? 'follow_up' : 'outro', auto_created: true, assigned_to: user.email, assigned_to_name: user.full_name || user.email });
@@ -197,6 +208,56 @@ Deno.serve(async (req) => {
         task = r.record; resposta = task ? `Pedido de insumo registrado para ${nameOf(client)}: ${detail}.` : `Erro ao registrar: ${r.error}.`; status = task ? 'interpretado' : 'erro';
       }
       acao = 'registrar pedido';
+    } else if (cmd === '/ajuda') {
+      resposta = `📋 COMANDOS DISPONÍVEIS — Modo Rua NR22888
+
+/sniper ou /ranking — Top 10 oportunidades
+/hoje — Resumo do dia
+/rota — Visitas de hoje
+/cliente [nome] — Resumo de rua do cliente
+/cidade [cidade] — Clientes da cidade
+/concorrente [marca] — Argumento contra concorrente
+/whatsapp ou /mensagem [nome|objetivo] — Gera mensagem (revisar no CRM)
+/proposta [nome|produto] — Cria tarefa de proposta
+/material [nome|material] — Cria tarefa de material
+/visita [nome|anotação] — Registra visita (fila segura)
+/tarefa [nome|ação] — Cria tarefa
+/followup [nome] — Cria follow-up
+/tarefas — Lista tarefas pendentes
+/followups — Lista follow-ups pendentes
+/alertas — Lista alertas não lidos
+/pendencias — Lista mensagens e atualizações pendentes
+/quentes — Oportunidades quentes
+/inativos — Clientes inativos com potencial
+/comodato — Potenciais de comodato
+/pedido [nome|insumo] — Registra pedido de insumo
+/campanha — Campanha ativa
+
+⚠️ Nenhum comando envia mensagem automaticamente. Tudo passa por fila de aprovação.`;
+      acao = 'menu de ajuda';
+    } else if (cmd === '/tarefas') {
+      const tasks = await filter(base44, 'Task', { status: 'pendente' }, '-due_date', 15);
+      resposta = tasks.length ? `📋 TAREFAS PENDENTES (${tasks.length})\n${tasks.map((t, i) => `${i + 1}. ${t.title || 'sem título'}${t.client_name ? ' · ' + t.client_name : ''}${t.due_date ? ' · vence ' + t.due_date : ''} · ${t.priority || 'media'}`).join('\n')}` : 'Nenhuma tarefa pendente.';
+      acao = 'listar tarefas';
+    } else if (cmd === '/followups') {
+      const tasks = await filter(base44, 'Task', { status: 'pendente', type: 'follow_up' }, '-due_date', 15);
+      resposta = tasks.length ? `📋 FOLLOW-UPS PENDENTES (${tasks.length})\n${tasks.map((t, i) => `${i + 1}. ${t.title || 'sem título'}${t.client_name ? ' · ' + t.client_name : ''}${t.due_date ? ' · vence ' + t.due_date : ''}`).join('\n')}` : 'Nenhum follow-up pendente.';
+      acao = 'listar follow-ups';
+    } else if (cmd === '/alertas') {
+      const alerts = await filter(base44, 'Alert', { read: false }, '-created_date', 15).catch(() => []);
+      resposta = alerts.length ? `🔔 ALERTAS NÃO LIDOS (${alerts.length})\n${alerts.map((a, i) => `${i + 1}. ${a.title || a.message || 'sem título'}${a.priority ? ' · ' + a.priority : ''}`).join('\n')}` : 'Nenhum alerta não lido.';
+      acao = 'listar alertas';
+    } else if (cmd === '/pendencias') {
+      const [pend, queue] = await Promise.all([
+        list(base44, 'PendingMessage', '-created_date', 10),
+        filter(base44, 'CRMUpdateQueue', { status: 'pendente' }, '-data_criacao', 10)
+      ]);
+      const pendActive = (pend || []).filter(m => ['pending','aguardando_aprovacao','ready_to_send','rascunho','aprovado'].includes(m.status));
+      const parts = [];
+      if (pendActive.length) parts.push(`📨 MENSAGENS PENDENTES (${pendActive.length})\n${pendActive.map((m, i) => `${i + 1}. ${m.destinatario_nome || m.recipient_name || 'sem nome'} · ${m.status} · ${m.canal || m.channel || 'whatsapp'}`).join('\n')}`);
+      if (queue.length) parts.push(`🔄 FILA CRM (${queue.length})\n${queue.map((q, i) => `${i + 1}. ${q.comando_interpretado || q.tipo_atualizacao || 'atualização'} · ${q.cliente_id || 'sem cliente'} · ${q.risco || 'medio'}`).join('\n')}`);
+      resposta = parts.length ? parts.join('\n\n') : 'Nenhuma pendência encontrada.';
+      acao = 'listar pendencias';
     } else if (cmd === '/campanha') {
       const camps = await filter(base44, 'Campaign', { status: 'ativa' }, '-created_date', 1).catch(() => []);
       if (camps.length > 0) {
@@ -207,7 +268,7 @@ Deno.serve(async (req) => {
       }
       acao = 'consultar campanha';
     } else {
-      resposta = 'Comando não reconhecido. Use /sniper, /hoje, /rota, /cliente, /cidade, /concorrente, /campanha, /pedido, /whatsapp, /proposta, /material, /visita, /tarefa, /quentes, /inativos ou /comodato.';
+      resposta = 'Comando não reconhecido. Use /ajuda para ver todos os comandos disponíveis.';
       acao = 'orientar comandos';
     }
 
