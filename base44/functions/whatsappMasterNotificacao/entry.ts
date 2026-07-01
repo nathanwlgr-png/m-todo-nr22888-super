@@ -1,5 +1,5 @@
 // FUNÇÃO 3: WhatsApp Master Notificação - envia resumos, alertas e análises direto no WhatsApp via link
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -8,7 +8,10 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { action, phone, custom_message } = await req.json();
-    const targetPhone = phone || '5514991676428';
+    if (!phone || !phone.trim()) {
+      return Response.json({ error: 'Parâmetro phone é obrigatório. Nenhum envio realizado.' }, { status: 400 });
+    }
+    const targetPhone = phone;
 
     let messageText = '';
 

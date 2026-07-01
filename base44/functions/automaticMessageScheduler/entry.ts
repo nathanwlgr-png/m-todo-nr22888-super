@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -110,7 +110,7 @@ async function executeAutomationNow(base44, userEmail) {
     }
 
     const config = settings[0];
-    const allClients = await base44.entities.Client.list().catch(() => []);
+    const allClients = await base44.entities.Client.list('-updated_date', 200).catch(() => []);
     let sentCount = 0;
 
     // Filter clients that need follow-up

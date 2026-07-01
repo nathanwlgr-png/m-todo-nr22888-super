@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
  * EXPLICAÇÃO DE COMO FUNCIONA A AUTOMAÇÃO
@@ -79,13 +79,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Contar mensagens enviadas hoje
+    // 3. Contar mensagens preparadas hoje (filtro pós-consulta: sent_at é date-time, não date)
     const today = new Date().toISOString().split('T')[0];
-    const sentToday = await base44.entities.AutomatedMessageLog.filter({
-      sent_status: 'enviada',
-      sent_at: today // Aproximado, busca por data
-    });
-    messagesSentToday = sentToday.length;
+    const recentLogs = await base44.entities.AutomatedMessageLog.filter({
+      sent_status: 'preparada'
+    }, '-created_date', 100).catch(() => []);
+    messagesSentToday = recentLogs.filter(l => (l.sent_at || l.created_date || '').startsWith(today)).length;
 
     if (messagesSentToday >= config.max_messages_per_day) {
       return new Response(

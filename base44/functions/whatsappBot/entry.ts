@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // ═══════════════════════════════════════════════════════════════
 // MÉTODO NR22 — WhatsApp Master Bot UNIFICADO v6
@@ -15,8 +15,9 @@ Deno.serve(async (req) => {
     const msg = (message || '').trim();
     const msgL = msg.toLowerCase();
 
-    // ─── CARREGAR CRM (cache único) ──────────────────────────────
-    const [clients, tasks, visits, sales] = await Promise.all([
+    // ─── LAZY LOAD: comandos simples não carregam CRM ─────────
+    const isSimpleCmd = msgL.match(/ajuda|help|comando|menu/);
+    const [clients, tasks, visits, sales] = isSimpleCmd ? [[], [], [], []] : await Promise.all([
       base44.asServiceRole.entities.Client.list('-purchase_score', 200),
       base44.asServiceRole.entities.Task.list('-due_date', 30),
       base44.asServiceRole.entities.Visit.list('-scheduled_date', 30),
