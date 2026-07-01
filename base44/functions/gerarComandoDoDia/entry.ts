@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       .sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0))
       .slice(0, 10)
       .map(c => ({
-        name: c.first_name,
+        name: c.clinic_name || c.full_name || c.first_name,
         score: c.purchase_score,
         city: c.city,
         recomendacao: !c.current_equipment ? 'VG1/VG2' : 'SMT/QT3'
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
       .sort((a, b) => (b.purchase_score || 0) - (a.purchase_score || 0))
       .slice(0, 10)
       .map(c => ({
-        name: c.first_name,
+        name: c.clinic_name || c.full_name || c.first_name,
         city: c.city,
         volume: c.current_volume,
         status: c.status
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       .sort((a, b) => (b.average_purchase_value || 0) - (a.average_purchase_value || 0))
       .slice(0, 10)
       .map(c => ({
-        name: c.first_name,
+        name: c.clinic_name || c.full_name || c.first_name,
         dias_sem_contato: c.last_contact_date ? Math.floor((now - new Date(c.last_contact_date)) / (1000 * 60 * 60 * 24)) : 999,
         valor_medio: c.average_purchase_value
       }));
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       .sort((a, b) => (b.projected_revenue || 0) - (a.projected_revenue || 0))
       .slice(0, 10)
       .map(c => ({
-        name: c.first_name,
+        name: c.clinic_name || c.full_name || c.first_name,
         status: c.pipeline_stage,
         receita_prevista: c.projected_revenue,
         deadline: c.decision_deadline

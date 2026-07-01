@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const texto = body.texto_transcrito || body.text || body.mensagem || '';
+    const texto = body.texto_transcrito || body.text || body.texto || body.mensagem || '';
     const origem = ['bixby', 'telegram', 'crm', 'voz_tablet', 'manual'].includes(body.origem) ? body.origem : 'crm';
     const usuario = body.usuario || user.email;
 
