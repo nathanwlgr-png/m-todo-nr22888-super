@@ -1,15 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
     // ── ENTITY AUTOMATION: dispara em Client update ──
     // Cria tarefa de acompanhamento quando prioridade muda, SEM chamar IA (economia de créditos)
@@ -43,10 +37,16 @@ Deno.serve(async (req) => {
         type: 'follow_up',
         auto_created: true,
         due_date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-        assigned_to: user?.email || '',
+        assigned_to: 'automacao',
       });
 
       return Response.json({ success: true, task_id: task.id, status: 'tarefa_criada_automaticamente' });
+    }
+
+    // Manual action path — auth required
+    const user = await base44.auth.me();
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { action, clientId, followUpData } = body;
