@@ -71,6 +71,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── TETO DIÁRIO DE SEGURANÇA (compartilhado com geocodeLoteSafe) ──
+    const TETO_DIARIO = 50;
+    const inicioDoDia = new Date();
+    inicioDoDia.setHours(0, 0, 0, 0);
+    const feitasHojeLista = await sr.entities.CRMUpdateQueue.filter({
+      tipo_atualizacao: 'geocodificacao',
+    }, '-data_criacao', 200).catch(() => []);
+    const feitasHoje = feitasHojeLista.filter(q => q.data_criacao && new Date(q.data_criacao) >= inicioDoDia).length;
+    if (feitasHoje >= TETO_DIARIO) {
+      return Response.json({
+        success: true,
+        skipped: true,
+        status: 'teto_diario_atingido',
+        feitas_hoje: feitasHoje,
+        teto_diario: TETO_DIARIO,
+        message: `Teto diário de ${TETO_DIARIO} geocodificações atingido. Lote noturno processa o restante.`
+      });
+    }
+
     const candidates = [
       { text: `${address}, ${city}, ${state}`, source: 'endereco_completo', precision: 'alta_confianca', score: 95 },
       { text: `${clinic_name}, ${city}, ${state}`, source: 'clinica_cidade', precision: 'media_confianca', score: 75 },

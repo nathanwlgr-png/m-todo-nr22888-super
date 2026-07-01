@@ -10,6 +10,45 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
+
+    // ── ENTITY AUTOMATION: dispara em Client update ──
+    // Cria tarefa de acompanhamento quando prioridade muda, SEM chamar IA (economia de créditos)
+    if (body?.event?.type === 'update' && body?.event?.entity_name === 'Client') {
+      const changed = Array.isArray(body.changed_fields) ? body.changed_fields : [];
+      if (!changed.includes('priority_level') && !changed.includes('status')) {
+        return Response.json({ success: true, skipped: true, status: 'sem_campo_relevante' });
+      }
+      const clientIdAuto = body?.event?.entity_id || body?.data?.id;
+      const clientData = body.data || {};
+      const oldData = body.old_data || {};
+      const novaPrioridade = clientData.priority_level;
+      const prioridadeAntiga = oldData.priority_level;
+      const novoStatus = clientData.status;
+
+      // Só cria tarefa se prioridade subiu OU cliente ficou quente
+      const prioridadeMelhorou = novaPrioridade && (prioridadeAntiga === undefined || novaPrioridade < prioridadeAntiga);
+      const ficouQuente = novoStatus === 'quente' && oldData.status !== 'quente';
+
+      if (!prioridadeMelhorou && !ficouQuente) {
+        return Response.json({ success: true, skipped: true, status: 'sem_mudanca_relevante' });
+      }
+
+      const task = await base44.asServiceRole.entities.Task.create({
+        title: `Acompanhamento: ${clientData.first_name || clientData.clinic_name || clientIdAuto}`,
+        description: `Cliente marcado como prioridade/status quente. Ação manual necessária.`,
+        client_id: clientIdAuto,
+        client_name: clientData.first_name || clientData.clinic_name || '',
+        status: 'pendente',
+        priority: 'alta',
+        type: 'follow_up',
+        auto_created: true,
+        due_date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        assigned_to: user?.email || '',
+      });
+
+      return Response.json({ success: true, task_id: task.id, status: 'tarefa_criada_automaticamente' });
+    }
+
     const { action, clientId, followUpData } = body;
 
     // Support multiple action name formats for compatibility

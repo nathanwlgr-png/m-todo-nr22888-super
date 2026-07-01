@@ -93,7 +93,6 @@ const SalesFunnel = lazy(() => import('./pages/SalesFunnel'));
 const ProposalGenerator = lazy(() => import('./pages/ProposalGenerator'));
 const EquipmentCatalog = lazy(() => import('./pages/EquipmentCatalog'));
 const ProductManager = lazy(() => import('./pages/ProductManager'));
-const RouteOptimization = lazy(() => import('./pages/RouteOptimization'));
 const RouteOptimizer = lazy(() => import('./pages/RouteOptimizer'));
 const WhatsAppHub = lazy(() => import('./pages/WhatsAppHub'));
 const WhatsAppInbox = lazy(() => import('./pages/WhatsAppInbox'));
