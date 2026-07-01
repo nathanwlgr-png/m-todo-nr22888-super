@@ -23,15 +23,26 @@ Deno.serve(async (req) => {
     const fallbackRecipients = admins.length > 0 ? admins : ['nathan.wlgr@gmail.com'];
     let alertsCreated = 0;
 
+    // Buscar alertas já existentes para evitar duplicidade por tarefa
+    const existingAlerts = await base44.asServiceRole.entities.Alert.filter({ read: false, type: 'high_score_lead' }).catch(() => []);
+    const existingAlertKeys = new Set(existingAlerts.map(a => `${a.user_email}||${a.title}||${a.link_to || ''}`));
+
     for (const task of dueTasks) {
+      const title = `Follow-up 48h: ${task.client_name || 'clínica'}`;
+      const linkTo = task.client_id ? `/ClientProfile?id=${task.client_id}` : '/TasksUnified';
+
       for (const email of fallbackRecipients) {
+        const key = `${email}||${title}||${linkTo}`;
+        if (existingAlertKeys.has(key)) continue; // já existe alerta ativo equivalente
+        existingAlertKeys.add(key);
+
         await base44.asServiceRole.entities.Alert.create({
           user_email: email,
-          title: `Follow-up 48h: ${task.client_name || 'clínica'}`,
+          title: title,
           message: `${task.title}\n\n${task.description || 'Retomar contato após visita.'}`,
           type: 'high_score_lead',
           priority: task.priority === 'alta' ? 'alta' : 'media',
-          link_to: task.client_id ? `/ClientProfile?id=${task.client_id}` : '/TasksUnified',
+          link_to: linkTo,
           read: false,
           dismissed: false
         });

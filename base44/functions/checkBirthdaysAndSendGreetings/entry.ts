@@ -112,19 +112,36 @@ Deno.serve(async (req) => {
         }
         
         try {
-          // Enviar mensagem via função existente
-          await base44.asServiceRole.functions.invoke('sendDocumentToWhatsapp', {
-            client_phone: client.phone,
-            message: message
+          // SAFE: NÃO envia mensagem automaticamente. Cria PendingMessage para aprovação manual.
+          await base44.asServiceRole.entities.PendingMessage.create({
+            canal: 'whatsapp',
+            channel: 'whatsapp',
+            destinatario_nome: client.first_name || client.full_name || client.clinic_name || 'Cliente',
+            destinatario_contato: client.phone || '',
+            cliente_id: client.id,
+            contexto: `Parabéns ${greetingType === 'birthday' ? 'aniversário' : 'aniversário da clínica'} — aguardando aprovação manual`,
+            context: `Parabéns ${greetingType === 'birthday' ? 'aniversário' : 'aniversário da clínica'} — aguardando aprovação manual`,
+            mensagem: message,
+            message_content: message,
+            status: 'aguardando_aprovacao',
+            criado_por_agente: 'checkBirthdaysAndSendGreetings',
+            aprovado_por_nathan: false,
+            data_criacao: new Date().toISOString(),
+            priority: 'media',
+            recipient_id: client.id,
+            recipient_name: client.first_name || client.full_name || client.clinic_name || '',
+            recipient_phone: client.phone || '',
+            ai_reasoning: greetingType,
+            proxima_acao: 'Revisar e enviar manualmente via WhatsApp'
           });
           
-          // Atualizar cliente marcando que enviou parabéns
+          // Marcar que a rotina processou (não que enviou) para não repetir
           await base44.asServiceRole.entities.Client.update(client.id, {
             birthday_greeting_sent: true,
             birthday_greeting_sent_date: today.toISOString().split('T')[0]
           });
         } catch (error) {
-          console.error(`Erro ao enviar parabéns para ${client.first_name}:`, error);
+          console.error(`Erro ao criar pendência de parabéns para ${client.first_name}:`, error);
         }
       }
     }

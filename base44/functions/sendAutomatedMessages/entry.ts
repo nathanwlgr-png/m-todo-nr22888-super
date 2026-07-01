@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
         // Simular envio (em produção, usaria API do WhatsApp)
         // await sendWhatsAppMessage(msg.client.phone, message);
 
-        // Registrar no log
+        // NÃO há envio real nesta função. Status reflete preparação para aprovação manual.
         await base44.entities.AutomatedMessageLog.create({
           client_id: msg.client.id,
           client_name: msg.client.first_name,
@@ -196,14 +196,14 @@ Deno.serve(async (req) => {
           message_type: msg.type,
           message_content: message,
           trigger_reason: msg.reason,
-          sent_status: 'enviada',
+          sent_status: 'preparada',
           sent_at: new Date().toISOString(),
           automation_enabled: true
         });
 
         sentCount++;
       } catch (error) {
-        console.error(`Erro ao enviar para ${msg.client.first_name}:`, error);
+        console.error(`Erro ao preparar mensagem para ${msg.client.first_name}:`, error);
         // Registrar falha no log
         await base44.entities.AutomatedMessageLog.create({
           client_id: msg.client.id,
@@ -222,7 +222,7 @@ Deno.serve(async (req) => {
         success: true, 
         sent: sentCount,
         queued: messagesToSend.length,
-        message: `${sentCount} mensagens enviadas automaticamente`
+        message: `${sentCount} mensagem(ns) preparada(s) para aprovação manual. Nenhum envio automático realizado.`
       }),
       { status: 200 }
     );
