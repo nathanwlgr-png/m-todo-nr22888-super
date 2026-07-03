@@ -31,13 +31,18 @@ export default function CampoTotalNR22888() {
     staleTime: 120000,
   });
 
+  const safePending = Array.isArray(pending) ? pending : [];
+  const safeScores = Array.isArray(scores) ? scores : [];
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const safeTelLogs = Array.isArray(telLogs) ? telLogs : [];
+
   const pendStatus = ['pending', 'aguardando_aprovacao', 'ready_to_send', 'rascunho', 'aprovado', 'approved'];
-  const whatsappPendentes = pending.filter(m => pendStatus.includes(m.status)).length;
-  const quentes = scores.filter(s => (s.elite_score || 0) >= 71).length;
-  const propostasPendentes = pending.filter(m => (m.contexto || m.context || '').toLowerCase().includes('proposta')).length;
+  const whatsappPendentes = safePending.filter(m => pendStatus.includes(m.status)).length;
+  const quentes = safeScores.filter(s => (s.elite_score || 0) >= 71).length;
+  const propostasPendentes = safePending.filter(m => (m.contexto || m.context || '').toLowerCase().includes('proposta')).length;
   const hoje = new Date().toISOString().slice(0, 10);
-  const followUpsHoje = tasks.filter(t => (t.due_date || '').slice(0, 10) <= hoje).length;
-  const telegramOk = telLogs.length > 0;
+  const followUpsHoje = safeTasks.filter(t => (t.due_date || '').slice(0, 10) <= hoje).length;
+  const telegramOk = safeTelLogs.length > 0;
 
   const Item = ({ icon: Icon, label, value, to, color }) => {
     const inner = (
