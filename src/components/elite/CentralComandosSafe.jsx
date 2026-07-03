@@ -27,6 +27,8 @@ export default function CentralComandosSafe() {
   };
 
   const applyQueue = async (item) => {
+    const resumo = `Campo: ${item.campo_alvo || item.tipo_atualizacao || 'N/A'}\nNovo valor: ${item.valor_novo || item.texto_original || 'N/A'}\nOrigem: ${item.origem || item.agente_origem || 'N/A'}\nRisco: ${item.risco || 'N/A'}\n\nConfirmar aplicar no CRM?`;
+    if (!window.confirm(resumo)) return;
     setBusy(item.id);
     const res = await base44.functions.invoke('aplicarAtualizacaoCRMComSeguranca', { queue_id: item.id });
     toast[res.data?.applied ? 'success' : 'info'](res.data?.applied ? 'Atualização aplicada com log.' : 'Atualização ficou pendente de aprovação.');
@@ -67,7 +69,7 @@ export default function CentralComandosSafe() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
           <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'aprovado', data_aprovacao: new Date().toISOString() })} className="min-h-10 text-[11px] bg-emerald-700 hover:bg-emerald-600"><CheckCircle className="w-4 h-4" />Aprovar</Button>
           <Button size="sm" disabled={busy === item.id} onClick={() => updateQueue(item, { status: 'rejeitado' })} className="min-h-10 text-[11px] bg-red-700 hover:bg-red-600"><XCircle className="w-4 h-4" />Rejeitar</Button>
-          <Button size="sm" disabled={busy === item.id} onClick={() => applyQueue(item)} className="min-h-10 text-[11px] bg-cyan-700 hover:bg-cyan-600">Aplicar</Button>
+          <Button size="sm" disabled={busy === item.id} onClick={() => applyQueue(item)} className="min-h-10 text-[11px] bg-cyan-700 hover:bg-cyan-600">Aplicar no CRM</Button>
           <Button size="sm" disabled={busy === item.id} onClick={() => toast.info('Edite o item na fila antes de aplicar.')} className="min-h-10 text-[11px] bg-slate-800 hover:bg-slate-700 text-white border border-slate-600">Editar</Button>
         </div>
       </div>)}

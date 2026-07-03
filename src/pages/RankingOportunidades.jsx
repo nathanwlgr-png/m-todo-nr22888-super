@@ -37,7 +37,7 @@ function ClientCard({ item, rank }) {
   const actionIcon = ACTION_ICONS[item.action_type] || '⚡';
 
   return (
-    <Link to={`/ClientProfile?id=${item.id}`}>
+    <Link to={`/ClienteDetalhe360?id=${item.id}`}>
       <div className={`rounded-xl p-3 bg-[#0f0f11] border ${cfg.border} shadow-lg ${cfg.glow} hover:scale-[1.01] transition-transform`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">

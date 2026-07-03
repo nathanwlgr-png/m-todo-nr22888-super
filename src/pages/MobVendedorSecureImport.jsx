@@ -123,7 +123,12 @@ export default function MobVendedorSecureImport() {
     },
   });
 
-  // Undo import
+  // Undo import — exige confirmação forte
+  const requestUndo = (importId) => {
+    if (!window.confirm('Confirma desfazer esta importação? Os itens importados serão revertidos.')) return;
+    undoImportMutation.mutate(importId);
+  };
+
   const undoImportMutation = useMutation({
     mutationFn: async (importId) => {
       const result = await base44.functions.invoke('importMobVendedorInventory', {
@@ -381,7 +386,7 @@ export default function MobVendedorSecureImport() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => undoImportMutation.mutate(imp.import_id)}
+                          onClick={() => requestUndo(imp.import_id)}
                           disabled={undoImportMutation.isPending}
                         >
                           <RotateCcw className="w-4 h-4 mr-1" />

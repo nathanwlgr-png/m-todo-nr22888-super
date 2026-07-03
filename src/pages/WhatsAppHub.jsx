@@ -171,6 +171,10 @@ export default function WhatsAppHub() {
   };
 
   const openPendingWhatsApp = (msg) => {
+    if (!['approved', 'aprovado', 'ready_to_send'].includes(msg.status)) {
+      toast.error('Aprove o texto antes de abrir o WhatsApp.');
+      return;
+    }
     const phone = (msg.phone || msg.destinatario_contato || msg.recipient_phone || '').replace(/\D/g, '');
     const text = encodeURIComponent(msg.message || msg.content || msg.mensagem || msg.message_content || '');
     if (!phone || !text) { toast.error('Telefone ou mensagem ausente.'); return; }
@@ -433,9 +437,10 @@ export default function WhatsAppHub() {
                     <Copy className="w-4 h-4" /> Copiar
                   </button>
                   <button onClick={() => openPendingWhatsApp(msg)}
-                    className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black"
+                    disabled={!['approved', 'aprovado', 'ready_to_send'].includes(msg.status)}
+                    className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black disabled:opacity-40"
                     style={{ background: 'rgba(37,211,102,0.18)', color: '#25d366', border: '1px solid rgba(37,211,102,0.35)' }}>
-                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
+                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp manualmente
                   </button>
                 </div>
               </div>

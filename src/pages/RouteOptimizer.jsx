@@ -48,6 +48,13 @@ export default function RouteOptimizer() {
     });
   }, [clients, searchTerm, cityFilter]);
 
+  const semEnderecoCount = useMemo(() => {
+    return clients.filter(c => {
+      const matchesCity = !cityFilter || c.city === cityFilter;
+      return matchesCity && !(c.address || c.cep);
+    }).length;
+  }, [clients, cityFilter]);
+
   const cities = useMemo(() => {
     return [...new Set(clients.map(c => c.city).filter(Boolean))].sort();
   }, [clients]);
@@ -139,6 +146,9 @@ export default function RouteOptimizer() {
       toast.error('Otimize a rota primeiro');
       return;
     }
+    if (!window.confirm(`Confirma salvar a rota "${routeName}" com ${optimizedRoute.visits?.length || 0} visitas?`)) {
+      return;
+    }
 
     saveRouteMutation.mutate({
       name: routeName,
@@ -177,6 +187,11 @@ export default function RouteOptimizer() {
               <CardTitle className="text-lg">Selecionar Clientes ({selectedClients.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {semEnderecoCount > 0 && (
+                <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-md p-2">
+                  ⚠️ {semEnderecoCount} cliente(s) fora da rota por falta de endereço
+                </p>
+              )}
               <div className="space-y-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

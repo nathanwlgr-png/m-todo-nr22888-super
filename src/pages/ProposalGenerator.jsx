@@ -635,7 +635,7 @@ Use as variáveis:
                 />
                 <Button size="sm" onClick={sendProposal} disabled={actionLocked} className="bg-green-600 hover:bg-green-700">
                   <Send className="w-4 h-4 mr-1" />
-                  Enviar WhatsApp
+                  Enviar para aprovação
                 </Button>
               </div>
             </CardTitle>

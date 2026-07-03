@@ -24,6 +24,12 @@ export default function EquipmentCatalog() {
     onSuccess: () => queryClient.invalidateQueries(['equipment'])
   });
 
+  const requestDelete = (eq) => {
+    if (window.confirm(`Confirma excluir "${eq.name}" (R$ ${eq.price?.toLocaleString('pt-BR') || '0'})? Esta ação não pode ser desfeita.`)) {
+      deleteMutation.mutate(eq.id);
+    }
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -138,7 +144,7 @@ export default function EquipmentCatalog() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => deleteMutation.mutate(eq.id)}
+                  onClick={() => requestDelete(eq)}
                   className="text-red-500"
                 >
                   <Trash2 className="w-4 h-4" />
