@@ -109,7 +109,7 @@ export default function AppLayout({ children, currentPageName }) {
       )}
 
       {/* CONTENT */}
-      <main className="pb-20">{children}</main>
+      <main className="pb-28">{children}</main>
 
       {/* BOTTOM NAV — sempre visível */}
       <nav

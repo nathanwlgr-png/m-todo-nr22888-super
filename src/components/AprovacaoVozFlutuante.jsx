@@ -26,7 +26,9 @@ export default function AprovacaoVozFlutuante() {
     enabled: open,
   });
 
-  const total = queueItems.length + pendingMsgs.length;
+  const safeQueueItems = Array.isArray(queueItems) ? queueItems : [];
+  const safePendingMsgs = Array.isArray(pendingMsgs) ? pendingMsgs : [];
+  const total = safeQueueItems.length + safePendingMsgs.length;
 
   const refreshAll = () => {
     refetchQueue();
@@ -81,11 +83,11 @@ export default function AprovacaoVozFlutuante() {
       {/* ── Botão flutuante ── */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed z-[110] bottom-24 right-4 flex items-center gap-2 rounded-full px-4 py-3 font-black text-sm text-black shadow-2xl"
+        className="fixed z-[110] bottom-28 right-3 sm:right-4 flex items-center gap-2 rounded-full px-3 py-3 sm:px-4 font-black text-xs sm:text-sm text-black shadow-2xl"
         style={{ background: '#ff9500' }}
       >
         <Mic className="w-5 h-5" />
-        Aprovar Voz
+        <span className="hidden sm:inline">Aprovar Voz</span>
         {total > 0 && (
           <span className="ml-1 min-w-[20px] h-5 px-1 rounded-full bg-black text-orange-400 text-xs flex items-center justify-center font-black">
             {total}
@@ -120,7 +122,7 @@ export default function AprovacaoVozFlutuante() {
               )}
 
               {/* Fila CRM (visita/agendamento) */}
-              {queueItems.map((item) => (
+              {safeQueueItems.map((item) => (
                 <div key={item.id} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,149,0,0.25)' }}>
                   <div className="flex items-center gap-1.5 mb-1 text-[11px] font-black text-orange-400 uppercase tracking-wide">
                     <ClipboardList className="w-3.5 h-3.5" />
@@ -139,7 +141,7 @@ export default function AprovacaoVozFlutuante() {
               ))}
 
               {/* Rascunhos WhatsApp */}
-              {pendingMsgs.map((msg) => (
+              {safePendingMsgs.map((msg) => (
                 <div key={msg.id} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(168,85,247,0.3)' }}>
                   <div className="flex items-center gap-1.5 mb-1 text-[11px] font-black text-purple-400 uppercase tracking-wide">
                     <MessageSquare className="w-3.5 h-3.5" />

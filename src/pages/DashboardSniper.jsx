@@ -72,7 +72,7 @@ export default function DashboardSniper() {
   const topClient = hotClients[0] || safeClients[0];
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 flex flex-col items-center p-4">
+    <div className="min-h-screen bg-black text-white pb-36 flex flex-col items-center p-4">
       <div className="w-full max-w-xl space-y-4">
 
         {/* ── HEADER ── */}
