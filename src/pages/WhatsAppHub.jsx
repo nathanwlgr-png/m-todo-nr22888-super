@@ -40,9 +40,12 @@ export default function WhatsAppHub() {
     queryFn: () => base44.entities.PendingMessage?.list('-created_date', 50).catch(() => []),
     staleTime: 30 * 1000,
   });
-  const pendingMessages = pendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
+  const safeClients = Array.isArray(clients) ? clients : [];
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const safePendingMessagesRaw = Array.isArray(pendingMessagesRaw) ? pendingMessagesRaw : [];
+  const pendingMessages = safePendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
 
-  const filteredClients = clients.filter(c =>
+  const filteredClients = safeClients.filter(c =>
     c.phone && (
       !search ||
       c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -64,9 +67,12 @@ export default function WhatsAppHub() {
         status: selectedClient.status,
         pipeline_stage: selectedClient.pipeline_stage,
       });
-      if (res?.data?.message || res?.data?.whatsapp_message) {
-        setMessage(res.data.message || res.data.whatsapp_message);
+      const generatedText = res?.data?.message || res?.data?.whatsapp_message || res?.data?.messages?.[0]?.text || '';
+      if (generatedText) {
+        setMessage(generatedText);
         toast.success('Mensagem IA gerada! Revise antes de aprovar.');
+      } else {
+        toast.error('A IA não retornou uma mensagem válida.');
       }
     } catch (e) {
       toast.error('Erro ao gerar: ' + e.message);
@@ -173,8 +179,8 @@ export default function WhatsAppHub() {
 
   // Histórico filtrado por cliente
   const clientMessages = selectedClient
-    ? messages.filter(m => m.client_id === selectedClient.id)
-    : messages;
+    ? safeMessages.filter(m => m.client_id === selectedClient.id)
+    : safeMessages;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>

@@ -104,28 +104,15 @@ Deno.serve(async (req) => {
 });
 
 async function sendWhatsAppMessage(phoneNumber, message) {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) return;
-  
-  try {
-    const response = await fetch(`https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        recipient_type: 'individual',
-        to: phoneNumber,
-        type: 'text',
-        text: { body: message }
-      })
-    });
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Send message error:', error);
-  }
+  // SAFE: função legada desativada para envio automático.
+  // Mantém o webhook funcional, mas não dispara WhatsApp Business API.
+  return {
+    success: true,
+    prepared_only: true,
+    phone: phoneNumber,
+    message_preview: String(message || '').slice(0, 120),
+    note: 'Envio automático desativado. Use a fila de aprovação/manual do WhatsAppHub.'
+  };
 }
 
 async function generateAIResponse(question, clientId) {

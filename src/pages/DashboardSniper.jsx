@@ -56,15 +56,20 @@ export default function DashboardSniper() {
     staleTime: 300000,
   });
 
-  const hotClients = (Array.isArray(clients) ? clients : []).filter(c => (c.purchase_score || 0) > 70);
-  const activeCampaign = campaigns[0] || null;
-  const noContact7d = (Array.isArray(clients) ? clients : []).filter(c => {
+  const safeClients = Array.isArray(clients) ? clients : [];
+  const safeCampaigns = Array.isArray(campaigns) ? campaigns : [];
+  const safeVisits = Array.isArray(visits) ? visits : [];
+  const safeSales = Array.isArray(sales) ? sales : [];
+
+  const hotClients = safeClients.filter(c => (c.purchase_score || 0) > 70);
+  const activeCampaign = safeCampaigns[0] || null;
+  const noContact7d = safeClients.filter(c => {
     if (!c.last_contact_date) return true;
     return (Date.now() - new Date(c.last_contact_date)) / 86400000 > 7;
   });
 
   // Cliente mais quente real para o link 360
-  const topClient = hotClients[0] || clients[0];
+  const topClient = hotClients[0] || safeClients[0];
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 flex flex-col items-center p-4">
@@ -111,7 +116,7 @@ export default function DashboardSniper() {
           <div className="grid grid-cols-2 gap-2">
             <Link to="/ModoCacaComercial" className="rounded-xl p-3 bg-rose-500/10 border border-rose-500/30"><p className="text-xs font-black text-rose-300">🎯 Caçar clínicas</p><p className="text-[10px] text-slate-400">Prospecção</p></Link>
             <Link to="/RankingOportunidades" className="rounded-xl p-3 bg-orange-500/10 border border-orange-500/30"><p className="text-xs font-black text-orange-300">💰 Clientes quentes</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
-            <Link to="/DayFieldView" className="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30"><p className="text-xs font-black text-cyan-300">📅 Agenda/Rota hoje</p><p className="text-[10px] text-slate-400">{visits.length} visitas</p></Link>
+            <Link to="/DayFieldView" className="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30"><p className="text-xs font-black text-cyan-300">📅 Agenda/Rota hoje</p><p className="text-[10px] text-slate-400">{safeVisits.length} visitas</p></Link>
             <Link to="/WhatsAppHub" className="rounded-xl p-3 bg-green-500/10 border border-green-500/30"><p className="text-xs font-black text-green-300">💬 WhatsApp manual</p><p className="text-[10px] text-slate-400">Fila/aprovação</p></Link>
             <Link to="/PainelConcorrencia" className="rounded-xl p-3 bg-red-500/10 border border-red-500/30"><p className="text-xs font-black text-red-300">🧭 Concorrente</p><p className="text-[10px] text-slate-400">Argumento de venda</p></Link>
             <Link to="/VisitManager" className="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30"><p className="text-xs font-black text-purple-300">📍 Registrar visita</p><p className="text-[10px] text-slate-400">Sem alterar cliente</p></Link>
@@ -213,8 +218,8 @@ export default function DashboardSniper() {
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl p-3 bg-[#0f0f11] border border-emerald-500/30"><p className="text-xs text-emerald-400 font-bold">🔥 Alta Prioridade</p><p className="text-2xl font-black text-emerald-300">{hotClients.length}</p></div>
               <div className="rounded-xl p-3 bg-[#0f0f11] border border-rose-500/30"><p className="text-xs text-rose-400 font-bold">⏰ Sem Contato +7d</p><p className="text-2xl font-black text-rose-300">{noContact7d.length}</p></div>
-              <div className="rounded-xl p-3 bg-[#0f0f11] border border-cyan-500/30"><p className="text-xs text-cyan-400 font-bold">📅 Visitas</p><p className="text-2xl font-black text-cyan-300">{visits.length}</p></div>
-              <div className="rounded-xl p-3 bg-[#0f0f11] border border-amber-500/30"><p className="text-xs text-amber-400 font-bold">💰 Vendas</p><p className="text-2xl font-black text-amber-300">{sales.length}</p></div>
+              <div className="rounded-xl p-3 bg-[#0f0f11] border border-cyan-500/30"><p className="text-xs text-cyan-400 font-bold">📅 Visitas</p><p className="text-2xl font-black text-cyan-300">{safeVisits.length}</p></div>
+              <div className="rounded-xl p-3 bg-[#0f0f11] border border-amber-500/30"><p className="text-xs text-amber-400 font-bold">💰 Vendas</p><p className="text-2xl font-black text-amber-300">{safeSales.length}</p></div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -226,7 +231,7 @@ export default function DashboardSniper() {
             </div>
 
             <Suspense fallback={<HeavyFallback />}><SmartRouteMap /></Suspense>
-            <Suspense fallback={<HeavyFallback />}><WeeklyHealthReport clients={clients} /></Suspense>
+            <Suspense fallback={<HeavyFallback />}><WeeklyHealthReport clients={safeClients} /></Suspense>
             <Suspense fallback={<HeavyFallback />}><SuperAgentWidget /></Suspense>
             <div className="rounded-xl p-3 bg-[#0f0f11] border border-green-500/30"><p className="text-xs font-black text-green-400 mb-2">💹 Relatório de Clínicas</p><Suspense fallback={<div className="h-10 animate-pulse rounded" />}><ExportClinicReportWithROI /></Suspense></div>
             <details className="rounded-2xl overflow-hidden border border-orange-500/20 bg-[#0f0f11]"><summary className="cursor-pointer list-none px-4 py-3 text-xs font-black text-orange-400 flex items-center justify-between"><span>🖼️ Imagem institucional</span><ChevronRight className="w-4 h-4" /></summary><div className="relative bg-[#050505]"><img src="https://media.base44.com/images/public/6997e09fd222346f10842c38/a3b87a785_file_000000003da471f5ae99a055bf18cb4a.png" className="w-full h-auto object-contain max-h-[320px]" alt="Painel Comercial" /></div></details>

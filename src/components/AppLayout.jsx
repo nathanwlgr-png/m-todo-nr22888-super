@@ -50,7 +50,8 @@ export default function AppLayout({ children, currentPageName }) {
     gcTime: 5 * 60 * 1000,
   });
 
-  const unread = alerts.length;
+  const safeAlerts = Array.isArray(alerts) ? alerts : [];
+  const unread = safeAlerts.length;
   const pageTitle = PAGE_TITLES[currentPageName] || currentPageName;
 
   const isTabActive = (nav) =>

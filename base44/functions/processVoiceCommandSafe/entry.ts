@@ -58,7 +58,7 @@ function interpret(text) {
   if (/(sniper|inicio|início|hoje|dashboard)/.test(t)) return { tipo: 'navegar', destino: '/', label: 'Abrir Sniper do Dia' };
   if (/(whatsapp ?hub|abrir whatsapp)/.test(t)) return { tipo: 'navegar', destino: '/WhatsAppHub', label: 'Abrir WhatsAppHub' };
   if (/(rota do dia|abrir rota|rota inteligente|rota smart)/.test(t)) return { tipo: 'navegar', destino: '/SmartRouteOptimizer', label: 'Abrir Rota do Dia' };
-  if (/(clientes quentes|mostrar quentes|oportunidades quentes)/.test(t)) return { tipo: 'listar', alvo: 'quentes', destino: '/RankingOportunidades', label: 'Mostrar clientes quentes' };
+  if (/(clientes? quente|clientes quentes|mostrar quentes|oportunidades quentes|cliente quente)/.test(t)) return { tipo: 'listar', alvo: 'quentes', destino: '/RankingOportunidades', label: 'Mostrar clientes quentes' };
   if (/(propostas paradas|propostas sem resposta)/.test(t)) return { tipo: 'listar', alvo: 'propostas', destino: '/SalesFunnel', label: 'Mostrar propostas paradas' };
   if (/(pendencias|pendências|o que falta)/.test(t)) return { tipo: 'listar', alvo: 'pendencias', destino: '/TasksUnified', label: 'Mostrar pendências' };
 

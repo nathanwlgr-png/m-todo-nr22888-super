@@ -92,15 +92,15 @@ Deno.serve(async (req) => {
       const encodedMsg = encodeURIComponent(part);
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMsg}`;
 
-      // Registra cada parte enviada
+      // Registra cada parte como preparada. O envio real continua manual pelo link.
       if (client_id) {
         await base44.asServiceRole.entities.WhatsAppMessage.create({
           contact_id: client_id,
           contact_name: client_name || '',
           contact_phone: phone,
-          direction: 'sent',
+          direction: 'outbound_prepared',
           message: part,
-          status: 'sent',
+          status: 'prepared',
           automated: false
         });
       }

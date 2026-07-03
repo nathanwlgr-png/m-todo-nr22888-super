@@ -115,17 +115,17 @@ Deno.serve(async (req) => {
     const encodedMessage = encodeURIComponent(messageText);
     const whatsappLink = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
 
-    // Log da mensagem
+    // Log da mensagem preparada. O envio real continua manual pelo link.
     await base44.asServiceRole.entities.WhatsAppMessage.create({
       contact_id: user.id || 'system',
       contact_name: 'Sistema NR22',
       contact_phone: targetPhone,
-      direction: 'sent',
+      direction: 'outbound_prepared',
       message: messageText,
-      status: 'sent',
+      status: 'prepared',
       sent_by: user.email,
       sent_by_name: user.full_name,
-      automated: true,
+      automated: false,
     }).catch(e => console.error('Log error:', e));
 
     return Response.json({
