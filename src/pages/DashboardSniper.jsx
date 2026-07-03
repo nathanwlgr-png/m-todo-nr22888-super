@@ -83,18 +83,20 @@ export default function DashboardSniper() {
           <p className="text-xs text-center text-orange-500 font-bold tracking-widest uppercase">Compet Distribuidora · Seamaty</p>
         </div>
 
-        {/* ── AÇÃO RÁPIDA — uma mão, durante a visita ── */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link to="/Leads">
-            <Button className="w-full h-16 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl border-none flex items-center justify-center gap-2 text-base shadow-lg">
-              <UserPlus className="w-6 h-6" /> Novo Lead
-            </Button>
-          </Link>
-          <Link to="/CentralIAMaster">
-            <Button className="w-full h-16 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-500 hover:to-fuchsia-400 text-white font-black rounded-2xl border-none flex items-center justify-center gap-2 text-base shadow-lg">
-              <Bot className="w-6 h-6" /> Chat IA
-            </Button>
-          </Link>
+        {/* ── RESUMO DE CAMPO — sem botões duplicados ── */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-2xl p-3 bg-[#0f0f11] border border-orange-500/20 text-center">
+            <p className="text-[10px] text-slate-400 font-bold uppercase">Quentes</p>
+            <p className="text-xl font-black text-orange-300">{hotClients.length}</p>
+          </div>
+          <div className="rounded-2xl p-3 bg-[#0f0f11] border border-cyan-500/20 text-center">
+            <p className="text-[10px] text-slate-400 font-bold uppercase">Visitas</p>
+            <p className="text-xl font-black text-cyan-300">{safeVisits.length}</p>
+          </div>
+          <div className="rounded-2xl p-3 bg-[#0f0f11] border border-rose-500/20 text-center">
+            <p className="text-[10px] text-slate-400 font-bold uppercase">Sem contato</p>
+            <p className="text-xl font-black text-rose-300">{noContact7d.length}</p>
+          </div>
         </div>
 
         {/* ── CAMPANHA ATIVA / INATIVA ── */}
@@ -107,21 +109,18 @@ export default function DashboardSniper() {
           <SniperDoDia />
         </Suspense>
 
-        {/* ── AÇÃO RÁPIDA — bloco único consolidado (tablet rápido) ── */}
+        {/* ── MODO UMA MÃO — somente ações de campo mais usadas ── */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-emerald-500/25 shadow-xl space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-black text-emerald-300 uppercase tracking-widest">⚡ Ação Rápida</h2>
-            <span className="text-[10px] text-slate-400">Tablet rápido</span>
+            <h2 className="text-xs font-black text-emerald-300 uppercase tracking-widest">⚡ Modo Uma Mão</h2>
+            <span className="text-[10px] text-slate-400">4 ações principais</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Link to="/ModoCacaComercial" className="rounded-xl p-3 bg-rose-500/10 border border-rose-500/30"><p className="text-xs font-black text-rose-300">🎯 Caçar clínicas</p><p className="text-[10px] text-slate-400">Prospecção</p></Link>
-            <Link to="/RankingOportunidades" className="rounded-xl p-3 bg-orange-500/10 border border-orange-500/30"><p className="text-xs font-black text-orange-300">💰 Clientes quentes</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
-            <Link to="/DayFieldView" className="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30"><p className="text-xs font-black text-cyan-300">📅 Agenda/Rota hoje</p><p className="text-[10px] text-slate-400">{safeVisits.length} visitas</p></Link>
-            <Link to="/WhatsAppHub" className="rounded-xl p-3 bg-green-500/10 border border-green-500/30"><p className="text-xs font-black text-green-300">💬 WhatsApp manual</p><p className="text-[10px] text-slate-400">Fila/aprovação</p></Link>
-            <Link to="/PainelConcorrencia" className="rounded-xl p-3 bg-red-500/10 border border-red-500/30"><p className="text-xs font-black text-red-300">🧭 Concorrente</p><p className="text-[10px] text-slate-400">Argumento de venda</p></Link>
-            <Link to="/VisitManager" className="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30"><p className="text-xs font-black text-purple-300">📍 Registrar visita</p><p className="text-[10px] text-slate-400">Sem alterar cliente</p></Link>
+            <Link to="/RankingOportunidades" className="rounded-2xl p-4 min-h-20 bg-orange-500/10 border border-orange-500/30 flex flex-col justify-center"><p className="text-sm font-black text-orange-300">💰 Cliente quente</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
+            <Link to="/DayFieldView" className="rounded-2xl p-4 min-h-20 bg-cyan-500/10 border border-cyan-500/30 flex flex-col justify-center"><p className="text-sm font-black text-cyan-300">📅 Rota hoje</p><p className="text-[10px] text-slate-400">Agenda + mapa</p></Link>
+            <Link to="/WhatsAppHub" className="rounded-2xl p-4 min-h-20 bg-green-500/10 border border-green-500/30 flex flex-col justify-center"><p className="text-sm font-black text-green-300">💬 WhatsApp</p><p className="text-[10px] text-slate-400">Aprovação manual</p></Link>
+            <Link to="/ProposalGenerator" className="rounded-2xl p-4 min-h-20 bg-amber-500/10 border border-amber-500/30 flex flex-col justify-center"><p className="text-sm font-black text-amber-300">📄 Proposta</p><p className="text-[10px] text-slate-400">Fechar venda</p></Link>
           </div>
-          <BotaoMaquinaInsumos />
         </div>
 
         {/* ── 2. ALERTAS CRÍTICOS — Sem contato +7d ── */}
@@ -142,15 +141,15 @@ export default function DashboardSniper() {
           </div>
         )}
 
-        {/* ── FLUXO CRONOLÓGICO DE VENDAS ── */}
+        {/* ── FLUXO CRONOLÓGICO DE VENDAS — consolidado ── */}
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-orange-500/20 shadow-xl space-y-3">
           <h2 className="text-xs font-black text-orange-400 uppercase tracking-widest text-center mb-1">
-            ⚡ Fluxo de Vendas
+            ⚡ Trilha de Conversão
           </h2>
           <div className="space-y-2">
             <Link to={createPageUrl('Clients')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Users className="w-5 h-5" /><span>1️⃣ Clientes</span></div>
+                <div className="flex items-center gap-2"><Users className="w-5 h-5" /><span>1️⃣ Cliente</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -166,21 +165,15 @@ export default function DashboardSniper() {
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link to={createPageUrl('WhatsAppHub')}>
-              <Button className="w-full justify-between h-14 bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><Bell className="w-5 h-5" /><span>4️⃣ Fila de Aprovação</span></div>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
             <Link to={createPageUrl('ProposalGenerator')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><FileText className="w-5 h-5" /><span>5️⃣ Gerar Proposta</span></div>
+                <div className="flex items-center gap-2"><FileText className="w-5 h-5" /><span>4️⃣ Proposta</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link to={createPageUrl('SalesFunnel')}>
               <Button className="w-full justify-between h-14 bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-500 hover:to-orange-400 text-white font-extrabold rounded-xl border-none">
-                <div className="flex items-center gap-2"><TrendingUp className="w-5 h-5" /><span>6️⃣ Fechamento</span></div>
+                <div className="flex items-center gap-2"><TrendingUp className="w-5 h-5" /><span>5️⃣ Fechamento</span></div>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -210,10 +203,11 @@ export default function DashboardSniper() {
         {showSecondary && (
           <div className="space-y-4">
             <Suspense fallback={<HeavyFallback />}>
-              <PlanoEliteStatus hotCount={hotClients?.length || 0} visitsCount={visits?.length || 0} inactiveCount={noContact7d?.length || 0} />
+              <PlanoEliteStatus hotCount={hotClients.length} visitsCount={safeVisits.length} inactiveCount={noContact7d.length} />
             </Suspense>
             <Suspense fallback={<HeavyFallback />}><CentralComandosSafe /></Suspense>
             <SaneamentoConversaoSeguro />
+            <BotaoMaquinaInsumos />
 
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl p-3 bg-[#0f0f11] border border-emerald-500/30"><p className="text-xs text-emerald-400 font-bold">🔥 Alta Prioridade</p><p className="text-2xl font-black text-emerald-300">{hotClients.length}</p></div>
@@ -223,11 +217,15 @@ export default function DashboardSniper() {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <Link to="/ModoCacaComercial"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30"><Target className="w-4 h-4 text-rose-400" /><span className="text-xs font-black text-rose-400">🎯 Prospecção</span></div></Link>
-              <Link to="/ClientLocationMap"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-blue-500/30"><MapPin className="w-4 h-4 text-blue-400" /><span className="text-xs font-black text-blue-400">📍 Mapa Matriz</span></div></Link>
-              <Link to="/AgendaMensal"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-indigo-500/30"><Calendar className="w-4 h-4 text-indigo-400" /><span className="text-xs font-black text-indigo-400">📅 Agenda Mensal</span></div></Link>
-              <Link to="/RelatorioRicardo"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-cyan-500/30"><FileText className="w-4 h-4 text-cyan-400" /><span className="text-xs font-black text-cyan-400">📊 Relatório</span></div></Link>
-              {topClient && <Link to={`/ClienteDetalhe360?id=${topClient.id}`}><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-orange-500/30"><Target className="w-4 h-4 text-orange-400" /><span className="text-xs font-black text-orange-400">📋 Cliente 360°</span></div></Link>}
+              <Link to="/Leads"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-emerald-500/30"><UserPlus className="w-4 h-4 text-emerald-400" /><span className="text-xs font-black text-emerald-400">Novo Lead</span></div></Link>
+              <Link to="/CentralIAMaster"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-violet-500/30"><Bot className="w-4 h-4 text-violet-400" /><span className="text-xs font-black text-violet-400">Chat IA</span></div></Link>
+              <Link to="/ModoCacaComercial"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-rose-500/30"><Target className="w-4 h-4 text-rose-400" /><span className="text-xs font-black text-rose-400">Prospecção</span></div></Link>
+              <Link to="/PainelConcorrencia"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-red-500/30"><AlertTriangle className="w-4 h-4 text-red-400" /><span className="text-xs font-black text-red-400">Concorrente</span></div></Link>
+              <Link to="/VisitManager"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-purple-500/30"><MapPin className="w-4 h-4 text-purple-400" /><span className="text-xs font-black text-purple-400">Registrar visita</span></div></Link>
+              <Link to="/ClientLocationMap"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-blue-500/30"><MapPin className="w-4 h-4 text-blue-400" /><span className="text-xs font-black text-blue-400">Mapa Matriz</span></div></Link>
+              <Link to="/AgendaMensal"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-indigo-500/30"><Calendar className="w-4 h-4 text-indigo-400" /><span className="text-xs font-black text-indigo-400">Agenda Mensal</span></div></Link>
+              <Link to="/RelatorioRicardo"><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-cyan-500/30"><FileText className="w-4 h-4 text-cyan-400" /><span className="text-xs font-black text-cyan-400">Relatório</span></div></Link>
+              {topClient && <Link to={`/ClienteDetalhe360?id=${topClient.id}`}><div className="rounded-xl p-3 flex items-center gap-2 bg-[#0f0f11] border border-orange-500/30"><Target className="w-4 h-4 text-orange-400" /><span className="text-xs font-black text-orange-400">Cliente 360°</span></div></Link>}
             </div>
 
             <Suspense fallback={<HeavyFallback />}><SmartRouteMap /></Suspense>
