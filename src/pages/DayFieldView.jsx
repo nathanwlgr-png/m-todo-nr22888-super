@@ -38,27 +38,45 @@ export default function DayFieldView() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Filtrar tarefas do dia (pendentes)
-  const tasksToday = allTasks.filter(t => {
-    if (!t.due_date || t.status === 'concluida') return false;
-    const dueDate = new Date(t.due_date);
-    return dueDate >= dayStart && dueDate < dayEnd;
-  });
+  const isInSelectedDay = (dateValue) => {
+    if (!dateValue) return false;
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return false;
+    return date >= dayStart && date < dayEnd;
+  };
+
+  const getRelatedClient = (record) => clients.find(c => c.id === record?.client_id);
+
+  const getBestClientName = (record) => {
+    const client = getRelatedClient(record);
+    return client?.clinic_name || client?.full_name || record?.client_name || client?.first_name || record?.title || 'Cliente sem nome';
+  };
+
+  const getTaskTitleDetail = (task) => {
+    const displayName = getBestClientName(task);
+    const title = String(task?.title || '').trim();
+    return title && title !== displayName ? title : '';
+  };
+
+  // Filtrar tarefas do dia, mantendo concluídas para contadores corretos
+  const tasksForDay = allTasks.filter(t => isInSelectedDay(t.due_date));
+  const tasksToday = tasksForDay.filter(t => t.status !== 'concluida');
+  const visitTasksToday = tasksForDay.filter(t => t.type === 'visita');
 
   // Filtrar visitas agendadas do dia
   const visitsToday = allVisits
-    .filter(v => {
-      if (v.status === 'cancelada') return false;
-      const scheduled = new Date(v.scheduled_date);
-      return scheduled >= dayStart && scheduled < dayEnd;
-    })
+    .filter(v => v.status !== 'cancelada' && isInSelectedDay(v.scheduled_date))
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
 
   // Mapear clients para visitas
   const visitsWithClients = visitsToday.map(v => ({
     ...v,
-    client: clients.find(c => c.id === v.client_id)
+    client: getRelatedClient(v)
   }));
+
+  const totalVisitsCount = visitsWithClients.length + visitTasksToday.length;
+  const completedCount = tasksForDay.filter(t => t.status === 'concluida' || completedTasks.has(t.id)).length
+    + visitsToday.filter(v => v.status === 'realizada').length;
 
   const handleCompleteTask = async (taskId) => runWithLock(async () => {
     await base44.entities.Task.update(taskId, { status: 'concluida' });
@@ -110,11 +128,11 @@ export default function DayFieldView() {
             <p className="text-[10px] text-slate-500">Tarefas</p>
           </div>
           <div className="rounded-xl p-2.5 text-center" style={{ background: '#1a1a1a' }}>
-            <p className="text-xl font-black text-blue-400">{visitsWithClients.length}</p>
+            <p className="text-xl font-black text-blue-400">{totalVisitsCount}</p>
             <p className="text-[10px] text-slate-500">Visitas</p>
           </div>
           <div className="rounded-xl p-2.5 text-center" style={{ background: '#1a1a1a' }}>
-            <p className="text-xl font-black text-green-400">{completedTasks.size}</p>
+            <p className="text-xl font-black text-green-400">{completedCount}</p>
             <p className="text-[10px] text-slate-500">Feitas</p>
           </div>
         </div>
@@ -133,13 +151,13 @@ export default function DayFieldView() {
               {tasksToday.map(task => (
                 <div key={task.id} className="rounded-2xl p-4" style={{ background: '#141414', border: '1px solid rgba(255,107,0,0.2)' }}>
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-black text-white mb-1">{task.title}</h3>
-                      {task.client_name && (
-                        <p className="text-sm text-slate-400 mb-2">📌 {task.client_name}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-black text-white mb-1 leading-snug break-words">{getBestClientName(task)}</h3>
+                      {getTaskTitleDetail(task) && (
+                        <p className="text-sm text-slate-400 mb-2 break-words">📌 {getTaskTitleDetail(task)}</p>
                       )}
                       {task.description && (
-                        <p className="text-sm text-slate-500">{task.description}</p>
+                        <p className="text-sm text-slate-500 whitespace-pre-wrap break-words">{task.description}</p>
                       )}
                     </div>
                   </div>

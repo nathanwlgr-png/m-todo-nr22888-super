@@ -14,6 +14,17 @@ import {
   gerarURLGoogleMaps, gerarURLWhatsApp, otimizarRota, coordenadasValidas
 } from '@/utils/locationSeamaty';
 
+const parseCoordinateLocation = (location) => {
+  const match = String(location || '').trim().match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  const latitude = Number(match[1]);
+  const longitude = Number(match[2]);
+  return coordenadasValidas(latitude, longitude) ? { latitude, longitude } : null;
+};
+
+const getClientName = (client) => client.clinic_name || client.full_name || client.first_name || 'Cliente sem nome';
+const getCityKey = (city) => String(city || '').trim() || 'Sem cidade cadastrada';
+
 const MapaSeamatyBrasil = () => {
   const [filtroAtivo, setFiltroAtivo] = useState('todos');
   const [filtroCity, setFiltroCity] = useState('');
@@ -49,6 +60,34 @@ const MapaSeamatyBrasil = () => {
         return await base44.entities.LocationPointSeamaty?.list?.() || [];
       } catch (e) {
         console.error('Erro ao carregar pontos:', e);
+        return [];
+      }
+    },
+    staleTime: 300000,
+  });
+
+  // Buscar clientes reais para fallback quando ainda não há pontos geocodificados
+  const { data: clientes = [], isLoading: loadingClientes } = useQuery({
+    queryKey: ['clients-mapa-fallback'],
+    queryFn: async () => {
+      try {
+        return await base44.entities.Client.list('-updated_date', 500) || [];
+      } catch (e) {
+        console.error('Erro ao carregar clientes:', e);
+        return [];
+      }
+    },
+    staleTime: 300000,
+  });
+
+  // Buscar visitas para aproveitar Visit.location quando vier como coordenada
+  const { data: visitas = [], isLoading: loadingVisitas } = useQuery({
+    queryKey: ['visits-mapa-fallback'],
+    queryFn: async () => {
+      try {
+        return await base44.entities.Visit.list('-scheduled_date', 500) || [];
+      } catch (e) {
+        console.error('Erro ao carregar visitas:', e);
         return [];
       }
     },
@@ -97,7 +136,7 @@ const MapaSeamatyBrasil = () => {
     // Cidade
     if (filtroCity) {
       resultado = resultado.filter(p =>
-        p.cidade.toLowerCase().includes(filtroCity.toLowerCase())
+        String(p.cidade || '').toLowerCase().includes(filtroCity.toLowerCase())
       );
     }
 
@@ -116,6 +155,76 @@ const MapaSeamatyBrasil = () => {
     return resultado;
   }, [pontos, filtroAtivo, filtroCity, filtroStatus, filtroEquipamento, filtroRepresentante]);
 
+  const clientesFiltrados = useMemo(() => {
+    return clientes.filter((cliente) => {
+      if (filtroRepresentante && cliente.representante && !cliente.representante.toLowerCase().includes(filtroRepresentante.toLowerCase())) {
+        return false;
+      }
+      if (filtroCity) {
+        const busca = filtroCity.toLowerCase();
+        const texto = [cliente.city, cliente.address, cliente.clinic_name, cliente.full_name, cliente.first_name]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!texto.includes(busca)) return false;
+      }
+      return true;
+    });
+  }, [clientes, filtroRepresentante, filtroCity]);
+
+  const visitasFiltradas = useMemo(() => {
+    return visitas.filter((visita) => {
+      if (!filtroCity) return true;
+      const busca = filtroCity.toLowerCase();
+      const texto = [visita.client_name, visita.location].filter(Boolean).join(' ').toLowerCase();
+      return texto.includes(busca);
+    });
+  }, [visitas, filtroCity]);
+
+  const visitasComCoordenada = useMemo(() => {
+    return visitasFiltradas
+      .map((visita) => ({ ...visita, coordenadas: parseCoordinateLocation(visita.location) }))
+      .filter((visita) => Boolean(visita.coordenadas));
+  }, [visitasFiltradas]);
+
+  const clientesPorCidadeFallback = useMemo(() => {
+    const mapa = new Map();
+    clientesFiltrados.forEach((cliente) => {
+      const cidade = getCityKey(cliente.city);
+      if (!mapa.has(cidade)) {
+        mapa.set(cidade, {
+          id: cidade,
+          cidade,
+          uf: cliente.uf || cliente.state || '',
+          total_clientes: 0,
+          total_leads: 0,
+          total_clientes_com_equipamento: 0,
+          total_clientes_sem_equipamento: 0,
+          score_cidade: 0,
+          prioridade_cidade: 'monitorar',
+          clientes: [],
+        });
+      }
+      const grupo = mapa.get(cidade);
+      grupo.total_clientes += 1;
+      grupo.clientes.push(cliente);
+      if (cliente.current_equipment || cliente.equipment_sold || cliente.equipment_interest) {
+        grupo.total_clientes_com_equipamento += 1;
+      } else {
+        grupo.total_clientes_sem_equipamento += 1;
+      }
+      grupo.score_cidade = Math.min(100, grupo.total_clientes * 10);
+      grupo.prioridade_cidade = classificarCidade(grupo.score_cidade);
+    });
+    return Array.from(mapa.values()).sort((a, b) => b.total_clientes - a.total_clientes);
+  }, [clientesFiltrados]);
+
+  const pontosGeograficos = useMemo(() => {
+    return pontosFiltrados.filter((ponto) => coordenadasValidas(Number(ponto.latitude), Number(ponto.longitude)));
+  }, [pontosFiltrados]);
+
+  const usarFallbackCidade = pontosGeograficos.length === 0;
+
   // Cidades filtradas
   const cidadesFiltradas = useMemo(() => {
     let resultado = cidades;
@@ -131,22 +240,26 @@ const MapaSeamatyBrasil = () => {
     
     if (filtroCity) {
       resultado = resultado.filter(c =>
-        c.cidade.toLowerCase().includes(filtroCity.toLowerCase())
+        String(c.cidade || '').toLowerCase().includes(filtroCity.toLowerCase())
       );
     }
+    if (resultado.length === 0 && clientesPorCidadeFallback.length > 0) {
+      return clientesPorCidadeFallback;
+    }
     return resultado;
-  }, [cidades, filtroCity, filtroRepresentante, pontos]);
+  }, [cidades, filtroCity, filtroRepresentante, pontos, clientesPorCidadeFallback]);
 
   // Calcular totais para o painel superior
   const totais = useMemo(() => {
     const totalCidades = cidadesFiltradas.length;
-    const totalClientes = pontosFiltrados.filter(p => p.tipo === 'cliente').length;
+    const clientesEmPontos = pontosFiltrados.filter(p => p.tipo === 'cliente').length;
+    const totalClientes = clientesEmPontos || clientesFiltrados.length;
     const comEquipamento = pontosFiltrados.filter(p =>
       p.tipo === 'cliente' && p.equipamentos_atuais?.length > 0
-    ).length;
+    ).length || clientesFiltrados.filter(c => c.current_equipment || c.equipment_sold || c.equipment_interest).length;
     const semEquipamento = pontosFiltrados.filter(p =>
       p.tipo === 'cliente' && (!p.equipamentos_atuais || p.equipamentos_atuais.length === 0)
-    ).length;
+    ).length || Math.max(0, clientesFiltrados.length - clientesFiltrados.filter(c => c.current_equipment || c.equipment_sold || c.equipment_interest).length);
     const oportunidadesA = pontosFiltrados.filter(p =>
       p.prioridade === 'a_quente'
     ).length;
@@ -163,6 +276,12 @@ const MapaSeamatyBrasil = () => {
       c.prioridade_cidade === 'prioridade_maxima'
     ).length;
 
+    const clientesComCidade = clientesFiltrados.filter(c => String(c.city || '').trim()).length;
+    const clientesComEndereco = clientesFiltrados.filter(c => String(c.address || '').trim()).length;
+    const visitasComLocalizacao = visitasFiltradas.filter(v => String(v.location || '').trim()).length;
+    const registrosSemLocalizacao = clientesFiltrados.filter(c => !String(c.city || '').trim() && !String(c.address || '').trim()).length +
+      visitasFiltradas.filter(v => !String(v.location || '').trim()).length;
+
     return {
       totalCidades,
       totalClientes,
@@ -173,8 +292,12 @@ const MapaSeamatyBrasil = () => {
       recompras,
       inativos,
       cidadesMax,
+      clientesComCidade,
+      clientesComEndereco,
+      visitasComLocalizacao,
+      registrosSemLocalizacao,
     };
-  }, [cidadesFiltradas, pontosFiltrados]);
+  }, [cidadesFiltradas, pontosFiltrados, clientesFiltrados, visitasFiltradas]);
 
   // Função para exportar dados
   const handleExportarDados = useCallback((formato) => {
@@ -328,7 +451,8 @@ const MapaSeamatyBrasil = () => {
   // Listar abas laterais
   const abas = [
     { id: 'cidades', label: 'Cidades', count: cidadesFiltradas.length },
-    { id: 'clientes', label: 'Clientes', count: pontosFiltrados.filter(p => p.tipo === 'cliente').length },
+    { id: 'clientes', label: 'Clientes', count: pontosFiltrados.filter(p => p.tipo === 'cliente').length || clientesFiltrados.length },
+    { id: 'visitas', label: 'Visitas', count: visitasComCoordenada.length },
     { id: 'comodatos', label: 'Comodatos', count: pontosFiltrados.filter(p => p.tipo === 'comodato').length },
     { id: 'recompras', label: 'Recompras', count: pontosFiltrados.filter(p => p.tipo === 'recompra_insumo').length },
     { id: 'oportunidades', label: 'Oportunidades', count: pontosFiltrados.filter(p => p.tipo === 'oportunidade_equipamento').length },
@@ -340,27 +464,45 @@ const MapaSeamatyBrasil = () => {
 
     if (abaLateral === 'cidades') {
       items = cidadesFiltradas
-        .filter(c => !searchLateral || c.cidade.toLowerCase().includes(searchLateral.toLowerCase()))
+        .filter(c => !searchLateral || String(c.cidade || '').toLowerCase().includes(searchLateral.toLowerCase()))
         .sort((a, b) => (b.score_cidade || 0) - (a.score_cidade || 0));
+    } else if (abaLateral === 'visitas') {
+      items = visitasComCoordenada.filter(v => !searchLateral || String(v.client_name || v.location || '').toLowerCase().includes(searchLateral.toLowerCase()));
+    } else if (abaLateral === 'clientes' && pontosFiltrados.filter(p => p.tipo === 'cliente').length === 0) {
+      items = clientesFiltrados
+        .filter(c => !searchLateral || [getClientName(c), c.city, c.address].filter(Boolean).join(' ').toLowerCase().includes(searchLateral.toLowerCase()))
+        .map(c => ({
+          id: c.id,
+          client_id: c.id,
+          nome_clinica: getClientName(c),
+          cidade: c.city || 'Sem cidade',
+          uf: c.uf || c.state || '',
+          endereco_completo: c.address,
+          whatsapp: c.phone,
+          responsavel: c.representante,
+          tipo: 'cliente',
+          prioridade: c.status === 'quente' ? 'a_quente' : 'b_morno',
+          equipamentos_atuais: [c.current_equipment || c.equipment_sold || c.equipment_interest].filter(Boolean),
+        }));
     } else {
       items = pontosFiltrados
         .filter(p => p.tipo === (abaLateral === 'clientes' ? 'cliente' : abaLateral === 'comodatos' ? 'comodato' : abaLateral === 'recompras' ? 'recompra_insumo' : abaLateral === 'oportunidades' ? 'oportunidade_equipamento' : 'inativo'))
-        .filter(p => !searchLateral || p.nome_clinica.toLowerCase().includes(searchLateral.toLowerCase()) || p.cidade.toLowerCase().includes(searchLateral.toLowerCase()))
+        .filter(p => !searchLateral || String(p.nome_clinica || '').toLowerCase().includes(searchLateral.toLowerCase()) || String(p.cidade || '').toLowerCase().includes(searchLateral.toLowerCase()))
         .sort((a, b) => (b.score_oportunidade || 0) - (a.score_oportunidade || 0));
     }
 
     return items;
-  }, [abaLateral, searchLateral, cidadesFiltradas, pontosFiltrados]);
+  }, [abaLateral, searchLateral, cidadesFiltradas, pontosFiltrados, clientesFiltrados, visitasComCoordenada]);
 
-  // Estado: se houver erro de carregamento
-  if (!loadingCidades && !loadingPontos && cidadesFiltradas.length === 0 && pontosFiltrados.length === 0) {
+  // Estado: se não houver nenhum registro operacional para listar
+  if (!loadingCidades && !loadingPontos && !loadingClientes && !loadingVisitas && cidadesFiltradas.length === 0 && pontosFiltrados.length === 0 && clientesFiltrados.length === 0 && visitasFiltradas.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: '#fafafa' }}>
         <div className="text-center max-w-md">
           <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Sem dados de geolocalização</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Mapa pendente de dados</h2>
           <p className="text-sm text-slate-500">
-            Nenhuma cidade ou cliente cadastrado com geolocalização. Importe dados ou cadastre clientes com coordenadas.
+            Nenhum cliente ou visita encontrado para montar a visão territorial.
           </p>
         </div>
       </div>
