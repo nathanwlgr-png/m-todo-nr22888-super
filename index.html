@@ -90,7 +90,21 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw-offline.js').catch(err => console.log('SW registration failed:', err));
+          const isEditor = window.location.hostname.includes('base44.com') ||
+            window.location.hostname.includes('localhost') ||
+            window.self !== window.top;
+
+          if (isEditor) {
+            navigator.serviceWorker.getRegistrations()
+              .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
+              .catch(() => {});
+            if ('caches' in window) {
+              caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))).catch(() => {});
+            }
+            return;
+          }
+
+          navigator.serviceWorker.register('/sw-offline.js?v=nr22888-v2').catch(err => console.log('SW registration failed:', err));
         });
       }
       

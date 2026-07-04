@@ -1,7 +1,7 @@
 // Service Worker para suporte offline PWA
 // NR22888 Seamaty Brasil
 
-const CACHE_NAME = 'nr22888-v1';
+const CACHE_NAME = 'nr22888-v2';
 const OFFLINE_FALLBACK = '/offline.html';
 
 const CRITICAL_ROUTES = [
@@ -78,8 +78,22 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Assets: cache first
+  // JS/CSS: network first para evitar chunks antigos com erro de sintaxe
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || request.destination === 'script' || request.destination === 'style') {
+    e.respondWith(
+      fetch(request).then((res) => {
+        if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, res.clone()));
+        return res;
+      }).catch(() => caches.match(request) || new Response('', { status: 404 }))
+    );
+    return;
+  }
+
+  // Imagens e fontes: cache first
   e.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request))
+    caches.match(request).then((cached) => cached || fetch(request).then((res) => {
+      if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, res.clone()));
+      return res;
+    }))
   );
 });
