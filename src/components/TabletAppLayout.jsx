@@ -15,6 +15,7 @@ import VendedorMenu from '@/components/VendedorMenu';
 import ArchiveModeBanner from '@/components/ArchiveModeBanner';
 
 const PAGE_TITLES = {
+  HojeModoRuaNR22888: 'Hoje — Modo Rua NR22888',
   DashboardSniper: 'Painel Comercial',
   GenerateWhatsAppIntegrated: 'WhatsApp Consultivo',
   RankingOportunidades: 'Interesse do Cliente',
@@ -41,18 +42,13 @@ const PAGE_TITLES = {
 
 // Sidebar lateral para tablet — segue o menu principal
 const SIDEBAR_ITEMS = [
-  { icon: Home,         label: 'Dashboard',   path: '/' },
-  { icon: Users,        label: 'Clientes',    path: '/Clients' },
-  { icon: UserSquare2,  label: 'Cliente 360', path: '/ClienteDetalhe360' },
-  { icon: GitBranch,    label: 'Pipeline',    path: '/PipelineView' },
-  { icon: Clock,        label: 'Tarefas',     path: '/TasksUnified' },
-  { icon: MessageSquare,label: 'Mensagens',   path: '/WhatsAppHub' },
-  { icon: MapPin,       label: 'Visitas',     path: '/VisitManager' },
-  { icon: Map,          label: 'Mapa',        path: '/MapaSeamatyBrasil' },
-  { icon: FileText,     label: 'Propostas',   path: '/ProposalGenerator' },
-  { icon: ShoppingCart, label: 'Vendas',      path: '/SalesFunnel' },
-  { icon: RefreshCw,    label: 'Pós-venda',   path: '/AutoFollowUpDashboard' },
-  { icon: Copy,         label: 'Duplicados',  path: '/DuplicateManager' },
+  { icon: Home,          label: 'Hoje',       path: '/' },
+  { icon: Users,         label: 'Clientes',   path: '/Clients' },
+  { icon: MessageSquare, label: 'Mensagens',  path: '/WhatsAppHub' },
+  { icon: MapPin,        label: 'Rota',       path: '/DayFieldView' },
+  { icon: FileText,      label: 'Propostas',  path: '/ProposalGenerator' },
+  { icon: RefreshCw,     label: 'Pós-venda',  path: '/AutoFollowUpDashboard' },
+  { icon: Menu,          label: 'Mais',       path: '/GlobalCommandCenter' },
 ];
 
 export default function TabletAppLayout({ children, currentPageName }) {

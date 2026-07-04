@@ -88,6 +88,7 @@ const RouteAuditReport = lazy(() => import('./pages/RouteAuditReport'));
 const CentralIAMaster = lazy(() => import('./pages/CentralIAMaster'));
 const ModoInvestigativoSupremo = lazy(() => import('./pages/ModoInvestigativoSupremo'));
 const DashboardSniper = lazy(() => import('./pages/DashboardSniper'));
+const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
 const AgendaMensal = lazy(() => import('./pages/AgendaMensal'));
@@ -161,7 +162,8 @@ const AuthenticatedApp = () => {
     <Suspense fallback={<PageLoader />}>
        <Routes>
          {/* ── HOME — Dashboard Sniper ── */}
-         <Route path="/" element={<LayoutWrapper currentPageName="DashboardSniper"><DashboardSniper /></LayoutWrapper>} />
+         <Route path="/" element={<LayoutWrapper currentPageName="HojeModoRuaNR22888"><HojeModoRuaNR22888 /></LayoutWrapper>} />
+         <Route path="/DashboardSniper" element={<LayoutWrapper currentPageName="DashboardSniper"><DashboardSniper /></LayoutWrapper>} />
 
         {/* ── MÓDULOS EXISTENTES (originais) ── */}
         <Route path="/VisitRouteManager" element={<LayoutWrapper currentPageName="VisitRouteManager"><VisitRouteManager /></LayoutWrapper>} />

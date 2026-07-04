@@ -13,18 +13,18 @@ export const setModo = (modo) => {
 
 // Menu principal — ordem única, limpa e objetiva
 export const VENDEDOR_PAGES = [
-  { page: '', label: '🏠 Dashboard', category: 'Menu' },
-  { page: 'Clients', label: '👥 Clientes', category: 'Menu' },
-  { page: 'ClienteDetalhe360', label: '🧿 Cliente 360', category: 'Menu' },
-  { page: 'PipelineView', label: '🔀 Pipeline', category: 'Menu' },
-  { page: 'TasksUnified', label: '✅ Tarefas', category: 'Menu' },
-  { page: 'WhatsAppHub', label: '💬 Mensagens', category: 'Menu' },
-  { page: 'VisitManager', label: '📍 Visitas', category: 'Menu' },
-  { page: 'MapaSeamatyBrasil', label: '🗺️ Mapa', category: 'Menu' },
-  { page: 'ProposalGenerator', label: '📄 Propostas', category: 'Menu' },
-  { page: 'SalesFunnel', label: '🏁 Vendas', category: 'Menu' },
-  { page: 'AutoFollowUpDashboard', label: '🔁 Pós-venda', category: 'Menu' },
-  { page: 'DuplicateManager', label: '🧹 Duplicados', category: 'Menu' },
+  { page: '', label: '🏠 Hoje', category: 'Operação de Rua' },
+  { page: 'Clients', label: '👥 Clientes', category: 'Operação de Rua' },
+  { page: 'WhatsAppHub', label: '💬 Mensagens', category: 'Operação de Rua' },
+  { page: 'DayFieldView', label: '🗺️ Rota', category: 'Operação de Rua' },
+  { page: 'ProposalGenerator', label: '📄 Propostas', category: 'Operação de Rua' },
+  { page: 'AutoFollowUpDashboard', label: '🔁 Pós-venda', category: 'Operação de Rua' },
+  { page: 'MapaSeamatyBrasil', label: '🗺️ Mapa', category: 'Mais' },
+  { page: 'DuplicateManager', label: '🧹 Duplicados', category: 'Mais' },
+  { page: 'NotificationSettings', label: '⚙️ Configurações', category: 'Mais' },
+  { page: 'RelatorioRicardo', label: '📊 Relatórios', category: 'Mais' },
+  { page: 'CentralIAMaster', label: '🧠 Ferramentas avançadas', category: 'Mais' },
+  { page: 'DashboardSniper', label: '🎯 Dashboard Sniper clássico', category: 'Mais' },
 ];
 
 // Botões de ação rápida no modo vendedor — ordem do fluxo de campo

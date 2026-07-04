@@ -13,12 +13,13 @@ const STALE_2MIN = 2 * 60 * 1000;
 const BOTTOM_NAV = [
   { to: '/',                       icon: Home,         label: 'Hoje',       match: ['/'] },
   { to: '/Clients',                icon: Users,        label: 'Clientes',   match: ['/Clients', '/ClientProfile', '/ClienteDetalhe360'] },
+  { to: '/WhatsAppHub',            icon: MessageSquare,label: 'Mensagens',  match: ['/WhatsAppHub', '/WhatsAppInbox', '/GenerateWhatsAppIntegrated'] },
+  { to: '/DayFieldView',           icon: Star,         label: 'Rota',       match: ['/DayFieldView', '/VisitManager', '/ScheduledAgenda'] },
   { to: '/ProposalGenerator',      icon: FileText,     label: 'Propostas',  match: ['/ProposalGenerator'] },
-  { to: '/RankingOportunidades',   icon: Star,         label: 'Interesse',  match: ['/RankingOportunidades', '/EventoClienteTracking'] },
-  { to: '/WhatsAppHub',            icon: MessageSquare,label: 'WhatsApp',   match: ['/WhatsAppHub', '/WhatsAppInbox', '/GenerateWhatsAppIntegrated'] },
 ];
 
 const PAGE_TITLES = {
+  HojeModoRuaNR22888: 'Hoje — Modo Rua NR22888',
   DashboardSniper: 'Painel Comercial',
   GenerateWhatsAppIntegrated: 'WhatsApp Consultivo',
   RankingOportunidades: 'Interesse do Cliente',
