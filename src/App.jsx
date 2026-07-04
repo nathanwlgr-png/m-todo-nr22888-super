@@ -1,16 +1,32 @@
-import React, { lazy as reactLazy, Suspense } from 'react';
+import React, { lazy as reactLazy, Suspense, useEffect } from 'react';
+
+const recoverFromStaleBuild = async () => {
+  const KEY = 'nr22888_stale_build_recovered';
+  if (sessionStorage.getItem(KEY)) return false;
+  sessionStorage.setItem(KEY, '1');
+  try {
+    if ('caches' in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map((name) => caches.delete(name)));
+    }
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.update()));
+    }
+  } catch (_) {
+    // recuperação silenciosa para cache antigo do PWA
+  }
+  window.location.reload();
+  return true;
+};
 
 // Recupera automaticamente de chunk antigo/estale (PWA no tablet cacheia agressivo).
-// Se um módulo dinâmico falhar ao carregar, recarrega UMA vez para buscar o build novo.
+// Se um módulo dinâmico falhar ao carregar, limpa cache e recarrega UMA vez para buscar o build novo.
 const lazy = (importer) =>
   reactLazy(() =>
-    importer().catch((err) => {
-      const KEY = 'nr22888_chunk_reloaded';
-      if (!sessionStorage.getItem(KEY)) {
-        sessionStorage.setItem(KEY, '1');
-        window.location.reload();
-        return new Promise(() => {}); // segura o render até o reload
-      }
+    importer().catch(async (err) => {
+      const recovered = await recoverFromStaleBuild();
+      if (recovered) return new Promise(() => {}); // segura o render até o reload
       throw err;
     })
   );
@@ -252,6 +268,24 @@ const AuthenticatedApp = () => {
 
 // ── REBUILD TRIGGER: 2026-06-06T00:00 ──
 function App() {
+  useEffect(() => {
+    const shouldRecover = (event) => {
+      const message = String(event?.message || event?.reason?.message || event?.error?.message || '');
+      return message.includes('Invalid or unexpected token') || message.includes('Failed to fetch dynamically imported module');
+    };
+
+    const handleRecoverableError = (event) => {
+      if (shouldRecover(event)) recoverFromStaleBuild();
+    };
+
+    window.addEventListener('error', handleRecoverableError);
+    window.addEventListener('unhandledrejection', handleRecoverableError);
+    return () => {
+      window.removeEventListener('error', handleRecoverableError);
+      window.removeEventListener('unhandledrejection', handleRecoverableError);
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClientInstance}>
