@@ -11,6 +11,7 @@ import {
   ExternalLink, Download, Image, Lock, CheckSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AbordagemInteligente from '@/components/AbordagemInteligente';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
@@ -140,7 +141,7 @@ export default function ClienteDetalhe360() {
         client_id: client.id,
         client_name: client.first_name,
         clinic_name: client.clinic_name,
-        equipment: client.equipment_interest || 'VG2',
+        equipment: client.equipment_interest || client.equipment_sold || client.current_equipment || '',
       });
       const url = res.data?.pdf_url || res.data?.url;
       if (url) {
@@ -285,7 +286,7 @@ export default function ClienteDetalhe360() {
     await base44.entities.Task.create({
       client_id: client.id,
       client_name: client.clinic_name || client.first_name,
-      title: `Follow-up VG2 — ${client.clinic_name}`,
+      title: `Follow-up SEAMATY — ${client.clinic_name || client.first_name || 'cliente'}`,
       type: 'follow_up',
       priority: 'alta',
       status: 'pendente',
@@ -501,6 +502,8 @@ export default function ClienteDetalhe360() {
               )}
             </div>
 
+            <AbordagemInteligente client={client} />
+
             {/* Funil */}
             <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
               <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">🔄 Funil</p>
@@ -606,7 +609,7 @@ export default function ClienteDetalhe360() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-[10px] font-black text-yellow-400 uppercase tracking-widest">💼 Proposta Ativa</p>
-                  <p className="text-base font-black text-white mt-1">{client.equipment_interest || 'VG2'} — Equipamento Seamaty</p>
+                  <p className="text-base font-black text-white mt-1">{client.equipment_interest || client.equipment_sold || client.current_equipment || 'Equipamento pendente'} — Equipamento SEAMATY</p>
                 </div>
                 <span className="text-[9px] font-black px-2 py-1 rounded-full" style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.3)' }}>
                   Em elaboração
@@ -614,20 +617,20 @@ export default function ClienteDetalhe360() {
               </div>
               <div className="space-y-2 mb-3">
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">Preço VI1</span>
+                  <span className="text-slate-500">Preço/condição</span>
                   <span className="text-yellow-400 font-black">⚠️ AGUARDANDO VALIDAÇÃO</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">Orçamento cliente</span>
-                  <span className="text-white font-bold">R$ {client.available_budget?.toLocaleString('pt-BR') || '—'}</span>
+                  <span className="text-white font-bold">{client.available_budget ? `R$ ${client.available_budget.toLocaleString('pt-BR')}` : 'base ainda não alimentada'}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">ROI estimado</span>
-                  <span className="text-green-400 font-bold">8 meses</span>
+                  <span className="text-slate-500">ROI</span>
+                  <span className="text-yellow-400 font-bold">AGUARDANDO VALIDAÇÃO</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">Economia mensal</span>
-                  <span className="text-green-400 font-bold">~R$ 4.200/mês</span>
+                  <span className="text-yellow-400 font-bold">AGUARDANDO VALIDAÇÃO</span>
                 </div>
               </div>
               <div className="rounded-xl p-2.5" style={{ background: 'rgba(255,68,68,0.06)', border: '1px solid rgba(255,68,68,0.2)' }}>
@@ -639,12 +642,7 @@ export default function ClienteDetalhe360() {
             <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(239,68,68,0.15)' }}>
               <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2">🩸 Gaps Identificados</p>
               <div className="space-y-1.5">
-                {[
-                  'Terceiriza 100% dos exames — custo alto',
-                  'Resultado em 24-48h vs 3min com VG2',
-                  'Sem autonomia de laboratório interno',
-                  'Sócio ainda não viu análise técnica completa',
-                ].map((g, i) => (
+                {((client.main_pains?.length || client.real_objections?.length) ? [...(client.main_pains || []), ...(client.real_objections || [])] : ['base ainda não alimentada']).map((g, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs text-slate-400">
                     <span className="text-red-500 shrink-0">▸</span>{g}
                   </div>

@@ -6,6 +6,7 @@ import {
   Bot, Calendar, CheckCircle2, ClipboardList, FileText, Flame,
   MapPin, MessageSquare, Package, Radar, Route, ShieldCheck, Siren
 } from 'lucide-react';
+import ProximaAcaoConsultivaModal from '@/components/ProximaAcaoConsultivaModal';
 
 const COMMANDS = [
   { cmd: '/hoje', label: 'Hoje', target: 'campo' },
@@ -54,7 +55,7 @@ function Section({ id, icon: Icon, title, count, children }) {
   );
 }
 
-function ClientCard({ client, context, recommendation }) {
+function ClientCard({ client, context }) {
   const [showNext, setShowNext] = useState(false);
   const phone = client?.phone || client?.recipient_phone || client?.destinatario_contato;
   const clientId = client?.client_id || client?.cliente_id || client?.id;
@@ -74,15 +75,14 @@ function ClientCard({ client, context, recommendation }) {
         ) : (
           <button className="h-12 rounded-xl text-xs md:text-sm font-black text-slate-500 bg-slate-800/60 border border-slate-700" disabled>WhatsApp</button>
         )}
-        <Link to={`/ClienteDetalhe360?id=${clientId}`} className="h-12 rounded-xl flex items-center justify-center text-xs md:text-sm font-black text-purple-300 bg-purple-500/10 border border-purple-500/30">Cliente 360</Link>
-        <button onClick={() => setShowNext((value) => !value)} className="h-12 rounded-xl text-xs md:text-sm font-black text-orange-300 bg-orange-500/10 border border-orange-500/30">Próxima ação</button>
+        {clientId ? (
+          <Link to={`/ClienteDetalhe360?id=${clientId}`} className="h-12 rounded-xl flex items-center justify-center text-xs md:text-sm font-black text-purple-300 bg-purple-500/10 border border-purple-500/30">Cliente 360</Link>
+        ) : (
+          <button className="h-12 rounded-xl text-xs md:text-sm font-black text-slate-500 bg-slate-800/60 border border-slate-700" disabled>Cliente 360</button>
+        )}
+        <button onClick={() => setShowNext(true)} className="h-12 rounded-xl text-xs md:text-sm font-black text-orange-300 bg-orange-500/10 border border-orange-500/30">Próxima ação</button>
       </div>
-      {showNext && (
-        <div className="mt-3 rounded-xl p-3 bg-orange-500/8 border border-orange-500/20">
-          <p className="text-xs font-bold text-orange-200">Rascunho visual: {recommendation}</p>
-          <p className="text-[11px] text-slate-500 mt-1">Nada foi salvo, enviado ou alterado.</p>
-        </div>
-      )}
+      <ProximaAcaoConsultivaModal client={client} isOpen={showNext} onClose={() => setShowNext(false)} />
     </div>
   );
 }
