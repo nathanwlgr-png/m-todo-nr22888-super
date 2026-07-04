@@ -16,7 +16,7 @@ export default function WhatsAppHub() {
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [approvedMsg, setApprovedMsg] = useState('');
-  const [openedMsg, setOpenedMsg] = useState(null); // { id, client, text } aguardando confirmação manual
+  const [openedMsg, setOpenedMsg] = useState(null);
   const [copied, setCopied] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = ['enviar', 'pendentes', 'historico', 'contatos'].includes(urlParams.get('tab')) ? urlParams.get('tab') : 'enviar';
@@ -45,7 +45,6 @@ export default function WhatsAppHub() {
   const safePendingMessagesRaw = Array.isArray(pendingMessagesRaw) ? pendingMessagesRaw : [];
   const pendingMessages = safePendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
 
-  // Chave do destinatário — usada para detectar repetições na aba Pendentes
   const getRecipientKey = (m) => m.phone || m.destinatario_contato || m.recipient_phone || m.client_id || m.client_name || m.destinatario_nome || 'sem-destinatario';
   const pendingRecipientCounts = pendingMessages.reduce((acc, m) => {
     const key = getRecipientKey(m);
@@ -62,7 +61,6 @@ export default function WhatsAppHub() {
     )
   );
 
-  // ─── GERAÇÃO IA ───
   const handleGenerateAI = async () => {
     if (!selectedClient) { toast.error('Selecione um cliente'); return; }
     setGenerating(true);
@@ -80,7 +78,7 @@ export default function WhatsAppHub() {
         setMessage(generatedText);
         toast.success('Mensagem IA gerada! Revise antes de aprovar.');
       } else {
-        toast.error('A IA não retornou uma mensagem válida.');
+        toast.error('A IA nao retornou uma mensagem valida.');
       }
     } catch (e) {
       toast.error('Erro ao gerar: ' + e.message);
@@ -89,21 +87,18 @@ export default function WhatsAppHub() {
     }
   };
 
-  // ─── APROVAR MENSAGEM ───
   const handleApprove = () => {
     if (!message.trim()) { toast.error('Escreva ou gere uma mensagem'); return; }
     setApprovedMsg(message);
-    toast.success('✅ Mensagem aprovada! Agora você pode enviar.');
+    toast.success('Mensagem aprovada! Agora voce pode enviar.');
   };
 
-  // ─── ENVIAR (só funciona após aprovação) ───
   const handleSend = async () => {
     if (!approvedMsg) { toast.error('Aprove a mensagem antes de enviar'); return; }
     if (!selectedClient) { toast.error('Selecione um cliente'); return; }
 
     setSending(true);
     try {
-      // Registrar apenas que o WhatsApp foi ABERTO (não enviado). Confirmação é manual.
       const created = await base44.entities.WhatsAppMessage?.create({
         client_id: selectedClient.id,
         client_name: selectedClient.first_name,
@@ -114,13 +109,12 @@ export default function WhatsAppHub() {
         approved_at: new Date().toISOString(),
       }).catch(() => null);
 
-      // Abre WhatsApp
       const phone = selectedClient.phone.replace(/\D/g, '');
       const encoded = encodeURIComponent(approvedMsg);
       window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
 
       setOpenedMsg({ id: created?.id || null, client: selectedClient, text: approvedMsg });
-      toast.message('WhatsApp aberto', { description: 'Confirme abaixo após enviar de fato.' });
+      toast.message('WhatsApp aberto', { description: 'Confirme abaixo apos enviar de fato.' });
       setMessage('');
       setApprovedMsg('');
       queryClient.invalidateQueries(['wa-messages']);
@@ -131,7 +125,6 @@ export default function WhatsAppHub() {
     }
   };
 
-  // ─── CONFIRMAR ENVIO MANUAL (única forma de marcar como enviado) ───
   const handleConfirmSent = async () => {
     if (!openedMsg) return;
     try {
@@ -157,7 +150,6 @@ export default function WhatsAppHub() {
     }
   };
 
-  // ─── APROVAR MSG PENDENTE ───
   const handleApprovePending = async (msg) => {
     try {
       await base44.entities.PendingMessage?.update(msg.id, {
@@ -189,7 +181,6 @@ export default function WhatsAppHub() {
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
-  // Histórico filtrado por cliente
   const clientMessages = selectedClient
     ? safeMessages.filter(m => m.client_id === selectedClient.id)
     : safeMessages;
@@ -197,31 +188,29 @@ export default function WhatsAppHub() {
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
       <div className="px-4 pt-5 pb-3">
-        <h1 className="text-xl font-black text-white mb-0.5">💬 WhatsApp Hub</h1>
+        <h1 className="text-xl font-black text-white mb-0.5">WhatsApp Hub</h1>
         <p className="text-[10px] text-green-600 font-bold uppercase tracking-widest mb-4">
-          Aprovação Obrigatória • Histórico Total • Modo Seguro
+          Aprovacao Obrigatoria - Historico Total - Modo Seguro
         </p>
 
-        {/* Alerta pendentes */}
         {pendingMessages.length > 0 && (
           <div className="rounded-xl p-3 mb-3 flex items-center justify-between"
             style={{ background: 'rgba(255,149,0,0.08)', border: '1px solid rgba(255,149,0,0.3)' }}>
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-orange-400" />
-              <p className="text-xs font-bold text-orange-400">{pendingMessages.length} mensagens aguardando aprovação</p>
+              <p className="text-xs font-bold text-orange-400">{pendingMessages.length} mensagens aguardando aprovacao</p>
             </div>
             <button onClick={() => setActiveTab('pendentes')}
               className="text-xs text-orange-300 underline">Ver</button>
           </div>
         )}
 
-        {/* Tabs */}
         <div className="flex gap-1 rounded-xl p-1 mb-4" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
           {[
-            { key: 'enviar', label: '✉️ Enviar' },
-            { key: 'pendentes', label: `⏳ Pendentes${pendingMessages.length > 0 ? ` (${pendingMessages.length})` : ''}` },
-            { key: 'historico', label: '📋 Histórico' },
-            { key: 'contatos', label: '👥 Contatos' },
+            { key: 'enviar', label: 'Enviar' },
+            { key: 'pendentes', label: `Pendentes${pendingMessages.length > 0 ? ` (${pendingMessages.length})` : ''}` },
+            { key: 'historico', label: 'Historico' },
+            { key: 'contatos', label: 'Contatos' },
           ].map(t => (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
               className="flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all"
@@ -236,12 +225,10 @@ export default function WhatsAppHub() {
 
       <div className="px-4">
 
-        {/* ── TAB: ENVIAR ── */}
         {activeTab === 'enviar' && (
           <div className="space-y-3">
-            {/* Busca cliente */}
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.2)' }}>
-              <p className="text-xs font-black text-green-400 mb-2">👤 Destinatário</p>
+              <p className="text-xs font-black text-green-400 mb-2">Destinatario</p>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-600" />
                 <input
@@ -253,7 +240,6 @@ export default function WhatsAppHub() {
                 />
               </div>
 
-              {/* Dropdown clientes */}
               {search && !selectedClient && filteredClients.length > 0 && (
                 <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)' }}>
                   {filteredClients.slice(0, 5).map(c => (
@@ -262,7 +248,7 @@ export default function WhatsAppHub() {
                       style={{ background: '#141414', borderColor: 'rgba(0,255,136,0.1)' }}>
                       <div className="text-left">
                         <p className="text-xs font-bold text-white">{c.first_name}</p>
-                        <p className="text-[10px] text-slate-500">{c.clinic_name} • {c.phone}</p>
+                        <p className="text-[10px] text-slate-500">{c.clinic_name} - {c.phone}</p>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-green-600" />
                     </button>
@@ -270,13 +256,12 @@ export default function WhatsAppHub() {
                 </div>
               )}
 
-              {/* Cliente selecionado */}
               {selectedClient && (
                 <div className="mt-2 rounded-xl px-3 py-2 flex items-center justify-between"
                   style={{ background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.3)' }}>
                   <div>
                     <p className="text-xs font-black text-green-400">{selectedClient.first_name}</p>
-                    <p className="text-[10px] text-slate-500">{selectedClient.clinic_name} • {selectedClient.phone}</p>
+                    <p className="text-[10px] text-slate-500">{selectedClient.clinic_name} - {selectedClient.phone}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <a href={`https://wa.me/${selectedClient.phone?.replace(/\D/g, '')}`}
@@ -291,10 +276,9 @@ export default function WhatsAppHub() {
               )}
             </div>
 
-            {/* Mensagem */}
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.2)' }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-black text-green-400">✏️ Mensagem</p>
+                <p className="text-xs font-black text-green-400">Mensagem</p>
                 <button
                   onClick={handleGenerateAI}
                   disabled={!selectedClient || generating}
@@ -315,7 +299,6 @@ export default function WhatsAppHub() {
               <p className="text-[10px] text-slate-600 mt-1">{message.length} caracteres</p>
             </div>
 
-            {/* Zona de aprovação */}
             <div className="rounded-2xl p-3" style={{
               background: approvedMsg ? 'rgba(0,255,136,0.05)' : 'rgba(255,107,0,0.05)',
               border: `1px solid ${approvedMsg ? 'rgba(0,255,136,0.4)' : 'rgba(255,107,0,0.3)'}`,
@@ -323,7 +306,7 @@ export default function WhatsAppHub() {
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="w-4 h-4" style={{ color: approvedMsg ? '#00ff88' : '#ff9500' }} />
                 <p className="text-xs font-black" style={{ color: approvedMsg ? '#00ff88' : '#ff9500' }}>
-                {approvedMsg ? '✅ Texto aprovado — Aprovar texto › Abrir WhatsApp › Confirmar que enviei' : '⚠️ Aprovar texto antes de abrir o WhatsApp'}
+                  {approvedMsg ? 'Texto aprovado - Abrir WhatsApp - Confirmar que enviei' : 'Aprovar texto antes de abrir o WhatsApp'}
                 </p>
               </div>
               {!approvedMsg ? (
@@ -332,7 +315,7 @@ export default function WhatsAppHub() {
                   disabled={!message.trim()}
                   className="w-full py-2.5 rounded-xl text-sm font-black disabled:opacity-40 transition-all"
                   style={{ background: 'rgba(255,107,0,0.2)', color: '#ff9500', border: '1px solid rgba(255,107,0,0.4)' }}>
-                  ✅ Aprovar texto
+                  Aprovar texto
                 </button>
               ) : (
                 <div className="space-y-2">
@@ -366,11 +349,10 @@ export default function WhatsAppHub() {
               )}
             </div>
 
-            {/* Confirmação de envio manual */}
             {openedMsg && (
               <div className="rounded-2xl p-3" style={{ background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.4)' }}>
-                <p className="text-xs font-black text-green-400 mb-1">📲 WhatsApp aberto para {openedMsg.client.first_name}</p>
-                <p className="text-[10px] text-slate-400 mb-2">O histórico só marca como ENVIADO depois que você confirmar.</p>
+                <p className="text-xs font-black text-green-400 mb-1">WhatsApp aberto para {openedMsg.client.first_name}</p>
+                <p className="text-[10px] text-slate-400 mb-2">O historico so marca como ENVIADO depois que voce confirmar.</p>
                 <div className="flex gap-2">
                   <button onClick={handleConfirmSent}
                     className="flex-1 py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2"
@@ -386,13 +368,12 @@ export default function WhatsAppHub() {
               </div>
             )}
 
-            {/* Templates */}
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
-              <p className="text-xs font-black text-green-400 mb-2">📋 Templates Rápidos</p>
+              <p className="text-xs font-black text-green-400 mb-2">Templates Rapidos</p>
               {[
-                { label: 'Apresentação', text: 'Olá! Sou Nathan, Consultor Técnico da CMAT Brasil. Gostaria de apresentar nossos equipamentos laboratoriais Seamaty para sua clínica. Posso agendar uma demonstração?' },
-                { label: 'Follow-up', text: 'Olá! Passando para verificar se surgiu alguma dúvida sobre os equipamentos Seamaty que apresentamos. Fico à disposição! 😊' },
-                { label: 'Proposta enviada', text: 'Acabei de enviar uma proposta personalizada para você. Assim que tiver oportunidade, dê uma olhada e me retorne com qualquer dúvida!' },
+                { label: 'Apresentacao', text: 'Ola! Sou Nathan, Consultor Tecnico da CMAT Brasil. Gostaria de apresentar nossos equipamentos laboratoriais Seamaty para sua clinica. Posso agendar uma demonstracao?' },
+                { label: 'Follow-up', text: 'Ola! Passando para verificar se surgiu alguma duvida sobre os equipamentos Seamaty que apresentamos. Fico a disposicao!' },
+                { label: 'Proposta enviada', text: 'Acabei de enviar uma proposta personalizada para voce. Assim que tiver oportunidade, de uma olhada e me retorne com qualquer duvida!' },
               ].map(tpl => (
                 <div key={tpl.label} className="flex items-center justify-between py-2 border-b last:border-0"
                   style={{ borderColor: 'rgba(0,255,136,0.08)' }}>
@@ -411,7 +392,6 @@ export default function WhatsAppHub() {
           </div>
         )}
 
-        {/* ── TAB: PENDENTES ── */}
         {activeTab === 'pendentes' && (
           <div className="space-y-2">
             {pendingMessages.length === 0 && (
@@ -434,7 +414,7 @@ export default function WhatsAppHub() {
                   <div className="flex items-center gap-1 mb-2 px-2 py-1 rounded-lg w-fit"
                     style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.3)' }}>
                     <AlertTriangle className="w-3 h-3 text-red-400" />
-                    <span className="text-[9px] font-black text-red-400">possível repetição</span>
+                    <span className="text-[9px] font-black text-red-400">possivel repeticao</span>
                   </div>
                 )}
                 <p className="text-xs text-slate-300 mb-3 p-2 rounded-lg" style={{ background: '#1a1a1a' }}>
@@ -455,7 +435,7 @@ export default function WhatsAppHub() {
                     disabled={!['approved', 'aprovado', 'ready_to_send'].includes(msg.status)}
                     className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black disabled:opacity-40"
                     style={{ background: 'rgba(37,211,102,0.18)', color: '#25d366', border: '1px solid rgba(37,211,102,0.35)' }}>
-                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp manualmente
+                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
                   </button>
                 </div>
               </div>
@@ -463,7 +443,6 @@ export default function WhatsAppHub() {
           </div>
         )}
 
-        {/* ── TAB: HISTÓRICO ── */}
         {activeTab === 'historico' && (
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-3">
@@ -480,7 +459,7 @@ export default function WhatsAppHub() {
                   <div className="flex items-center gap-2">
                     {msg.approved && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>✅ aprovado</span>
+                        style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>aprovado</span>
                     )}
                     <span className="text-[9px] text-slate-600">
                       {msg.created_date ? new Date(msg.created_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : ''}
@@ -491,12 +470,11 @@ export default function WhatsAppHub() {
               </div>
             ))}
             {clientMessages.length === 0 && (
-              <div className="text-center py-8 text-slate-600 text-sm">Nenhum histórico encontrado.</div>
+              <div className="text-center py-8 text-slate-600 text-sm">Nenhum historico encontrado.</div>
             )}
           </div>
         )}
 
-        {/* ── TAB: CONTATOS ── */}
         {activeTab === 'contatos' && (
           <div className="space-y-2">
             <div className="relative mb-3">
