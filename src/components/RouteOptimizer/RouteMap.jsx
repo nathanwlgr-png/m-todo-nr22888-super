@@ -89,9 +89,13 @@ export default function RouteMap({ route, startLocation }) {
                       <p className="text-[10px] text-slate-500 truncate">{stop.clinic_name}</p>
                     )}
                     <div className="flex items-center gap-3 mt-1">
-                      {stop.location && (
+                      {stop.location ? (
                         <p className="text-[10px] text-slate-600 flex items-center gap-1 truncate">
                           <MapPin className="w-2.5 h-2.5 shrink-0" />{stop.location}
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-red-400 flex items-center gap-1 truncate">
+                          <MapPin className="w-2.5 h-2.5 shrink-0" />endereço pendente
                         </p>
                       )}
                       {stop.visit_type && (

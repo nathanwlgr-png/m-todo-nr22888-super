@@ -66,9 +66,18 @@ export default function SmartRouteOptimizer() {
     setBatchLoading(false);
   };
 
-  const route = result?.optimized_route || [];
+  // Remove paradas repetidas (mesmo nome + mesmo endereço)
+  const rawRoute = result?.optimized_route || [];
+  const seenStops = new Set();
+  const route = rawRoute.filter((stop) => {
+    const key = `${stop.client_name || ''}|${stop.location || ''}`;
+    if (seenStops.has(key)) return false;
+    seenStops.add(key);
+    return true;
+  });
   const stats = result?.stats;
   const waMessage = result?.whatsapp_message || '';
+  const hasDistance = stats?.estimated_km !== undefined && stats?.estimated_km !== null;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
@@ -228,7 +237,7 @@ export default function SmartRouteOptimizer() {
             <div className="grid grid-cols-3 gap-2 mb-3">
               {[
                 { val: route.length, label: 'Visitas', color: '#ff9500' },
-                { val: `~${stats?.estimated_km || 0}km`, label: 'Distância', color: '#00bfff' },
+                { val: hasDistance ? `~${stats.estimated_km}km` : 'não calculada', label: 'Distância', color: '#00bfff' },
                 { val: `${stats?.estimated_km_saved || 0}km`, label: 'Economia', color: '#00ff88' },
               ].map(({ val, label, color }) => (
                 <div key={label} className="rounded-xl p-2 text-center"

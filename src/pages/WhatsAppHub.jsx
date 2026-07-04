@@ -5,7 +5,7 @@ import {
   MessageSquare, Search, Phone,
   ChevronRight, CheckCircle, AlertCircle, Loader2,
   Zap, Copy, Check, ExternalLink, RefreshCw,
-  Shield, X, Pencil
+  Shield, X, Pencil, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,6 +44,14 @@ export default function WhatsAppHub() {
   const safeMessages = Array.isArray(messages) ? messages : [];
   const safePendingMessagesRaw = Array.isArray(pendingMessagesRaw) ? pendingMessagesRaw : [];
   const pendingMessages = safePendingMessagesRaw.filter(m => ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'].includes(m.status));
+
+  // Chave do destinatário — usada para detectar repetições na aba Pendentes
+  const getRecipientKey = (m) => m.phone || m.destinatario_contato || m.recipient_phone || m.client_id || m.client_name || m.destinatario_nome || 'sem-destinatario';
+  const pendingRecipientCounts = pendingMessages.reduce((acc, m) => {
+    const key = getRecipientKey(m);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
 
   const filteredClients = safeClients.filter(c =>
     c.phone && (
@@ -422,6 +430,13 @@ export default function WhatsAppHub() {
                   <span className="text-[9px] px-2 py-0.5 rounded-full font-bold"
                     style={{ background: 'rgba(255,149,0,0.15)', color: '#ff9500' }}>{msg.status || 'aguardando_aprovacao'}</span>
                 </div>
+                {pendingRecipientCounts[getRecipientKey(msg)] > 1 && (
+                  <div className="flex items-center gap-1 mb-2 px-2 py-1 rounded-lg w-fit"
+                    style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.3)' }}>
+                    <AlertTriangle className="w-3 h-3 text-red-400" />
+                    <span className="text-[9px] font-black text-red-400">possível repetição</span>
+                  </div>
+                )}
                 <p className="text-xs text-slate-300 mb-3 p-2 rounded-lg" style={{ background: '#1a1a1a' }}>
                   {msg.message || msg.content || msg.mensagem || msg.message_content}
                 </p>
