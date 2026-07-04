@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import VendedorMenu from '@/components/VendedorMenu';
+import ArchiveModeBanner from '@/components/ArchiveModeBanner';
 
 const PAGE_TITLES = {
   DashboardSniper: 'Painel Comercial',
@@ -30,6 +31,7 @@ const PAGE_TITLES = {
   ScheduledAgenda: 'Agenda',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
+  ArquivoMasterConsulta: 'Arquivo Master / Consulta',
 };
 
 // Sidebar lateral para tablet
@@ -68,7 +70,9 @@ export default function TabletAppLayout({ children, currentPageName }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
+      <ArchiveModeBanner />
+      <div className="flex flex-1 overflow-hidden">
       {/* SIDEBAR */}
       <aside
         className="flex flex-col transition-all duration-300 flex-shrink-0"
@@ -185,6 +189,7 @@ export default function TabletAppLayout({ children, currentPageName }) {
 
       {/* MENU DRAWER */}
       <VendedorMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+      </div>
     </div>
   );
 }

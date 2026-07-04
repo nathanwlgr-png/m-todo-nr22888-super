@@ -5,6 +5,7 @@ import { Bell, Home, Users, FileText, Star, MessageSquare, ChevronLeft, Menu } f
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import VendedorMenu from '@/components/VendedorMenu';
+import ArchiveModeBanner from '@/components/ArchiveModeBanner';
 
 const STALE_2MIN = 2 * 60 * 1000;
 
@@ -36,6 +37,7 @@ const PAGE_TITLES = {
   DayFieldView: 'Campo Hoje',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
+  ArquivoMasterConsulta: 'Arquivo Master / Consulta',
 };
 
 export default function AppLayout({ children, currentPageName }) {
@@ -59,6 +61,7 @@ export default function AppLayout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
+      <ArchiveModeBanner />
       {/* TOP BAR — aparece em todas as páginas exceto home */}
       {!isHome && (
         <header
