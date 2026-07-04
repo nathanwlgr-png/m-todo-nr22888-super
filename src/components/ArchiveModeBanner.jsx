@@ -11,7 +11,7 @@ export default function ArchiveModeBanner() {
     >
       <Archive className="w-3 h-3 text-yellow-500 shrink-0" />
       <p className="text-[9px] sm:text-[10px] font-bold text-yellow-500 leading-tight">
-        Modo consulta / arquivo — CRM oficial SEAMATY: NR22888 SuperAgent
+        CRM SEAMATY — Método NR22888 master.
       </p>
     </div>
   );

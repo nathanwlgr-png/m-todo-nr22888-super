@@ -6,7 +6,8 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import {
   Menu, X, Bell, Home, Users, FileText, Star, MessageSquare,
-  MapPin, Clock, Settings, LogOut, ChevronLeft
+  MapPin, Map, Clock, Settings, LogOut, ChevronLeft,
+  UserSquare2, GitBranch, ShoppingCart, RefreshCw, Copy
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -32,18 +33,26 @@ const PAGE_TITLES = {
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
   ArquivoMasterConsulta: 'Arquivo Master / Consulta',
+  PipelineView: 'Pipeline',
+  SalesFunnel: 'Vendas',
+  AutoFollowUpDashboard: 'Pós-venda',
+  DuplicateManager: 'Duplicados',
 };
 
-// Sidebar lateral para tablet
+// Sidebar lateral para tablet — segue o menu principal
 const SIDEBAR_ITEMS = [
-  { icon: Home,         label: 'Início',      path: '/' },
+  { icon: Home,         label: 'Dashboard',   path: '/' },
   { icon: Users,        label: 'Clientes',    path: '/Clients' },
-  { icon: FileText,     label: 'Propostas',   path: '/ProposalGenerator' },
-  { icon: Star,         label: 'Interesse',   path: '/RankingOportunidades' },
-  { icon: MessageSquare,label: 'WhatsApp',    path: '/WhatsAppHub' },
-  { icon: MapPin,       label: 'Visitas',     path: '/VisitManager' },
+  { icon: UserSquare2,  label: 'Cliente 360', path: '/ClienteDetalhe360' },
+  { icon: GitBranch,    label: 'Pipeline',    path: '/PipelineView' },
   { icon: Clock,        label: 'Tarefas',     path: '/TasksUnified' },
-  { icon: Settings,     label: 'Configs',     path: '/ContactSettings' },
+  { icon: MessageSquare,label: 'Mensagens',   path: '/WhatsAppHub' },
+  { icon: MapPin,       label: 'Visitas',     path: '/VisitManager' },
+  { icon: Map,          label: 'Mapa',        path: '/MapaSeamatyBrasil' },
+  { icon: FileText,     label: 'Propostas',   path: '/ProposalGenerator' },
+  { icon: ShoppingCart, label: 'Vendas',      path: '/SalesFunnel' },
+  { icon: RefreshCw,    label: 'Pós-venda',   path: '/AutoFollowUpDashboard' },
+  { icon: Copy,         label: 'Duplicados',  path: '/DuplicateManager' },
 ];
 
 export default function TabletAppLayout({ children, currentPageName }) {

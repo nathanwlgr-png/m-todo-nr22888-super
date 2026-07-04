@@ -114,6 +114,7 @@ const ClientLocationMap = lazy(() => import('./pages/ClientLocationMap.jsx'));
 const MapaSeamatyBrasil = lazy(() => import('./pages/MapaSeamatyBrasil.jsx'));
 const ClienteDetalhe360 = lazy(() => import('./pages/ClienteDetalhe360.jsx'));
 const ArquivoMasterConsulta = lazy(() => import('./pages/ArquivoMasterConsulta.jsx'));
+const DuplicateManager = lazy(() => import('./pages/DuplicateManager.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -216,6 +217,7 @@ const AuthenticatedApp = () => {
         <Route path="/MapaSeamatyBrasil" element={<LayoutWrapper currentPageName="MapaSeamatyBrasil"><MapaSeamatyBrasil /></LayoutWrapper>} />
         <Route path="/ClienteDetalhe360" element={<LayoutWrapper currentPageName="ClienteDetalhe360"><ClienteDetalhe360 /></LayoutWrapper>} />
         <Route path="/ArquivoMasterConsulta" element={<LayoutWrapper currentPageName="ArquivoMasterConsulta"><ArquivoMasterConsulta /></LayoutWrapper>} />
+        <Route path="/DuplicateManager" element={<LayoutWrapper currentPageName="DuplicateManager"><DuplicateManager /></LayoutWrapper>} />
         <Route path="/debug-caca" element={<DebugCaca />} />
         <Route path="/RelatorioRicardo" element={<LayoutWrapper currentPageName="RelatorioRicardo"><RelatorioRicardo /></LayoutWrapper>} />
         <Route path="/AgendaMensal" element={<LayoutWrapper currentPageName="AgendaMensal"><AgendaMensal /></LayoutWrapper>} />

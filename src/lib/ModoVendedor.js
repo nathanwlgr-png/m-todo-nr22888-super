@@ -11,32 +11,20 @@ export const setModo = (modo) => {
   try { localStorage.setItem(MODO_KEY, modo); } catch {}
 };
 
-// Páginas do MODO VENDEDOR — ordenadas pelo FLUXO COMERCIAL REAL de campo:
-// 1º Dia (o que fazer agora) → Cliente → Investigação → SPIN/WhatsApp → Proposta/Fechamento → Apoio
+// Menu principal — ordem única, limpa e objetiva
 export const VENDEDOR_PAGES = [
-  // 1. COMEÇO DO DIA — para onde ir e quem atacar primeiro
-  { page: 'Clients', label: '👥 Clientes', category: '1. Meu Dia' },
-  { page: 'MapaSeamatyBrasil', label: '📍 Mapa de Clientes', category: '1. Meu Dia' },
-  { page: 'SmartRouteOptimizer', label: '🗺️ Rota do Dia', category: '1. Meu Dia' },
-  { page: 'VisitManager', label: '📍 Visitas', category: '1. Meu Dia' },
-  { page: 'TasksUnified', label: '✅ Tarefas', category: '1. Meu Dia' },
-
-  // 2. INVESTIGAR — antes de abordar
-  { page: 'ModoInvestigativoSupremo', label: '🕵️ Investigar Cliente', category: '2. Investigar' },
-  { page: 'ModoCacaComercial', label: '🎯 Modo Caça', category: '2. Investigar' },
-
-  // 3. ABORDAR — SPIN + WhatsApp
-  { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN', category: '3. Abordar' },
-  { page: 'WhatsAppHub', label: '💬 WhatsApp', category: '3. Abordar' },
-
-  // 4. FECHAR — proposta e equipamento
-  { page: 'ProposalGenerator', label: '📄 Proposta', category: '4. Fechar' },
-  { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty', category: '4. Fechar' },
-
-  // 5. APOIO — usado eventualmente
-  { page: 'CentralIAMaster', label: '🧠 Central IA', category: '5. Apoio' },
-  { page: 'Leads', label: '🎯 Leads', category: '5. Apoio' },
-  { page: 'OfflineMode', label: '📴 Offline', category: '5. Apoio' },
+  { page: '', label: '🏠 Dashboard', category: 'Menu' },
+  { page: 'Clients', label: '👥 Clientes', category: 'Menu' },
+  { page: 'ClienteDetalhe360', label: '🧿 Cliente 360', category: 'Menu' },
+  { page: 'PipelineView', label: '🔀 Pipeline', category: 'Menu' },
+  { page: 'TasksUnified', label: '✅ Tarefas', category: 'Menu' },
+  { page: 'WhatsAppHub', label: '💬 Mensagens', category: 'Menu' },
+  { page: 'VisitManager', label: '📍 Visitas', category: 'Menu' },
+  { page: 'MapaSeamatyBrasil', label: '🗺️ Mapa', category: 'Menu' },
+  { page: 'ProposalGenerator', label: '📄 Propostas', category: 'Menu' },
+  { page: 'SalesFunnel', label: '🏁 Vendas', category: 'Menu' },
+  { page: 'AutoFollowUpDashboard', label: '🔁 Pós-venda', category: 'Menu' },
+  { page: 'DuplicateManager', label: '🧹 Duplicados', category: 'Menu' },
 ];
 
 // Botões de ação rápida no modo vendedor — ordem do fluxo de campo

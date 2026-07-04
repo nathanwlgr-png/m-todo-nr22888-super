@@ -38,6 +38,10 @@ const PAGE_TITLES = {
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
   ArquivoMasterConsulta: 'Arquivo Master / Consulta',
+  PipelineView: 'Pipeline',
+  SalesFunnel: 'Vendas',
+  AutoFollowUpDashboard: 'Pós-venda',
+  DuplicateManager: 'Duplicados',
 };
 
 export default function AppLayout({ children, currentPageName }) {
