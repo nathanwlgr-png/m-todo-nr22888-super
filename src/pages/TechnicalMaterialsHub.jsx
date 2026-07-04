@@ -1168,7 +1168,7 @@ export default function TechnicalMaterialsHub() {
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
         doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
-        doc.text('Seamaty Brasil - Material Técnico Veterinário', 105, 290, { align: 'center' });
+        doc.text('SEAMATY Brasil - Material Técnico Veterinário', 105, 290, { align: 'center' });
       }
 
       doc.save('Bioquimica_Rotores_Enzimas_Seamaty.pdf');

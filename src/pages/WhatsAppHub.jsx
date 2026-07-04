@@ -371,7 +371,7 @@ export default function WhatsAppHub() {
             <div className="rounded-2xl p-3" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
               <p className="text-xs font-black text-green-400 mb-2">Templates Rapidos</p>
               {[
-                { label: 'Apresentacao', text: 'Ola! Sou Nathan, Consultor Tecnico da CMAT Brasil. Gostaria de apresentar nossos equipamentos laboratoriais Seamaty para sua clinica. Posso agendar uma demonstracao?' },
+                { label: 'Apresentacao', text: 'Ola! Sou Nathan, Consultor Tecnico da SEAMATY Brasil. Gostaria de apresentar nossos equipamentos laboratoriais Seamaty para sua clinica. Posso agendar uma demonstracao?' },
                 { label: 'Follow-up', text: 'Ola! Passando para verificar se surgiu alguma duvida sobre os equipamentos Seamaty que apresentamos. Fico a disposicao!' },
                 { label: 'Proposta enviada', text: 'Acabei de enviar uma proposta personalizada para voce. Assim que tiver oportunidade, de uma olhada e me retorne com qualquer duvida!' },
               ].map(tpl => (

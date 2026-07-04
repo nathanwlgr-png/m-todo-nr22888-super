@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
         const intel = client.ai_sales_intelligence || {};
         try {
           const pkg = await base44.asServiceRole.integrations.Core.InvokeLLM({
-            prompt: `Você é Nathan, consultor técnico sênior da CMAT Brasil, especialista em equipamentos diagnósticos veterinários Seamaty.
+            prompt: `Você é Nathan, consultor técnico sênior da SEAMATY Brasil, especialista em equipamentos diagnósticos veterinários Seamaty.
 
 PERFIL COMPLETO DO CLIENTE:
 Nome: ${client.first_name} | Clínica: ${client.clinic_name || 'N/A'} | Cidade: ${client.city || 'N/A'}

@@ -364,7 +364,7 @@ function formatForWhatsApp({ webResearch: w, cnpjData: c, hasDuplicate, duplicat
   } else {
     lines.push('💬 _Deseja CADASTRAR como Lead ou Cliente?_');
   }
-  lines.push('🔥 *Método NR22 | Seamaty Brasil*');
+  lines.push('🔥 *Método NR22 | SEAMATY Brasil*');
 
   return lines.join('\n');
 }

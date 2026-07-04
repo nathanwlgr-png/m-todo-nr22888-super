@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
 
     // Invocar IA para gerar sugestões de prospecção
     const suggestions = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Você é um especialista em vendas B2B para equipamentos veterinários (CMAT Brasil / Seamaty).
+      prompt: `Você é um especialista em vendas B2B para equipamentos veterinários (SEAMATY Brasil / Seamaty).
 
 Com base no PERFIL DO CLIENTE IDEAL (ICP) abaixo, sugira ${limit} clínicas veterinárias ESPECÍFICAS para prospecção agora mesmo.
 

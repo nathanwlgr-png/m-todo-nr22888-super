@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
 IDENTIDADE DO REMETENTE:
 - Nome: Nathan Rosa
-- Empresa: Seamaty Brasil
+- Empresa: SEAMATY Brasil
 - Produto: Equipamentos de diagnóstico in-house para clínicas e hospitais veterinários
 - Diferenciais: Garantia 25 meses, bonificação em insumos, ROI rápido, suporte técnico
 
@@ -75,12 +75,12 @@ Para CADA mensagem, defina:
 1. Dia de envio (relativo a hoje: 0, 1, 3, 7, 14...)
 2. Canal preferencial (email ou whatsapp)
 3. Assunto (para email) — objetivo e direto sobre o equipamento
-4. Corpo da mensagem COMPLETO — assine sempre como "Nathan Rosa | Seamaty Brasil"
+4. Corpo da mensagem COMPLETO — assine sempre como "Nathan Rosa | SEAMATY Brasil"
 5. Objetivo desta mensagem específica
 6. CTA (call-to-action) claro e contextual
 
 REGRAS:
-- SEMPRE assinar como "Nathan Rosa | Seamaty Brasil"
+- SEMPRE assinar como "Nathan Rosa | SEAMATY Brasil"
 - Adapte tom ao perfil numerológico ${client.numerology_number}
 - Seja progressivo: comece suave, aumente urgência gradualmente
 - Use dores/interesses identificados (equipamento: ${client.equipment_interest || 'diagnóstico veterinário'})

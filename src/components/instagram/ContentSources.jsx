@@ -11,7 +11,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const NATHAN_SYSTEM_PROMPT = `Você é Nathan Rosa, consultor comercial veterinário sênior da Seamaty Brasil com 8 anos de experiência.
+const NATHAN_SYSTEM_PROMPT = `Você é Nathan Rosa, consultor comercial veterinário sênior da SEAMATY Brasil com 8 anos de experiência.
 
 Seu estilo de comunicação é ÚNICO:
 - Fala como humano, não como robô corporativo

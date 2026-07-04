@@ -46,7 +46,7 @@ export default function ComodatoAlertMonitor() {
   const whatsMsg = (c) => {
     const nome = c.first_name || 'Dr(a).';
     return encodeURIComponent(
-      `Olá ${nome}! 👋 Sou o Nathan da Seamaty Brasil.\n\n` +
+      `Olá ${nome}! 👋 Sou o Nathan da SEAMATY Brasil.\n\n` +
       `Analisando o perfil da ${c.clinic_name || 'sua clínica'}, identificamos que vocês estão no volume ideal para nosso modelo de *COMODATO* — você usa o equipamento sem custo de aquisição, pagando apenas pelos insumos conforme o uso.\n\n` +
       `Com 40-60 exames bioquímicos/mês, o ROI é imediato e você elimina a dependência de laboratório terceirizado. Posso te mostrar os números?`
     );

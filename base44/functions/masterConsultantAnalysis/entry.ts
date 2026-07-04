@@ -157,7 +157,7 @@ Responda em JSON estruturado.`,
         recommendation: aiAnalysis
       },
       interaction_history_count: interactions?.length || 0,
-      presentation: `Nathan - Consultor Técnico da CMAT Brasil`,
+      presentation: `Nathan - Consultor Técnico da SEAMATY Brasil`,
       next_steps: {
         methodology: profile?.methodology,
         best_time: profile?.best_time,

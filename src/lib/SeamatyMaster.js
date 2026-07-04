@@ -1,6 +1,6 @@
 /**
  * SeamatyMaster.js — Fonte central de identidade, preços e especificações técnicas
- * NR22888 | Seamaty Brasil
+ * NR22888 | SEAMATY Brasil
  * NUNCA espalhar preços fixos em templates. Sempre importar daqui.
  */
 
@@ -8,8 +8,8 @@
 export const IDENTIDADE = {
   consultor: 'Nathan Rosa',
   cargo: 'Consultor Técnico Comercial',
-  empresa: 'Seamaty Brasil',
-  assinatura: 'Nathan Rosa\nConsultor Técnico Comercial\nSeamaty Brasil',
+  empresa: 'SEAMATY Brasil',
+  assinatura: 'Nathan Rosa\nConsultor Técnico Comercial\nSEAMATY Brasil',
   destinatario_relatorio: 'Ricardo',
 };
 
@@ -207,7 +207,7 @@ export const getEquipamentosFaltantes = (equipamentos) => {
 // ── VALIDAÇÃO TÉCNICA ─────────────────────────────────────────────────────────
 const TERMOS_BLOQUEADOS = [
   { regex: /36\s*par[aâ]metros/gi, msg: '"36 parâmetros" — SMT-120VP tem até 24 parâmetros.' },
-  { regex: /CMAT\s*Brasil/gi, msg: '"CMAT Brasil" — empresa correta é Seamaty Brasil.' },
+  { regex: /CMAT\s*Brasil/gi, msg: '"SEAMATY Brasil" — empresa correta é SEAMATY Brasil.' },
   { regex: /Ricardo\s*representante/gi, msg: '"Ricardo representante" — Ricardo é destinatário interno, não vendedor.' },
   { regex: /SMT.*setoriz/gi, msg: '"SMT setorizado" — SMT-120VP usa apenas rotores circulares.' },
   { regex: /VG2.*tudo.*4\s*min/gi, msg: '"VG2 tudo em 4 minutos" — apenas hemogasometria é em 4 min; imunofluorescência pode levar até 10 min.' },

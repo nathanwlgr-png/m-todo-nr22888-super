@@ -76,7 +76,7 @@ export default function CRMManualPDF() {
       doc.text('CRM NR22 — Manual de Uso', W / 2, 28, { align: 'center' });
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.text('Sistema Completo de Vendas · Seamaty Brasil', W / 2, 38, { align: 'center' });
+      doc.text('Sistema Completo de Vendas · SEAMATY Brasil', W / 2, 38, { align: 'center' });
       doc.text('Nathan Rosa · (14) 99167-6428', W / 2, 46, { align: 'center' });
       doc.setTextColor(200, 200, 255);
       doc.setFontSize(9);

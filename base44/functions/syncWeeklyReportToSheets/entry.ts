@@ -141,14 +141,14 @@ Deno.serve(async (req) => {
   <table><tr><th>Cliente</th><th>Produto</th><th>Valor</th></tr>
     ${closedDeals.map(s=>`<tr><td>${s.client_name||'-'}</td><td>${s.equipment_name||'-'}</td><td>R$ ${(s.sale_value||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')||'<tr><td colspan="3" style="text-align:center;color:#9ca3af">Nenhuma venda esta semana</td></tr>'}
   </table>
-  <div class="footer">Relatório automático · CRM NR22 · Seamaty Brasil</div>
+  <div class="footer">Relatório automático · CRM NR22 · SEAMATY Brasil</div>
 </body></html>`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: user.email,
       subject: `📊 Relatório Semanal de Vendas – ${periodStr}`,
       body: htmlReport,
-      from_name: 'CRM NR22 – Seamaty Brasil'
+      from_name: 'CRM NR22 – SEAMATY Brasil'
     });
 
     return Response.json({

@@ -45,7 +45,7 @@ export default function CacaSuccessPanel({ lead, onBack, onReset }) {
   const handleWhatsApp = () => {
     if (!lead.phone) { toast.error('Telefone não cadastrado.'); return; }
     const phone = lead.phone.replace(/\D/g, '');
-    const msg = encodeURIComponent(`Olá! Sou Nathan, consultor Seamaty Brasil. Gostaria de conversar sobre soluções de diagnóstico para sua clínica. Posso te apresentar nosso equipamento? 🐾`);
+    const msg = encodeURIComponent(`Olá! Sou Nathan, consultor SEAMATY Brasil. Gostaria de conversar sobre soluções de diagnóstico para sua clínica. Posso te apresentar nosso equipamento? 🐾`);
     window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
   };
 

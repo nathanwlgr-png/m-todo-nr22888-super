@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const activeConsumables = consumables.filter(c => c.is_active);
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Você é um especialista em vendas de equipamentos veterinários da SEAMATY/CMAT Brasil, usando o Método NR22.
+      prompt: `Você é um especialista em vendas de equipamentos veterinários da SEAMATY/SEAMATY Brasil, usando o Método NR22.
 
 DADOS DO CLIENTE:
 Nome: ${client.first_name} | Clínica: ${client.clinic_name || 'N/A'} | Cidade: ${client.city || 'N/A'}

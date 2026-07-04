@@ -326,7 +326,7 @@ Deno.serve(async (req) => {
 
     if (cmdNorm === 'proposta' || cmdNorm === 'msg' || cmdNorm === 'nova_versao') {
       if (formato === 'whatsapp_curto') {
-        conteudo = `Olá, ${nomeCliente}! 👋\n\nSou o Nathan da Seamaty Brasil.\n\nVi que ${clinica}${cidadeCliente ? ` em ${cidadeCliente}` : ''} pode se beneficiar muito com o *${equip.nome}*.\n\n${linhasTecnicas}\n\n${DIFERENCIAIS}\n\n📊 Posso te mostrar o ROI real pra sua realidade?\n\n⏰ 5 minutos de conversa pode mudar seu fluxo diagnóstico.\n\n💬 Quando você tem uns minutinhos essa semana?`;
+        conteudo = `Olá, ${nomeCliente}! 👋\n\nSou o Nathan da SEAMATY Brasil.\n\nVi que ${clinica}${cidadeCliente ? ` em ${cidadeCliente}` : ''} pode se beneficiar muito com o *${equip.nome}*.\n\n${linhasTecnicas}\n\n${DIFERENCIAIS}\n\n📊 Posso te mostrar o ROI real pra sua realidade?\n\n⏰ 5 minutos de conversa pode mudar seu fluxo diagnóstico.\n\n💬 Quando você tem uns minutinhos essa semana?`;
       } else if (formato === 'whatsapp_tecnico') {
         conteudo = `Dr(a). ${nomeCliente},\n\nA Seamaty desenvolveu o *${equip.nome}* especificamente para o fluxo veterinário:\n\n${linhasTecnicas}\n\n${DIFERENCIAIS}\n\n📎 Posso encaminhar o material técnico completo?\n\nAguardo seu retorno, ${nomeCliente}.`;
       } else {

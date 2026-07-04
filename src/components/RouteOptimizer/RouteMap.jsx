@@ -79,20 +79,20 @@ export default function RouteMap({ route, startLocation }) {
             const isLast = idx === route.length - 1;
             const statusColor = STATUS_COLORS[stop.client_status] || '#888';
             const displayName = stop.display_name || stop.clinic_name || stop.full_name || stop.client_name || 'Cliente sem nome completo';
-            const hasValidAddress = !isInvalidAddress(stop.location);
+            const hasValidAddress = stop.address_status !== 'pendente' && !isInvalidAddress(stop.location);
             return (
-              <div key={stop.id} className="flex items-start gap-3">
+              <div key={`${stop.id || stop.client_id || idx}-${stop.display_position || idx}`} className="flex items-start gap-3">
                 <div className="flex flex-col items-center">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs"
                     style={{ background: `${statusColor}22`, border: `2px solid ${statusColor}`, color: statusColor }}>
-                    {stop.optimized_position}
+                    {stop.display_position || stop.optimized_position}
                   </div>
                   {!isLast && <div className="w-0.5 h-6 mt-1" style={{ background: 'rgba(255,107,0,0.25)' }} />}
                 </div>
                 <div className="pb-4 flex-1">
                   <div className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${statusColor}33` }}>
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-sm font-black text-white leading-snug break-words">{displayName}</p>
+                      <p className="text-sm sm:text-base font-black text-white leading-snug break-words">{displayName}</p>
                       {stop.suggested_time && (
                         <span className="text-[10px] font-bold text-orange-400 flex items-center gap-1 shrink-0">
                           <Clock className="w-2.5 h-2.5" />{stop.suggested_time}

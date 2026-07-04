@@ -38,21 +38,21 @@ Deno.serve(async (req) => {
             const firstName = client.first_name || client.full_name || 'Cliente';
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: client.email,
-              subject: `🔔 Seu contrato vence em ${daysUntilRenewal} dias – Seamaty Brasil`,
+              subject: `🔔 Seu contrato vence em ${daysUntilRenewal} dias – SEAMATY Brasil`,
               body: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                   <h2 style="color: #4f46e5;">Olá, ${firstName}! 👋</h2>
-                  <p>Este é um lembrete amigável: seu contrato com a <strong>Seamaty Brasil</strong> vence em <strong>${daysUntilRenewal} dias</strong> (${renewalDate.toLocaleDateString('pt-BR')}).</p>
+                  <p>Este é um lembrete amigável: seu contrato com a <strong>SEAMATY Brasil</strong> vence em <strong>${daysUntilRenewal} dias</strong> (${renewalDate.toLocaleDateString('pt-BR')}).</p>
                   <p>Para garantir a continuidade dos seus serviços sem interrupção, entre em contato conosco para renovar:</p>
                   <div style="text-align: center; margin: 30px 0;">
                     <a href="https://wa.me/5514991676428" style="background: #25D366; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                       💬 Renovar pelo WhatsApp
                     </a>
                   </div>
-                  <p style="color: #6b7280; font-size: 14px;">Atenciosamente,<br><strong>Equipe Seamaty Brasil</strong></p>
+                  <p style="color: #6b7280; font-size: 14px;">Atenciosamente,<br><strong>Equipe SEAMATY Brasil</strong></p>
                 </div>
               `,
-              from_name: 'Seamaty Brasil'
+              from_name: 'SEAMATY Brasil'
             });
           }
 

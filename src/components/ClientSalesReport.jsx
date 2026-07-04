@@ -95,7 +95,7 @@ export default function ClientSalesReport({ client, sales = [], visits = [], tas
     y += 6;
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text('Gerado pelo Método NR22 — CMAT Brasil | Seamaty', 15, y);
+    doc.text('Gerado pelo Método NR22 — SEAMATY Brasil | Seamaty', 15, y);
 
     const fileName = `NR22_Relatorio_${client?.first_name || 'Cliente'}_${period}d_${Date.now()}.pdf`;
     doc.save(fileName);

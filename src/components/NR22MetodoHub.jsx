@@ -312,7 +312,7 @@ export default function NR22MetodoHub() {
       {/* Footer */}
       <div className="text-center py-2">
         <p className="text-[10px] text-slate-400">
-          Desenvolvido por <strong className="text-indigo-600">Nathan Rosa</strong> · CMAT Brasil · Método NR22 v4 TURBO
+          Desenvolvido por <strong className="text-indigo-600">Nathan Rosa</strong> · SEAMATY Brasil · Método NR22 v4 TURBO
         </p>
         <p className="text-[9px] text-slate-300 mt-0.5">Sistema criado para servir o vendedor, não o contrário.</p>
       </div>

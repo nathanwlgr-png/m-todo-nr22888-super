@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
     ).join('') || '<tr><td colspan="3" style="text-align:center;color:#9ca3af">Nenhuma venda fechada esta semana</td></tr>'}
   </table>
 
-  <div class="footer">Relatório automático gerado pelo CRM NR22 · Seamaty Brasil</div>
+  <div class="footer">Relatório automático gerado pelo CRM NR22 · SEAMATY Brasil</div>
 </body>
 </html>`;
 
@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
         to: email,
         subject: `📊 Relatório Semanal de Vendas – ${periodStr}`,
         body: htmlReport,
-        from_name: 'CRM NR22 – Seamaty Brasil'
+        from_name: 'CRM NR22 – SEAMATY Brasil'
       });
     }
 

@@ -174,7 +174,7 @@ export default function SalesCommandCenter() {
           <div>
             <h1 className="text-xl font-black text-white">⚡ NR22888 Command</h1>
             <p className="text-[10px] text-orange-600 font-bold uppercase tracking-widest">
-              Seamaty Brasil • Sniper Mode
+              SEAMATY Brasil • Sniper Mode
             </p>
           </div>
           <div className="flex items-center gap-2">

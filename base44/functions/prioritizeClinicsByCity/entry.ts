@@ -13,9 +13,9 @@ Deno.serve(async (req) => {
     }
 
     // Usar IA para pesquisar e priorizar clínicas
-    const llmPrompt = `Você é um analista de vendas da Seamaty Brasil, empresa que vende equipamentos de diagnóstico veterinário (analisadores hematológicos e bioquímicos).
+    const llmPrompt = `Você é um analista de vendas da SEAMATY Brasil, empresa que vende equipamentos de diagnóstico veterinário (analisadores hematológicos e bioquímicos).
 
-Encontre as 20 clínicas veterinárias mais promissoras em ${city}, Brasil para vendas de equipamentos de diagnóstico Seamaty Brasil.
+Encontre as 20 clínicas veterinárias mais promissoras em ${city}, Brasil para vendas de equipamentos de diagnóstico SEAMATY Brasil.
 
 Para cada clínica, retorne:
 - nome: nome completo da clínica

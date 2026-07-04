@@ -111,7 +111,7 @@ export default function SeamatyEquipmentOpportunity({ client }) {
                 ? `Verifique tabela oficial de insumos compatíveis com: ${equipsVendidos.join(', ')}`
                 : 'Cadastre o equipamento do cliente para ver oportunidades de insumos.'}
             </p>
-            <p className="text-xs text-orange-600 mt-1 font-medium">Preços de insumos: consultar tabela oficial Seamaty Brasil.</p>
+            <p className="text-xs text-orange-600 mt-1 font-medium">Preços de insumos: consultar tabela oficial SEAMATY Brasil.</p>
           </div>
 
           {/* Alerta técnico */}

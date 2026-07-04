@@ -5,7 +5,7 @@ export default function RouteStats({ stats }) {
   if (!stats) return null;
 
   const distanceValue = Number(stats.estimated_km);
-  const hasDistance = Number.isFinite(distanceValue);
+  const hasDistance = Number.isFinite(distanceValue) && distanceValue > 0;
 
   const items = [
     {
@@ -17,19 +17,19 @@ export default function RouteStats({ stats }) {
     {
       icon: TrendingDown,
       label: 'Km economizados',
-      value: `${stats.estimated_km_saved || 0} km`,
+      value: hasDistance ? `${stats.estimated_km_saved || 0} km` : 'não calculada',
       color: '#00ff88',
     },
     {
       icon: Fuel,
       label: 'Combustível poupado',
-      value: `~${(stats.estimated_fuel_saved_liters || 0).toFixed(1)}L`,
+      value: hasDistance ? `~${(stats.estimated_fuel_saved_liters || 0).toFixed(1)}L` : 'não calculada',
       color: '#00bfff',
     },
     {
       icon: Clock,
       label: 'Tempo no trânsito',
-      value: `~${stats.total_drive_minutes || 0} min`,
+      value: hasDistance ? `~${stats.total_drive_minutes || 0} min` : 'não calculada',
       color: '#ff6b00',
     },
   ];

@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
 4. Atividade dos principais concorrentes: IDEXX, Mindray, Heska, Mobivet, Primori, Hemograma.net
 5. Precificação média de mercado para analisadores hematológicos e bioquímicos
 
-Contexto: CMAT Brasil distribui equipamentos Seamaty (SMT-120VP, VG1, VG2, VBC50A, Vi1, VQ1 PCR)
+Contexto: SEAMATY Brasil distribui equipamentos Seamaty (SMT-120VP, VG1, VG2, VBC50A, Vi1, VQ1 PCR)
 Foco em São Paulo e região.
 
 Gere um relatório executivo com insights acionáveis para vendas.`,
@@ -71,7 +71,7 @@ Pesquise e analise:
 2. Faixa de preço praticada no Brasil
 3. Termos de garantia e suporte técnico
 4. Presença online (site, redes sociais, avaliações)
-5. Pontos fortes e fracos vs Seamaty (CMAT Brasil)
+5. Pontos fortes e fracos vs Seamaty (SEAMATY Brasil)
 6. Depoimentos e reclamações de clientes (Reclame Aqui, Google)
 7. Argumentos específicos para superar esse concorrente em vendas
 

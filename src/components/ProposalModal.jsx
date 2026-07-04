@@ -91,7 +91,7 @@ export default function ProposalModal({ client, open, onOpenChange }) {
 
 📞 Nathan Rosa
 (14) 99167-6428
-Consultor Técnico Seamaty Brasil
+Consultor Técnico SEAMATY Brasil
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 

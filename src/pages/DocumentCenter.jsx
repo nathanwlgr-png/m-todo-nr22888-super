@@ -224,7 +224,7 @@ Com base em nossa análise e nas necessidades da ${selectedClient.clinic_name ||
 
 ## 📞 CONTATO
 
-**Seamaty Brasil**  
+**SEAMATY Brasil**  
 Site: https://seamaty.com.br  
 Instagram: @seamatybrasil  
 Email: contato@seamaty.com.br

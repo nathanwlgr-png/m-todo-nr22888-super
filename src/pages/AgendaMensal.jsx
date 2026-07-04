@@ -214,7 +214,7 @@ export default function AgendaMensal() {
       doc.text(`Agenda Mensal Sniper — ${MES_NOMES[mesRef]}/${anoRef}`, 15, y); y += 8;
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text('Nathan Rosa | Consultor Técnico Comercial | Seamaty Brasil', 15, y); y += 10;
+      doc.text('Nathan Rosa | Consultor Técnico Comercial | SEAMATY Brasil', 15, y); y += 10;
 
       dias.forEach(d => {
         if (isDiaFolga(d)) return;

@@ -200,7 +200,7 @@ export const getTextoPreco = (modelo) => {
 // Preços de insumos APENAS de tabela oficial cadastrada.
 // Se não tiver valor confirmado → mostrar "Preço sob validação"
 export const INSUMOS_PLACEHOLDER = {
-  aviso: 'Preço sob validação. Confirmar com tabela oficial Seamaty Brasil.',
+  aviso: 'Preço sob validação. Confirmar com tabela oficial SEAMATY Brasil.',
 };
 
 export const formatPrecoInsumo = (preco) => {
@@ -212,15 +212,15 @@ export const formatPrecoInsumo = (preco) => {
 export const IDENTIDADE = {
   consultor: 'Nathan Rosa',
   cargo: 'Consultor Técnico Comercial',
-  empresa: 'Seamaty Brasil',
-  assinatura: 'Nathan Rosa\nConsultor Técnico Comercial\nSeamaty Brasil',
-  assinatura_whatsapp: '\n\nNathan Rosa\nConsultor Técnico Comercial\nSeamaty Brasil',
+  empresa: 'SEAMATY Brasil',
+  assinatura: 'Nathan Rosa\nConsultor Técnico Comercial\nSEAMATY Brasil',
+  assinatura_whatsapp: '\n\nNathan Rosa\nConsultor Técnico Comercial\nSEAMATY Brasil',
 };
 
 // ─── VALIDAÇÃO TÉCNICA ────────────────────────────────────────────────────────
 const TERMOS_PROIBIDOS = [
   { termo: '36 parâmetros', motivo: 'SMT-120VP tem até 24 parâmetros' },
-  { termo: 'CMAT Brasil', motivo: 'Empresa correta: Seamaty Brasil' },
+  { termo: 'SEAMATY Brasil', motivo: 'Empresa correta: SEAMATY Brasil' },
   { termo: 'Ricardo representante', motivo: 'Ricardo é destinatário interno, não vendedor' },
   { termo: 'SMT setorizado', motivo: 'SMT-120VP usa apenas rotores circulares' },
   { termo: 'VG2 tudo em 4 minutos', motivo: 'Imunofluorescência no VG2 pode levar até 10 minutos' },
@@ -243,16 +243,16 @@ export const validarTextoTecnico = (texto) => {
 // ─── TEMPLATES DE WHATSAPP ───────────────────────────────────────────────────
 export const TEMPLATES_WHATSAPP = {
   abordagem_fria: (c) =>
-    `Olá, ${c?.first_name || 'Dr(a)'}. Tudo bem? Sou o Nathan Rosa, Consultor Técnico Comercial da Seamaty Brasil. Trabalho com tecnologia diagnóstica veterinária para trazer resultado rápido dentro da clínica, com mais segurança clínica e oportunidade de receita com exames internos. Posso te mostrar em 10 minutos como isso funciona na prática?${IDENTIDADE.assinatura_whatsapp}`,
+    `Olá, ${c?.first_name || 'Dr(a)'}. Tudo bem? Sou o Nathan Rosa, Consultor Técnico Comercial da SEAMATY Brasil. Trabalho com tecnologia diagnóstica veterinária para trazer resultado rápido dentro da clínica, com mais segurança clínica e oportunidade de receita com exames internos. Posso te mostrar em 10 minutos como isso funciona na prática?${IDENTIDADE.assinatura_whatsapp}`,
 
   followup: (c) =>
-    `Olá, ${c?.first_name || 'Dr(a)'}. Tudo bem? Sou o Nathan da Seamaty Brasil. Passando para saber se conseguiu avaliar a proposta e se ficou alguma dúvida sobre o equipamento, ROI ou operação na rotina da clínica.${IDENTIDADE.assinatura_whatsapp}`,
+    `Olá, ${c?.first_name || 'Dr(a)'}. Tudo bem? Sou o Nathan da SEAMATY Brasil. Passando para saber se conseguiu avaliar a proposta e se ficou alguma dúvida sobre o equipamento, ROI ou operação na rotina da clínica.${IDENTIDADE.assinatura_whatsapp}`,
 
   pos_visita: (c) =>
     `${c?.first_name || 'Dr(a)'}, obrigado pela atenção hoje. Pelo perfil da ${c?.clinic_name || 'clínica'}, vejo uma oportunidade real de melhorar tempo de resposta, reduzir terceirização e aumentar receita com exames internos. Posso te enviar o próximo passo?${IDENTIDADE.assinatura_whatsapp}`,
 
   proposta: (c) =>
-    `${c?.first_name || 'Dr(a)'}, segue a proposta personalizada da Seamaty Brasil. Montei pensando na rotina da ${c?.clinic_name || 'clínica'}, volume de exames e retorno financeiro. Posso te explicar o ROI em poucos minutos?${IDENTIDADE.assinatura_whatsapp}`,
+    `${c?.first_name || 'Dr(a)'}, segue a proposta personalizada da SEAMATY Brasil. Montei pensando na rotina da ${c?.clinic_name || 'clínica'}, volume de exames e retorno financeiro. Posso te explicar o ROI em poucos minutos?${IDENTIDADE.assinatura_whatsapp}`,
 
   comodato: (c) =>
     `${c?.first_name || 'Dr(a)'}, pela rotina da ${c?.clinic_name || 'clínica'}, pode fazer sentido avaliar uma condição de comodato. A ideia é reduzir barreira de entrada e gerar recorrência com exames internos. Posso te explicar as condições?${IDENTIDADE.assinatura_whatsapp}`,
@@ -261,7 +261,7 @@ export const TEMPLATES_WHATSAPP = {
     `${c?.first_name || 'Dr(a)'}, passando para acompanhar o uso do equipamento Seamaty e garantir que a equipe esteja segura na operação. Quer que eu organize um treinamento rápido?${IDENTIDADE.assinatura_whatsapp}`,
 
   reativacao: (c) =>
-    `${c?.first_name || 'Dr(a)'}, tudo bem? Faz um tempo que não nos falamos. A Seamaty Brasil tem condições e soluções que podem encaixar bem na rotina da ${c?.clinic_name || 'clínica'}. Posso te atualizar rapidamente?${IDENTIDADE.assinatura_whatsapp}`,
+    `${c?.first_name || 'Dr(a)'}, tudo bem? Faz um tempo que não nos falamos. A SEAMATY Brasil tem condições e soluções que podem encaixar bem na rotina da ${c?.clinic_name || 'clínica'}. Posso te atualizar rapidamente?${IDENTIDADE.assinatura_whatsapp}`,
 };
 
 // ─── SUGESTÃO DE UPGRADE ─────────────────────────────────────────────────────

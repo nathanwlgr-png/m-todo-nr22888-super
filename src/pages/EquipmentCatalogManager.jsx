@@ -122,7 +122,7 @@ export default function EquipmentCatalogManager() {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">📊 Catálogo CMAT Brasil</h1>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">📊 Catálogo SEAMATY Brasil</h1>
         <p className="text-slate-600">Equipamentos Seamaty - Preços São Paulo 2026</p>
       </div>
 

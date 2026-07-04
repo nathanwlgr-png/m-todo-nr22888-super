@@ -126,7 +126,7 @@ export default function SeamatyProposalGenerator() {
     
     doc.setFontSize(10);
     doc.text('SEAMATY BRASIL', 105, 32, { align: 'center' });
-    doc.text('Seamaty Brasil', 105, 38, { align: 'center' });
+    doc.text('SEAMATY Brasil', 105, 38, { align: 'center' });
 
     // Título
     doc.setTextColor(...gray);
@@ -205,7 +205,7 @@ export default function SeamatyProposalGenerator() {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Seamaty Brasil', 105, 286, { align: 'center' });
+    doc.text('SEAMATY Brasil', 105, 286, { align: 'center' });
 
     doc.save(`Proposta-${params.equipment}-${params.client_name || 'Cliente'}.pdf`);
     toast.success('PDF exportado!');
@@ -219,7 +219,7 @@ export default function SeamatyProposalGenerator() {
         </div>
         <div className="flex-1">
           <h2 className="text-xl font-bold text-slate-800">Gerador Proposta Seamaty</h2>
-          <p className="text-sm text-slate-600">Modelo profissional Seamaty Brasil</p>
+          <p className="text-sm text-slate-600">Modelo profissional SEAMATY Brasil</p>
         </div>
       </div>
 

@@ -236,7 +236,7 @@ const MapaSeamatyBrasil = () => {
       const doc = new jsPDF();
       
       doc.setFontSize(14);
-      doc.text('Mapa Territorial Seamaty Brasil', 10, 15);
+      doc.text('Mapa Territorial SEAMATY Brasil', 10, 15);
       doc.setFontSize(10);
       doc.text(`Representante: ${filtroRepresentante || 'Todos'}`, 10, 22);
       doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 10, 28);
@@ -378,7 +378,7 @@ const MapaSeamatyBrasil = () => {
                 <Map className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-slate-900">Mapa Territorial Seamaty Brasil</h1>
+                <h1 className="text-xl font-black text-slate-900">Mapa Territorial SEAMATY Brasil</h1>
                 <p className="text-xs text-slate-500">Cobertura comercial — Nathan</p>
               </div>
             </div>
@@ -687,7 +687,7 @@ const MapaSeamatyBrasil = () => {
         >
           <div className="max-w-2xl text-center">
             <h2 className="text-4xl font-black text-slate-900 mb-2">
-              Mapa Territorial Seamaty Brasil
+              Mapa Territorial SEAMATY Brasil
             </h2>
             <p className="text-lg text-slate-600 mb-6">
               Cobertura comercial regional — Operação Nathan

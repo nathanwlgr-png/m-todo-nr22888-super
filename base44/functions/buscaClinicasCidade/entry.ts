@@ -109,7 +109,7 @@ Para cada clínica encontre:
 Busque no Google Maps, sites de clínicas, Instagram, Facebook.
 Retorne o MÁXIMO de clínicas que encontrar (mínimo 10).
 
-Contexto: Somos a CMAT Brasil, distribuidores Seamaty (SMT-120VP, VG1, VG2, Vi1, VBC50A, VQ1 PCR).
+Contexto: Somos a SEAMATY Brasil, distribuidores Seamaty (SMT-120VP, VG1, VG2, Vi1, VBC50A, VQ1 PCR).
 Clínicas que terceirizam hemogramas ou têm volume >40/mês são nossos clientes ideais.`,
       add_context_from_internet: true,
       response_json_schema: {

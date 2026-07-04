@@ -24,21 +24,39 @@ const isInvalidAddress = (value) => {
   return !normalized || ['n a', 'na', 'n/a', 'nao informado', 'sem endereco', 'endereco pendente', 'undefined', 'null'].includes(normalized) || normalized.length < 5;
 };
 
+const BAD_NAME_TOKENS = ['cli', 'dra', 'dr', 'c', 'alma'];
+
+const removeBadNameTokens = (value) => cleanText(value)
+  .split(/\s+/)
+  .filter((part) => !BAD_NAME_TOKENS.includes(normalizeText(part)))
+  .join(' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
 const isCutName = (value) => {
   const text = cleanText(value);
   const normalized = normalizeText(text);
-  return !normalized || ['cli', 'dra', 'dr', 'c', 'alma'].includes(normalized) || (normalized.length <= 3 && !text.includes(' '));
+  const parts = normalized.split(' ').filter(Boolean);
+  return !normalized || BAD_NAME_TOKENS.includes(normalized) || parts.every(part => BAD_NAME_TOKENS.includes(part)) || (normalized.length <= 3 && !text.includes(' '));
+};
+
+const firstCompleteName = (...values) => {
+  for (const value of values) {
+    const cleaned = removeBadNameTokens(value);
+    if (cleaned && !isCutName(cleaned)) return cleaned;
+  }
+  return '';
 };
 
 const getRouteDisplayName = (stop, client = {}) => {
-  const clinicName = cleanText(client.clinic_name) || cleanText(stop.clinic_name);
-  if (clinicName && !isCutName(clinicName)) return clinicName;
+  const clinicName = firstCompleteName(client.clinic_name, stop.clinic_name);
+  if (clinicName) return clinicName;
 
-  const fullName = cleanText(client.full_name) || cleanText(stop.full_name);
-  if (fullName && !isCutName(fullName)) return fullName;
+  const fullName = firstCompleteName(client.full_name, stop.full_name);
+  if (fullName) return fullName;
 
-  const clientName = cleanText(stop.client_name) || cleanText(client.first_name);
-  if (clientName && !isCutName(clientName)) return clientName;
+  const clientName = firstCompleteName(stop.client_name, client.first_name);
+  if (clientName) return clientName;
 
   return 'Cliente sem nome completo';
 };
@@ -121,21 +139,23 @@ export default function SmartRouteOptimizer() {
         display_name: getRouteDisplayName(stop, client),
         location: hasValidAddress ? cleanText(stop.location) : '',
         original_location: stop.location,
+        address_status: hasValidAddress ? 'ok' : 'pendente',
       };
     })
     .filter((stop) => {
-      const normalizedAddress = normalizeText(stop.location);
+      const normalizedAddress = normalizeText(stop.location || 'endereco pendente');
       const normalizedName = normalizeText(stop.display_name);
-      const key = normalizedAddress ? `${normalizedName}|${normalizedAddress}` : `${normalizedName}|${stop.client_id || stop.id}`;
+      const key = `${normalizedName}|${normalizedAddress}`;
       if (seenStops.has(key)) return false;
       seenStops.add(key);
       return true;
-    });
-  const hasInvalidRouteAddress = route.some(stop => !stop.location);
-  const stats = hasInvalidRouteAddress ? { ...(result?.stats || {}), estimated_km: null } : result?.stats;
+    })
+    .map((stop, index) => ({ ...stop, display_position: index + 1 }));
+  const hasInvalidRouteAddress = route.some(stop => stop.address_status === 'pendente');
+  const stats = hasInvalidRouteAddress ? { ...(result?.stats || {}), estimated_km: null, estimated_km_saved: null, estimated_fuel_saved_liters: null, total_drive_minutes: null } : result?.stats;
   const waMessage = result?.whatsapp_message || '';
   const distanceValue = Number(stats?.estimated_km);
-  const hasDistance = Number.isFinite(distanceValue);
+  const hasDistance = Number.isFinite(distanceValue) && distanceValue > 0;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
@@ -295,8 +315,8 @@ export default function SmartRouteOptimizer() {
             <div className="grid grid-cols-3 gap-2 mb-3">
               {[
                 { val: route.length, label: 'Visitas', color: '#ff9500' },
-                { val: hasDistance ? `~${distanceValue}km` : 'não calculada', label: 'Distância', color: '#00bfff' },
-                { val: `${stats?.estimated_km_saved || 0}km`, label: 'Economia', color: '#00ff88' },
+                { val: hasDistance ? `~${distanceValue}km` : 'distância não calculada', label: 'Distância', color: '#00bfff' },
+                { val: hasDistance ? `${stats?.estimated_km_saved || 0}km` : 'não calculada', label: 'Economia', color: '#00ff88' },
               ].map(({ val, label, color }) => (
                 <div key={label} className="rounded-xl p-2 text-center"
                   style={{ background: '#141414', border: `1px solid ${color}33` }}>

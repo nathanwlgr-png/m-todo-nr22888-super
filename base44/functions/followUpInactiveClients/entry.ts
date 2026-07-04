@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
           <h2 style="color: #4f46e5;">Olá, ${firstName}! 👋</h2>
           ${clinicName ? `<p>Esperamos que tudo esteja ótimo na <strong>${clinicName}</strong>!</p>` : ''}
           <p>Já faz um tempo que não nos falamos e gostaríamos de saber como você está e se podemos ajudar em algo.</p>
-          <p>Na <strong>Seamaty Brasil</strong>, temos novidades e soluções que podem agregar muito valor ao seu laboratório veterinário:</p>
+          <p>Na <strong>SEAMATY Brasil</strong>, temos novidades e soluções que podem agregar muito valor ao seu laboratório veterinário:</p>
           <ul>
             <li>🔬 Novos rotores bioquímicos com maior precisão</li>
             <li>💡 Cassetes de imunofluorescência atualizados</li>
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
               💬 Falar no WhatsApp
             </a>
           </div>
-          <p style="color: #6b7280; font-size: 14px;">Até breve!<br><strong>Equipe Seamaty Brasil</strong></p>
+          <p style="color: #6b7280; font-size: 14px;">Até breve!<br><strong>Equipe SEAMATY Brasil</strong></p>
         </div>
       `;
 
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
         to: client.email,
         subject,
         body,
-        from_name: 'Seamaty Brasil'
+        from_name: 'SEAMATY Brasil'
       });
 
       // Update last_contact_follow_up_date

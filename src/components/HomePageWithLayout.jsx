@@ -34,7 +34,7 @@ export default function HomePageWithLayout() {
 
         <div className="text-center">
           <p className="text-xs font-black text-orange-400">NR22888</p>
-          <p className="text-[8px] text-slate-600 uppercase tracking-widest">Seamaty Brasil</p>
+          <p className="text-[8px] text-slate-600 uppercase tracking-widest">SEAMATY Brasil</p>
         </div>
 
         <div className="flex items-center gap-2">

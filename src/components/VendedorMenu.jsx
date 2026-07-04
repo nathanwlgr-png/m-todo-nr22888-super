@@ -100,7 +100,7 @@ export default function VendedorMenu({ isOpen, onClose }) {
           style={{ borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
           <div>
             <p className="text-sm font-black text-orange-400">Painel Comercial</p>
-            <p className="text-[10px] text-slate-500">Seamaty Brasil • Modo consulta/arquivo</p>
+            <p className="text-[10px] text-slate-500">SEAMATY Brasil • Modo consulta/arquivo</p>
           </div>
           <div className="flex items-center gap-2">
             <button

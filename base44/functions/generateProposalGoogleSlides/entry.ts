@@ -80,7 +80,7 @@ Retorne JSON com:
     const createResp = await fetch('https://slides.googleapis.com/v1/presentations', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: `Proposta ${equip} — ${client.first_name || client.full_name} | CMAT Brasil` })
+      body: JSON.stringify({ title: `Proposta ${equip} — ${client.first_name || client.full_name} | SEAMATY Brasil` })
     });
     const presentation = await createResp.json();
     const presentationId = presentation.presentationId;
@@ -159,7 +159,7 @@ Retorne JSON com:
     requests.push(...addText('slide_capa', equip, 40, 120, 640, 80, 52, true, { red: 1, green: 1, blue: 1 }));
     requests.push(...addText('slide_capa', aiContent.slide_titulo_abertura || `Solução Diagnóstica para ${client.clinic_name || 'sua clínica'}`, 40, 210, 640, 60, 22, false, { red: 0.85, green: 0.85, blue: 0.95 }));
     requests.push(...addText('slide_capa', `${client.first_name || client.full_name} | ${client.clinic_name || ''}`, 40, 300, 640, 40, 16, false, { red: 0.6, green: 0.8, blue: 1 }));
-    requests.push(...addText('slide_capa', `CMAT Brasil — Seamaty | ${now}`, 40, 360, 640, 30, 12, false, { red: 0.5, green: 0.7, blue: 0.9 }));
+    requests.push(...addText('slide_capa', `SEAMATY Brasil — Seamaty | ${now}`, 40, 360, 640, 30, 12, false, { red: 0.5, green: 0.7, blue: 0.9 }));
 
     // ── SLIDE 2: DIAGNÓSTICO ──
     requests.push(addBackground('slide_diagnostico', 0.97, 0.97, 1));
@@ -205,7 +205,7 @@ Retorne JSON com:
     requests.push(...addText('slide_prox_passos', '1️⃣  Demonstração técnica do equipamento', 40, 165, 640, 35, 16, false, { red: 0.2, green: 0.2, blue: 0.5 }));
     requests.push(...addText('slide_prox_passos', '2️⃣  Análise de viabilidade financeira', 40, 205, 640, 35, 16, false, { red: 0.2, green: 0.2, blue: 0.5 }));
     requests.push(...addText('slide_prox_passos', '3️⃣  Proposta personalizada e condições', 40, 245, 640, 35, 16, false, { red: 0.2, green: 0.2, blue: 0.5 }));
-    requests.push(...addText('slide_prox_passos', `Nathan Rosa | CMAT Brasil — Seamaty`, 40, 320, 640, 30, 13, true, { red: 0.3, green: 0.3, blue: 0.7 }));
+    requests.push(...addText('slide_prox_passos', `Nathan Rosa | SEAMATY Brasil — Seamaty`, 40, 320, 640, 30, 13, true, { red: 0.3, green: 0.3, blue: 0.7 }));
     requests.push(...addText('slide_prox_passos', `📱 WhatsApp | ✉️ cmat@seamaty.com.br`, 40, 350, 640, 25, 12, false, { red: 0.4, green: 0.4, blue: 0.6 }));
 
     // ── 6. Enviar batchUpdate ─────────────────────────────────
@@ -245,7 +245,7 @@ Retorne JSON com:
       client_name: client.first_name || client.full_name,
       equipment: equip,
       message: `✅ Apresentação criada! ${slideIds.length} slides personalizados para ${client.first_name || client.full_name}`,
-      whatsapp_text: `🎯 *Proposta ${equip} — ${client.first_name || client.full_name}*\n\nAcesse sua apresentação personalizada:\n${slideUrl}\n\n_Gerada pelo Método NR22 | CMAT Brasil_`,
+      whatsapp_text: `🎯 *Proposta ${equip} — ${client.first_name || client.full_name}*\n\nAcesse sua apresentação personalizada:\n${slideUrl}\n\n_Gerada pelo Método NR22 | SEAMATY Brasil_`,
     });
 
   } catch (error) {

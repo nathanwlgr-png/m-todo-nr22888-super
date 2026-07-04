@@ -28,7 +28,7 @@ export default function SeamatyProductMatcher({ client }) {
         `- **${eq.name}** (R$ ${eq.price?.toLocaleString('pt-BR')}) - ${eq.specifications}`
       ).join('\n');
 
-      const prompt = `Você é especialista em equipamentos veterinários Seamaty Brasil.
+      const prompt = `Você é especialista em equipamentos veterinários SEAMATY Brasil.
 
 📋 CATÁLOGO DISPONÍVEL (USE APENAS ESTES):
 ${catalogList}

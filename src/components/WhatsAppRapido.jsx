@@ -1,7 +1,7 @@
 /**
  * WhatsAppRapido — botões de mensagem rápida por tipo para qualquer cliente/lead.
  * Nunca envia automaticamente. Sempre abre WhatsApp com texto pronto para aprovação.
- * Identidade: Nathan Rosa — Consultor Técnico Comercial — Seamaty Brasil
+ * Identidade: Nathan Rosa — Consultor Técnico Comercial — SEAMATY Brasil
  * Props: client (objeto com first_name, clinic_name, phone, city, equipment_sold, equipment_interest)
  */
 import React, { useState } from 'react';
@@ -20,7 +20,7 @@ const gerarMensagem = (tipo, client) => {
   const preco = PRECOS[equip];
   
   const templates = {
-    abordagem_fria: () => `Olá ${n}, tudo bem? 😊\n\nSou Nathan Rosa, Consultor Técnico da Seamaty Brasil.\n\nGostaríamos de conhecer melhor a ${c} e entender suas necessidades laboratoriais.\n\nTeria uns 15 minutos nos próximos dias para uma conversa rápida?\n\n${IDENTIDADE.assinatura}`,
+    abordagem_fria: () => `Olá ${n}, tudo bem? 😊\n\nSou Nathan Rosa, Consultor Técnico da SEAMATY Brasil.\n\nGostaríamos de conhecer melhor a ${c} e entender suas necessidades laboratoriais.\n\nTeria uns 15 minutos nos próximos dias para uma conversa rápida?\n\n${IDENTIDADE.assinatura}`,
     followup: () => `Oi ${n}! 👋\n\nTudo bem com você?\n\nGostaría de acompanhar se houve alguma evolução nas necessidades da ${c}.\n\nContinuamos à disposição para ajudar!\n\n${IDENTIDADE.assinatura}`,
     pos_visita: () => `Ótimo saber que a visita foi produtiva! 🎉\n\nFicamos felizes em ajudar a ${c}.\n\nQualquer dúvida técnica ou comercial, é só chamar!\n\n${IDENTIDADE.assinatura}`,
     proposta: () => `${n}, a proposta está pronta! 📄\n\nÉ exatamente o que conversamos para a ${c}.\n\nQuando consigo agendar uma chamada para revisar?\n\n${IDENTIDADE.assinatura}`,

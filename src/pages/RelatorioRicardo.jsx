@@ -221,7 +221,7 @@ export default function RelatorioRicardo() {
       const sep = ';';
       const linhas = [
         ['Métrica', 'Valor'],
-        ['Relatório', 'Relatório Comercial Mensal — Seamaty Brasil'],
+        ['Relatório', 'Relatório Comercial Mensal — SEAMATY Brasil'],
         ['Período', dados.periodo],
         ['Responsável', 'Nathan Rosa'],
         ['Destinatário', 'Ricardo — Direção Comercial'],
@@ -278,7 +278,7 @@ export default function RelatorioRicardo() {
             <h1 className="text-base font-bold text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-yellow-300" /> Relatório Comercial Mensal
             </h1>
-            <p className="text-indigo-200 text-xs">Seamaty Brasil · Nathan Rosa · para Ricardo</p>
+            <p className="text-indigo-200 text-xs">SEAMATY Brasil · Nathan Rosa · para Ricardo</p>
           </div>
         </div>
         <div className="flex gap-2 items-center bg-white/10 rounded-xl p-2">

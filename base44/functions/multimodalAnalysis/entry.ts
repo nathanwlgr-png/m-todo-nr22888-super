@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
       const { image_url, client_id } = body;
 
       const vision = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt: `Você é um especialista em diagnóstico veterinário e avaliador de equipamentos laboratoriais da CMAT Brasil.
+        prompt: `Você é um especialista em diagnóstico veterinário e avaliador de equipamentos laboratoriais da SEAMATY Brasil.
 
 Analise esta imagem de uma clínica/laboratório veterinário e extraia:
 

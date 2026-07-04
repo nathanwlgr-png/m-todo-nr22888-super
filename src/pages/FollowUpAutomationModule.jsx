@@ -15,19 +15,19 @@ const TEMPLATES = [
     id: 'suave',
     label: '😊 Suave (score ≥ 700)',
     texto: (nome, equipamento) =>
-      `Olá {nome_contato}! 😊\n\nPassou um tempinho desde nossa conversa e queria saber se você teve a chance de pensar na proposta do *{equipamento}*.\n\nSe tiver alguma dúvida ou quiser ajustar algum detalhe, estou à disposição!\n\nAbraços,\nEquipe Seamaty Brasil 🐾`,
+      `Olá {nome_contato}! 😊\n\nPassou um tempinho desde nossa conversa e queria saber se você teve a chance de pensar na proposta do *{equipamento}*.\n\nSe tiver alguma dúvida ou quiser ajustar algum detalhe, estou à disposição!\n\nAbraços,\nEquipe SEAMATY Brasil 🐾`,
   },
   {
     id: 'consultivo',
     label: '🤝 Consultivo (score 500-699)',
     texto: (nome, equipamento) =>
-      `Olá {nome_contato}! 👋\n\nEstava revisando nossa proposta do *{equipamento}* e queria entender melhor sua situação atual.\n\nPosso te mostrar como outros clientes conseguiram viabilizar a aquisição com condições especiais. Que tal conversarmos 10 minutinhos?\n\nEquipe Seamaty Brasil`,
+      `Olá {nome_contato}! 👋\n\nEstava revisando nossa proposta do *{equipamento}* e queria entender melhor sua situação atual.\n\nPosso te mostrar como outros clientes conseguiram viabilizar a aquisição com condições especiais. Que tal conversarmos 10 minutinhos?\n\nEquipe SEAMATY Brasil`,
   },
   {
     id: 'urgente',
     label: '⚡ Urgente (score < 500)',
     texto: (nome, equipamento) =>
-      `Olá {nome_contato}! ⚡\n\nNossa proposta do *{equipamento}* ainda está disponível, mas as condições de pagamento têm prazo.\n\nPara garantir as melhores condições — *pagamento via PIX com desconto especial* — precisamos de uma resposta até amanhã.\n\nMe chame agora! Equipe Seamaty Brasil`,
+      `Olá {nome_contato}! ⚡\n\nNossa proposta do *{equipamento}* ainda está disponível, mas as condições de pagamento têm prazo.\n\nPara garantir as melhores condições — *pagamento via PIX com desconto especial* — precisamos de uma resposta até amanhã.\n\nMe chame agora! Equipe SEAMATY Brasil`,
   },
 ];
 

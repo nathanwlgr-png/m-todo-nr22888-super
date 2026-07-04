@@ -71,7 +71,7 @@ export default function SeamatyPriceTableViewer() {
   const savePackRulesKnowledge = async () => {
     try {
       await base44.entities.AIKnowledgeDocument.create({
-        title: 'Regras de Embalagem Seamaty Brasil — Cálculo de Preço Unitário por Cassete/Cartucho',
+        title: 'Regras de Embalagem SEAMATY Brasil — Cálculo de Preço Unitário por Cassete/Cartucho',
         document_type: 'documento_operacional',
         file_format: 'txt',
         summary: 'PCR=6 cassetes/cx | Bioquímica=10 testes/cx | Hemogásio=20 cartuchos/cx | Imunofluorescência=10/cx',
@@ -121,7 +121,7 @@ export default function SeamatyPriceTableViewer() {
           <div>
             <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <DollarSign className="w-6 h-6 text-green-600" />
-              Tabela de Preços SP - Seamaty Brasil 2026
+              Tabela de Preços SP - SEAMATY Brasil 2026
             </h3>
             <p className="text-sm text-slate-600 mt-1">{products.length} produtos cadastrados</p>
           </div>

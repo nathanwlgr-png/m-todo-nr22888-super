@@ -47,7 +47,7 @@ const TIMING_POR_DIA = {
 
 function gerarMensagemSPIN(cliente, tipoProblemaSuspeitado) {
   const nome = cliente.first_name || 'Doutor';
-  const equipamento = cliente.equipment_interest || 'equipamento Seamaty Brasil';
+  const equipamento = cliente.equipment_interest || 'equipamento SEAMATY Brasil';
 
   if (tipoProblemaSuspeitado === 'reagente_parado') {
     return `Oi ${nome}, tudo bem? Estava passando pelos registros aqui e vi que seu fluxo de reagentes mudou. Queria saber: está tudo ok com o ${equipamento}? A gente quer garantir que a clínica nunca pare por falta de insumo.`;
