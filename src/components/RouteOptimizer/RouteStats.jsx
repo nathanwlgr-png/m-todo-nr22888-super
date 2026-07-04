@@ -4,13 +4,14 @@ import { TrendingDown, Clock, Fuel, MapPin, CheckCircle } from 'lucide-react';
 export default function RouteStats({ stats }) {
   if (!stats) return null;
 
-  const hasDistance = stats.estimated_km !== undefined && stats.estimated_km !== null;
+  const distanceValue = Number(stats.estimated_km);
+  const hasDistance = Number.isFinite(distanceValue);
 
   const items = [
     {
       icon: MapPin,
       label: 'Distância est.',
-      value: hasDistance ? `~${stats.estimated_km} km` : 'distância não calculada',
+      value: hasDistance ? `~${distanceValue} km` : 'distância não calculada',
       color: '#ff9500',
     },
     {

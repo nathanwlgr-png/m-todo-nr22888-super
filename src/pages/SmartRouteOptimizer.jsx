@@ -5,12 +5,43 @@ import RouteMap from '@/components/RouteOptimizer/RouteMap';
 import RouteStats from '@/components/RouteOptimizer/RouteStats';
 import WhatsAppRouteAlert from '@/components/RouteOptimizer/WhatsAppRouteAlert';
 import {
-  Route, RefreshCw, Calendar, MapPin, Zap, ChevronDown,
-  Navigation, Sparkles, Clock, Users, BarChart3
+  RefreshCw, Calendar, MapPin, Zap,
+  Navigation, Sparkles, BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const BR_STATES = ['SP', 'MG', 'RJ', 'RS', 'PR', 'SC', 'BA', 'GO', 'MT', 'MS'];
+const cleanText = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const normalizeText = (value) => cleanText(value)
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
+const isInvalidAddress = (value) => {
+  const normalized = normalizeText(value);
+  return !normalized || ['n a', 'na', 'n/a', 'nao informado', 'sem endereco', 'endereco pendente', 'undefined', 'null'].includes(normalized) || normalized.length < 5;
+};
+
+const isCutName = (value) => {
+  const text = cleanText(value);
+  const normalized = normalizeText(text);
+  return !normalized || ['cli', 'dra', 'dr', 'c', 'alma'].includes(normalized) || (normalized.length <= 3 && !text.includes(' '));
+};
+
+const getRouteDisplayName = (stop, client = {}) => {
+  const clinicName = cleanText(client.clinic_name) || cleanText(stop.clinic_name);
+  if (clinicName && !isCutName(clinicName)) return clinicName;
+
+  const fullName = cleanText(client.full_name) || cleanText(stop.full_name);
+  if (fullName && !isCutName(fullName)) return fullName;
+
+  const clientName = cleanText(stop.client_name) || cleanText(client.first_name);
+  if (clientName && !isCutName(clientName)) return clientName;
+
+  return 'Cliente sem nome completo';
+};
 
 export default function SmartRouteOptimizer() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -18,6 +49,7 @@ export default function SmartRouteOptimizer() {
   const [notifyPhone, setNotifyPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [clientDetails, setClientDetails] = useState({});
   const [tab, setTab] = useState('rota'); // rota | stats | whatsapp
 
   // Para otimização em lote por cidade
@@ -30,18 +62,29 @@ export default function SmartRouteOptimizer() {
   const handleOptimizeDay = async () => {
     setLoading(true);
     setResult(null);
+    setClientDetails({});
     try {
       const res = await base44.functions.invoke('optimizeDayRoute', {
         date,
         start_location: startLocation,
         notify_phone: notifyPhone || null,
       });
-      setResult(res.data);
-      if (res.data?.optimized_route?.length > 0) {
-        toast.success(`Rota otimizada! ${res.data.optimized_route.length} visitas organizadas.`);
+      const data = res.data;
+      setResult(data);
+
+      const clientIds = [...new Set((data?.optimized_route || []).map(stop => stop.client_id).filter(Boolean))];
+      if (clientIds.length > 0) {
+        const clientsById = {};
+        const loadedClients = await Promise.all(clientIds.map(id => base44.entities.Client.get(id).catch(() => null)));
+        loadedClients.filter(Boolean).forEach(client => { clientsById[client.id] = client; });
+        setClientDetails(clientsById);
+      }
+
+      if (data?.optimized_route?.length > 0) {
+        toast.success(`Rota otimizada! ${data.optimized_route.length} visitas organizadas.`);
         setTab('rota');
       } else {
-        toast.info(res.data?.message || 'Nenhuma visita encontrada para este dia.');
+        toast.info(data?.message || 'Nenhuma visita encontrada para este dia.');
       }
     } catch (e) {
       toast.error('Erro ao otimizar rota: ' + e.message);
@@ -66,18 +109,33 @@ export default function SmartRouteOptimizer() {
     setBatchLoading(false);
   };
 
-  // Remove paradas repetidas (mesmo nome + mesmo endereço)
+  // Normaliza apenas a exibicao da rota: nao altera clientes, visitas ou tarefas.
   const rawRoute = result?.optimized_route || [];
   const seenStops = new Set();
-  const route = rawRoute.filter((stop) => {
-    const key = `${stop.client_name || ''}|${stop.location || ''}`;
-    if (seenStops.has(key)) return false;
-    seenStops.add(key);
-    return true;
-  });
-  const stats = result?.stats;
+  const route = rawRoute
+    .map((stop) => {
+      const client = clientDetails[stop.client_id] || {};
+      const hasValidAddress = !isInvalidAddress(stop.location);
+      return {
+        ...stop,
+        display_name: getRouteDisplayName(stop, client),
+        location: hasValidAddress ? cleanText(stop.location) : '',
+        original_location: stop.location,
+      };
+    })
+    .filter((stop) => {
+      const normalizedAddress = normalizeText(stop.location);
+      const normalizedName = normalizeText(stop.display_name);
+      const key = normalizedAddress ? `${normalizedName}|${normalizedAddress}` : `${normalizedName}|${stop.client_id || stop.id}`;
+      if (seenStops.has(key)) return false;
+      seenStops.add(key);
+      return true;
+    });
+  const hasInvalidRouteAddress = route.some(stop => !stop.location);
+  const stats = hasInvalidRouteAddress ? { ...(result?.stats || {}), estimated_km: null } : result?.stats;
   const waMessage = result?.whatsapp_message || '';
-  const hasDistance = stats?.estimated_km !== undefined && stats?.estimated_km !== null;
+  const distanceValue = Number(stats?.estimated_km);
+  const hasDistance = Number.isFinite(distanceValue);
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
@@ -237,7 +295,7 @@ export default function SmartRouteOptimizer() {
             <div className="grid grid-cols-3 gap-2 mb-3">
               {[
                 { val: route.length, label: 'Visitas', color: '#ff9500' },
-                { val: hasDistance ? `~${stats.estimated_km}km` : 'não calculada', label: 'Distância', color: '#00bfff' },
+                { val: hasDistance ? `~${distanceValue}km` : 'não calculada', label: 'Distância', color: '#00bfff' },
                 { val: `${stats?.estimated_km_saved || 0}km`, label: 'Economia', color: '#00ff88' },
               ].map(({ val, label, color }) => (
                 <div key={label} className="rounded-xl p-2 text-center"

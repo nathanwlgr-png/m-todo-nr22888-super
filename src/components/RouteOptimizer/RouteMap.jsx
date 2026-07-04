@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Navigation, Clock, Star } from 'lucide-react';
+import { MapPin, Navigation, Clock } from 'lucide-react';
 
 const STATUS_COLORS = {
   quente: '#ff4444',
@@ -12,6 +12,18 @@ const VISIT_TYPE_LABEL = {
   demonstracao: 'Demo',
   followup: 'Follow-up',
   fechamento: 'Fechamento',
+};
+
+const cleanText = (value) => (typeof value === 'string' ? value.trim() : '');
+const normalizeText = (value) => cleanText(value)
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+const isInvalidAddress = (value) => {
+  const normalized = normalizeText(value);
+  return !normalized || ['n a', 'na', 'n/a', 'nao informado', 'sem endereco', 'endereco pendente', 'undefined', 'null'].includes(normalized) || normalized.length < 5;
 };
 
 export default function RouteMap({ route, startLocation }) {
@@ -66,6 +78,8 @@ export default function RouteMap({ route, startLocation }) {
           {route.map((stop, idx) => {
             const isLast = idx === route.length - 1;
             const statusColor = STATUS_COLORS[stop.client_status] || '#888';
+            const displayName = stop.display_name || stop.clinic_name || stop.full_name || stop.client_name || 'Cliente sem nome completo';
+            const hasValidAddress = !isInvalidAddress(stop.location);
             return (
               <div key={stop.id} className="flex items-start gap-3">
                 <div className="flex flex-col items-center">
@@ -78,23 +92,21 @@ export default function RouteMap({ route, startLocation }) {
                 <div className="pb-4 flex-1">
                   <div className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${statusColor}33` }}>
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-xs font-black text-white truncate">{stop.client_name}</p>
+                      <p className="text-sm font-black text-white leading-snug break-words">{displayName}</p>
                       {stop.suggested_time && (
                         <span className="text-[10px] font-bold text-orange-400 flex items-center gap-1 shrink-0">
                           <Clock className="w-2.5 h-2.5" />{stop.suggested_time}
                         </span>
                       )}
                     </div>
-                    {stop.clinic_name && (
-                      <p className="text-[10px] text-slate-500 truncate">{stop.clinic_name}</p>
-                    )}
                     <div className="flex items-center gap-3 mt-1">
-                      {stop.location ? (
-                        <p className="text-[10px] text-slate-600 flex items-center gap-1 truncate">
+                      {hasValidAddress ? (
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1 break-words">
                           <MapPin className="w-2.5 h-2.5 shrink-0" />{stop.location}
                         </p>
                       ) : (
-                        <p className="text-[10px] text-red-400 flex items-center gap-1 truncate">
+                        <p className="text-[10px] text-red-300 font-black flex items-center gap-1 px-2 py-1 rounded-lg"
+                          style={{ background: 'rgba(255,68,68,0.12)', border: '1px solid rgba(255,68,68,0.3)' }}>
                           <MapPin className="w-2.5 h-2.5 shrink-0" />endereço pendente
                         </p>
                       )}
