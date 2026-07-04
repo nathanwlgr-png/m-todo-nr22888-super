@@ -268,7 +268,9 @@
   ],
   "app_user_connector_configs": [],
   "selected_skill_names": [],
-  "selected_workspace_skill_ids": [],
+  "selected_workspace_skill_ids": [
+    "69bd25a21104e50b897c289c"
+  ],
   "allow_anonymous_access": false,
   "name": "whatsapp_master_agent_NR22888"
 }
