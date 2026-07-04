@@ -1,5 +1,5 @@
 # RELATÓRIO ETAPA 6 — UX MASTER, MODO VENDEDOR E PÁGINAS FUNCIONAIS
-## NR22888 CRM Veterinário Seamaty Brasil
+## NR22888 CRM Veterinário SEAMATY Brasil
 **Data:** 15/05/2026 | **Status:** ✅ CONCLUÍDO
 
 ---
@@ -154,4 +154,4 @@ A Etapa 6 entregou o sistema de modo duplo **Vendedor / Admin** com menu drawer 
 
 **✅ ETAPA 6 CONCLUÍDA**
 
-*NR22888 | Seamaty Brasil | 15/05/2026*
+*NR22888 | SEAMATY Brasil | 15/05/2026*
