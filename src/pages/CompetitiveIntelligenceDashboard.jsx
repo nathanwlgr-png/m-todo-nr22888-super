@@ -42,6 +42,9 @@ export default function CompetitiveIntelligenceDashboard() {
 
   const handleScan = async () => {
     if (!city.trim()) return;
+    if (!window.confirm('Esta ação pode consumir créditos ou processar muitos dados. Use apenas quando for realmente necessário. Confirma executar?')) {
+      return;
+    }
     setScanning(true);
     setScanResult(null);
     try {
@@ -77,6 +80,7 @@ export default function CompetitiveIntelligenceDashboard() {
           <div>
             <h1 className="text-xl font-black text-white">Inteligência Competitiva</h1>
             <p className="text-xs text-orange-600">Radar de novas clínicas • Alertas automáticos</p>
+            <p className="text-[10px] text-orange-500 mt-1">Modo econômico ativo — execute apenas sob necessidade.</p>
           </div>
         </div>
       </div>
@@ -128,7 +132,7 @@ export default function CompetitiveIntelligenceDashboard() {
           className="w-full font-black gap-2 h-11"
           style={{ background: scanning ? '#333' : 'linear-gradient(135deg, #ff6b00, #ff9500)', color: 'white' }}>
           {scanning ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-          {scanning ? 'Escaneando com IA...' : 'Escanear Região'}
+          {scanning ? 'Escaneando com IA...' : 'Executar manualmente com confirmação'}
         </Button>
 
         {/* Scan Result */}

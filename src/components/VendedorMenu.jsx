@@ -36,7 +36,6 @@ const ADMIN_CATEGORIES = [
     label: '4. 🏁 Fechar',
     pages: [
       { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
-      { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty' },
       { page: 'ModoInsumos', label: '📦 Insumos' },
       { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
     ],
@@ -58,6 +57,19 @@ const ADMIN_CATEGORIES = [
       { page: 'NotificationSettings', label: '🔔 Notificações' },
       { page: 'Integrations', label: '🔗 Integrações' },
       { page: 'ArquivoMasterConsulta', label: '🗄️ Arquivo Master / Consulta (legado)' },
+    ],
+  },
+  {
+    label: '7. 🛠️ Ferramentas Avançadas (uso consciente)',
+    pages: [
+      { page: 'DeepHunter', label: '🎯 Deep Hunter' },
+      { page: 'SeamatyHunter', label: '📡 Seamaty Hunter' },
+      { page: 'InvestigacaoDeCampoReal', label: '🔎 Investigação de Campo Real' },
+      { page: 'CompetitiveIntelligenceDashboard', label: '🧭 Inteligência Competitiva' },
+      { page: 'MarketingAIStudio', label: '🎨 Marketing IA' },
+      { page: 'MobVendedorSecureImport', label: '📥 Importação Mob Vendedor' },
+      { page: 'EquipmentCatalog', label: '🔬 Catálogo Seamaty' },
+      { page: 'DuplicateManager', label: '🧹 Duplicados' },
     ],
   },
 ];

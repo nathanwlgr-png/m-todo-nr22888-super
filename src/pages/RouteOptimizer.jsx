@@ -134,6 +134,9 @@ export default function RouteOptimizer() {
       toast.error('Selecione pelo menos 2 clientes');
       return;
     }
+    if (!window.confirm('Esta ação pode consumir créditos ou processar muitos dados. Use apenas quando for realmente necessário. Confirma executar?')) {
+      return;
+    }
     optimizeRouteMutation.mutate();
   };
 
@@ -175,6 +178,7 @@ export default function RouteOptimizer() {
               <div>
                 <CardTitle>Otimizador de Rotas</CardTitle>
                 <p className="text-sm text-slate-600">Planeje visitas eficientes</p>
+                <p className="text-xs text-orange-600 mt-1">Modo econômico ativo — execute apenas sob necessidade. Use com critério: esta função pode consumir créditos ou processamento.</p>
               </div>
             </div>
           </CardHeader>
@@ -280,7 +284,7 @@ export default function RouteOptimizer() {
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 <Navigation className="w-4 h-4 mr-2" />
-                {optimizeRouteMutation.isPending ? 'Otimizando...' : 'Otimizar Rota'}
+                {optimizeRouteMutation.isPending ? 'Otimizando...' : 'Executar manualmente com confirmação'}
               </Button>
             </CardContent>
           </Card>

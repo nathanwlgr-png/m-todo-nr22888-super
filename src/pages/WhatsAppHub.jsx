@@ -330,7 +330,7 @@ export default function WhatsAppHub() {
                       className="flex-1 py-2.5 rounded-xl text-sm font-black disabled:opacity-40 flex items-center justify-center gap-2"
                       style={{ background: '#25d366', color: 'white' }}>
                       {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-                      {sending ? 'Abrindo...' : 'Abrir WhatsApp'}
+                      {sending ? 'Abrindo...' : 'Abrir WhatsApp manualmente'}
                     </button>
                     <button
                       onClick={() => { handleCopy(approvedMsg); }}
@@ -435,7 +435,7 @@ export default function WhatsAppHub() {
                     disabled={!['approved', 'aprovado', 'ready_to_send'].includes(msg.status)}
                     className="py-3 rounded-xl flex items-center justify-center gap-1 text-xs font-black disabled:opacity-40"
                     style={{ background: 'rgba(37,211,102,0.18)', color: '#25d366', border: '1px solid rgba(37,211,102,0.35)' }}>
-                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
+                    <ExternalLink className="w-4 h-4" /> Abrir WhatsApp manualmente
                   </button>
                 </div>
               </div>

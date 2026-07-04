@@ -40,6 +40,10 @@ export default function SeamatyHunter() {
       toast.warning('IA desativada — Busca básica apenas');
     }
 
+    if (!window.confirm('Esta ação pode consumir créditos ou processar muitos dados. Use apenas quando for realmente necessário. Confirma executar?')) {
+      return;
+    }
+
     setLoading(true);
     toast.info('🔍 Investigando clínicas...');
 
@@ -79,6 +83,7 @@ export default function SeamatyHunter() {
             🎯 Seamaty Hunter — Radar de Oportunidades
           </h1>
           <p className="text-slate-400">Detecta clínicas com potencial para equipamentos Seamaty</p>
+          <p className="text-xs text-orange-400 mt-1">Modo econômico ativo — execute apenas sob necessidade.</p>
         </div>
 
         {/* BUSCA */}
@@ -129,7 +134,7 @@ export default function SeamatyHunter() {
                   disabled={loading || !selectedCity}
                   className="w-full bg-purple-600 hover:bg-purple-700"
                 >
-                  {loading ? '⏳ Investigando...' : '🚀 Investigar'}
+                  {loading ? '⏳ Investigando...' : '🚀 Executar manualmente com confirmação'}
                 </Button>
               </div>
             </div>

@@ -44,6 +44,10 @@ export default function InvestigacaoDeCampoReal() {
       toast.warning('Sem GPS ativo: investigação seguirá pela cidade informada.');
     }
 
+    if (!window.confirm('Esta ação pode consumir créditos ou processar muitos dados. Use apenas quando for realmente necessário. Confirma executar?')) {
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await base44.functions.invoke('investigacaoCampoReal', {
@@ -96,6 +100,10 @@ export default function InvestigacaoDeCampoReal() {
       return;
     }
 
+    if (!window.confirm(`Confirma aplicar no CRM a clínica "${clinic.name}"?`)) {
+      return;
+    }
+
     try {
       await base44.entities.Client.create({
         first_name: clinic.name,
@@ -123,6 +131,10 @@ export default function InvestigacaoDeCampoReal() {
   const calculateRoute = async () => {
     if (investigations.length === 0) {
       toast.error('Nenhuma clínica para roteirizar');
+      return;
+    }
+
+    if (!window.confirm('Esta ação pode consumir créditos ou processar muitos dados. Use apenas quando for realmente necessário. Confirma executar?')) {
       return;
     }
 
@@ -154,6 +166,7 @@ export default function InvestigacaoDeCampoReal() {
         <div className="mb-6">
           <h1 className="text-3xl font-black text-blue-400 mb-2">🔍 Investigação de Campo Real</h1>
           <p className="text-blue-200 text-sm">GPS integrado + Google Maps + Detecção de Lacunas CRM</p>
+          <p className="text-xs text-orange-400 mt-1">Modo econômico ativo — execute apenas sob necessidade.</p>
         </div>
 
         {/* Controles */}
@@ -211,7 +224,7 @@ export default function InvestigacaoDeCampoReal() {
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Navigation className="w-4 h-4 mr-2" />}
-                {loading ? 'Investigando...' : 'Iniciar Investigação'}
+                {loading ? 'Investigando...' : 'Executar manualmente com confirmação'}
               </Button>
 
               {investigations.length > 0 && (
@@ -366,7 +379,7 @@ export default function InvestigacaoDeCampoReal() {
                             }}
                           >
                             <Zap className="w-3 h-3 mr-1" />
-                            {inCRM ? 'Já no CRM' : 'Adicionar CRM'}
+                            {inCRM ? 'Já no CRM' : 'Aplicar no CRM com confirmação'}
                           </Button>
                         </div>
                       </div>
