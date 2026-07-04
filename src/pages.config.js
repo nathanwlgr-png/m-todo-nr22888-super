@@ -216,6 +216,8 @@ import FollowUpAutomationModule from './pages/FollowUpAutomationModule';
 import ModoInvestigativoSupremo from './pages/ModoInvestigativoSupremo';
 import __Layout from './Layout.jsx';
 
+const CampaignBuilder = NewCampaign;
+const ClientRegistration = NewClient;
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
@@ -313,7 +315,9 @@ export const PAGES = {
     "MonthlyVisitPlanner": MonthlyVisitPlanner,
     "MyProfile": MyProfile,
     "NewCampaign": NewCampaign,
+    "CampaignBuilder": CampaignBuilder,
     "NewClient": NewClient,
+    "ClientRegistration": ClientRegistration,
     "NotificationSettings": NotificationSettings,
     "NumerologyAnalysis": NumerologyAnalysis,
     "ObjectionAnalyzer": ObjectionAnalyzer,

@@ -76,6 +76,9 @@ const WhatsAppMasterAssistantLapidado = lazy(() => import('./pages/WhatsAppMaste
 const ExecutiveSalesAnalysis = lazy(() => import('./pages/ExecutiveSalesAnalysis'));
 const SalesFunnelKanban = lazy(() => import('./pages/SalesFunnelKanban'));
 const WhatsAppAutomationTriggers = lazy(() => import('./pages/WhatsAppAutomationTriggers'));
+const NewClient = lazy(() => import('./pages/NewClient'));
+const NewCampaign = lazy(() => import('./pages/NewCampaign'));
+const CampaignDetails = lazy(() => import('./pages/CampaignDetails'));
 const ModoCacaComercial = lazy(() => import('./pages/ModoCacaComercial'));
 const ModoInsumos = lazy(() => import('./pages/ModoInsumos'));
 const PrescriptiveAnalytics = lazy(() => import('./pages/PrescriptiveAnalytics'));
@@ -190,6 +193,11 @@ const AuthenticatedApp = () => {
         <Route path="/ExecutiveSalesAnalysis" element={<LayoutWrapper currentPageName="ExecutiveSalesAnalysis"><ExecutiveSalesAnalysis /></LayoutWrapper>} />
         <Route path="/SalesFunnelKanban" element={<LayoutWrapper currentPageName="SalesFunnelKanban"><SalesFunnelKanban /></LayoutWrapper>} />
         <Route path="/WhatsAppAutomationTriggers" element={<LayoutWrapper currentPageName="WhatsAppAutomationTriggers"><WhatsAppAutomationTriggers /></LayoutWrapper>} />
+        <Route path="/NewClient" element={<LayoutWrapper currentPageName="NewClient"><NewClient /></LayoutWrapper>} />
+        <Route path="/ClientRegistration" element={<LayoutWrapper currentPageName="NewClient"><NewClient /></LayoutWrapper>} />
+        <Route path="/NewCampaign" element={<LayoutWrapper currentPageName="NewCampaign"><NewCampaign /></LayoutWrapper>} />
+        <Route path="/CampaignBuilder" element={<LayoutWrapper currentPageName="NewCampaign"><NewCampaign /></LayoutWrapper>} />
+        <Route path="/CampaignDetails" element={<LayoutWrapper currentPageName="CampaignDetails"><CampaignDetails /></LayoutWrapper>} />
         <Route path="/PrescriptiveAnalytics" element={<LayoutWrapper currentPageName="PrescriptiveAnalytics"><PrescriptiveAnalytics /></LayoutWrapper>} />
         <Route path="/CompetitiveIntelligenceDashboard" element={<LayoutWrapper currentPageName="CompetitiveIntelligenceDashboard"><CompetitiveIntelligenceDashboard /></LayoutWrapper>} />
         <Route path="/ActiveProspecting" element={<LayoutWrapper currentPageName="ActiveProspecting"><ActiveProspecting /></LayoutWrapper>} />
