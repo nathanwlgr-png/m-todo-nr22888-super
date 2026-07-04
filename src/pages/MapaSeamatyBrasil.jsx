@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { jsPDF } from 'jspdf';
 import {
-  Map, Settings, Filter, Phone, MessageSquare, MapPin, Zap,
+  Map as MapIcon, Settings, Filter, Phone, MessageSquare, MapPin, Zap,
   Eye, EyeOff, ChevronRight, ArrowUp, BarChart3, Layers, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -188,7 +188,7 @@ const MapaSeamatyBrasil = () => {
   }, [visitasFiltradas]);
 
   const clientesPorCidadeFallback = useMemo(() => {
-    const mapa = new Map();
+    const mapa = new globalThis.Map();
     clientesFiltrados.forEach((cliente) => {
       const cidade = getCityKey(cliente.city);
       if (!mapa.has(cidade)) {
@@ -517,7 +517,7 @@ const MapaSeamatyBrasil = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: '#ff6f00' }}>
-                <Map className="w-5 h-5 text-white" />
+                <MapIcon className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-black text-slate-900">Mapa Territorial SEAMATY Brasil</h1>
