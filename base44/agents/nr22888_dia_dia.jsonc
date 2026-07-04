@@ -183,7 +183,9 @@
     }
   ],
   "app_user_connector_configs": [],
-  "selected_skill_names": [],
+  "selected_skill_names": [
+    "nr22888-registro-crm-seguro"
+  ],
   "selected_workspace_skill_ids": [],
   "allow_anonymous_access": false,
   "name": "nr22888_dia_dia"
