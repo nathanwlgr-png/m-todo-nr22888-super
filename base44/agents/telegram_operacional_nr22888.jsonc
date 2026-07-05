@@ -72,9 +72,9 @@
   "selected_skill_names": [],
   "selected_workspace_skill_ids": [],
   "model": "gpt_5_5",
-  "whatsapp_greeting": null,
+  "whatsapp_greeting": "",
   "telegram_greeting": "\u26a1 NR22888 Modo Rua conectado. Use /sniper, /hoje, /rota, /cliente Nome, /cidade Mar\u00edlia, /concorrente Idexx, /whatsapp Cliente objetivo, /proposta Cliente produto, /material Cliente material, /visita Cliente anota\u00e7\u00e3o, /tarefa Cliente a\u00e7\u00e3o, /quentes, /inativos ou /comodato. Nada \u00e9 enviado ao cliente sem aprova\u00e7\u00e3o manual.",
-  "line_greeting": null,
+  "line_greeting": "",
   "memory_config": {
     "enabled": true,
     "scope": "both",
@@ -84,5 +84,6 @@
   "voice_config": {
     "voice_id": null
   },
+  "allow_anonymous_access": false,
   "name": "telegram_operacional_nr22888"
 }
