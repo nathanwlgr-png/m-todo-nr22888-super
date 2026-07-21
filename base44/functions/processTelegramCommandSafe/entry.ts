@@ -93,6 +93,26 @@ async function concorrentes(base44, raw) {
   }).slice(0, 6).map((c, i) => `${i + 1}. ${c.nome}${c.marca_concorrente ? ` · ${c.marca_concorrente}` : ''} · ${c.cidade || 'sem cidade'}\nEquipamento visto: ${c.equipamento_instalado || 'sem evidência'}\nAmeaça: ${c.nivel_ameaca || 'médio'}\nFonte: ${(c.ultimas_publicacoes || [])[0]?.fonte || (c.fontes_consultadas || [])[0] || 'sem fonte'}\nArgumento: ${c.argumento_contra || c.oportunidade_detectada || 'Velocidade, ROI e suporte Seamaty'}\nAção: usar no SPIN e proposta.`);
 }
 
+function visitDate(value) {
+  if (!value) return 'sem data';
+  return new Date(value).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' });
+}
+
+async function investigateClient(base44, raw) {
+  const found = await oneClient(base44, raw);
+  if (!found.client) return { matched: false, ambiguous: found.resposta.includes('mais de um'), resposta: found.resposta };
+
+  const client = found.client;
+  const visits = await filter(base44, 'Visit', { client_id: client.id }, '-scheduled_date', 10);
+  const nowMs = Date.now();
+  const upcoming = visits
+    .filter(v => ['agendada', 'remarcada'].includes(v.status) && new Date(v.scheduled_date).getTime() >= nowMs)
+    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))[0];
+  const visitLines = visits.slice(0, 5).map((v, i) => `${i + 1}. ${visitDate(v.scheduled_date)} · ${v.status || 'sem status'} · ${v.visit_type || 'visita'}${v.location ? ` · ${v.location}` : ''}`);
+  const resposta = `CLIENTE INVESTIGADO — ${nameOf(client)}\nClínica: ${client.clinic_name || client.razao_social || 'não informada'}\nCidade: ${client.city || 'não informada'}\nWhatsApp: ${client.phone || 'sem telefone'}\nStatus comercial: ${client.pipeline_stage || client.status || 'sem status'}\nEquipamento atual: ${client.current_equipment || 'não informado'}\nInteresse: ${client.equipment_interest || client.equipment_suggestion || 'avaliar Seamaty'}\nScore: ${client.purchase_score ?? client.health_score ?? 'sem score'}\nPróxima ação: ${client.next_action || client.ai_next_best_action || 'fazer diagnóstico SPIN'}\nPróxima visita: ${upcoming ? `${visitDate(upcoming.scheduled_date)} · ${upcoming.status}` : 'nenhuma agendada'}\n\nVISITAS RECENTES/AGENDADAS\n${visitLines.length ? visitLines.join('\n') : 'Nenhuma visita registrada.'}`;
+  return { matched: true, ambiguous: false, resposta, client };
+}
+
 async function investigateCompetitor(base44, raw) {
   const q = norm(raw);
   if (!q) return 'Use /investigar [concorrente, marca ou cidade].';
@@ -153,8 +173,20 @@ Deno.serve(async (req) => {
       resposta = rows.length ? rows.map((c, i) => `${i + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${c.purchase_score || c.health_score || 0} · ${c.phone ? 'WhatsApp ok' : 'sem WhatsApp'}`).join('\n') : 'Nenhum cliente prioritário encontrado para essa cidade.';
       acao = 'listar cidade';
     } else if (cmd === '/investigar') {
-      resposta = await investigateCompetitor(base44, args);
-      status = resposta.startsWith('INVESTIGAÇÃO SUPREMA') ? 'interpretado' : 'erro';
+      const target = args.replace(/^(cliente|visitas?)\s+/i, '').trim();
+      if (!target) {
+        resposta = 'Use /investigar [cliente, código, telefone, CNPJ, concorrente, marca ou cidade].';
+        status = 'erro';
+      } else {
+        const clientSearch = await investigateClient(base44, target);
+        if (clientSearch.matched || clientSearch.ambiguous) {
+          resposta = clientSearch.resposta;
+          client = clientSearch.client || null;
+        } else {
+          resposta = await investigateCompetitor(base44, target);
+        }
+        status = resposta.startsWith('CLIENTE INVESTIGADO') || resposta.startsWith('INVESTIGAÇÃO SUPREMA') ? 'interpretado' : 'erro';
+      }
       acao = 'executar busca investigativa';
     } else if (cmd === '/concorrente') {
       const rows = await concorrentes(base44, args);
@@ -236,7 +268,7 @@ Deno.serve(async (req) => {
 /cliente [nome] — Resumo de rua do cliente
 /cidade [cidade] — Clientes da cidade
 /concorrente [marca] — Consulta rápida no radar
-/investigar [concorrente/marca/cidade] — Executa a Investigação Suprema
+/investigar [cliente/código/telefone/CNPJ/concorrente] — Consulta cliente, status das visitas ou Investigação Suprema
 /whatsapp ou /mensagem [nome|objetivo] — Gera mensagem (revisar no CRM)
 /proposta [nome|produto] — Cria tarefa de proposta
 /material [nome|material] — Cria tarefa de material
