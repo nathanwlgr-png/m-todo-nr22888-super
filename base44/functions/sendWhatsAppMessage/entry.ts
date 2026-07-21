@@ -34,30 +34,33 @@ Deno.serve(async (req) => {
     // Gerar link wa.me (padrão principal seguro)
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-    // Log automático no CRM (salva histórico independente do envio)
+    // Registra como mensagem preparada; não marca como enviada sem confirmação humana.
     if (auto_log && client_id) {
       try {
-        // Buscar nome do cliente
-        let clientName = '';
         const clients = await base44.asServiceRole.entities.Client.filter({ id: client_id });
-        if (clients && clients.length > 0) {
-          clientName = clients[0].full_name || clients[0].first_name || clients[0].clinic_name || '';
-        }
+        const client = clients?.[0];
+        const clientName = client?.full_name || client?.first_name || client?.clinic_name || '';
 
-        await base44.asServiceRole.entities.AutomatedMessageLog.create({
-          client_id,
-          client_name: clientName,
-          client_phone: phone,
-          message_type: 'whatsapp',
+        await base44.asServiceRole.entities.PendingMessage.create({
+          canal: 'whatsapp',
+          channel: 'whatsapp',
+          cliente_id: client_id,
+          recipient_id: client_id,
+          destinatario_nome: clientName,
+          recipient_name: clientName,
+          destinatario_contato: phone,
+          recipient_phone: phone,
+          mensagem: message,
           message_content: message,
-          trigger_reason: 'Link WhatsApp preparado no CRM (envio manual)',
-          sent_status: 'prepared',
+          status: 'ready_to_send',
+          aprovado_por_nathan: true,
+          approved_by: user.email,
+          approved_at: new Date().toISOString(),
+          wa_url: waUrl,
           prepared_at: new Date().toISOString(),
-          automation_enabled: false,
-          success: true
+          contexto: 'Mensagem personalizada preparada no perfil do cliente'
         });
       } catch (logErr) {
-        // Log falhou mas não bloqueia resposta
         console.warn('[sendWhatsAppMessage] Log falhou:', logErr.message);
       }
     }

@@ -1,18 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Clipboard, ExternalLink, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Clipboard, ExternalLink, MessageCircle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 
 const buildLink = (request) => `${window.location.origin}/CatalogoCliente?codigo=${encodeURIComponent(request.client_code)}&pedido=${request.id}&token=${encodeURIComponent(request.access_token)}`;
 
 export default function ClientCatalogRequestPanel({ client }) {
   const queryClient = useQueryClient();
-  const { data: requests = [] } = useQuery({
+  const [message, setMessage] = useState('');
+  const { data: requests = [], refetch } = useQuery({
     queryKey: ['catalog-requests', client.id],
     queryFn: () => base44.entities.CatalogRequest.filter({ client_id: client.id }, '-updated_date', 10),
   });
   const latest = requests[0];
+
+  useEffect(() => {
+    const unsubscribe = base44.entities.CatalogRequest.subscribe(event => {
+      if (event.data?.client_id === client.id) refetch();
+    });
+    return unsubscribe;
+  }, [client.id, refetch]);
+
+  const prepareWhatsApp = () => {
+    if (!client.phone) { toast.error('Cliente sem WhatsApp cadastrado'); return; }
+    const name = client.first_name || client.full_name || 'Olá';
+    const clinic = client.clinic_name ? ` para a ${client.clinic_name}` : '';
+    const items = (latest.selected_items || []).map(item => `• ${item.product_name}`).join('\n');
+    setMessage(`Olá, ${name}! Tudo bem?\n\nRegistrei os produtos que você selecionou${clinic}:\n${items}\n\nVou validar as melhores condições e preparar uma proposta personalizada. Posso seguir?`);
+  };
 
   const createRequest = async () => {
     const code = client.external_code || client.id;
@@ -49,9 +66,11 @@ export default function ClientCatalogRequestPanel({ client }) {
           <a href={buildLink(latest)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><ExternalLink className="h-4 w-4" />Abrir</a>
           {latest.status === 'aguardando_validacao' && <button onClick={() => updateStatus('validado', 'validado')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-2 text-xs font-black text-black"><CheckCircle2 className="h-4 w-4" />Validar para orçamento</button>}
           {latest.status === 'validado' && <button onClick={() => updateStatus('reaberto', 'reaberto')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><RotateCcw className="h-4 w-4" />Permitir alterações</button>}
+          {!!latest.selected_items?.length && <button onClick={prepareWhatsApp} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-xs font-black text-black"><MessageCircle className="h-4 w-4" />WhatsApp personalizado</button>}
         </div>
         {latest.status === 'validado' && <button onClick={createRequest} className="mt-2 w-full py-2 text-xs font-bold text-orange-400">Criar nova seleção</button>}
       </>}
+      {message && <WhatsAppSendModal client={client} initialMessage={message} onClose={() => setMessage('')} />}
     </section>
   );
 }
