@@ -1,0 +1,61 @@
+{
+  "name": "InstagramPost",
+  "type": "object",
+  "description": "Fila individual de ofertas e publica\u00e7\u00f5es do Instagram Business da equipe NR22888.",
+  "properties": {
+    "post_content": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "hashtags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "campaign": {
+      "type": "string"
+    },
+    "post_status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "agendado",
+        "publicando",
+        "publicado",
+        "erro"
+      ],
+      "default": "rascunho"
+    },
+    "scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "instagram_post_id": {
+      "type": "string"
+    },
+    "instagram_link": {
+      "type": "string"
+    },
+    "instagram_account_id": {
+      "type": "string"
+    },
+    "instagram_username": {
+      "type": "string"
+    },
+    "error_message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "post_content",
+    "image_url",
+    "post_status"
+  ]
+}

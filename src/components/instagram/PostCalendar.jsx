@@ -13,7 +13,7 @@ export default function PostCalendar({ scheduledPosts = [] }) {
 
   const firstDayOfWeek = startOfMonth(currentMonth).getDay();
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  const getPostsForDay = (day) => scheduledPosts.filter(p => p.date && isSameDay(new Date(p.date), day));
+  const getPostsForDay = (day) => scheduledPosts.filter(p => (p.scheduled_at || p.date) && isSameDay(new Date(p.scheduled_at || p.date), day));
 
   return (
     <div className="bg-white rounded-2xl border p-4">
@@ -66,7 +66,7 @@ export default function PostCalendar({ scheduledPosts = [] }) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-slate-700 truncate">{post.label || post.client_name || 'Post'}</p>
                 <p className="text-[10px] text-slate-400">
-                  {post.date ? format(new Date(post.date), "dd/MM", { locale: ptBR }) : '—'} • {post.format || 'feed'}
+                  {post.scheduled_at || post.date ? format(new Date(post.scheduled_at || post.date), "dd/MM HH:mm", { locale: ptBR }) : '—'} • {post.post_status || post.format || 'agendado'}
                 </p>
               </div>
               <Badge className="text-[10px] bg-purple-100 text-purple-600 border-0 shrink-0">{post.source || 'instagram'}</Badge>

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import InstagramPoster from '@/components/InstagramPoster';
 
 const NATHAN_SYSTEM_PROMPT = `Você é Nathan Rosa, consultor comercial veterinário sênior da SEAMATY Brasil com 8 anos de experiência.
 
@@ -197,7 +198,7 @@ Gere conteúdo para ${formatLabel} no estilo Nathan Rosa. Retorne JSON:
 }`;
 }
 
-function GeneratedBlock({ content, isCampaign, onCopy }) {
+function GeneratedBlock({ content, isCampaign, onCopy, onSchedule }) {
   const [copied, setCopied] = useState(null);
   const [expanded, setExpanded] = useState({});
 
@@ -227,6 +228,7 @@ function GeneratedBlock({ content, isCampaign, onCopy }) {
         {content.cta && <Section label="📣 CTA" text={content.cta} onCopy={() => copy(content.cta, 'cta')} copied={copied === 'cta'} highlight />}
         {content.script && <Section label="🎬 Script Reels" text={content.script} onCopy={() => copy(content.script, 'script')} copied={copied === 'script'} />}
         <p className="text-xs text-blue-600">{content.hashtags}</p>
+        <InstagramPoster content={`${content.hook || ''}\n\n${content.caption || ''}\n\n${content.cta || ''}`.trim()} hashtags={String(content.hashtags || '').split(/\s+/).filter(Boolean).map(tag => tag.replace(/^#/, ''))} onQueued={onSchedule} />
       </div>
     );
   }
@@ -273,6 +275,7 @@ function GeneratedBlock({ content, isCampaign, onCopy }) {
         </div>
       ))}
       {content.hashtags && <p className="text-xs text-blue-600 px-1">{content.hashtags}</p>}
+      <InstagramPoster content={`${content.post_feed?.hook || ''}\n\n${content.post_feed?.caption || ''}\n\n${content.post_feed?.cta || ''}`.trim()} hashtags={String(content.hashtags || '').split(/\s+/).filter(Boolean).map(tag => tag.replace(/^#/, ''))} campaign="Campanha NR22888" onQueued={onSchedule} />
     </div>
   );
 }
@@ -439,7 +442,7 @@ function SourceCard({ source, contextItems, cases, campaignMode, onSchedule }) {
           </div>
         )}
 
-        <GeneratedBlock content={generatedContent} isCampaign={campaignMode} />
+        <GeneratedBlock content={generatedContent} isCampaign={campaignMode} onSchedule={onSchedule} />
       </CardContent>
     </Card>
   );
