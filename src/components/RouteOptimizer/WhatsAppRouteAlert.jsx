@@ -1,39 +1,20 @@
 import React, { useState } from 'react';
-import { MessageSquare, Send, Copy, CheckCircle, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageSquare, Send, Copy, Phone } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { buildWhatsAppUrl } from '@/utils/phoneUtils';
 
 export default function WhatsAppRouteAlert({ message, date, totalVisits }) {
   const [phone, setPhone] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message);
     toast.success('Mensagem copiada!');
   };
 
-  const handleSendWA = async () => {
-    if (!phone.trim()) {
-      // Abrir WhatsApp Web direto
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-      return;
-    }
-    setSending(true);
-    try {
-      await base44.functions.invoke('sendWhatsAppMessage', {
-        phone: phone.replace(/\D/g, ''),
-        message,
-      });
-      setSent(true);
-      toast.success('Rota enviada via WhatsApp!');
-    } catch (e) {
-      // Fallback: abrir WhatsApp Web
-      const cleanPhone = phone.replace(/\D/g, '');
-      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
-    }
-    setSending(false);
+  const handleOpenWhatsApp = () => {
+    const url = phone.trim() ? buildWhatsAppUrl(phone, message) : `https://wa.me/?text=${encodeURIComponent(message)}`;
+    if (!url) { toast.error('Informe um telefone válido com DDD'); return; }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleSendToSelf = () => {
@@ -44,7 +25,7 @@ export default function WhatsAppRouteAlert({ message, date, totalVisits }) {
     <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.3)' }}>
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="w-4 h-4 text-green-400" />
-        <p className="text-xs font-black text-green-400 uppercase tracking-widest">Notificação WhatsApp</p>
+        <p className="text-xs font-black text-green-400 uppercase tracking-widest">Rascunho da rota</p>
       </div>
 
       {/* Preview da mensagem */}
@@ -79,11 +60,7 @@ export default function WhatsAppRouteAlert({ message, date, totalVisits }) {
           style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }}>
           <MessageSquare className="w-3 h-3" /> Enviar p/ mim
         </button>
-        <Button onClick={handleSendWA} disabled={sending || sent} size="sm"
-          className="flex-1 h-9 text-xs font-black gap-1"
-          style={{ background: sent ? '#1a3a1a' : 'linear-gradient(135deg, #00c851, #00ff88)', color: sent ? '#00ff88' : '#000' }}>
-          {sent ? <><CheckCircle className="w-3 h-3" /> Enviado</> : <><Send className="w-3 h-3" /> Enviar</>}
-        </Button>
+        <button onClick={handleOpenWhatsApp} className="flex-1 h-9 rounded-xl text-xs font-black flex items-center justify-center gap-1" style={{ background: 'linear-gradient(135deg, #00c851, #00ff88)', color: '#000' }}><Send className="w-3 h-3" /> Abrir WhatsApp</button>
       </div>
     </div>
   );

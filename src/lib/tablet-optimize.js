@@ -83,10 +83,6 @@ export const tabletCSS = `
       min-width: 3rem;
     }
 
-    /* Grid layout para landscape */
-    .grid {
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
   }
 
   /* Reduce blur for performance */

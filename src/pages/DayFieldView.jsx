@@ -3,17 +3,15 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft, Phone, MapPin, Clock, CheckCircle2,
-  MessageSquare, Target, ChevronRight, RefreshCw, Calendar
+  ArrowLeft, MapPin, Clock, CheckCircle2,
+  MessageSquare, Target, RefreshCw, Navigation
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { buildWhatsAppUrl } from '@/utils/phoneUtils';
 import useActionLock from '@/hooks/useActionLock';
 
 export default function DayFieldView() {
   const now = new Date();
-  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-
   const [completedTasks, setCompletedTasks] = useState(new Set());
   const { locked: actionLocked, runWithLock } = useActionLock();
 
@@ -38,12 +36,16 @@ export default function DayFieldView() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isInSelectedDay = (dateValue) => {
-    if (!dateValue) return false;
+  const localDateKey = (dateValue) => {
+    if (!dateValue) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return dateValue;
     const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return false;
-    return date >= dayStart && date < dayEnd;
+    if (Number.isNaN(date.getTime())) return '';
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 10);
   };
+  const todayKey = localDateKey(now.toISOString());
+  const isInSelectedDay = (dateValue) => localDateKey(dateValue) === todayKey;
 
   const getRelatedClient = (record) => clients.find(c => c.id === record?.client_id);
 
@@ -61,7 +63,6 @@ export default function DayFieldView() {
   // Filtrar tarefas do dia, mantendo concluídas para contadores corretos
   const tasksForDay = allTasks.filter(t => isInSelectedDay(t.due_date));
   const tasksToday = tasksForDay.filter(t => t.status !== 'concluida');
-  const visitTasksToday = tasksForDay.filter(t => t.type === 'visita');
 
   // Filtrar visitas agendadas do dia
   const visitsToday = allVisits
@@ -74,7 +75,7 @@ export default function DayFieldView() {
     client: getRelatedClient(v)
   }));
 
-  const totalVisitsCount = visitsWithClients.length + visitTasksToday.length;
+  const totalVisitsCount = visitsWithClients.length;
   const completedCount = tasksForDay.filter(t => t.status === 'concluida' || completedTasks.has(t.id)).length
     + visitsToday.filter(v => v.status === 'realizada').length;
 
@@ -201,7 +202,10 @@ export default function DayFieldView() {
             </div>
 
             <div className="space-y-2.5">
-              {visitsWithClients.map(visit => (
+              {visitsWithClients.map(visit => {
+                const whatsappUrl = buildWhatsAppUrl(visit.client?.phone);
+                const mapsUrl = visit.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(visit.location)}` : null;
+                return (
                 <div key={visit.id} className="rounded-2xl p-4" style={{ background: '#141414', border: '1px solid rgba(0,191,255,0.2)' }}>
                   {/* Cabeçalho com hora */}
                   <div className="flex items-center gap-2 mb-2">
@@ -237,19 +241,10 @@ export default function DayFieldView() {
 
                   {/* Botões de ação */}
                   <div className="grid grid-cols-2 gap-2">
-                    {visit.client?.phone && (
-                      <a href={`https://wa.me/${visit.client.phone.replace(/\D/g, '')}`}
-                        target="_blank" rel="noopener noreferrer"
-                        className="py-3 rounded-xl text-base font-black text-green-400 flex items-center justify-center gap-2"
-                        style={{ background: 'rgba(37,211,102,0.15)', border: '2px solid rgba(37,211,102,0.4)' }}>
-                        <MessageSquare className="w-5 h-5" /> WhatsApp
-                      </a>
-                    )}
-                    <Link to={`/ClientProfile?id=${visit.client_id}`}
-                      className="py-3 rounded-xl text-base font-black text-purple-400 flex items-center justify-center gap-2"
-                      style={{ background: 'rgba(168,85,247,0.15)', border: '2px solid rgba(168,85,247,0.4)' }}>
-                      <Target className="w-5 h-5" /> Perfil
-                    </Link>
+                    {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="py-3 rounded-xl text-base font-black text-green-400 flex items-center justify-center gap-2" style={{ background: 'rgba(37,211,102,0.15)', border: '2px solid rgba(37,211,102,0.4)' }}><MessageSquare className="w-5 h-5" /> WhatsApp</a>}
+                    {mapsUrl && <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="py-3 rounded-xl text-base font-black text-cyan-400 flex items-center justify-center gap-2" style={{ background: 'rgba(6,182,212,0.15)', border: '2px solid rgba(6,182,212,0.4)' }}><Navigation className="w-5 h-5" /> Maps</a>}
+                    <Link to={`/ClientProfile?id=${visit.client_id}`} className="py-3 rounded-xl text-base font-black text-purple-400 flex items-center justify-center gap-2" style={{ background: 'rgba(168,85,247,0.15)', border: '2px solid rgba(168,85,247,0.4)' }}><Target className="w-5 h-5" /> Perfil</Link>
+                    {visit.client?.phone && <a href={`tel:${String(visit.client.phone).replace(/\D/g, '')}`} className="py-3 rounded-xl text-base font-black text-orange-400 flex items-center justify-center gap-2" style={{ background: 'rgba(255,107,0,0.15)', border: '2px solid rgba(255,107,0,0.35)' }}>Ligar</a>}
                   </div>
 
                   {/* Botão concluir visita */}
@@ -260,7 +255,8 @@ export default function DayFieldView() {
                     ✓ VISITA REALIZADA
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -314,20 +310,20 @@ export default function DayFieldView() {
               style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)' }}>
               💬 WhatsApp Hub
             </Link>
-            <Link to="/TasksUnified"
+            <Link to="/SmartRouteOptimizer"
               className="py-3 px-3 rounded-xl text-center text-base font-black text-orange-400"
               style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
-              📋 Tarefas
+              🗺️ Otimizar rota
             </Link>
             <Link to="/Clients"
               className="py-3 px-3 rounded-xl text-center text-base font-black text-purple-400"
               style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
               👥 Clientes
             </Link>
-            <Link to="/SalesCommandCenter"
-              className="py-3 px-3 rounded-xl text-center text-base font-black text-red-400"
-              style={{ background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.3)' }}>
-              🎯 Command
+            <Link to="/OfflineMode"
+              className="py-3 px-3 rounded-xl text-center text-base font-black text-cyan-400"
+              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}>
+              📲 Modo offline
             </Link>
           </div>
         </div>

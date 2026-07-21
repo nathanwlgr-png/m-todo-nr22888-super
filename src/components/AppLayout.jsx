@@ -14,7 +14,7 @@ const BOTTOM_NAV = [
   { to: '/',                       icon: Home,         label: 'Hoje',       match: ['/'] },
   { to: '/Clients',                icon: Users,        label: 'Clientes',   match: ['/Clients', '/ClientProfile', '/ClienteDetalhe360'] },
   { to: '/WhatsAppHub',            icon: MessageSquare,label: 'Mensagens',  match: ['/WhatsAppHub', '/WhatsAppInbox', '/GenerateWhatsAppIntegrated'] },
-  { to: '/DayFieldView',           icon: Star,         label: 'Rota',       match: ['/DayFieldView', '/VisitManager', '/ScheduledAgenda'] },
+  { to: '/DayFieldView',           icon: Star,         label: 'Rota',       match: ['/DayFieldView', '/VisitManager', '/ScheduledAgenda', '/SmartRouteOptimizer', '/OfflineMode'] },
   { to: '/ProposalGenerator',      icon: FileText,     label: 'Propostas',  match: ['/ProposalGenerator'] },
 ];
 
@@ -36,6 +36,8 @@ const PAGE_TITLES = {
   AgendaMensal: 'Agenda',
   ScheduledAgenda: 'Agenda',
   DayFieldView: 'Campo Hoje',
+  SmartRouteOptimizer: 'Rota Inteligente',
+  OfflineMode: 'Modo Offline',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
   ArquivoMasterConsulta: 'Arquivo Master / Consulta',

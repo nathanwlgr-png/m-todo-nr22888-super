@@ -3,13 +3,11 @@ const { useState } = React;
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
 import {
-  Menu, X, Bell, Home, Users, FileText, Star, MessageSquare,
-  MapPin, Map, Clock, Settings, LogOut, ChevronLeft,
-  UserSquare2, GitBranch, ShoppingCart, RefreshCw, Copy
+  Menu, X, Bell, Home, Users, FileText, MessageSquare,
+  MapPin, Calendar, WifiOff, LogOut, ChevronLeft,
+  RefreshCw
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import VendedorMenu from '@/components/VendedorMenu';
 import ArchiveModeBanner from '@/components/ArchiveModeBanner';
@@ -31,6 +29,9 @@ const PAGE_TITLES = {
   VisitManager: 'Visitas',
   AgendaMensal: 'Agenda',
   ScheduledAgenda: 'Agenda',
+  DayFieldView: 'Campo Hoje',
+  SmartRouteOptimizer: 'Rota Inteligente',
+  OfflineMode: 'Modo Offline',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
   ArquivoMasterConsulta: 'Arquivo Master / Consulta',
@@ -45,10 +46,11 @@ const SIDEBAR_ITEMS = [
   { icon: Home,          label: 'Hoje',       path: '/' },
   { icon: Users,         label: 'Clientes',   path: '/Clients' },
   { icon: MessageSquare, label: 'Mensagens',  path: '/WhatsAppHub' },
-  { icon: MapPin,        label: 'Rota',       path: '/DayFieldView' },
+  { icon: MapPin,        label: 'Campo',      path: '/DayFieldView' },
+  { icon: Calendar,      label: 'Agenda',     path: '/ScheduledAgenda' },
   { icon: FileText,      label: 'Propostas',  path: '/ProposalGenerator' },
   { icon: RefreshCw,     label: 'Pós-venda',  path: '/AutoFollowUpDashboard' },
-  { icon: Menu,          label: 'Mais',       path: '/GlobalCommandCenter' },
+  { icon: WifiOff,       label: 'Offline',    path: '/OfflineMode' },
 ];
 
 export default function TabletAppLayout({ children, currentPageName }) {

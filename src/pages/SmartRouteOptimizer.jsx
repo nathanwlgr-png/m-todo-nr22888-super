@@ -11,6 +11,10 @@ import {
 import { toast } from 'sonner';
 
 const cleanText = (value) => (typeof value === 'string' ? value.trim() : '');
+const localToday = () => {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
 
 const normalizeText = (value) => cleanText(value)
   .normalize('NFD')
@@ -62,9 +66,8 @@ const getRouteDisplayName = (stop, client = {}) => {
 };
 
 export default function SmartRouteOptimizer() {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(localToday());
   const [startLocation, setStartLocation] = useState('Marília, SP');
-  const [notifyPhone, setNotifyPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [clientDetails, setClientDetails] = useState({});
@@ -85,7 +88,7 @@ export default function SmartRouteOptimizer() {
       const res = await base44.functions.invoke('optimizeDayRoute', {
         date,
         start_location: startLocation,
-        notify_phone: notifyPhone || null,
+        notify_phone: null,
       });
       const data = res.data;
       setResult(data);
@@ -168,7 +171,7 @@ export default function SmartRouteOptimizer() {
           </div>
           <div>
             <h1 className="text-xl font-black text-white">Rotas Inteligentes</h1>
-            <p className="text-xs text-orange-600">IA • Agenda otimizada • Notificação WhatsApp</p>
+            <p className="text-xs text-orange-600">Agenda otimizada • Maps • Rascunho para WhatsApp</p>
           </div>
         </div>
 
@@ -213,13 +216,7 @@ export default function SmartRouteOptimizer() {
                     style={{ background: '#1a1a1a', border: '1px solid rgba(255,107,0,0.3)' }} />
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 mb-1 block">WhatsApp para notificação (opcional)</label>
-                <input value={notifyPhone} onChange={e => setNotifyPhone(e.target.value)}
-                  placeholder="5514999999999"
-                  className="w-full h-10 px-3 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none"
-                  style={{ background: '#1a1a1a', border: '1px solid rgba(0,255,136,0.2)' }} />
-              </div>
+
             </div>
 
             <Button onClick={handleOptimizeDay} disabled={loading}
@@ -369,7 +366,7 @@ export default function SmartRouteOptimizer() {
               <li>• <span className="text-orange-400">Dia:</span> otimiza visitas já agendadas para a data escolhida</li>
               <li>• <span className="text-purple-400">Semana:</span> cria agenda automática de uma cidade por 1–7 dias</li>
               <li>• A IA agrupa visitas por região para economizar combustível</li>
-              <li>• Receba a rota otimizada direto no WhatsApp</li>
+              <li>• Revise e abra manualmente o resumo da rota no WhatsApp</li>
             </ul>
           </div>
         )}

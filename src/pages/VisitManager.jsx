@@ -7,7 +7,7 @@ import VisitFlowManager from '@/components/VisitFlowManager';
 
 export default function VisitManager() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 pb-28">
       <div className="max-w-4xl mx-auto">
         <Link to={createPageUrl('Home')}>
           <Button variant="ghost" className="mb-4">
