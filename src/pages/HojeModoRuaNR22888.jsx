@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import ProximaAcaoConsultivaModal from '@/components/ProximaAcaoConsultivaModal';
 import OperationalMetricCards from '@/components/dashboard/OperationalMetricCards';
+import FieldQuickActions from '@/components/dashboard/FieldQuickActions';
 
 const COMMANDS = [
   { cmd: '/hoje', label: 'Hoje', target: 'campo' },
@@ -196,6 +197,7 @@ export default function HojeModoRuaNR22888() {
           </div>
         </div>
 
+        <FieldQuickActions />
         <OperationalMetricCards metrics={operationalMetrics} />
 
         <Section id="sniper" icon={Radar} title="Sniper do dia" count={sniper ? 1 : 0}>
