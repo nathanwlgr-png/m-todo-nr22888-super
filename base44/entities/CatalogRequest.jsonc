@@ -1,0 +1,105 @@
+{
+  "name": "CatalogRequest",
+  "type": "object",
+  "description": "Sele\u00e7\u00e3o de produtos feita pelo cliente por link, com hist\u00f3rico de altera\u00e7\u00f5es e valida\u00e7\u00e3o humana antes do or\u00e7amento.",
+  "properties": {
+    "client_id": {
+      "type": "string"
+    },
+    "client_code": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "access_token": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "enviado",
+        "aguardando_validacao",
+        "validado",
+        "reaberto"
+      ],
+      "default": "rascunho"
+    },
+    "selected_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_source": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "change_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "criado",
+              "adicionado",
+              "removido",
+              "enviado",
+              "validado",
+              "reaberto"
+            ]
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "revision": {
+      "type": "number",
+      "default": 0
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validated_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_id",
+    "client_code",
+    "access_token"
+  ]
+}

@@ -107,6 +107,7 @@ const RankingOportunidades = lazy(() => import('./pages/RankingOportunidades'));
 const TesteAgentes = lazy(() => import('./pages/TesteAgentes'));
 const VozCampo = lazy(() => import('./pages/VozCampo'));
 const PainelConcorrencia = lazy(() => import('./pages/PainelConcorrencia'));
+const CatalogoCliente = lazy(() => import('./pages/CatalogoCliente'));
 
 // ── PÁGINAS REAIS — conectadas definitivamente ──
 const Clients = lazy(() => import('./pages/Clients'));
@@ -154,6 +155,11 @@ const LayoutWrapper = ({ children, currentPageName }) => {
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const isPublicCatalog = window.location.pathname === '/CatalogoCliente';
+
+  if (isPublicCatalog) {
+    return <Suspense fallback={<PageLoader />}><Routes><Route path="/CatalogoCliente" element={<CatalogoCliente />} /></Routes></Suspense>;
+  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return <AppLoadingScreen />;

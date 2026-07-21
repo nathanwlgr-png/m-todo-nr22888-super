@@ -1,0 +1,57 @@
+import React from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, Clipboard, ExternalLink, RotateCcw } from 'lucide-react';
+import { toast } from 'sonner';
+
+const buildLink = (request) => `${window.location.origin}/CatalogoCliente?codigo=${encodeURIComponent(request.client_code)}&pedido=${request.id}&token=${encodeURIComponent(request.access_token)}`;
+
+export default function ClientCatalogRequestPanel({ client }) {
+  const queryClient = useQueryClient();
+  const { data: requests = [] } = useQuery({
+    queryKey: ['catalog-requests', client.id],
+    queryFn: () => base44.entities.CatalogRequest.filter({ client_id: client.id }, '-updated_date', 10),
+  });
+  const latest = requests[0];
+
+  const createRequest = async () => {
+    const code = client.external_code || client.id;
+    const request = await base44.entities.CatalogRequest.create({
+      client_id: client.id, client_code: code,
+      client_name: client.clinic_name || client.full_name || client.first_name,
+      access_token: crypto.randomUUID(), status: 'enviado', selected_items: [], revision: 0,
+      change_history: [{ changed_at: new Date().toISOString(), action: 'criado', actor: 'vendedor' }],
+    });
+    queryClient.invalidateQueries({ queryKey: ['catalog-requests', client.id] });
+    await navigator.clipboard.writeText(buildLink(request));
+    toast.success('Link criado e copiado');
+  };
+
+  const updateStatus = async (status, action) => {
+    const history = [...(latest.change_history || []), { changed_at: new Date().toISOString(), action, actor: 'vendedor' }];
+    await base44.entities.CatalogRequest.update(latest.id, {
+      status, change_history: history,
+      ...(status === 'validado' ? { validated_at: new Date().toISOString() } : {}),
+    });
+    queryClient.invalidateQueries({ queryKey: ['catalog-requests', client.id] });
+    toast.success(status === 'validado' ? 'Seleção validada' : 'Seleção reaberta');
+  };
+
+  return (
+    <section className="rounded-2xl border border-orange-500/20 bg-neutral-950 p-4">
+      <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-orange-400">Catálogo para o cliente</p>
+      {!latest ? <button onClick={createRequest} className="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-black text-black">Criar e copiar link</button> : <>
+        <div className="mb-3 flex items-center justify-between gap-2"><div><p className="text-sm font-bold text-white">{latest.selected_items?.length || 0} itens selecionados</p><p className="text-xs text-slate-500">Status: {latest.status} · revisão {latest.revision || 0}</p></div><span className="text-xs text-slate-500">{latest.client_code}</span></div>
+        {(latest.selected_items || []).map(item => <p key={`${item.product_source}:${item.product_id}`} className="border-t border-neutral-800 py-2 text-xs text-slate-300">{item.product_name}</p>)}
+        {!!latest.change_history?.length && <div className="mt-3 rounded-xl bg-neutral-900 p-3"><p className="mb-2 text-[10px] font-black uppercase text-slate-500">Últimas alterações</p>{latest.change_history.slice(-5).reverse().map((change, index) => <p key={`${change.changed_at}-${index}`} className="text-[11px] text-slate-400">{change.action}{change.product_name ? `: ${change.product_name}` : ''} · {new Date(change.changed_at).toLocaleString('pt-BR')}</p>)}</div>}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button onClick={async () => { await navigator.clipboard.writeText(buildLink(latest)); toast.success('Link copiado'); }} className="flex items-center justify-center gap-2 rounded-xl border border-orange-500/30 py-2 text-xs font-bold text-orange-400"><Clipboard className="h-4 w-4" />Copiar link</button>
+          <a href={buildLink(latest)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><ExternalLink className="h-4 w-4" />Abrir</a>
+          {latest.status === 'aguardando_validacao' && <button onClick={() => updateStatus('validado', 'validado')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-2 text-xs font-black text-black"><CheckCircle2 className="h-4 w-4" />Validar para orçamento</button>}
+          {latest.status === 'validado' && <button onClick={() => updateStatus('reaberto', 'reaberto')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><RotateCcw className="h-4 w-4" />Permitir alterações</button>}
+        </div>
+        {latest.status === 'validado' && <button onClick={createRequest} className="mt-2 w-full py-2 text-xs font-bold text-orange-400">Criar nova seleção</button>}
+      </>}
+    </section>
+  );
+}

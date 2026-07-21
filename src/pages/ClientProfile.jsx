@@ -13,6 +13,7 @@ import WhatsAppRapido from '@/components/WhatsAppRapido';
 import SeamatyEquipmentPanel from '@/components/SeamatyEquipmentPanel';
 import Score4x4Display from '@/components/Score4x4Display';
 import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
+import ClientCatalogRequestPanel from '@/components/catalog/ClientCatalogRequestPanel';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -220,6 +221,8 @@ export default function ClientProfile() {
 
         {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
         <SeamatyEquipmentPanel client={client} />
+
+        <ClientCatalogRequestPanel client={client} />
 
         {/* Dados básicos */}
         <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.15)' }}>
