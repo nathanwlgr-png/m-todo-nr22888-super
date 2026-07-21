@@ -1,13 +1,19 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getAutomationEmail, getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getOptionalUser(base44);
+    if (isForbiddenManualUser(user)) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
     const { action = 'analyze', focus_competitors = [], focus_markets = [] } = body;
+    const dryRun = body.dry_run === true || !user;
+    const notificationEmail = await getAutomationEmail(base44, user);
+    if (body.smoke_test === true) {
+      return Response.json({ success: true, smoke_test: true, dry_run: true, reports_created: 0, alerts_created: 0 });
+    }
 
     // ─── 1. BUSCAR DADOS DO CRM ─────────────────────────────────────────────
     const [allClients, allSales, allCompetitorReports] = await Promise.all([
@@ -64,6 +70,7 @@ FOQUE EM:
 
 Retorne em JSON estruturado.`,
       add_context_from_internet: true,
+      model: 'gemini_3_flash',
       response_json_schema: {
         type: "object",
         properties: {
@@ -111,6 +118,7 @@ RETORNE:
 
 Use dados reais e atualizados.`,
       add_context_from_internet: true,
+      model: 'gemini_3_flash',
       response_json_schema: {
         type: "object",
         properties: {
@@ -153,6 +161,7 @@ FOQUE EM:
 
 Retorne em JSON.`,
       add_context_from_internet: true,
+      model: 'gemini_3_flash',
       response_json_schema: {
         type: "object",
         properties: {
@@ -195,22 +204,24 @@ Retorne em JSON.`,
       ],
       competitors_mentioned: marketAnalysis.competitors?.map(c => c.name) || ['IDEXX', 'Mindray', 'Biosys', 'Roche'],
       opportunities_count: (marketAnalysis.opportunities || []).length,
-      generated_by: user.email,
+      generated_by: user?.email || 'automacao_safe',
       is_pinned: false
     };
 
     // ─── 6. SALVAR NO CRM ──────────────────────────────────────────────────
-    try {
-      await base44.asServiceRole.entities.MarketIntelligenceReport?.create?.(report);
-    } catch (e) {
-      console.log('MarketIntelligenceReport criar: optional', e.message);
+    if (!dryRun) {
+      try {
+        await base44.asServiceRole.entities.MarketIntelligenceReport?.create?.(report);
+      } catch (e) {
+        console.log('MarketIntelligenceReport criar: optional', e.message);
+      }
     }
 
     // ─── 7. CRIAR ALERTAS PARA O TIME ──────────────────────────────────────
     const threats = (marketAnalysis.threats || []).slice(0, 3);
-    const alertPromises = threats.map(threat =>
+    const alertPromises = dryRun ? [] : threats.map(threat =>
       base44.asServiceRole.entities.Alert?.create?.({
-        user_email: user.email,
+        user_email: notificationEmail,
         title: `🚨 Ameaça de Mercado Detectada`,
         message: threat,
         type: 'high_score_lead',
@@ -236,7 +247,8 @@ Retorne em JSON.`,
         top_competitors: marketAnalysis.competitors?.slice(0, 3).map(c => c.name) || []
       },
       alerts_created: threats.length,
-      generated_at: new Date().toISOString()
+      generated_at: new Date().toISOString(),
+      dry_run: dryRun
     });
 
   } catch (error) {

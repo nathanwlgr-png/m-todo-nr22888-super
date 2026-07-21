@@ -1,6 +1,30 @@
 {
   "name": "Health Check Autom\u00e1tico (a cada hora)",
-  "description": "Monitora a sa\u00fade do sistema a cada hora e reporta problemas",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "health_check_automatico_horario",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "verificar_saude": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "systemHealthMonitor",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Verificar sa\u00fade",
+            "description": "Testes reais sem IA"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Monitora entidades e conex\u00f5es reais a cada hora, sem consumir IA nem declarar fun\u00e7\u00f5es n\u00e3o testadas como saud\u00e1veis.",
   "trigger": {
     "condition": null,
     "config": {
@@ -9,33 +33,13 @@
       "schedule_mode": "interval",
       "cron_expression": null,
       "one_time_date": null,
-      "timezone": "UTC",
-      "interval_value": 6,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": 1,
       "interval_unit": "hours",
-      "interval_anchor": "2026-03-10T15:32:17.886000",
+      "interval_anchor": null,
       "ends_type": "never",
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "health_check_autom_tico_a_cada_hora",
-      "version": "1.0",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "run_function": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "systemHealthMonitor",
-            "args": {}
-          },
-          "then": "end"
-        }
-      }
-    ]
   }
 }

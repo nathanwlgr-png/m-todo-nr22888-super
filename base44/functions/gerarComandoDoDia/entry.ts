@@ -1,19 +1,20 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getOptionalUser(base44);
+    if (isForbiddenManualUser(user)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
+    const sr = base44.asServiceRole;
 
-    const clients = await base44.entities.Client.list('-purchase_score', 500).catch(() => []);
-    const sales = await base44.entities.Sale.list('-sale_date', 100).catch(() => []);
-    const consumables = await base44.entities.ConsumableOrder?.list('-next_reorder_date', 100).catch(() => []);
-    const leads = await base44.entities.Lead?.list('-created_date', 100).catch(() => []);
-    const tasks = await base44.entities.Task?.list('-due_date', 100).catch(() => []);
+    const clients = await sr.entities.Client.list('-purchase_score', 500).catch(() => []);
+    const sales = await sr.entities.Sale.list('-sale_date', 100).catch(() => []);
+    const consumables = await sr.entities.ConsumableOrder?.list('-next_reorder_date', 100).catch(() => []);
+    const leads = await sr.entities.Lead?.list('-created_date', 100).catch(() => []);
+    const tasks = await sr.entities.Task?.list('-due_date', 100).catch(() => []);
 
     const now = new Date();
 

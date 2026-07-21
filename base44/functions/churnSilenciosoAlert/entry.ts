@@ -1,4 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getAutomationEmail, getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 // Alerta de Churn Silencioso — NR22888
 // Detecta clientes quentes que pararam de interagir sem sinalizar saída
@@ -64,8 +65,10 @@ function gerarMensagemSPIN(cliente, tipoProblemaSuspeitado) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Não autorizado' }, { status: 401 });
+    const user = await getOptionalUser(base44);
+    if (isForbiddenManualUser(user)) return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const { dry_run = false } = await req.json().catch(() => ({}));
+    const notificationEmail = await getAutomationEmail(base44, user);
 
     const hoje = new Date();
     const resultados = [];
@@ -169,30 +172,30 @@ Deno.serve(async (req) => {
         return a.tipo;
       }).join(' | ');
 
-      // Salvar alerta no CRM
+      // Salvar apenas campos válidos do alerta; a mensagem continua sendo sugestão interna.
       const nomeCliente = cliente.first_name || cliente.clinic_name || 'Cliente';
-      const alertaCriado = await base44.asServiceRole.entities.Alert.create({
-        title: `⚠️ Churn Silencioso — ${nomeCliente}`,
-        type: 'churn_silencioso',
-        message: `⚠️ CHURN SILENCIOSO — ${nomeCliente}\n📋 ${alertaDescricao}\n⏰ Melhor momento: ${melhorHorario} (${timingDescricao})\n💬 Mensagem sugerida:\n${mensagemSPIN}`,
-        client_id: cliente.id,
-        client_name: nomeCliente,
-        user_email: 'nathan.wlgr@gmail.com',
-        priority: 'alta',
-        status: 'pendente',
-        created_date: hoje.toISOString(),
-      }).catch(() => null);
+      if (!dry_run) {
+        await base44.asServiceRole.entities.Alert.create({
+          user_email: notificationEmail,
+          title: `⚠️ Churn Silencioso — ${nomeCliente}`,
+          type: 'client_cold',
+          message: `⚠️ CHURN SILENCIOSO — ${nomeCliente}\n📋 ${alertaDescricao}\n⏰ Melhor momento: ${melhorHorario} (${timingDescricao})\n💬 Mensagem sugerida:\n${mensagemSPIN}`,
+          priority: 'alta',
+          link_to: `ClientProfile?id=${cliente.id}`,
+          read: false,
+          dismissed: false
+        }).catch(() => null);
 
-      // Salvar em AIInteractionLog
-      await base44.asServiceRole.entities.AIInteractionLog.create({
-        action_type: 'general',
-        user_message: `Churn silencioso detectado: ${alertaDescricao}`,
-        ai_response: mensagemSPIN,
-        client_id: cliente.id,
-        client_name: cliente.first_name || cliente.clinic_name,
-        source: 'automation',
-        success: true,
-      }).catch(() => null);
+        await base44.asServiceRole.entities.AIInteractionLog.create({
+          action_type: 'general',
+          user_message: `Churn silencioso detectado: ${alertaDescricao}`,
+          ai_response: mensagemSPIN,
+          client_id: cliente.id,
+          client_name: cliente.first_name || cliente.clinic_name,
+          source: 'automation',
+          success: true,
+        }).catch(() => null);
+      }
 
       resultados.push({
         cliente: cliente.first_name || cliente.clinic_name,
@@ -210,6 +213,7 @@ Deno.serve(async (req) => {
       alertasGerados: resultados.length,
       detalhes: resultados,
       executadoEm: hoje.toISOString(),
+      dry_run,
     });
 
   } catch (error) {

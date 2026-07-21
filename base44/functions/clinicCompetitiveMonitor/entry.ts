@@ -1,13 +1,19 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getAutomationEmail, getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getOptionalUser(base44);
+    if (isForbiddenManualUser(user)) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
-    const { city = 'São Paulo', state = 'SP', radius_km = 100, notify_phone = null } = body;
+    const { city = 'Marília', state = 'SP', radius_km = 100, notify_phone = null } = body;
+    const dryRun = body.dry_run === true || !user;
+    const notificationEmail = await getAutomationEmail(base44, user);
+    if (body.smoke_test === true) {
+      return Response.json({ success: true, smoke_test: true, dry_run: true, external_messages_sent: 0 });
+    }
 
     console.log(`🔍 Iniciando monitoramento competitivo: ${city}/${state}`);
 
@@ -40,6 +46,7 @@ PERFIL IDEAL SEAMATY (alta compatibilidade):
 Para CADA clínica identificada, forneça análise de fit com Seamaty (0-100) e razões.
 Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
       add_context_from_internet: true,
+      model: 'gemini_3_flash',
       response_json_schema: {
         type: "object",
         properties: {
@@ -84,7 +91,7 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
 
     // ── 4. Salvar alertas no banco ────────────────────────────────────────────
     const savedAlerts = [];
-    for (const clinic of newHighFit.slice(0, 20)) {
+    for (const clinic of dryRun ? [] : newHighFit.slice(0, 20)) {
       const alert = await base44.asServiceRole.entities.ClinicAlert.create({
         clinic_name: clinic.clinic_name || 'Clínica sem nome',
         city: clinic.city || city,
@@ -111,7 +118,7 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
     // ── 5. SAFE: NÃO envia WhatsApp automático e NÃO marca como enviado ───────
     // Apenas prepara a mensagem como rascunho em PendingMessage para aprovação humana.
     let whatsappPrepared = false;
-    if (notify_phone && newHighFit.length > 0) {
+    if (!dryRun && notify_phone && newHighFit.length > 0) {
       const topClinics = newHighFit
         .sort((a, b) => b.seamaty_fit_score - a.seamaty_fit_score)
         .slice(0, 3);
@@ -156,9 +163,9 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
     }
 
     // ── 6. Criar notificação no sistema ──────────────────────────────────────
-    if (newHighFit.length > 0) {
+    if (!dryRun && newHighFit.length > 0) {
       await base44.asServiceRole.entities.Alert?.create?.({
-        user_email: user.email,
+        user_email: notificationEmail,
         title: `🏥 ${newHighFit.length} Novas Clínicas Detectadas em ${city}`,
         message: `Monitoramento identificou ${newHighFit.length} clínicas com alto fit para Seamaty. Top: ${newHighFit[0]?.clinic_name || 'Ver dashboard'}`,
         type: 'high_score_lead',
@@ -178,6 +185,7 @@ Use dados públicos: Google Maps, redes sociais, sites, notícias locais.`,
       market_summary: searchResult.market_summary || '',
       whatsapp_sent: false,
       whatsapp_prepared: whatsappPrepared,
+      dry_run: dryRun,
       top_opportunities: newHighFit
         .sort((a, b) => b.seamaty_fit_score - a.seamaty_fit_score)
         .slice(0, 5)

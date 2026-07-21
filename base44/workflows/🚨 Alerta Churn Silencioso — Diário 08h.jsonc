@@ -1,15 +1,39 @@
 {
   "name": "\ud83d\udea8 Alerta Churn Silencioso \u2014 Di\u00e1rio 08h",
-  "description": "Detecta diariamente clientes quentes/mornos que pararam de comprar reagentes ou de responder. Gera alerta com mensagem SPIN pronta + timing numerol\u00f3gico ideal para reabordagem.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "alerta_churn_silencioso_diario",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "detectar_churn": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "churnSilenciosoAlert",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Detectar churn silencioso",
+            "description": "Alerta interno seguro"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Detecta risco de churn diariamente \u00e0s 08h e cria apenas alertas internos v\u00e1lidos.",
   "trigger": {
     "condition": null,
     "config": {
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 11 * * *",
+      "cron_expression": "0 8 * * *",
       "one_time_date": null,
-      "timezone": "UTC",
+      "timezone": "America/Sao_Paulo",
       "interval_value": null,
       "interval_unit": null,
       "interval_anchor": null,
@@ -17,25 +41,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "alerta_churn_silencioso_di_rio_08h",
-      "version": "1.0",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "run_function": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "churnSilenciosoAlert",
-            "args": {}
-          },
-          "then": "end"
-        }
-      }
-    ]
   }
 }

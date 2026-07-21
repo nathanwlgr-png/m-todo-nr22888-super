@@ -1,4 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getAutomationEmail, getOptionalUser } from '../../shared/automationAuth.js';
 
 // ── MOTOR DE RECOMPRA DE INSUMOS — NR22888 ──
 // Detecta clientes cujo pedido de reagente passou do prazo de recompra,
@@ -10,7 +11,7 @@ function gerarMensagemRecompra(cliente, produto, equipamento, diasAtraso) {
   const nome = cliente.first_name || cliente.clinic_name || 'Doutor';
   const item = produto || 'reagentes';
   const eq = equipamento || 'seu equipamento Seamaty';
-  return `Oi ${nome}, tudo bem? 😊\n\nVi aqui que seu estoque de ${item} para o ${eq} já deve estar chegando no fim (passou cerca de ${diasAtraso} dias do ciclo normal de reposição).\n\nPosso já liberar o mesmo pedido do último mês pra você, com a bonificação ativa deste mês? Assim a clínica não corre risco de parar exame nenhum. 🧪\n\nMe confirma que eu agilizo agora.`;
+  return `Oi ${nome}, tudo bem? 😊\n\nVi aqui que seu estoque de ${item} para o ${eq} pode estar chegando ao fim (cerca de ${diasAtraso} dias desde o último ciclo registrado).\n\nPosso verificar a necessidade de reposição e as condições comerciais vigentes para evitar interrupções nos exames? 🧪\n\nSe fizer sentido, me confirma que eu preparo a melhor opção.`;
 }
 
 Deno.serve(async (req) => {
@@ -18,11 +19,9 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     // Suporta execução autenticada (botão) e automática (agendador)
-    let isAutomated = false;
-    try {
-      const user = await base44.auth.me();
-      if (!user) isAutomated = true;
-    } catch (_e) { isAutomated = true; }
+    const user = await getOptionalUser(base44);
+    const isAutomated = !user;
+    const notificationEmail = await getAutomationEmail(base44, user);
 
     let dryRun = false;
     try {
@@ -119,12 +118,14 @@ Deno.serve(async (req) => {
     // Alerta consolidado (se houver oportunidades)
     if (criados > 0) {
       await base44.asServiceRole.entities.Alert.create({
+        user_email: notificationEmail,
         title: `🧪 ${criados} recompra(s) de insumo prontas para aprovar`,
-        type: 'recompra_insumo',
+        type: 'client_cold',
         message: `${criados} cliente(s) estão no ciclo de recompra de reagentes. Mensagens prontas na fila de aprovação do WhatsApp.`,
         priority: 'alta',
-        status: 'pendente',
-        created_date: hoje.toISOString(),
+        link_to: 'MessageApproval',
+        read: false,
+        dismissed: false
       }).catch(() => null);
 
       // Notificação interna via Telegram (se configurado)

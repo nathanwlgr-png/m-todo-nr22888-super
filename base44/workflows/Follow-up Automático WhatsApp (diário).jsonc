@@ -1,33 +1,15 @@
 {
   "name": "Follow-up Autom\u00e1tico WhatsApp (di\u00e1rio)",
-  "description": "",
-  "trigger": {
-    "condition": null,
-    "config": {
-      "trigger_type": "scheduled",
-      "events": [],
-      "schedule_mode": "recurring",
-      "cron_expression": "0 12 * * *",
-      "one_time_date": null,
-      "timezone": "UTC",
-      "interval_value": null,
-      "interval_unit": null,
-      "interval_anchor": null,
-      "ends_type": "never",
-      "ends_on_date": null,
-      "ends_after_count": null
-    }
-  },
   "definition": {
     "document": {
       "dsl": "1.0.0",
-      "name": "follow_up_autom_tico_whatsapp_di_rio",
-      "version": "1.0",
+      "name": "follow_up_whatsapp_diario",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [
       {
-        "run_function": {
+        "preparar_followups": {
           "call": "invoke_backend_function",
           "with": {
             "function_name": "followUpWhatsApp",
@@ -35,9 +17,31 @@
               "dias_sem_resposta": 3
             }
           },
-          "then": "end"
+          "then": "end",
+          "x-base44": {
+            "title": "Preparar follow-ups",
+            "description": "Fila de aprova\u00e7\u00e3o"
+          }
         }
       }
     ]
+  },
+  "description": "Prepara follow-ups consultivos diariamente \u00e0s 09h; nenhuma mensagem \u00e9 enviada sem aprova\u00e7\u00e3o.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
   }
 }

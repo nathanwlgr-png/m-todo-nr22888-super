@@ -1,6 +1,32 @@
 {
   "name": "Ca\u00e7a Mensal de Concorrentes Futuros",
-  "description": "Uma vez por m\u00eas, busca novos lan\u00e7amentos de equipamentos veterin\u00e1rios (China + global), registra concorrentes futuros no Painel Concorr\u00eancia e alerta no Telegram.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "caca_mensal_concorrentes_futuros",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "pesquisar_em_previa": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "cacaConcorrentesFuturos",
+            "args": {
+              "dry_run": true
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Pesquisar em pr\u00e9via",
+            "description": "Sem grava\u00e7\u00e3o autom\u00e1tica"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Pesquisa lan\u00e7amentos concorrentes em modo de pr\u00e9via; n\u00e3o grava nem envia Telegram sem valida\u00e7\u00e3o humana.",
   "trigger": {
     "condition": null,
     "config": {
@@ -9,7 +35,7 @@
       "schedule_mode": "recurring",
       "cron_expression": "0 8 1 * *",
       "one_time_date": null,
-      "timezone": "UTC",
+      "timezone": "America/Sao_Paulo",
       "interval_value": null,
       "interval_unit": null,
       "interval_anchor": null,
@@ -17,25 +43,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "ca_a_mensal_de_concorrentes_futuros",
-      "version": "1.0",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "run_function": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "cacaConcorrentesFuturos",
-            "args": {}
-          },
-          "then": "end"
-        }
-      }
-    ]
   }
 }

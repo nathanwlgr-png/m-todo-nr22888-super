@@ -6,7 +6,7 @@ const TEMPLATES = {
   consultivo: (nome, equipamento) =>
     `Olá ${nome}! 👋\n\nEstava revisando nossa proposta do *${equipamento}* e queria entender melhor sua situação atual.\n\nPosso te mostrar como outros clientes conseguiram viabilizar a aquisição com condições especiais. Que tal conversarmos 10 minutinhos?\n\nEquipe SEAMATY Brasil`,
   urgente: (nome, equipamento) =>
-    `Olá ${nome}! ⚡\n\nNossa proposta do *${equipamento}* ainda está disponível, mas as condições de pagamento têm prazo.\n\nPara garantir as melhores condições — *pagamento via PIX com desconto especial* — precisamos de uma resposta até amanhã.\n\nMe chame agora! Equipe SEAMATY Brasil`,
+    `Olá ${nome}! ⚡\n\nQueria retomar nossa conversa sobre *${equipamento}*.\n\nSe ainda fizer sentido para a clínica, posso verificar as condições comerciais vigentes e ajustar a proposta conforme sua necessidade. Podemos falar hoje?\n\nEquipe SEAMATY Brasil`,
 };
 
 function getTemplate(score) {
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me().catch(() => null);
     const isAutomacao = !user;
 
-    const { dias_sem_resposta = 3, client_ids = [] } = await req.json().catch(() => ({}));
+    const { dias_sem_resposta = 3, client_ids = [], dry_run = false } = await req.json().catch(() => ({}));
 
     let clientes;
     if (client_ids.length > 0) {
@@ -58,34 +58,36 @@ Deno.serve(async (req) => {
       const score = scoreMap[cnpjLimpo] || null;
       const templateFn = getTemplate(score);
       const nome = c.first_name || (c.full_name || '').split(' ')[0] || 'cliente';
-      const equipamento = c.equipment_interest || c.equipment_sold || 'Seamaty VG2';
+      const equipamento = c.equipment_interest || c.equipment_sold || 'equipamento Seamaty indicado para a clínica';
       const mensagem = templateFn(nome, equipamento);
 
       const phoneIntl = phone.startsWith('55') ? phone : `55${phone}`;
       const url = `https://api.whatsapp.com/send?phone=${phoneIntl}&text=${encodeURIComponent(mensagem)}`;
       whatsapp_urls.push({ client_id: c.id, client_name: c.clinic_name || c.full_name, url, mensagem });
 
-      await sr.entities.PendingMessage.create({
-        recipient_id: c.id,
-        recipient_name: c.clinic_name || c.full_name,
-        recipient_phone: phoneIntl,
-        channel: 'whatsapp',
-        message_content: mensagem,
-        context: `Follow-up sugerido para negociação sem resposta há ${dias_sem_resposta}+ dias`,
-        ai_reasoning: `Score CNPJ/risco: ${score || 'não disponível'} | Equipamento: ${equipamento}`,
-        status: 'pending',
-        priority: score !== null && score < 500 ? 'alta' : 'media'
-      });
+      if (!dry_run) {
+        await sr.entities.PendingMessage.create({
+          recipient_id: c.id,
+          recipient_name: c.clinic_name || c.full_name,
+          recipient_phone: phoneIntl,
+          channel: 'whatsapp',
+          message_content: mensagem,
+          context: `Follow-up sugerido para negociação sem resposta há ${dias_sem_resposta}+ dias`,
+          ai_reasoning: `Score CNPJ/risco: ${score || 'não disponível'} | Equipamento: ${equipamento}`,
+          status: 'pending',
+          priority: score !== null && score < 500 ? 'alta' : 'media'
+        });
 
-      await sr.entities.AIInteractionLog.create({
-        user_message: `Follow-up automático preparado para ${c.clinic_name || c.full_name}`,
-        ai_response: mensagem,
-        action_type: 'whatsapp',
-        client_id: c.id,
-        client_name: c.clinic_name || c.full_name,
-        source: 'automation',
-        success: true
-      }).catch(() => null);
+        await sr.entities.AIInteractionLog.create({
+          user_message: `Follow-up automático preparado para ${c.clinic_name || c.full_name}`,
+          ai_response: mensagem,
+          action_type: 'whatsapp',
+          client_id: c.id,
+          client_name: c.clinic_name || c.full_name,
+          source: 'automation',
+          success: true
+        }).catch(() => null);
+      }
 
       enviados++;
     }
@@ -96,6 +98,8 @@ Deno.serve(async (req) => {
       enviados,
       preparados_para_aprovacao: enviados,
       sem_telefone,
+      dry_run,
+      external_messages_sent: 0,
     };
 
     // Chamada manual retorna URLs; automação scheduled não expõe dados de clientes

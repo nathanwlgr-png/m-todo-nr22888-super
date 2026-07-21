@@ -1,8 +1,8 @@
 {
   "name": "Geocodificar Cliente Novo/Alterado",
-  "description": "",
+  "description": "Gera uma sugest\u00e3o de geocodifica\u00e7\u00e3o quando endere\u00e7o, cidade ou nome do cliente muda; exige aprova\u00e7\u00e3o humana.",
   "trigger": {
-    "condition": "${ (.trigger.changed_fields == \"address\" or .trigger.changed_fields == \"clinic_name\" or .trigger.changed_fields == \"city\") }",
+    "condition": "${ .trigger.event_type == \"create\" or any((.trigger.changed_fields // [])[]; . == \"address\" or . == \"clinic_name\" or . == \"city\" or . == \"cep\" or . == \"first_name\" or . == \"full_name\") }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -16,20 +16,27 @@
     "document": {
       "dsl": "1.0.0",
       "name": "geocodificar_cliente_novo_alterado",
-      "version": "1.0",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [
       {
-        "run_function": {
+        "preparar_geocodificacao": {
           "call": "invoke_backend_function",
           "with": {
             "function_name": "geocodeClientLocation",
             "args": {
-              "auto_geocode": true
+              "data": "${ .trigger.data }",
+              "client_id": "${ .trigger.entity_id }",
+              "event_type": "${ .trigger.event_type }",
+              "changed_fields": "${ .trigger.changed_fields }"
             }
           },
-          "then": "end"
+          "then": "end",
+          "x-base44": {
+            "title": "Preparar geocodifica\u00e7\u00e3o",
+            "description": "Envia para aprova\u00e7\u00e3o"
+          }
         }
       }
     ]

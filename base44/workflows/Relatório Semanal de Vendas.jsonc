@@ -1,15 +1,39 @@
 {
   "name": "Relat\u00f3rio Semanal de Vendas",
-  "description": "Gera e envia relat\u00f3rio semanal com novos leads e vendas fechadas",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "relatorio_semanal_de_vendas",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "gerar_relatorio": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "weeklySalesReport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Gerar relat\u00f3rio semanal",
+            "description": "Segunda-feira \u00e0s 08h"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Gera o relat\u00f3rio semanal principal toda segunda-feira \u00e0s 08h no hor\u00e1rio de S\u00e3o Paulo.",
   "trigger": {
     "condition": null,
     "config": {
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 11 * * 1",
+      "cron_expression": "0 8 * * 1",
       "one_time_date": null,
-      "timezone": "UTC",
+      "timezone": "America/Sao_Paulo",
       "interval_value": null,
       "interval_unit": null,
       "interval_anchor": null,
@@ -17,25 +41,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "relat_rio_semanal_de_vendas",
-      "version": "1.0",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "run_function": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "weeklySalesReport",
-            "args": {}
-          },
-          "then": "end"
-        }
-      }
-    ]
   }
 }

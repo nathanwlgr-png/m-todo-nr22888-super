@@ -1,15 +1,39 @@
 {
   "name": "\ud83e\uddea Motor de Recompra de Insumos \u2014 Di\u00e1rio 08h",
-  "description": "Detecta diariamente clientes no ciclo de recompra de reagentes e prepara a mensagem de WhatsApp pronta na fila de aprova\u00e7\u00e3o. SAFE: n\u00e3o envia nada e n\u00e3o altera clientes.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "motor_recompra_insumos_diario",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "preparar_recompras": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "motorRecompraInsumos",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Preparar recompras",
+            "description": "Aprova\u00e7\u00e3o obrigat\u00f3ria"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Detecta ciclos de recompra \u00e0s 08h e prepara mensagens sem afirmar promo\u00e7\u00f5es n\u00e3o validadas.",
   "trigger": {
     "condition": null,
     "config": {
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 11 * * *",
+      "cron_expression": "0 8 * * *",
       "one_time_date": null,
-      "timezone": "UTC",
+      "timezone": "America/Sao_Paulo",
       "interval_value": null,
       "interval_unit": null,
       "interval_anchor": null,
@@ -17,25 +41,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "motor_de_recompra_de_insumos_di_rio_08h",
-      "version": "1.0",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "run_function": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "motorRecompraInsumos",
-            "args": {}
-          },
-          "then": "end"
-        }
-      }
-    ]
   }
 }
