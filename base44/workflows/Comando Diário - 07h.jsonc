@@ -1,0 +1,45 @@
+{
+  "name": "Comando Di\u00e1rio - 07:00",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "comando_diario_07_00",
+      "version": "1.1",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "gerar_comando": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "gerarComandoDoDia",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Gerar comando do dia",
+            "description": "Prioridades comerciais"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Gera o Comando do Dia diariamente \u00e0s 07h no hor\u00e1rio de S\u00e3o Paulo.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
