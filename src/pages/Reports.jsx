@@ -18,6 +18,7 @@ import { ArrowLeft, Download, FileText, Loader2, TrendingUp, Sparkles, Target, U
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
 import MarketBenchmarkAnalysis from '@/components/MarketBenchmarkAnalysis';
+import GoogleSheetsHistoryExport from '@/components/reports/GoogleSheetsHistoryExport';
 
 const statusLabels = {
   quente: 'Quente',
@@ -303,6 +304,8 @@ Seja específico, prático e focado em AÇÃO. Pense como um consultor de vendas
       </div>
 
       <div className="p-4 space-y-4">
+        <GoogleSheetsHistoryExport />
+
         {/* Market Benchmark */}
         <MarketBenchmarkAnalysis />
 

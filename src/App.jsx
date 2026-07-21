@@ -94,6 +94,7 @@ const DashboardSniper = lazy(() => import('./pages/DashboardSniper'));
 const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
+const Reports = lazy(() => import('./pages/Reports'));
 const AgendaMensal = lazy(() => import('./pages/AgendaMensal'));
 const WeeklyReportSettings = lazy(() => import('./pages/WeeklyReportSettings'));
 const RankingOportunidades = lazy(() => import('./pages/RankingOportunidades'));
@@ -258,7 +259,7 @@ const AuthenticatedApp = () => {
         <Route path="/AIAssistant" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
         <Route path="/EliteVetClientSearch" element={<Navigate to="/ModoInvestigativoSupremo" replace />} />
-        <Route path="/Reports" element={<Navigate to="/" replace />} />
+        <Route path="/Reports" element={<LayoutWrapper currentPageName="Reports"><Reports /></LayoutWrapper>} />
         <Route path="/NumerologyAnalysis" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/WhatsAppMasterAssistant" element={<Navigate to="/WhatsAppHub" replace />} />
         <Route path="/FollowUpAutomationModule" element={<Navigate to="/AutoFollowUpDashboard" replace />} />
