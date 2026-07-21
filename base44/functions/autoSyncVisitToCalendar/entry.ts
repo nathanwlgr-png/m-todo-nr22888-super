@@ -1,4 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 const GCal = 'https://www.googleapis.com/calendar/v3/calendars/primary';
 
@@ -6,9 +7,11 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
+    const user = await getOptionalUser(base44);
+    if (isForbiddenManualUser(user)) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     // Pode ser chamado por automação de entidade OU manualmente
-    const { event, data, entity_id } = body;
+    const { event, data, entity_id, validate_only = false } = body;
 
     // ─── PROTEÇÃO ANTI-LOOP ──────────────────────────────────────────
     // A automação dispara em create E update da Visit.
@@ -56,8 +59,9 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, reason: 'ID da visita não encontrado' });
     }
 
-    // Somente sincroniza visitas agendadas
-    if (visit.status && visit.status !== 'agendada') {
+    // Sincroniza visitas agendadas e remarcadas.
+    const activeStatuses = ['agendada', 'remarcada'];
+    if (visit.status && !activeStatuses.includes(visit.status)) {
       // Se foi cancelada e tinha evento, deletar do Google Calendar
       if (visit.status === 'cancelada' && visit.google_calendar_event_id) {
         await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, { method: 'DELETE', headers }).catch(() => {});
@@ -80,7 +84,11 @@ Deno.serve(async (req) => {
     }
 
     const start = new Date(visit.scheduled_date);
-    const end = new Date(start.getTime() + (visit.duration_minutes || 60) * 60000);
+    if (!visit.scheduled_date || Number.isNaN(start.getTime())) {
+      return Response.json({ success: false, reason: 'Data da visita inválida' }, { status: 400 });
+    }
+    const durationMinutes = Number(visit.duration_minutes) > 0 ? Number(visit.duration_minutes) : 60;
+    const end = new Date(start.getTime() + durationMinutes * 60000);
 
     const colorMap = {
       fechamento: '11',     // vermelho
@@ -95,7 +103,7 @@ Deno.serve(async (req) => {
         `CRM NR22 | Tipo: ${visit.visit_type || 'visita'}`,
         visit.notes ? `\n📝 ${visit.notes}` : '',
         visit.location ? `\n📍 ${visit.location}` : '',
-        `\n🔗 Visita ID: ${visit.id}`,
+        `\n🔗 Visita ID: ${finalVisitId}`,
       ].join(''),
       location: visit.location || '',
       start: { dateTime: start.toISOString(), timeZone: 'America/Sao_Paulo' },
@@ -109,8 +117,12 @@ Deno.serve(async (req) => {
         ],
       },
       colorId: colorMap[visit.visit_type] || '1',
-      extendedProperties: { private: { crm_visit_id: visit.id } },
+      extendedProperties: { private: { crm_visit_id: finalVisitId } },
     };
+
+    if (validate_only) {
+      return Response.json({ success: true, action: 'validated', visit_id: finalVisitId });
+    }
 
     let gcalRes;
     let action;
@@ -143,28 +155,34 @@ Deno.serve(async (req) => {
       // Sem event_id — criar novo evento
       // Proteção anti-duplicata: buscar por crm_visit_id nas propriedades privadas
       const searchRes = await fetch(
-        `${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(visit.id)}&maxResults=1`,
+        `${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(finalVisitId)}&maxResults=1`,
         { method: 'GET', headers }
       );
 
       if (searchRes.ok) {
         const searchData = await searchRes.json();
         if (searchData.items && searchData.items.length > 0) {
-          // Evento já existe! Salvar o ID e retornar ignorado
+          // Evento já existe: atualizar os dados e recuperar o vínculo sem duplicar.
           const existingId = searchData.items[0].id;
-          await base44.asServiceRole.entities.Visit.update(finalVisitId, {
-            google_calendar_synced: true,
-            google_calendar_event_id: existingId,
-          }).catch(() => {});
-          console.log(`[SYNC] Visita ${visit.client_name} — evento já existe (${existingId}), ignorando duplicata`);
-          return Response.json({ success: true, action: 'ignored_duplicate', event_id: existingId });
+          gcalRes = await fetch(`${GCal}/events/${encodeURIComponent(existingId)}`, {
+            method: 'PUT', headers, body: JSON.stringify(eventBody),
+          });
+          action = 'updated_existing';
         }
       }
 
-      gcalRes = await fetch(`${GCal}/events`, {
-        method: 'POST', headers, body: JSON.stringify(eventBody),
-      });
-      action = 'created';
+      if (!gcalRes) {
+        gcalRes = await fetch(`${GCal}/events`, {
+          method: 'POST', headers, body: JSON.stringify(eventBody),
+        });
+        action = 'created';
+      }
+    }
+
+    if (!gcalRes.ok) {
+      const errorText = await gcalRes.text();
+      console.error(`[SYNC] Google Calendar respondeu ${gcalRes.status}:`, errorText);
+      return Response.json({ success: false, error: `Google Calendar: ${gcalRes.status}` }, { status: 502 });
     }
 
     const gcalData = await gcalRes.json();

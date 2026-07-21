@@ -1,8 +1,8 @@
 {
   "name": "Auto-Sync Visita \u2192 Google Calendar",
-  "description": "Sincroniza automaticamente visitas agendadas, alteradas ou canceladas no CRM com o Google Calendar pessoal do consultor, sem duplicar eventos.",
+  "description": "Sincroniza automaticamente visitas agendadas, remarcadas ou canceladas no CRM com o Google Calendar pessoal do consultor, sem duplicar eventos.",
   "trigger": {
-    "condition": "${ .trigger.data.status == \"agendada\" or .trigger.data.status == \"cancelada\" }",
+    "condition": "${ .trigger.data.status == \"agendada\" or .trigger.data.status == \"remarcada\" or .trigger.data.status == \"cancelada\" }",
     "config": {
       "trigger_type": "entity",
       "events": [
@@ -16,7 +16,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "auto_sync_visita_google_calendar",
-      "version": "1.1",
+      "version": "1.2",
       "namespace": "base44"
     },
     "do": [
