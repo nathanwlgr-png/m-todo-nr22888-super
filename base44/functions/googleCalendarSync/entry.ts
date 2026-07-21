@@ -43,14 +43,26 @@ Deno.serve(async (req) => {
 
         let gcalRes;
         if (visit.google_calendar_event_id) {
-          // Update existing event
-          gcalRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, {
-            method: 'PUT', headers, body: JSON.stringify(eventBody),
+          const checkRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, { headers });
+          const targetUrl = checkRes.status === 404 || checkRes.status === 410
+            ? `${GCal}/events`
+            : `${GCal}/events/${visit.google_calendar_event_id}`;
+          gcalRes = await fetch(targetUrl, {
+            method: targetUrl.endsWith('/events') ? 'POST' : 'PUT',
+            headers,
+            body: JSON.stringify(eventBody),
           });
         } else {
-          // Create new event
-          gcalRes = await fetch(`${GCal}/events`, {
-            method: 'POST', headers, body: JSON.stringify(eventBody),
+          const searchRes = await fetch(
+            `${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(visit.id)}&maxResults=1`,
+            { headers }
+          );
+          const searchData = searchRes.ok ? await searchRes.json() : { items: [] };
+          const existingId = searchData.items?.[0]?.id;
+          gcalRes = await fetch(existingId ? `${GCal}/events/${existingId}` : `${GCal}/events`, {
+            method: existingId ? 'PUT' : 'POST',
+            headers,
+            body: JSON.stringify(eventBody),
           });
         }
 
