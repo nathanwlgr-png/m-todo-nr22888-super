@@ -15,6 +15,8 @@ export const setModo = (modo) => {
 export const VENDEDOR_PAGES = [
   { page: '', label: '🏠 Hoje', category: 'Operação de Rua' },
   { page: 'Clients', label: '👥 Clientes', category: 'Operação de Rua' },
+  { page: 'AracatubaClinics', label: '📍 Araçatuba', category: 'Operação de Rua' },
+  { page: 'MessageApproval', label: '✅ Aprovar mensagens', category: 'Operação de Rua' },
   { page: 'WhatsAppHub', label: '💬 Mensagens', category: 'Operação de Rua' },
   { page: 'DayFieldView', label: '🗺️ Rota', category: 'Operação de Rua' },
   { page: 'ProposalGenerator', label: '📄 Propostas', category: 'Operação de Rua' },
@@ -22,7 +24,7 @@ export const VENDEDOR_PAGES = [
   { page: 'MapaSeamatyBrasil', label: '🗺️ Mapa', category: 'Mais' },
   { page: 'DuplicateManager', label: '🧹 Duplicados', category: 'Mais' },
   { page: 'NotificationSettings', label: '⚙️ Configurações', category: 'Mais' },
-  { page: 'RelatorioRicardo', label: '📊 Relatórios', category: 'Mais' },
+  { page: 'Reports', label: '📊 Central de Relatórios', category: 'Mais' },
   { page: 'CentralIAMaster', label: '🧠 Ferramentas avançadas', category: 'Mais' },
   { page: 'DashboardSniper', label: '🎯 Dashboard Sniper clássico', category: 'Mais' },
 ];

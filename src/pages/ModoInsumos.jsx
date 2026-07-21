@@ -334,8 +334,8 @@ export default function ModoInsumos() {
                         disabled={generatingMessage}
                       >
                         {generatingMessage ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Send className="w-3 h-3 mr-1" />}
-                        WhatsApp
-                      </Button>
+                        Preparar rascunho
+                        </Button>
                       <Button
                         size="sm"
                         variant="outline"
@@ -369,7 +369,7 @@ export default function ModoInsumos() {
                   navigator.clipboard.writeText(selectedClient.generatedMessage);
                 }}>
                   <Send className="w-3 h-3 mr-1" />
-                  Copiar
+                  Copiar rascunho
                 </Button>
                 <Button
                   size="sm"

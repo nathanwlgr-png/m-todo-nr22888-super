@@ -95,6 +95,12 @@ const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
 const Reports = lazy(() => import('./pages/Reports'));
+const AracatubaClinics = lazy(() => import('./pages/AracatubaClinics'));
+const MessageApproval = lazy(() => import('./pages/MessageApproval'));
+const EquipmentConsumables = lazy(() => import('./pages/EquipmentConsumables'));
+const DocumentTracking = lazy(() => import('./pages/DocumentTracking'));
+const PreVisitChecklist = lazy(() => import('./pages/PreVisitChecklist'));
+const PostVisitAnalysis = lazy(() => import('./pages/PostVisitAnalysis'));
 const AgendaMensal = lazy(() => import('./pages/AgendaMensal'));
 const WeeklyReportSettings = lazy(() => import('./pages/WeeklyReportSettings'));
 const RankingOportunidades = lazy(() => import('./pages/RankingOportunidades'));
@@ -253,8 +259,14 @@ const AuthenticatedApp = () => {
         <Route path="/TesteAgentes" element={<LayoutWrapper currentPageName="TesteAgentes"><TesteAgentes /></LayoutWrapper>} />
         <Route path="/VozCampo" element={<LayoutWrapper currentPageName="VozCampo"><VozCampo /></LayoutWrapper>} />
         <Route path="/PainelConcorrencia" element={<LayoutWrapper currentPageName="PainelConcorrencia"><PainelConcorrencia /></LayoutWrapper>} />
+        <Route path="/AracatubaClinics" element={<LayoutWrapper currentPageName="AracatubaClinics"><AracatubaClinics /></LayoutWrapper>} />
+        <Route path="/MessageApproval" element={<LayoutWrapper currentPageName="MessageApproval"><MessageApproval /></LayoutWrapper>} />
+        <Route path="/EquipmentConsumables" element={<LayoutWrapper currentPageName="EquipmentConsumables"><EquipmentConsumables /></LayoutWrapper>} />
+        <Route path="/DocumentTracking" element={<DocumentTracking />} />
+        <Route path="/PreVisitChecklist" element={<LayoutWrapper currentPageName="PreVisitChecklist"><PreVisitChecklist /></LayoutWrapper>} />
+        <Route path="/PostVisitAnalysis" element={<LayoutWrapper currentPageName="PostVisitAnalysis"><PostVisitAnalysis /></LayoutWrapper>} />
 
-        {/* ── ROTAS LEGACY → Consolidadas ── */}
+         {/* ── ROTAS LEGACY → Consolidadas ── */}
         <Route path="/PossibleSales" element={<Navigate to="/" replace />} />
         <Route path="/AIAssistant" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
@@ -267,6 +279,18 @@ const AuthenticatedApp = () => {
         <Route path="/AIKnowledgeUploader" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/ClientImportManager" element={<Navigate to="/Clients" replace />} />
         <Route path="/MasterCRM" element={<Navigate to="/Clients" replace />} />
+        <Route path="/ProspeccaoSeamaty" element={<Navigate to="/Clients" replace />} />
+        <Route path="/PipelineNegociacao" element={<Navigate to="/SalesFunnelKanban" replace />} />
+        <Route path="/PropostaCliente" element={<Navigate to="/ProposalGenerator" replace />} />
+        <Route path="/MaterialPersonalizadoSeamaty" element={<Navigate to="/ProposalGenerator" replace />} />
+        <Route path="/FilaAprovacaoMensagem" element={<Navigate to="/MessageApproval" replace />} />
+        <Route path="/InsumoRecorrencia" element={<Navigate to="/ModoInsumos" replace />} />
+        <Route path="/EstoqueInsumo" element={<Navigate to="/EquipmentConsumables" replace />} />
+        <Route path="/VisitaComercial" element={<Navigate to="/VisitManager" replace />} />
+        <Route path="/PlanejamentoMensal" element={<Navigate to="/AgendaMensal" replace />} />
+        <Route path="/PropostaEnvioTracking" element={<Navigate to="/DocumentTracking" replace />} />
+        <Route path="/EventoPropostaTracking" element={<Navigate to="/DocumentTracking" replace />} />
+        <Route path="/ResumoTrackingCliente" element={<Navigate to="/DocumentTracking" replace />} />
 
         {/* ── INTELIGÊNCIA DE CAMPO ── */}
         <Route path="/ModoInvestigativoSupremo" element={<LayoutWrapper currentPageName="ModoInvestigativoSupremo"><ModoInvestigativoSupremo /></LayoutWrapper>} />

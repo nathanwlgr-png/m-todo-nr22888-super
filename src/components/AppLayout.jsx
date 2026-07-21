@@ -43,6 +43,11 @@ const PAGE_TITLES = {
   SalesFunnel: 'Vendas',
   AutoFollowUpDashboard: 'Pós-venda',
   Reports: 'Central de Relatórios',
+  AracatubaClinics: 'Clínicas de Araçatuba',
+  MessageApproval: 'Aprovação de Mensagens',
+  EquipmentConsumables: 'Estoque de Insumos',
+  PreVisitChecklist: 'Preparação de Visita',
+  PostVisitAnalysis: 'Resumo Pós-Visita',
   DuplicateManager: 'Duplicados',
 };
 

@@ -19,6 +19,7 @@ export default function DocumentTracking() {
   useEffect(() => {
     if (!trackingId) {
       toast.error('Link inválido');
+      setLoading(false);
       return;
     }
 
@@ -118,6 +119,10 @@ export default function DocumentTracking() {
     );
   }
 
+  if (!engagement) {
+    return <div className="min-h-screen flex items-center justify-center p-6"><Card className="p-6 text-center"><h1 className="font-bold">Rastreamento não encontrado</h1><p className="text-sm text-slate-600 mt-2">Abra um link válido de proposta para consultar o sinal de interesse.</p></Card></div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6">
       <div className="max-w-2xl mx-auto">
@@ -140,12 +145,12 @@ export default function DocumentTracking() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Eye className="w-5 h-5 text-purple-600" />
-                <p className="font-semibold text-purple-900">Documento Rastreado</p>
+                <p className="font-semibold text-purple-900">Sinal de interesse registrado</p>
               </div>
               <p className="text-sm text-purple-700">Tempo: {Math.floor(timeSpent / 60)}:{String(timeSpent % 60).padStart(2, '0')}</p>
             </div>
             <p className="text-xs text-purple-700">
-              Este documento está sendo rastreado. O vendedor saberá que você visualizou.
+              A abertura e o clique indicam interesse, mas não comprovam leitura completa do documento.
             </p>
           </div>
 

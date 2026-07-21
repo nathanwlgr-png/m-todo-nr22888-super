@@ -329,7 +329,16 @@ Use as variáveis:
 {{necessidades}} = ${selectedClient.lab_needs?.join(', ')}`;
       }
 
-      prompt += `\n\nGere uma proposta PROFISSIONAL E PERSUASIVA que:
+      prompt += `\n\nREGRAS TÉCNICAS E DE SEGURANÇA OBRIGATÓRIAS:
+      - Nunca mencionar numerologia ao cliente; usar somente “perfil comportamental interno” quando indispensável.
+      - SMT-120VP: somente rotores circulares, até 24 parâmetros, 100 µL, cerca de 12 minutos.
+      - VG1: hemogasometria e eletrólitos, 100 µL, cerca de 4 minutos.
+      - VI1: imuno; não citar volume de amostra.
+      - VQ1: PCR, cerca de 40 minutos.
+      - VBC50A: hematologia de 5 partes.
+      - Nunca prometer desconto, condição especial, reposição, bonificação ou negociação sem aprovação de Nathan.
+
+Gere uma proposta PROFISSIONAL E PERSUASIVA que:
       1. Aborde especificamente as necessidades do cliente
       2. Conecte os produtos às dores identificadas
       3. Use os dados do histórico para criar rapport
@@ -792,7 +801,7 @@ Use as variáveis:
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="manual">Manual (você aprova cada liberação)</SelectItem>
-                            <SelectItem value="automatic">Automático (libera ao detectar uso)</SelectItem>
+
                           </SelectContent>
                         </Select>
                       </div>

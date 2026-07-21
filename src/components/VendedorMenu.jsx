@@ -9,6 +9,7 @@ const ADMIN_CATEGORIES = [
     label: '1. ⚡ Meu Dia',
     pages: [
       { page: 'Clients', label: '👥 Clientes' },
+      { page: 'AracatubaClinics', label: '📍 Araçatuba' },
       { page: 'MapaSeamatyBrasil', label: '📍 Mapa de Clientes' },
       { page: 'SmartRouteOptimizer', label: '🗺️ Rota do Dia' },
       { page: 'VisitManager', label: '📋 Visitas' },
@@ -29,6 +30,7 @@ const ADMIN_CATEGORIES = [
     label: '3. 💬 Abordar',
     pages: [
       { page: 'GenerateWhatsAppIntegrated', label: '⚡ Gerar SPIN' },
+      { page: 'MessageApproval', label: '✅ Aprovar Mensagens' },
       { page: 'WhatsAppHub', label: '💬 WhatsApp Hub' },
     ],
   },
@@ -36,7 +38,8 @@ const ADMIN_CATEGORIES = [
     label: '4. 🏁 Fechar',
     pages: [
       { page: 'ProposalGenerator', label: '📄 Gerar Proposta' },
-      { page: 'ModoInsumos', label: '📦 Insumos' },
+      { page: 'ModoInsumos', label: '📦 Recorrência de Insumos' },
+      { page: 'EquipmentConsumables', label: '📦 Estoque de Insumos' },
       { page: 'SalesFunnel', label: '🏁 Funil & Fechamento' },
     ],
   },
@@ -47,6 +50,7 @@ const ADMIN_CATEGORIES = [
       { page: 'SalesFunnelKanban', label: '📊 Funil Kanban' },
       { page: 'ExecutiveSalesAnalysis', label: '📈 Análise Executiva' },
       { page: 'CentralIAMaster', label: '🧠 Central IA' },
+      { page: 'Reports', label: '📊 Central de Relatórios' },
     ],
   },
   {

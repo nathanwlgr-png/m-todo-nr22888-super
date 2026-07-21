@@ -20,57 +20,47 @@ export default function MessageApproval() {
 
   const { data: automatedMessages = [], isLoading: loadingAuto } = useQuery({
     queryKey: ['pending-messages-auto'],
-    queryFn: () => base44.entities.AutomatedMessageLog?.filter({ sent_status: 'pendente' }).catch(() => []),
-    refetchInterval: 5000
+    queryFn: () => Promise.resolve([]),
+    refetchInterval: 30000
   });
 
   const { data: pendingMsgs = [], isLoading: loadingPending } = useQuery({
     queryKey: ['pending-messages-queue'],
-    queryFn: () => base44.entities.PendingMessage?.filter({ status: 'pending' }).catch(() => []),
-    refetchInterval: 5000
+    queryFn: () => base44.entities.PendingMessage?.list('-created_date', 200).then((items) => items.filter((m) => ['pending', 'aguardando_aprovacao', 'rascunho', 'edited'].includes(m.status))).catch(() => []),
+    refetchInterval: 30000
   });
 
-  // Normaliza ambas as fontes para um formato unificado
-  const pendingMessages = [
-    ...automatedMessages.map(m => ({ ...m, _source: 'auto' })),
-    ...pendingMsgs.map(m => ({
-      id: m.id,
-      _source: 'pending',
-      client_name: m.client_name || m.contact_name || 'Contato',
-      message_type: m.channel || 'whatsapp',
-      message_content: m.message_content || m.content || '',
-      trigger_reason: m.trigger_reason || m.reason || '',
-      ai_reasoning: m.ai_reasoning || '',
-      email_subject: m.email_subject || '',
-      context: m.context || '',
-      suggested_send_time: m.suggested_send_time || null,
-    }))
-  ];
+  // Apenas rascunhos da fila humana; esta tela nunca dispara envio externo.
+  const pendingMessages = pendingMsgs.map(m => ({
+    id: m.id,
+    _source: 'pending',
+    client_name: m.recipient_name || m.destinatario_nome || 'Contato',
+    message_type: m.channel || m.canal || 'whatsapp',
+    message_content: m.edited_content || m.message_content || m.mensagem || '',
+    trigger_reason: m.context || m.contexto || '',
+    ai_reasoning: m.ai_reasoning || '',
+    email_subject: m.email_subject || '',
+    context: m.context || m.contexto || '',
+    suggested_send_time: m.suggested_send_time || null,
+  }));
 
   const isLoading = loadingAuto && loadingPending;
 
   const approveMutation = useMutation({
-    mutationFn: async ({ id, content, source }) => {
-      if (source === 'pending') {
-        await base44.entities.PendingMessage.update(id, {
-          status: 'approved',
-          message_content: content,
-          approved_at: new Date().toISOString()
-        });
-      } else {
-        await base44.entities.AutomatedMessageLog.update(id, {
-          sent_status: 'enviada',
-          message_content: content,
-          sent_at: new Date().toISOString()
-        });
-        await base44.functions.invoke('sendApprovedMessages', { message_id: id });
-      }
+    mutationFn: async ({ id, content }) => {
+      await base44.entities.PendingMessage.update(id, {
+        status: 'approved',
+        message_content: content,
+        edited_content: content,
+        approved_at: new Date().toISOString(),
+        aprovado_por_nathan: true
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending-messages-auto'] });
       queryClient.invalidateQueries({ queryKey: ['pending-messages-queue'] });
       queryClient.invalidateQueries({ queryKey: ['pending-messages-count'] });
-      toast.success('✅ Mensagem aprovada e enviada!');
+      toast.success('Mensagem aprovada para envio manual. Nenhum envio foi realizado.');
       setEditingId(null);
     }
   });
@@ -116,9 +106,9 @@ export default function MessageApproval() {
     <div className="space-y-4 pb-20">
       <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
         <CardHeader>
-          <CardTitle className="text-2xl">Aprovação de Mensagens Automáticas</CardTitle>
+          <CardTitle className="text-2xl">Fila de Aprovação de Mensagens</CardTitle>
           <p className="text-indigo-100">
-            {pendingMessages.length} mensagem(ns) aguardando sua aprovação
+            {pendingMessages.length} rascunho(s) aguardando Nathan. Aprovar não envia automaticamente.
           </p>
         </CardHeader>
       </Card>
@@ -221,7 +211,7 @@ export default function MessageApproval() {
                         className="flex-1 bg-green-600"
                       >
                         <Send className="w-4 h-4 mr-2" />
-                        Aprovar Editada
+                        Aprovar edição para envio manual
                       </Button>
                       <Button
                         onClick={() => setEditingId(null)}
@@ -237,7 +227,7 @@ export default function MessageApproval() {
                         className="flex-1 bg-green-600"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Aprovar & Enviar
+                        Aprovar para envio manual
                       </Button>
                       <Button
                         onClick={() => handleEdit(msg)}

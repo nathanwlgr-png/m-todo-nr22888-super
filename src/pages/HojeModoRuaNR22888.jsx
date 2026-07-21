@@ -7,6 +7,7 @@ import {
   MapPin, MessageSquare, Package, Radar, Route, ShieldCheck, Siren
 } from 'lucide-react';
 import ProximaAcaoConsultivaModal from '@/components/ProximaAcaoConsultivaModal';
+import OperationalMetricCards from '@/components/dashboard/OperationalMetricCards';
 
 const COMMANDS = [
   { cmd: '/hoje', label: 'Hoje', target: 'campo' },
@@ -20,7 +21,7 @@ const COMMANDS = [
   { cmd: '/comodato', label: 'Comodato', target: 'posvenda' },
 ];
 
-const pendingStatuses = ['pending', 'aguardando_aprovacao', 'rascunho', 'ready_to_send'];
+const pendingStatuses = ['pending', 'aguardando_aprovacao', 'rascunho', 'edited'];
 const todayKey = new Date().toISOString().slice(0, 10);
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
@@ -110,6 +111,16 @@ export default function HojeModoRuaNR22888() {
     queryFn: () => base44.entities.PendingMessage.list('-created_date', 100).catch(() => []),
     staleTime: 120000,
   });
+  const { data: proposalsRaw = [] } = useQuery({
+    queryKey: ['hoje-rua-proposals'],
+    queryFn: () => base44.entities.ConsultativeProposal.list('-updated_date', 100).catch(() => []),
+    staleTime: 120000,
+  });
+  const { data: consumableOrdersRaw = [] } = useQuery({
+    queryKey: ['hoje-rua-consumables'],
+    queryFn: () => base44.entities.ConsumableOrder.list('-next_reorder_date', 100).catch(() => []),
+    staleTime: 120000,
+  });
   const { data: queueRaw = [] } = useQuery({
     queryKey: ['hoje-rua-crm-queue'],
     queryFn: () => base44.entities.CRMUpdateQueue.list('-created_date', 100).catch(() => []),
@@ -125,6 +136,8 @@ export default function HojeModoRuaNR22888() {
   const tasks = safeArray(tasksRaw);
   const visits = safeArray(visitsRaw);
   const pendingMessages = safeArray(pendingRaw).filter((m) => pendingStatuses.includes(m.status));
+  const proposals = safeArray(proposalsRaw);
+  const consumableOrders = safeArray(consumableOrdersRaw);
   const crmQueue = safeArray(queueRaw).filter((q) => ['pendente', 'erro'].includes(q.status));
   const openAlerts = safeArray(alertsRaw).filter((a) => !a.read && !a.dismissed);
 
@@ -138,6 +151,13 @@ export default function HojeModoRuaNR22888() {
   const fieldVisits = visits.filter((v) => v.status !== 'cancelada' && (isToday(v.scheduled_date) || v.status === 'agendada')).slice(0, 6);
   const hotProposals = clients.filter((c) => ['proposta', 'negociacao'].includes(c.pipeline_stage) || c.sale_closed === true).slice(0, 5);
   const postSaleRisk = clients.filter((c) => (c.equipment_sold || c.current_equipment || c.contract_renewal_date) && daysSince(c.last_purchase_date) > 45).slice(0, 5);
+  const overdueTasks = tasks.filter((t) => t.status === 'pendente' && t.due_date && t.due_date < todayKey);
+  const pendingProposals = proposals.filter((p) => ['draft', 'sent', 'viewed', 'shared'].includes(p.status));
+  const supplyAlerts = consumableOrders.filter((o) => o.status === 'ativo' && o.next_reorder_date && o.next_reorder_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const installedClients = clients.filter((c) => c.equipment_sold || /seamaty/i.test(c.current_equipment || '')).length;
+  const todayVisits = visits.filter((v) => isToday(v.scheduled_date) && v.status !== 'cancelada');
+  const totalHotClients = clients.filter((c) => c.status === 'quente' || c.pipeline_stage === 'negociacao' || (c.purchase_score || 0) >= 70).length;
+  const operationalMetrics = { today: fieldTasks.length + todayVisits.length, overdue: overdueTasks.length, hot: totalHotClients, proposals: pendingProposals.length, supplies: supplyAlerts.length, route: todayVisits.length, approvals: pendingMessages.length, installed: installedClients };
   const sniper = hotClients[0] || clients[0];
 
   const goToCommand = (command) => {
@@ -176,12 +196,7 @@ export default function HojeModoRuaNR22888() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <div className="rounded-2xl p-3 bg-[#101012] border border-orange-500/20"><p className="text-2xl font-black text-orange-300">{hotClients.length}</p><p className="text-[10px] text-slate-500 font-bold uppercase">Quentes</p></div>
-          <div className="rounded-2xl p-3 bg-[#101012] border border-green-500/20"><p className="text-2xl font-black text-green-300">{pendingMessages.length}</p><p className="text-[10px] text-slate-500 font-bold uppercase">Aprovações</p></div>
-          <div className="rounded-2xl p-3 bg-[#101012] border border-cyan-500/20"><p className="text-2xl font-black text-cyan-300">{fieldTasks.length + fieldVisits.length}</p><p className="text-[10px] text-slate-500 font-bold uppercase">Campo</p></div>
-          <div className="rounded-2xl p-3 bg-[#101012] border border-red-500/20"><p className="text-2xl font-black text-red-300">{openAlerts.length + crmQueue.length}</p><p className="text-[10px] text-slate-500 font-bold uppercase">Pendências</p></div>
-        </div>
+        <OperationalMetricCards metrics={operationalMetrics} />
 
         <Section id="sniper" icon={Radar} title="Sniper do dia" count={sniper ? 1 : 0}>
           {sniper ? <ClientCard client={sniper} context={`Score ${sniper.purchase_score || 0} • ${sniper.city || 'cidade não informada'}`} recommendation="priorizar contato consultivo, validar necessidade de equipamento e preparar abordagem SPIN antes do WhatsApp." /> : <EmptyState />}
