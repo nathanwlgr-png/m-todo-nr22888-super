@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const now = () => new Date().toISOString();
 const today = () => new Date().toISOString().slice(0, 10);
@@ -93,6 +93,21 @@ async function concorrentes(base44, raw) {
   }).slice(0, 6).map((c, i) => `${i + 1}. ${c.nome}${c.marca_concorrente ? ` · ${c.marca_concorrente}` : ''} · ${c.cidade || 'sem cidade'}\nEquipamento visto: ${c.equipamento_instalado || 'sem evidência'}\nAmeaça: ${c.nivel_ameaca || 'médio'}\nFonte: ${(c.ultimas_publicacoes || [])[0]?.fonte || (c.fontes_consultadas || [])[0] || 'sem fonte'}\nArgumento: ${c.argumento_contra || c.oportunidade_detectada || 'Velocidade, ROI e suporte Seamaty'}\nAção: usar no SPIN e proposta.`);
 }
 
+async function investigateCompetitor(base44, raw) {
+  const q = norm(raw);
+  if (!q) return 'Use /investigar [concorrente, marca ou cidade].';
+  const comps = await filter(base44, 'CompetitorTracker', { ativo: true }, '-ultima_investigacao', 50);
+  const matches = comps.filter(c => norm(`${c.nome} ${c.marca_concorrente} ${c.cidade} ${c.uf}`).includes(q)).slice(0, 6);
+  if (!matches.length) return 'Alvo não encontrado no radar. Cadastre-o na Investigação Suprema antes de pesquisar pelo Telegram.';
+  if (matches.length > 1) return `Encontrei mais de um alvo. Especifique melhor:\n${matches.map((c, i) => `${i + 1}. ${c.nome} · ${c.marca_concorrente || 'sem marca'} · ${c.cidade || 'sem cidade'}`).join('\n')}`;
+
+  const result = await base44.functions.invoke('investigarConcorrenteSupremo', { competitor_id: matches[0].id });
+  const data = result?.data || result;
+  const comp = data?.competitor || matches[0];
+  const source = (comp.ultimas_publicacoes || [])[0]?.fonte || (comp.fontes_consultadas || [])[0] || 'sem evidência pública';
+  return `INVESTIGAÇÃO SUPREMA — ${comp.nome}\nCidade: ${comp.cidade || 'não informada'}\nMarca: ${comp.marca_concorrente || 'não informada'}\nEquipamento: ${comp.equipamento_instalado || 'sem evidência pública'}\nAmeaça: ${comp.nivel_ameaca || 'medio'}\nSinal recente: ${(comp.ultimas_publicacoes || [])[0]?.resumo || comp.inteligencia_ia || 'sem evidência pública'}\nFonte: ${source}\nOportunidade: ${comp.oportunidade_detectada || 'avaliar abertura comercial'}\nArgumento Seamaty: ${comp.argumento_contra || 'velocidade, ROI e suporte'}\nPróxima ação: usar no SPIN antes do WhatsApp e da proposta.${data?.cached ? '\nCache de hoje usado para economizar IA/API.' : ''}`;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -137,6 +152,10 @@ Deno.serve(async (req) => {
       const rows = await findClients(base44, args, 10);
       resposta = rows.length ? rows.map((c, i) => `${i + 1}. ${nameOf(c)} · ${c.city || 'sem cidade'} · score ${c.purchase_score || c.health_score || 0} · ${c.phone ? 'WhatsApp ok' : 'sem WhatsApp'}`).join('\n') : 'Nenhum cliente prioritário encontrado para essa cidade.';
       acao = 'listar cidade';
+    } else if (cmd === '/investigar') {
+      resposta = await investigateCompetitor(base44, args);
+      status = resposta.startsWith('INVESTIGAÇÃO SUPREMA') ? 'interpretado' : 'erro';
+      acao = 'executar busca investigativa';
     } else if (cmd === '/concorrente') {
       const rows = await concorrentes(base44, args);
       resposta = rows.join('\n\n') || 'Nenhum concorrente encontrado para esse termo/cidade/cliente.';
@@ -216,7 +235,8 @@ Deno.serve(async (req) => {
 /rota — Visitas de hoje
 /cliente [nome] — Resumo de rua do cliente
 /cidade [cidade] — Clientes da cidade
-/concorrente [marca] — Argumento contra concorrente
+/concorrente [marca] — Consulta rápida no radar
+/investigar [concorrente/marca/cidade] — Executa a Investigação Suprema
 /whatsapp ou /mensagem [nome|objetivo] — Gera mensagem (revisar no CRM)
 /proposta [nome|produto] — Cria tarefa de proposta
 /material [nome|material] — Cria tarefa de material
@@ -272,6 +292,7 @@ Deno.serve(async (req) => {
       acao = 'orientar comandos';
     }
 
+    if (body.validate_only) return Response.json({ resposta, comando: cmd, validated: true, envio_automatico: false });
     const lg = await log(base44, user, text, cmd, resposta, { status, cliente_detectado: client ? nameOf(client) : '', acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '' });
     return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', envio_automatico: false });
   } catch (error) {
