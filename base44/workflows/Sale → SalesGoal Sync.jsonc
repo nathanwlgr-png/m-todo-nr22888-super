@@ -1,0 +1,35 @@
+{
+  "name": "Sale \u2192 SalesGoal Sync",
+  "description": "Atualiza automaticamente o current_value das metas ativas quando uma venda \u00e9 criada ou fechada",
+  "trigger": {
+    "condition": "${ (.trigger.data.status == \"fechada\" or .trigger.data.status == \"entregue\") }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "Sale"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sale_salesgoal_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "saleGoalSync",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

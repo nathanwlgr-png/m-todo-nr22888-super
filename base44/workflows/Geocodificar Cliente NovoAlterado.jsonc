@@ -1,0 +1,37 @@
+{
+  "name": "Geocodificar Cliente Novo/Alterado",
+  "description": "",
+  "trigger": {
+    "condition": "${ (.trigger.changed_fields == \"address\" or .trigger.changed_fields == \"clinic_name\" or .trigger.changed_fields == \"city\") }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "Client"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "geocodificar_cliente_novo_alterado",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "geocodeClientLocation",
+            "args": {
+              "auto_geocode": true
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

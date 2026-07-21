@@ -1,0 +1,41 @@
+{
+  "name": "\ud83c\udfaf Radar de Prospec\u00e7\u00e3o Quente \u2014 Ter\u00e7a 06h",
+  "description": "Varre semanalmente a regi\u00e3o base e captura cl\u00ednicas quentes (terceirizado/concorrente) como leads quentes com battlecard pronto. SAFE: dados p\u00fablicos, aguarda aprova\u00e7\u00e3o do Nathan.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * 2",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "radar_de_prospec_o_quente_ter_a_06h",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "radarProspeccaoQuente",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

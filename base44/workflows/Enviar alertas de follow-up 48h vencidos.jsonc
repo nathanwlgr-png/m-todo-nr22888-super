@@ -1,0 +1,41 @@
+{
+  "name": "Enviar alertas de follow-up 48h vencidos",
+  "description": "Verifica de hora em hora tarefas de follow-up p\u00f3s-visita vencidas e envia alerta interno uma \u00fanica vez.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 1,
+      "interval_unit": "hours",
+      "interval_anchor": "2026-06-23T03:03:59.736000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "enviar_alertas_de_follow_up_48h_vencidos",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendDueVisitFollowUpAlerts",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

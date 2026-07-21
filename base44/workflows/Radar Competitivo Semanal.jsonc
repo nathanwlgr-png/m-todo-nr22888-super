@@ -1,0 +1,45 @@
+{
+  "name": "Radar Competitivo Semanal",
+  "description": "Escaneia novas cl\u00ednicas veterin\u00e1rias toda segunda-feira e envia alertas autom\u00e1ticos via WhatsApp",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 11 * * 1",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "radar_competitivo_semanal",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "clinicCompetitiveMonitor",
+            "args": {
+              "city": "S\u00e3o Paulo",
+              "state": "SP",
+              "radius_km": 150
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

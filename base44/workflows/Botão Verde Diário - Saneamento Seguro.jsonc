@@ -1,0 +1,43 @@
+{
+  "name": "Bot\u00e3o Verde Di\u00e1rio - Saneamento Seguro",
+  "description": "Prepara diariamente sugest\u00f5es de saneamento comercial na fila de aprova\u00e7\u00e3o, sem alterar clientes automaticamente.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 10 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "bot_o_verde_di_rio_saneamento_seguro",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "prepararSaneamentoConversao",
+            "args": {
+              "limit": 50
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

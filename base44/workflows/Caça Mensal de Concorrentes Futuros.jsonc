@@ -1,0 +1,41 @@
+{
+  "name": "Ca\u00e7a Mensal de Concorrentes Futuros",
+  "description": "Uma vez por m\u00eas, busca novos lan\u00e7amentos de equipamentos veterin\u00e1rios (China + global), registra concorrentes futuros no Painel Concorr\u00eancia e alerta no Telegram.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 1 * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "ca_a_mensal_de_concorrentes_futuros",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "cacaConcorrentesFuturos",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

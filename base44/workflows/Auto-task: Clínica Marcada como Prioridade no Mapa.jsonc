@@ -1,0 +1,37 @@
+{
+  "name": "Auto-task: Cl\u00ednica Marcada como Prioridade no Mapa",
+  "description": "Cria automaticamente uma tarefa de acompanhamento para Nathan quando um cliente \u00e9 marcado com alta prioridade de aten\u00e7\u00e3o no Mapa Seamaty.",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"priority_level\") != null) or (.trigger.changed_fields | index(\"attention_priority\") != null)) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Client"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_task_cl_nica_marcada_como_prioridade_no_mapa",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "aiFollowUpAutomation",
+            "args": {
+              "action": "create_priority_task",
+              "assigned_to": "Nathan"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

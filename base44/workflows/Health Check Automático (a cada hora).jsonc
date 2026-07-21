@@ -1,0 +1,41 @@
+{
+  "name": "Health Check Autom\u00e1tico (a cada hora)",
+  "description": "Monitora a sa\u00fade do sistema a cada hora e reporta problemas",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 6,
+      "interval_unit": "hours",
+      "interval_anchor": "2026-03-10T15:32:17.886000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "health_check_autom_tico_a_cada_hora",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "systemHealthMonitor",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Sync Di\u00e1rio Offline - 6h",
+  "description": "Sincroniza snapshot completo de clientes, vendas, leads e tarefas para acesso offline. Roda diariamente \u00e0s 6h.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sync_di_rio_offline_6h",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dailyOfflineSync",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

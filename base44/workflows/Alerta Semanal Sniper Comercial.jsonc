@@ -1,0 +1,41 @@
+{
+  "name": "Alerta Semanal Sniper Comercial",
+  "description": "Toda segunda de manh\u00e3 gera alerta interno com a lista consolidada das cl\u00ednicas priorit\u00e1rias baseada na agenda do Sniper Comercial.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 11 * * 1",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "alerta_semanal_sniper_comercial",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "weeklySniperPriorityAlert",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

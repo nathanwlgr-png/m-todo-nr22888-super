@@ -1,0 +1,34 @@
+{
+  "name": "Criar follow-up 48h ao concluir visita",
+  "description": "Garante o follow-up 48 horas depois quando uma visita \u00e9 marcada como realizada.",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"status\") != null) and (.trigger.data.status == \"realizada\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Visit"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "criar_follow_up_48h_ao_concluir_visita",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scheduleVisitFollowUp48h",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
