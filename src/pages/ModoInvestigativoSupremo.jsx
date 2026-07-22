@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import Score4x4Display from '@/components/Score4x4Display';
 import BattlecardAtaque from '@/components/elite/BattlecardAtaque';
+import DropboxEvidenceCard from '@/components/investigation/DropboxEvidenceCard';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -63,21 +64,28 @@ export default function ModoInvestigativoSupremo() {
     loadScore4x4(client.id);
 
     try {
-      const res = await base44.functions.invoke('investigacaoCampoReal', {
-        clinic_name: client.clinic_name || `Clínica ${client.first_name}`,
-        city: client.city,
-        client_name: client.first_name,
-        phone: client.phone,
-        website: client.website,
-        instagram: client.instagram_handle,
-        cnpj: client.cnpj,
-        current_equipment: client.current_equipment,
-        client_type: client.client_type,
-        market_time: client.market_time,
-      });
+      const [res, dropbox] = await Promise.all([
+        base44.functions.invoke('investigacaoCampoReal', {
+          clinic_name: client.clinic_name || `Clínica ${client.first_name}`,
+          city: client.city,
+          client_name: client.first_name,
+          phone: client.phone,
+          website: client.website,
+          instagram: client.instagram_handle,
+          cnpj: client.cnpj,
+          current_equipment: client.current_equipment,
+          client_type: client.client_type,
+          market_time: client.market_time,
+        }),
+        base44.functions.invoke('dropboxInventarioReadOnly', {
+          action: 'search_support',
+          query: client.equipment_interest || client.current_equipment || client.clinic_name || 'manual Seamaty',
+          client_context: `${client.clinic_name || client.first_name}; equipamento atual: ${client.current_equipment || 'não informado'}; interesse: ${client.equipment_interest || 'não informado'}; necessidades: ${(client.lab_needs || []).join(', ') || 'não informadas'}`,
+        }),
+      ]);
 
       if (res?.data) {
-        setResult(res.data);
+        setResult({ ...res.data, dropbox_support: dropbox?.data });
       } else {
         // Gerar análise via IA se função não retornou
         const aiRes = await base44.integrations.Core.InvokeLLM({
@@ -252,7 +260,7 @@ export default function ModoInvestigativoSupremo() {
               <Brain className="w-6 h-6 text-purple-400 animate-pulse" />
             </div>
             <p className="text-sm font-black text-purple-400">Investigando...</p>
-            <p className="text-xs text-slate-500 text-center">Analisando dados públicos, perfil de mercado e potencial comercial</p>
+            <p className="text-xs text-slate-500 text-center">Analisando CRM, dados públicos e documentos de suporte do Dropbox</p>
             <div className="flex gap-1">
               {[0, 1, 2].map(i => (
                 <div key={i} className="w-2 h-2 rounded-full bg-purple-500 animate-bounce"
@@ -268,6 +276,7 @@ export default function ModoInvestigativoSupremo() {
         <div className="px-4 space-y-3">
           {/* Motor 4x4 */}
           {selectedClient && <Score4x4Display score={score4x4} isLoading={loadingScore} />}
+          <DropboxEvidenceCard evidence={result.dropbox_support} />
 
           {/* Header do resultado */}
           <div className="rounded-2xl p-4" style={{ background: '#111', border: `1px solid ${scoreColor}44` }}>

@@ -144,13 +144,74 @@ async function getAccountInfo(accessToken) {
   return await resp.json();
 }
 
+const SUPPORT_EXTENSIONS = /\.(pdf|doc|docx|txt|rtf|xls|xlsx|csv|ppt|pptx)$/i;
+
+async function searchSupportFiles(accessToken, query) {
+  const resp = await fetch('https://api.dropboxapi.com/2/files/search_v2', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, options: { path: '', max_results: 20, file_status: 'active', filename_only: false } }),
+  });
+  if (!resp.ok) return [];
+  const data = await resp.json();
+  return (data.matches || []).map((match) => match.metadata?.metadata || match.metadata).filter((file) => file?.name && SUPPORT_EXTENSIONS.test(file.name));
+}
+
+async function uploadDropboxFile(base44, accessToken, file) {
+  const resp = await fetch('https://content.dropboxapi.com/2/files/download', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Dropbox-API-Arg': JSON.stringify({ path: file.path_lower || file.path_display }) },
+  });
+  if (!resp.ok) return null;
+  const bytes = await resp.arrayBuffer();
+  const uploaded = await base44.asServiceRole.integrations.Core.UploadFile({
+    file: new File([bytes], file.name, { type: resp.headers.get('content-type') || 'application/octet-stream' }),
+  });
+  return uploaded.file_url || null;
+}
+
+async function buildSupportIntelligence(base44, accessToken, payload) {
+  const searches = [payload.query, 'manual Seamaty', 'suporte técnico'].filter(Boolean);
+  const batches = await Promise.all(searches.map((term) => searchSupportFiles(accessToken, term)));
+  const unique = new Map();
+  batches.flat().forEach((file) => unique.set(file.path_lower || file.path_display, file));
+  const candidates = [...unique.values()].slice(0, 8);
+  const linked = await Promise.all(candidates.slice(0, 4).map(async (file) => ({
+    name: file.name,
+    path: file.path_display || file.path_lower,
+    link: await uploadDropboxFile(base44, accessToken, file),
+  })));
+  const readable = linked.filter((file) => file.link);
+  if (!readable.length) return { success: true, files_read: [], summary: 'Nenhum manual ou documento de suporte relacionado foi encontrado.' };
+
+  const analysis = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt: `Leia os documentos anexados do Dropbox em modo somente leitura. Extraia apenas fatos explícitos e úteis para suporte técnico e venda consultiva Seamaty. Contexto da investigação: ${payload.client_context || payload.query || 'não informado'}. Não invente informações. Para cada fato, cite o nome do arquivo fonte. Diferencie claramente especificação oficial, orientação operacional e inferência comercial.`,
+    file_urls: readable.map((file) => file.link),
+    response_json_schema: {
+      type: 'object',
+      properties: {
+        summary: { type: 'string' },
+        exact_facts: { type: 'array', items: { type: 'string' } },
+        commercial_application: { type: 'string' },
+        cautions: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  });
+  return { success: true, files_read: readable.map(({ name, path }) => ({ name, path })), ...analysis };
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const payload = await req.json().catch(() => ({}));
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('dropbox');
+
+    if (payload.action === 'search_support') {
+      return Response.json(await buildSupportIntelligence(base44, accessToken, payload));
+    }
 
     // ── 1. Info da conta ─────────────────────────────────────────────────────
     const accountInfo = await getAccountInfo(accessToken);
