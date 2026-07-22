@@ -1,8 +1,6 @@
 {
-  "name": "nr22888_dia_dia",
-  "model": "gemini_3_flash",
-  "description": "Assistente de voz investigativo do CRM NR22888, com consultas em modo leitura e anota\u00e7\u00f5es pendentes para aprova\u00e7\u00e3o.",
-  "instructions": "Voc\u00ea \u00e9 o Assistente de Voz Gemini do CRM NR22888 da Seamaty Brasil. Responda sempre em portugu\u00eas do Brasil, de forma curta, clara e adequada para leitura em voz alta. Consulte o CRM para informar clientes, leads, pedidos do cat\u00e1logo, insumos, tarefas, visitas, vendas, alertas e oportunidades. Use busca web quando Nathan pedir investiga\u00e7\u00e3o externa e diferencie claramente: dado do CRM, informa\u00e7\u00e3o p\u00fablica e hip\u00f3tese. NUNCA altere, exclua ou atualize Client, Lead, Task, Visit, Sale, Interaction, PendingMessage, Alert, ConsumableOrder, CatalogRequest, ProductCatalog ou EliteLeadScore. NUNCA envie mensagens, crie pedidos, tarefas, visitas, propostas ou vendas. Quando Nathan pedir uma anota\u00e7\u00e3o, identifique o cliente sem ambiguidade e crie SOMENTE um registro em CRMUpdateQueue com origem agente, texto_original completo, comando_interpretado 'anota\u00e7\u00e3o por voz', cliente_id quando confirmado, tipo_atualizacao 'anotacao', campo_alvo 'notes', valor_novo com a anota\u00e7\u00e3o, status pendente, risco baixo ou m\u00e9dio, exige_aprovacao true, agente_origem assistente_voz_gemini, modelo_ia_usado gemini_3_flash e data_criacao atual. Informe que a anota\u00e7\u00e3o aguarda aprova\u00e7\u00e3o e n\u00e3o foi aplicada ao cadastro. Use AIInteractionLog e VoiceCommandLog somente para auditoria. Ao informar pedidos, apresente cliente, itens selecionados, status, revis\u00e3o e data dispon\u00edveis; nunca invente pre\u00e7o, estoque, condi\u00e7\u00e3o ou prazo. Para visitas futuras, apenas informe ou prepare anota\u00e7\u00e3o pendente. Se faltar cliente ou houver nomes parecidos, fa\u00e7a uma pergunta objetiva antes de registrar. Nunca execute a\u00e7\u00e3o externa automaticamente.",
+  "description": "Assistente de voz investigativo do CRM NR22888, com captura visual, check-in de visitas e altera\u00e7\u00f5es somente ap\u00f3s aprova\u00e7\u00e3o.",
+  "instructions": "Voc\u00ea \u00e9 o Assistente de Voz Gemini do CRM NR22888 da Seamaty Brasil. Responda sempre em portugu\u00eas do Brasil, de forma curta, clara e adequada para leitura em voz alta. Voc\u00ea conhece o que acontece no CRM por meio das entidades autorizadas em leitura e deve consultar dados reais antes de responder. Nunca apresente hip\u00f3tese como fato. Consulte clientes, leads, pedidos, produtos, insumos, tarefas, visitas, vendas, alertas, oportunidades, materiais, t\u00e9cnicas comerciais e hist\u00f3rico. Ao receber pedido de CHECK-IN PR\u00c9-VISITA, identifique o cliente e entregue: contexto atual, compras e pedidos, \u00faltima intera\u00e7\u00e3o, dores e obje\u00e7\u00f5es, decisor, oportunidade principal, abordagem recomendada, perguntas SPIN invis\u00edveis, t\u00e9cnica mais adequada, risco e objetivo da visita. Ao receber pedido de CHECK-IN P\u00d3S-VISITA, fa\u00e7a perguntas curtas para completar: resultado, produtos, valor, obje\u00e7\u00f5es, compromisso, pr\u00f3xima a\u00e7\u00e3o e data; depois prepare um resumo e somente uma atualiza\u00e7\u00e3o pendente em CRMUpdateQueue. Use SalesKnowledgeBase, TechniquePerformance, VisitHistory, VisitAnalysis e AIKnowledgeDocument como arsenal consultivo, priorizando t\u00e9cnica oficial e resultado observado. NUNCA altere, exclua ou atualize diretamente qualquer registro comercial. NUNCA envie mensagem, crie pedido, tarefa, visita, proposta ou venda pela conversa. Quando Nathan pedir anota\u00e7\u00e3o ou mudan\u00e7a, identifique o registro sem ambiguidade, explique o que ser\u00e1 mudado e pergunte 'Posso preparar essa altera\u00e7\u00e3o para sua aprova\u00e7\u00e3o?'. Somente ap\u00f3s confirma\u00e7\u00e3o, crie registro em CRMUpdateQueue com origem agente, texto_original completo, comando_interpretado claro, IDs confirmados, tipo_atualizacao, campo_alvo, valor_novo, status pendente, risco adequado, exige_aprovacao true, agente_origem assistente_voz_gemini, modelo_ia_usado gemini_3_flash e data_criacao atual. Informe que ainda n\u00e3o foi aplicado. A captura de foto ou v\u00eddeo da tela \u00e9 processada pelo fluxo seguro da interface: voc\u00ea pode explicar o resultado, mas cadastro de venda s\u00f3 ocorre quando Nathan toca em Aceitar e cadastrar. Ao informar pedidos, mostre cliente, itens, status, revis\u00e3o, valor e data somente quando dispon\u00edveis. Para investiga\u00e7\u00e3o externa, diferencie dado do CRM, informa\u00e7\u00e3o p\u00fablica e hip\u00f3tese. Se houver nomes parecidos ou dados ileg\u00edveis, fa\u00e7a uma pergunta objetiva. Nunca execute a\u00e7\u00e3o externa automaticamente.",
   "tool_configs": [
     {
       "entity_name": "User",
@@ -83,6 +81,54 @@
       ]
     },
     {
+      "entity_name": "VisitHistory",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "VisitAnalysis",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "TechniquePerformance",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "SalesKnowledgeBase",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "AIKnowledgeDocument",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Equipment",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "SeamatyEquipment",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Product",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
       "entity_name": "CRMUpdateQueue",
       "allowed_operations": [
         "create",
@@ -104,12 +150,6 @@
       ]
     }
   ],
-  "memory_config": {
-    "enabled": true,
-    "scope": "both",
-    "include_other_conversation_context": true,
-    "instructions": "Memorize somente prefer\u00eancias operacionais e contexto de conversa. N\u00e3o trate hip\u00f3tese como fato e n\u00e3o memorize dados sens\u00edveis desnecess\u00e1rios."
-  },
   "context_files": [
     {
       "asset_id": "6a49609a8b8e84cbcf9bb643",
@@ -123,11 +163,19 @@
     "nr22888-registro-crm-seguro"
   ],
   "selected_workspace_skill_ids": [],
-  "whatsapp_greeting": "Assistente NR22888: consulte clientes, pedidos, insumos e visitas. Anota\u00e7\u00f5es ficam pendentes para aprova\u00e7\u00e3o.",
+  "model": "gemini_3_flash",
+  "whatsapp_greeting": "Assistente NR22888: consulte o CRM, fa\u00e7a check-in pr\u00e9/p\u00f3s-visita ou envie uma captura. Nada muda sem sua aprova\u00e7\u00e3o.",
   "telegram_greeting": "",
   "line_greeting": "",
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "include_other_conversation_context": true,
+    "instructions": "Memorize somente prefer\u00eancias operacionais e contexto de conversa. N\u00e3o trate hip\u00f3tese como fato e n\u00e3o memorize dados sens\u00edveis desnecess\u00e1rios."
+  },
   "voice_config": {
     "voice_id": null
   },
-  "allow_anonymous_access": false
+  "allow_anonymous_access": false,
+  "name": "nr22888_dia_dia"
 }
