@@ -59,10 +59,10 @@ export default function TabletAppLayout({ children, currentPageName }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { data: notifications = [] } = useQuery({
-    queryKey: ['notifications-tablet'],
+    queryKey: ['layout-alerts'],
     queryFn: () => base44.entities.Alert?.filter({ read: false }).catch(() => []),
-    staleTime: 60000,
-    refetchInterval: 60000,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const unreadCount = notifications.length;

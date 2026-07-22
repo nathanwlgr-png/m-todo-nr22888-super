@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   isTablet,
   isLandscape,
@@ -11,25 +11,24 @@ import {
 } from '@/lib/tablet-optimize';
 
 export const useTabletOptimizations = () => {
-  const optimizations = useMemo(() => {
-    return {
-      isTablet: isTablet(),
-      isLandscape: isLandscape(),
-      isSamsung: isSamsungGalaxy(),
-      isDeX: isDeXMode(),
-      reduceMotion: reduceMotion(),
-      ...getTabletOptimizations(),
-    };
-  }, []);
+  const readOptimizations = () => ({
+    isTablet: isTablet(),
+    isLandscape: isLandscape(),
+    isSamsung: isSamsungGalaxy(),
+    isDeX: isDeXMode(),
+    reduceMotion: reduceMotion(),
+    ...getTabletOptimizations(),
+  });
+  const [optimizations, setOptimizations] = useState(readOptimizations);
 
   useEffect(() => {
     applyTabletOptimizations();
   }, []);
 
-  // Monitor orientation changes
+  // Atualiza o layout ao girar a tela ou alternar o modo DeX.
   useEffect(() => {
     const handleOrientationChange = throttle(() => {
-      window.dispatchEvent(new Event('tablet-orientation-change'));
+      setOptimizations(readOptimizations());
     }, 500);
 
     window.addEventListener('orientationchange', handleOrientationChange);
@@ -57,8 +56,8 @@ export const useTabletQuery = (options = {}) => {
 
   return {
     ...options,
-    staleTime: reduceMemory ? 60000 : options.staleTime || 5 * 60 * 1000,
-    cacheTime: reduceMemory ? 30000 : options.cacheTime || 10 * 60 * 1000,
+    staleTime: reduceMemory ? 60000 : (options.staleTime ?? 5 * 60 * 1000),
+    gcTime: reduceMemory ? 30000 : (options.gcTime ?? 10 * 60 * 1000),
     refetchOnWindowFocus: !reduceMemory,
   };
 };

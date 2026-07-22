@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Download, X, ExternalLink, Smartphone } from 'lucide-react';
 
 export default function PWAInstallButtonFloating() {
+  const [eligible, setEligible] = useState(false);
   const [show, setShow] = useState(false);
   const [platform, setPlatform] = useState(null);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -32,6 +33,7 @@ export default function PWAInstallButtonFloating() {
     if (/android/i.test(ua)) setPlatform('android');
     else if (/iphone|ipad|ipod/i.test(ua)) setPlatform('ios');
     else setPlatform('desktop');
+    setEligible(true);
 
     // Captura evento nativo Chrome/Edge
     const handleBeforeInstall = (e) => {
@@ -68,6 +70,8 @@ export default function PWAInstallButtonFloating() {
     setShow(false);
     localStorage.setItem('pwa-dismissed-v2', Date.now());
   };
+
+  if (!eligible) return null;
 
   if (!show) {
     // Ícone pequeno e discreto — não cobre listas, WhatsApp, pendências nem rodapé.

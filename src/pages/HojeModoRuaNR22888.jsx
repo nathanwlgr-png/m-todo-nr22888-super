@@ -9,7 +9,6 @@ import {
 import ProximaAcaoConsultivaModal from '@/components/ProximaAcaoConsultivaModal';
 import OperationalMetricCards from '@/components/dashboard/OperationalMetricCards';
 import FieldQuickActions from '@/components/dashboard/FieldQuickActions';
-import WeeklyCleanupReview from '@/components/WeeklyCleanupReview';
 
 const COMMANDS = [
   { cmd: '/hoje', label: 'Hoje', target: 'campo' },
@@ -133,9 +132,10 @@ export default function HojeModoRuaNR22888() {
     staleTime: 120000,
   });
   const { data: alertsRaw = [] } = useQuery({
-    queryKey: ['hoje-rua-alerts'],
-    queryFn: () => base44.entities.Alert.list('-created_date', 100).catch(() => []),
+    queryKey: ['layout-alerts'],
+    queryFn: () => base44.entities.Alert.filter({ read: false }).catch(() => []),
     staleTime: 120000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const clients = safeArray(clientsRaw);
@@ -204,7 +204,6 @@ export default function HojeModoRuaNR22888() {
 
         <FieldQuickActions />
         <OperationalMetricCards metrics={operationalMetrics} />
-        <WeeklyCleanupReview />
 
         <Section id="sniper" icon={Radar} title="Sniper do dia" count={sniper ? 1 : 0}>
           {sniper ? <ClientCard client={sniper} context={`Score ${sniper.purchase_score || 0} • ${sniper.city || 'cidade não informada'}`} recommendation="priorizar contato consultivo, validar necessidade de equipamento e preparar abordagem SPIN antes do WhatsApp." /> : <EmptyState />}

@@ -1,7 +1,10 @@
 // Detectar dispositivo tablet
 export const isTablet = () => {
   const ua = navigator.userAgent;
-  return /iPad|Android(?!.*Mobile)|Tablet/.test(ua);
+  const shortSide = Math.min(window.screen.width, window.screen.height);
+  const tabletUA = /iPad|Tablet|Android(?!.*Mobile)/i.test(ua);
+  const largeTouchDevice = navigator.maxTouchPoints > 0 && shortSide >= 600;
+  return tabletUA || largeTouchDevice;
 };
 
 // Detectar Samsung Galaxy

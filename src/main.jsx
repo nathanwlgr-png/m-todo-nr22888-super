@@ -12,13 +12,4 @@ import { AICache } from './lib/AICache.js'
 OfflineManager.registerServiceWorker();
 // Purge expired AI cache on startup (no AI cost)
 try { AICache.purgeExpired(); } catch {}
-// Auto-sync pending operations when online
-if (navigator.onLine) {
-  OfflineManager.getPendingOperations().then(ops => {
-    if (ops.length > 0) {
-      console.log(`[OfflineManager] ${ops.length} operações pendentes de sync`);
-    }
-  });
-}
-
 ReactDOM.createRoot(document.getElementById('root')).render(<App />)
