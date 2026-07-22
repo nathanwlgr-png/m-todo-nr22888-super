@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function useCRMVoiceAgent() {
@@ -16,7 +16,7 @@ export default function useCRMVoiceAgent() {
     });
   }, [conversation?.id]);
 
-  const send = async (content) => {
+  const send = useCallback(async (content) => {
     if (!content.trim() || loading) return;
     setLoading(true); setError('');
     try {
@@ -31,7 +31,7 @@ export default function useCRMVoiceAgent() {
       setError('Não consegui consultar o CRM agora. Nada foi alterado.');
       setLoading(false);
     }
-  };
+  }, [conversation, loading]);
 
   return { messages, loading, error, send };
 }
