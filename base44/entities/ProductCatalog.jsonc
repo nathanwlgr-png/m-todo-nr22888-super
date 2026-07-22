@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Cat\u00e1logo complementar audit\u00e1vel de produtos, equipamentos, insumos e materiais Seamaty para propostas e materiais premium. N\u00e3o substitui Product, Equipment ou SeamatyPriceTable.",
   "properties": {
+    "codigo_produto": {
+      "type": "string",
+      "description": "C\u00f3digo oficial do produto na tabela Seamaty"
+    },
     "nome_produto": {
       "type": "string"
     },
@@ -12,6 +16,7 @@
         "equipamento",
         "cartucho_hemogas",
         "cassete_imuno",
+        "painel_pcr",
         "rotor_bioquimica",
         "insumo",
         "material",
@@ -67,12 +72,11 @@
     },
     "fonte_validacao": {
       "type": "string",
-      "description": "Origem da valida\u00e7\u00e3o da foto/dados (ex: cat\u00e1logo oficial Seamaty, Nathan, fornecedor). Nunca IA."
+      "description": "Origem da valida\u00e7\u00e3o da foto/dados. Nunca IA."
     },
     "data_validacao": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora em que a foto/dados foram validados por humano."
+      "format": "date-time"
     },
     "ativo": {
       "type": "boolean",
