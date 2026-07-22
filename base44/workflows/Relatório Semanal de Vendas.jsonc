@@ -1,30 +1,6 @@
 {
   "name": "Relat\u00f3rio Semanal de Vendas",
-  "definition": {
-    "document": {
-      "dsl": "1.0.0",
-      "name": "relatorio_semanal_de_vendas",
-      "version": "1.1",
-      "namespace": "base44"
-    },
-    "do": [
-      {
-        "gerar_relatorio": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "weeklySalesReport",
-            "args": {}
-          },
-          "then": "end",
-          "x-base44": {
-            "title": "Gerar relat\u00f3rio semanal",
-            "description": "Segunda-feira \u00e0s 08h"
-          }
-        }
-      }
-    ]
-  },
-  "description": "Gera o relat\u00f3rio semanal principal toda segunda-feira \u00e0s 08h no hor\u00e1rio de S\u00e3o Paulo.",
+  "description": "Toda segunda-feira \u00e0s 08h gera a previs\u00e3o e o relat\u00f3rio de vendas, atualiza o DashboardConfig executivo e envia o resumo interno pelo telegram_operacional_nr22888.",
   "trigger": {
     "condition": null,
     "config": {
@@ -41,5 +17,66 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "relatorio_semanal_de_vendas",
+      "version": "2.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "gerar_previsao": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateSalesForecast",
+            "args": {
+              "period_type": "monthly"
+            }
+          },
+          "then": "gerar_relatorio",
+          "x-base44": {
+            "title": "Gerar previs\u00e3o de vendas",
+            "description": "Proje\u00e7\u00e3o dos pr\u00f3ximos 30 dias"
+          }
+        }
+      },
+      {
+        "gerar_relatorio": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateSalesReport",
+            "args": {
+              "format": "word",
+              "clinics_text": "Relat\u00f3rio executivo semanal consolidado pelo NR22888.",
+              "notes": "Previs\u00e3o: ${ .gerar_previsao.forecast.predicted_sales_count } venda(s), receita de R$ ${ .gerar_previsao.forecast.predicted_revenue }, confian\u00e7a de ${ .gerar_previsao.forecast.confidence_level }%."
+            }
+          },
+          "then": "publicar_resumo",
+          "x-base44": {
+            "title": "Gerar relat\u00f3rio comercial",
+            "description": "Documento executivo semanal"
+          }
+        }
+      },
+      {
+        "publicar_resumo": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "publishWeeklySalesExecutiveSummary",
+            "args": {
+              "forecast": "${ .gerar_previsao.forecast }",
+              "report_document_id": "${ .gerar_relatorio.document_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Publicar resumo executivo",
+            "description": "Dashboard e Telegram operacional"
+          }
+        }
+      }
+    ]
   }
 }

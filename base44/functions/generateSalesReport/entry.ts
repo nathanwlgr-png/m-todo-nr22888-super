@@ -9,7 +9,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { date, clinics_text, notes, format, visits, monthly_visits } = await req.json();
+    const body = await req.json();
+    const date = body.date || new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const clinics_text = body.clinics_text || 'Relatório executivo semanal gerado automaticamente.';
+    const notes = body.notes || '';
+    const format = body.format || 'word';
+    const visits = body.visits || [];
+    const monthly_visits = body.monthly_visits || [];
 
     // Gerar conteúdo do relatório
     const reportLines = [];
