@@ -132,7 +132,8 @@ function buildGoogleRouteUrl(points, myLocation) {
   const selected = points.slice(0, 8);
   const destination = selected[selected.length - 1];
   const waypoints = selected.slice(0, -1).map(c => `${c._lat},${c._lng}`).join('|');
-  const origin = myLocation ? `&origin=${myLocation[0]},${myLocation[1]}` : '';
+  const originCoords = myLocation || [-22.2139, -49.9458];
+  const origin = `&origin=${originCoords[0]},${originCoords[1]}`;
   const via = waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : '';
   return `https://www.google.com/maps/dir/?api=1${origin}&destination=${destination._lat},${destination._lng}${via}&travelmode=driving`;
 }
@@ -252,7 +253,7 @@ export default function ClientLocationMap() {
   const statusLabel = { quente: '🔥 Quente', morno: '⚡ Morno', frio: '❄️ Frio' };
   const statusBadge = { quente: 'bg-green-600', morno: 'bg-amber-500', frio: 'bg-red-600' };
 
-  const defaultCenter = myLocation || [-23.55, -46.63];
+  const defaultCenter = myLocation || [-22.2139, -49.9458];
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64 text-slate-400">

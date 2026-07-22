@@ -270,7 +270,7 @@ const AuthenticatedApp = () => {
         <Route path="/TesteAgentes" element={<LayoutWrapper currentPageName="TesteAgentes"><TesteAgentes /></LayoutWrapper>} />
         <Route path="/VozCampo" element={<LayoutWrapper currentPageName="VozCampo"><VozCampo /></LayoutWrapper>} />
         <Route path="/PainelConcorrencia" element={<LayoutWrapper currentPageName="PainelConcorrencia"><PainelConcorrencia /></LayoutWrapper>} />
-        <Route path="/AracatubaClinics" element={<LayoutWrapper currentPageName="AracatubaClinics"><AracatubaClinics /></LayoutWrapper>} />
+        <Route path="/AracatubaClinics" element={<Navigate to="/PainelConcorrencia?city=Aracatuba" replace />} />
         <Route path="/MessageApproval" element={<LayoutWrapper currentPageName="MessageApproval"><MessageApproval /></LayoutWrapper>} />
         <Route path="/EquipmentConsumables" element={<LayoutWrapper currentPageName="EquipmentConsumables"><EquipmentConsumables /></LayoutWrapper>} />
         <Route path="/DocumentTracking" element={<DocumentTracking />} />

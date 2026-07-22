@@ -9,7 +9,6 @@ const ADMIN_CATEGORIES = [
     label: '1. ⚡ Meu Dia',
     pages: [
       { page: 'Clients', label: '👥 Clientes' },
-      { page: 'AracatubaClinics', label: '📍 Araçatuba' },
       { page: 'MapaSeamatyBrasil', label: '📍 Mapa de Clientes' },
       { page: 'SmartRouteOptimizer', label: '🗺️ Rota do Dia' },
       { page: 'VisitManager', label: '📋 Visitas' },

@@ -425,8 +425,8 @@ const MapaSeamatyBrasil = () => {
 
     // Otimizar rota por proximidade (versão simplificada)
     const rotaOtimizada = otimizarRota(pontosPriority, {
-      lat: -23.5505,
-      lng: -46.6333, // São Paulo (referência)
+      lat: -22.2139,
+      lng: -49.9458, // Marília/SP (ponto de partida do Nathan)
     });
 
     // Criar tarefa de rota

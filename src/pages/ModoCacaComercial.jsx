@@ -68,7 +68,7 @@ import { cacaDebugStore } from '@/lib/cacaDebugStore';
 export default function ModoCacaComercial() {
   const [step, setStep] = useState('idle');
   const [gpsLocation, setGpsLocation] = useState(null);
-  const [manualCity, setManualCity] = useState('');
+  const [manualCity, setManualCity] = useState('Marília');
   const [clinics, setClinics] = useState([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false); // loading único anti-clique-duplo
@@ -130,11 +130,11 @@ export default function ModoCacaComercial() {
   }, [loading]);
 
   // ── ETAPA 2: Buscar clínicas ──
-  const handleFetchClinics = useCallback(async (cityOverride) => {
+  const handleFetchClinics = useCallback(async (cityOverride, forceGPS = false) => {
     if (isFetching.current) return;
-    const cityRaw = cityOverride || manualCity;
+    const cityRaw = forceGPS ? '' : (cityOverride || manualCity);
     const city = normalizeCity(cityRaw);
-    const byGPS = !cityRaw && gpsLocation;
+    const byGPS = forceGPS && Boolean(gpsLocation);
 
     // Validações
     if (!byGPS && (!city || city.length < 3)) {
@@ -191,14 +191,9 @@ export default function ModoCacaComercial() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const res = await base44.functions.invoke('buscarClinicasProximas', {
-        cidade: city || undefined,
-        lat: byGPS ? payload.latitude : undefined,
-        lng: byGPS ? payload.longitude : undefined,
-        raio_km: 20,
-      });
+      const res = await base44.functions.invoke('getNearbyVeterinaryClinics', payload);
       clearTimeout(timeoutId);
-      const data = res.data?.clinicas || [];
+      const data = res.data?.clinics || [];
       cacaDebugStore.lastStatus = res.data?.status;
       cacaDebugStore.lastDurationMs = Date.now() - t0;
       cacaDebugStore.lastResultCount = data.length;
@@ -299,7 +294,7 @@ export default function ModoCacaComercial() {
   const handleReset = useCallback(() => {
     setStep('idle');
     setGpsLocation(null);
-    setManualCity('');
+    setManualCity('Marília');
     setClinics([]);
     setSelectedClinic(null);
     setSavedLead(null);
@@ -423,7 +418,7 @@ export default function ModoCacaComercial() {
               )}
               <Button
                 className="w-full bg-orange-600 hover:bg-orange-700 font-bold h-12"
-                onClick={() => handleFetchClinics()}
+                onClick={() => handleFetchClinics('', true)}
                 disabled={loading}
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Target className="w-4 h-4 mr-2" />}
