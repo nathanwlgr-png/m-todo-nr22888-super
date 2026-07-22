@@ -94,7 +94,7 @@ const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
 const Reports = lazy(() => import('./pages/Reports'));
-const AracatubaClinics = lazy(() => import('./pages/AracatubaClinics'));
+
 const MessageApproval = lazy(() => import('./pages/MessageApproval'));
 const EquipmentConsumables = lazy(() => import('./pages/EquipmentConsumables'));
 const DocumentTracking = lazy(() => import('./pages/DocumentTracking'));
@@ -270,7 +270,7 @@ const AuthenticatedApp = () => {
         <Route path="/TesteAgentes" element={<LayoutWrapper currentPageName="TesteAgentes"><TesteAgentes /></LayoutWrapper>} />
         <Route path="/VozCampo" element={<LayoutWrapper currentPageName="VozCampo"><VozCampo /></LayoutWrapper>} />
         <Route path="/PainelConcorrencia" element={<LayoutWrapper currentPageName="PainelConcorrencia"><PainelConcorrencia /></LayoutWrapper>} />
-        <Route path="/AracatubaClinics" element={<Navigate to="/PainelConcorrencia?city=Aracatuba" replace />} />
+        <Route path="/AracatubaClinics" element={<Navigate to="/MapaSeamatyBrasil?city=Araçatuba" replace />} />
         <Route path="/MessageApproval" element={<LayoutWrapper currentPageName="MessageApproval"><MessageApproval /></LayoutWrapper>} />
         <Route path="/EquipmentConsumables" element={<LayoutWrapper currentPageName="EquipmentConsumables"><EquipmentConsumables /></LayoutWrapper>} />
         <Route path="/DocumentTracking" element={<DocumentTracking />} />

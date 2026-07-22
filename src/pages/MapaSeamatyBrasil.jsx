@@ -27,10 +27,10 @@ const getCityKey = (city) => String(city || '').trim() || 'Sem cidade cadastrada
 
 const MapaSeamatyBrasil = () => {
   const [filtroAtivo, setFiltroAtivo] = useState('todos');
-  const [filtroCity, setFiltroCity] = useState('');
+  const [filtroCity, setFiltroCity] = useState(() => new URLSearchParams(window.location.search).get('city') || '');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroEquipamento, setFiltroEquipamento] = useState('');
-  const [filtroRepresentante, setFiltroRepresentante] = useState('Nathan');
+  const [filtroRepresentante, setFiltroRepresentante] = useState('');
   const [camadaAtiva, setCamadaAtiva] = useState(new Set(['cidades', 'clientes', 'oportunidades']));
   const [modoPublicacao, setModoPublicacao] = useState(false);
   const [showGeoloc, setShowGeoloc] = useState(true);
@@ -521,7 +521,7 @@ const MapaSeamatyBrasil = () => {
               </div>
               <div>
                 <h1 className="text-xl font-black text-slate-900">Mapa Territorial SEAMATY Brasil</h1>
-                <p className="text-xs text-slate-500">Cobertura comercial — Nathan</p>
+                <p className="text-xs text-slate-500">Base central: Marília/SP — todos os clientes unificados</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

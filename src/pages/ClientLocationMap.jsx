@@ -30,6 +30,8 @@ const createRecordIcon = (status, recordType) => {
   });
 };
 
+const MARILIA_ORIGIN = [-22.2139, -49.9458];
+
 const myLocationIcon = L.divIcon({
   html: `<div style="background:#3B82F6;width:20px;height:20px;border-radius:50%;border:4px solid white;box-shadow:0 0 0 3px rgba(59,130,246,0.4),0 2px 8px rgba(0,0,0,0.3);"></div>`,
   className: '',
@@ -132,7 +134,7 @@ function buildGoogleRouteUrl(points, myLocation) {
   const selected = points.slice(0, 8);
   const destination = selected[selected.length - 1];
   const waypoints = selected.slice(0, -1).map(c => `${c._lat},${c._lng}`).join('|');
-  const originCoords = myLocation || [-22.2139, -49.9458];
+  const originCoords = myLocation || MARILIA_ORIGIN;
   const origin = `&origin=${originCoords[0]},${originCoords[1]}`;
   const via = waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : '';
   return `https://www.google.com/maps/dir/?api=1${origin}&destination=${destination._lat},${destination._lng}${via}&travelmode=driving`;
@@ -142,7 +144,7 @@ function buildGoogleRouteUrl(points, myLocation) {
 export default function ClientLocationMap() {
   const [filterStatus, setFilterStatus] = useState('todos');
   const [filterType, setFilterType] = useState('todos');
-  const [myLocation, setMyLocation] = useState(null);
+  const [myLocation, setMyLocation] = useState(MARILIA_ORIGIN);
   const [locating, setLocating] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -187,8 +189,7 @@ export default function ClientLocationMap() {
     );
   }, []);
 
-  // Pegar localização automaticamente ao abrir
-  useEffect(() => { locateMe(); }, []);
+  // Marília é a origem inicial; o GPS atual só substitui quando solicitado.
 
   // ── CLÍNICAS COM LOCALIZAÇÃO + DISTÂNCIA ─────────────────────────────────
   const recordsWithCoords = useMemo(() =>
@@ -253,7 +254,7 @@ export default function ClientLocationMap() {
   const statusLabel = { quente: '🔥 Quente', morno: '⚡ Morno', frio: '❄️ Frio' };
   const statusBadge = { quente: 'bg-green-600', morno: 'bg-amber-500', frio: 'bg-red-600' };
 
-  const defaultCenter = myLocation || [-22.2139, -49.9458];
+  const defaultCenter = myLocation || MARILIA_ORIGIN;
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64 text-slate-400">
@@ -310,7 +311,7 @@ export default function ClientLocationMap() {
           )}
           <Button onClick={locateMe} disabled={locating} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1 h-8 text-xs">
             <LocateFixed className={`w-4 h-4 ${locating ? 'animate-pulse' : ''}`} />
-            {locating ? 'Localizando...' : 'Minha Posição'}
+            {locating ? 'Localizando...' : 'Usar GPS atual'}
           </Button>
           <Button onClick={refetch} variant="outline" size="sm" className="h-8">
             <RefreshCw className="w-3.5 h-3.5" />
@@ -340,7 +341,7 @@ export default function ClientLocationMap() {
             <>
               <Marker position={myLocation} icon={myLocationIcon}>
                 <Popup>
-                  <div className="text-xs font-bold text-blue-700">📍 Você está aqui</div>
+                  <div className="text-xs font-bold text-blue-700">📍 Ponto de partida da rota</div>
                 </Popup>
               </Marker>
               <Circle
@@ -474,7 +475,7 @@ export default function ClientLocationMap() {
                       </a>
                       {client._lat && client._lng && (
                         <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${client._lat},${client._lng}`}
+                          href={`https://www.google.com/maps/dir/?api=1&origin=${myLocation[0]},${myLocation[1]}&destination=${client._lat},${client._lng}`}
                           target="_blank" rel="noreferrer"
                           onClick={e => e.stopPropagation()}
                           className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"
