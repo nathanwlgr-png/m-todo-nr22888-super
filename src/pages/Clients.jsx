@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { lazy, Suspense, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -36,10 +36,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
-import ProposalModal from '@/components/ProposalModal';
 import WeeklyHealthReport from '@/components/WeeklyHealthReport';
-import SalesFunnelChart from '@/components/SalesFunnelChart';
-import AIMetricsBadges from '@/components/AIMetricsBadges';
 import { useOfflineClients } from '@/components/OfflineClientCache';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import {
@@ -50,6 +47,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+
+const ProposalModal = lazy(() => import('@/components/ProposalModal'));
+const SalesFunnelChart = lazy(() => import('@/components/SalesFunnelChart'));
 
 const ORANGE_REGION_CITIES = [
   'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
@@ -767,7 +767,9 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
         {/* Funnel Chart */}
         {showFunnel && (
           <div className="px-4 pb-4 bg-slate-50 border-t">
-            <SalesFunnelChart clients={clients} />
+            <Suspense fallback={<div className="py-6 text-center text-sm text-slate-500">Carregando funil...</div>}>
+              <SalesFunnelChart clients={clients} />
+            </Suspense>
           </div>
         )}
 
@@ -1028,11 +1030,13 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
 
       {/* Proposal Modal */}
       {proposalClient && (
-        <ProposalModal
-          client={proposalClient}
-          open={!!proposalClient}
-          onOpenChange={(o) => { if (!o) setProposalClient(null); }}
-        />
+        <Suspense fallback={null}>
+          <ProposalModal
+            client={proposalClient}
+            open={!!proposalClient}
+            onOpenChange={(o) => { if (!o) setProposalClient(null); }}
+          />
+        </Suspense>
       )}
 
       {/* Quick Sale Modal */}

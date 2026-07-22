@@ -24,12 +24,15 @@ const COMMANDS = [
 ];
 
 const pendingStatuses = ['pending', 'aguardando_aprovacao', 'rascunho', 'edited'];
-const todayKey = new Date().toISOString().slice(0, 10);
+const localDateKey = (date = new Date()) => {
+  const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localTime.toISOString().slice(0, 10);
+};
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const clientName = (client) => client?.clinic_name || client?.full_name || client?.first_name || client?.client_name || 'Cliente sem nome';
 const hasPhone = (value) => String(value || '').replace(/\D/g, '').length >= 10;
-const isToday = (value) => String(value || '').slice(0, 10) === todayKey;
+const isToday = (value, todayKey) => String(value || '').slice(0, 10) === todayKey;
 const daysSince = (value) => {
   if (!value) return 999;
   const time = new Date(value).getTime();
@@ -92,6 +95,7 @@ function ClientCard({ client, context }) {
 
 export default function HojeModoRuaNR22888() {
   const [activeCommand, setActiveCommand] = useState('/hoje');
+  const todayKey = localDateKey();
 
   const { data: clientsRaw = [] } = useQuery({
     queryKey: ['hoje-rua-clients'],
@@ -149,15 +153,15 @@ export default function HojeModoRuaNR22888() {
     .slice(0, 5), [clients]);
 
   const followups = tasks.filter((t) => t.status !== 'concluida' && (t.type === 'follow_up' || String(t.title || '').toLowerCase().includes('follow'))).slice(0, 6);
-  const fieldTasks = tasks.filter((t) => t.status !== 'concluida' && (isToday(t.due_date) || t.type === 'visita')).slice(0, 6);
-  const fieldVisits = visits.filter((v) => v.status !== 'cancelada' && (isToday(v.scheduled_date) || v.status === 'agendada')).slice(0, 6);
+  const fieldTasks = tasks.filter((t) => t.status !== 'concluida' && (isToday(t.due_date, todayKey) || t.type === 'visita')).slice(0, 6);
+  const fieldVisits = visits.filter((v) => v.status !== 'cancelada' && (isToday(v.scheduled_date, todayKey) || v.status === 'agendada')).slice(0, 6);
   const hotProposals = clients.filter((c) => ['proposta', 'negociacao'].includes(c.pipeline_stage) || c.sale_closed === true).slice(0, 5);
   const postSaleRisk = clients.filter((c) => (c.equipment_sold || c.current_equipment || c.contract_renewal_date) && daysSince(c.last_purchase_date) > 45).slice(0, 5);
   const overdueTasks = tasks.filter((t) => t.status === 'pendente' && t.due_date && t.due_date < todayKey);
   const pendingProposals = proposals.filter((p) => ['draft', 'sent', 'viewed', 'shared'].includes(p.status));
   const supplyAlerts = consumableOrders.filter((o) => o.status === 'ativo' && o.next_reorder_date && o.next_reorder_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
   const installedClients = clients.filter((c) => c.equipment_sold || /seamaty/i.test(c.current_equipment || '')).length;
-  const todayVisits = visits.filter((v) => isToday(v.scheduled_date) && v.status !== 'cancelada');
+  const todayVisits = visits.filter((v) => isToday(v.scheduled_date, todayKey) && v.status !== 'cancelada');
   const totalHotClients = clients.filter((c) => c.status === 'quente' || c.pipeline_stage === 'negociacao' || (c.purchase_score || 0) >= 70).length;
   const operationalMetrics = { today: fieldTasks.length + todayVisits.length, overdue: overdueTasks.length, hot: totalHotClients, proposals: pendingProposals.length, supplies: supplyAlerts.length, route: todayVisits.length, approvals: pendingMessages.length, installed: installedClients };
   const sniper = hotClients[0] || clients[0];

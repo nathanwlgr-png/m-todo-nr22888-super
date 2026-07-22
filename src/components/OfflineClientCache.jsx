@@ -76,10 +76,11 @@ export function useOfflineClients() {
       return allClients;
     },
     enabled: true,
-    staleTime: 2 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    retry: 2
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 
   // Se tem dados online, usa eles. Se erro, usa cache. Se carregando e tem cache, usa cache.

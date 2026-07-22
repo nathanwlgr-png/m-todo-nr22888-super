@@ -12,9 +12,9 @@ Toda correção deve ter evidência no código, preservar dados existentes e ser
 | 1 | Cadastro de cliente | Perfil usava nome completo quando disponível | Abordagem diferente da regra comercial | Calcular perfil somente pelo primeiro nome | Concluído |
 | 1 | Cadastro por GPS/CEP | Respostas assíncronas usavam estado antigo do formulário | Sobrescrever campos digitados durante a busca | Atualização funcional preservando o estado atual | Concluído |
 | 1 | Lista de clientes | Gerador de PDF entrava no pacote inicial da página | Abertura mais lenta no tablet e celular | Carregar o gerador apenas ao exportar | Concluído |
-| 2 | Dashboard operacional | Oito consultas independentes carregam até 1.100 registros | Rede, memória e processamento | Medir e reduzir consultas sem perder indicadores | Próxima etapa |
-| 2 | Consultas e cache | Chaves diferentes podem repetir dados equivalentes entre telas | Tráfego duplicado | Padronizar somente consultas comprovadamente equivalentes | Pendente |
-| 2 | Lista de clientes | Página concentra busca, importação, PDF, venda e filtros | Pacote grande e muitas renderizações | Separar recursos pesados sob demanda | Pendente |
+| 2 | Dashboard operacional | Oito consultas independentes carregam até 1.100 registros | Rede, memória e processamento | Manter indicadores e corrigir a data local; consolidação das consultas exige etapa de backend controlada | Parcial — data local corrigida |
+| 2 | Consultas e cache | A carteira forçava nova leitura ao montar, ao focar a janela e repetia tentativas | Tráfego duplicado e lentidão | Cache de 5 minutos, sem recarga por foco/montagem e com uma tentativa segura | Concluído |
+| 2 | Lista de clientes | PDF, funil, proposta e importação estavam no mesmo carregamento | Pacote grande e muitas renderizações | PDF, funil e proposta carregados somente quando solicitados | Parcial — principais pesos isolados |
 | 3 | Fluxo mestre | Validar cada ligação Dashboard → Cliente → Investigação → SPIN → WhatsApp → Proposta → Fechamento | Quebra de conversão | Auditar destinos, parâmetros e estados de retorno | Pendente |
 | 3 | Rotas | Validar todas as rotas explícitas, redirecionamentos e destinos internos | Tela errada ou redirecionamento oculto | Consolidar somente duplicações confirmadas | Pendente |
 | 4 | PWA e offline | Validar cache, atualização de versão e formulários em rede instável | Dados antigos ou perda de entrada | Corrigir sem armazenar dados sensíveis indevidamente | Pendente |
