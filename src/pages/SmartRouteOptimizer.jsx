@@ -113,6 +113,32 @@ export default function SmartRouteOptimizer() {
     setLoading(false);
   };
 
+  const handleSuggestNearby = async () => {
+    setLoading(true);
+    setResult(null);
+    setClientDetails({});
+    try {
+      const res = await base44.functions.invoke('optimizeDayRoute', {
+        date,
+        start_location: 'Marília, SP',
+        mode: 'suggest_nearby',
+        max_stops: 8,
+        radius_km: 120,
+      });
+      setStartLocation('Marília, SP');
+      setResult(res.data);
+      if (res.data?.optimized_route?.length) {
+        toast.success(`${res.data.optimized_route.length} clientes e leads organizados partindo de Marília.`);
+        setTab('rota');
+      } else {
+        toast.info(res.data?.message || 'Nenhum contato próximo com localização válida.');
+      }
+    } catch (e) {
+      toast.error('Erro ao sugerir rota: ' + e.message);
+    }
+    setLoading(false);
+  };
+
   const handleBatchOptimize = async () => {
     if (!city.trim()) { toast.error('Informe a cidade'); return; }
     setBatchLoading(true);
@@ -219,13 +245,22 @@ export default function SmartRouteOptimizer() {
 
             </div>
 
-            <Button onClick={handleOptimizeDay} disabled={loading}
-              className="w-full h-11 font-black gap-2"
-              style={{ background: loading ? '#1a1a1a' : 'linear-gradient(135deg, #ff6b00, #ff9500)', color: 'white', border: 'none' }}>
-              {loading
-                ? <><RefreshCw className="w-4 h-4 animate-spin" /> Calculando rota com IA...</>
-                : <><Sparkles className="w-4 h-4" /> Otimizar Rota do Dia</>}
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={handleSuggestNearby} disabled={loading}
+                className="w-full h-11 font-black gap-2"
+                style={{ background: loading ? '#1a1a1a' : 'linear-gradient(135deg, #00a86b, #00c896)', color: 'white', border: 'none' }}>
+                {loading
+                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Organizando contatos...</>
+                  : <><Navigation className="w-4 h-4" /> Sugerir rota saindo de Marília</>}
+              </Button>
+              <Button onClick={handleOptimizeDay} disabled={loading}
+                className="w-full h-11 font-black gap-2"
+                style={{ background: loading ? '#1a1a1a' : 'linear-gradient(135deg, #ff6b00, #ff9500)', color: 'white', border: 'none' }}>
+                {loading
+                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Calculando rota...</>
+                  : <><Sparkles className="w-4 h-4" /> Otimizar visitas agendadas</>}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -324,7 +359,16 @@ export default function SmartRouteOptimizer() {
             </div>
 
             {tab === 'rota' && (
-              <RouteMap route={route} startLocation={startLocation} />
+              <div className="space-y-3">
+                <RouteMap route={route} startLocation={startLocation} />
+                {result?.google_maps_url && (
+                  <a href={result.google_maps_url} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button className="w-full h-11 font-black gap-2" style={{ background: '#2563eb', color: 'white' }}>
+                      <Navigation className="w-4 h-4" /> Abrir rota no Google Maps
+                    </Button>
+                  </a>
+                )}
+              </div>
             )}
 
             {tab === 'stats' && (
@@ -363,6 +407,7 @@ export default function SmartRouteOptimizer() {
           <div className="rounded-xl p-3" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.1)' }}>
             <p className="text-xs font-black text-orange-600 mb-2">💡 Como usar:</p>
             <ul className="space-y-1 text-[11px] text-slate-500">
+              <li>• <span className="text-green-400">Sugestão:</span> organiza clientes e leads próximos saindo de Marília</li>
               <li>• <span className="text-orange-400">Dia:</span> otimiza visitas já agendadas para a data escolhida</li>
               <li>• <span className="text-purple-400">Semana:</span> cria agenda automática de uma cidade por 1–7 dias</li>
               <li>• A IA agrupa visitas por região para economizar combustível</li>

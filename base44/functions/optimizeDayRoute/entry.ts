@@ -1,4 +1,15 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+
+const MARILIA = { lat: -22.2171, lng: -49.9501 };
+const toRad = (value) => value * Math.PI / 180;
+const distanceKm = (a, b) => {
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const value = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(value));
+};
+const hasCoords = (item) => Number.isFinite(Number(item.latitude)) && Number.isFinite(Number(item.longitude)) && Number(item.latitude) !== 0 && Number(item.longitude) !== 0;
+const normalizeCity = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 Deno.serve(async (req) => {
   try {
@@ -6,9 +17,91 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Não autorizado' }, { status: 401 });
 
-    const { date, start_location, notify_phone, mode = 'optimize' } = await req.json();
+    const { date, start_location, notify_phone, mode = 'optimize', max_stops = 8, radius_km = 120 } = await req.json();
 
     const targetDate = date || new Date().toISOString().split('T')[0];
+
+    if (mode === 'suggest_nearby') {
+      const [clients, leads] = await Promise.all([
+        base44.asServiceRole.entities.Client.list('-purchase_score', 500),
+        base44.asServiceRole.entities.Lead.list('-predictive_score', 500)
+      ]);
+      const origin = MARILIA;
+      const candidates = [
+        ...clients.map(item => ({ ...item, source_type: 'client', source_id: item.id, route_name: item.clinic_name || item.full_name || item.first_name || 'Cliente', commercial_score: Number(item.purchase_score || item.health_score || 0) })),
+        ...leads.map(item => ({ ...item, source_type: 'lead', source_id: item.id, route_name: item.company || item.full_name || 'Lead', commercial_score: Number(item.predictive_score || item.conversion_probability || 0) }))
+      ].filter(item => (hasCoords(item) || normalizeCity(item.city) === 'marilia') && (item.address || item.city));
+
+      const ranked = candidates.map(item => {
+        const distance = hasCoords(item) ? distanceKm(origin, { lat: Number(item.latitude), lng: Number(item.longitude) }) : 0;
+        return { ...item, distance_from_marilia_km: distance, route_priority: item.commercial_score - distance * 0.15 };
+      }).filter(item => item.distance_from_marilia_km <= Number(radius_km))
+        .sort((a, b) => b.route_priority - a.route_priority)
+        .slice(0, Math.max(2, Math.min(Number(max_stops), 12)));
+
+      const ordered = [];
+      const remaining = [...ranked];
+      let current = origin;
+      while (remaining.length) {
+        remaining.sort((a, b) => {
+          const distanceA = hasCoords(a) ? distanceKm(current, { lat: Number(a.latitude), lng: Number(a.longitude) }) : 0;
+          const distanceB = hasCoords(b) ? distanceKm(current, { lat: Number(b.latitude), lng: Number(b.longitude) }) : 0;
+          return distanceA - distanceB || b.commercial_score - a.commercial_score;
+        });
+        const next = remaining.shift();
+        ordered.push(next);
+        if (hasCoords(next)) current = { lat: Number(next.latitude), lng: Number(next.longitude) };
+      }
+
+      let totalDistance = 0;
+      current = origin;
+      ordered.forEach(item => {
+        if (hasCoords(item)) {
+          const point = { lat: Number(item.latitude), lng: Number(item.longitude) };
+          totalDistance += distanceKm(current, point);
+          current = point;
+        }
+      });
+      if (ordered.length && hasCoords(ordered[ordered.length - 1])) totalDistance += distanceKm(current, origin);
+
+      const optimizedRoute = ordered.map((item, index) => ({
+        id: item.source_id,
+        client_id: item.source_id,
+        client_name: item.route_name,
+        full_name: item.full_name || '',
+        clinic_name: item.clinic_name || item.company || '',
+        location: [item.address, item.city].filter(Boolean).join(', '),
+        city: item.city || '',
+        phone: item.phone || '',
+        client_status: item.status || item.stage || 'morno',
+        purchase_score: item.commercial_score,
+        source_type: item.source_type,
+        visit_type: item.source_type === 'lead' ? 'Lead' : 'Cliente',
+        optimized_position: index + 1,
+        suggested_time: `${String(8 + Math.floor(index * 90 / 60)).padStart(2, '0')}:${String((index * 90) % 60).padStart(2, '0')}`,
+        distance_from_marilia_km: Number(item.distance_from_marilia_km.toFixed(1))
+      }));
+      const routePoints = ordered.map(item => hasCoords(item) ? `${item.latitude},${item.longitude}` : [item.address, item.city].filter(Boolean).join(', '));
+      const destination = encodeURIComponent(routePoints[routePoints.length - 1] || 'Marília, SP');
+      const waypoints = routePoints.slice(0, -1).map(encodeURIComponent).join('|');
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent('Marília, SP')}&destination=${destination}${waypoints ? `&waypoints=${waypoints}` : ''}&travelmode=driving`;
+
+      return Response.json({
+        success: true,
+        date: targetDate,
+        total_visits: optimizedRoute.length,
+        optimized_route: optimizedRoute,
+        stats: {
+          estimated_km: Number(totalDistance.toFixed(1)),
+          estimated_km_saved: 0,
+          estimated_fuel_saved_liters: Number((totalDistance / 10).toFixed(1)),
+          total_drive_minutes: Math.round(totalDistance / 60 * 60),
+          route_summary: `Rota sugerida partindo de Marília com ${optimizedRoute.length} clientes e leads em até ${radius_km} km.`
+        },
+        google_maps_url: googleMapsUrl,
+        message: optimizedRoute.length ? 'Melhor rota sugerida com clientes e leads próximos.' : 'Nenhum cliente ou lead com localização válida foi encontrado próximo de Marília.'
+      });
+    }
 
     // Buscar visitas do dia
     const allVisits = await base44.entities.Visit.list('-scheduled_date', 500);
