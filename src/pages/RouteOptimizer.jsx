@@ -126,18 +126,25 @@ export default function RouteOptimizer() {
       });
       const createdVisits = visitsToCreate.length ? await base44.entities.Visit.bulkCreate(visitsToCreate) : [];
       let calendarSynced = 0;
+      let calendarConnected = true;
       if (createdVisits.length) {
         try {
           const response = await base44.functions.invoke('googleCalendarSync', { action: 'sync_visits', visit_ids: createdVisits.map((visit) => visit.id) });
           calendarSynced = response.data?.synced || 0;
-        } catch { calendarSynced = 0; }
+        } catch {
+          calendarConnected = false;
+        }
       }
-      return { savedRoute, created: createdVisits.length, calendarSynced };
+      return { savedRoute, created: createdVisits.length, calendarSynced, calendarConnected };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries(['optimized-routes']);
       queryClient.invalidateQueries(['visits-agenda']);
-      toast.success(`Rota salva com ${data.created} visitas; ${data.calendarSynced} sincronizadas na agenda.`);
+      if (!data.calendarConnected) {
+        toast.warning(`Rota salva com ${data.created} visitas. Conecte seu calendário na aba GCal para sincronizar.`);
+      } else {
+        toast.success(`Rota salva com ${data.created} visitas; ${data.calendarSynced} sincronizadas no seu Google Calendar.`);
+      }
     }
   });
 

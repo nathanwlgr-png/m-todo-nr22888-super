@@ -54,7 +54,7 @@ function randomCode() {
 }
 
 function catalogLink(request) {
-  const appUrl = String(Deno.env.get('APP_URL') || 'https://nr22888-73878882.base44.app').replace(/\/+$/, '');
+  const appUrl = 'https://nr22888-73878882.base44.app';
   return `${appUrl}/CatalogoCliente?codigo=${encodeURIComponent(request.client_code)}&pedido=${request.id}&token=${encodeURIComponent(request.access_token)}`;
 }
 
@@ -404,7 +404,7 @@ Deno.serve(async (req) => {
     if (body.validate_only) return Response.json({ resposta, comando: cmd, validated: true, envio_automatico: false });
     const detectedName = client ? nameOf(client) : lead?.full_name || '';
     const lg = await log(base44, user, text, cmd, resposta, { status, cliente_detectado: detectedName, acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '' });
-    return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', lead_id: lead?.id || '', catalog_request_id: catalogRequest?.id || '', envio_automatico: false });
+    return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', lead_id: lead?.id || '', catalog_request_id: catalogRequest?.id || '', catalog_url: catalogRequest ? catalogLink(catalogRequest) : '', envio_automatico: false });
   } catch (error) {
     return Response.json({ error: error.message, envio_automatico: false }, { status: 500 });
   }

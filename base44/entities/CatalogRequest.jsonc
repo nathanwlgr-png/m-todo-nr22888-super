@@ -77,6 +77,10 @@
       "type": "number",
       "default": 0
     },
+    "last_view_id": {
+      "type": "string",
+      "description": "Identificador t\u00e9cnico da \u00faltima abertura para evitar contagem duplicada do mesmo carregamento."
+    },
     "first_viewed_at": {
       "type": "string",
       "format": "date-time"

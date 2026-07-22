@@ -51,12 +51,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Este link expirou. Solicite um novo ao vendedor.' }, { status: 410 });
     }
     if (body.action === 'load') {
+      const duplicateLoad = body.view_id && request.last_view_id === body.view_id;
+      if (duplicateLoad) {
+        return Response.json({ request: { id: request.id, client_code: request.client_code, client_name: request.client_name, status: request.status, expires_at: request.expires_at, views_count: request.views_count || 0, interest_level: request.interest_level || 'frio', engagement_score: request.engagement_score || 10 } });
+      }
       const viewedAt = new Date().toISOString();
       const viewsCount = (request.views_count || 0) + 1;
       const engagement = engagementFor(viewsCount, request.selected_items || []);
       const history = [...(request.change_history || []), { changed_at: viewedAt, action: 'aberto', actor: 'destinatario' }];
-      const tracked = { ...request, views_count: viewsCount, first_viewed_at: request.first_viewed_at || viewedAt, last_viewed_at: viewedAt, ...engagement, change_history: history };
-      await base44.asServiceRole.entities.CatalogRequest.update(request.id, { views_count: viewsCount, first_viewed_at: tracked.first_viewed_at, last_viewed_at: viewedAt, ...engagement, change_history: history });
+      const tracked = { ...request, views_count: viewsCount, last_view_id: body.view_id || '', first_viewed_at: request.first_viewed_at || viewedAt, last_viewed_at: viewedAt, ...engagement, change_history: history };
+      await base44.asServiceRole.entities.CatalogRequest.update(request.id, { views_count: viewsCount, last_view_id: body.view_id || '', first_viewed_at: tracked.first_viewed_at, last_viewed_at: viewedAt, ...engagement, change_history: history });
       await syncTemperature(base44, tracked, engagement, request.selected_items || []);
       return Response.json({ request: { id: request.id, client_code: request.client_code, client_name: request.client_name, status: request.status, expires_at: request.expires_at, views_count: viewsCount, ...engagement } });
     }

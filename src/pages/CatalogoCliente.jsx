@@ -6,6 +6,8 @@ import CatalogAccessGate from '@/components/catalog/CatalogAccessGate';
 import { Input } from '@/components/ui/input';
 import catalogProducts from '@/lib/catalogProducts';
 
+const PAGE_VIEW_ID = crypto.randomUUID();
+
 export default function CatalogoCliente() {
   const params = new URLSearchParams(window.location.search);
   const credentials = { request_id: params.get('pedido'), client_code: params.get('codigo'), access_token: params.get('token') };
@@ -20,7 +22,7 @@ export default function CatalogoCliente() {
 
   useEffect(() => {
     Promise.all([
-      base44.functions.invoke('catalogOrderAccess', { action: 'load', ...credentials }),
+      base44.functions.invoke('catalogOrderAccess', { action: 'load', view_id: PAGE_VIEW_ID, ...credentials }),
       base44.entities.ProductCatalog.list('nome_produto', 500),
       base44.entities.Product.list('name', 500),
       base44.entities.Consumable.list('name', 500),
