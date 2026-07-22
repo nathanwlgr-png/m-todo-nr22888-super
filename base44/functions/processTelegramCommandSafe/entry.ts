@@ -49,6 +49,45 @@ async function oneClient(base44, raw) {
   return { client: null, resposta: 'Cliente não encontrado. Tente nome, código, cidade, telefone ou CNPJ.' };
 }
 
+function randomCode() {
+  return String(crypto.getRandomValues(new Uint32Array(1))[0] % 900000 + 100000);
+}
+
+function catalogLink(request) {
+  const appUrl = String(Deno.env.get('APP_URL') || '').replace(/\/+$/, '');
+  if (!appUrl) return '';
+  return `${appUrl}/CatalogoCliente?codigo=${encodeURIComponent(request.client_code)}&pedido=${request.id}&token=${encodeURIComponent(request.access_token)}`;
+}
+
+async function findLead(base44, rawName, rawPhone) {
+  const phone = digits(rawPhone);
+  if (phone.length >= 10) {
+    for (const value of [phone, phone.length <= 11 ? `55${phone}` : phone]) {
+      const rows = await filter(base44, 'Lead', { phone: value }, '-updated_date', 1);
+      if (rows.length) return rows[0];
+    }
+  }
+  const rows = await list(base44, 'Lead', '-updated_date', 80);
+  const wanted = norm(rawName);
+  return rows.find(row => wanted && norm(row.full_name) === wanted) || null;
+}
+
+async function createCatalogRequest(base44, recipient) {
+  const requestData = {
+    client_id: recipient.client_id || undefined,
+    lead_id: recipient.lead_id || undefined,
+    recipient_type: recipient.lead_id ? 'lead' : 'client',
+    recipient_phone: recipient.phone || '', sent_via: 'telegram',
+    client_code: recipient.code, client_name: recipient.name,
+    access_token: crypto.randomUUID(), verification_code: randomCode(),
+    expires_at: new Date(Date.now() + 86400000).toISOString(),
+    status: 'enviado', views_count: 0, engagement_score: 10, interest_level: 'frio',
+    selected_items: [], revision: 0,
+    change_history: [{ changed_at: now(), action: 'criado', actor: 'telegram' }]
+  };
+  return await create(base44, 'CatalogRequest', requestData);
+}
+
 function competitorFor(client, competitors) {
   const city = norm(client?.city);
   const eq = norm(`${client?.current_equipment || ''} ${client?.equipment_interest || ''} ${client?.equipment_sold || ''}`);
@@ -143,7 +182,7 @@ Deno.serve(async (req) => {
     const text = body?.message?.text || body?.edited_message?.text || body.mensagem || body.text || '';
     const cmd = cmdOf(text);
     const args = argsOf(text);
-    let resposta = '', status = 'interpretado', client = null, queue = null, pending = null, task = null, acao = '';
+    let resposta = '', status = 'interpretado', client = null, lead = null, catalogRequest = null, queue = null, pending = null, task = null, acao = '';
 
     if (cmd === '/sniper' || cmd === '/ranking' || cmd === '/quentes') {
       const rows = await sniper(base44, cmd === '/sniper' || cmd === '/ranking' ? 10 : 8);
@@ -221,6 +260,43 @@ Deno.serve(async (req) => {
       }
       resposta = out.join('\n') || 'Nenhum potencial de comodato encontrado sem IA.';
       acao = 'listar comodato';
+    } else if (cmd === '/catalogo') {
+      const fields = args.split('|').map(value => value.trim());
+      const targetName = fields[0] || '';
+      const targetPhone = fields[1] || '';
+      const targetCity = fields[2] || '';
+      if (!targetName) {
+        resposta = 'Use /catalogo Nome | telefone | cidade. Se já for cliente, também pode usar apenas /catalogo Nome.';
+        status = 'erro';
+      } else {
+        const found = await oneClient(base44, targetName);
+        if (found.client) {
+          client = found.client;
+          const created = await createCatalogRequest(base44, { client_id: client.id, code: client.external_code || client.id, name: nameOf(client), phone: client.phone || '' });
+          catalogRequest = created.record;
+          const link = catalogRequest ? catalogLink(catalogRequest) : '';
+          resposta = catalogRequest && link ? `CATÁLOGO RASTREÁVEL — ${nameOf(client)}\n${link}\n\nCódigo: ${catalogRequest.verification_code}\nVálido por 24 horas. Aberturas e produtos selecionados atualizam o interesse no CRM. Nada foi enviado automaticamente.` : `Não foi possível gerar o catálogo: ${created.error || 'APP_URL não configurada'}.`;
+          status = catalogRequest && link ? 'interpretado' : 'erro';
+        } else if (found.resposta.includes('mais de um')) {
+          resposta = found.resposta;
+          status = 'interpretado';
+        } else {
+          lead = await findLead(base44, targetName, targetPhone);
+          if (!lead) {
+            const createdLead = await create(base44, 'Lead', { full_name: targetName, phone: digits(targetPhone) || undefined, city: targetCity || undefined, source: 'importacao_manual', stage: 'novo', status: 'novo', assigned_to: user.email, predictive_score: 10, conversion_probability: 10, priority_level: 'low', next_best_action: 'Aguardar abertura do catálogo rastreável', notes: `Lead criado imediatamente pelo comando /catalogo no Telegram em ${now()}.` });
+            lead = createdLead.record;
+            if (!lead) { resposta = `Não foi possível criar o lead: ${createdLead.error}.`; status = 'erro'; }
+          }
+          if (lead) {
+            const created = await createCatalogRequest(base44, { lead_id: lead.id, code: `LEAD-${lead.id}`, name: lead.full_name || targetName, phone: lead.phone || targetPhone });
+            catalogRequest = created.record;
+            const link = catalogRequest ? catalogLink(catalogRequest) : '';
+            resposta = catalogRequest && link ? `NOVO LEAD + CATÁLOGO RASTREÁVEL\nLead: ${lead.full_name || targetName}${lead.city ? ` · ${lead.city}` : ''}\n${link}\n\nCódigo: ${catalogRequest.verification_code}\nVálido por 24 horas. 1 abertura = morno; 2 ou mais aberturas, ou seleção de produto = quente. Nada foi enviado automaticamente.` : `Lead criado, mas o catálogo falhou: ${created.error || 'APP_URL não configurada'}.`;
+            status = catalogRequest && link ? 'interpretado' : 'erro';
+          }
+        }
+      }
+      acao = 'gerar catalogo rastreavel';
     } else if (['/visita','/tarefa','/followup','/whatsapp','/mensagem','/proposta','/material'].includes(cmd)) {
       const parsed = splitNameDetail(args);
       const found = await oneClient(base44, parsed.name);
@@ -283,6 +359,8 @@ Deno.serve(async (req) => {
 /inativos — Clientes inativos com potencial
 /comodato — Potenciais de comodato
 /pedido [nome|insumo] — Registra pedido de insumo
+/catalogo [nome] — Gera catálogo rastreável para cliente existente
+/catalogo [nome | telefone | cidade] — Cria lead imediatamente e gera catálogo rastreável
 /campanha — Campanha ativa
 
 ⚠️ Nenhum comando envia mensagem automaticamente. Tudo passa por fila de aprovação.`;
@@ -325,8 +403,9 @@ Deno.serve(async (req) => {
     }
 
     if (body.validate_only) return Response.json({ resposta, comando: cmd, validated: true, envio_automatico: false });
-    const lg = await log(base44, user, text, cmd, resposta, { status, cliente_detectado: client ? nameOf(client) : '', acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '' });
-    return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', envio_automatico: false });
+    const detectedName = client ? nameOf(client) : lead?.full_name || '';
+    const lg = await log(base44, user, text, cmd, resposta, { status, cliente_detectado: detectedName, acao_sugerida: acao, crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '' });
+    return Response.json({ resposta, comando: cmd, telegram_log_id: lg.record?.id || '', crm_update_queue_id: queue?.id || '', pending_message_id: pending?.id || '', task_id: task?.id || '', lead_id: lead?.id || '', catalog_request_id: catalogRequest?.id || '', envio_automatico: false });
   } catch (error) {
     return Response.json({ error: error.message, envio_automatico: false }, { status: 500 });
   }

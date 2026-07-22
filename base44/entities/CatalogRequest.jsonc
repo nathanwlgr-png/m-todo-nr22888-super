@@ -1,10 +1,31 @@
 {
   "name": "CatalogRequest",
   "type": "object",
-  "description": "Sele\u00e7\u00e3o tempor\u00e1ria de produtos feita pelo cliente por link, confirmada por c\u00f3digo enviado no WhatsApp e validada pelo vendedor.",
+  "description": "Sele\u00e7\u00e3o tempor\u00e1ria e rastre\u00e1vel de produtos por cliente ou lead, confirmada por c\u00f3digo e validada pelo vendedor.",
   "properties": {
     "client_id": {
       "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "recipient_type": {
+      "type": "string",
+      "enum": [
+        "client",
+        "lead"
+      ]
+    },
+    "recipient_phone": {
+      "type": "string"
+    },
+    "sent_via": {
+      "type": "string",
+      "enum": [
+        "telegram",
+        "whatsapp",
+        "link_direto"
+      ]
     },
     "client_code": {
       "type": "string"
@@ -36,7 +57,8 @@
     "signature_method": {
       "type": "string",
       "enum": [
-        "whatsapp_code"
+        "whatsapp_code",
+        "telegram_code"
       ]
     },
     "status": {
@@ -50,6 +72,31 @@
         "expirado"
       ],
       "default": "rascunho"
+    },
+    "views_count": {
+      "type": "number",
+      "default": 0
+    },
+    "first_viewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_viewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "engagement_score": {
+      "type": "number",
+      "default": 10
+    },
+    "interest_level": {
+      "type": "string",
+      "enum": [
+        "frio",
+        "morno",
+        "quente"
+      ],
+      "default": "frio"
     },
     "selected_items": {
       "type": "array",
@@ -91,6 +138,7 @@
             "type": "string",
             "enum": [
               "criado",
+              "aberto",
               "adicionado",
               "removido",
               "quantidade_alterada",
@@ -133,7 +181,6 @@
     }
   },
   "required": [
-    "client_id",
     "client_code",
     "access_token"
   ]
