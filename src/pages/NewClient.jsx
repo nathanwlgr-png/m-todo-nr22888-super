@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,12 +188,12 @@ export default function NewClient() {
                 state
               ].filter(Boolean).join(', ');
               
-              setFormData({
-                ...formData,
+              setFormData((current) => ({
+                ...current,
                 address: fullAddress,
-                city: city,
+                city,
                 cep: postcode
-              });
+              }));
               
               alert('Localização capturada com sucesso!');
             }
@@ -223,12 +222,12 @@ export default function NewClient() {
       const data = await response.json();
       
       if (!data.erro) {
-        setFormData({
-          ...formData,
+        setFormData((current) => ({
+          ...current,
           cep: cleanCEP,
           address: `${data.logradouro}, ${data.bairro}`,
           city: data.localidade
-        });
+        }));
       }
     } catch (error) {
       console.log('Erro ao buscar CEP');
@@ -243,9 +242,7 @@ export default function NewClient() {
     setLoading(true);
     
     try {
-      const nameForNumerology = formData.full_name || formData.first_name;
-      const numerologyNumber = calculateNumerology(nameForNumerology);
-      const lifePathNumber = calculateLifePath(formData.birthdate);
+      const numerologyNumber = calculateNumerology(formData.first_name);
       
       // Remove campos vazios para evitar erros
       const cleanedData = {};
@@ -258,7 +255,6 @@ export default function NewClient() {
       const clientData = {
         ...cleanedData,
         numerology_number: numerologyNumber,
-        life_path_number: lifePathNumber,
         behavioral_profile: getBehavioralProfile(numerologyNumber),
         decision_style: getDecisionStyle(numerologyNumber),
         purchase_motivators: motivators.length > 0 ? motivators : undefined,
@@ -398,7 +394,7 @@ export default function NewClient() {
               placeholder="DD/MM/AAAA ou AAAA-MM-DD"
               className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
             />
-            <p className="text-xs text-slate-500">Para cálculo completo de numerologia</p>
+            <p className="text-xs text-slate-500">Informação opcional de cadastro</p>
           </div>
 
           {/* CNPJ */}

@@ -44,7 +44,6 @@ import AppLoadingScreen from '@/components/AppLoadingScreen';
 import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 import Layout from '@/components/AppLayout';
 import TabletAppLayout from '@/components/TabletAppLayout';
-import HomePageWithLayout from '@/components/HomePageWithLayout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useTabletOptimizations } from '@/hooks/useTabletOptimizations';
 import { AIGlobalProvider } from '@/lib/AIGlobalContext';

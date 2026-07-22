@@ -50,7 +50,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
 
 const ORANGE_REGION_CITIES = [
   'Marília', 'Presidente Prudente', 'Assis', 'Tupã', 'Adamantina', 
@@ -353,6 +352,7 @@ export default function Clients() {
   };
 
   const exportClientDocument = async (client) => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     doc.setFontSize(14);
     doc.text(`Perfil do Cliente - ${client.first_name}`, 14, 15);
@@ -380,7 +380,8 @@ export default function Clients() {
     toast.success('Documento exportado!');
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF('portrait');
     
     // Título
