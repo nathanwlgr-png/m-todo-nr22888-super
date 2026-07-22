@@ -54,8 +54,7 @@ function randomCode() {
 }
 
 function catalogLink(request) {
-  const appUrl = String(Deno.env.get('APP_URL') || '').replace(/\/+$/, '');
-  if (!appUrl) return '';
+  const appUrl = String(Deno.env.get('APP_URL') || 'https://nr22888-73878882.base44.app').replace(/\/+$/, '');
   return `${appUrl}/CatalogoCliente?codigo=${encodeURIComponent(request.client_code)}&pedido=${request.id}&token=${encodeURIComponent(request.access_token)}`;
 }
 
