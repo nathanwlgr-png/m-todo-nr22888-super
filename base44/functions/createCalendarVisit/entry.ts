@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const GCAL = 'https://www.googleapis.com/calendar/v3';
+const CONNECTOR_ID = '6a6031d8a6b552c19b90098b';
 
 Deno.serve(async (req) => {
   try {
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
       duration_minutes = 60,
     } = body;
 
-    const { accessToken } = await base44.asServiceRole.connectors.getConnection('googlecalendar');
+    const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
@@ -154,6 +155,7 @@ Deno.serve(async (req) => {
           google_calendar_synced: true,
           google_calendar_event_id: calEvent.id,
         });
+        await base44.asServiceRole.entities.CalendarEventLink.create({ user_id: user.id, user_email: user.email, visit_id, event_id: calEvent.id, calendar_id: 'primary', sync_status: 'synced', last_synced_at: new Date().toISOString() });
       }
 
       return Response.json({

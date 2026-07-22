@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const GCal = 'https://www.googleapis.com/calendar/v3/calendars/primary';
+const CONNECTOR_ID = '6a6031d8a6b552c19b90098b';
 
 Deno.serve(async (req) => {
   try {
@@ -8,7 +9,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { accessToken } = await base44.asServiceRole.connectors.getConnection('googlecalendar');
+    const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
     const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
 
     const body = await req.json();
@@ -16,7 +17,11 @@ Deno.serve(async (req) => {
 
     // ── SYNC VISITS TO GOOGLE CALENDAR ──────────────────────────────────────
     if (action === 'sync_visits') {
-      const visits = await base44.asServiceRole.entities.Visit.filter({ status: 'agendada' });
+      const allVisits = await base44.asServiceRole.entities.Visit.filter({ status: 'agendada' });
+      const requestedIds = Array.isArray(body.visit_ids) ? new Set(body.visit_ids) : null;
+      const visits = requestedIds ? allVisits.filter((visit) => requestedIds.has(visit.id)) : allVisits;
+      const links = await base44.asServiceRole.entities.CalendarEventLink.filter({ user_id: user.id }, '-updated_date', 1000).catch(() => []);
+      const linkByVisit = Object.fromEntries(links.map((link) => [link.visit_id, link]));
       const results = [];
 
       for (const visit of visits) {
@@ -42,36 +47,25 @@ Deno.serve(async (req) => {
         };
 
         let gcalRes;
-        if (visit.google_calendar_event_id) {
-          const checkRes = await fetch(`${GCal}/events/${visit.google_calendar_event_id}`, { headers });
-          const targetUrl = checkRes.status === 404 || checkRes.status === 410
-            ? `${GCal}/events`
-            : `${GCal}/events/${visit.google_calendar_event_id}`;
-          gcalRes = await fetch(targetUrl, {
-            method: targetUrl.endsWith('/events') ? 'POST' : 'PUT',
-            headers,
-            body: JSON.stringify(eventBody),
-          });
+        const link = linkByVisit[visit.id];
+        if (link?.event_id) {
+          const checkRes = await fetch(`${GCal}/events/${link.event_id}`, { headers });
+          const targetUrl = checkRes.status === 404 || checkRes.status === 410 ? `${GCal}/events` : `${GCal}/events/${link.event_id}`;
+          gcalRes = await fetch(targetUrl, { method: targetUrl.endsWith('/events') ? 'POST' : 'PUT', headers, body: JSON.stringify(eventBody) });
         } else {
-          const searchRes = await fetch(
-            `${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(visit.id)}&maxResults=1`,
-            { headers }
-          );
+          const searchRes = await fetch(`${GCal}/events?privateExtendedProperty=crm_visit_id%3D${encodeURIComponent(visit.id)}&maxResults=1`, { headers });
           const searchData = searchRes.ok ? await searchRes.json() : { items: [] };
           const existingId = searchData.items?.[0]?.id;
-          gcalRes = await fetch(existingId ? `${GCal}/events/${existingId}` : `${GCal}/events`, {
-            method: existingId ? 'PUT' : 'POST',
-            headers,
-            body: JSON.stringify(eventBody),
-          });
+          gcalRes = await fetch(existingId ? `${GCal}/events/${existingId}` : `${GCal}/events`, { method: existingId ? 'PUT' : 'POST', headers, body: JSON.stringify(eventBody) });
         }
 
         const gcalData = await gcalRes.json();
         if (gcalData.id) {
-          await base44.asServiceRole.entities.Visit.update(visit.id, {
-            google_calendar_synced: true,
-            google_calendar_event_id: gcalData.id,
-          });
+          await base44.asServiceRole.entities.Visit.update(visit.id, { google_calendar_synced: true, google_calendar_event_id: gcalData.id });
+          const link = linkByVisit[visit.id];
+          const linkData = { user_id: user.id, user_email: user.email, visit_id: visit.id, event_id: gcalData.id, calendar_id: 'primary', sync_status: 'synced', last_synced_at: new Date().toISOString() };
+          if (link) await base44.asServiceRole.entities.CalendarEventLink.update(link.id, linkData);
+          else await base44.asServiceRole.entities.CalendarEventLink.create(linkData);
           results.push({ visit_id: visit.id, event_id: gcalData.id, client: visit.client_name });
         }
       }
@@ -159,6 +153,7 @@ Deno.serve(async (req) => {
         google_calendar_synced: true,
         google_calendar_event_id: event.id,
       });
+      await base44.asServiceRole.entities.CalendarEventLink.create({ user_id: user.id, user_email: user.email, visit_id: newVisit.id, event_id: event.id, calendar_id: 'primary', sync_status: 'synced', last_synced_at: new Date().toISOString() });
 
       await base44.asServiceRole.integrations.Core.AnalyticsTrack({
         eventName: 'google_calendar_sync_success',
@@ -176,6 +171,8 @@ Deno.serve(async (req) => {
     if (action === 'delete_event') {
       const { event_id } = body;
       await fetch(`${GCal}/events/${event_id}`, { method: 'DELETE', headers });
+      const links = await base44.asServiceRole.entities.CalendarEventLink.filter({ user_id: user.id, event_id }, '-updated_date', 1).catch(() => []);
+      if (links[0]) await base44.asServiceRole.entities.CalendarEventLink.update(links[0].id, { sync_status: 'deleted', last_synced_at: new Date().toISOString() });
       return Response.json({ success: true });
     }
 

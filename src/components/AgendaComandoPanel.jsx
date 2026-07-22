@@ -64,6 +64,10 @@ export default function AgendaComandoPanel({ onAgendaGerada }) {
         toast.success(`Agenda gerada! ${res.data.resumo?.total_visitas} visitas em ${res.data.resumo?.total_dias} dias`);
         if (res.data.resumo?.visitas_criadas_crm > 0) {
           toast.success(`${res.data.resumo.visitas_criadas_crm} visitas criadas no CRM!`);
+          try {
+            const sync = await base44.functions.invoke('googleCalendarSync', { action: 'sync_visits', visit_ids: res.data.visitas_criadas.map((visit) => visit.id) });
+            toast.success(`${sync.data?.synced || 0} visitas adicionadas à sua agenda.`);
+          } catch { toast.info('Visitas salvas. Conecte seu Google Calendar na aba GCal para sincronizar.'); }
         }
       } else {
         toast.error('Erro ao gerar agenda');

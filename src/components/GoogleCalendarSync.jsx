@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,13 @@ import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const CONNECTOR_ID = '6a6031d8a6b552c19b90098b';
+
 export default function GoogleCalendarSync() {
   const [syncingVisits, setSyncingVisits] = useState(false);
+  const [calendarUser, setCalendarUser] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [connectionLoading, setConnectionLoading] = useState(true);
   const [syncingTasks, setSyncingTasks] = useState(false);
   const [importingId, setImportingId] = useState(null);
   const [activeTab, setActiveTab] = useState('sync'); // sync | import
@@ -23,11 +28,39 @@ export default function GoogleCalendarSync() {
     queryKey: ['gcal-events'],
     queryFn: async () => {
       const res = await base44.functions.invoke('googleCalendarSync', { action: 'get_events' });
+      setConnected(true);
       return res.data?.events || [];
     },
     staleTime: 60000,
     retry: false,
+    enabled: !!calendarUser,
   });
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(async (authenticated) => {
+      if (authenticated) {
+        setCalendarUser(await base44.auth.me());
+      }
+      setConnectionLoading(false);
+    });
+  }, []);
+
+  const connectCalendar = async () => {
+    const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
+    const popup = window.open(url, '_blank');
+    const timer = setInterval(async () => {
+      if (!popup || popup.closed) {
+        clearInterval(timer);
+        const result = await refetch();
+        setConnected(!result.error);
+      }
+    }, 500);
+  };
+
+  const disconnectCalendar = async () => {
+    await base44.connectors.disconnectAppUser(CONNECTOR_ID);
+    setConnected(false);
+  };
 
   const { data: visits = [] } = useQuery({
     queryKey: ['visits-sync'],
@@ -119,6 +152,10 @@ export default function GoogleCalendarSync() {
     !!e.extendedProperties?.private?.crm_visit_id ||
     !!e.extendedProperties?.private?.crm_task_id;
 
+  if (connectionLoading || (calendarUser && loadingEvents && !connected)) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-indigo-600" /></div>;
+  if (!calendarUser) return <Card><CardContent className="pt-6"><Button className="w-full" onClick={() => base44.auth.redirectToLogin()}>Entrar para conectar o Google Calendar</Button></CardContent></Card>;
+  if (!connected) return <Card className="border-indigo-200"><CardContent className="space-y-3 pt-6"><p className="text-sm text-slate-600">Conecte sua agenda pessoal para receber visitas com horário e endereço.</p><Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={connectCalendar}><Calendar className="mr-2 h-4 w-4" />Conectar meu Google Calendar</Button></CardContent></Card>;
+
   return (
     <div className="space-y-4">
 
@@ -135,8 +172,9 @@ export default function GoogleCalendarSync() {
             </div>
             <div className="ml-auto flex items-center gap-1">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-green-700 font-medium">Conectado</span>
-            </div>
+              <span className="text-xs text-green-700 font-medium">Minha agenda conectada</span>
+              <button onClick={disconnectCalendar} className="ml-2 text-xs text-slate-500 underline">Desconectar</button>
+              </div>
           </div>
 
           {/* Métricas */}

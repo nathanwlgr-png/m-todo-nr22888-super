@@ -2,12 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { getOptionalUser, isForbiddenManualUser } from '../../shared/automationAuth.js';
 
 const GCal = 'https://www.googleapis.com/calendar/v3/calendars/primary';
+const CONNECTOR_ID = '6a6031d8a6b552c19b90098b';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
     const user = await getOptionalUser(base44);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (isForbiddenManualUser(user)) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     // Pode ser chamado por automação de entidade OU manualmente
@@ -31,7 +33,7 @@ Deno.serve(async (req) => {
     // Obter token do Google Calendar
     let accessToken;
     try {
-      const conn = await base44.asServiceRole.connectors.getConnection('googlecalendar');
+      const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
       accessToken = conn.accessToken;
     } catch (e) {
       console.log('Google Calendar não conectado:', e.message);

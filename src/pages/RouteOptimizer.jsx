@@ -114,10 +114,30 @@ export default function RouteOptimizer() {
   });
 
   const saveRouteMutation = useMutation({
-    mutationFn: (routeData) => base44.entities.OptimizedRoute.create(routeData),
-    onSuccess: () => {
+    mutationFn: async (routeData) => {
+      const savedRoute = await base44.entities.OptimizedRoute.create(routeData);
+      const existing = await base44.entities.Visit.list('-scheduled_date', 1000);
+      const selectedMap = Object.fromEntries(clients.filter((client) => selectedClients.includes(client.id)).map((client) => [client.id, client]));
+      const visitsToCreate = (optimizedRoute.visits || []).filter((visit) => !existing.some((item) => item.client_id === visit.client_id && item.scheduled_date?.startsWith(routeDate))).map((visit, index) => {
+        const arrival = visit.estimated_arrival ? new Date(visit.estimated_arrival) : null;
+        const time = arrival && !Number.isNaN(arrival.getTime()) ? `${String(arrival.getHours()).padStart(2, '0')}:${String(arrival.getMinutes()).padStart(2, '0')}` : `${String(8 + index).padStart(2, '0')}:00`;
+        const client = selectedMap[visit.client_id] || {};
+        return { client_id: visit.client_id, client_name: visit.client_name || client.first_name || client.clinic_name, scheduled_date: new Date(`${routeDate}T${time}:00`).toISOString(), duration_minutes: visitDuration, visit_type: 'primeira_visita', location: visit.address || client.address || client.city || '', notes: `Rota: ${routeName}`, status: 'agendada' };
+      });
+      const createdVisits = visitsToCreate.length ? await base44.entities.Visit.bulkCreate(visitsToCreate) : [];
+      let calendarSynced = 0;
+      if (createdVisits.length) {
+        try {
+          const response = await base44.functions.invoke('googleCalendarSync', { action: 'sync_visits', visit_ids: createdVisits.map((visit) => visit.id) });
+          calendarSynced = response.data?.synced || 0;
+        } catch { calendarSynced = 0; }
+      }
+      return { savedRoute, created: createdVisits.length, calendarSynced };
+    },
+    onSuccess: (data) => {
       queryClient.invalidateQueries(['optimized-routes']);
-      toast.success('Rota salva!');
+      queryClient.invalidateQueries(['visits-agenda']);
+      toast.success(`Rota salva com ${data.created} visitas; ${data.calendarSynced} sincronizadas na agenda.`);
     }
   });
 
@@ -390,7 +410,7 @@ export default function RouteOptimizer() {
                       className="w-full bg-green-600 hover:bg-green-700"
                     >
                       <Save className="w-4 h-4 mr-2" />
-                      Salvar Rota
+                      Salvar Rota e Agenda
                     </Button>
                   </div>
                 </div>

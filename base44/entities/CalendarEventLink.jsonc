@@ -1,0 +1,41 @@
+{
+  "name": "CalendarEventLink",
+  "type": "object",
+  "description": "V\u00ednculo individual entre uma visita do CRM e o evento criado no Google Calendar de cada usu\u00e1rio.",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "visit_id": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "calendar_id": {
+      "type": "string",
+      "default": "primary"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "synced",
+        "deleted",
+        "error"
+      ],
+      "default": "synced"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "visit_id",
+    "event_id"
+  ]
+}
