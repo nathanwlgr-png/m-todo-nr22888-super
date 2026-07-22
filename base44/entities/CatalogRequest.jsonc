@@ -1,7 +1,7 @@
 {
   "name": "CatalogRequest",
   "type": "object",
-  "description": "Sele\u00e7\u00e3o de produtos e quantidades feita pelo cliente por link, com hist\u00f3rico e valida\u00e7\u00e3o humana antes do or\u00e7amento.",
+  "description": "Sele\u00e7\u00e3o tempor\u00e1ria de produtos feita pelo cliente por link, confirmada por c\u00f3digo enviado no WhatsApp e validada pelo vendedor.",
   "properties": {
     "client_id": {
       "type": "string"
@@ -15,6 +15,30 @@
     "access_token": {
       "type": "string"
     },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_code": {
+      "type": "string"
+    },
+    "verification_session_hash": {
+      "type": "string"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signature_method": {
+      "type": "string",
+      "enum": [
+        "whatsapp_code"
+      ]
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -22,7 +46,8 @@
         "enviado",
         "aguardando_validacao",
         "validado",
-        "reaberto"
+        "reaberto",
+        "expirado"
       ],
       "default": "rascunho"
     },
@@ -69,6 +94,8 @@
               "adicionado",
               "removido",
               "quantidade_alterada",
+              "codigo_verificado",
+              "assinado",
               "enviado",
               "validado",
               "reaberto"

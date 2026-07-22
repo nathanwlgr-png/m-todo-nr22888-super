@@ -11,12 +11,12 @@ const findImage = (name, images) => {
   })?.image_url || '';
 };
 
-export default function catalogProducts({ catalog, products, equipment, consumables, images }) {
+export default function catalogProducts({ catalog, products, consumables, images }) {
+  const isEquipment = (value = '') => /equipamento|analisador|maquina|máquina/i.test(value);
   const rows = [
-    ...catalog.filter((p) => p.ativo !== false).map((p) => ({ id: p.id, source: 'ProductCatalog', name: p.nome_produto, category: p.linha || p.categoria, image_url: p.imagem_url })),
-    ...equipment.filter((p) => p.is_active !== false).map((p) => ({ id: p.id, source: 'Equipment', name: p.name, category: 'Equipamento', image_url: '' })),
+    ...catalog.filter((p) => p.ativo !== false && p.categoria !== 'equipamento').map((p) => ({ id: p.id, source: 'ProductCatalog', name: p.nome_produto, category: p.linha || p.categoria, image_url: p.imagem_url })),
     ...consumables.filter((p) => p.is_active !== false).map((p) => ({ id: p.id, source: 'Consumable', name: p.name, category: p.category || 'Insumo', image_url: '' })),
-    ...products.filter((p) => p.is_active !== false && p.status !== 'inativo').map((p) => ({ id: p.id, source: 'Product', name: p.name, category: p.category || 'Produto', image_url: '' })),
+    ...products.filter((p) => p.is_active !== false && p.status !== 'inativo' && !isEquipment(`${p.name} ${p.category}`)).map((p) => ({ id: p.id, source: 'Product', name: p.name, category: p.category || 'Produto', image_url: '' })),
   ];
   const seen = new Set();
   return rows.filter((p) => p.name && !seen.has(clean(p.name)) && seen.add(clean(p.name))).map((p) => ({ ...p, image_url: p.image_url || findImage(p.name, images) }));
