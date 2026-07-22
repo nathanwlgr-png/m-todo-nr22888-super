@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Clipboard, ExternalLink, MessageCircle, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Clipboard, ExternalLink, FileText, MessageCircle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import WhatsAppSendModal from '@/components/WhatsAppSendModal';
 
@@ -27,7 +27,7 @@ export default function ClientCatalogRequestPanel({ client }) {
     if (!client.phone) { toast.error('Cliente sem WhatsApp cadastrado'); return; }
     const name = client.first_name || client.full_name || 'Olá';
     const clinic = client.clinic_name ? ` para a ${client.clinic_name}` : '';
-    const items = (latest.selected_items || []).map(item => `• ${item.product_name}`).join('\n');
+    const items = (latest.selected_items || []).map(item => `• ${item.quantity || 1}x ${item.product_name}`).join('\n');
     setMessage(`Olá, ${name}! Tudo bem?\n\nRegistrei os produtos que você selecionou${clinic}:\n${items}\n\nVou validar as melhores condições e preparar uma proposta personalizada. Posso seguir?`);
   };
 
@@ -58,14 +58,14 @@ export default function ClientCatalogRequestPanel({ client }) {
     <section className="rounded-2xl border border-orange-500/20 bg-neutral-950 p-4">
       <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-orange-400">Catálogo para o cliente</p>
       {!latest ? <button onClick={createRequest} className="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-black text-black">Criar e copiar link</button> : <>
-        <div className="mb-3 flex items-center justify-between gap-2"><div><p className="text-sm font-bold text-white">{latest.selected_items?.length || 0} itens selecionados</p><p className="text-xs text-slate-500">Status: {latest.status} · revisão {latest.revision || 0}</p></div><span className="text-xs text-slate-500">{latest.client_code}</span></div>
-        {(latest.selected_items || []).map(item => <p key={`${item.product_source}:${item.product_id}`} className="border-t border-neutral-800 py-2 text-xs text-slate-300">{item.product_name}</p>)}
-        {!!latest.change_history?.length && <div className="mt-3 rounded-xl bg-neutral-900 p-3"><p className="mb-2 text-[10px] font-black uppercase text-slate-500">Últimas alterações</p>{latest.change_history.slice(-5).reverse().map((change, index) => <p key={`${change.changed_at}-${index}`} className="text-[11px] text-slate-400">{change.action}{change.product_name ? `: ${change.product_name}` : ''} · {new Date(change.changed_at).toLocaleString('pt-BR')}</p>)}</div>}
+        <div className="mb-3 flex items-center justify-between gap-2"><div><p className="text-sm font-bold text-white">{latest.selected_items?.length || 0} produtos · {(latest.selected_items || []).reduce((sum, item) => sum + (item.quantity || 1), 0)} unidades</p><p className="text-xs text-slate-500">Status: {latest.status} · revisão {latest.revision || 0}</p></div><span className="text-xs text-slate-500">{latest.client_code}</span></div>
+        {(latest.selected_items || []).map(item => <p key={`${item.product_source}:${item.product_id}`} className="border-t border-neutral-800 py-2 text-xs text-slate-300"><strong>{item.quantity || 1}x</strong> {item.product_name}</p>)}
+        {!!latest.change_history?.length && <div className="mt-3 rounded-xl bg-neutral-900 p-3"><p className="mb-2 text-[10px] font-black uppercase text-slate-500">Últimas alterações</p>{latest.change_history.slice(-5).reverse().map((change, index) => <p key={`${change.changed_at}-${index}`} className="text-[11px] text-slate-400">{change.action}{change.product_name ? `: ${change.product_name}` : ''}{change.quantity ? ` (${change.quantity}x)` : ''} · {new Date(change.changed_at).toLocaleString('pt-BR')}</p>)}</div>}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button onClick={async () => { await navigator.clipboard.writeText(buildLink(latest)); toast.success('Link copiado'); }} className="flex items-center justify-center gap-2 rounded-xl border border-orange-500/30 py-2 text-xs font-bold text-orange-400"><Clipboard className="h-4 w-4" />Copiar link</button>
           <a href={buildLink(latest)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><ExternalLink className="h-4 w-4" />Abrir</a>
           {latest.status === 'aguardando_validacao' && <button onClick={() => updateStatus('validado', 'validado')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-2 text-xs font-black text-black"><CheckCircle2 className="h-4 w-4" />Validar para orçamento</button>}
-          {latest.status === 'validado' && <button onClick={() => updateStatus('reaberto', 'reaberto')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><RotateCcw className="h-4 w-4" />Permitir alterações</button>}
+          {latest.status === 'validado' && <><a href={`/ProposalGenerator?client_id=${client.id}&catalog_request_id=${latest.id}`} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-xs font-black text-black"><FileText className="h-4 w-4" />Gerar orçamento e pagamento</a><button onClick={() => updateStatus('reaberto', 'reaberto')} className="col-span-2 flex items-center justify-center gap-2 rounded-xl border border-slate-700 py-2 text-xs font-bold text-slate-300"><RotateCcw className="h-4 w-4" />Permitir alterações</button></>}
           {!!latest.selected_items?.length && <button onClick={prepareWhatsApp} className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-xs font-black text-black"><MessageCircle className="h-4 w-4" />WhatsApp personalizado</button>}
         </div>
         {latest.status === 'validado' && <button onClick={createRequest} className="mt-2 w-full py-2 text-xs font-bold text-orange-400">Criar nova seleção</button>}

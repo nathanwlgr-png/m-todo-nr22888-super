@@ -1,7 +1,7 @@
 {
   "name": "CatalogRequest",
   "type": "object",
-  "description": "Sele\u00e7\u00e3o de produtos feita pelo cliente por link, com hist\u00f3rico de altera\u00e7\u00f5es e valida\u00e7\u00e3o humana antes do or\u00e7amento.",
+  "description": "Sele\u00e7\u00e3o de produtos e quantidades feita pelo cliente por link, com hist\u00f3rico e valida\u00e7\u00e3o humana antes do or\u00e7amento.",
   "properties": {
     "client_id": {
       "type": "string"
@@ -45,6 +45,10 @@
           },
           "image_url": {
             "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
           }
         }
       }
@@ -64,6 +68,7 @@
               "criado",
               "adicionado",
               "removido",
+              "quantidade_alterada",
               "enviado",
               "validado",
               "reaberto"
@@ -74,6 +79,9 @@
           },
           "product_name": {
             "type": "string"
+          },
+          "quantity": {
+            "type": "number"
           },
           "actor": {
             "type": "string"
