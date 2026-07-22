@@ -1,0 +1,40 @@
+{
+  "name": "GoogleSheetsLeadSync",
+  "type": "object",
+  "description": "Configura\u00e7\u00e3o individual da planilha Google Sheets Bye usada para sincronizar leads do CRM.",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "spreadsheet_id": {
+      "type": "string"
+    },
+    "spreadsheet_url": {
+      "type": "string"
+    },
+    "spreadsheet_title": {
+      "type": "string",
+      "default": "Bye"
+    },
+    "sheet_name": {
+      "type": "string",
+      "default": "Leads"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synced_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_id",
+    "spreadsheet_id",
+    "spreadsheet_url"
+  ]
+}

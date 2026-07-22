@@ -287,6 +287,7 @@ Deno.serve(async (req) => {
             if (!lead) { resposta = `Não foi possível criar o lead: ${createdLead.error}.`; status = 'erro'; }
           }
           if (lead) {
+            await base44.functions.invoke('syncLeadToByeSheet', { action: 'sync_lead', lead_id: lead.id }).catch(() => null);
             const created = await createCatalogRequest(base44, { lead_id: lead.id, code: `LEAD-${lead.id}`, name: lead.full_name || targetName, phone: lead.phone || targetPhone });
             catalogRequest = created.record;
             const link = catalogRequest ? catalogLink(catalogRequest) : '';

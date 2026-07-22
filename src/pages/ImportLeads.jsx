@@ -69,6 +69,7 @@ export default function ImportLeads() {
       }));
 
       await base44.entities.Lead.bulkCreate(leadsWithScores);
+      await base44.functions.invoke('syncLeadToByeSheet', { action: 'sync_pending' }).catch(() => null);
 
       queryClient.invalidateQueries(['leads']);
       setImportResult({

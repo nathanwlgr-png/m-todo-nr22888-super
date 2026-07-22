@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import LeadsPriorityList from '@/components/LeadsPriorityList';
+import LeadSheetsSync from '@/components/leads/LeadSheetsSync';
 import {
   Select,
   SelectContent,
@@ -199,6 +200,7 @@ export default function Leads() {
       </div>
 
       <div className="px-4 -mt-8 space-y-4">
+        <LeadSheetsSync />
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Button

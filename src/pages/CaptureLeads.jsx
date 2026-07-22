@@ -42,11 +42,13 @@ export default function CaptureLeads() {
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const score = calculateLeadScore(data);
-      return base44.entities.Lead.create({
+      const lead = await base44.entities.Lead.create({
         ...data,
         lead_score: score,
         status: 'novo'
       });
+      await base44.functions.invoke('syncLeadToByeSheet', { action: 'sync_lead', lead_id: lead.id }).catch(() => null);
+      return lead;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['leads']);
