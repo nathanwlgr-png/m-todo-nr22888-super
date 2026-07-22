@@ -14,6 +14,7 @@ import SeamatyEquipmentPanel from '@/components/SeamatyEquipmentPanel';
 import Score4x4Display from '@/components/Score4x4Display';
 import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 import ClientCatalogRequestPanel from '@/components/catalog/ClientCatalogRequestPanel';
+import ClientProductDemo from '@/components/catalog/ClientProductDemo';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -221,6 +222,8 @@ export default function ClientProfile() {
 
         {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
         <SeamatyEquipmentPanel client={client} />
+
+        <ClientProductDemo client={client} />
 
         <ClientCatalogRequestPanel client={client} />
 
