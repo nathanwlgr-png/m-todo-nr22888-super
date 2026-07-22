@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { whatsappToneGuidelines } from '../../shared/whatsappTone.js';
 
 Deno.serve(async (req) => {
   try {
@@ -37,7 +38,8 @@ CONTEXTO: ${context || 'follow_up'}
 
 TAREFA:
 Gere uma mensagem WhatsApp CURTA (máx 300 caracteres), personalizada e estratégica para este cliente.
-Use emojis sutis e linguagem consultiva.
+
+${whatsappToneGuidelines(clientData)}
 
 Retorne APENAS a mensagem pronta para enviar.`;
 

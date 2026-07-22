@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { whatsappToneGuidelines } from '../../shared/whatsappTone.js';
 
 Deno.serve(async (req) => {
   try {
@@ -29,17 +30,19 @@ Deno.serve(async (req) => {
       main_pains = []
     } = payload;
 
-    // Se só veio client_id, busca dados do cliente no banco
-    if (client_id && !client_name) {
+    if (!client_id && !client_name) return Response.json({ error: 'client_id ou client_name obrigatório' }, { status: 400 });
+    let clientProfile = {};
+    if (client_id) {
       try {
         const c = await base44.entities.Client.get(client_id);
         if (c) {
-          client_name = c.clinic_name || c.full_name || c.first_name || client_name;
+          clientProfile = c;
+          client_name = client_name || c.clinic_name || c.full_name || c.first_name;
           city = city || c.city;
           last_interaction = last_interaction || c.last_contact_date;
           current_equipment = current_equipment || c.current_equipment;
           pipeline_stage = pipeline_stage || c.pipeline_stage;
-          main_pains = (main_pains && main_pains.length) ? main_pains : (c.main_pains || []);
+          main_pains = main_pains.length ? main_pains : (c.main_pains || []);
         }
       } catch (_e) {}
     }
@@ -69,7 +72,9 @@ Deno.serve(async (req) => {
             role: 'system',
             content: `Você é um especialista em vendas SPIN Selling para equipamentos veterinários. 
             Gere 3 mensagens WhatsApp PERSONALIZADAS baseadas no perfil do cliente.
-            
+
+            ${whatsappToneGuidelines({ ...clientProfile, pipeline_stage, main_pains })}
+
             Cada mensagem deve:
             1. Ter max 240 caracteres (limite WhatsApp)
             2. Usar técnica SPIN (Situation → Problem → Implication → Need Payoff)

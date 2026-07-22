@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { whatsappToneGuidelines } from '../../shared/whatsappTone.js';
 
 Deno.serve(async (req) => {
   try {
@@ -98,6 +99,9 @@ ${include_payment_terms ? '6. Sugere 2-3 formas de pagamento' : ''}
 7. Call-to-action claro com próximos passos
 8. Tom profissional mas amigável
 9. Estrutura em MARKDOWN para WhatsApp
+
+PADRÃO DE COMUNICAÇÃO:
+${whatsappToneGuidelines(client)}
 
 VALIDADE: Esta proposta é válida por 30 dias.
 DATA: ${today}

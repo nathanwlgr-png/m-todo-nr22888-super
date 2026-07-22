@@ -1,18 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { buildTechnicalFollowUp } from '../../shared/whatsappTone.js';
 
-const TEMPLATES = {
-  suave: (nome, equipamento) =>
-    `Olá ${nome}! 😊\n\nPassou um tempinho desde nossa conversa e queria saber se você teve a chance de pensar na proposta do *${equipamento}*.\n\nSe tiver alguma dúvida ou quiser ajustar algum detalhe, estou à disposição!\n\nAbraços,\nEquipe SEAMATY Brasil 🐾`,
-  consultivo: (nome, equipamento) =>
-    `Olá ${nome}! 👋\n\nEstava revisando nossa proposta do *${equipamento}* e queria entender melhor sua situação atual.\n\nPosso te mostrar como outros clientes conseguiram viabilizar a aquisição com condições especiais. Que tal conversarmos 10 minutinhos?\n\nEquipe SEAMATY Brasil`,
-  urgente: (nome, equipamento) =>
-    `Olá ${nome}! ⚡\n\nQueria retomar nossa conversa sobre *${equipamento}*.\n\nSe ainda fizer sentido para a clínica, posso verificar as condições comerciais vigentes e ajustar a proposta conforme sua necessidade. Podemos falar hoje?\n\nEquipe SEAMATY Brasil`,
-};
-
-function getTemplate(score) {
-  if (!score || score >= 700) return TEMPLATES.suave;
-  if (score >= 500) return TEMPLATES.consultivo;
-  return TEMPLATES.urgente;
+function getPressure(client) {
+  if (['proposta', 'negociacao'].includes(client.pipeline_stage) && (client.purchase_score || 0) >= 70) return 'firme';
+  if (['qualificado', 'proposta', 'negociacao'].includes(client.pipeline_stage)) return 'consultivo';
+  return 'leve';
 }
 
 Deno.serve(async (req) => {
@@ -56,10 +48,8 @@ Deno.serve(async (req) => {
 
       const cnpjLimpo = (c.cnpj || '').replace(/\D/g, '');
       const score = scoreMap[cnpjLimpo] || null;
-      const templateFn = getTemplate(score);
-      const nome = c.first_name || (c.full_name || '').split(' ')[0] || 'cliente';
       const equipamento = c.equipment_interest || c.equipment_sold || 'equipamento Seamaty indicado para a clínica';
-      const mensagem = templateFn(nome, equipamento);
+      const mensagem = buildTechnicalFollowUp(c, equipamento, getPressure(c));
 
       const phoneIntl = phone.startsWith('55') ? phone : `55${phone}`;
       const url = `https://api.whatsapp.com/send?phone=${phoneIntl}&text=${encodeURIComponent(mensagem)}`;

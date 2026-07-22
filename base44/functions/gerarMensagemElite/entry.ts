@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { whatsappToneGuidelines } from '../../shared/whatsappTone.js';
 
 Deno.serve(async (req) => {
   try {
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
     const nome = target.first_name || target.full_name || target.company || target.clinic_name || 'cliente';
     const produto = score?.produto_recomendado || target.equipment_interest || target.interest || 'SMT-120VP';
     const acao = score?.proxima_melhor_acao || target.next_best_action || 'mandar_whatsapp';
-    const prompt = `Responda em português do Brasil com uma mensagem curta de WhatsApp para venda consultiva Seamaty. Não prometa envio automático. Cliente: ${nome}. Clínica/empresa: ${target.clinic_name || target.company || ''}. Produto recomendado: ${produto}. Ação: ${acao}. Funil: ${score?.status_funil || target.pipeline_stage || target.status || ''}. Objeção provável: ${target.real_objections?.[0] || 'preço/ROI'}. Contexto extra: ${contexto_extra || ''}. Tom direto, humano e focado em conversão. Máximo 650 caracteres.`;
+    const prompt = `Responda em português do Brasil com uma mensagem curta de WhatsApp para venda consultiva Seamaty. Não prometa envio automático. Cliente: ${nome}. Clínica/empresa: ${target.clinic_name || target.company || ''}. Produto recomendado: ${produto}. Ação: ${acao}. Funil: ${score?.status_funil || target.pipeline_stage || target.status || ''}. Objeção provável: ${target.real_objections?.[0] || 'preço/ROI'}. Contexto extra: ${contexto_extra || ''}. Máximo 650 caracteres.\n\n${whatsappToneGuidelines({ ...target, pipeline_stage: score?.status_funil || target.pipeline_stage })}`;
 
     let mensagem = '';
     try {

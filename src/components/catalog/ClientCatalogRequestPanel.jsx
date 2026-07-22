@@ -28,7 +28,7 @@ export default function ClientCatalogRequestPanel({ client }) {
     const name = client.first_name || client.full_name || 'Olá';
     const clinic = client.clinic_name ? ` para a ${client.clinic_name}` : '';
     const items = (latest.selected_items || []).map(item => `• ${item.quantity || 1}x ${item.product_name}`).join('\n');
-    setMessage(`Olá, ${name}! Tudo bem?\n\nRegistrei os produtos que você selecionou${clinic}:\n${items}\n\nVou validar as melhores condições e preparar uma proposta personalizada. Posso seguir?`);
+    setMessage(`Olá, ${name}. Revisei sua seleção${clinic}:\n${items}\n\nVou validar compatibilidade, quantidades, aplicação técnica e condição comercial antes de montar o orçamento. Posso preparar a proposta com as opções de pagamento adequadas ao seu cenário?`);
   };
 
   const createRequest = async () => {
