@@ -285,16 +285,9 @@ async function importRegional(base44, user, sourceUrl, sheetName, knownClients, 
         else updateClients.push(update);
         updatedClientIds.add(existingClient.id);
       } else createClients.push({ ...data, pipeline_stage: 'fechado', custom_tags: ['Cliente_Seamaty', 'Base_Regional_Nathan'] });
-    } else if (existingClient) {
-      prospectsExistentes += 1;
-      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, first_name: (item.contact || item.clinic_name).split(' ')[0], clinic_name: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, address: item.address, cep: item.cep, city: item.city, representante: 'Nathan', lead_source: 'importacao_planilha', notes: `Prospecção regional. Segmento: ${item.segment}. Bairro: ${item.neighborhood}.` });
-      if (!updatedClientIds.has(existingClient.id)) {
-        const tags = Array.from(new Set([...(existingClient.custom_tags || []), 'Prospect_Regional', 'Base_Regional_Nathan']));
-        updateClients.push({ ...mergeMissing(existingClient, data), pipeline_stage: existingClient.pipeline_stage || 'lead', custom_tags: tags });
-        updatedClientIds.add(existingClient.id);
-      }
     } else {
-      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, company: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, city: item.city, address: item.address, neighborhood: item.neighborhood, cep: item.cep, source: 'importacao_manual', interest: 'Equipamentos Seamaty', stage: 'novo', status: 'novo', assigned_to: user.email, map_status: 'pendente', notes: `Prospecção regional. Segmento: ${item.segment}.` });
+      if (existingClient) prospectsExistentes += 1;
+      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, company: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, city: item.city, address: item.address, neighborhood: item.neighborhood, cep: item.cep, source: 'importacao_manual', interest: 'Equipamentos Seamaty', stage: 'novo', status: 'novo', assigned_to: user.email, map_status: 'pendente', notes: `Prospecção regional. Segmento: ${item.segment}. Bairro: ${item.neighborhood}.` });
       if (existingLead) updateLeads.push(mergeMissing(existingLead, data));
       else createLeads.push(data);
     }

@@ -12,13 +12,15 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // ─── ÍCONES ────────────────────────────────────────────────────────────────
-const createClientIcon = (status) => {
+const createRecordIcon = (status, recordType) => {
   const colors = {
     quente: { bg: '#16A34A', border: '#BBF7D0', emoji: '🔥' },
     morno:  { bg: '#D97706', border: '#FDE68A', emoji: '⚡' },
     frio:   { bg: '#DC2626', border: '#FECACA', emoji: '❄️' },
   };
-  const c = colors[status] || { bg: '#6B7280', border: '#E5E7EB', emoji: '📍' };
+  const c = recordType === 'lead'
+    ? { bg: '#7C3AED', border: '#DDD6FE', emoji: '🎯' }
+    : colors[status] || { bg: '#6B7280', border: '#E5E7EB', emoji: '📍' };
   return L.divIcon({
     html: `<div style="background:${c.bg};width:36px;height:36px;border-radius:50%;border:3px solid ${c.border};display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">${c.emoji}</div>`,
     className: '',
@@ -138,6 +140,7 @@ function buildGoogleRouteUrl(points, myLocation) {
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────
 export default function ClientLocationMap() {
   const [filterStatus, setFilterStatus] = useState('todos');
+  const [filterType, setFilterType] = useState('todos');
   const [myLocation, setMyLocation] = useState(null);
   const [locating, setLocating] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -145,11 +148,20 @@ export default function ClientLocationMap() {
   const [nearbyRadius, setNearbyRadius] = useState(10); // km
   const [listExpanded, setListExpanded] = useState(true);
 
-  const { data: clients = [], isLoading, refetch } = useQuery({
+  const { data: clients = [], isLoading: loadingClients, refetch: refetchClients } = useQuery({
     queryKey: ['client-map'],
     queryFn: () => base44.entities.Client.list('-updated_date', 1000),
     staleTime: 60000,
   });
+
+  const { data: leads = [], isLoading: loadingLeads, refetch: refetchLeads } = useQuery({
+    queryKey: ['lead-map'],
+    queryFn: () => base44.entities.Lead.list('-updated_date', 1000),
+    staleTime: 60000,
+  });
+
+  const isLoading = loadingClients || loadingLeads;
+  const refetch = useCallback(() => Promise.all([refetchClients(), refetchLeads()]), [refetchClients, refetchLeads]);
 
   // ── GPS: pegar localização atual ─────────────────────────────────────────
   const locateMe = useCallback(() => {
@@ -178,31 +190,30 @@ export default function ClientLocationMap() {
   useEffect(() => { locateMe(); }, []);
 
   // ── CLÍNICAS COM LOCALIZAÇÃO + DISTÂNCIA ─────────────────────────────────
-  const clientsWithCoords = useMemo(() =>
-    clients
-      .map(c => {
-        const coords = getClientLatLng(c);
+  const recordsWithCoords = useMemo(() =>
+    [...clients.map(record => ({ ...record, _recordType: 'client' })), ...leads.map(record => ({ ...record, _recordType: 'lead' }))]
+      .map(record => {
+        const coords = getClientLatLng(record);
         if (!coords) return null;
         return {
-          ...c,
+          ...record,
           _lat: coords.lat,
           _lng: coords.lng,
           _locationApprox: coords.approximate,
-          distance: myLocation
-            ? calcDistance(myLocation[0], myLocation[1], coords.lat, coords.lng)
-            : null,
+          distance: myLocation ? calcDistance(myLocation[0], myLocation[1], coords.lat, coords.lng) : null,
         };
       })
       .filter(Boolean)
       .sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999)),
-    [clients, myLocation]
+    [clients, leads, myLocation]
   );
 
   const filtered = useMemo(() =>
-    clientsWithCoords.filter(c =>
-      filterStatus === 'todos' || c.status === filterStatus
+    recordsWithCoords.filter(record =>
+      (filterType === 'todos' || record._recordType === filterType) &&
+      (filterStatus === 'todos' || record._recordType === 'lead' || record.status === filterStatus)
     ),
-    [clientsWithCoords, filterStatus]
+    [recordsWithCoords, filterStatus, filterType]
   );
 
   const nearby = useMemo(() =>
@@ -256,10 +267,19 @@ export default function ClientLocationMap() {
       <div className="flex items-center justify-between flex-wrap gap-2 px-1">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-blue-600" />
-          <span className="font-black text-slate-800 text-base">Mapa de Clínicas da Matriz</span>
-          <Badge variant="outline" className="text-xs">{filtered.length} no mapa</Badge>
+          <span className="font-black text-slate-800 text-base">Mapa de Prospecção</span>
+          <Badge variant="outline" className="text-xs">{filtered.length} registros no mapa</Badge>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <select
+            value={filterType}
+            onChange={e => setFilterType(e.target.value)}
+            className="h-8 text-xs border rounded-md px-2 bg-white"
+          >
+            <option value="todos">Clientes e leads</option>
+            <option value="client">Clientes atuais</option>
+            <option value="lead">Novos leads</option>
+          </select>
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
@@ -330,18 +350,18 @@ export default function ClientLocationMap() {
             </>
           )}
 
-          {/* Marcadores dos clientes */}
+          {/* Marcadores de clientes e leads */}
           {filtered.map(client => (
             <Marker
               key={client.id}
               position={[client._lat, client._lng]}
-              icon={createClientIcon(client.status)}
+              icon={createRecordIcon(client.status, client._recordType)}
               eventHandlers={{ click: () => setSelectedClient(client) }}
             >
               <Popup>
                 <div className="w-52 text-sm">
-                  <p className="font-bold leading-tight">{client.clinic_name || client.first_name}</p>
-                  <p className="text-xs text-slate-500 mb-1">{client.city}{client._locationApprox ? ' · coordenada aproximada por cidade' : ''}</p>
+                  <p className="font-bold leading-tight">{client.clinic_name || client.company || client.full_name || client.first_name}</p>
+                  <p className="text-xs text-slate-500 mb-1">{client._recordType === 'lead' ? 'Novo lead' : 'Cliente atual'} · {client.city}{client._locationApprox ? ' · coordenada aproximada por cidade' : ''}</p>
                   <div className="flex gap-1 flex-wrap">
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${statusBadge[client.status] || 'bg-gray-500'}`}>
                       {statusLabel[client.status] || client.status}
@@ -357,7 +377,7 @@ export default function ClientLocationMap() {
                       <a href={`https://wa.me/${client.phone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer"
                         className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded font-semibold">WhatsApp</a>
                     )}
-                    <a href={`/ClientProfile?id=${client.id}`}
+                    <a href={`/${client._recordType === 'lead' ? 'LeadProfile' : 'ClientProfile'}?id=${client.id}`}
                       className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">Perfil</a>
                   </div>
                 </div>
@@ -369,7 +389,8 @@ export default function ClientLocationMap() {
         {/* Legenda flutuante */}
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-lg shadow px-3 py-2 text-xs space-y-1 z-[1000]">
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-white"></div> Você</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-green-600"></div> Quente</div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-purple-600"></div> Novo lead</div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-green-600"></div> Cliente quente</div>
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-amber-500"></div> Morno</div>
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-red-600"></div> Frio</div>
         </div>
@@ -417,8 +438,8 @@ export default function ClientLocationMap() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-slate-800 truncate">{client.clinic_name || client.first_name}</p>
-                      <p className="text-xs text-slate-400 truncate">{client.city} {client._locationApprox ? '• ponto aproximado' : ''} {client.address ? `• ${client.address}` : ''}</p>
+                      <p className="font-semibold text-sm text-slate-800 truncate">{client.clinic_name || client.company || client.full_name || client.first_name}</p>
+                      <p className="text-xs text-slate-400 truncate">{client._recordType === 'lead' ? 'Lead' : 'Cliente'} • {client.city} {client._locationApprox ? '• ponto aproximado' : ''} {client.address ? `• ${client.address}` : ''}</p>
                     </div>
 
                     {/* Status + Score */}
@@ -444,7 +465,7 @@ export default function ClientLocationMap() {
                         </a>
                       )}
                       <a
-                        href={`/ClientProfile?id=${client.id}`}
+                        href={`/${client._recordType === 'lead' ? 'LeadProfile' : 'ClientProfile'}?id=${client.id}`}
                         onClick={e => e.stopPropagation()}
                         className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200"
                       >
