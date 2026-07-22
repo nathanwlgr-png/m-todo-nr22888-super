@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import InstagramConnectionCard from '@/components/instagram/InstagramConnectionCard';
@@ -10,7 +11,7 @@ import InstagramPostQueue from '@/components/instagram/InstagramPostQueue';
 
 const connectorId = '6a5efcdbac896b7758ca5c9c';
 
-export default function InstagramPoster({ content, hashtags = [], imageUrl: initialImageUrl = '', campaign = 'Oferta NR22888', onQueued }) {
+export default function InstagramPoster({ content, hashtags = [], imageUrl: initialImageUrl = '', campaign = 'Oferta NR22888', onQueued, connectionOnly = false }) {
   const [user, setUser] = useState(null);
   const [connected, setConnected] = useState(false);
   const [account, setAccount] = useState(null);
@@ -19,7 +20,11 @@ export default function InstagramPoster({ content, hashtags = [], imageUrl: init
   const [saving, setSaving] = useState(false);
   const [publishingId, setPublishingId] = useState(null);
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
+  const [editableContent, setEditableContent] = useState(content || '');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
+
+  useEffect(() => { setEditableContent(content || ''); }, [content]);
 
   const fetchStatus = async () => {
     try {
@@ -61,13 +66,23 @@ export default function InstagramPoster({ content, hashtags = [], imageUrl: init
     setPosts([]);
   };
 
+  const uploadImage = async (file) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setImageUrl(file_url);
+    } catch (error) { toast.error(error.message || 'Erro ao enviar a imagem.'); }
+    finally { setUploadingImage(false); }
+  };
+
   const schedule = async () => {
-    if (!content || !imageUrl || !scheduleDate) return toast.error('Informe legenda, URL da imagem e data.');
+    if (!editableContent || !imageUrl || !scheduleDate) return toast.error('Informe legenda, imagem e data.');
     setSaving(true);
     try {
       const response = await base44.functions.invoke('instagramPublish', {
         action: 'schedule',
-        caption: content,
+        caption: editableContent,
         image_url: imageUrl,
         hashtags,
         campaign,
@@ -107,14 +122,19 @@ export default function InstagramPoster({ content, hashtags = [], imageUrl: init
         onConnect={connect}
         onDisconnect={disconnect}
       />
-      {connected && <>
+      {connectionOnly ? (connected && <Card>
+        <CardHeader><CardTitle className="text-sm">Minha fila de ofertas</CardTitle></CardHeader>
+        <CardContent><InstagramPostQueue posts={posts} publishingId={publishingId} onPublish={publish} /></CardContent>
+      </Card>) : connected && <>
         <Card>
           <CardHeader><CardTitle className="text-sm">Agendar oferta na minha fila</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {imageUrl && <img src={imageUrl} alt="Prévia da oferta" className="h-48 w-full rounded-lg object-cover" />}
-            <Input value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="URL pública da imagem da oferta" />
+            <Textarea value={editableContent} onChange={(event) => setEditableContent(event.target.value)} rows={7} placeholder="Revise a legenda antes de publicar" />
+            <Input type="file" accept="image/*" onChange={(event) => uploadImage(event.target.files?.[0])} disabled={uploadingImage} />
+            <Input value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="Ou informe uma URL pública" />
             <Input type="datetime-local" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
-            <Button className="w-full gap-2 bg-pink-600 hover:bg-pink-700" onClick={schedule} disabled={saving || !content || !imageUrl || !scheduleDate}>
+            <Button className="w-full gap-2 bg-pink-600 hover:bg-pink-700" onClick={schedule} disabled={saving || uploadingImage || !editableContent || !imageUrl || !scheduleDate}>
               {saving ? <Loader2 className="animate-spin" /> : <Send />} Adicionar à fila
             </Button>
           </CardContent>

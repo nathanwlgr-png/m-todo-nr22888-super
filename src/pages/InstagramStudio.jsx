@@ -7,9 +7,15 @@ import ContentSources from '@/components/instagram/ContentSources';
 import CaseLibrary from '@/components/instagram/CaseLibrary';
 import PostCalendar from '@/components/instagram/PostCalendar';
 import MetricsPanel from '@/components/instagram/MetricsPanel';
+import InstagramPoster from '@/components/InstagramPoster';
 
 export default function InstagramStudio() {
-  const [scheduledPosts, setScheduledPosts] = useState([]);
+  const [newPosts, setNewPosts] = useState([]);
+  const { data: storedPosts = [] } = useQuery({
+    queryKey: ['instagram-posts-calendar'],
+    queryFn: () => base44.entities.InstagramPost.list('-scheduled_at', 100).catch(() => []),
+  });
+  const scheduledPosts = [...newPosts, ...storedPosts.filter((post) => !newPosts.some((item) => item.id === post.id))];
 
   const { data: sales = [] } = useQuery({
     queryKey: ['sales-instagram'],
@@ -30,7 +36,7 @@ export default function InstagramStudio() {
   });
 
   const handleSchedule = (post) => {
-    setScheduledPosts(prev => [...prev, post]);
+    setNewPosts((current) => [post, ...current.filter((item) => item.id !== post.id)]);
   };
 
   return (
@@ -57,7 +63,8 @@ export default function InstagramStudio() {
       </div>
 
       <div className="px-4 pt-4">
-        <Tabs defaultValue="fontes">
+        <InstagramPoster content="" connectionOnly />
+        <Tabs defaultValue="fontes" className="mt-4">
           <TabsList className="w-full bg-white border mb-4 p-1 rounded-xl grid grid-cols-5">
             <TabsTrigger value="fontes" className="text-[10px] data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg px-1">
               <Layers className="w-3 h-3 mr-0.5" /> Fontes

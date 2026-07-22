@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Upload, Loader2, FileText, Trash2, Package } from 'lucide-react';
+import GoogleDriveBrowser from '@/components/catalog/GoogleDriveBrowser';
+import CatalogPhotoUpload from '@/components/catalog/CatalogPhotoUpload';
 
 export default function EquipmentCatalog() {
   const navigate = useNavigate();
@@ -124,6 +126,8 @@ export default function EquipmentCatalog() {
       </div>
 
       <div className="px-4 -mt-8 space-y-4">
+        <GoogleDriveBrowser />
+        <CatalogPhotoUpload />
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />

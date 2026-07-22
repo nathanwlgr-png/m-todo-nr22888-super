@@ -9,6 +9,7 @@ import {
 import ProximaAcaoConsultivaModal from '@/components/ProximaAcaoConsultivaModal';
 import OperationalMetricCards from '@/components/dashboard/OperationalMetricCards';
 import FieldQuickActions from '@/components/dashboard/FieldQuickActions';
+import WeeklyCleanupReview from '@/components/WeeklyCleanupReview';
 
 const COMMANDS = [
   { cmd: '/hoje', label: 'Hoje', target: 'campo' },
@@ -199,6 +200,7 @@ export default function HojeModoRuaNR22888() {
 
         <FieldQuickActions />
         <OperationalMetricCards metrics={operationalMetrics} />
+        <WeeklyCleanupReview />
 
         <Section id="sniper" icon={Radar} title="Sniper do dia" count={sniper ? 1 : 0}>
           {sniper ? <ClientCard client={sniper} context={`Score ${sniper.purchase_score || 0} • ${sniper.city || 'cidade não informada'}`} recommendation="priorizar contato consultivo, validar necessidade de equipamento e preparar abordagem SPIN antes do WhatsApp." /> : <EmptyState />}

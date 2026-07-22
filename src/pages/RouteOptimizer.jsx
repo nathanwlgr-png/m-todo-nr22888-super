@@ -20,13 +20,13 @@ export default function RouteOptimizer() {
   const [visitDuration, setVisitDuration] = useState(60);
   const [optimizedRoute, setOptimizedRoute] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [cityFilter, setCityFilter] = useState('Marília');
+  const [cityFilter, setCityFilter] = useState('');
   const queryClient = useQueryClient();
 
   // SAFE/performance: limite razoável para tablet — não carregar base inteira de uma vez.
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-route'],
-    queryFn: () => base44.entities.Client.list('-created_date', 500),
+    queryFn: () => base44.entities.Client.list('-created_date', 9999),
   });
 
   const { data: savedRoutes = [] } = useQuery({
@@ -237,6 +237,7 @@ export default function RouteOptimizer() {
                       />
                       <div className="flex-1">
                         <p className="font-semibold text-sm">{client.first_name}</p>
+                        <p className="text-[11px] text-indigo-600">{client.behavioral_profile || client.decision_style || client.client_tone || 'Perfil comportamental pendente'}</p>
                         {client.clinic_name && (
                           <p className="text-xs text-slate-600">{client.clinic_name}</p>
                         )}
