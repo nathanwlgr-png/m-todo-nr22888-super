@@ -166,6 +166,169 @@ async function readRowsFromExcel(fileUrl, sheetName) {
   return XLSX.utils.sheet_to_json(sheet, { defval: '' });
 }
 
+async function readMatrixFromExcel(fileUrl, sheetName) {
+  const response = await fetch(fileUrl);
+  if (!response.ok) throw new Error(`Falha ao baixar planilha: ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+  const sheet = workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+}
+
+function normalizeEmail(value) {
+  const email = clean(value).toLowerCase();
+  return email.includes('@') ? email : '';
+}
+
+function regionalCandidate(row, start) {
+  const code = clean(row[start]).replace(/\.0$/, '');
+  const legalName = clean(row[start + 1]);
+  const fantasy = clean(row[start + 2]);
+  const city = clean(row[start + 3]);
+  if (!/^\d+$/.test(code) || !legalName || !city) return null;
+  const tail = row.slice(start + 8, start + 20).map(clean);
+  const dddIndex = tail.findIndex((value) => /^\d{2}(?:\.0)?$/.test(value));
+  const ddd = dddIndex >= 0 ? tail[dddIndex].replace(/\.0$/, '') : '';
+  const phoneValues = dddIndex >= 0 ? tail.slice(dddIndex + 1, dddIndex + 3) : [];
+  const phones = phoneValues.map((value) => value.replace(/\.0$/, '').replace(/\D/g, '')).filter((value) => value.length >= 8);
+  const chosenPhone = phones.find((value) => value.length >= 9) || phones[0] || '';
+  const email = normalizeEmail(tail.find((value) => value.includes('@')));
+  const contactIndex = dddIndex >= 0 ? dddIndex + 3 : -1;
+  return {
+    external_code: code,
+    razao_social: legalName,
+    clinic_name: fantasy || legalName,
+    city,
+    address: clean(row[start + 4]),
+    neighborhood: clean(row[start + 5]),
+    cep: clean(row[start + 6]),
+    segment: clean(row[start + 7]),
+    phone: chosenPhone ? `55${ddd}${chosenPhone}` : '',
+    email,
+    contact: contactIndex >= 0 ? clean(tail[contactIndex]) : ''
+  };
+}
+
+function tokenKey(value) {
+  const stop = new Set(['ltda', 'me', 'epp', 'eireli', 'clinica', 'veterinaria', 'veterinario', 'hospital', 'pet', 'shop', 'comercio', 'produtos', 'de', 'da', 'do', 'e']);
+  return normalizeKey(value).replace(/[^a-z0-9 ]/g, ' ').split(' ').filter((part) => part.length > 1 && !stop.has(part)).sort();
+}
+
+function sameBusiness(a, b, cityA, cityB) {
+  if (normalizeKey(cityA) !== normalizeKey(cityB)) return false;
+  const left = tokenKey(a);
+  const right = tokenKey(b);
+  if (!left.length || !right.length) return false;
+  const common = left.filter((token) => right.includes(token)).length;
+  return common / Math.min(left.length, right.length) >= 0.75;
+}
+
+function mergeMissing(existing, incoming) {
+  const output = { id: existing.id };
+  for (const [key, value] of Object.entries(incoming)) {
+    if ((existing[key] === undefined || existing[key] === null || existing[key] === '') && value !== undefined && value !== null && value !== '') output[key] = value;
+  }
+  return output;
+}
+
+async function importRegional(base44, user, sourceUrl, sheetName, knownClients, dryRun) {
+  const matrix = await readMatrixFromExcel(sourceUrl, sheetName);
+  const raw = [];
+  for (const row of matrix) {
+    const first = regionalCandidate(row, 0);
+    const shifted = regionalCandidate(row, 4);
+    if (first) raw.push(first);
+    if (shifted) raw.push(shifted);
+  }
+  const unique = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const key = item.external_code || item.email || item.phone || `${normalizeKey(item.clinic_name)}|${normalizeKey(item.city)}`;
+    if (!seen.has(key)) { seen.add(key); unique.push(item); }
+  }
+
+  const [clients, leads] = await Promise.all([
+    base44.asServiceRole.entities.Client.list('-updated_date', 5000),
+    base44.asServiceRole.entities.Lead.list('-updated_date', 5000)
+  ]);
+  const distinctKnown = [];
+  for (const known of knownClients || []) {
+    if (!distinctKnown.some((saved) => sameBusiness(saved.name || saved.nome, known.name || known.nome, saved.city || saved.cidade, known.city || known.cidade))) distinctKnown.push(known);
+  }
+  const knownFor = (item) => distinctKnown.find((known) => sameBusiness(item.razao_social, known.name || known.nome, item.city, known.city || known.cidade) || sameBusiness(item.clinic_name, known.name || known.nome, item.city, known.city || known.cidade));
+  const matchRecord = (records, item) => records.find((record) =>
+    (item.email && normalizeEmail(record.email) === item.email) ||
+    (item.phone && normalizePhone(record.phone) === normalizePhone(item.phone)) ||
+    sameBusiness(record.clinic_name || record.company || record.razao_social || record.full_name, item.clinic_name || item.razao_social, record.city, item.city)
+  );
+
+  const createClients = [], updateClients = [], createLeads = [], updateLeads = [];
+  const matchedKnown = new Set();
+  const updatedClientIds = new Set();
+  let clientesOficiais = 0;
+  let prospectsExistentes = 0;
+  for (const item of unique) {
+    const existingClient = matchRecord(clients, item);
+    const existingLead = matchRecord(leads, item);
+    const known = knownFor(item);
+    if (known) {
+      const knownKey = `${normalizeKey(known.name || known.nome)}|${normalizeKey(known.city || known.cidade)}`;
+      if (!matchedKnown.has(knownKey)) clientesOficiais += 1;
+      matchedKnown.add(knownKey);
+      const equipment = (known.equipment || known.equipamentos || []).join(' | ');
+      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, first_name: (item.contact || item.clinic_name).split(' ')[0], clinic_name: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, address: item.address, cep: item.cep, city: item.city, current_equipment: equipment, equipment_sold: equipment, representante: 'Nathan', lead_source: 'importacao_planilha', status: 'morno', notes: `Cliente Seamaty validado. Segmento: ${item.segment}. Bairro: ${item.neighborhood}.` });
+      if (existingClient) {
+        const tags = Array.from(new Set([...(existingClient.custom_tags || []), 'Cliente_Seamaty', 'Base_Regional_Nathan']));
+        const update = { ...mergeMissing(existingClient, data), pipeline_stage: 'fechado', custom_tags: tags, ...(equipment ? { current_equipment: equipment, equipment_sold: equipment } : {}) };
+        const updateIndex = updateClients.findIndex((saved) => saved.id === existingClient.id);
+        if (updateIndex >= 0) updateClients[updateIndex] = { ...updateClients[updateIndex], ...update };
+        else updateClients.push(update);
+        updatedClientIds.add(existingClient.id);
+      } else createClients.push({ ...data, pipeline_stage: 'fechado', custom_tags: ['Cliente_Seamaty', 'Base_Regional_Nathan'] });
+    } else if (existingClient) {
+      prospectsExistentes += 1;
+      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, first_name: (item.contact || item.clinic_name).split(' ')[0], clinic_name: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, address: item.address, cep: item.cep, city: item.city, representante: 'Nathan', lead_source: 'importacao_planilha', notes: `Prospecção regional. Segmento: ${item.segment}. Bairro: ${item.neighborhood}.` });
+      if (!updatedClientIds.has(existingClient.id)) {
+        const tags = Array.from(new Set([...(existingClient.custom_tags || []), 'Prospect_Regional', 'Base_Regional_Nathan']));
+        updateClients.push({ ...mergeMissing(existingClient, data), pipeline_stage: existingClient.pipeline_stage || 'lead', custom_tags: tags });
+        updatedClientIds.add(existingClient.id);
+      }
+    } else {
+      const data = cleanObject({ external_code: item.external_code, full_name: item.contact || item.clinic_name, company: item.clinic_name, razao_social: item.razao_social, email: item.email, phone: item.phone, city: item.city, address: item.address, neighborhood: item.neighborhood, cep: item.cep, source: 'importacao_manual', interest: 'Equipamentos Seamaty', stage: 'novo', status: 'novo', assigned_to: user.email, map_status: 'pendente', notes: `Prospecção regional. Segmento: ${item.segment}.` });
+      if (existingLead) updateLeads.push(mergeMissing(existingLead, data));
+      else createLeads.push(data);
+    }
+  }
+
+  for (const known of distinctKnown) {
+    const knownKey = `${normalizeKey(known.name || known.nome)}|${normalizeKey(known.city || known.cidade)}`;
+    if (matchedKnown.has(knownKey)) continue;
+    const name = known.name || known.nome;
+    const city = known.city || known.cidade;
+    const equipment = (known.equipment || known.equipamentos || []).join(' | ');
+    const existing = clients.find((client) => sameBusiness(client.clinic_name || client.razao_social || client.full_name, name, client.city, city));
+    clientesOficiais += 1;
+    if (existing) {
+      const tags = Array.from(new Set([...(existing.custom_tags || []), 'Cliente_Seamaty', 'Base_Regional_Nathan']));
+      const update = { id: existing.id, pipeline_stage: 'fechado', custom_tags: tags, ...(equipment ? { current_equipment: equipment, equipment_sold: equipment } : {}) };
+      const updateIndex = updateClients.findIndex((saved) => saved.id === existing.id);
+      if (updateIndex >= 0) updateClients[updateIndex] = { ...updateClients[updateIndex], ...update };
+      else updateClients.push(update);
+      updatedClientIds.add(existing.id);
+    } else {
+      createClients.push(cleanObject({ full_name: name, first_name: name.split(' ')[0], clinic_name: name, city, current_equipment: equipment, equipment_sold: equipment, representante: 'Nathan', lead_source: 'importacao_planilha', pipeline_stage: 'fechado', status: 'morno', custom_tags: ['Cliente_Seamaty', 'Base_Regional_Nathan'], notes: 'Cliente confirmado pelo relatório comercial Seamaty.' }));
+    }
+  }
+
+  if (!dryRun) {
+    for (let i = 0; i < createClients.length; i += 100) await base44.asServiceRole.entities.Client.bulkCreate(createClients.slice(i, i + 100));
+    for (let i = 0; i < updateClients.length; i += 100) await base44.asServiceRole.entities.Client.bulkUpdate(updateClients.slice(i, i + 100));
+    for (let i = 0; i < createLeads.length; i += 100) await base44.asServiceRole.entities.Lead.bulkCreate(createLeads.slice(i, i + 100));
+    for (let i = 0; i < updateLeads.length; i += 100) await base44.asServiceRole.entities.Lead.bulkUpdate(updateLeads.slice(i, i + 100));
+  }
+  return { success: true, dryRun, summary: { linhas_validas: unique.length, clientes_oficiais: clientesOficiais, prospects_existentes_reclassificados: prospectsExistentes, clientes_criar: createClients.length, registros_atualizar_sem_duplicar: updateClients.length + updateLeads.length, leads_criar: createLeads.length, duplicados_evitar: updateClients.length + updateLeads.length, trecho_deslocado_recuperado: raw.length - matrix.filter((row) => regionalCandidate(row, 0)).length } };
+}
+
 function indexExistingClients(clients) {
   const byExternal = new Map();
   const byCnpj = new Map();
@@ -189,9 +352,10 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { fileUrl, file_url, sheetName = 'BASE44_IMPORT_VALIDADA', dryRun = false } = await req.json();
+    const { fileUrl, file_url, sheetName = 'BASE44_IMPORT_VALIDADA', dryRun = false, mode = 'matriz_515', knownClients = [] } = await req.json();
     const sourceUrl = fileUrl || file_url;
     if (!sourceUrl) return Response.json({ error: 'fileUrl é obrigatório' }, { status: 400 });
+    if (mode === 'regional_prospects') return Response.json(await importRegional(base44, user, sourceUrl, sheetName, knownClients, dryRun));
 
     const rows = await readRowsFromExcel(sourceUrl, sheetName);
     const validRows = rows.filter((row) => clean(row.status_base44).toLowerCase().includes('pronto') && clean(row.nome_comercial));

@@ -2,9 +2,13 @@
   "name": "Lead",
   "type": "object",
   "properties": {
+    "external_code": {
+      "type": "string",
+      "description": "C\u00f3digo externo da origem"
+    },
     "full_name": {
       "type": "string",
-      "description": "Nome completo do lead"
+      "description": "Nome completo do lead ou contato"
     },
     "email": {
       "type": "string",
@@ -18,9 +22,42 @@
       "type": "string",
       "description": "Nome da empresa/cl\u00ednica"
     },
+    "razao_social": {
+      "type": "string",
+      "description": "Raz\u00e3o social da cl\u00ednica"
+    },
     "city": {
       "type": "string",
       "description": "Cidade"
+    },
+    "address": {
+      "type": "string",
+      "description": "Endere\u00e7o comercial"
+    },
+    "neighborhood": {
+      "type": "string",
+      "description": "Bairro"
+    },
+    "cep": {
+      "type": "string",
+      "description": "CEP"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude para exibi\u00e7\u00e3o no mapa"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude para exibi\u00e7\u00e3o no mapa"
+    },
+    "map_status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "geocodificado",
+        "erro"
+      ],
+      "default": "pendente"
     },
     "source": {
       "type": "string",
@@ -91,24 +128,19 @@
       "type": "object",
       "properties": {
         "engagement_score": {
-          "type": "number",
-          "description": "Score de engajamento (0-100)"
+          "type": "number"
         },
         "fit_score": {
-          "type": "number",
-          "description": "Score de fit com ICP (0-100)"
+          "type": "number"
         },
         "intent_score": {
-          "type": "number",
-          "description": "Score de inten\u00e7\u00e3o de compra (0-100)"
+          "type": "number"
         },
         "timing_score": {
-          "type": "number",
-          "description": "Score de timing ideal (0-100)"
+          "type": "number"
         },
         "interaction_score": {
-          "type": "number",
-          "description": "Score de qualidade das intera\u00e7\u00f5es (0-100)"
+          "type": "number"
         }
       },
       "description": "Breakdown detalhado do score"
