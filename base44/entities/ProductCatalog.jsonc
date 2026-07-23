@@ -68,7 +68,31 @@
     },
     "preco_base": {
       "type": "number",
-      "description": "Pre\u00e7o interno; nunca enviado ao cat\u00e1logo p\u00fablico"
+      "description": "Pre\u00e7o interno da faixa 1"
+    },
+    "preco_faixa_2": {
+      "type": "number",
+      "description": "Pre\u00e7o interno da faixa 2"
+    },
+    "preco_faixa_3": {
+      "type": "number",
+      "description": "Pre\u00e7o interno da faixa 3"
+    },
+    "preco_faixa_4": {
+      "type": "number",
+      "description": "Pre\u00e7o interno da faixa 4"
+    },
+    "rotulo_faixa_1": {
+      "type": "string"
+    },
+    "rotulo_faixa_2": {
+      "type": "string"
+    },
+    "rotulo_faixa_3": {
+      "type": "string"
+    },
+    "rotulo_faixa_4": {
+      "type": "string"
     },
     "custo_insumo": {
       "type": "number",
@@ -96,7 +120,7 @@
     },
     "fonte_validacao": {
       "type": "string",
-      "description": "Origem oficial da foto e dos dados"
+      "description": "Origem oficial da foto, dos dados e dos pre\u00e7os"
     },
     "data_validacao": {
       "type": "string",
