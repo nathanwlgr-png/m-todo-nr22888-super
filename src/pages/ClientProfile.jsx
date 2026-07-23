@@ -32,6 +32,7 @@ export default function ClientProfile() {
   const [showWaModal, setShowWaModal] = useState(false);
   const [waMessage, setWaMessage] = useState('');
   const [generatingMsg, setGeneratingMsg] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState('');
 
   const { data: client, isLoading, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
@@ -76,8 +77,8 @@ export default function ClientProfile() {
   };
 
   const handleGenerateAndSend = async () => {
-    if (!client?.phone) { toast.error('Sem telefone cadastrado'); return; }
     setGeneratingMsg(true);
+    setGenerationStatus('processing');
     toast.info('Gerando recomendação em segundo plano. Você pode continuar trabalhando.');
     try {
       const res = await base44.functions.invoke('generateSpinSellingMessages', {
@@ -86,7 +87,10 @@ export default function ClientProfile() {
         clinic_name: client.clinic_name,
         equipment_interest: client.equipment_interest,
       });
-      const msg = res.data?.message || res.data?.spin_message || (typeof res.data === 'string' ? res.data : '');
+      const generatedMessages = Array.isArray(res.data?.messages) ? res.data.messages : [];
+      const msg = generatedMessages.length > 0
+        ? generatedMessages.map((item, index) => `${index + 1}. ${item.text || item}`).join('\n\n')
+        : res.data?.message || res.data?.spin_message || (typeof res.data === 'string' ? res.data : '');
       if (!msg) throw new Error('Recomendação vazia');
       await base44.entities.EliteAIRecommendationLog.create({
         data_hora: new Date().toISOString(),
@@ -102,9 +106,11 @@ export default function ClientProfile() {
       });
       queryClient.invalidateQueries({ queryKey: ['ai-recommendations', client.id] });
       setWaMessage(msg);
-      setShowWaModal(true);
+      if (client.phone) setShowWaModal(true);
+      setGenerationStatus('done');
       toast.success('Recomendação pronta e salva no histórico.');
     } catch (e) {
+      setGenerationStatus('error');
       toast.error('Não foi possível gerar a recomendação. Tente novamente.');
     } finally {
       setGeneratingMsg(false);
@@ -229,6 +235,17 @@ export default function ClientProfile() {
             </div>
           </Link>
         </div>
+        {generationStatus && (
+          <div role="status" className="rounded-xl px-3 py-2 text-xs font-bold" style={{
+            background: generationStatus === 'error' ? 'rgba(255,68,68,0.1)' : 'rgba(255,107,0,0.1)',
+            border: generationStatus === 'error' ? '1px solid rgba(255,68,68,0.3)' : '1px solid rgba(255,107,0,0.3)',
+            color: generationStatus === 'error' ? '#ff7777' : '#ffb86b'
+          }}>
+            {generationStatus === 'processing' && 'IA trabalhando em segundo plano — você pode continuar usando o CRM.'}
+            {generationStatus === 'done' && 'Recomendação pronta e salva no histórico abaixo.'}
+            {generationStatus === 'error' && 'Não foi possível gerar agora. Tente novamente.'}
+          </div>
+        )}
       </div>
 
       <div className="px-4 space-y-3">
