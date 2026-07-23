@@ -2,6 +2,13 @@ import { base44 } from '@/api/base44Client';
 import { OfflineManager } from '@/lib/OfflineManager';
 
 const localId = () => `offline-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+const MAX_SYNC_RETRIES = 3;
+
+const getErrorStatus = (error) => Number(error?.status || error?.response?.status || error?.statusCode || 0);
+const isPermanentError = (error) => {
+  const status = getErrorStatus(error);
+  return status >= 400 && status < 500 && ![408, 425, 429].includes(status);
+};
 
 export async function listWithOfflineCache(entity, sort, limit) {
   if (!navigator.onLine) return OfflineManager.listEntities(entity);
@@ -20,7 +27,8 @@ export async function createWithOfflineQueue(entity, data) {
       const created = await base44.entities[entity].create(data);
       await OfflineManager.saveEntity(entity, created);
       return { record: created, queued: false };
-    } catch (_) {
+    } catch (error) {
+      if (isPermanentError(error)) throw error;
       // A conexão pode cair antes de navigator.onLine atualizar.
     }
   }
@@ -37,7 +45,8 @@ export async function updateWithOfflineQueue(entity, id, data) {
       const updated = await base44.entities[entity].update(id, data);
       await OfflineManager.saveEntity(entity, updated);
       return { record: updated, queued: false };
-    } catch (_) {
+    } catch (error) {
+      if (isPermanentError(error)) throw error;
       // Preserva a alteração localmente se a rede falhar durante a chamada.
     }
   }
@@ -68,6 +77,7 @@ async function performPendingSync() {
   const createdIds = new Map(Object.entries(savedMap));
   let synced = 0;
   let failed = 0;
+  let quarantined = 0;
 
   for (const operation of operations) {
     try {
@@ -93,14 +103,19 @@ async function performPendingSync() {
       }
       await OfflineManager.markOperationSynced(operation.id);
       synced += 1;
-    } catch (_) {
+    } catch (error) {
+      const retryCount = (operation._retry_count || 0) + 1;
+      const terminal = isPermanentError(error) || retryCount >= MAX_SYNC_RETRIES;
+      await OfflineManager.recordOperationFailure(operation.id, error, terminal);
       failed += 1;
+      if (terminal) quarantined += 1;
     }
   }
 
   await OfflineManager.clearSyncedOperations();
   await OfflineManager.setMeta('last_queue_sync', new Date().toISOString());
-  return { synced, failed, pending: failed };
+  const pending = (await OfflineManager.getPendingOperations()).length;
+  return { synced, failed, quarantined, pending };
 }
 
 export function syncPendingOperations() {

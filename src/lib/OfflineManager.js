@@ -139,7 +139,26 @@ export class OfflineManager {
   static async getPendingOperations() {
     const db = await this.initDB();
     const all = await db.getAll('SyncQueue');
-    return all.filter(op => !op._synced);
+    return all.filter(op => !op._synced && !op._failed);
+  }
+
+  static async getFailedOperations() {
+    const db = await this.initDB();
+    const all = await db.getAll('SyncQueue');
+    return all.filter(op => op._failed);
+  }
+
+  static async recordOperationFailure(id, error, terminal = false) {
+    const db = await this.initDB();
+    const op = await db.get('SyncQueue', id);
+    if (!op) return;
+    await db.put('SyncQueue', {
+      ...op,
+      _retry_count: (op._retry_count || 0) + 1,
+      _last_error: String(error?.message || 'Falha de sincronização').slice(0, 300),
+      _last_attempt_at: Date.now(),
+      _failed: terminal,
+    });
   }
 
   static async markOperationSynced(id) {
@@ -203,7 +222,8 @@ export class OfflineManager {
     const queueSync = await this.getMeta('last_queue_sync');
     const lastSync = [fullSync, queueSync].filter(Boolean).sort().at(-1) || null;
     const pending = (await this.getPendingOperations()).length;
-    return { counts, lastSync, pending };
+    const failed = (await this.getFailedOperations()).length;
+    return { counts, lastSync, pending, failed };
   }
 
   // ─── SERVICE WORKER ───────────────────────────────────────────────

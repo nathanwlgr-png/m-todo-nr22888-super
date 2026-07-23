@@ -70,8 +70,11 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
         setResult({ counts: {}, total: 0, uploaded: queueResult.synced, failed: queueResult.failed });
         toast.success(`${queueResult.synced} ações offline sincronizadas`);
         onSyncComplete?.();
+      } else if (queueResult.quarantined > 0) {
+        toast.error(`${queueResult.quarantined} ações foram preservadas para revisão`);
+        onSyncComplete?.();
       } else if (queueResult.failed > 0) {
-        toast.error(`${queueResult.failed} ações continuam aguardando sincronização`);
+        toast.error(`${queueResult.failed} ações tentarão sincronizar novamente`);
         onSyncComplete?.();
       }
     };
