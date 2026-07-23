@@ -78,7 +78,7 @@ export function whatsAppUrl(phone, text) {
  * Abre o WhatsApp. Se a mensagem couber em 1 chunk, abre direto.
  * Se tiver múltiplos chunks, abre o primeiro e retorna todos os chunks
  * para que o UI possa apresentar os demais ao usuário.
- * @returns { chunks: string[], total: number }
+ * @returns {{ chunks: string[], total: number }}
  */
 export function openWhatsAppChunked(phone, message) {
   const chunks = splitWhatsAppMessage(message);

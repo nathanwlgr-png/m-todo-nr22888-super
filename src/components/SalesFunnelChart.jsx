@@ -29,7 +29,7 @@ export default function SalesFunnelChart({ clients = [] }) {
     const conversionRates = data.map((stage, idx) => {
       if (idx === 0) return null;
       const prevCount = data[idx - 1].count;
-      return prevCount > 0 ? ((stage.count / prevCount) * 100).toFixed(1) : 0;
+      return prevCount > 0 ? Number(((stage.count / prevCount) * 100).toFixed(1)) : 0;
     });
 
     return data.map((stage, idx) => ({
@@ -41,7 +41,7 @@ export default function SalesFunnelChart({ clients = [] }) {
   const lostClients = clients.filter(c => c.pipeline_stage === 'perdido');
   const totalRevenue = funnelData.reduce((sum, stage) => sum + stage.revenue, 0);
   const overallConversion = clients.length > 0 
-    ? ((funnelData[4].count / clients.length) * 100).toFixed(1) 
+    ? Number(((funnelData[4].count / clients.length) * 100).toFixed(1))
     : 0;
 
   return (

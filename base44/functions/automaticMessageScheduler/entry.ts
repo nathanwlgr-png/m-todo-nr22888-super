@@ -1,24 +1,98 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const { action, automationConfig = {}, confirmed_by_user } = await req.json();
+    const getSettings = () => base44.entities.AutomationSettings.filter({ user_email: user.email });
+
+    if (action === 'get_status') {
+      const settings = await getSettings();
+      return Response.json({
+        success: true,
+        enabled: Boolean(settings[0]?.automation_enabled),
+        config: settings[0] || null
+      });
     }
 
-    const { action, automationConfig } = await req.json();
+    if (action === 'disable') {
+      const settings = await getSettings();
+      if (settings[0]) await base44.entities.AutomationSettings.update(settings[0].id, { automation_enabled: false });
+      return Response.json({ success: true, message: 'Preparação automática de rascunhos desativada.' });
+    }
 
     if (action === 'enable') {
-      return await enableAutomation(base44, user.email, automationConfig);
-    } else if (action === 'disable') {
-      return await disableAutomation(base44, user.email);
-    } else if (action === 'get_status') {
-      return await getAutomationStatus(base44, user.email);
-    } else if (action === 'execute_now') {
-      return await executeAutomationNow(base44, user.email);
+      if (confirmed_by_user !== true) {
+        return Response.json({ success: false, requires_confirmation: true, message: 'Confirmação humana obrigatória.' }, { status: 409 });
+      }
+      const settings = await getSettings();
+      const data = {
+        user_email: user.email,
+        automation_enabled: true,
+        message_types_enabled: automationConfig.message_types_enabled || {
+          turbo_venda: false, follow_up: false, conquistar: false,
+          reativacao: false, proposta: false, lembranca_visita: false
+        },
+        send_time: automationConfig.send_time || '09:00',
+        max_messages_per_day: Math.max(1, Math.min(Number(automationConfig.max_messages_per_day) || 20, 100)),
+        avoid_time_ranges: automationConfig.avoid_time_ranges || []
+      };
+      if (settings[0]) await base44.entities.AutomationSettings.update(settings[0].id, data);
+      else await base44.entities.AutomationSettings.create(data);
+      return Response.json({ success: true, message: 'Preparação de rascunhos ativada; nenhum envio será automático.' });
+    }
+
+    if (action === 'execute_now') {
+      if (confirmed_by_user !== true) {
+        return Response.json({ success: false, requires_confirmation: true, message: 'Confirmação humana obrigatória.' }, { status: 409 });
+      }
+      const settings = await getSettings();
+      const config = settings[0];
+      if (!config?.automation_enabled) return Response.json({ success: false, message: 'Preparação de rascunhos não está ativada.' });
+
+      const types = config.message_types_enabled || {};
+      const maxDrafts = Math.max(1, Math.min(Number(config.max_messages_per_day) || 20, 100));
+      const clients = await base44.entities.Client.list('-updated_date', 200);
+      const pending = await base44.entities.PendingMessage.filter({ status: 'aguardando_aprovacao' }, '-created_date', 200);
+      const drafts = [];
+
+      for (const client of clients) {
+        if (drafts.length >= maxDrafts || !client.phone) continue;
+        const daysSince = client.last_contact_date
+          ? Math.floor((Date.now() - new Date(client.last_contact_date).getTime()) / 86400000)
+          : Number.POSITIVE_INFINITY;
+        let messageType = '';
+        let message = '';
+        if (types.turbo_venda && client.status === 'quente') {
+          messageType = 'turbo_venda';
+          message = `Olá ${client.first_name || 'Doutor(a)'}. Revisei o momento da clínica e preparei uma sugestão objetiva. Posso te apresentar em uma conversa rápida?`;
+        } else if (types.follow_up && daysSince > 7) {
+          messageType = 'follow_up';
+          message = `Olá ${client.first_name || 'Doutor(a)'}. Passando para acompanhar nossa última conversa. Existe algum ponto técnico ou comercial que eu possa esclarecer?`;
+        } else if (types.reativacao && client.status === 'frio') {
+          messageType = 'reativacao';
+          message = `Olá ${client.first_name || 'Doutor(a)'}. Tenho uma atualização que pode fazer sentido para a rotina da clínica. Posso te encaminhar um resumo objetivo?`;
+        } else if (types.conquistar && !client.last_contact_date) {
+          messageType = 'conquistar';
+          message = `Olá ${client.first_name || 'Doutor(a)'}. Trabalho com diagnóstico veterinário e preparei uma abordagem objetiva para a realidade da clínica. Posso te apresentar?`;
+        }
+        if (!message || pending.some((item) => item.cliente_id === client.id && item.contexto === `automacao_${messageType}`)) continue;
+        const name = client.first_name || client.full_name || client.clinic_name || 'Cliente';
+        drafts.push({
+          canal: 'whatsapp', destinatario_nome: name, destinatario_contato: client.phone,
+          cliente_id: client.id, contexto: `automacao_${messageType}`, mensagem: message,
+          status: 'aguardando_aprovacao', criado_por_agente: 'automaticMessageScheduler',
+          aprovado_por_nathan: false, data_criacao: new Date().toISOString(),
+          recipient_id: client.id, recipient_name: name, recipient_phone: client.phone,
+          channel: 'whatsapp', message_content: message, context: `automacao_${messageType}`,
+          priority: client.status === 'quente' ? 'alta' : 'media'
+        });
+      }
+      if (drafts.length) await base44.entities.PendingMessage.bulkCreate(drafts);
+      return Response.json({ success: true, message: `${drafts.length} rascunho(s) preparado(s) para aprovação. Nenhuma mensagem foi enviada.`, prepared_count: drafts.length, sent_count: 0 });
     }
 
     return Response.json({ error: 'Invalid action' }, { status: 400 });
@@ -27,141 +101,3 @@ Deno.serve(async (req) => {
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
-
-async function enableAutomation(base44, userEmail, config) {
-  try {
-    // Get or create automation settings
-    const settings = await base44.entities.AutomationSettings.filter({ user_email: userEmail }).catch(() => []);
-    
-    const automationData = {
-      user_email: userEmail,
-      automation_enabled: true,
-      message_types_enabled: config.message_types_enabled || {
-        turbo_venda: true,
-        follow_up: true,
-        conquistar: false,
-        reativacao: false,
-        proposta: false,
-        lembranca_visita: false
-      },
-      send_time: config.send_time || '09:00',
-      max_messages_per_day: config.max_messages_per_day || 20,
-      avoid_time_ranges: config.avoid_time_ranges || []
-    };
-
-    if (settings.length === 0) {
-      await base44.entities.AutomationSettings.create(automationData);
-    } else {
-      await base44.entities.AutomationSettings.update(settings[0].id, automationData);
-    }
-
-    return Response.json({
-      success: true,
-      message: '✅ Automação ativada com sucesso'
-    });
-  } catch (error) {
-    console.error('Enable error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-}
-
-async function disableAutomation(base44, userEmail) {
-  try {
-    const settings = await base44.entities.AutomationSettings.filter({ user_email: userEmail }).catch(() => []);
-    
-    if (settings.length > 0) {
-      await base44.entities.AutomationSettings.update(settings[0].id, {
-        automation_enabled: false
-      });
-    }
-
-    return Response.json({
-      success: true,
-      message: '✅ Automação desativada'
-    });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-}
-
-async function getAutomationStatus(base44, userEmail) {
-  try {
-    const settings = await base44.entities.AutomationSettings.filter({ user_email: userEmail }).catch(() => []);
-    
-    return Response.json({
-      success: true,
-      enabled: settings.length > 0 && settings[0].automation_enabled,
-      config: settings.length > 0 ? settings[0] : null
-    });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-}
-
-async function executeAutomationNow(base44, userEmail) {
-  try {
-    const settings = await base44.entities.AutomationSettings.filter({ 
-      user_email: userEmail,
-      automation_enabled: true
-    }).catch(() => []);
-
-    if (settings.length === 0) {
-      return Response.json({ success: false, message: 'Automação não está ativada' });
-    }
-
-    const config = settings[0];
-    const allClients = await base44.entities.Client.list('-updated_date', 200).catch(() => []);
-    let sentCount = 0;
-
-    // Filter clients that need follow-up
-    const clientsToContact = allClients.filter(c => {
-      if (!c.last_contact_date) return config.message_types_enabled.follow_up;
-      const daysSince = Math.floor((new Date() - new Date(c.last_contact_date)) / (1000 * 60 * 60 * 24));
-      return daysSince > 7;
-    }).slice(0, config.max_messages_per_day);
-
-    for (const client of clientsToContact) {
-      if (sentCount >= config.max_messages_per_day) break;
-
-      try {
-        // Generate personalized message based on client status
-        let messageContent = '';
-        
-        if (config.message_types_enabled.turbo_venda && client.status === 'quente') {
-          messageContent = `🚀 ${client.first_name}! Temos uma oportunidade imperdível para sua clínica. Quer conversar?`;
-        } else if (config.message_types_enabled.follow_up && daysSince > 7) {
-          messageContent = `👋 ${client.first_name}! Estava pensando em você. Como vai a clínica? Posso ajudar em algo?`;
-        } else if (config.message_types_enabled.reativacao && client.status === 'frio') {
-          messageContent = `💡 ${client.first_name}, senti sua falta! Temos novidades que podem interessar. Bora conversar?`;
-        }
-
-        if (messageContent && client.phone) {
-          // Log the automated message
-          await base44.entities.AutomatedMessageLog.create({
-            client_id: client.id,
-            client_phone: client.phone,
-            client_name: client.first_name,
-            message_type: 'turbo_venda',
-            message_content: messageContent,
-            trigger_reason: 'Automatic scheduled automation',
-            sent_status: 'pendente',
-            automation_enabled: true
-          });
-
-          sentCount++;
-        }
-      } catch (e) {
-        console.error(`Error processing client ${client.id}:`, e);
-      }
-    }
-
-    return Response.json({
-      success: true,
-      message: `✅ ${sentCount} mensagens agendadas`,
-      sent_count: sentCount
-    });
-  } catch (error) {
-    console.error('Execute error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-}

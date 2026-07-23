@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,8 @@ export default function AutomationSettings() {
   const [sendTime, setSendTime] = useState('09:00');
   const [maxMessages, setMaxMessages] = useState(20);
   const [enabledTypes, setEnabledTypes] = useState({
-    turbo_venda: true,
-    follow_up: true,
+    turbo_venda: false,
+    follow_up: false,
     conquistar: false,
     reativacao: false,
     proposta: false,
@@ -35,11 +35,25 @@ export default function AutomationSettings() {
     }
   });
 
+  useEffect(() => {
+    if (!statusQuery.data) return;
+    setAutomationEnabled(Boolean(statusQuery.data.enabled));
+    if (statusQuery.data.config?.send_time) setSendTime(statusQuery.data.config.send_time);
+    if (statusQuery.data.config?.max_messages_per_day) setMaxMessages(statusQuery.data.config.max_messages_per_day);
+    if (statusQuery.data.config?.message_types_enabled) {
+      setEnabledTypes((current) => ({ ...current, ...statusQuery.data.config.message_types_enabled }));
+    }
+  }, [statusQuery.data]);
+
   // Enable automation
   const enableMutation = useMutation({
     mutationFn: async () => {
+      if (!window.confirm('Ativar a preparação automática de rascunhos? Nenhuma mensagem será enviada sem sua aprovação.')) {
+        throw new Error('cancelled');
+      }
       const response = await base44.functions.invoke('automaticMessageScheduler', {
         action: 'enable',
+        confirmed_by_user: true,
         automationConfig: {
           message_types_enabled: enabledTypes,
           send_time: sendTime,
@@ -52,7 +66,7 @@ export default function AutomationSettings() {
       toast.success(data.message);
       setAutomationEnabled(true);
     },
-    onError: () => toast.error('Erro ao ativar')
+    onError: (error) => toast.error(error.message === 'cancelled' ? 'Ativação cancelada' : 'Erro ao ativar')
   });
 
   // Disable automation
@@ -73,15 +87,19 @@ export default function AutomationSettings() {
   // Execute now
   const executeMutation = useMutation({
     mutationFn: async () => {
+      if (!window.confirm('Preparar os rascunhos agora? Eles ficarão pendentes para aprovação manual.')) {
+        throw new Error('cancelled');
+      }
       const response = await base44.functions.invoke('automaticMessageScheduler', {
-        action: 'execute_now'
+        action: 'execute_now',
+        confirmed_by_user: true
       });
       return response.data;
     },
     onSuccess: (data) => {
       toast.success(data.message);
     },
-    onError: () => toast.error('Erro ao executar')
+    onError: (error) => toast.error(error.message === 'cancelled' ? 'Preparação cancelada' : 'Erro ao preparar')
   });
 
   return (
@@ -94,8 +112,8 @@ export default function AutomationSettings() {
               <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Automação de Mensagens</h1>
-              <p className="text-sm text-slate-600">Ative mensagens automáticas para seus clientes</p>
+              <h1 className="text-2xl font-bold text-slate-900">Preparação de Mensagens</h1>
+              <p className="text-sm text-slate-600">Prepare rascunhos; o envio sempre exige aprovação humana</p>
             </div>
           </div>
         </div>
@@ -114,11 +132,11 @@ export default function AutomationSettings() {
                 )}
                 <div>
                   <p className="font-semibold text-slate-900">
-                    {automationEnabled ? '✅ Automação Ativa' : '⏸️ Automação Desativada'}
+                    {automationEnabled ? 'Preparação Ativa' : 'Preparação Desativada'}
                   </p>
                   <p className="text-xs text-slate-600">
                     {automationEnabled 
-                      ? `Próximo envio: ${sendTime}` 
+                      ? `Próxima preparação: ${sendTime}` 
                       : 'Configure e ative para começar'}
                   </p>
                 </div>
@@ -156,7 +174,7 @@ export default function AutomationSettings() {
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
-                Horário de Envio
+                Horário Preferido
               </label>
               <Input
                 type="time"
@@ -164,13 +182,13 @@ export default function AutomationSettings() {
                 onChange={(e) => setSendTime(e.target.value)}
                 className="w-full max-w-xs"
               />
-              <p className="text-xs text-slate-500 mt-1">Horário em que as mensagens serão enviadas</p>
+              <p className="text-xs text-slate-500 mt-1">Horário sugerido para preparar os rascunhos</p>
             </div>
 
             {/* Max Messages */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Máximo de Mensagens por Dia
+                Máximo de Rascunhos por Dia
               </label>
               <Input
                 type="number"
@@ -180,7 +198,7 @@ export default function AutomationSettings() {
                 onChange={(e) => setMaxMessages(parseInt(e.target.value))}
                 className="w-full max-w-xs"
               />
-              <p className="text-xs text-slate-500 mt-1">Quantidade máxima de mensagens automáticas por dia</p>
+              <p className="text-xs text-slate-500 mt-1">Quantidade máxima de rascunhos preparados por dia</p>
             </div>
           </div>
         </Card>
@@ -233,7 +251,7 @@ export default function AutomationSettings() {
             Executar Agora
           </h2>
           <p className="text-sm text-slate-600 mb-4">
-            Envie mensagens automáticas imediatamente para clientes qualificados
+            Prepare rascunhos para clientes qualificados, sem envio automático
           </p>
           <Button
             onClick={() => executeMutation.mutate()}
@@ -241,7 +259,7 @@ export default function AutomationSettings() {
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Play className="w-4 h-4 mr-2" />
-            {executeMutation.isPending ? 'Enviando...' : 'Executar Automação'}
+            {executeMutation.isPending ? 'Preparando...' : 'Preparar Rascunhos'}
           </Button>
         </Card>
 
@@ -249,9 +267,9 @@ export default function AutomationSettings() {
         <Card className="p-6 mt-6 bg-amber-50 border-amber-200">
           <h3 className="font-bold text-lg mb-3">📖 Como Ativar</h3>
           <div className="space-y-2 text-sm text-slate-700">
-            <p>✅ <strong>1. Configure os parâmetros:</strong> Horário e tipo de mensagens</p>
-            <p>✅ <strong>2. Ative a automação:</strong> Clique no botão verde "Ativar"</p>
-            <p>✅ <strong>3. Teste agora:</strong> Use "Executar Automação" para testar</p>
+            <p>1. <strong>Configure:</strong> horário e tipos de rascunho</p>
+            <p>2. <strong>Ative a preparação:</strong> confirme no botão verde</p>
+            <p>3. <strong>Prepare agora:</strong> revise tudo na fila de aprovação</p>
             <p>✅ <strong>4. Agende:</strong> Configure uma tarefa agendada via dashboard</p>
             <p className="mt-3 font-semibold">💡 <strong>Dica:</strong> Use IA Follow-up no WhatsApp Hub para mensagens ainda mais personalizadas!</p>
           </div>
