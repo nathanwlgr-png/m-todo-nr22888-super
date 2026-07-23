@@ -90,7 +90,9 @@
       "enabled": true
     }
   ],
-  "selected_skill_names": [],
+  "selected_skill_names": [
+    "nr22888-registro-crm-seguro"
+  ],
   "selected_workspace_skill_ids": [
     "69ccbba6c6ee8d30e186bd71"
   ],
