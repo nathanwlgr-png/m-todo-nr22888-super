@@ -94,7 +94,8 @@
     "nr22888-registro-crm-seguro"
   ],
   "selected_workspace_skill_ids": [
-    "69ccbba6c6ee8d30e186bd71"
+    "69ccbba6c6ee8d30e186bd71",
+    "69bd25a21104e50b897c289c"
   ],
   "model": "gpt_5_5",
   "whatsapp_greeting": "",
