@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Upload, Loader2, FileText, Trash2, Package } from 'lucide-react';
 import GoogleDriveBrowser from '@/components/catalog/GoogleDriveBrowser';
 import CatalogPhotoUpload from '@/components/catalog/CatalogPhotoUpload';
+import SeamatyGallery from '@/components/SeamatyGallery';
 
 export default function EquipmentCatalog() {
   const navigate = useNavigate();
@@ -187,6 +188,10 @@ export default function EquipmentCatalog() {
             </Card>
           ))
         )}
+
+        <div className="pt-4">
+          <SeamatyGallery />
+        </div>
       </div>
     </div>
   );

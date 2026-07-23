@@ -11,8 +11,9 @@ import { toast } from 'sonner';
 const isPdf = (url = '') => /\.pdf($|\?)/i.test(url);
 const isImage = (url = '') => /\.(png|jpe?g|webp|gif)($|\?)/i.test(url);
 
-export default function SeamatyGallery() {
+export default function SeamatyGallery({ clientId, clientName }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sendingId, setSendingId] = useState(null);
   const [filterCategory, setFilterCategory] = useState('');
   const [editingImage, setEditingImage] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +43,36 @@ export default function SeamatyGallery() {
   });
 
   const categories = ['logo', 'produto', 'equipamento', 'case_sucesso', 'tecnico', 'marketing'];
+
+  // Gera link rastreável (se houver cliente) e abre WhatsApp; sem cliente, envia link direto
+  const enviarWhatsApp = async (image) => {
+    setSendingId(image.id);
+    try {
+      let link = image.image_url;
+      if (clientId) {
+        const trackingId = `doc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        await base44.entities.DocumentEngagement.create({
+          client_id: clientId,
+          client_name: clientName || '',
+          document_type: isPdf(image.image_url) ? 'pdf' : (isImage(image.image_url) ? 'imagem' : 'link'),
+          document_title: image.title,
+          document_url: image.image_url,
+          tracking_id: trackingId,
+          sent_via: 'whatsapp',
+          sent_at: new Date().toISOString(),
+        });
+        const base = window.location.origin;
+        link = `${base}/DocumentTracking?id=${trackingId}`;
+      }
+      const texto = `*${image.title}*\n\n${link}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+      if (clientId) toast.success('📊 Link rastreável gerado');
+    } catch (e) {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`*${image.title}*\n\n${image.image_url}`)}`, '_blank');
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -179,13 +210,11 @@ export default function SeamatyGallery() {
                 </Button>
                 <Button
                   size="sm"
+                  disabled={sendingId === image.id}
                   className="flex-1 gap-1 bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    const texto = `*${image.title}*\n\n${image.image_url}`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-                  }}
+                  onClick={() => enviarWhatsApp(image)}
                 >
-                  <Send className="w-3 h-3" />
+                  {sendingId === image.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                   WhatsApp
                 </Button>
               </div>
