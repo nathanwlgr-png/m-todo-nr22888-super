@@ -9,6 +9,7 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
+    "diagnose:base44": "node src/scripts/base44-connection-diagnostic.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
