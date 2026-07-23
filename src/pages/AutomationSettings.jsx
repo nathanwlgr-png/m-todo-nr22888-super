@@ -49,9 +49,6 @@ export default function AutomationSettings() {
   // Enable automation
   const enableMutation = useMutation({
     mutationFn: async () => {
-      if (!window.confirm('Ativar a preparação automática de rascunhos? Nenhuma mensagem será enviada sem sua aprovação.')) {
-        throw new Error('cancelled');
-      }
       const response = await base44.functions.invoke('automaticMessageScheduler', {
         action: 'enable',
         confirmed_by_user: true,
@@ -71,7 +68,7 @@ export default function AutomationSettings() {
       setAutomationEnabled(true);
       await statusQuery.refetch();
     },
-    onError: (error) => toast.error(error.message === 'cancelled' ? 'Ativação cancelada' : 'Erro ao ativar')
+    onError: (error) => toast.error(error.message || 'Erro ao ativar')
   });
 
   // Disable automation
