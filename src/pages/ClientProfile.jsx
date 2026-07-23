@@ -77,22 +77,11 @@ export default function ClientProfile() {
   };
 
   const handleGenerateAndSend = async () => {
+    if (generatingMsg) return;
     setGeneratingMsg(true);
     setGenerationStatus('processing');
-    toast.info('Gerando recomendação em segundo plano. Você pode continuar trabalhando.');
     try {
-      const res = await base44.functions.invoke('generateSpinSellingMessages', {
-        client_id: client.id,
-        client_name: client.first_name,
-        clinic_name: client.clinic_name,
-        equipment_interest: client.equipment_interest,
-      });
-      const generatedMessages = Array.isArray(res.data?.messages) ? res.data.messages : [];
-      const msg = generatedMessages.length > 0
-        ? generatedMessages.map((item, index) => `${index + 1}. ${item.text || item}`).join('\n\n')
-        : res.data?.message || res.data?.spin_message || (typeof res.data === 'string' ? res.data : '');
-      if (!msg) throw new Error('Recomendação vazia');
-      await base44.entities.EliteAIRecommendationLog.create({
+      const log = await base44.entities.EliteAIRecommendationLog.create({
         data_hora: new Date().toISOString(),
         modo_operacional: 'PLANO_ELITE',
         contexto: `Pitch para ${client.clinic_name || client.first_name}`,
@@ -102,18 +91,36 @@ export default function ClientProfile() {
         cliente_id: client.id,
         agente: 'Perfil do Cliente',
         acao: 'Gerar recomendação de pitch',
-        resultado_resumido: msg,
+        resultado_resumido: 'Processando recomendação — você pode continuar usando o CRM.',
       });
-      queryClient.invalidateQueries({ queryKey: ['ai-recommendations', client.id] });
-      setWaMessage(msg);
-      if (client.phone) setShowWaModal(true);
-      setGenerationStatus('done');
-      toast.success('Recomendação pronta e salva no histórico.');
-    } catch (e) {
-      setGenerationStatus('error');
-      toast.error('Não foi possível gerar a recomendação. Tente novamente.');
-    } finally {
+      await queryClient.invalidateQueries({ queryKey: ['ai-recommendations', client.id] });
+      void (async () => {
+        try {
+          const res = await base44.functions.invoke('generateSpinSellingMessages', {
+            client_id: client.id,
+            client_name: client.first_name || client.full_name,
+            clinic_name: client.clinic_name,
+            equipment_interest: client.equipment_interest,
+          });
+          const messages = Array.isArray(res.data?.messages) ? res.data.messages : [];
+          const msg = messages.length
+            ? messages.map((item, index) => `${index + 1}. ${item.text || item}`).join('\n\n')
+            : res.data?.message || res.data?.spin_message || '';
+          if (!msg) throw new Error('Recomendação vazia');
+          await base44.entities.EliteAIRecommendationLog.update(log.id, { resultado_resumido: msg, observacao: 'Concluído' });
+          setWaMessage(msg);
+          setGenerationStatus('done');
+        } catch {
+          await base44.entities.EliteAIRecommendationLog.update(log.id, { resultado_resumido: 'Não foi possível gerar a recomendação.', observacao: 'Falha' });
+          setGenerationStatus('error');
+        } finally {
+          setGeneratingMsg(false);
+          queryClient.invalidateQueries({ queryKey: ['ai-recommendations', client.id] });
+        }
+      })();
+    } catch {
       setGeneratingMsg(false);
+      setGenerationStatus('error');
     }
   };
 
@@ -218,7 +225,7 @@ export default function ClientProfile() {
             className="py-2.5 rounded-xl flex flex-col items-center gap-1 disabled:opacity-60"
             style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.3)' }}>
             {generatingMsg ? <Loader2 className="w-4 h-4 text-orange-400 animate-spin" /> : <Lightbulb className="w-4 h-4 text-orange-400" />}
-            <span className="text-[10px] font-black text-orange-400">Gerar Msg</span>
+            <span className="text-[10px] font-black text-orange-400">{generatingMsg ? 'IA trabalhando' : 'Gerar Msg'}</span>
           </button>
           <Link to={`/GenerateWhatsAppIntegrated?client_id=${client.id}`}>
             <div className="py-2.5 rounded-xl flex flex-col items-center gap-1"
