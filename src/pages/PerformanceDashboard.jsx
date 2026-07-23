@@ -19,7 +19,8 @@ import {
   Sparkles,
   BarChart3
 } from 'lucide-react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ConsolidatedSalesPerformance from '@/components/performance/ConsolidatedSalesPerformance';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -56,7 +57,12 @@ export default function PerformanceDashboard() {
     queryFn: () => base44.entities.SalesPoints.list()
   });
 
-  const isLoading = loadingClients || loadingSales || loadingVisits || loadingTasks || loadingPoints;
+  const { data: salesGoals = [], isLoading: loadingGoals } = useQuery({
+    queryKey: ['sales-goals-performance'],
+    queryFn: () => base44.entities.SalesGoal.list('-end_date', 200)
+  });
+
+  const isLoading = loadingClients || loadingSales || loadingVisits || loadingTasks || loadingPoints || loadingGoals;
 
   // KPIs de Vendas
   const salesKPIs = useMemo(() => {
@@ -96,7 +102,7 @@ export default function PerformanceDashboard() {
     const sellers = {};
 
     sales.forEach(sale => {
-      const seller = sale.salesperson || sale.created_by || 'Não identificado';
+      const seller = sale.salesperson || sale.created_by_id || 'Não identificado';
       if (!sellers[seller]) {
         sellers[seller] = {
           name: seller,
@@ -114,14 +120,14 @@ export default function PerformanceDashboard() {
     });
 
     visits.forEach(visit => {
-      const seller = visit.created_by || 'Não identificado';
+      const seller = visit.created_by_id || 'Não identificado';
       if (sellers[seller]) {
         sellers[seller].visits++;
       }
     });
 
     tasks.forEach(task => {
-      const seller = task.created_by || 'Não identificado';
+      const seller = task.assigned_to || task.created_by_id || 'Não identificado';
       if (sellers[seller]) {
         sellers[seller].tasks++;
         if (task.status === 'concluida') {
@@ -273,6 +279,8 @@ export default function PerformanceDashboard() {
             </div>
           </div>
         </Card>
+
+        <ConsolidatedSalesPerformance sales={sales} goals={salesGoals} />
 
         {/* Performance por Vendedor */}
         <Card className="p-4 bg-white">

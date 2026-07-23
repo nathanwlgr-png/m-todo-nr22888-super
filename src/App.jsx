@@ -94,6 +94,7 @@ const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
 const Reports = lazy(() => import('./pages/Reports'));
+const PerformanceDashboard = lazy(() => import('./pages/PerformanceDashboard'));
 
 const MessageApproval = lazy(() => import('./pages/MessageApproval'));
 const EquipmentConsumables = lazy(() => import('./pages/EquipmentConsumables'));
@@ -285,6 +286,7 @@ const AuthenticatedApp = () => {
         <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
         <Route path="/EliteVetClientSearch" element={<Navigate to="/ModoInvestigativoSupremo" replace />} />
         <Route path="/Reports" element={<LayoutWrapper currentPageName="Reports"><Reports /></LayoutWrapper>} />
+        <Route path="/PerformanceDashboard" element={<LayoutWrapper currentPageName="PerformanceDashboard"><PerformanceDashboard /></LayoutWrapper>} />
         <Route path="/NumerologyAnalysis" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/WhatsAppMasterAssistant" element={<Navigate to="/WhatsAppHub" replace />} />
         <Route path="/FollowUpAutomationModule" element={<Navigate to="/AutoFollowUpDashboard" replace />} />
