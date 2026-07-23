@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
+import { OfflineManager } from '@/lib/OfflineManager';
 import { Plus, Check, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,10 +29,16 @@ export default function OfflineDataEntryForm() {
     setSaving(true);
 
     try {
-      const user = await base44.auth.me();
+      let userEmail = localStorage.getItem('nr22888_offline_user_email');
+      if (navigator.onLine) {
+        const user = await base44.auth.me();
+        userEmail = user.email;
+        localStorage.setItem('nr22888_offline_user_email', userEmail);
+      }
+      if (!userEmail) throw new Error('Abra o aplicativo conectado uma vez antes de usar o modo offline.');
 
       const entryData = {
-        user_email: user.email,
+        user_email: userEmail,
         entry_type: entryType,
         entry_date: formData.entry_date,
         clinic_name: formData.clinic_name,
@@ -49,9 +56,27 @@ export default function OfflineDataEntryForm() {
         entryData.sale_value = parseFloat(formData.sale_value);
       }
 
-      await base44.entities.OfflineDataEntry.create(entryData);
+      if (navigator.onLine) {
+        try {
+          await base44.entities.OfflineDataEntry.create(entryData);
+        } catch {
+          await OfflineManager.queueOperation({
+            entity: 'OfflineDataEntry',
+            action: 'create',
+            data: entryData,
+            description: `${entryType}: ${formData.clinic_name}`,
+          });
+        }
+      } else {
+        await OfflineManager.queueOperation({
+          entity: 'OfflineDataEntry',
+          action: 'create',
+          data: entryData,
+          description: `${entryType}: ${formData.clinic_name}`,
+        });
+      }
 
-      setSuccessMessage(`${entryType === 'visita' ? 'Visita' : 'Venda'} registrada offline com sucesso! ✓`);
+      setSuccessMessage(`${entryType === 'visita' ? 'Visita' : 'Venda'} registrada com segurança! ✓`);
       
       // Limpar formulário
       setFormData({

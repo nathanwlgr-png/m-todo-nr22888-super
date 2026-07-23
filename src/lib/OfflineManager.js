@@ -85,62 +85,51 @@ export class OfflineManager {
   static QUEUE_TRIM_TO    = 400;   // ao limpar, manter as 400 mais recentes
 
   static async queueOperation(operation) {
-    // operation: { entity, action, data, description }
+    // A fila é durável: nenhuma coleta offline é descartada por volume ou tentativas.
     const db = await this.initDB();
-    
     const pending = await this.getPendingOperations();
+
     if (pending.length >= this.QUEUE_HARD_LIMIT) {
-      // Separar críticas e não-críticas
-      const critical = pending.filter(op => this.CRITICAL_ENTITIES.includes(op.entity));
-      const nonCritical = pending.filter(op => !this.CRITICAL_ENTITIES.includes(op.entity));
-
-      // Calcular quantas não-críticas precisamos remover para voltar ao limite
-      const removeCount = pending.length - this.QUEUE_TRIM_TO;
-      
-      if (removeCount > 0) {
-        // Só descartar não-críticas, ordenadas pelas mais antigas
-        const sorted = nonCritical.sort((a, b) => a._queued_at - b._queued_at);
-        const toDelete = sorted.slice(0, removeCount);
-
-        if (toDelete.length > 0) {
-          console.warn(`[OFFLINE] SyncQueue: descartando ${toDelete.length} ops não-críticas antigas (limite ${this.QUEUE_HARD_LIMIT} atingido)`);
-          const tx = db.transaction('SyncQueue', 'readwrite');
-          await Promise.all(toDelete.map(op => tx.store.delete(op.id)));
-          await tx.done;
-        }
-
-        // Se ainda lotado (só críticas), registrar aviso mas NÃO descartar
-        const remaining = await this.getPendingOperations();
-        if (remaining.length >= this.QUEUE_HARD_LIMIT) {
-          console.error(`[OFFLINE] SyncQueue CHEIO com ${remaining.length} ops críticas — não descartando. Sincronize o dispositivo!`);
-          // Salvar alerta no Meta para UI exibir
-          await this.setMeta('sync_queue_overflow', {
-            count: remaining.length,
-            at: Date.now(),
-            message: 'Fila offline cheia! Conecte-se à internet para sincronizar dados críticos.'
-          });
-        }
-      }
+      await this.setMeta('sync_queue_overflow', {
+        count: pending.length,
+        at: Date.now(),
+        message: 'Fila offline extensa. Mantenha o aplicativo aberto ao recuperar a conexão.'
+      });
     }
-    
-    await db.add('SyncQueue', {
+
+    return db.add('SyncQueue', {
       ...operation,
+      operation_id: operation.operation_id || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       _queued_at: Date.now(),
       _synced: false,
       _retry_count: 0,
+      _last_error: null,
     });
   }
 
   static async getPendingOperations() {
     const db = await this.initDB();
     const all = await db.getAll('SyncQueue');
-    return all.filter(op => !op._synced);
+    return all.filter(op => !op._synced).sort((a, b) => a._queued_at - b._queued_at);
   }
 
   static async markOperationSynced(id) {
     const db = await this.initDB();
     const op = await db.get('SyncQueue', id);
     if (op) await db.put('SyncQueue', { ...op, _synced: true, _synced_at: Date.now() });
+  }
+
+  static async markOperationFailed(id, error) {
+    const db = await this.initDB();
+    const op = await db.get('SyncQueue', id);
+    if (op) {
+      await db.put('SyncQueue', {
+        ...op,
+        _retry_count: (op._retry_count || 0) + 1,
+        _last_error: String(error?.message || error || 'Falha de sincronização'),
+        _last_attempt_at: Date.now(),
+      });
+    }
   }
 
   static async clearSyncedOperations() {

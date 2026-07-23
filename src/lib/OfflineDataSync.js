@@ -3,138 +3,106 @@ import { OfflineManager, isOnline } from './OfflineManager';
 import { base44 } from '@/api/base44Client';
 
 export class OfflineDataSync {
-  static async syncAllEntities() {
-    if (!isOnline()) {
-      console.log('[SYNC] Offline - aguardando conexão');
-      return { synced: 0, failed: 0, pending: 0 };
+  static syncPromise = null;
+
+  static syncAllEntities() {
+    if (!isOnline()) return Promise.resolve({ synced: 0, failed: 0, pending: 0 });
+    if (this.syncPromise) return this.syncPromise;
+
+    this.syncPromise = this.runSync().finally(() => {
+      this.syncPromise = null;
+    });
+    return this.syncPromise;
+  }
+
+  static async runSync() {
+    await this.migrateLegacyEditQueue();
+    const queued = await OfflineManager.getPendingOperations();
+    if (queued.length === 0) return { synced: 0, failed: 0, pending: 0 };
+
+    const result = await this.processSyncQueue();
+    if (result.pending === 0) {
+      await this.cacheForOffline();
+      await OfflineManager.setMeta('last_full_sync', Date.now());
     }
+    await OfflineManager.setMeta('last_sync_attempt', Date.now());
+    return result;
+  }
 
-    let synced = 0, failed = 0;
-    const entities = ['Client', 'Task', 'Visit', 'Sale', 'Lead', 'Equipment', 'ConsumableOrder'];
+  static async migrateLegacyEditQueue() {
+    if (typeof localStorage === 'undefined') return;
+    const key = 'nr22_edit_queue';
+    const legacy = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!Array.isArray(legacy) || legacy.length === 0) return;
 
-    for (const entity of entities) {
-      try {
-        const localData = await OfflineManager.listEntities(entity);
-        if (localData.length === 0) continue;
-
-        // Batch sync - máx 50 registros por vez
-        const batches = [];
-        for (let i = 0; i < localData.length; i += 50) {
-          batches.push(localData.slice(i, i + 50));
-        }
-
-        for (const batch of batches) {
-          try {
-            // Fetch online
-            const onlineData = await base44.entities[entity].list('-updated_date', 1000).catch(() => []);
-            
-            // Merge inteligente — resolver conflitos por timestamp (ambos em ms)
-            for (const local of batch) {
-              const online = onlineData.find(o => o.id === local.id);
-              // Converter updated_date do servidor para ms para comparação correta
-              const onlineTs = online?.updated_date ? new Date(online.updated_date).getTime() : 0;
-              const localTs = local._cached_at || 0;
-              
-              if (!online) {
-                // Registro existe localmente mas não no servidor — não enviar update (pode ter sido deletado)
-                console.log(`[SYNC] ${entity}/${local.id} não encontrado online — ignorando`);
-              } else if (localTs > onlineTs) {
-                // Local é MAIS RECENTE que o servidor → enviar
-                if (local.id) {
-                  const { _cached_at, ...cleanData } = local; // não enviar campo interno ao servidor
-                  await base44.entities[entity].update(local.id, cleanData).catch((err) => {
-                    console.warn(`[SYNC] Falha ao atualizar ${entity}/${local.id}:`, err);
-                    failed++;
-                  });
-                }
-              } else {
-                // Servidor é mais recente — preservar dado do servidor, não sobrescrever
-                console.log(`[SYNC] ${entity}/${local.id} — servidor é mais recente, preservando online`);
-              }
-            }
-            synced += batch.length - failed;
-          } catch (batchError) {
-            console.warn(`[SYNC] Batch error em ${entity}:`, batchError);
-            failed += batch.length;
-          }
-        }
-      } catch (error) {
-        console.warn(`[SYNC] Error em ${entity}:`, error);
+    for (const edit of legacy) {
+      if (!edit.synced && edit.entityName && edit.entityId) {
+        await OfflineManager.queueOperation({
+          operation_id: `legacy-${edit.id}`,
+          entity: edit.entityName,
+          action: 'update',
+          data: { id: edit.entityId, ...edit.updateData },
+          description: edit.clientName || 'Edição offline migrada',
+        });
       }
     }
-
-    // Processar fila de sync após sincronização de entidades
-    const pending = await this.processSyncQueue();
-
-    return { synced, failed, pending };
+    localStorage.removeItem(key);
   }
 
   static async processSyncQueue() {
     const pendingOps = await OfflineManager.getPendingOperations();
-    if (pendingOps.length === 0) return 0;
-
     let processed = 0;
+    let failed = 0;
 
     for (const op of pendingOps) {
-      if (op._retry_count >= 3) {
-        await OfflineManager.markOperationSynced(op.id);
-        continue;
-      }
+      if (!isOnline()) break;
 
       try {
         const { entity, action, data } = op;
-        
+        const entityApi = base44.entities[entity];
+        if (!entityApi || !['create', 'update', 'delete'].includes(action)) {
+          throw new Error('Operação offline inválida');
+        }
+
         if (action === 'create') {
-          await base44.entities[entity].create(data);
+          await entityApi.create(data);
         } else if (action === 'update') {
-          await base44.entities[entity].update(data.id, data);
-        } else if (action === 'delete') {
-          await base44.entities[entity].delete(data.id);
+          const { id, ...changes } = data || {};
+          if (!id) throw new Error('Atualização offline sem identificador');
+          await entityApi.update(id, changes);
+        } else {
+          if (!data?.id) throw new Error('Exclusão offline sem identificador');
+          await entityApi.delete(data.id);
         }
 
         await OfflineManager.markOperationSynced(op.id);
         processed++;
       } catch (error) {
-        console.warn('[SYNC] Operation failed:', op.id, error);
-        // Incrementar retry count
-        const db = await OfflineManager.initDB();
-        const updated = { ...op, _retry_count: (op._retry_count || 0) + 1 };
-        await db.put('SyncQueue', updated);
+        failed++;
+        await OfflineManager.markOperationFailed(op.id, error);
+        console.warn('[SYNC] Operação preservada para nova tentativa:', op.id, error);
       }
     }
 
     await OfflineManager.clearSyncedOperations();
-    return processed;
+    const pending = (await OfflineManager.getPendingOperations()).length;
+    return { synced: processed, failed, pending };
   }
 
   static async cacheForOffline() {
-    try {
-      const entities = ['Client', 'Equipment', 'ConsumableOrder'];
-      
-      for (const entity of entities) {
-        const data = await base44.entities[entity].list('-updated_date', 500).catch(() => []);
-        if (data.length > 0) {
-          await OfflineManager.bulkSaveEntity(entity, data);
-          await OfflineManager.cacheData(`${entity}_cached`, true, 30 * 24 * 60 * 60 * 1000);
-        }
+    const entityConfig = [
+      ['Client', 500], ['Lead', 300], ['Task', 200], ['Visit', 200],
+      ['Sale', 150], ['Equipment', 50], ['ConsumableOrder', 150],
+    ];
+
+    for (const [entity, limit] of entityConfig) {
+      try {
+        const data = await base44.entities[entity].list('-updated_date', limit);
+        if (data.length > 0) await OfflineManager.bulkSaveEntity(entity, data);
+      } catch (error) {
+        console.warn(`[SYNC] Cache de ${entity} será atualizado depois:`, error);
       }
-
-      await OfflineManager.setMeta('last_full_sync', Date.now());
-      console.log('[SYNC] Cache offline atualizado');
-      return true;
-    } catch (error) {
-      console.warn('[SYNC] Cache error:', error);
-      return false;
     }
+    return true;
   }
-}
-
-// Auto-sync quando voltar online
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    console.log('[SYNC] Conexão restaurada - sincronizando...');
-    OfflineDataSync.syncAllEntities().then(result => {
-      console.log('[SYNC] Resultado:', result);
-    });
-  });
 }
