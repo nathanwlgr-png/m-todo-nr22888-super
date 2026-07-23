@@ -1,0 +1,41 @@
+{
+  "name": "Saneamento Autom\u00e1tico Noturno",
+  "description": "Roda todo dia \u00e0s 2h da manh\u00e3: corrige telefones, aplica defaults e detecta duplicatas no CRM.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 5 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "saneamento_autom_tico_noturno",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "saneamentoInteligente",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
