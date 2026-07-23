@@ -28,6 +28,7 @@ import {
   ArrowUpDown,
   Table,
   FileDown,
+  FileSpreadsheet,
   Edit2,
   FileText,
   Eye,
@@ -47,6 +48,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+import { exportClientsExcel } from '@/lib/exportClientsExcel';
 
 const ProposalModal = lazy(() => import('@/components/ProposalModal'));
 const SalesFunnelChart = lazy(() => import('@/components/SalesFunnelChart'));
@@ -85,6 +87,7 @@ export default function Clients() {
   const [quickSaleClient, setQuickSaleClient] = useState(null);
   const [selectedEquipment, setSelectedEquipment] = useState('');
   const [saleValue, setSaleValue] = useState('');
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -382,6 +385,18 @@ export default function Clients() {
     toast.success('Documento exportado!');
   };
 
+  const handleExportExcel = async () => {
+    setExportingExcel(true);
+    try {
+      await exportClientsExcel(clients);
+      toast.success('Planilha Excel exportada com sucesso!');
+    } catch (error) {
+      toast.error(`Erro ao exportar planilha: ${error.message}`);
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
   const generatePDF = async () => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF('portrait');
@@ -625,6 +640,17 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
             className="mr-2"
           >
             <FileDown className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExportExcel}
+            disabled={exportingExcel || clients.length === 0}
+            className="mr-2"
+            title="Exportar contatos e histórico para Excel"
+            aria-label="Exportar contatos e histórico para Excel"
+          >
+            {exportingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
           </Button>
           <Button
             size="sm"
