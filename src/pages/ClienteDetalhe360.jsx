@@ -411,7 +411,7 @@ export default function ClienteDetalhe360() {
           {[
             { id: 'visao_geral', label: '📋 Geral' },
             { id: 'proposta', label: '💼 Proposta' },
-            { id: 'mensagens', label: '💬 Mensagens' },
+            { id: 'mensagens', label: '💬 Conversas + Sentimento' },
             { id: 'aprovacao', label: `✅ Aprovação${pendingApproval.length > 0 ? ` (${pendingApproval.length})` : ''}` },
             { id: 'anexos', label: '📎 Anexos' },
             { id: 'mapa', label: '🗺️ Mapa' },
