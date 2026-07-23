@@ -20,6 +20,8 @@ function calcDist(lat1, lon1, lat2, lon2) {
 
 const STOP_RADIUS = 100;
 const STOP_TIME = 2 * 60 * 1000;
+const ALERT_RADIUS = 500; // metros — dispara alerta ao entrar neste raio de um cliente
+const ALERT_RESET = 1500; // metros — só re-alerta o cliente após se afastar além disto
 
 // Sugestões de parada por região/horário
 const PARADAS_ALMOCO = {
@@ -59,8 +61,13 @@ export default function GPSClinicaRadar({ clients = [] }) {
   // Rota ativa (próximos destinos)
   const [rotaAtiva, setRotaAtiva] = useState(null); // { destinos: [], atual: 0 }
 
+  const [alertasProximidade, setAlertasProximidade] = useState(true);
+
   const watchRef = useRef(null);
   const paradaRef = useRef({ pos: null, since: null });
+  // Guarda o estado de proximidade por cliente para não repetir o alerta.
+  // { [clientId]: 'dentro' | 'fora' }
+  const alertadosRef = useRef({});
 
   const clientesGeo = clients.filter(c => c.phone || c.city);
 
@@ -145,7 +152,30 @@ export default function GPSClinicaRadar({ clients = [] }) {
       })
       .slice(0, 5);
     setClinicasProximas(proximas);
-  }, [clientesGeo]);
+
+    // ═══ ALERTA DE PROXIMIDADE ═══
+    // Dispara UMA vez ao entrar no raio de um cliente com coordenada validada.
+    // Só re-alerta depois que o vendedor se afasta além de ALERT_RESET.
+    if (alertasProximidade) {
+      proximas.forEach(c => {
+        if (c.dist_metros == null) return;
+        const estadoAnterior = alertadosRef.current[c.id];
+        if (c.dist_metros <= ALERT_RADIUS && estadoAnterior !== 'dentro') {
+          alertadosRef.current[c.id] = 'dentro';
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          toast.success(
+            `📍 Cliente próximo: ${c.first_name}${c.clinic_name ? ` · ${c.clinic_name}` : ''}`,
+            {
+              description: `${c.dist_metros}m de distância · ${c.city || ''}${c.status === 'quente' ? ' · 🔥 QUENTE' : ''}`,
+              duration: 10000,
+            }
+          );
+        } else if (c.dist_metros > ALERT_RESET && estadoAnterior === 'dentro') {
+          alertadosRef.current[c.id] = 'fora';
+        }
+      });
+    }
+  }, [clientesGeo, alertasProximidade]);
 
   const iniciarGPS = () => {
     if (!navigator.geolocation) { toast.error('GPS não disponível neste dispositivo'); return; }
@@ -278,6 +308,24 @@ export default function GPSClinicaRadar({ clients = [] }) {
               Precisão: {Math.round(posAtual.acc)}m
               {paradaDetectada && <Badge className="bg-orange-500 text-white text-xs ml-1 animate-pulse">PARADO!</Badge>}
             </p>
+          )}
+
+          {/* Toggle de alertas de proximidade */}
+          {gpsAtivo && (
+            <button
+              onClick={() => setAlertasProximidade(v => !v)}
+              className={`w-full flex items-center justify-between text-xs px-2 py-1.5 rounded-md border transition-colors ${
+                alertasProximidade ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-50 text-slate-500 border-slate-200'
+              }`}
+            >
+              <span className="flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                Alerta ao passar perto de um cliente (500m)
+              </span>
+              <Badge className={alertasProximidade ? 'bg-blue-500 text-white text-xs' : 'bg-slate-300 text-slate-600 text-xs'}>
+                {alertasProximidade ? 'ON' : 'OFF'}
+              </Badge>
+            </button>
           )}
 
           {/* ═══ CRONÔMETRO DE VISITA ═══ */}
