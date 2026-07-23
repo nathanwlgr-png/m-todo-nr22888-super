@@ -1,9 +1,14 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { interaction_id, text } = await req.json();
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const { interaction_id, text } = await req.json().catch(() => ({}));
+    if (!interaction_id || !text?.trim()) {
+      return Response.json({ error: 'interaction_id e text são obrigatórios' }, { status: 400 });
+    }
 
     // Análise de sentimento com IA
     const sentimentAnalysis = await base44.integrations.Core.InvokeLLM({
@@ -35,14 +40,23 @@ RETORNE JSON VÁLIDO.`,
       }
     });
 
-    // Atualizar interação
+    const emotionMap = {
+      alegria: 'joy', joy: 'joy', raiva: 'anger', anger: 'anger', medo: 'fear', fear: 'fear',
+      tristeza: 'sadness', sadness: 'sadness', surpresa: 'surprise', surprise: 'surprise', neutro: 'neutral', neutral: 'neutral'
+    };
+    const priorityMap = {
+      low: 'baixa', baixa: 'baixa', medium: 'media', média: 'media', media: 'media',
+      high: 'alta', alta: 'alta', urgent: 'urgente', urgente: 'urgente'
+    };
+
+    // Atualizar interação com valores compatíveis com o CRM
     await base44.entities.Interaction.update(interaction_id, {
       sentiment: sentimentAnalysis.sentiment,
       sentiment_score: sentimentAnalysis.sentiment_score,
       sentiment_confidence: sentimentAnalysis.confidence,
       sentiment_keywords: sentimentAnalysis.keywords,
-      emotion_detected: sentimentAnalysis.emotion,
-      ai_priority: sentimentAnalysis.priority
+      emotion_detected: emotionMap[String(sentimentAnalysis.emotion || '').toLowerCase()] || 'neutral',
+      ai_priority: priorityMap[String(sentimentAnalysis.priority || '').toLowerCase()] || 'media'
     });
 
     // Buscar interação atualizada
