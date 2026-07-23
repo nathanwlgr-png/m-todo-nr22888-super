@@ -146,6 +146,7 @@ const ClienteDetalhe360 = lazy(() => import('./pages/ClienteDetalhe360.jsx'));
 const ArquivoMasterConsulta = lazy(() => import('./pages/ArquivoMasterConsulta.jsx'));
 const DuplicateManager = lazy(() => import('./pages/DuplicateManager.jsx'));
 const CatalogEngagement = lazy(() => import('./pages/CatalogEngagement.jsx'));
+const GitHubTaskSync = lazy(() => import('./pages/GitHubTaskSync.jsx'));
 
 
 const PageLoader = () => <AppLoadingScreen />;
@@ -264,6 +265,7 @@ const AuthenticatedApp = () => {
         <Route path="/ArquivoMasterConsulta" element={<LayoutWrapper currentPageName="ArquivoMasterConsulta"><ArquivoMasterConsulta /></LayoutWrapper>} />
         <Route path="/DuplicateManager" element={<LayoutWrapper currentPageName="DuplicateManager"><DuplicateManager /></LayoutWrapper>} />
         <Route path="/CatalogEngagement" element={<LayoutWrapper currentPageName="CatalogEngagement"><CatalogEngagement /></LayoutWrapper>} />
+        <Route path="/GitHubTaskSync" element={<LayoutWrapper currentPageName="GitHubTaskSync"><GitHubTaskSync /></LayoutWrapper>} />
         <Route path="/debug-caca" element={<DebugCaca />} />
         <Route path="/RelatorioRicardo" element={<LayoutWrapper currentPageName="RelatorioRicardo"><RelatorioRicardo /></LayoutWrapper>} />
         <Route path="/AgendaMensal" element={<LayoutWrapper currentPageName="AgendaMensal"><AgendaMensal /></LayoutWrapper>} />
