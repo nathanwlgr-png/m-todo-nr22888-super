@@ -42,6 +42,15 @@
       "format": "date-time",
       "description": "Data/hora do envio do alerta autom\u00e1tico de follow-up"
     },
+    "google_calendar_synced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a tarefa foi sincronizada com o Google Calendar"
+    },
+    "google_calendar_event_id": {
+      "type": "string",
+      "description": "ID do evento correspondente no Google Calendar"
+    },
     "status": {
       "type": "string",
       "enum": [

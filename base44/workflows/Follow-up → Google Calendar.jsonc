@@ -1,0 +1,41 @@
+{
+  "name": "Follow-up \u2192 Google Calendar",
+  "description": "Quando o assistente cria ou atualiza uma tarefa de follow-up, o evento aparece automaticamente na sua agenda do Google Calendar.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Task",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.type == \"follow_up\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "followup_to_google_calendar",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_task": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncFollowUpTaskToCalendar",
+            "args": {
+              "task_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sincronizar com a agenda",
+            "description": "Cria/atualiza o evento"
+          }
+        }
+      }
+    ]
+  }
+}
