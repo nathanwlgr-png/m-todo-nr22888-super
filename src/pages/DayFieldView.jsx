@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -9,30 +9,47 @@ import {
 import { toast } from 'sonner';
 import { buildWhatsAppUrl } from '@/utils/phoneUtils';
 import useActionLock from '@/hooks/useActionLock';
+import { OfflineManager } from '@/lib/OfflineManager';
+import VisitOutcomeActions from '@/components/visits/VisitOutcomeActions';
+
+const loadFieldEntity = async (entity, sort, limit) => {
+  if (navigator.onLine) {
+    try {
+      const records = await base44.entities[entity].list(sort, limit);
+      if (records.length > 0) await OfflineManager.bulkSaveEntity(entity, records);
+      return records;
+    } catch (_) {
+      // usa o pacote local quando a conexão oscila
+    }
+  }
+  return OfflineManager.listEntities(entity);
+};
 
 export default function DayFieldView() {
   const now = new Date();
+  const selectedVisitId = new URLSearchParams(window.location.search).get('visit_id');
   const [completedTasks, setCompletedTasks] = useState(new Set());
+  const [completedVisits, setCompletedVisits] = useState(new Set());
   const { locked: actionLocked, runWithLock } = useActionLock();
 
   // Buscar tarefas do dia
   const { data: allTasks = [], refetch: refetchTasks } = useQuery({
     queryKey: ['field-tasks-today'],
-    queryFn: () => base44.entities.Task.list('-due_date', 100),
+    queryFn: () => loadFieldEntity('Task', '-due_date', 100),
     staleTime: 2 * 60 * 1000,
   });
 
   // Buscar visitas agendadas do dia
   const { data: allVisits = [], refetch: refetchVisits } = useQuery({
     queryKey: ['field-visits-today'],
-    queryFn: () => base44.entities.Visit.list('-scheduled_date', 100),
+    queryFn: () => loadFieldEntity('Visit', '-scheduled_date', 100),
     staleTime: 2 * 60 * 1000,
   });
 
   // Buscar dados de clientes para as visitas
   const { data: clients = [] } = useQuery({
     queryKey: ['field-clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date', 200),
+    queryFn: () => loadFieldEntity('Client', '-updated_date', 200),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -66,8 +83,12 @@ export default function DayFieldView() {
 
   // Filtrar visitas agendadas do dia
   const visitsToday = allVisits
-    .filter(v => v.status !== 'cancelada' && isInSelectedDay(v.scheduled_date))
-    .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
+    .filter(v => v.status !== 'cancelada' && (isInSelectedDay(v.scheduled_date) || v.id === selectedVisitId))
+    .sort((a, b) => {
+      if (a.id === selectedVisitId) return -1;
+      if (b.id === selectedVisitId) return 1;
+      return new Date(a.scheduled_date) - new Date(b.scheduled_date);
+    });
 
   // Mapear clients para visitas
   const visitsWithClients = visitsToday.map(v => ({
@@ -77,20 +98,43 @@ export default function DayFieldView() {
 
   const totalVisitsCount = visitsWithClients.length;
   const completedCount = tasksForDay.filter(t => t.status === 'concluida' || completedTasks.has(t.id)).length
-    + visitsToday.filter(v => v.status === 'realizada').length;
+    + visitsToday.filter(v => v.status === 'realizada' || completedVisits.has(v.id)).length;
 
-  const handleCompleteTask = async (taskId) => runWithLock(async () => {
-    await base44.entities.Task.update(taskId, { status: 'concluida' });
-    setCompletedTasks(prev => new Set([...prev, taskId]));
-    toast.success('Tarefa concluída!');
-    refetchTasks();
+  const handleCompleteTask = async (task) => runWithLock(async () => {
+    const changes = { status: 'concluida' };
+    if (navigator.onLine) {
+      await base44.entities.Task.update(task.id, changes);
+      refetchTasks();
+    } else {
+      await OfflineManager.queueOperation({ entity: 'Task', action: 'update', data: { id: task.id, ...changes }, description: task.title });
+      await OfflineManager.saveEntity('Task', { ...task, ...changes });
+    }
+    setCompletedTasks(prev => new Set([...prev, task.id]));
+    toast.success(navigator.onLine ? 'Tarefa concluída!' : 'Tarefa salva na fila offline');
   });
 
-  const handleCompleteVisit = async (visitId) => runWithLock(async () => {
-    await base44.entities.Visit.update(visitId, { status: 'realizada' });
-    toast.success('Visita marcada como realizada!');
-    refetchVisits();
+  const handleCompleteVisit = async (visit, outcome) => runWithLock(async () => {
+    const changes = { status: 'realizada', result_notes: outcome };
+    if (navigator.onLine) {
+      await base44.entities.Visit.update(visit.id, changes);
+      refetchVisits();
+    } else {
+      await OfflineManager.queueOperation({ entity: 'Visit', action: 'update', data: { id: visit.id, ...changes }, description: `${visit.client_name || 'Cliente'} — ${outcome}` });
+      await OfflineManager.saveEntity('Visit', { ...visit, ...changes });
+    }
+    setCompletedVisits(prev => new Set([...prev, visit.id]));
+    toast.success(navigator.onLine ? 'Visita concluída!' : 'Visita salva na fila offline');
   });
+
+  useEffect(() => {
+    const handleSync = (event) => {
+      refetchTasks();
+      refetchVisits();
+      if (event.detail?.synced > 0) toast.success(`${event.detail.synced} ação(ões) offline sincronizada(s)`);
+    };
+    window.addEventListener('nr22888:offline-sync', handleSync);
+    return () => window.removeEventListener('nr22888:offline-sync', handleSync);
+  }, [refetchTasks, refetchVisits]);
 
   const formatTime = (date) => {
     return new Date(date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -181,7 +225,7 @@ export default function DayFieldView() {
                     )}
                   </div>
 
-                  <button onClick={() => handleCompleteTask(task.id)}
+                  <button onClick={() => handleCompleteTask(task)}
                     disabled={actionLocked || completedTasks.has(task.id)}
                     className="w-full py-3 rounded-xl text-lg font-black transition-all disabled:opacity-50"
                     style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '2px solid rgba(34,197,94,0.4)' }}>
@@ -247,13 +291,11 @@ export default function DayFieldView() {
                     {visit.client?.phone && <a href={`tel:${String(visit.client.phone).replace(/\D/g, '')}`} className="py-3 rounded-xl text-base font-black text-orange-400 flex items-center justify-center gap-2" style={{ background: 'rgba(255,107,0,0.15)', border: '2px solid rgba(255,107,0,0.35)' }}>Ligar</a>}
                   </div>
 
-                  {/* Botão concluir visita */}
-                  <button onClick={() => handleCompleteVisit(visit.id)}
+                  <VisitOutcomeActions
                     disabled={actionLocked}
-                    className="w-full mt-2 py-3 rounded-xl text-lg font-black text-blue-400 transition-all disabled:opacity-50"
-                    style={{ background: 'rgba(0,191,255,0.15)', border: '2px solid rgba(0,191,255,0.4)' }}>
-                    ✓ VISITA REALIZADA
-                  </button>
+                    completed={visit.status === 'realizada' || completedVisits.has(visit.id)}
+                    onComplete={(outcome) => handleCompleteVisit(visit, outcome)}
+                  />
                 </div>
                 );
               })}

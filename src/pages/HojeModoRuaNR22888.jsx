@@ -61,7 +61,7 @@ function Section({ id, icon: Icon, title, count, children }) {
   );
 }
 
-function ClientCard({ client, context }) {
+function ClientCard({ client, context, visitId }) {
   const [showNext, setShowNext] = useState(false);
   const phone = client?.phone || client?.recipient_phone || client?.destinatario_contato;
   const clientId = client?.client_id || client?.cliente_id || client?.id;
@@ -83,6 +83,8 @@ function ClientCard({ client, context }) {
         )}
         {clientId ? (
           <Link to={`/ClienteDetalhe360?id=${clientId}`} className="h-12 rounded-xl flex items-center justify-center text-xs md:text-sm font-black text-purple-300 bg-purple-500/10 border border-purple-500/30">Cliente 360</Link>
+        ) : visitId ? (
+          <Link to={`/DayFieldView?visit_id=${visitId}`} className="h-12 rounded-xl flex items-center justify-center text-xs md:text-sm font-black text-blue-300 bg-blue-500/10 border border-blue-500/30">Registrar visita</Link>
         ) : (
           <button className="h-12 rounded-xl text-xs md:text-sm font-black text-slate-500 bg-slate-800/60 border border-slate-700" disabled>Cliente 360</button>
         )}
@@ -227,7 +229,7 @@ export default function HojeModoRuaNR22888() {
 
         <Section id="campo" icon={Route} title="Visitas e tarefas de campo" count={fieldTasks.length + fieldVisits.length}>
           {fieldTasks.length + fieldVisits.length === 0 ? <EmptyState /> : <div className="space-y-3">
-            {fieldVisits.map((v) => <ClientCard key={`v-${v.id}`} client={resolveClient(v) || { clinic_name: v.client_name }} context={`${v.location || 'sem endereço'} • ${v.status || 'visita'}`} recommendation="confirmar rota, objetivo da visita e principal dor antes de chegar na clínica." />)}
+            {fieldVisits.map((v) => <ClientCard key={`v-${v.id}`} client={resolveClient(v) || { clinic_name: v.client_name }} visitId={v.id} context={`${v.location || 'sem endereço'} • ${v.status || 'visita'}`} recommendation="confirmar rota, objetivo da visita e principal dor antes de chegar na clínica." />)}
             {fieldTasks.map((t) => <ClientCard key={`t-${t.id}`} client={resolveClient(t) || { clinic_name: t.client_name || t.title }} context={t.description || t.type || 'tarefa de campo'} recommendation="executar a tarefa pendente e registrar conclusão somente na tela de tarefas, se necessário." />)}
           </div>}
         </Section>
