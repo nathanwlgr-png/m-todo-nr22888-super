@@ -12,20 +12,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'client_id e stage_name válido são obrigatórios' }, { status: 400 });
     }
 
-    const client = await base44.entities.Client.get(client_id);
+    const client = await base44.asServiceRole.entities.Client.get(client_id);
     if (!client) return Response.json({ error: 'Client not found' }, { status: 404 });
 
-    await base44.entities.Client.update(client_id, { pipeline_stage: stage_name });
+    await base44.asServiceRole.entities.Client.update(client_id, { pipeline_stage: stage_name });
     const shouldAutomate = from_stage !== stage_name && stage_name === 'qualificado';
     let taskCreated = false;
     let messageQueued = false;
 
     if (shouldAutomate) {
       const taskTitle = 'Follow-up automático — Lead qualificado';
-      const pendingTasks = await base44.entities.Task.filter({ client_id, status: 'pendente' });
+      const pendingTasks = await base44.asServiceRole.entities.Task.filter({ client_id, status: 'pendente' });
       if (!pendingTasks.some(task => task.auto_created && task.title === taskTitle)) {
         const dueDate = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
-        await base44.entities.Task.create({
+        await base44.asServiceRole.entities.Task.create({
           client_id,
           client_name: client.clinic_name || client.full_name || client.first_name,
           title: taskTitle,
@@ -41,12 +41,12 @@ Deno.serve(async (req) => {
         taskCreated = true;
       }
 
-      const pendingMessages = await base44.entities.PendingMessage.filter({ recipient_id: client_id });
+      const pendingMessages = await base44.asServiceRole.entities.PendingMessage.filter({ recipient_id: client_id });
       const context = 'Automação lead_status_change — lead qualificado';
       if (!pendingMessages.some(message => message.context === context && ['pending', 'aguardando_aprovacao'].includes(message.status))) {
         const recipientName = client.clinic_name || client.full_name || client.first_name;
         const message = `Olá, ${client.first_name || recipientName}! Agora que avançamos na qualificação, posso alinhar os próximos passos para a solução Seamaty mais adequada à sua rotina?`;
-        await base44.entities.PendingMessage.create({
+        await base44.asServiceRole.entities.PendingMessage.create({
           canal: 'whatsapp',
           channel: 'whatsapp',
           destinatario_nome: recipientName,

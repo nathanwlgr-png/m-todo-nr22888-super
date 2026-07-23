@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
@@ -48,8 +48,8 @@ const CONECTORES_STATUS = [
 
 // ── Componente Principal ────────────────────────────────────────────────────
 export default function ClienteDetalhe360() {
-  const params = new URLSearchParams(window.location.search);
-  const clientId = params.get('id');
+  const [searchParams] = useSearchParams();
+  const clientId = searchParams.get('id');
   const qc = useQueryClient();
 
   // Estados locais
@@ -63,7 +63,7 @@ export default function ClienteDetalhe360() {
   const fileInputRef = useRef(null);
 
   // ── Queries ────────────────────────────────────────────────────────────────
-  const { data: client, isLoading } = useQuery({
+  const { data: client, isLoading, isError, refetch } = useQuery({
     queryKey: ['c360-client', clientId],
     queryFn: () => base44.entities.Client.get(clientId),
     enabled: !!clientId,
@@ -113,8 +113,27 @@ export default function ClienteDetalhe360() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleUpdateStage = async (stage) => {
-    await updateClient.mutateAsync({ id: client.id, data: { pipeline_stage: stage } });
-    toast.success(`Funil: ${STAGE_LABELS[stage]}`);
+    if (stage === client.pipeline_stage || loadingAction === 'stage') return;
+    setLoadingAction('stage');
+    try {
+      const response = await base44.functions.invoke('processFunnelMovement', {
+        client_id: client.id,
+        stage_name: stage,
+        from_stage: client.pipeline_stage,
+      });
+      if (!response.data?.success) throw new Error('Falha ao atualizar funil');
+      await Promise.all([
+        refetch(),
+        qc.invalidateQueries({ queryKey: ['c360-tasks', clientId] }),
+      ]);
+      toast.success(response.data.automation_triggered
+        ? 'Funil atualizado; follow-up e WhatsApp enviados para aprovação.'
+        : `Funil: ${STAGE_LABELS[stage]}`);
+    } catch {
+      toast.error('Não foi possível atualizar o funil. Tente novamente.');
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   const handleGerarProposta = () => {
@@ -336,9 +355,13 @@ export default function ClienteDetalhe360() {
     </div>
   );
 
-  if (!client) return (
+  if (isError || !client) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-      <p className="text-red-400">Cliente não encontrado. <Link to="/Clients" className="text-orange-400 underline">← Clientes</Link></p>
+      <div className="text-center">
+        <p className="text-red-400 mb-3">Não foi possível carregar este cliente.</p>
+        <button onClick={() => refetch()} className="text-orange-400 underline mr-4">Tentar novamente</button>
+        <Link to="/Clients" className="text-orange-400 underline">Clientes</Link>
+      </div>
     </div>
   );
 
@@ -513,8 +536,8 @@ export default function ClienteDetalhe360() {
               <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">🔄 Funil</p>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(STAGE_LABELS).map(([key, label]) => (
-                  <button key={key} onClick={() => handleUpdateStage(key)}
-                    className="px-2.5 py-1 rounded-xl text-[10px] font-black transition-all"
+                  <button key={key} onClick={() => handleUpdateStage(key)} disabled={loadingAction === 'stage'}
+                    className="px-2.5 py-1 rounded-xl text-[10px] font-black transition-all disabled:opacity-50"
                     style={{
                       background: client.pipeline_stage === key ? `${STAGE_COLORS[key]}25` : '#1a1a1a',
                       border: `1px solid ${client.pipeline_stage === key ? STAGE_COLORS[key] : '#333'}`,

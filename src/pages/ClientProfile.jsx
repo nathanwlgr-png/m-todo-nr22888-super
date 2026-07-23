@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
   Calendar, TrendingUp, Target, Edit3, CheckCircle, Clock,
@@ -26,8 +26,8 @@ const STAGE_COLORS = {
 
 export default function ClientProfile() {
   const queryClient = useQueryClient();
-  const params = new URLSearchParams(window.location.search);
-  const clientId = params.get('id');
+  const [searchParams] = useSearchParams();
+  const clientId = searchParams.get('id');
   const [editingNote, setEditingNote] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [showWaModal, setShowWaModal] = useState(false);
@@ -37,7 +37,7 @@ export default function ClientProfile() {
   const [updatingStage, setUpdatingStage] = useState('');
   const [stageUpdateStatus, setStageUpdateStatus] = useState('');
 
-  const { data: client, isLoading, refetch } = useQuery({
+  const { data: client, isLoading, isError, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
     queryFn: () => base44.entities.Client.get(clientId),
     enabled: !!clientId,
@@ -183,12 +183,13 @@ export default function ClientProfile() {
     );
   }
 
-  if (!client) {
+  if (isError || !client) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: '#0a0a0a' }}>
         <div className="text-center">
-          <p className="text-red-400 font-bold mb-4">Cliente não encontrado</p>
-          <Link to="/Clients" className="text-orange-400 underline text-sm">← Voltar aos Clientes</Link>
+          <p className="text-red-400 font-bold mb-4">Não foi possível carregar este cliente</p>
+          <button onClick={() => refetch()} className="text-orange-400 underline text-sm mr-4">Tentar novamente</button>
+          <Link to="/Clients" className="text-orange-400 underline text-sm">Voltar aos Clientes</Link>
         </div>
       </div>
     );
