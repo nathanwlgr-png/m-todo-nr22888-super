@@ -38,7 +38,7 @@ export default function WhatsAppHub() {
       return undefined;
     }
     setIsSearching(true);
-    const timer = window.setTimeout(() => setIsSearching(false), 1200);
+    const timer = window.setTimeout(() => setIsSearching(false), 2500);
     return () => window.clearTimeout(timer);
   }, [search, isLoadingClients]);
 
