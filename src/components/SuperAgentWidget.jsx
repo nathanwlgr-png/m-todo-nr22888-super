@@ -149,9 +149,12 @@ export default function SuperAgentWidget() {
         {auditLogs.length === 0 && docs.length === 0 && alerts.length === 0 && pendencias.length === 0 && (
           <div className="text-center py-3">
             <Bot className="w-6 h-6 text-violet-600 mx-auto mb-1" />
-            <p className="text-[10px] text-slate-600">SuperAgent ainda não registrou eventos.<br />Conecte o Telegram para ativar.</p>
+            <p className="text-[10px] text-slate-600">SuperAgent pronto para iniciar uma auditoria controlada.</p>
           </div>
         )}
+        <Link to="/SuperAgentAudit" className="flex min-h-11 items-center justify-center rounded-xl border border-violet-500/30 bg-violet-500/10 px-3 text-xs font-black text-violet-300 hover:bg-violet-500/20">
+          Abrir central de auditoria
+        </Link>
       </div>
     </div>
   );
