@@ -30,6 +30,7 @@ const localDateKey = (date = new Date()) => {
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const clientName = (client) => client?.clinic_name || client?.full_name || client?.first_name || client?.client_name || 'Cliente sem nome';
+const normalizeName = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 const hasPhone = (value) => String(value || '').replace(/\D/g, '').length >= 10;
 const isToday = (value, todayKey) => String(value || '').slice(0, 10) === todayKey;
 const daysSince = (value) => {
@@ -141,6 +142,13 @@ export default function HojeModoRuaNR22888() {
   const clients = safeArray(clientsRaw);
   const tasks = safeArray(tasksRaw);
   const visits = safeArray(visitsRaw);
+  const resolveClient = (record) => {
+    const byId = clients.find((client) => client.id === record?.client_id);
+    if (byId) return byId;
+    const recordName = normalizeName(record?.client_name);
+    if (!recordName) return null;
+    return clients.find((client) => [client.clinic_name, client.full_name, client.first_name].some((name) => normalizeName(name) === recordName)) || null;
+  };
   const pendingMessages = safeArray(pendingRaw).filter((m) => pendingStatuses.includes(m.status));
   const proposals = safeArray(proposalsRaw);
   const consumableOrders = safeArray(consumableOrdersRaw);
@@ -215,8 +223,8 @@ export default function HojeModoRuaNR22888() {
 
         <Section id="campo" icon={Route} title="Visitas e tarefas de campo" count={fieldTasks.length + fieldVisits.length}>
           {fieldTasks.length + fieldVisits.length === 0 ? <EmptyState /> : <div className="space-y-3">
-            {fieldVisits.map((v) => <ClientCard key={`v-${v.id}`} client={{ id: v.client_id, clinic_name: v.client_name }} context={`${v.location || 'sem endereço'} • ${v.status || 'visita'}`} recommendation="confirmar rota, objetivo da visita e principal dor antes de chegar na clínica." />)}
-            {fieldTasks.map((t) => <ClientCard key={`t-${t.id}`} client={{ id: t.client_id, clinic_name: t.client_name || t.title }} context={t.description || t.type || 'tarefa de campo'} recommendation="executar a tarefa pendente e registrar conclusão somente na tela de tarefas, se necessário." />)}
+            {fieldVisits.map((v) => <ClientCard key={`v-${v.id}`} client={resolveClient(v) || { clinic_name: v.client_name }} context={`${v.location || 'sem endereço'} • ${v.status || 'visita'}`} recommendation="confirmar rota, objetivo da visita e principal dor antes de chegar na clínica." />)}
+            {fieldTasks.map((t) => <ClientCard key={`t-${t.id}`} client={resolveClient(t) || { clinic_name: t.client_name || t.title }} context={t.description || t.type || 'tarefa de campo'} recommendation="executar a tarefa pendente e registrar conclusão somente na tela de tarefas, se necessário." />)}
           </div>}
         </Section>
 
