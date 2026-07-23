@@ -1,0 +1,47 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "limpeza_semanal_contatos_duplicados",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "organizar_contatos": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "limpezaCompletaCRM",
+            "args": {
+              "dry_run": false
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Organizar contatos",
+            "description": "Sem IA e sem exclus\u00e3o autom\u00e1tica"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Organiza telefones e campos padr\u00e3o sem IA e envia para revis\u00e3o apenas contatos com c\u00f3digo externo e nome da empresa id\u00eanticos.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 3 * * 1",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Limpeza Semanal de Contatos Duplicados \u2014 Segunda 03h"
+}

@@ -22,6 +22,9 @@ function completeness(r) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Não autorizado' }, { status: 401 });
+    if (user.role !== 'admin') return Response.json({ error: 'Apenas administradores podem executar a limpeza' }, { status: 403 });
     const sr = base44.asServiceRole;
 
     let dry_run = true;
@@ -48,7 +51,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── DETECÇÃO DE DUPLICATAS (sem arquivar) ──
+    // ── DETECÇÃO SEGURA: código externo + nome exato da empresa ──
+    const normalizeText = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const groups = [];
     for (let i = 0; i < clients.length; i++) {
       if (processed.has(clients[i].id)) continue;
@@ -56,21 +60,19 @@ Deno.serve(async (req) => {
       for (let j = i + 1; j < clients.length; j++) {
         if (processed.has(clients[j].id)) continue;
         const a = clients[i], b = clients[j];
-        const pA = normalizePhone(a.phone || ''), pB = normalizePhone(b.phone || '');
-        const samePhone = pA.length >= 12 && pA === pB;
-        const cnpjA = (a.cnpj || '').replace(/\D/g,''), cnpjB = (b.cnpj || '').replace(/\D/g,'');
-        const sameCNPJ = cnpjA.length >= 14 && cnpjA === cnpjB;
-        const emailA = (a.email || '').toLowerCase().trim(), emailB = (b.email || '').toLowerCase().trim();
-        const sameEmail = emailA.length > 3 && emailA === emailB;
-        const nameA = (a.first_name || a.full_name || '').toLowerCase().trim();
-        const nameB = (b.first_name || b.full_name || '').toLowerCase().trim();
-        const sameCity = (a.city || '').toLowerCase() === (b.city || '').toLowerCase();
-        const similarName = nameA.length > 2 && nameB.length > 2 && (nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA));
-        if (samePhone || sameCNPJ || sameEmail || (similarName && sameCity)) {
-          group.push(clients[j]); processed.add(clients[j].id);
+        const codeA = normalizeText(a.external_code), codeB = normalizeText(b.external_code);
+        const companyA = normalizeText(a.clinic_name || a.razao_social);
+        const companyB = normalizeText(b.clinic_name || b.razao_social);
+        const sameExternalCodeAndCompany = codeA.length > 0 && companyA.length > 2 && codeA === codeB && companyA === companyB;
+        if (sameExternalCodeAndCompany) {
+          group.push(clients[j]);
+          processed.add(clients[j].id);
         }
       }
-      if (group.length > 1) { processed.add(clients[i].id); groups.push({ group, samePhone: true }); }
+      if (group.length > 1) {
+        processed.add(clients[i].id);
+        groups.push({ group });
+      }
     }
 
     // ── FILA DE REVISÃO (nunca arquiva). dry_run=true só conta, não cria fila. ──
@@ -93,10 +95,10 @@ Deno.serve(async (req) => {
           entidade_id_duplicada: dup.id,
           nome_principal: keeper.first_name || keeper.clinic_name || keeper.id,
           nome_duplicada: dup.first_name || dup.clinic_name || dup.id,
-          motivo_suspeita: 'telefone/cnpj/email/nome+cidade',
+          motivo_suspeita: 'codigo_externo+nome_empresa_exatos',
           dados_comparados: JSON.stringify({
-            principal: { phone: keeper.phone, cnpj: keeper.cnpj, email: keeper.email, city: keeper.city },
-            duplicada: { phone: dup.phone, cnpj: dup.cnpj, email: dup.email, city: dup.city },
+            principal: { external_code: keeper.external_code, clinic_name: keeper.clinic_name, razao_social: keeper.razao_social },
+            duplicada: { external_code: dup.external_code, clinic_name: dup.clinic_name, razao_social: dup.razao_social },
           }),
           sugestao: `Manter ${keeper.first_name || keeper.clinic_name}, revisar arquivamento da duplicata`,
           risco: 'medio',
@@ -109,8 +111,8 @@ Deno.serve(async (req) => {
     }
 
     const summary = dry_run
-      ? `🔍 Prévia (dry_run): ${phonesFixed} telefones e ${defaultsFixed} defaults SERIAM corrigidos, ${groups.length} grupos duplicados detectados. Nada foi alterado.`
-      : `✅ Auditoria SAFE: ${phonesFixed} telefones normalizados, ${defaultsFixed} defaults, ${groups.length} grupos duplicados detectados, ${queued} enviados para revisão humana (nada arquivado).`;
+      ? `🔍 Prévia: ${phonesFixed} telefones e ${defaultsFixed} campos SERIAM organizados; ${groups.length} grupos com código externo + empresa idênticos. Nada foi alterado.`
+      : `✅ Limpeza segura: ${phonesFixed} telefones normalizados, ${defaultsFixed} campos organizados e ${queued} duplicatas exatas enviadas para revisão.`;
 
     await sr.entities.AuditLog.create({
       module: 'limpeza_crm', action: 'limpeza_auditoria_safe', user_email: 'sistema_automatico',

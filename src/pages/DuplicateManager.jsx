@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import WeeklyDuplicateCleanupCard from '@/components/duplicates/WeeklyDuplicateCleanupCard';
 import { 
   Users, 
   UserPlus, 
@@ -123,6 +124,8 @@ export default function DuplicateManager() {
           Identifique e remova clientes e leads duplicados no sistema
         </p>
       </div>
+
+      <WeeklyDuplicateCleanupCard />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
