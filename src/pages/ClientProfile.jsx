@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Star, MessageSquare,
@@ -15,6 +15,7 @@ import Score4x4Display from '@/components/Score4x4Display';
 import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 import ClientCatalogRequestPanel from '@/components/catalog/ClientCatalogRequestPanel';
 import ClientProductDemo from '@/components/catalog/ClientProductDemo';
+import AIRecommendationLog from '@/components/AIRecommendationLog';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -23,6 +24,7 @@ const STAGE_COLORS = {
 };
 
 export default function ClientProfile() {
+  const queryClient = useQueryClient();
   const params = new URLSearchParams(window.location.search);
   const clientId = params.get('id');
   const [editingNote, setEditingNote] = useState(false);
@@ -76,6 +78,7 @@ export default function ClientProfile() {
   const handleGenerateAndSend = async () => {
     if (!client?.phone) { toast.error('Sem telefone cadastrado'); return; }
     setGeneratingMsg(true);
+    toast.info('Gerando recomendação em segundo plano. Você pode continuar trabalhando.');
     try {
       const res = await base44.functions.invoke('generateSpinSellingMessages', {
         client_id: client.id,
@@ -84,11 +87,25 @@ export default function ClientProfile() {
         equipment_interest: client.equipment_interest,
       });
       const msg = res.data?.message || res.data?.spin_message || (typeof res.data === 'string' ? res.data : '');
-      setWaMessage(msg || '');
+      if (!msg) throw new Error('Recomendação vazia');
+      await base44.entities.EliteAIRecommendationLog.create({
+        data_hora: new Date().toISOString(),
+        modo_operacional: 'PLANO_ELITE',
+        contexto: `Pitch para ${client.clinic_name || client.first_name}`,
+        categoria_decisao: 'pitch_produto',
+        modelo_usado: 'generateSpinSellingMessages',
+        impacto_comercial: 'alto',
+        cliente_id: client.id,
+        agente: 'Perfil do Cliente',
+        acao: 'Gerar recomendação de pitch',
+        resultado_resumido: msg,
+      });
+      queryClient.invalidateQueries({ queryKey: ['ai-recommendations', client.id] });
+      setWaMessage(msg);
       setShowWaModal(true);
+      toast.success('Recomendação pronta e salva no histórico.');
     } catch (e) {
-      toast.error('Erro ao gerar mensagem');
-      setShowWaModal(true);
+      toast.error('Não foi possível gerar a recomendação. Tente novamente.');
     } finally {
       setGeneratingMsg(false);
     }
@@ -217,6 +234,8 @@ export default function ClientProfile() {
       <div className="px-4 space-y-3">
         {/* Motor 4x4 */}
         <Score4x4Display score={score4x4} isLoading={loadingScore} />
+
+        <AIRecommendationLog clientId={client.id} />
 
         <ComoVenderAgoraCard target={client} type="cliente" />
 
