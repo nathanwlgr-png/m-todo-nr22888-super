@@ -9,11 +9,10 @@ import * as React from 'react';
 const { useState } = React;
 import { CloudDownload, CheckCircle2, WifiOff, Loader2, Database } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { OfflineManager } from '@/lib/OfflineManager';
-import { syncPendingOperations } from '@/lib/offlineOperations';
+import { OfflineManager, OFFLINE_ENTITIES } from '@/lib/OfflineManager';
 import { toast } from 'sonner';
 
-export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
+export default function OfflineSyncButton({ compact = false }) {
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null); // { counts, total }
 
@@ -22,8 +21,6 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
     setSyncing(true);
     setResult(null);
 
-    await OfflineManager.requeueFailedOperations(['Visit', 'Task']);
-    const queueResult = await syncPendingOperations();
     const counts = {};
     let total = 0;
 
@@ -57,11 +54,8 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
     await OfflineManager.setMeta('last_full_sync', new Date().toISOString());
 
     setSyncing(false);
-    setResult({ counts, total, uploaded: queueResult.synced, failed: queueResult.failed });
-    onSyncComplete?.();
-    toast.success(queueResult.synced > 0
-      ? `${queueResult.synced} ações enviadas e ${total} registros atualizados`
-      : `${total} registros salvos para uso offline`);
+    setResult({ counts, total });
+    toast.success(`✅ ${total} registros salvos para uso offline!`);
   };
 
   if (compact) {
@@ -95,7 +89,7 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
         {result && (
           <span className="text-xs font-bold text-green-400 flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" />
-            {result.uploaded > 0 ? `${result.uploaded} enviados` : `${result.total} salvos`}
+            {result.total} salvos
           </span>
         )}
       </div>

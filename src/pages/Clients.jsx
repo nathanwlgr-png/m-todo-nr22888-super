@@ -34,8 +34,7 @@ import {
   Eye,
   Download,
   Calendar,
-  DollarSign,
-  MapPin
+  DollarSign
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
 import WeeklyHealthReport from '@/components/WeeklyHealthReport';
@@ -761,17 +760,6 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
               </div>
             )}
           </div>
-        </div>
-
-        <div className="px-4 pb-3">
-          <Button
-            type="button"
-            onClick={() => navigate('/ClientLocationMap?type=client&gps=1')}
-            className="h-11 w-full gap-2 bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <MapPin className="h-4 w-4" />
-            Ver clientes próximos no mapa
-          </Button>
         </div>
 
         {/* Quick Status Filter */}

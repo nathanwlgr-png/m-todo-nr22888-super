@@ -40,7 +40,6 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineBanner from '@/components/OfflineBanner';
-import OfflineAutoSync from '@/components/OfflineAutoSync';
 import AppLoadingScreen from '@/components/AppLoadingScreen';
 import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 import Layout from '@/components/AppLayout';
@@ -95,7 +94,6 @@ const HojeModoRuaNR22888 = lazy(() => import('./pages/HojeModoRuaNR22888'));
 const DebugCaca = lazy(() => import('./pages/DebugCaca'));
 const RelatorioRicardo = lazy(() => import('./pages/RelatorioRicardo'));
 const Reports = lazy(() => import('./pages/Reports'));
-const PerformanceDashboard = lazy(() => import('./pages/PerformanceDashboard'));
 
 const MessageApproval = lazy(() => import('./pages/MessageApproval'));
 const EquipmentConsumables = lazy(() => import('./pages/EquipmentConsumables'));
@@ -121,7 +119,6 @@ const ScoreElite = lazy(() => import('./pages/ScoreElite.jsx'));
 const TasksUnified = lazy(() => import('./pages/TasksUnified'));
 const ScheduledAgenda = lazy(() => import('./pages/ScheduledAgenda'));
 const VisitManager = lazy(() => import('./pages/VisitManager'));
-const VisitWorkflow = lazy(() => import('./pages/VisitWorkflow'));
 const SalesFunnel = lazy(() => import('./pages/SalesFunnel'));
 const ProposalGenerator = lazy(() => import('./pages/ProposalGenerator'));
 const EquipmentCatalog = lazy(() => import('./pages/EquipmentCatalog'));
@@ -180,9 +177,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <>
-      <OfflineAutoSync />
-      <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PageLoader />}>
        <Routes>
          {/* ── HOME — Dashboard Sniper ── */}
          <Route path="/" element={<LayoutWrapper currentPageName="HojeModoRuaNR22888"><HojeModoRuaNR22888 /></LayoutWrapper>} />
@@ -241,7 +236,6 @@ const AuthenticatedApp = () => {
         <Route path="/TasksUnified" element={<LayoutWrapper currentPageName="TasksUnified"><TasksUnified /></LayoutWrapper>} />
         <Route path="/ScheduledAgenda" element={<LayoutWrapper currentPageName="ScheduledAgenda"><ScheduledAgenda /></LayoutWrapper>} />
         <Route path="/VisitManager" element={<LayoutWrapper currentPageName="VisitManager"><VisitManager /></LayoutWrapper>} />
-        <Route path="/VisitWorkflow" element={<LayoutWrapper currentPageName="VisitWorkflow"><VisitWorkflow /></LayoutWrapper>} />
         <Route path="/SalesFunnel" element={<LayoutWrapper currentPageName="SalesFunnel"><SalesFunnel /></LayoutWrapper>} />
         <Route path="/ProposalGenerator" element={<LayoutWrapper currentPageName="ProposalGenerator"><ProposalGenerator /></LayoutWrapper>} />
         <Route path="/EquipmentCatalog" element={<LayoutWrapper currentPageName="EquipmentCatalog"><EquipmentCatalog /></LayoutWrapper>} />
@@ -289,7 +283,6 @@ const AuthenticatedApp = () => {
         <Route path="/ProposalTemplates" element={<Navigate to="/ProposalGenerator" replace />} />
         <Route path="/EliteVetClientSearch" element={<Navigate to="/ModoInvestigativoSupremo" replace />} />
         <Route path="/Reports" element={<LayoutWrapper currentPageName="Reports"><Reports /></LayoutWrapper>} />
-        <Route path="/PerformanceDashboard" element={<LayoutWrapper currentPageName="PerformanceDashboard"><PerformanceDashboard /></LayoutWrapper>} />
         <Route path="/NumerologyAnalysis" element={<Navigate to="/CentralIAMaster" replace />} />
         <Route path="/WhatsAppMasterAssistant" element={<Navigate to="/WhatsAppHub" replace />} />
         <Route path="/FollowUpAutomationModule" element={<Navigate to="/AutoFollowUpDashboard" replace />} />
@@ -315,8 +308,7 @@ const AuthenticatedApp = () => {
 
         <Route path="*" element={<Navigate to="/SalesCommandCenter" replace />} />
       </Routes>
-      </Suspense>
-    </>
+    </Suspense>
   );
 };
 

@@ -53,10 +53,6 @@
       "type": "string",
       "description": "Notas do resultado da visita"
     },
-    "offline_operation_id": {
-      "type": "string",
-      "description": "Identificador idempotente da cria\u00e7\u00e3o offline"
-    },
     "google_calendar_synced": {
       "type": "boolean",
       "default": false,

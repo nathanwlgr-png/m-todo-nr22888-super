@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCheck, FileCheck, Calendar, ArrowRight, Route } from 'lucide-react';
+import { ClipboardCheck, FileCheck, Calendar, ArrowRight } from 'lucide-react';
 
 export default function VisitFlowManager() {
   return (
@@ -50,20 +50,12 @@ export default function VisitFlowManager() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 mt-3 sm:grid-cols-2">
-        <Link to="/VisitWorkflow">
-          <Button className="w-full bg-green-600 hover:bg-green-700">
-            <Route className="w-4 h-4 mr-2" />
-            Executar visita completa
-          </Button>
-        </Link>
-        <Link to={createPageUrl('ScheduledAgenda')}>
-          <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-            <Calendar className="w-4 h-4 mr-2" />
-            Ver Agenda Completa
-          </Button>
-        </Link>
-      </div>
+      <Link to={createPageUrl('ScheduledAgenda')}>
+        <Button className="w-full mt-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+          <Calendar className="w-4 h-4 mr-2" />
+          Ver Agenda Completa
+        </Button>
+      </Link>
     </Card>
   );
 }

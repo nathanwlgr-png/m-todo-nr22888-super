@@ -77,11 +77,6 @@ export class OfflineManager {
     await db.clear(entityName);
   }
 
-  static async deleteEntity(entityName, id) {
-    const db = await this.initDB();
-    await db.delete(entityName, id);
-  }
-
   // ─── SYNC QUEUE ───────────────────────────────────────────────────
 
   // Entidades críticas que NUNCA devem ser descartadas da fila
@@ -134,53 +129,12 @@ export class OfflineManager {
       _synced: false,
       _retry_count: 0,
     });
-    if (typeof window !== 'undefined') window.dispatchEvent(new Event('offline-queue-changed'));
   }
 
   static async getPendingOperations() {
     const db = await this.initDB();
     const all = await db.getAll('SyncQueue');
-    return all.filter(op => !op._synced && !op._failed);
-  }
-
-  static async getFailedOperations() {
-    const db = await this.initDB();
-    const all = await db.getAll('SyncQueue');
-    return all.filter(op => op._failed);
-  }
-
-  static async recordOperationFailure(id, error, terminal = false) {
-    const db = await this.initDB();
-    const op = await db.get('SyncQueue', id);
-    if (!op) return;
-    await db.put('SyncQueue', {
-      ...op,
-      _retry_count: (op._retry_count || 0) + 1,
-      _last_error: String(error?.message || 'Falha de sincronização').slice(0, 300),
-      _last_attempt_at: Date.now(),
-      _failed: terminal,
-    });
-  }
-
-  static async requeueFailedOperations(entityNames = ['Visit', 'Task'], onlyOnce = false) {
-    const recoveryKey = 'failed_queue_recovery_v1';
-    if (onlyOnce && await this.getMeta(recoveryKey)) return 0;
-    const db = await this.initDB();
-    const all = await db.getAll('SyncQueue');
-    const failed = all.filter(op => op._failed && entityNames.includes(op.entity));
-    const tx = db.transaction('SyncQueue', 'readwrite');
-    await Promise.all(failed.map(op => tx.store.put({
-      ...op,
-      _failed: false,
-      _retry_count: 0,
-      _requeued_at: Date.now(),
-    })));
-    await tx.done;
-    if (onlyOnce) await this.setMeta(recoveryKey, true);
-    if (failed.length > 0 && typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('offline-queue-changed'));
-    }
-    return failed.length;
+    return all.filter(op => !op._synced);
   }
 
   static async markOperationSynced(id) {
@@ -240,12 +194,9 @@ export class OfflineManager {
     for (const entity of OFFLINE_ENTITIES) {
       counts[entity] = await this.countEntities(entity);
     }
-    const fullSync = await this.getMeta('last_full_sync');
-    const queueSync = await this.getMeta('last_queue_sync');
-    const lastSync = [fullSync, queueSync].filter(Boolean).sort().at(-1) || null;
+    const lastSync = await this.getMeta('last_full_sync');
     const pending = (await this.getPendingOperations()).length;
-    const failed = (await this.getFailedOperations()).length;
-    return { counts, lastSync, pending, failed };
+    return { counts, lastSync, pending };
   }
 
   // ─── SERVICE WORKER ───────────────────────────────────────────────

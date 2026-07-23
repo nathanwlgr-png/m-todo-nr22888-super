@@ -14,12 +14,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSafeClients } from '../components/SafeDataFetcher';
-import { createWithOfflineQueue, listWithOfflineCache, updateWithOfflineQueue } from '@/lib/offlineOperations';
 
 export default function VisitWorkflow() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [activePhase, setActivePhase] = useState('pre');
-  const [isSavingVisit, setIsSavingVisit] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [preVisitData, setPreVisitData] = useState({
     objective: '',
@@ -47,24 +45,24 @@ export default function VisitWorkflow() {
   // Buscar visitas
   const { data: visits = [] } = useQuery({
     queryKey: ['visits'],
-    queryFn: () => listWithOfflineCache('Visit', '-scheduled_date', 200),
+    queryFn: () => base44.entities.Visit.list(),
     initialData: []
   });
 
   // Criar/atualizar visita
   const createVisitMutation = useMutation({
-    mutationFn: (data) => createWithOfflineQueue('Visit', data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['visits'] });
-      toast.success(result.queued ? 'Visita salva offline e adicionada à fila' : 'Visita registrada');
+    mutationFn: (data) => base44.entities.Visit.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['visits']);
+      toast.success('Visita registrada');
     }
   });
 
   const updateClientMutation = useMutation({
-    mutationFn: ({ id, data }) => updateWithOfflineQueue('Client', id, data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['safe-clients'] });
-      toast.success(result.queued ? 'Cliente atualizado na fila offline' : 'Cliente atualizado');
+    mutationFn: ({ id, data }) => base44.entities.Client.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['safe-clients']);
+      toast.success('Cliente atualizado');
     }
   });
 
@@ -148,36 +146,18 @@ Formato curto e prático.`
 
   // Salvar visita completa
   const saveCompleteVisit = async () => {
-    if (!selectedClient || isSavingVisit) return;
-    setIsSavingVisit(true);
+    if (!selectedClient) return;
 
     try {
       // Criar registro de visita
-      const visitResult = await createVisitMutation.mutateAsync({
+      await createVisitMutation.mutateAsync({
         client_id: selectedClient.id,
         client_name: selectedClient.first_name,
         scheduled_date: new Date().toISOString(),
         visit_type: 'followup',
         notes: `PRÉ: ${JSON.stringify(preVisitData)}\n\nDURANTE: ${JSON.stringify(duringVisitData)}\n\nPÓS: ${JSON.stringify(postVisitData)}`,
-        result_notes: postVisitData.notes || duringVisitData.observations,
         status: 'realizada'
       });
-
-      if (postVisitData.follow_up_date) {
-        await createWithOfflineQueue('Task', {
-          client_id: selectedClient.id,
-          client_name: selectedClient.first_name,
-          title: `Follow-up da visita — ${selectedClient.first_name}`,
-          description: duringVisitData.next_steps || postVisitData.notes || 'Retomar contato após a visita',
-          due_date: postVisitData.follow_up_date,
-          source_visit_id: visitResult.record.id,
-          priority: duringVisitData.interest_level === 'muito_alto' ? 'alta' : 'media',
-          status: 'pendente',
-          type: 'follow_up',
-          auto_created: true
-        });
-        queryClient.invalidateQueries({ queryKey: ['tasks-rua'] });
-      }
 
       // Atualizar cliente
       await updateClientMutation.mutateAsync({
@@ -185,11 +165,11 @@ Formato curto e prático.`
         data: {
           last_visit_date: new Date().toISOString().split('T')[0],
           total_visits_count: (selectedClient.total_visits_count || 0) + 1,
-          notes: `${selectedClient.notes || ''}\n\n[VISITA ${new Date().toLocaleDateString()}]\n${postVisitData.notes || ''}`
+          notes: selectedClient.notes + `\n\n[VISITA ${new Date().toLocaleDateString()}]\n${postVisitData.notes}`
         }
       });
 
-      toast.success(navigator.onLine ? 'Visita e follow-up salvos com sucesso!' : 'Visita e follow-up salvos offline para sincronização!');
+      toast.success('Visita salva com sucesso!');
       
       // Reset
       setPreVisitData({ objective: '', questions: '', triggers: '', materials: '' });
@@ -198,8 +178,6 @@ Formato curto e prático.`
       setActivePhase('pre');
     } catch (error) {
       toast.error('Erro ao salvar');
-    } finally {
-      setIsSavingVisit(false);
     }
   };
 
@@ -539,11 +517,10 @@ Formato curto e prático.`
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           onClick={saveCompleteVisit}
-                          disabled={isSavingVisit}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          {isSavingVisit ? 'Salvando...' : 'Salvar Visita'}
+                          Salvar Visita
                         </Button>
                         <Button
                           variant="outline"

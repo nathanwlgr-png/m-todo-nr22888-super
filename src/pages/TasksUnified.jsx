@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { createWithOfflineQueue, listWithOfflineCache, updateWithOfflineQueue } from '@/lib/offlineOperations';
 
 export default function TasksUnified() {
   const [showForm, setShowForm] = useState(false);
@@ -46,20 +45,20 @@ export default function TasksUnified() {
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks-rua'],
-    queryFn: () => listWithOfflineCache('Task', '-due_date', 200),
+    queryFn: () => base44.entities.Task.list('-due_date', 200),
     staleTime: 120000,
   });
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-task-search', clientSearch],
-    queryFn: () => listWithOfflineCache('Client', '-updated_date', 80),
+    queryFn: () => base44.entities.Client.list('-updated_date', 80),
     enabled: clientSearch.length >= 2 || showForm || aiPriority,
     staleTime: 300000,
   });
 
   const { data: leads = [] } = useQuery({
     queryKey: ['leads-task-priority'],
-    queryFn: () => listWithOfflineCache('Lead', '-created_date', 80),
+    queryFn: () => base44.entities.Lead.list('-created_date', 80),
     enabled: aiPriority,
     staleTime: 300000,
   });
@@ -116,23 +115,21 @@ export default function TasksUnified() {
   }, [tasks, filters, searchTerm, aiPriority, clients, leads]);
 
   const createTaskMutation = useMutation({
-    mutationFn: (data) => createWithOfflineQueue('Task', data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['tasks-rua'] });
+    mutationFn: (data) => base44.entities.Task.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks']);
       setShowForm(false);
       setEditingTask(null);
-      toast.success(result.queued ? 'Tarefa salva offline e adicionada à fila' : 'Tarefa criada!');
-    },
-    onError: () => toast.error('Revise os dados obrigatórios da tarefa')
+      toast.success('Tarefa criada!');
+    }
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, data }) => updateWithOfflineQueue('Task', id, data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['tasks-rua'] });
-      toast.success(result.queued ? 'Alteração salva offline e adicionada à fila' : 'Tarefa atualizada!');
-    },
-    onError: () => toast.error('Não foi possível atualizar a tarefa')
+    mutationFn: ({ id, data }) => base44.entities.Task.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks']);
+      toast.success('Tarefa atualizada!');
+    }
   });
 
   const clientSuggestions = clientSearch.length >= 2
@@ -151,10 +148,6 @@ export default function TasksUnified() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!taskData.client_id) {
-      toast.error('Selecione um cliente válido para salvar a tarefa');
-      return;
-    }
     if (editingTask) {
       updateTaskMutation.mutate({ id: editingTask.id, data: taskData });
     } else {
