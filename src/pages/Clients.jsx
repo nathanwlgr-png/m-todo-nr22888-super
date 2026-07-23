@@ -137,17 +137,18 @@ export default function Clients() {
   // Busca e ordenação
   const filteredClients = useMemo(() => {
     if (!Array.isArray(clients) || clients.length === 0) return [];
-    const searchLower = search.toLowerCase();
+    const searchLower = search.trim().toLocaleLowerCase('pt-BR');
     
     let filtered = clients.filter(client => {
       if (!client || !client.id) return false;
       
-      // Busca por nome do cliente ou clínica
-      const matchesSearch = !search || (
-        client.first_name?.toLowerCase().includes(searchLower) ||
-        client.full_name?.toLowerCase().includes(searchLower) ||
-        client.clinic_name?.toLowerCase().includes(searchLower) ||
-        client.city?.toLowerCase().includes(searchLower)
+      // Busca instantânea por contato ou status
+      const matchesSearch = !searchLower || (
+        client.first_name?.toLocaleLowerCase('pt-BR').includes(searchLower) ||
+        client.full_name?.toLocaleLowerCase('pt-BR').includes(searchLower) ||
+        client.clinic_name?.toLocaleLowerCase('pt-BR').includes(searchLower) ||
+        client.city?.toLocaleLowerCase('pt-BR').includes(searchLower) ||
+        client.status?.toLocaleLowerCase('pt-BR').includes(searchLower)
       );
       
       // Filtros
@@ -219,18 +220,19 @@ export default function Clients() {
     setSearch(value);
     
     if (value.length >= 1) {
-      const searchLower = value.toLowerCase();
+      const searchLower = value.trim().toLocaleLowerCase('pt-BR');
       const matches = clients
         .filter(c => {
-          // Busca em qualquer parte do nome, clínica ou cidade
-          const nameMatch = c.first_name?.toLowerCase().includes(searchLower);
-          const fullNameMatch = c.full_name?.toLowerCase().includes(searchLower);
-          const clinicMatch = c.clinic_name?.toLowerCase().includes(searchLower);
-          const cityMatch = c.city?.toLowerCase().includes(searchLower);
+          // Busca em qualquer parte do nome, clínica, cidade, contato ou status
+          const nameMatch = c.first_name?.toLocaleLowerCase('pt-BR').includes(searchLower);
+          const fullNameMatch = c.full_name?.toLocaleLowerCase('pt-BR').includes(searchLower);
+          const clinicMatch = c.clinic_name?.toLocaleLowerCase('pt-BR').includes(searchLower);
+          const cityMatch = c.city?.toLocaleLowerCase('pt-BR').includes(searchLower);
+          const statusMatch = c.status?.toLocaleLowerCase('pt-BR').includes(searchLower);
           const cnpjMatch = c.cnpj?.includes(value);
           const phoneMatch = c.phone?.includes(value);
           
-          return nameMatch || fullNameMatch || clinicMatch || cityMatch || cnpjMatch || phoneMatch;
+          return nameMatch || fullNameMatch || clinicMatch || cityMatch || statusMatch || cnpjMatch || phoneMatch;
         })
         .sort((a, b) => {
           // Priorizar matches que começam com a busca
@@ -646,7 +648,8 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input
-              placeholder="Buscar por nome, clínica, cidade, telefone..."
+              placeholder="Buscar contato por nome ou status..."
+              aria-label="Buscar clientes por nome ou status"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 pr-10 h-12 rounded-xl border-2"
