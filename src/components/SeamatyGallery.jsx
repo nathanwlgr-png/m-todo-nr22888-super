@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Loader2, Plus, Edit2, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, AlertCircle, CheckCircle, FileText, ExternalLink, Send, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+
+const isPdf = (url = '') => /\.pdf($|\?)/i.test(url);
+const isImage = (url = '') => /\.(png|jpe?g|webp|gif)($|\?)/i.test(url);
 
 export default function SeamatyGallery() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,13 +102,25 @@ export default function SeamatyGallery() {
                 : 'border-yellow-300 bg-yellow-50'
             }`}
           >
-            <div className="aspect-video bg-slate-200 overflow-hidden">
-              <img
-                src={image.image_url}
-                alt={image.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform"
-              />
-            </div>
+            <a
+              href={image.image_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block aspect-video bg-slate-100 overflow-hidden"
+            >
+              {isImage(image.image_url) ? (
+                <img
+                  src={image.image_url}
+                  alt={image.title}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-500 hover:bg-slate-200 transition-colors">
+                  {isPdf(image.image_url) ? <FileText className="w-10 h-10 text-red-500" /> : <ImageIcon className="w-10 h-10" />}
+                  <span className="text-xs font-medium">{isPdf(image.image_url) ? 'PDF' : 'Documento'}</span>
+                </div>
+              )}
+            </a>
 
             <CardContent className="p-4 space-y-3">
               <div>
@@ -152,8 +167,31 @@ export default function SeamatyGallery() {
                 )}
               </div>
 
-              {/* AÇÕES */}
+              {/* AÇÕES PRINCIPAIS - venda em campo */}
               <div className="flex gap-2 pt-2 border-t">
+                <Button
+                  size="sm"
+                  className="flex-1 gap-1 bg-slate-800 hover:bg-slate-900"
+                  onClick={() => window.open(image.image_url, '_blank')}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Abrir
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 gap-1 bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    const texto = `*${image.title}*\n\n${image.image_url}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+                  }}
+                >
+                  <Send className="w-3 h-3" />
+                  WhatsApp
+                </Button>
+              </div>
+
+              {/* AÇÕES SECUNDÁRIAS */}
+              <div className="flex gap-2">
                 <Button
                   size="sm"
                   variant="outline"
