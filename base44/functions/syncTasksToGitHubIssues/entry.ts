@@ -40,25 +40,22 @@ Deno.serve(async (req) => {
     }
 
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('github');
-    const gh = async (path: string, init: RequestInit = {}, attempt = 0): Promise<any> => {
+    const gh = async (path: string, init: RequestInit = {}): Promise<any> => {
       const res = await fetch(`https://api.github.com${path}`, {
         ...init,
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: 'application/vnd.github+json',
           'Content-Type': 'application/json',
+          'User-Agent': 'NR22888-CRM', // OBRIGATÓRIO: sem isto o GitHub retorna 403
           ...(init.headers || {}),
         },
       });
-      // 403/429 = rate limit secundário do GitHub → espera e tenta de novo (até 2x)
-      if ((res.status === 403 || res.status === 429) && attempt < 2) {
-        const retryAfter = Number(res.headers.get('retry-after')) || 3;
-        await sleep(retryAfter * 1000);
-        return gh(path, init, attempt + 1);
-      }
-      const data = await res.json().catch(() => ({}));
+      const text = await res.text();
+      let data: any = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (_) { data = { message: text }; }
       if (!res.ok) {
-        console.error(`GH FAIL ${init.method || 'GET'} ${path} → ${res.status}: ${data?.message || ''} ${JSON.stringify(data?.errors || '')}`);
+        console.error(`GH FAIL ${init.method || 'GET'} ${path} → ${res.status}: ${data?.message || text}`);
         throw new Error(data?.message || `GitHub ${res.status}`);
       }
       return data;
@@ -74,7 +71,6 @@ Deno.serve(async (req) => {
     for (const label of wantedLabels) {
       try {
         await gh(`/repos/${repo}/labels`, { method: 'POST', body: JSON.stringify(label) });
-        await sleep(400);
       } catch (_e) {
         // já existe — segue
       }
@@ -117,7 +113,6 @@ Deno.serve(async (req) => {
             method: 'PATCH',
             body: JSON.stringify({ title, body: issueBody(task), state: 'open', labels }),
           });
-          await sleep(400);
           updated++;
         } else {
           skipped++;
@@ -127,7 +122,6 @@ Deno.serve(async (req) => {
           method: 'POST',
           body: JSON.stringify({ title, body: issueBody(task), labels }),
         });
-        await sleep(600);
         created++;
       }
     }
@@ -140,7 +134,6 @@ Deno.serve(async (req) => {
           method: 'PATCH',
           body: JSON.stringify({ state: 'closed' }),
         });
-        await sleep(400);
         closedCount++;
       }
     }
