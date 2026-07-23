@@ -33,6 +33,8 @@ export default function ClientProfile() {
   const [waMessage, setWaMessage] = useState('');
   const [generatingMsg, setGeneratingMsg] = useState(false);
   const [generationStatus, setGenerationStatus] = useState('');
+  const [updatingStage, setUpdatingStage] = useState('');
+  const [stageUpdateStatus, setStageUpdateStatus] = useState('');
 
   const { data: client, isLoading, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
@@ -125,9 +127,28 @@ export default function ClientProfile() {
   };
 
   const handleUpdateStage = async (stage) => {
-    await base44.entities.Client.update(client.id, { pipeline_stage: stage });
-    toast.success(`Funil atualizado para: ${stage}`);
-    refetch();
+    if (updatingStage || stage === client.pipeline_stage) return;
+    setUpdatingStage(stage);
+    setStageUpdateStatus('');
+    try {
+      const response = await base44.functions.invoke('processFunnelMovement', {
+        client_id: client.id,
+        stage_name: stage,
+        from_stage: client.pipeline_stage,
+      });
+      if (!response.data?.success) throw new Error('Falha ao atualizar funil');
+      await Promise.all([
+        refetch(),
+        queryClient.invalidateQueries({ queryKey: ['client-tasks', clientId] }),
+      ]);
+      setStageUpdateStatus(response.data.automation_triggered
+        ? 'Funil atualizado · follow-up verificado · WhatsApp enviado para aprovação.'
+        : `Funil atualizado para ${stage}.`);
+    } catch {
+      setStageUpdateStatus('Não foi possível atualizar o funil. Tente novamente.');
+    } finally {
+      setUpdatingStage('');
+    }
   };
 
   if (!clientId) {
@@ -325,8 +346,8 @@ export default function ClientProfile() {
           <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-3">🔄 Mover no Funil</p>
           <div className="flex flex-wrap gap-2">
             {['lead', 'qualificado', 'proposta', 'negociacao', 'fechado', 'perdido'].map(stage => (
-              <button key={stage} onClick={() => handleUpdateStage(stage)}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-black capitalize transition-all"
+              <button key={stage} onClick={() => handleUpdateStage(stage)} disabled={!!updatingStage}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-black capitalize transition-all disabled:opacity-50"
                 style={{
                   background: client.pipeline_stage === stage ? `${STAGE_COLORS[stage]}30` : '#1a1a1a',
                   border: `1px solid ${client.pipeline_stage === stage ? STAGE_COLORS[stage] : '#333'}`,
@@ -336,6 +357,8 @@ export default function ClientProfile() {
               </button>
             ))}
           </div>
+          {updatingStage && <p role="status" className="mt-2 text-[10px] font-bold text-orange-300">Atualizando funil e executando automação...</p>}
+          {stageUpdateStatus && <p role="status" className="mt-2 text-[10px] font-bold text-blue-300">{stageUpdateStatus}</p>}
         </div>
 
         {/* Tarefas pendentes */}
