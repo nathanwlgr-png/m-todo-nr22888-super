@@ -46,6 +46,7 @@ export default function NewClient() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    external_code: '',
     full_name: '',
     first_name: '',
     birthdate: '',
@@ -180,17 +181,19 @@ export default function NewClient() {
         recommended_communication: salesProfile.communication,
         purchase_motivators: motivators.length > 0 ? motivators : undefined,
         real_objections: objections.length > 0 ? objections : undefined,
-        purchase_score: Math.floor(Math.random() * 40) + 30,
+        purchase_score: 0,
         status: 'morno'
       };
 
       const client = await base44.entities.Client.create(clientData);
+      await base44.functions.invoke('validateClientRegistration', { client_id: client.id }).catch(() => null);
 
-      // Automações desabilitadas para evitar rate limit
+      // A investigação de potencial roda somente sob demanda para economizar API
       // Crie tarefas manualmente se necessário
 
       // Resetar formulário em vez de navegar
       setFormData({
+        external_code: '',
         full_name: '',
         first_name: '',
         birthdate: '',
@@ -251,6 +254,21 @@ export default function NewClient() {
 
         {/* Form */}
         <div className="space-y-5">
+          {/* Código externo vem antes da identificação do cliente */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-slate-700">
+              <Building2 className="w-4 h-4" />
+              Código Externo da Empresa
+            </Label>
+            <Input
+              placeholder="Ex: CLI-01234"
+              value={formData.external_code}
+              onChange={(e) => setFormData({ ...formData, external_code: e.target.value.toUpperCase().trim() })}
+              className="h-14 text-lg rounded-xl border-2 focus:border-orange-500"
+            />
+            <p className="text-xs text-slate-500">Se estiver ausente ou inválido, o cadastro será enviado para revisão.</p>
+          </div>
+
           {/* First Name */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-slate-700">
@@ -649,7 +667,7 @@ export default function NewClient() {
           ) : (
             <>
               <Sparkles className="w-5 h-5 mr-2" />
-              Gerar Perfil e IA
+              Cadastrar Cliente
             </>
           )}
         </Button>

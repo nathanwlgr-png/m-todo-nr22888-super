@@ -141,13 +141,18 @@ async function investigateClient(base44, raw) {
   if (!found.client) return { matched: false, ambiguous: found.resposta.includes('mais de um'), resposta: found.resposta };
 
   const client = found.client;
+  const investigationResponse = await base44.functions.invoke('investigacaoCampoReal', { client_id: client.id });
+  const investigation = investigationResponse?.data || investigationResponse || {};
   const visits = await filter(base44, 'Visit', { client_id: client.id }, '-scheduled_date', 10);
   const nowMs = Date.now();
   const upcoming = visits
     .filter(v => ['agendada', 'remarcada'].includes(v.status) && new Date(v.scheduled_date).getTime() >= nowMs)
     .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))[0];
   const visitLines = visits.slice(0, 5).map((v, i) => `${i + 1}. ${visitDate(v.scheduled_date)} · ${v.status || 'sem status'} · ${v.visit_type || 'visita'}${v.location ? ` · ${v.location}` : ''}`);
-  const resposta = `CLIENTE INVESTIGADO — ${nameOf(client)}\nClínica: ${client.clinic_name || client.razao_social || 'não informada'}\nCidade: ${client.city || 'não informada'}\nWhatsApp: ${client.phone || 'sem telefone'}\nStatus comercial: ${client.pipeline_stage || client.status || 'sem status'}\nEquipamento atual: ${client.current_equipment || 'não informado'}\nInteresse: ${client.equipment_interest || client.equipment_suggestion || 'avaliar Seamaty'}\nScore: ${client.purchase_score ?? client.health_score ?? 'sem score'}\nPróxima ação: ${client.next_action || client.ai_next_best_action || 'fazer diagnóstico SPIN'}\nPróxima visita: ${upcoming ? `${visitDate(upcoming.scheduled_date)} · ${upcoming.status}` : 'nenhuma agendada'}\n\nVISITAS RECENTES/AGENDADAS\n${visitLines.length ? visitLines.join('\n') : 'Nenhuma visita registrada.'}`;
+  const services = Object.entries(investigation.services || {}).filter(([, value]) => value).map(([key]) => key).join(', ') || 'nenhum serviço validado';
+  const equipment = investigation.equipment_evidence || {};
+  const sources = (investigation.sources || []).slice(0, 3).map((source, index) => `${index + 1}. ${source.url}`).join('\n') || 'sem fonte pública suficiente';
+  const resposta = `CLIENTE INVESTIGADO — ${nameOf(client)}\nCódigo: ${client.external_code || 'PENDENTE DE REVISÃO'}\nClínica: ${client.clinic_name || client.razao_social || 'não informada'}\nClassificação: ${investigation.organization_type || 'desconhecida'} · porte ${investigation.organization_size || 'desconhecido'}\nExperiência: ${investigation.years_experience || 0} anos · Seguidores: ${investigation.followers || 0}\nEspecialidades: ${(investigation.specialties || []).join(', ') || 'não validadas'}\nServiços laboratoriais: ${services}\nEquipamento: ${equipment.status || 'não encontrado'}${equipment.names?.length ? ` · ${equipment.names.join(', ')}` : ''}\nEvidência: ${equipment.evidence || 'sem evidência pública conclusiva'}\nScore de compra de equipamento: ${investigation.commercial_score ?? 0}/100 (${investigation.score_level || 'baixo'})\nJustificativa: ${investigation.score_justification || investigation.equipment_purchase_potential || 'dados públicos insuficientes'}\nProduto indicado: ${investigation.recommended_product || 'definir após diagnóstico SPIN'}\nPróxima ação: ${investigation.next_action || 'fazer diagnóstico SPIN'}\nPróxima visita: ${upcoming ? `${visitDate(upcoming.scheduled_date)} · ${upcoming.status}` : 'nenhuma agendada'}\n\nFONTES\n${sources}\n\nVISITAS RECENTES/AGENDADAS\n${visitLines.length ? visitLines.join('\n') : 'Nenhuma visita registrada.'}`;
   return { matched: true, ambiguous: false, resposta, client };
 }
 

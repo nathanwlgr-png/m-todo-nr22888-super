@@ -12,6 +12,7 @@ import BattlecardAtaque from '@/components/elite/BattlecardAtaque';
 import DropboxEvidenceCard from '@/components/investigation/DropboxEvidenceCard';
 import SalesPersonalityCard from '@/components/clients/SalesPersonalityCard';
 import CollapsibleInsightSection from '@/components/investigation/CollapsibleInsightSection';
+import InvestigationEvidenceCard from '@/components/investigation/InvestigationEvidenceCard';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -287,6 +288,7 @@ export default function ModoInvestigativoSupremo() {
           {selectedClient && <Score4x4Display score={score4x4} isLoading={loadingScore} />}
           {selectedClient && <SalesPersonalityCard client={selectedClient} />}
           <DropboxEvidenceCard evidence={result.dropbox_support} />
+          <InvestigationEvidenceCard result={result} />
 
           {/* Header do resultado */}
           <div className="rounded-2xl p-4" style={{ background: '#111', border: `1px solid ${scoreColor}44` }}>

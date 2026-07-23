@@ -1,0 +1,41 @@
+{
+  "name": "Validar padr\u00e3o de cadastro de clientes",
+  "description": "Envia para revis\u00e3o cadastros sem c\u00f3digo externo v\u00e1lido ou sem nome da empresa, sem bloquear o vendedor.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Client",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.event_type == \"create\" or ((.trigger.changed_fields // []) | index(\"external_code\") != null) or ((.trigger.changed_fields // []) | index(\"clinic_name\") != null) or ((.trigger.changed_fields // []) | index(\"razao_social\") != null) }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "validar_padrao_cadastro_clientes",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "validar_cadastro": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "validateClientRegistration",
+            "args": {
+              "client_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Validar cadastro",
+            "description": "C\u00f3digo externo e empresa"
+          }
+        }
+      }
+    ]
+  }
+}
