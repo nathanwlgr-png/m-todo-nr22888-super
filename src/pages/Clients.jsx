@@ -26,7 +26,6 @@ import {
   TrendingUp,
   Upload,
   ArrowUpDown,
-  Table,
   FileDown,
   FileSpreadsheet,
   Edit2,
@@ -486,6 +485,20 @@ export default function Clients() {
         toast.info('Extraindo dados do arquivo...');
       }
 
+      if (uploadedFile?.name.toLowerCase().endsWith('.csv')) {
+        const importResponse = await base44.functions.invoke('importClientsFromExcelV2', {
+          file_url: fileUrl,
+          mode: 'client_csv_by_representative',
+          dryRun: false
+        });
+        if (!importResponse.data?.success) throw new Error(importResponse.data?.error || 'Falha ao importar CSV');
+        const summary = importResponse.data.summary;
+        setResults({ representativeImport: importResponse.data });
+        await queryClient.invalidateQueries({ queryKey: ['clients'] });
+        toast.success(`${summary.imported} cliente(s) importado(s); ${summary.rejected_representatives} linha(s) rejeitada(s) por representante.`);
+        return;
+      }
+
       const aiMode = localStorage.getItem('nr22_ai_mode') || 'economy';
       
       if (aiMode === 'off') {
@@ -677,9 +690,12 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
             size="sm"
             variant="outline"
             onClick={() => setShowImportDialog(true)}
-            className="mr-2"
+            className="mr-2 gap-1 px-2"
+            title="Importar clientes de CSV"
+            aria-label="Importar clientes de CSV"
           >
-            <Table className="w-4 h-4" />
+            <Upload className="w-4 h-4" />
+            <span className="text-xs"><span className="md:hidden">CSV</span><span className="hidden md:inline">Importar CSV</span></span>
           </Button>
           <Button
             size="sm"
@@ -1151,7 +1167,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Importar Clientes da Planilha</DialogTitle>
+            <DialogTitle>Importar Clientes por CSV</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -1205,7 +1221,7 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                       )}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Formatos: Excel, CSV, PDF ou Imagem (JPG, PNG)
+                      CSV recomendado · Apenas Nathan, Luan, Gabriel e Rosa serão importados
                     </p>
                   </label>
                 </div>
@@ -1237,6 +1253,21 @@ Maria Costa | Pet Care Center      | Tupã          | 14988888888   | Sem equipa
                 />
               </div>
             </div>
+
+            {results?.representativeImport && (
+              <div role="status" className="rounded-lg border border-green-300 bg-green-50 p-4 text-sm">
+                <p className="font-semibold text-green-800">Importação CSV concluída</p>
+                <p className="mt-1 text-green-700">{results.representativeImport.summary.imported} importado(s) · {results.representativeImport.summary.duplicates} duplicado(s) ignorado(s) · {results.representativeImport.summary.rejected_representatives} rejeitado(s) por representante.</p>
+                <p className="mt-1 text-xs text-green-700">Representantes permitidos: Nathan, Luan, Gabriel e Rosa.</p>
+                {results.representativeImport.rejected_representatives.length > 0 && (
+                  <div className="mt-3 max-h-32 overflow-y-auto rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+                    {results.representativeImport.rejected_representatives.map((item, index) => (
+                      <p key={`${item.name}-${index}`}>{item.name}: representante “{item.representante}” não permitido</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {results?.duplicates?.length > 0 && (
               <div className="space-y-3 max-h-96 overflow-y-auto mb-4">

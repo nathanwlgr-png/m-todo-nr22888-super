@@ -5,6 +5,23 @@ function clean(value) {
   return String(value ?? '').trim();
 }
 
+const ALLOWED_REPRESENTATIVES = ['Nathan', 'Luan', 'Gabriel', 'Rosa'];
+
+function rowValue(row, aliases) {
+  const entries = Object.entries(row || {});
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeKey(alias).replace(/[^a-z0-9]/g, '');
+    const match = entries.find(([key]) => normalizeKey(key).replace(/[^a-z0-9]/g, '') === normalizedAlias);
+    if (match) return clean(match[1]);
+  }
+  return '';
+}
+
+function allowedRepresentative(value) {
+  const normalized = normalizeKey(value);
+  return ALLOWED_REPRESENTATIVES.find((name) => normalizeKey(name) === normalized) || '';
+}
+
 function isMissing(value) {
   const text = clean(value).toLowerCase();
   return !text || text.includes('não identificado') || text.includes('sem registro') || text.includes('validar') || text === 'nan';
@@ -164,6 +181,84 @@ async function readRowsFromExcel(fileUrl, sheetName) {
   const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
   const sheet = workbook.Sheets[sheetName] || workbook.Sheets.BASE44_IMPORT_VALIDADA || workbook.Sheets[workbook.SheetNames[0]];
   return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+}
+
+async function importClientCsvByRepresentative(base44, sourceUrl, dryRun) {
+  const rows = await readRowsFromExcel(sourceUrl);
+  const existing = await base44.asServiceRole.entities.Client.list('-updated_date', 5000);
+  const toCreate = [];
+  const rejectedRepresentatives = [];
+  const rejectedInvalid = [];
+  let duplicates = 0;
+
+  for (const row of rows) {
+    const representativeRaw = rowValue(row, ['representante', 'representative', 'rep', 'vendedor', 'responsavel', 'responsável']);
+    const representative = allowedRepresentative(representativeRaw);
+    const fullName = rowValue(row, ['full_name', 'nome completo', 'nome', 'cliente', 'contato']);
+    const clinicName = rowValue(row, ['clinic_name', 'clinica', 'clínica', 'empresa', 'nome fantasia']);
+
+    if (!representative) {
+      rejectedRepresentatives.push({ name: fullName || clinicName || 'Linha sem nome', representante: representativeRaw || 'não informado' });
+      continue;
+    }
+    if (!fullName && !clinicName) {
+      rejectedInvalid.push({ reason: 'Nome do cliente não informado', representante: representative });
+      continue;
+    }
+
+    const phone = normalizePhone(rowValue(row, ['phone', 'telefone', 'celular', 'whatsapp']));
+    const cnpj = normalizeCnpj(rowValue(row, ['cnpj']));
+    const city = rowValue(row, ['city', 'cidade', 'municipio', 'município']);
+    const name = fullName || clinicName;
+    const duplicate = existing.some((client) =>
+      (phone && normalizePhone(client.phone) === phone) ||
+      (cnpj && normalizeCnpj(client.cnpj) === cnpj) ||
+      (normalizeKey(client.full_name || client.first_name || client.clinic_name) === normalizeKey(name) && normalizeKey(client.city) === normalizeKey(city))
+    );
+    if (duplicate) {
+      duplicates += 1;
+      continue;
+    }
+
+    toCreate.push(cleanObject({
+      full_name: name,
+      first_name: name.split(/\s+/)[0],
+      clinic_name: clinicName,
+      city,
+      phone,
+      email: rowValue(row, ['email', 'e-mail']),
+      address: rowValue(row, ['address', 'endereco', 'endereço']),
+      cnpj: cnpj || undefined,
+      current_equipment: rowValue(row, ['current_equipment', 'equipamento atual', 'equipamento']),
+      representante: representative,
+      lead_source: 'importacao_planilha',
+      status: 'morno',
+      pipeline_stage: 'lead'
+    }));
+  }
+
+  if (!dryRun) {
+    for (let index = 0; index < toCreate.length; index += 100) {
+      await base44.asServiceRole.entities.Client.bulkCreate(toCreate.slice(index, index + 100));
+    }
+  }
+
+  return {
+    success: true,
+    dryRun,
+    allowed_representatives: ALLOWED_REPRESENTATIVES,
+    summary: {
+      total_rows: rows.length,
+      allowed_rows: toCreate.length + duplicates,
+      imported: dryRun ? 0 : toCreate.length,
+      ready_to_import: toCreate.length,
+      duplicates,
+      rejected_representatives: rejectedRepresentatives.length,
+      rejected_invalid: rejectedInvalid.length
+    },
+    rejected_representatives: rejectedRepresentatives,
+    rejected_invalid: rejectedInvalid
+  };
 }
 
 async function readMatrixFromExcel(fileUrl, sheetName) {
@@ -348,6 +443,10 @@ Deno.serve(async (req) => {
     const { fileUrl, file_url, sheetName = 'BASE44_IMPORT_VALIDADA', dryRun = false, mode = 'matriz_515', knownClients = [] } = await req.json();
     const sourceUrl = fileUrl || file_url;
     if (!sourceUrl) return Response.json({ error: 'fileUrl é obrigatório' }, { status: 400 });
+    if (mode === 'client_csv_by_representative') {
+      if (user.role !== 'admin') return Response.json({ success: false, error: 'Apenas administradores podem importar clientes.' }, { status: 403 });
+      return Response.json(await importClientCsvByRepresentative(base44, sourceUrl, dryRun));
+    }
     if (mode === 'regional_prospects') return Response.json(await importRegional(base44, user, sourceUrl, sheetName, knownClients, dryRun));
 
     const rows = await readRowsFromExcel(sourceUrl, sheetName);
