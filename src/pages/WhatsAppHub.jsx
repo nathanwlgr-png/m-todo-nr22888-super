@@ -23,9 +23,9 @@ export default function WhatsAppHub() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const queryClient = useQueryClient();
 
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [], isLoading: isLoadingClients } = useQuery({
     queryKey: ['wa-clients'],
-    queryFn: () => base44.entities.Client.filter({ phone: { $exists: true } }, '-updated_date', 50).catch(() => base44.entities.Client.list('-updated_date', 50)),
+    queryFn: () => base44.entities.Client.list('-updated_date', 300),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -52,14 +52,13 @@ export default function WhatsAppHub() {
     return acc;
   }, {});
 
-  const filteredClients = safeClients.filter(c =>
-    c.phone && (
-      !search ||
-      c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.clinic_name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone?.includes(search)
-    )
-  );
+  const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR');
+  const filteredClients = safeClients.filter(c => {
+    if (!c.phone) return false;
+    if (!normalizedSearch) return true;
+    return [c.first_name, c.full_name, c.clinic_name, c.phone]
+      .some(value => String(value || '').toLocaleLowerCase('pt-BR').includes(normalizedSearch));
+  });
 
   const handleGenerateAI = async () => {
     if (!selectedClient) { toast.error('Selecione um cliente'); return; }
@@ -240,7 +239,13 @@ export default function WhatsAppHub() {
                 />
               </div>
 
-              {search && !selectedClient && filteredClients.length > 0 && (
+              {search && !selectedClient && isLoadingClients && (
+                <div className="mt-2 flex items-center gap-2 px-3 py-2 text-xs text-slate-500">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Buscando clientes...
+                </div>
+              )}
+
+              {search && !selectedClient && !isLoadingClients && filteredClients.length > 0 && (
                 <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)' }}>
                   {filteredClients.slice(0, 5).map(c => (
                     <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); }}
@@ -254,6 +259,10 @@ export default function WhatsAppHub() {
                     </button>
                   ))}
                 </div>
+              )}
+
+              {search && !selectedClient && !isLoadingClients && filteredClients.length === 0 && (
+                <p className="mt-2 px-3 py-2 text-xs text-slate-500">Nenhum cliente com WhatsApp encontrado.</p>
               )}
 
               {selectedClient && (
