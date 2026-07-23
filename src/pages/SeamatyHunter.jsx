@@ -154,17 +154,18 @@ export default function SeamatyHunter() {
               <div>
                 <label htmlFor="hunter-city" className="text-sm font-semibold text-slate-300 mb-2 block">Cidade</label>
                 <select
+                  key={`hunter-city-${selectedState || 'none'}`}
                   id="hunter-city"
                   name="city"
                   aria-label="Cidade"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
-                  disabled={!selectedState}
+                  disabled={availableCities.length === 0}
                   className="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
                 >
-                  <option className="bg-slate-900 text-white" value="">Selecione...</option>
+                  <option value="">Selecione...</option>
                   {availableCities.map(city => (
-                    <option className="bg-slate-900 text-white" key={`${selectedState}-${city}`} value={city}>{city}</option>
+                    <option key={city} value={city}>{city}</option>
                   ))}
                 </select>
               </div>

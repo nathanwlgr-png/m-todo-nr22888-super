@@ -196,6 +196,11 @@ export default function ModoInvestigativoSupremo() {
   };
 
   const scoreColor = result?.score_level ? SCORE_COLORS[result.score_level] : '#ff9500';
+  const decisionProfile = result?.decision_maker_profile || result?.decision_profile || selectedClient?.behavioral_profile;
+  const decisionStyle = result?.decision_style || selectedClient?.decision_style;
+  const decisionMotivations = result?.main_motivations?.length
+    ? result.main_motivations
+    : (selectedClient?.purchase_motivators || []);
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>
@@ -348,15 +353,17 @@ export default function ModoInvestigativoSupremo() {
 
           {/* Perfil do Decisor */}
           <CollapsibleInsightSection title="Perfil do Decisor" icon="👤" tone="blue">
-            <p className="mb-2 text-xs text-slate-300">{result.decision_maker_profile}</p>
-            {result.decision_style && (
-              <p className="text-[11px] text-blue-300">Estilo: <strong>{result.decision_style}</strong></p>
+            <p className="mb-2 text-xs text-slate-300">
+              {decisionProfile || 'Perfil ainda não confirmado. Valide função, prioridades e critérios de decisão durante a abordagem SPIN.'}
+            </p>
+            {decisionStyle && (
+              <p className="text-[11px] text-blue-300">Estilo: <strong>{decisionStyle}</strong></p>
             )}
-            {result.main_motivations?.length > 0 && (
+            {decisionMotivations.length > 0 && (
               <div className="mt-2">
                 <p className="mb-1 text-[10px] text-slate-500">Motivações principais:</p>
                 <div className="flex flex-wrap gap-1">
-                  {result.main_motivations.map((motivation, index) => (
+                  {decisionMotivations.map((motivation, index) => (
                     <span key={index} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] text-blue-400">{motivation}</span>
                   ))}
                 </div>
