@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { syncPendingOperations } from '@/lib/offlineOperations';
+import { OfflineManager } from '@/lib/OfflineManager';
 
 export default function OfflineAutoSync() {
   const queryClient = useQueryClient();
@@ -43,7 +44,8 @@ export default function OfflineAutoSync() {
       if (document.visibilityState === 'visible') schedule(0);
     };
 
-    schedule(1500);
+    OfflineManager.requeueFailedOperations(['Visit', 'Task'], true)
+      .finally(() => schedule(1500));
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline-queue-changed', handleQueueChange);
     document.addEventListener('visibilitychange', handleVisibility);

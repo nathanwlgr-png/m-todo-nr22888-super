@@ -122,7 +122,7 @@ export default function OfflineModePage() {
         {status?.failed > 0 && (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
             <p className="text-sm font-black text-red-300">{status.failed} ações preservadas para revisão</p>
-            <p className="mt-1 text-xs text-slate-400">Falhas permanentes foram retiradas da fila ativa para não bloquear novas sincronizações.</p>
+            <p className="mt-1 text-xs text-slate-400">Elas não bloqueiam a fila; use o botão de sincronização para tentar enviá-las novamente.</p>
           </div>
         )}
 

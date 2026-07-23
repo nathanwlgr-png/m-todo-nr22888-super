@@ -162,6 +162,27 @@ export class OfflineManager {
     });
   }
 
+  static async requeueFailedOperations(entityNames = ['Visit', 'Task'], onlyOnce = false) {
+    const recoveryKey = 'failed_queue_recovery_v1';
+    if (onlyOnce && await this.getMeta(recoveryKey)) return 0;
+    const db = await this.initDB();
+    const all = await db.getAll('SyncQueue');
+    const failed = all.filter(op => op._failed && entityNames.includes(op.entity));
+    const tx = db.transaction('SyncQueue', 'readwrite');
+    await Promise.all(failed.map(op => tx.store.put({
+      ...op,
+      _failed: false,
+      _retry_count: 0,
+      _requeued_at: Date.now(),
+    })));
+    await tx.done;
+    if (onlyOnce) await this.setMeta(recoveryKey, true);
+    if (failed.length > 0 && typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('offline-queue-changed'));
+    }
+    return failed.length;
+  }
+
   static async markOperationSynced(id) {
     const db = await this.initDB();
     const op = await db.get('SyncQueue', id);

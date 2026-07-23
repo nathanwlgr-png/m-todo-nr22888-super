@@ -22,6 +22,7 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
     setSyncing(true);
     setResult(null);
 
+    await OfflineManager.requeueFailedOperations(['Visit', 'Task']);
     const queueResult = await syncPendingOperations();
     const counts = {};
     let total = 0;
