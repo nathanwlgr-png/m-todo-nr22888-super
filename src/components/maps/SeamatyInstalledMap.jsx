@@ -1,4 +1,5 @@
 import { ExternalLink, MapPinned } from 'lucide-react';
+import SeamatyMapAudit from '@/components/maps/SeamatyMapAudit';
 
 const MAP_ID = '16bAphR1nMX5tH0pYoH_45JkzN2IgtOo';
 const EMBED_URL = `https://www.google.com/maps/d/embed?mid=${MAP_ID}`;
@@ -20,6 +21,7 @@ export default function SeamatyInstalledMap() {
         </a>
       </div>
       <iframe title="Mapa completo de clientes com equipamentos Seamaty" src={EMBED_URL} className="h-[65vh] min-h-[420px] w-full border-0" allowFullScreen />
+      <SeamatyMapAudit />
     </section>
   );
 }

@@ -1,0 +1,103 @@
+{
+  "name": "SeamatyClientPerformance",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente conforme relat\u00f3rio oficial Seamaty"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade informada no relat\u00f3rio"
+    },
+    "relationship_status": {
+      "type": "string",
+      "enum": [
+        "novo",
+        "recorrente",
+        "perdido"
+      ],
+      "description": "Situa\u00e7\u00e3o comparativa entre os semestres"
+    },
+    "revenue_2s2025": {
+      "type": "number",
+      "description": "Faturamento no segundo semestre de 2025"
+    },
+    "revenue_1s2026": {
+      "type": "number",
+      "description": "Faturamento no primeiro semestre de 2026"
+    },
+    "variation_percent": {
+      "type": "number",
+      "description": "Varia\u00e7\u00e3o percentual entre os per\u00edodos"
+    },
+    "products_2s2025": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "is_equipment": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "products_1s2026": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "is_equipment": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "installed_equipment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modelos de analisadores identificados nas compras dos dois per\u00edodos"
+    },
+    "new_equipment_1s2026": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Equipamentos adquiridos no primeiro semestre de 2026"
+    },
+    "source_report": {
+      "type": "string"
+    },
+    "source_file_url": {
+      "type": "string"
+    },
+    "verified_from_report": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "client_name",
+    "source_report"
+  ]
+}
