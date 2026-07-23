@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
@@ -7,6 +7,10 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { latitude, longitude, radius = 5, city } = await req.json();
+    const hasCoordinates = Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude));
+    if (!city && !hasCoordinates) {
+      return Response.json({ error: 'Informe uma cidade ou coordenadas GPS válidas.' }, { status: 400 });
+    }
 
     // Buscar clínicas próximas usando IA com contexto da internet
     const searchPrompt = city 
@@ -75,7 +79,7 @@ Deno.serve(async (req) => {
         company: clinic.name,
         phone: clinic.phone || '',
         city: clinic.city || city || 'N/A',
-        source: 'gps_discovery',
+        source: 'google',
         notes: `Descoberto via GPS em ${new Date().toISOString().split('T')[0]} nas coordenadas ${latitude},${longitude}`,
         status: 'novo',
       });

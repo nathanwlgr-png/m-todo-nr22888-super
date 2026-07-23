@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,7 +69,11 @@ export default function GPSClinicaRadar({ clients = [] }) {
   // { [clientId]: 'dentro' | 'fora' }
   const alertadosRef = useRef({});
 
-  const clientesGeo = clients.filter(c => c.phone || c.city);
+  const clientesGeo = useMemo(() => clients.filter((client) => {
+    const lat = Number(client.latitude);
+    const lng = Number(client.longitude);
+    return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  }), [clients]);
 
   // Cronômetro
   useEffect(() => {
@@ -135,15 +139,11 @@ export default function GPSClinicaRadar({ clients = [] }) {
     // SAFE: distância real só quando o cliente tem coordenada validada.
     // Nunca usar distância aleatória/simulada.
     const proximas = clientesGeo
-      .filter(c => c.city)
-      .map(c => {
-        const temCoord = !!(c.latitude && c.longitude);
-        return {
-          ...c,
-          tem_coordenada: temCoord,
-          dist_metros: temCoord ? Math.round(calcDist(latitude, longitude, c.latitude, c.longitude)) : null,
-        };
-      })
+      .map(c => ({
+        ...c,
+        tem_coordenada: true,
+        dist_metros: Math.round(calcDist(latitude, longitude, Number(c.latitude), Number(c.longitude))),
+      }))
       .sort((a, b) => {
         if (a.dist_metros == null && b.dist_metros == null) return 0;
         if (a.dist_metros == null) return 1;
@@ -182,14 +182,18 @@ export default function GPSClinicaRadar({ clients = [] }) {
     setGpsAtivo(true);
     watchRef.current = navigator.geolocation.watchPosition(
       atualizarPosicao,
-      (err) => toast.error('Erro GPS: ' + err.message),
+      (err) => {
+        watchRef.current = null;
+        setGpsAtivo(false);
+        toast.error('Erro GPS: ' + err.message);
+      },
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
     );
     toast.success('🛰️ GPS ativado! Monitorando sua rota...');
   };
 
   const pararGPS = () => {
-    if (watchRef.current) navigator.geolocation.clearWatch(watchRef.current);
+    if (watchRef.current != null) navigator.geolocation.clearWatch(watchRef.current);
     setGpsAtivo(false);
     setPosAtual(null);
     setParadaDetectada(null);

@@ -53,8 +53,8 @@ export function buildGoogleMapsRouteUrl(origin, destination) {
   const safeDestination = encodeURIComponent(destination || '');
   
   let safeOrigin = '';
-  if (origin?.lat && origin?.lng) {
-    safeOrigin = `${origin.lat},${origin.lng}`;
+  if (Number.isFinite(Number(origin?.lat)) && Number.isFinite(Number(origin?.lng))) {
+    safeOrigin = `${Number(origin.lat)},${Number(origin.lng)}`;
   } else if (origin?.city) {
     safeOrigin = encodeURIComponent(origin.city);
   } else {

@@ -15,6 +15,7 @@ export default function GPSTrackerButton() {
   const watchIdRef = useRef(null);
   const lastScanRef = useRef(0);
   const processedRef = useRef(new Set());
+  const SCAN_INTERVAL_MS = 5 * 60 * 1000;
 
   const startTracking = () => {
     if (!navigator.geolocation) {
@@ -31,8 +32,8 @@ export default function GPSTrackerButton() {
         const { latitude, longitude } = position.coords;
         const now = Date.now();
 
-        // Escanear a cada 30 segundos
-        if (now - lastScanRef.current > 30000) {
+        // Limita a busca externa a uma vez a cada 5 minutos.
+        if (now - lastScanRef.current > SCAN_INTERVAL_MS) {
           lastScanRef.current = now;
           await scanArea(latitude, longitude);
         }
@@ -46,7 +47,7 @@ export default function GPSTrackerButton() {
   };
 
   const stopTracking = () => {
-    if (watchIdRef.current) {
+    if (watchIdRef.current != null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
@@ -112,7 +113,7 @@ Apenas clínicas < 500m.`,
             phone: clinica.telefone,
             email: clinica.email,
             instagram_handle: clinica.instagram?.replace('@', ''),
-            source: 'analise_mercado_ia',
+            source: 'google',
             interest: 'Equipamentos Seamaty',
             lead_score: 70,
             status: 'novo',

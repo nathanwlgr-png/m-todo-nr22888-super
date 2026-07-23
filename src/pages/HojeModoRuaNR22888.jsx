@@ -152,7 +152,11 @@ export default function HojeModoRuaNR22888() {
   const pendingMessages = safeArray(pendingRaw).filter((m) => pendingStatuses.includes(m.status));
   const proposals = safeArray(proposalsRaw);
   const consumableOrders = safeArray(consumableOrdersRaw);
-  const crmQueue = safeArray(queueRaw).filter((q) => ['pendente', 'erro'].includes(q.status));
+  const crmQueue = [...new Map(
+    safeArray(queueRaw)
+      .filter((q) => ['pendente', 'erro'].includes(q.status))
+      .map((q) => [`${q.cliente_id || q.lead_id || q.id}:${q.tipo_atualizacao || q.comando_interpretado}:${q.campo_alvo || ''}`, q])
+  ).values()];
   const openAlerts = safeArray(alertsRaw).filter((a) => !a.read && !a.dismissed);
 
   const hotClients = useMemo(() => clients

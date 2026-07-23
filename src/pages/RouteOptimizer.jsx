@@ -26,7 +26,7 @@ export default function RouteOptimizer() {
   // SAFE/performance: limite razoável para tablet — não carregar base inteira de uma vez.
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-route'],
-    queryFn: () => base44.entities.Client.list('-created_date', 9999),
+    queryFn: () => base44.entities.Client.list('-created_date', 1000),
   });
 
   const { data: savedRoutes = [] } = useQuery({
@@ -64,13 +64,15 @@ export default function RouteOptimizer() {
       // Transformar client_ids em locations compatíveis com optimizeRoute
       const selected = clients.filter(c => selectedClients.includes(c.id));
       const locations = selected.map(c => {
-        const hasCoords = !!(c.latitude && c.longitude);
+        const latitude = Number(c.latitude);
+        const longitude = Number(c.longitude);
+        const hasCoords = Number.isFinite(latitude) && Number.isFinite(longitude);
         return {
           id: c.id,
           name: c.first_name || c.clinic_name,
           clinic_name: c.clinic_name,
-          lat: hasCoords ? c.latitude : null,
-          lng: hasCoords ? c.longitude : null,
+          lat: hasCoords ? latitude : null,
+          lng: hasCoords ? longitude : null,
           address: c.address || [c.cep, c.city].filter(Boolean).join(', '),
           city: c.city,
           has_coords: hasCoords,
@@ -138,8 +140,8 @@ export default function RouteOptimizer() {
       return { savedRoute, created: createdVisits.length, calendarSynced, calendarConnected };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['optimized-routes']);
-      queryClient.invalidateQueries(['visits-agenda']);
+      queryClient.invalidateQueries({ queryKey: ['optimized-routes'] });
+      queryClient.invalidateQueries({ queryKey: ['visits-agenda'] });
       if (!data.calendarConnected) {
         toast.warning(`Rota salva com ${data.created} visitas. Conecte seu calendário na aba GCal para sincronizar.`);
       } else {
@@ -258,8 +260,9 @@ export default function RouteOptimizer() {
                     onClick={() => toggleClient(client.id)}
                   >
                     <div className="flex items-start gap-3">
-                      <Checkbox 
+                      <Checkbox
                         checked={selectedClients.includes(client.id)}
+                        onClick={(event) => event.stopPropagation()}
                         onCheckedChange={() => toggleClient(client.id)}
                       />
                       <div className="flex-1">

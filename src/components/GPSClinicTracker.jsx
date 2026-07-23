@@ -18,6 +18,8 @@ export default function GPSClinicTracker({ compact = false }) {
   const [notifications, setNotifications] = useState([]);
   const watchIdRef = useRef(null);
   const processedClinicsRef = useRef(new Set());
+  const lastScanRef = useRef(0);
+  const SCAN_INTERVAL_MS = 5 * 60 * 1000;
   const queryClient = useQueryClient();
 
   const startTracking = () => {
@@ -35,8 +37,12 @@ export default function GPSClinicTracker({ compact = false }) {
         const { latitude, longitude } = position.coords;
         setCurrentLocation({ lat: latitude, lng: longitude });
 
-        // Buscar clínicas próximas a cada 30 segundos
-        await scanNearbyClinic(latitude, longitude);
+        // Atualiza a posição continuamente, mas limita buscas externas a cada 5 minutos.
+        const now = Date.now();
+        if (now - lastScanRef.current >= SCAN_INTERVAL_MS) {
+          lastScanRef.current = now;
+          await scanNearbyClinic(latitude, longitude);
+        }
       },
       (error) => {
         console.error('Erro GPS:', error);
@@ -54,7 +60,7 @@ export default function GPSClinicTracker({ compact = false }) {
   };
 
   const stopTracking = () => {
-    if (watchIdRef.current) {
+    if (watchIdRef.current != null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
@@ -128,8 +134,8 @@ Priorize clínicas mais próximas (< 200m).`,
         }
       });
 
-      // Cadastrar novas clínicas
-      for (const clinica of result.clinicas) {
+      // Cadastrar somente resultados válidos.
+      for (const clinica of result.clinicas || []) {
         const clinicKey = `${clinica.nome}-${clinica.cidade}`;
         
         if (!processedClinicsRef.current.has(clinicKey)) {
@@ -143,7 +149,7 @@ Priorize clínicas mais próximas (< 200m).`,
             phone: clinica.telefone,
             email: clinica.email,
             instagram_handle: clinica.instagram?.replace('@', ''),
-            source: 'analise_mercado_ia',
+            source: 'google',
             interest: 'Equipamentos Seamaty',
             company_size: clinica.tipo === 'hospital_veterinario' ? '51-200' : '1-10',
             lead_score: clinica.rating ? Math.round(clinica.rating * 20) : 50,
