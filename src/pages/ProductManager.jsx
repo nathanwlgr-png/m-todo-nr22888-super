@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Download, Edit2, Trash2, Save, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import CatalogManagerPanel from '@/components/catalog/CatalogManagerPanel';
 
 export default function ProductManager() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +84,13 @@ export default function ProductManager() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Gerenciador de Produtos</h1>
-        <p className="text-slate-600">Edite produtos importados de Fabia</p>
+        <p className="text-slate-600">Gerencie o catálogo Seamaty e os produtos importados</p>
+      </div>
+
+      <CatalogManagerPanel />
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-bold text-slate-800">Produtos importados</h2>
       </div>
 
       {/* Ações */}

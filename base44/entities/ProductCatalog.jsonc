@@ -1,11 +1,11 @@
 {
   "name": "ProductCatalog",
   "type": "object",
-  "description": "Cat\u00e1logo complementar audit\u00e1vel de produtos, equipamentos, insumos e materiais Seamaty para propostas e materiais premium. N\u00e3o substitui Product, Equipment ou SeamatyPriceTable.",
+  "description": "Cat\u00e1logo oficial de equipamentos e insumos Seamaty, com pre\u00e7os internos nunca expostos no link do cliente.",
   "properties": {
     "codigo_produto": {
       "type": "string",
-      "description": "C\u00f3digo oficial do produto na tabela Seamaty"
+      "description": "C\u00f3digo ou refer\u00eancia oficial"
     },
     "nome_produto": {
       "type": "string"
@@ -47,11 +47,36 @@
     "tipo_insumo": {
       "type": "string"
     },
+    "quantidade_caixa": {
+      "type": "number",
+      "description": "Quantidade de testes, cartuchos ou unidades por caixa"
+    },
+    "unidade_venda": {
+      "type": "string",
+      "enum": [
+        "unidade",
+        "caixa",
+        "kit"
+      ],
+      "default": "caixa"
+    },
+    "equipamentos_compativeis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "preco_base": {
-      "type": "number"
+      "type": "number",
+      "description": "Pre\u00e7o interno; nunca enviado ao cat\u00e1logo p\u00fablico"
     },
     "custo_insumo": {
-      "type": "number"
+      "type": "number",
+      "description": "Custo interno"
+    },
+    "preco_visivel_cliente": {
+      "type": "boolean",
+      "default": false
     },
     "imagem_url": {
       "type": "string"
@@ -67,12 +92,11 @@
         "foto_vinculada",
         "precisa_validacao"
       ],
-      "default": "pendente_foto_oficial",
-      "description": "Estado da foto oficial. Nunca usar imagem IA como foto oficial."
+      "default": "pendente_foto_oficial"
     },
     "fonte_validacao": {
       "type": "string",
-      "description": "Origem da valida\u00e7\u00e3o da foto/dados. Nunca IA."
+      "description": "Origem oficial da foto e dos dados"
     },
     "data_validacao": {
       "type": "string",

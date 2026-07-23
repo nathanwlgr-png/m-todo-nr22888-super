@@ -4,7 +4,6 @@ import { Loader2, Search, Send, ShieldCheck } from 'lucide-react';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogAccessGate from '@/components/catalog/CatalogAccessGate';
 import { Input } from '@/components/ui/input';
-import catalogProducts from '@/lib/catalogProducts';
 
 const PAGE_VIEW_ID = crypto.randomUUID();
 
@@ -21,21 +20,16 @@ export default function CatalogoCliente() {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      base44.functions.invoke('catalogOrderAccess', { action: 'load', view_id: PAGE_VIEW_ID, ...credentials }),
-      base44.entities.ProductCatalog.list('nome_produto', 500),
-      base44.entities.Product.list('name', 500),
-      base44.entities.Consumable.list('name', 500),
-      base44.entities.SeamatyImage.list('-upload_date', 500),
-    ]).then(([access, catalog, allProducts, consumables, images]) => {
-      setRequest(access.data.request);
-      setProducts(catalogProducts({ catalog, products: allProducts, consumables, images }));
-    }).catch((err) => setError(err.response?.data?.error || err.message || 'Não foi possível abrir o catálogo')).finally(() => setLoading(false));
+    base44.functions.invoke('catalogOrderAccess', { action: 'load', view_id: PAGE_VIEW_ID, ...credentials })
+      .then((access) => setRequest(access.data.request))
+      .catch((err) => setError(err.response?.data?.error || err.message || 'Não foi possível abrir o catálogo'))
+      .finally(() => setLoading(false));
   }, []);
 
   const verify = async (code) => {
     const response = await base44.functions.invoke('catalogOrderAccess', { action: 'verify', code, ...credentials });
     setRequest(response.data.request);
+    setProducts(response.data.products || []);
     setSessionToken(response.data.session_token);
   };
   const selectedByKey = useMemo(() => new Map((request?.selected_items || []).map((item) => [`${item.product_source}:${item.product_id}`, item])), [request]);

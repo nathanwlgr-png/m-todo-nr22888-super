@@ -16,6 +16,17 @@ const engagementFor = (views, selectedItems = []) => {
   return { interest_level: 'frio', engagement_score: 10 };
 };
 
+const loadSafeCatalog = async (base44) => {
+  const rows = await base44.asServiceRole.entities.ProductCatalog.list('nome_produto', 500);
+  return rows.filter((item) => item.ativo !== false).map((item) => ({
+    id: item.id,
+    source: 'ProductCatalog',
+    name: item.nome_produto,
+    category: item.linha || item.categoria,
+    image_url: item.imagem_url || ''
+  }));
+};
+
 const syncTemperature = async (base44, request, engagement, selectedItems = []) => {
   const nextAction = selectedItems.length ? 'Contatar sobre os produtos selecionados no catálogo' : engagement.interest_level === 'quente' ? 'Fazer contato consultivo agora' : 'Acompanhar interesse no catálogo';
   if (request.lead_id) {
@@ -70,7 +81,8 @@ Deno.serve(async (req) => {
       const now = new Date().toISOString();
       const history = [...(request.change_history || []), { changed_at: now, action: 'codigo_verificado', actor: 'cliente' }];
       await base44.asServiceRole.entities.CatalogRequest.update(request.id, { verification_session_hash: await hashValue(sessionToken), verified_at: now, change_history: history });
-      return Response.json({ request: sanitize({ ...request, verified_at: now, change_history: history }), session_token: sessionToken });
+      const products = await loadSafeCatalog(base44);
+      return Response.json({ request: sanitize({ ...request, verified_at: now, change_history: history }), session_token: sessionToken, products });
     }
     if (!body.session_token || await hashValue(body.session_token) !== request.verification_session_hash) return Response.json({ error: 'Confirmação necessária' }, { status: 403 });
     if (body.action === 'update_selection') {
