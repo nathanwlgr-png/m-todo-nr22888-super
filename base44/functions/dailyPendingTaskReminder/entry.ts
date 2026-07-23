@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
 
     const overdue = tasks.filter((task) => task.due_date && task.due_date < today);
     const followUps = tasks.filter((task) => task.type === 'follow_up');
-    const details = tasks.slice(0, 10).map((task, index) => {
+    const topTasks = tasks.slice(0, 5);
+    const details = topTasks.map((task, index) => {
       const due = task.due_date ? ` — ${task.due_date < today ? 'ATRASADA' : task.due_date}` : '';
       const client = task.client_name ? ` (${task.client_name})` : '';
       return `${index + 1}. ${task.title}${client}${due}`;
@@ -30,11 +31,21 @@ Deno.serve(async (req) => {
     const summary = tasks.length === 0
       ? 'Nenhuma tarefa pendente. Agenda livre para novas oportunidades.'
       : `${tasks.length} tarefa(s) pendente(s), ${followUps.length} follow-up(s) e ${overdue.length} atrasada(s).`;
-    const message = [`LEMBRETE DIÁRIO NR22888 — ${today}`, summary, ...details, tasks.length > 10 ? `+ ${tasks.length - 10} tarefa(s) no CRM.` : '', 'Abrir: Tarefas Unificadas'].filter(Boolean).join('\n');
+    const message = [`LEMBRETE DIÁRIO NR22888 — ${today}`, summary, ...details, tasks.length > 5 ? `+ ${tasks.length - 5} tarefa(s) no CRM.` : '', 'Abrir: Tarefas Unificadas'].filter(Boolean).join('\n');
     const title = `Tarefas pendentes — ${today}`;
 
     if (dry_run) {
-      return Response.json({ success: true, dry_run: true, pending: tasks.length, follow_ups: followUps.length, overdue: overdue.length, message });
+      return Response.json({
+        success: true,
+        dry_run: true,
+        pending: tasks.length,
+        follow_ups: followUps.length,
+        overdue: overdue.length,
+        top_tasks: topTasks.map(({ id, title, client_name, due_date, type }) => ({ id, title, client_name, due_date, type })),
+        message,
+        alerts_created: 0,
+        external_notifications_sent: false
+      });
     }
 
     const existing = await base44.asServiceRole.entities.Alert.filter({ user_email: recipientEmail, title }, '-created_date', 1);

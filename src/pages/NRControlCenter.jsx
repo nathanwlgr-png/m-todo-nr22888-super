@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Zap, Brain, Database, Wifi, WifiOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAIGlobal } from '@/lib/AIGlobalContext.jsx';
 import { isOnline } from '@/lib/OfflineManager';
+import DailyReminderDryRunCard from '@/components/control/DailyReminderDryRunCard';
 
 export default function NRControlCenter() {
   const { aiEnabled, toggleAI, powerMode, setPowerMode, creditsEstimate } = useAIGlobal();
@@ -175,6 +176,8 @@ export default function NRControlCenter() {
             ))}
           </CardContent>
         </Card>
+
+        <DailyReminderDryRunCard />
 
         {/* APIS */}
         <Card className="bg-slate-800 border-slate-700">
