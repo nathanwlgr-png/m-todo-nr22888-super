@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AbordagemInteligente from '@/components/AbordagemInteligente';
+import ConversationSentimentPanel from '@/components/sentiment/ConversationSentimentPanel';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
@@ -673,6 +674,8 @@ export default function ClienteDetalhe360() {
         {/* ━━ TAB: MENSAGENS ━━ */}
         {activeTab === 'mensagens' && (
           <>
+            <ConversationSentimentPanel client={client} />
+
             <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(34,211,102,0.2)' }}>
               <p className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-3">💬 Criar Mensagem</p>
               <textarea
