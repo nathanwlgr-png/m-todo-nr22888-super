@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { OfflineManager } from '@/lib/OfflineManager';
 
 /**
  * Validador e filtro robusto de dados
@@ -33,12 +34,18 @@ export function useSafeClients(options = {}) {
   return useQuery({
     queryKey: ['safe-clients', options],
     queryFn: async () => {
+      if (!navigator.onLine) {
+        const cached = await OfflineManager.listEntities('Client');
+        return cached.filter(validateClient);
+      }
       try {
         const data = await base44.entities.Client.list();
+        await OfflineManager.bulkSaveEntity('Client', data || []);
         return (data || []).filter(validateClient);
       } catch (error) {
-        console.warn('Erro ao buscar clientes:', error);
-        return [];
+        console.warn('Usando clientes salvos offline:', error);
+        const cached = await OfflineManager.listEntities('Client');
+        return cached.filter(validateClient);
       }
     },
     retry: 2,

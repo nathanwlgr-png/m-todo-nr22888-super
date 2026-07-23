@@ -110,7 +110,20 @@ export default function OfflineModePage() {
         </div>
 
         {/* Sync Button */}
-        <OfflineSyncButton />
+        <OfflineSyncButton onSyncComplete={loadStatus} />
+
+        {status?.pending > 0 && (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-sm font-black text-amber-300">{status.pending} ações aguardando sincronização</p>
+            <p className="mt-1 text-xs text-slate-400">Elas serão enviadas automaticamente quando a internet voltar, ou pelo botão acima.</p>
+          </div>
+        )}
+
+        {status?.pending === 0 && status?.lastSync && (
+          <div className="rounded-2xl border border-green-500/25 bg-green-500/10 p-3 text-center text-xs font-bold text-green-300">
+            Fila sincronizada · nenhuma ação pendente
+          </div>
+        )}
 
         {/* Contagens */}
         {status && (

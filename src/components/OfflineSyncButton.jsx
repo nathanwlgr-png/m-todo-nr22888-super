@@ -9,10 +9,11 @@ import * as React from 'react';
 const { useState } = React;
 import { CloudDownload, CheckCircle2, WifiOff, Loader2, Database } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { OfflineManager, OFFLINE_ENTITIES } from '@/lib/OfflineManager';
+import { OfflineManager } from '@/lib/OfflineManager';
+import { syncPendingOperations } from '@/lib/offlineOperations';
 import { toast } from 'sonner';
 
-export default function OfflineSyncButton({ compact = false }) {
+export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null); // { counts, total }
 
@@ -21,6 +22,7 @@ export default function OfflineSyncButton({ compact = false }) {
     setSyncing(true);
     setResult(null);
 
+    const queueResult = await syncPendingOperations();
     const counts = {};
     let total = 0;
 
@@ -54,9 +56,28 @@ export default function OfflineSyncButton({ compact = false }) {
     await OfflineManager.setMeta('last_full_sync', new Date().toISOString());
 
     setSyncing(false);
-    setResult({ counts, total });
-    toast.success(`✅ ${total} registros salvos para uso offline!`);
+    setResult({ counts, total, uploaded: queueResult.synced, failed: queueResult.failed });
+    onSyncComplete?.();
+    toast.success(queueResult.synced > 0
+      ? `${queueResult.synced} ações enviadas e ${total} registros atualizados`
+      : `${total} registros salvos para uso offline`);
   };
+
+  React.useEffect(() => {
+    const syncOnReconnect = async () => {
+      const queueResult = await syncPendingOperations();
+      if (queueResult.synced > 0) {
+        setResult({ counts: {}, total: 0, uploaded: queueResult.synced, failed: queueResult.failed });
+        toast.success(`${queueResult.synced} ações offline sincronizadas`);
+        onSyncComplete?.();
+      } else if (queueResult.failed > 0) {
+        toast.error(`${queueResult.failed} ações continuam aguardando sincronização`);
+        onSyncComplete?.();
+      }
+    };
+    window.addEventListener('online', syncOnReconnect);
+    return () => window.removeEventListener('online', syncOnReconnect);
+  }, [onSyncComplete]);
 
   if (compact) {
     return (
@@ -89,7 +110,7 @@ export default function OfflineSyncButton({ compact = false }) {
         {result && (
           <span className="text-xs font-bold text-green-400 flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" />
-            {result.total} salvos
+            {result.uploaded > 0 ? `${result.uploaded} enviados` : `${result.total} salvos`}
           </span>
         )}
       </div>

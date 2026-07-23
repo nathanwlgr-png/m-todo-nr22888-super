@@ -77,6 +77,11 @@ export class OfflineManager {
     await db.clear(entityName);
   }
 
+  static async deleteEntity(entityName, id) {
+    const db = await this.initDB();
+    await db.delete(entityName, id);
+  }
+
   // ─── SYNC QUEUE ───────────────────────────────────────────────────
 
   // Entidades críticas que NUNCA devem ser descartadas da fila
@@ -194,7 +199,9 @@ export class OfflineManager {
     for (const entity of OFFLINE_ENTITIES) {
       counts[entity] = await this.countEntities(entity);
     }
-    const lastSync = await this.getMeta('last_full_sync');
+    const fullSync = await this.getMeta('last_full_sync');
+    const queueSync = await this.getMeta('last_queue_sync');
+    const lastSync = [fullSync, queueSync].filter(Boolean).sort().at(-1) || null;
     const pending = (await this.getPendingOperations()).length;
     return { counts, lastSync, pending };
   }

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSafeClients } from '../components/SafeDataFetcher';
+import { createWithOfflineQueue, listWithOfflineCache, updateWithOfflineQueue } from '@/lib/offlineOperations';
 
 export default function VisitWorkflow() {
   const [selectedClient, setSelectedClient] = useState(null);
@@ -45,24 +46,24 @@ export default function VisitWorkflow() {
   // Buscar visitas
   const { data: visits = [] } = useQuery({
     queryKey: ['visits'],
-    queryFn: () => base44.entities.Visit.list(),
+    queryFn: () => listWithOfflineCache('Visit', '-scheduled_date', 200),
     initialData: []
   });
 
   // Criar/atualizar visita
   const createVisitMutation = useMutation({
-    mutationFn: (data) => base44.entities.Visit.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['visits']);
-      toast.success('Visita registrada');
+    mutationFn: (data) => createWithOfflineQueue('Visit', data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['visits'] });
+      toast.success(result.queued ? 'Visita salva offline e adicionada à fila' : 'Visita registrada');
     }
   });
 
   const updateClientMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Client.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['safe-clients']);
-      toast.success('Cliente atualizado');
+    mutationFn: ({ id, data }) => updateWithOfflineQueue('Client', id, data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['safe-clients'] });
+      toast.success(result.queued ? 'Cliente atualizado na fila offline' : 'Cliente atualizado');
     }
   });
 
@@ -165,7 +166,7 @@ Formato curto e prático.`
         data: {
           last_visit_date: new Date().toISOString().split('T')[0],
           total_visits_count: (selectedClient.total_visits_count || 0) + 1,
-          notes: selectedClient.notes + `\n\n[VISITA ${new Date().toLocaleDateString()}]\n${postVisitData.notes}`
+          notes: `${selectedClient.notes || ''}\n\n[VISITA ${new Date().toLocaleDateString()}]\n${postVisitData.notes || ''}`
         }
       });
 

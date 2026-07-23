@@ -119,6 +119,7 @@ const ScoreElite = lazy(() => import('./pages/ScoreElite.jsx'));
 const TasksUnified = lazy(() => import('./pages/TasksUnified'));
 const ScheduledAgenda = lazy(() => import('./pages/ScheduledAgenda'));
 const VisitManager = lazy(() => import('./pages/VisitManager'));
+const VisitWorkflow = lazy(() => import('./pages/VisitWorkflow'));
 const SalesFunnel = lazy(() => import('./pages/SalesFunnel'));
 const ProposalGenerator = lazy(() => import('./pages/ProposalGenerator'));
 const EquipmentCatalog = lazy(() => import('./pages/EquipmentCatalog'));
@@ -236,6 +237,7 @@ const AuthenticatedApp = () => {
         <Route path="/TasksUnified" element={<LayoutWrapper currentPageName="TasksUnified"><TasksUnified /></LayoutWrapper>} />
         <Route path="/ScheduledAgenda" element={<LayoutWrapper currentPageName="ScheduledAgenda"><ScheduledAgenda /></LayoutWrapper>} />
         <Route path="/VisitManager" element={<LayoutWrapper currentPageName="VisitManager"><VisitManager /></LayoutWrapper>} />
+        <Route path="/VisitWorkflow" element={<LayoutWrapper currentPageName="VisitWorkflow"><VisitWorkflow /></LayoutWrapper>} />
         <Route path="/SalesFunnel" element={<LayoutWrapper currentPageName="SalesFunnel"><SalesFunnel /></LayoutWrapper>} />
         <Route path="/ProposalGenerator" element={<LayoutWrapper currentPageName="ProposalGenerator"><ProposalGenerator /></LayoutWrapper>} />
         <Route path="/EquipmentCatalog" element={<LayoutWrapper currentPageName="EquipmentCatalog"><EquipmentCatalog /></LayoutWrapper>} />
