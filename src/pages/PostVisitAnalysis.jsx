@@ -48,10 +48,7 @@ export default function PostVisitAnalysis() {
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
-    queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: clientId });
-      return clients[0];
-    },
+    queryFn: () => base44.entities.Client.get(clientId),
     enabled: !!clientId
   });
 

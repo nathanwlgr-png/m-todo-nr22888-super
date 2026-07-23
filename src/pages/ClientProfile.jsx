@@ -33,7 +33,7 @@ export default function ClientProfile() {
 
   const { data: client, isLoading, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
-    queryFn: () => base44.entities.Client.filter({ id: clientId }).then(r => r[0]),
+    queryFn: () => base44.entities.Client.get(clientId),
     enabled: !!clientId,
     staleTime: 2 * 60 * 1000,
   });
