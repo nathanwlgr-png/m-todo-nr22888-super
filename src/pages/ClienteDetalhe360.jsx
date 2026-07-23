@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import AbordagemInteligente from '@/components/AbordagemInteligente';
 import ConversationSentimentPanel from '@/components/sentiment/ConversationSentimentPanel';
+import ClientBonusPanel from '@/components/clients/ClientBonusPanel';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
@@ -502,6 +503,8 @@ export default function ClienteDetalhe360() {
                 </button>
               )}
             </div>
+
+            <ClientBonusPanel client={client} />
 
             <AbordagemInteligente client={client} />
 

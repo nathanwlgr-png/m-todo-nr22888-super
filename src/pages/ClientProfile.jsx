@@ -461,6 +461,13 @@ export default function ClientProfile() {
 
         {/* Links de ação */}
         <div className="grid grid-cols-2 gap-2">
+          <Link to={`/ClienteDetalhe360?id=${client.id}`}>
+            <div className="rounded-xl p-3 flex items-center gap-2"
+              style={{ background: '#141414', border: '1px solid rgba(168,85,247,0.25)' }}>
+              <Target className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-black text-purple-400">Cliente 360</span>
+            </div>
+          </Link>
           <Link to={`/ProposalGenerator?client_id=${client.id}`}>
             <div className="rounded-xl p-3 flex items-center gap-2"
               style={{ background: '#141414', border: '1px solid rgba(255,149,0,0.2)' }}>
