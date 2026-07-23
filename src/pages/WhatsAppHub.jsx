@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 
 export default function WhatsAppHub() {
   const [search, setSearch] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [message, setMessage] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -55,6 +56,17 @@ export default function WhatsAppHub() {
   }, {});
 
   const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR');
+
+  useEffect(() => {
+    if (!normalizedSearch || selectedClient) {
+      setIsSearching(false);
+      return undefined;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 700);
+    return () => window.clearTimeout(timer);
+  }, [normalizedSearch, selectedClient]);
+
   const filteredClients = safeClients.filter(c => {
     if (!c.phone) return false;
     if (!normalizedSearch) return true;
@@ -256,7 +268,7 @@ export default function WhatsAppHub() {
                 />
               </div>
 
-              {search.trim() && !selectedClient && (
+              {search.trim() && !selectedClient && (isLoadingClients || isSearching) && (
                 <div
                   role="status"
                   aria-live="polite"
@@ -268,7 +280,7 @@ export default function WhatsAppHub() {
                 </div>
               )}
 
-              {search && !selectedClient && !isLoadingClients && filteredClients.length > 0 && (
+              {search && !selectedClient && !isLoadingClients && !isSearching && filteredClients.length > 0 && (
                 <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)' }}>
                   {filteredClients.slice(0, 5).map(c => (
                     <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); }}
@@ -284,7 +296,7 @@ export default function WhatsAppHub() {
                 </div>
               )}
 
-              {search && !selectedClient && !isLoadingClients && filteredClients.length === 0 && (
+              {search && !selectedClient && !isLoadingClients && !isSearching && filteredClients.length === 0 && (
                 <p className="mt-2 px-3 py-2 text-xs text-slate-500">Nenhum cliente com WhatsApp encontrado.</p>
               )}
 
