@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { FileText, Sparkles, Copy, Send, Loader2, Plus, X, MapPin, Edit } from 'lucide-react';
+import { FileText, Sparkles, Copy, Send, Loader2, Plus, X, MapPin, Image as ImageIcon } from 'lucide-react';
 import GoogleSlidesProposalButton from '@/components/GoogleSlidesProposalButton';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import useActionLock from '@/hooks/useActionLock';
+import SeamatyGallery from '@/components/SeamatyGallery';
 
 export default function ProposalGenerator() {
   const initialClientId = new URLSearchParams(window.location.search).get('client_id') || '';
@@ -30,6 +31,7 @@ export default function ProposalGenerator() {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [generating, setGenerating] = useState(false);
   const [proposal, setProposal] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
   const [newTemplate, setNewTemplate] = useState({ name: '', content_template: '' });
@@ -379,13 +381,17 @@ Gere uma proposta PROFISSIONAL E PERSUASIVA que:
         return;
       }
 
+      const imageAttachment = selectedImage
+        ? `\n\nImagem SEAMATY: ${selectedImage.title}\n${selectedImage.image_url}${selectedImage.required_credit ? `\nCrédito: ${selectedImage.credit_text || 'crédito obrigatório não informado'}` : ''}`
+        : '';
+
       await base44.entities.PendingMessage.create({
         recipient_id: selectedClient.id,
         recipient_name: selectedClient.first_name,
         recipient_phone: selectedClient.phone,
         channel: 'whatsapp',
-        message_content: proposal,
-        context: `Proposta: ${selectedProducts.join(', ')}`,
+        message_content: `${proposal}${imageAttachment}`,
+        context: `Proposta: ${selectedProducts.join(', ')}${selectedImage ? ` | Imagem: ${selectedImage.title}` : ''}`,
         ai_reasoning: `Proposta personalizada com dados do cliente e ${selectedProducts.length} produto(s)`,
         priority: 'alta',
         status: 'pending'
@@ -475,8 +481,9 @@ Gere uma proposta PROFISSIONAL E PERSUASIVA que:
       </Card>
 
       <Tabs defaultValue="proposta" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
           <TabsTrigger value="proposta">Gerar Proposta</TabsTrigger>
+          <TabsTrigger value="imagens">Imagens</TabsTrigger>
           <TabsTrigger value="bonus">Bonificações</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="regiao">Região Laranja</TabsTrigger>
@@ -601,6 +608,19 @@ Gere uma proposta PROFISSIONAL E PERSUASIVA que:
             </CardContent>
           </Card>
 
+          {selectedImage && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-4 flex items-center gap-3">
+                <ImageIcon className="w-5 h-5 text-blue-700" />
+                <div className="flex-1">
+                  <p className="font-semibold">Imagem anexada: {selectedImage.title}</p>
+                  {selectedImage.required_credit && <p className="text-xs text-blue-800">Crédito: {selectedImage.credit_text || 'não informado — revise antes de usar'}</p>}
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedImage(null)}>Remover</Button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex gap-2">
             <GoogleSlidesProposalButton
               clientId={selectedClientId}
@@ -659,6 +679,17 @@ Gere uma proposta PROFISSIONAL E PERSUASIVA que:
         </Card>
       )}
 
+        </TabsContent>
+
+        <TabsContent value="imagens" className="space-y-4">
+          <SeamatyGallery
+            selectionMode
+            selectedImageId={selectedImage?.id}
+            onSelect={(image) => {
+              setSelectedImage(image);
+              toast.success('Imagem anexada ao rascunho da proposta');
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="bonus" className="space-y-4">

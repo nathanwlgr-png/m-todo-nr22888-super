@@ -7,6 +7,7 @@ import {
   Zap, Copy, Check, ExternalLink, RefreshCw,
   Shield, X, Pencil, AlertTriangle
 } from 'lucide-react';
+import SeamatyGallery from '@/components/SeamatyGallery';
 import { toast } from 'sonner';
 
 export default function WhatsAppHub() {
@@ -18,8 +19,9 @@ export default function WhatsAppHub() {
   const [approvedMsg, setApprovedMsg] = useState('');
   const [openedMsg, setOpenedMsg] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [selectedMarketingImage, setSelectedMarketingImage] = useState(null);
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = ['enviar', 'pendentes', 'historico', 'contatos'].includes(urlParams.get('tab')) ? urlParams.get('tab') : 'enviar';
+  const initialTab = ['enviar', 'imagens', 'pendentes', 'historico', 'contatos'].includes(urlParams.get('tab')) ? urlParams.get('tab') : 'enviar';
   const [activeTab, setActiveTab] = useState(initialTab);
   const queryClient = useQueryClient();
 
@@ -169,6 +171,16 @@ export default function WhatsAppHub() {
     toast.success('Copiado!');
   };
 
+  const handleSelectImage = (image) => {
+    const credit = image.required_credit ? `\nCrédito: ${image.credit_text || 'crédito obrigatório não informado'}` : '';
+    const attachment = `\n\n${image.title}\n${image.image_url}${credit}`;
+    setSelectedMarketingImage(image);
+    setMessage(current => `${current.trim()}${attachment}`.trim());
+    setApprovedMsg('');
+    setActiveTab('enviar');
+    toast.success('Imagem anexada ao rascunho');
+  };
+
   const openPendingWhatsApp = (msg) => {
     if (!['approved', 'aprovado', 'ready_to_send'].includes(msg.status)) {
       toast.error('Aprove o texto antes de abrir o WhatsApp.');
@@ -204,15 +216,16 @@ export default function WhatsAppHub() {
           </div>
         )}
 
-        <div className="flex gap-1 rounded-xl p-1 mb-4" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
+        <div className="flex gap-1 rounded-xl p-1 mb-4 overflow-x-auto" style={{ background: '#111', border: '1px solid rgba(0,255,136,0.1)' }}>
           {[
             { key: 'enviar', label: 'Enviar' },
+            { key: 'imagens', label: 'Imagens' },
             { key: 'pendentes', label: `Pendentes${pendingMessages.length > 0 ? ` (${pendingMessages.length})` : ''}` },
             { key: 'historico', label: 'Historico' },
             { key: 'contatos', label: 'Contatos' },
           ].map(t => (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
-              className="flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all"
+              className="flex-1 min-w-[72px] py-1.5 rounded-lg text-[10px] font-black transition-all"
               style={activeTab === t.key
                 ? { background: '#25d366', color: 'white' }
                 : { color: '#555' }}>
@@ -398,6 +411,16 @@ export default function WhatsAppHub() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'imagens' && (
+          <div className="rounded-2xl bg-white p-3">
+            <SeamatyGallery
+              selectionMode
+              selectedImageId={selectedMarketingImage?.id}
+              onSelect={handleSelectImage}
+            />
           </div>
         )}
 
