@@ -1,0 +1,41 @@
+{
+  "name": "Interesse Avan\u00e7ado \u2014 Materiais para Aprova\u00e7\u00e3o",
+  "description": "Quando um ClientSegment muda para Interesse Avan\u00e7ado, gera PDF cient\u00edfico VG2 e propostas personalizadas para todos os clientes, deixando o envio na fila de aprova\u00e7\u00e3o manual do whatsapp_master_agent_NR22888.",
+  "trigger": {
+    "condition": "${ .trigger.data.segment_name == \"Interesse Avan\u00e7ado\" and .trigger.old_data.segment_name != \"Interesse Avan\u00e7ado\" }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ClientSegment",
+      "events": [
+        "update"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "interesse_avancado_materiais_aprovacao",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "preparar_materiais": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "prepareAdvancedInterestMaterials",
+            "args": {
+              "segment_id": "${ .trigger.entity_id }",
+              "trigger_version": "${ .trigger.data.updated_date }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Preparar materiais para aprova\u00e7\u00e3o",
+            "description": "PDF, proposta e fila WhatsApp"
+          }
+        }
+      }
+    ]
+  }
+}
