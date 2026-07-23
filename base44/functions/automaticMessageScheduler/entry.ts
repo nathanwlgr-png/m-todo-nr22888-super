@@ -20,8 +20,11 @@ Deno.serve(async (req) => {
 
     if (action === 'disable') {
       const settings = await getSettings();
-      if (settings[0]) await base44.entities.AutomationSettings.update(settings[0].id, { automation_enabled: false });
-      return Response.json({ success: true, message: 'Preparação automática de rascunhos desativada.' });
+      if (settings[0]) await base44.entities.AutomationSettings.update(settings[0].id, {
+        automation_enabled: false,
+        last_updated: new Date().toISOString()
+      });
+      return Response.json({ success: true, enabled: false, message: 'Preparação automática de rascunhos desativada.' });
     }
 
     if (action === 'enable') {
@@ -38,11 +41,12 @@ Deno.serve(async (req) => {
         },
         send_time: automationConfig.send_time || '09:00',
         max_messages_per_day: Math.max(1, Math.min(Number(automationConfig.max_messages_per_day) || 20, 100)),
-        avoid_time_ranges: automationConfig.avoid_time_ranges || []
+        avoid_time_ranges: automationConfig.avoid_time_ranges || [],
+        last_updated: new Date().toISOString()
       };
       if (settings[0]) await base44.entities.AutomationSettings.update(settings[0].id, data);
       else await base44.entities.AutomationSettings.create(data);
-      return Response.json({ success: true, message: 'Preparação de rascunhos ativada; nenhum envio será automático.' });
+      return Response.json({ success: true, enabled: true, message: 'Preparação de rascunhos ativada; nenhum envio será automático.' });
     }
 
     if (action === 'execute_now') {
@@ -92,7 +96,14 @@ Deno.serve(async (req) => {
         });
       }
       if (drafts.length) await base44.entities.PendingMessage.bulkCreate(drafts);
-      return Response.json({ success: true, message: `${drafts.length} rascunho(s) preparado(s) para aprovação. Nenhuma mensagem foi enviada.`, prepared_count: drafts.length, sent_count: 0 });
+      return Response.json({
+        success: true,
+        message: `${drafts.length} rascunho(s) preparado(s) para aprovação. Nenhuma mensagem foi enviada.`,
+        prepared_count: drafts.length,
+        queue_status: 'aguardando_aprovacao',
+        sent_count: 0,
+        automatic_send: false
+      });
     }
 
     return Response.json({ error: 'Invalid action' }, { status: 400 });

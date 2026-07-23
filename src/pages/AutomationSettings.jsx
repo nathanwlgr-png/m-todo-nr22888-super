@@ -15,6 +15,7 @@ export default function AutomationSettings() {
   const [automationEnabled, setAutomationEnabled] = useState(false);
   const [sendTime, setSendTime] = useState('09:00');
   const [maxMessages, setMaxMessages] = useState(20);
+  const [executionResult, setExecutionResult] = useState(null);
   const [enabledTypes, setEnabledTypes] = useState({
     turbo_venda: false,
     follow_up: false,
@@ -60,6 +61,9 @@ export default function AutomationSettings() {
           max_messages_per_day: maxMessages
         }
       });
+      if (!response.data?.success || response.data?.enabled !== true) {
+        throw new Error(response.data?.message || 'Não foi possível ativar');
+      }
       return response.data;
     },
     onSuccess: async (data) => {
@@ -95,12 +99,18 @@ export default function AutomationSettings() {
         action: 'execute_now',
         confirmed_by_user: true
       });
+      if (!response.data?.success) throw new Error(response.data?.message || 'Erro ao preparar');
       return response.data;
     },
+    onMutate: () => setExecutionResult(null),
     onSuccess: (data) => {
+      setExecutionResult(data);
       toast.success(data.message);
     },
-    onError: (error) => toast.error(error.message === 'cancelled' ? 'Preparação cancelada' : 'Erro ao preparar')
+    onError: (error) => {
+      if (error.message !== 'cancelled') setExecutionResult({ success: false, message: error.message });
+      toast.error(error.message === 'cancelled' ? 'Preparação cancelada' : error.message);
+    }
   });
 
   return (
@@ -267,6 +277,20 @@ export default function AutomationSettings() {
             <Play className="w-4 h-4 mr-2" />
             {executeMutation.isPending ? 'Preparando...' : 'Preparar Rascunhos'}
           </Button>
+          {executionResult && (
+            <div role="status" className={`mt-4 rounded-lg border p-4 ${executionResult.success ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
+              <p className={`font-semibold ${executionResult.success ? 'text-green-800' : 'text-red-800'}`}>
+                {executionResult.message}
+              </p>
+              {executionResult.success && (
+                <div className="mt-2 space-y-1 text-sm text-green-700">
+                  <p><strong>{executionResult.prepared_count ?? 0}</strong> rascunho(s) adicionado(s) à fila.</p>
+                  <p>Status: <strong>{executionResult.queue_status || 'aguardando_aprovacao'}</strong></p>
+                  <p>Envios automáticos: <strong>{executionResult.sent_count ?? 0}</strong> — nenhum envio foi realizado.</p>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
 
         {/* Guide */}
