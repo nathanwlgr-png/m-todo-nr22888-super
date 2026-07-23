@@ -19,6 +19,7 @@ import { createWithOfflineQueue, listWithOfflineCache, updateWithOfflineQueue } 
 export default function VisitWorkflow() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [activePhase, setActivePhase] = useState('pre');
+  const [isSavingVisit, setIsSavingVisit] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [preVisitData, setPreVisitData] = useState({
     objective: '',
@@ -147,7 +148,8 @@ Formato curto e prático.`
 
   // Salvar visita completa
   const saveCompleteVisit = async () => {
-    if (!selectedClient) return;
+    if (!selectedClient || isSavingVisit) return;
+    setIsSavingVisit(true);
 
     try {
       // Criar registro de visita
@@ -196,6 +198,8 @@ Formato curto e prático.`
       setActivePhase('pre');
     } catch (error) {
       toast.error('Erro ao salvar');
+    } finally {
+      setIsSavingVisit(false);
     }
   };
 
@@ -535,10 +539,11 @@ Formato curto e prático.`
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           onClick={saveCompleteVisit}
+                          disabled={isSavingVisit}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Salvar Visita
+                          {isSavingVisit ? 'Salvando...' : 'Salvar Visita'}
                         </Button>
                         <Button
                           variant="outline"

@@ -122,7 +122,8 @@ export default function TasksUnified() {
       setShowForm(false);
       setEditingTask(null);
       toast.success(result.queued ? 'Tarefa salva offline e adicionada à fila' : 'Tarefa criada!');
-    }
+    },
+    onError: () => toast.error('Revise os dados obrigatórios da tarefa')
   });
 
   const updateTaskMutation = useMutation({
@@ -130,7 +131,8 @@ export default function TasksUnified() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['tasks-rua'] });
       toast.success(result.queued ? 'Alteração salva offline e adicionada à fila' : 'Tarefa atualizada!');
-    }
+    },
+    onError: () => toast.error('Não foi possível atualizar a tarefa')
   });
 
   const clientSuggestions = clientSearch.length >= 2
@@ -149,6 +151,10 @@ export default function TasksUnified() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!taskData.client_id) {
+      toast.error('Selecione um cliente válido para salvar a tarefa');
+      return;
+    }
     if (editingTask) {
       updateTaskMutation.mutate({ id: editingTask.id, data: taskData });
     } else {

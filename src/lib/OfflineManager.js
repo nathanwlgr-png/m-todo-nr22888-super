@@ -134,6 +134,7 @@ export class OfflineManager {
       _synced: false,
       _retry_count: 0,
     });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('offline-queue-changed'));
   }
 
   static async getPendingOperations() {

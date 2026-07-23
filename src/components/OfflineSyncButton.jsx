@@ -63,25 +63,6 @@ export default function OfflineSyncButton({ compact = false, onSyncComplete }) {
       : `${total} registros salvos para uso offline`);
   };
 
-  React.useEffect(() => {
-    const syncOnReconnect = async () => {
-      const queueResult = await syncPendingOperations();
-      if (queueResult.synced > 0) {
-        setResult({ counts: {}, total: 0, uploaded: queueResult.synced, failed: queueResult.failed });
-        toast.success(`${queueResult.synced} ações offline sincronizadas`);
-        onSyncComplete?.();
-      } else if (queueResult.quarantined > 0) {
-        toast.error(`${queueResult.quarantined} ações foram preservadas para revisão`);
-        onSyncComplete?.();
-      } else if (queueResult.failed > 0) {
-        toast.error(`${queueResult.failed} ações tentarão sincronizar novamente`);
-        onSyncComplete?.();
-      }
-    };
-    window.addEventListener('online', syncOnReconnect);
-    return () => window.removeEventListener('online', syncOnReconnect);
-  }, [onSyncComplete]);
-
   if (compact) {
     return (
       <button
