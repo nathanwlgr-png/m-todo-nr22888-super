@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { MessageCircle, Send, Zap, TrendingUp, Phone, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { splitWhatsAppMessage } from '@/components/utils/whatsappChunks';
 
 /**
  * WhatsApp Master Assistant — Lapidação
@@ -51,32 +53,37 @@ export default function WhatsAppMasterAssistantLapidado() {
     onError: () => toast.error('Erro ao gerar sugestões'),
   });
 
-  // Enviar mensagem
+  // Enviar mensagem, dividindo textos longos em partes sequenciais identificadas
   const sendMessageMutation = useMutation({
     mutationFn: async (message) => {
-      if (!selectedClient?.phone) {
-        toast.error('Cliente sem WhatsApp');
-        return;
+      if (!selectedClient?.phone) throw new Error('Cliente sem WhatsApp');
+
+      const rawChunks = splitWhatsAppMessage(message, 1400);
+      const chunks = rawChunks.length > 1
+        ? rawChunks.map((chunk, index) => `[${index + 1}/${rawChunks.length}] ${chunk}`)
+        : rawChunks;
+
+      toast.info(chunks.length > 1 ? `📤 Enviando ${chunks.length} partes em sequência...` : '📤 Enviando...');
+      for (const chunk of chunks) {
+        await base44.functions.invoke('sendWhatsAppMessage', {
+          phone: selectedClient.phone,
+          message: chunk,
+          client_id: selectedClient.id,
+        });
       }
-      toast.info('📤 Enviando...');
-      const result = await base44.functions.invoke('sendWhatsAppMessage', {
-        phone: selectedClient.phone,
-        message: message,
-        client_id: selectedClient.id,
-      });
-      return result.data;
+      return chunks;
     },
-    onSuccess: () => {
-      setConversationHistory(prev => [...prev, {
-        role: 'sent',
-        text: messageInput,
-        time: new Date().toLocaleTimeString('pt-BR')
-      }]);
+    onSuccess: (chunks) => {
+      const time = new Date().toLocaleTimeString('pt-BR');
+      setConversationHistory(prev => [
+        ...prev,
+        ...chunks.map(text => ({ role: 'sent', text, time }))
+      ]);
       setMessageInput('');
       setSuggestedMessages([]);
-      toast.success('✅ Mensagem enviada');
+      toast.success(chunks.length > 1 ? `✅ ${chunks.length} partes enviadas em sequência` : '✅ Mensagem enviada');
     },
-    onError: () => toast.error('Erro ao enviar'),
+    onError: (error) => toast.error(error.message || 'Erro ao enviar'),
   });
 
   const handleQuickMessage = (msg) => {
@@ -90,6 +97,7 @@ export default function WhatsAppMasterAssistantLapidado() {
 
   // Filtrar clientes "quentes"
   const hotClients = clients.filter(c => c.status === 'quente').slice(0, 10);
+  const messageChunks = splitWhatsAppMessage(messageInput, 1400);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 pb-20">
@@ -220,13 +228,11 @@ export default function WhatsAppMasterAssistantLapidado() {
                 <Card className="bg-white">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Escreva sua mensagem..."
+                      <Textarea
+                        placeholder="Escreva ou cole seu roteiro SPIN completo..."
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+                        className="flex-1 min-h-20 text-sm focus:ring-2 focus:ring-green-600"
                       />
                       <Button
                         onClick={handleSendMessage}
@@ -237,6 +243,20 @@ export default function WhatsAppMasterAssistantLapidado() {
                         Enviar
                       </Button>
                     </div>
+
+                    {messageChunks.length > 1 && (
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-3 space-y-2" role="status" aria-live="polite">
+                        <p className="text-xs font-bold text-green-900">
+                          A mensagem será enviada em {messageChunks.length} partes sequenciais:
+                        </p>
+                        {messageChunks.map((chunk, index) => (
+                          <div key={index} className="rounded border border-green-200 bg-white p-2 text-xs text-slate-700">
+                            <span className="font-bold text-green-700">[{index + 1}/{messageChunks.length}]</span>{' '}
+                            {chunk.slice(0, 120)}{chunk.length > 120 ? '...' : ''}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     <Button
                       onClick={() => suggestMessageMutation.mutate(selectedClient.id)}
