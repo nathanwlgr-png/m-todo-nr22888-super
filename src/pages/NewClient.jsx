@@ -23,6 +23,7 @@ import {
   Navigation
 } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
+import { getFirstNameSalesProfile } from '@/lib/firstNameSalesProfile';
 
 const clientTypes = [
   { value: 'clinica_pequena', label: 'Clínica Pequena (até 40 exames/mês)' },
@@ -40,88 +41,6 @@ const decisionRoles = [
   { value: 'coordenador_tecnico', label: 'Coordenador Técnico' },
   { value: 'socio', label: 'Sócio' },
 ];
-
-// Numerologia Pitagórica - Nome
-const calculateNumerology = (name) => {
-  const values = {
-    a: 1, j: 1, s: 1,
-    b: 2, k: 2, t: 2,
-    c: 3, l: 3, u: 3,
-    d: 4, m: 4, v: 4,
-    e: 5, n: 5, w: 5,
-    f: 6, o: 6, x: 6,
-    g: 7, p: 7, y: 7,
-    h: 8, q: 8, z: 8,
-    i: 9, r: 9
-  };
-  
-  let sum = 0;
-  const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
-  
-  for (const char of cleanName) {
-    sum += values[char] || 0;
-  }
-  
-  // Preservar números mestres 11 e 22
-  while (sum > 22 || (sum > 9 && sum !== 11 && sum !== 22)) {
-    sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
-  }
-  
-  return sum || 1;
-};
-
-// Numerologia Pitagórica - Caminho de Vida (Data de Nascimento)
-const calculateLifePath = (birthdate) => {
-  if (!birthdate) return null;
-  
-  const numbers = birthdate.replace(/\D/g, '');
-  let sum = 0;
-  
-  for (const digit of numbers) {
-    sum += parseInt(digit);
-  }
-  
-  // Preservar números mestres 11 e 22
-  while (sum > 22 || (sum > 9 && sum !== 11 && sum !== 22)) {
-    sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
-  }
-  
-  return sum;
-};
-
-const getBehavioralProfile = (number) => {
-  const profiles = {
-    1: 'Líder decidido, valoriza inovação e autonomia',
-    2: 'Diplomático, busca harmonia e parceria',
-    3: 'Comunicador criativo, valoriza reconhecimento',
-    4: 'Prático e metódico, valoriza estabilidade',
-    5: 'Versátil e curioso, valoriza liberdade',
-    6: 'Responsável e protetor, valoriza qualidade',
-    7: 'Analítico e investigativo, valoriza conhecimento',
-    8: 'Empreendedor ambicioso, foca em resultados',
-    9: 'Visionário idealista, valoriza propósito',
-    11: 'Visionário iluminado, inspirador nato, intuitivo e sensível',
-    22: 'Construtor mestre, transforma visões em realidade concreta'
-  };
-  return profiles[number] || profiles[1];
-};
-
-const getDecisionStyle = (number) => {
-  const styles = {
-    1: 'Decide rápido quando vê benefício claro',
-    2: 'Precisa de tempo e confiança',
-    3: 'Decide por entusiasmo e histórias',
-    4: 'Decide com dados e garantias',
-    5: 'Decide por impulso em oportunidades',
-    6: 'Decide pensando na equipe',
-    7: 'Decide após análise completa',
-    8: 'Decide por retorno financeiro',
-    9: 'Decide por propósito maior',
-    11: 'Decide por inspiração e visão de impacto',
-    22: 'Decide com visão de longo prazo e legado'
-  };
-  return styles[number] || styles[1];
-};
 
 export default function NewClient() {
   const navigate = useNavigate();
@@ -242,7 +161,7 @@ export default function NewClient() {
     setLoading(true);
     
     try {
-      const numerologyNumber = calculateNumerology(formData.first_name);
+      const salesProfile = getFirstNameSalesProfile(formData.first_name);
       
       // Remove campos vazios para evitar erros
       const cleanedData = {};
@@ -254,9 +173,11 @@ export default function NewClient() {
 
       const clientData = {
         ...cleanedData,
-        numerology_number: numerologyNumber,
-        behavioral_profile: getBehavioralProfile(numerologyNumber),
-        decision_style: getDecisionStyle(numerologyNumber),
+        numerology_number: salesProfile.number,
+        behavioral_profile: `${salesProfile.title}. ${salesProfile.description}`,
+        decision_style: salesProfile.decision,
+        approach_tips: salesProfile.approach,
+        recommended_communication: salesProfile.communication,
         purchase_motivators: motivators.length > 0 ? motivators : undefined,
         real_objections: objections.length > 0 ? objections : undefined,
         purchase_score: Math.floor(Math.random() * 40) + 30,

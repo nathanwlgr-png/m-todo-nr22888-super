@@ -17,6 +17,7 @@ import ClientCatalogRequestPanel from '@/components/catalog/ClientCatalogRequest
 import ClientProductDemo from '@/components/catalog/ClientProductDemo';
 import AIRecommendationLog from '@/components/AIRecommendationLog';
 import ConversationSentimentPanel from '@/components/sentiment/ConversationSentimentPanel';
+import SalesPersonalityCard from '@/components/clients/SalesPersonalityCard';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -290,6 +291,8 @@ export default function ClientProfile() {
         <ConversationSentimentPanel client={client} />
 
         <ComoVenderAgoraCard target={client} type="cliente" />
+
+        <SalesPersonalityCard client={client} />
 
         {/* OPORTUNIDADE SEAMATY — Equipamentos + Upgrade + SPIN */}
         <SeamatyEquipmentPanel client={client} />

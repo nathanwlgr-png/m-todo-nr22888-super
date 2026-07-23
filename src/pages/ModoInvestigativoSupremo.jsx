@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import Score4x4Display from '@/components/Score4x4Display';
 import BattlecardAtaque from '@/components/elite/BattlecardAtaque';
 import DropboxEvidenceCard from '@/components/investigation/DropboxEvidenceCard';
+import SalesPersonalityCard from '@/components/clients/SalesPersonalityCard';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -76,6 +77,9 @@ export default function ModoInvestigativoSupremo() {
           current_equipment: client.current_equipment,
           client_type: client.client_type,
           market_time: client.market_time,
+          behavioral_profile: client.behavioral_profile,
+          decision_style: client.decision_style,
+          approach_tips: client.approach_tips,
         }),
         base44.functions.invoke('dropboxInventarioReadOnly', {
           action: 'search_support',
@@ -98,6 +102,10 @@ export default function ModoInvestigativoSupremo() {
             Volume mensal: ${client.current_volume || 'não informado'}
             Status: ${client.status || 'morno'}
             Score: ${client.purchase_score || 0}
+            Perfil comportamental: ${client.behavioral_profile || 'não informado'}
+            Estilo de decisão: ${client.decision_style || 'não informado'}
+            Direção de abordagem: ${client.approach_tips || 'não informada'}
+            Use esses dados apenas para dosar a abordagem comercial, sem citar cálculo, número ou numerologia.
             
             Gere:
             1. Score comercial (0-100) com justificativa
@@ -276,6 +284,7 @@ export default function ModoInvestigativoSupremo() {
         <div className="px-4 space-y-3">
           {/* Motor 4x4 */}
           {selectedClient && <Score4x4Display score={score4x4} isLoading={loadingScore} />}
+          {selectedClient && <SalesPersonalityCard client={selectedClient} />}
           <DropboxEvidenceCard evidence={result.dropbox_support} />
 
           {/* Header do resultado */}
