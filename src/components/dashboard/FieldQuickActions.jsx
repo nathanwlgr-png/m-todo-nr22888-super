@@ -20,10 +20,10 @@ export default function FieldQuickActions() {
         <h2 id="field-actions-title" className="text-xs font-black uppercase tracking-widest text-slate-400">Ações de campo</h2>
         <span className="text-[10px] text-slate-600">1 toque</span>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {actions.map(({ label, to, icon: Icon, color }) => (
-          <Link key={to} to={to} aria-label={label} className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border bg-[#101012] px-1 text-center active:scale-95 ${color}`}>
-            <Icon className="h-5 w-5" aria-hidden="true" />
+          <Link key={to} to={to} aria-label={label} className={`flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border bg-card px-3 active:scale-95 ${color}`}>
+            <Icon className="h-4 w-4" aria-hidden="true" />
             <span className="text-[10px] font-bold leading-tight">{label}</span>
           </Link>
         ))}
