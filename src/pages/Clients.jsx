@@ -37,6 +37,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import ClientCard from '@/components/ClientCard';
+import ClientQuickActions from '@/components/clients/ClientQuickActions';
 import WeeklyHealthReport from '@/components/WeeklyHealthReport';
 import { useOfflineClients } from '@/components/OfflineClientCache';
 import OfflineIndicator from '@/components/OfflineIndicator';
@@ -51,6 +52,7 @@ import { toast } from 'sonner';
 import { exportClientsExcel } from '@/lib/exportClientsExcel';
 
 const ProposalModal = lazy(() => import('@/components/ProposalModal'));
+const ScheduleVisitModal = lazy(() => import('@/components/ScheduleVisitModal'));
 const SalesFunnelChart = lazy(() => import('@/components/SalesFunnelChart'));
 
 const ORANGE_REGION_CITIES = [
@@ -84,6 +86,8 @@ export default function Clients() {
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [equipmentFilter, setEquipmentFilter] = useState('all');
   const [proposalClient, setProposalClient] = useState(null);
+  const [visitClient, setVisitClient] = useState(null);
+  const [busyAction, setBusyAction] = useState('');
   const [quickSaleClient, setQuickSaleClient] = useState(null);
   const [selectedEquipment, setSelectedEquipment] = useState('');
   const [saleValue, setSaleValue] = useState('');
@@ -267,7 +271,21 @@ export default function Clients() {
     setEditingName(client.first_name || '');
   };
 
+  const handleQuickStatus = (client, status) => {
+    if (client.status === status) return;
+    setBusyAction(`${client.id}:status`);
+    updateClientMutation.mutate(
+      { id: client.id, data: { status } },
+      {
+        onSuccess: () => toast.success(`Status alterado para ${status}.`),
+        onError: () => toast.error('Não foi possível atualizar o status.'),
+        onSettled: () => setBusyAction(''),
+      }
+    );
+  };
+
   const handleQuickFollowUp = async (client) => {
+    setBusyAction(`${client.id}:followup`);
     try {
       const today = new Date();
       const followUpDate = new Date(today);
@@ -277,17 +295,20 @@ export default function Clients() {
       await base44.entities.Task.create({
         client_id: client.id,
         client_name: client.first_name || client.full_name,
-        title: `📞 Follow-up: ${client.first_name}`,
-        description: 'Follow-up automático de relacionamento',
+        title: `Follow-up: ${client.first_name || client.full_name}`,
+        description: 'Follow-up de relacionamento criado pela lista de clientes',
         due_date: formattedDate,
         status: 'pendente',
         priority: 'media',
         type: 'follow_up'
       });
 
-      toast.success(`📅 Follow-up agendado para ${followUpDate.toLocaleDateString('pt-BR')}!`);
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      toast.success(`Follow-up agendado para ${followUpDate.toLocaleDateString('pt-BR')}.`);
     } catch (error) {
       toast.error('Erro ao agendar follow-up: ' + error.message);
+    } finally {
+      setBusyAction('');
     }
   };
 
@@ -1004,16 +1025,10 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                         ) : (
                           <>
                             <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                            <div className="grid grid-cols-3 gap-1.5 mt-1.5">
-                              <Button size="sm" onClick={() => navigate(`/ClienteDetalhe360?id=${client.id}`)} className="h-9 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold">
-                                Abrir 360°
-                              </Button>
-                              <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs font-bold">
-                                Ação rápida
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setProposalClient(client)} className="h-9 text-xs">
-                                Proposta
-                              </Button>
+                            <ClientQuickActions client={client} busy={busyAction} onStatusChange={handleQuickStatus} onScheduleVisit={setVisitClient} onFollowUp={handleQuickFollowUp} />
+                            <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                              <Button size="sm" onClick={() => navigate(`/ClienteDetalhe360?id=${client.id}`)} className="h-9 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold">Abrir 360°</Button>
+                              <Button size="sm" variant="outline" onClick={() => setProposalClient(client)} className="h-9 text-xs">Proposta</Button>
                             </div>
                           </>
                         )}
@@ -1043,9 +1058,9 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
                   ) : (
                     <>
                       <ClientCard client={client} hasPurchase={hasPurchase} scheduledVisit={scheduledVisit} lastVisit={lastVisit} />
-                      <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                      <ClientQuickActions client={client} busy={busyAction} onStatusChange={handleQuickStatus} onScheduleVisit={setVisitClient} onFollowUp={handleQuickFollowUp} />
+                      <div className="grid grid-cols-2 gap-1.5 mt-1.5">
                         <Button size="sm" onClick={() => navigate(`/ClienteDetalhe360?id=${client.id}`)} className="h-9 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold">Abrir 360°</Button>
-                        <Button size="sm" onClick={() => handleQuickFollowUp(client)} className="h-9 bg-green-600 hover:bg-green-700 text-white text-xs font-bold">Ação rápida</Button>
                         <Button size="sm" variant="outline" onClick={() => setProposalClient(client)} className="h-9 text-xs">Proposta</Button>
                       </div>
                     </>
@@ -1056,6 +1071,12 @@ Retorne JSON válido com TODOS os clientes encontrados.`,
           </>
         )}
       </div>
+
+      {visitClient && (
+        <Suspense fallback={null}>
+          <ScheduleVisitModal client={visitClient} open={!!visitClient} onOpenChange={(open) => { if (!open) { setVisitClient(null); queryClient.invalidateQueries({ queryKey: ['all-visits'] }); } }} />
+        </Suspense>
+      )}
 
       {/* Proposal Modal */}
       {proposalClient && (
