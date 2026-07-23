@@ -158,7 +158,28 @@
       "file_type": "pdf"
     }
   ],
-  "app_user_connector_configs": [],
+  "app_user_connector_configs": [
+    {
+      "connector_id": "6a6031d8a6b552c19b90098b",
+      "enabled": true
+    },
+    {
+      "connector_id": "6a602143b5175a5251df09d9",
+      "enabled": true
+    },
+    {
+      "connector_id": "6a5efcdbac896b7758ca5c9c",
+      "enabled": true
+    },
+    {
+      "connector_id": "6a2d5589e6f59c31e605d3d3",
+      "enabled": true
+    },
+    {
+      "connector_id": "6a2686433220785c03d4341f",
+      "enabled": true
+    }
+  ],
   "selected_skill_names": [
     "nr22888-registro-crm-seguro"
   ],
