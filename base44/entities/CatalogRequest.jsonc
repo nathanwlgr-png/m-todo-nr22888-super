@@ -78,8 +78,7 @@
       "default": 0
     },
     "last_view_id": {
-      "type": "string",
-      "description": "Identificador t\u00e9cnico da \u00faltima abertura para evitar contagem duplicada do mesmo carregamento."
+      "type": "string"
     },
     "first_viewed_at": {
       "type": "string",
@@ -187,5 +186,50 @@
   "required": [
     "client_code",
     "access_token"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

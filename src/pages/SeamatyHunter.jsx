@@ -63,17 +63,12 @@ export default function SeamatyHunter() {
         segments
       });
 
-      const rawResults = response.data?.leads || response.data?.search_results || [];
-      const analyzed = rawResults.map(clinic => ({
-        ...clinic,
-        city: clinic.city || selectedCity,
-        state: clinic.state || selectedState,
-        opportunity_score: Number(clinic.seamaty_score ?? clinic.opportunity_score ?? 0),
-        seamaty_fit: Number(clinic.seamaty_score ?? clinic.seamaty_fit ?? 0),
-        next_action: clinic.next_action || 'Investigar clínica'
-      }));
+      const rawResults = response.data?.leads || [];
+      const analyzed = rawResults.filter((clinic) =>
+        ['VALIDADO_OFICIAL', 'VALIDADO_MULTIFONTE'].includes(clinic.validation_status) && clinic.source_urls?.length
+      );
 
-      setResults(analyzed.sort((a, b) => b.opportunity_score - a.opportunity_score));
+      setResults(analyzed.sort((a, b) => b.source_urls.length - a.source_urls.length));
       if (analyzed.length === 0) toast.info('Nenhuma clínica encontrada nesta busca.');
       else toast.success(`✅ ${analyzed.length} clínicas encontradas`);
     } catch (err) {
@@ -85,25 +80,29 @@ export default function SeamatyHunter() {
   };
 
   const importProspect = async (clinic) => {
+    if (!['VALIDADO_OFICIAL', 'VALIDADO_MULTIFONTE'].includes(clinic.validation_status)) {
+      toast.error('Resultado sem validação suficiente.');
+      return;
+    }
     setImportingName(clinic.name);
     try {
-      const existing = await base44.entities.Client.filter({ clinic_name: clinic.name }, '-updated_date', 1);
-      const client = existing[0] || await base44.entities.Client.create({
-        first_name: clinic.name,
-        clinic_name: clinic.name,
-        phone: clinic.phone || undefined,
-        city: clinic.city || selectedCity,
-        status: 'morno',
-        pipeline_stage: 'lead',
-        equipment_interest: clinic.potential_product || undefined,
-        notes: `Prospect importado pelo Seamaty Hunter. ${clinic.notes || ''}`.trim(),
+      await base44.entities.CRMUpdateQueue.create({
+        origem: 'manual',
+        texto_original: JSON.stringify({ name: clinic.name, city: clinic.city, state: clinic.state, sources: clinic.source_urls }),
+        comando_interpretado: 'Revisar prospect antes de incluir no CRM',
+        tipo_atualizacao: 'prospect_revisao',
+        campo_alvo: 'novo_lead',
+        valor_novo: clinic.name,
+        status: 'pendente',
+        risco: 'medio',
+        exige_aprovacao: true,
+        data_criacao: new Date().toISOString(),
+        observacao: `${clinic.validation_status} · ${clinic.validation_method}`
       });
-      setResults(current => current.map(item => item.name === clinic.name
-        ? { ...item, imported_client_id: client.id }
-        : item));
-      toast.success(existing[0] ? 'Prospect já estava no pipeline.' : 'Prospect importado para o pipeline.');
+      setResults(current => current.map(item => item.name === clinic.name ? { ...item, queued_for_review: true } : item));
+      toast.success('Prospect enviado para revisão. Nenhum cliente foi criado.');
     } catch (err) {
-      toast.error(`Erro ao importar: ${err.message}`);
+      toast.error(`Erro ao enviar para revisão: ${err.message}`);
     } finally {
       setImportingName('');
     }
@@ -117,9 +116,9 @@ export default function SeamatyHunter() {
         <div className="mb-8">
           <h1 className="text-4xl font-black text-white mb-2 flex items-center gap-3">
             <Radar className="w-10 h-10 text-purple-400" />
-            🎯 Seamaty Hunter — Radar de Oportunidades
+            🎯 SEAMATY Hunter — Radar de Oportunidades
           </h1>
-          <p className="text-slate-400">Detecta clínicas com potencial para equipamentos Seamaty</p>
+          <p className="text-slate-400">Pesquisa organizações com fontes públicas verificáveis para revisão comercial</p>
           <p className="text-xs text-orange-400 mt-1">Modo econômico ativo — execute apenas sob necessidade.</p>
         </div>
 
@@ -227,7 +226,8 @@ export default function SeamatyHunter() {
                           <li>📍 {clinic.city}</li>
                           <li>📞 {clinic.phone || 'Não disponível'}</li>
                           <li>🌐 {clinic.website ? 'Com website' : 'Sem website'}</li>
-                          <li>📊 Score: {clinic.opportunity_score}%</li>
+                          <li>✅ {clinic.validation_status}</li>
+                          <li>🔗 {clinic.source_urls?.length || 0} fonte(s) verificável(is)</li>
                         </ul>
                       </div>
                     ))}
@@ -242,8 +242,8 @@ export default function SeamatyHunter() {
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="py-10 text-center">
               <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-              <p className="font-bold text-white">Nenhuma clínica encontrada</p>
-              <p className="text-sm text-slate-400 mt-1">Tente outra cidade ou execute novamente mais tarde.</p>
+              <p className="font-bold text-white">Nenhum resultado validado encontrado</p>
+              <p className="text-sm text-slate-400 mt-1">Nenhum dado sem fonte foi exibido. Tente outra cidade ou execute novamente mais tarde.</p>
             </CardContent>
           </Card>
         )}

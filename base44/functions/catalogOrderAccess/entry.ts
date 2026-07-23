@@ -27,27 +27,16 @@ const loadSafeCatalog = async (base44) => {
   }));
 };
 
-const syncTemperature = async (base44, request, engagement, selectedItems = []) => {
-  const nextAction = selectedItems.length ? 'Contatar sobre os produtos selecionados no catálogo' : engagement.interest_level === 'quente' ? 'Fazer contato consultivo agora' : 'Acompanhar interesse no catálogo';
-  if (request.lead_id) {
-    const lead = await base44.asServiceRole.entities.Lead.get(request.lead_id).catch(() => null);
-    if (lead) await base44.asServiceRole.entities.Lead.update(lead.id, {
-      stage: 'em_contato', status: 'contatado',
-      predictive_score: Math.max(lead.predictive_score || 0, engagement.engagement_score),
-      conversion_probability: Math.max(lead.conversion_probability || 0, engagement.engagement_score),
-      priority_level: engagement.interest_level === 'quente' ? 'high' : 'medium',
-      next_best_action: nextAction,
-      engagement_metrics: { ...(lead.engagement_metrics || {}), website_visits: request.views_count || 0, documents_viewed: selectedItems.length, last_engagement: new Date().toISOString() }
-    });
-  }
-  if (request.client_id) {
-    const client = await base44.asServiceRole.entities.Client.get(request.client_id).catch(() => null);
-    if (client) await base44.asServiceRole.entities.Client.update(client.id, {
-      status: engagement.interest_level,
-      engagement_score: Math.max(client.engagement_score || 0, engagement.engagement_score),
-      next_action: nextAction
-    });
-  }
+const queueInterestReview = async (base44, request) => {
+  const existing = await base44.asServiceRole.entities.CRMUpdateQueue.filter({ origem: 'sistema', tipo_atualizacao: 'catalogo_interesse', cliente_id: request.client_id || '', lead_id: request.lead_id || '', status: 'pendente' }, '-created_date', 1);
+  if (existing.length) return;
+  await base44.asServiceRole.entities.CRMUpdateQueue.create({
+    origem: 'sistema', texto_original: `Seleção de catálogo ${request.id}`,
+    comando_interpretado: 'Revisar sinal de interesse no catálogo', cliente_id: request.client_id || '', lead_id: request.lead_id || '',
+    tipo_atualizacao: 'catalogo_interesse', campo_alvo: 'proxima_acao', valor_novo: 'Revisar produtos selecionados',
+    status: 'pendente', risco: 'baixo', exige_aprovacao: true, data_criacao: new Date().toISOString(),
+    observacao: 'Abertura e seleção são sinais de interesse; não comprovam leitura nem intenção de compra.'
+  });
 };
 
 Deno.serve(async (req) => {
@@ -72,7 +61,6 @@ Deno.serve(async (req) => {
       const history = [...(request.change_history || []), { changed_at: viewedAt, action: 'aberto', actor: 'destinatario' }];
       const tracked = { ...request, views_count: viewsCount, last_view_id: body.view_id || '', first_viewed_at: request.first_viewed_at || viewedAt, last_viewed_at: viewedAt, ...engagement, change_history: history };
       await base44.asServiceRole.entities.CatalogRequest.update(request.id, { views_count: viewsCount, last_view_id: body.view_id || '', first_viewed_at: tracked.first_viewed_at, last_viewed_at: viewedAt, ...engagement, change_history: history });
-      await syncTemperature(base44, tracked, engagement, request.selected_items || []);
       return Response.json({ request: { id: request.id, client_code: request.client_code, client_name: request.client_name, status: request.status, expires_at: request.expires_at, views_count: viewsCount, ...engagement } });
     }
     if (body.action === 'verify') {
@@ -93,17 +81,17 @@ Deno.serve(async (req) => {
       const revision = (request.revision || 0) + 1;
       const engagement = engagementFor(request.views_count || 0, items);
       await base44.asServiceRole.entities.CatalogRequest.update(request.id, { selected_items: items, change_history: history, revision, ...engagement });
-      await syncTemperature(base44, request, engagement, items);
       return Response.json({ request: sanitize({ ...request, selected_items: items, change_history: history, revision, ...engagement }) });
     }
     if (body.action === 'submit') {
+      if (request.status === 'aguardando_validacao' || request.status === 'validado') return Response.json({ error: 'Seleção já enviada' }, { status: 409 });
       if (!request.selected_items?.length) return Response.json({ error: 'Selecione pelo menos um item' }, { status: 400 });
       const now = new Date().toISOString();
       const history = [...(request.change_history || []), { changed_at: now, action: 'assinado', actor: 'cliente' }, { changed_at: now, action: 'enviado', actor: 'cliente' }];
       const engagement = engagementFor(request.views_count || 0, request.selected_items || []);
       await base44.asServiceRole.entities.CatalogRequest.update(request.id, { status: 'aguardando_validacao', submitted_at: now, signed_at: now, signature_method: request.sent_via === 'telegram' ? 'telegram_code' : 'whatsapp_code', change_history: history, ...engagement });
-      await syncTemperature(base44, request, engagement, request.selected_items || []);
-      return Response.json({ success: true, signed_at: now, ...engagement });
+      await queueInterestReview(base44, request);
+      return Response.json({ success: true, signed_at: now, ...engagement, official_status_changed: false });
     }
     return Response.json({ error: 'Ação inválida' }, { status: 400 });
   } catch (error) {

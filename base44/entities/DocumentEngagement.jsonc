@@ -37,17 +37,15 @@
     "views_count": {
       "type": "number",
       "default": 0,
-      "description": "N\u00famero de visualiza\u00e7\u00f5es"
+      "description": "N\u00famero de sess\u00f5es \u00fanicas"
     },
     "last_viewed_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora da \u00faltima visualiza\u00e7\u00e3o"
+      "format": "date-time"
     },
     "first_viewed_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora da primeira visualiza\u00e7\u00e3o"
+      "format": "date-time"
     },
     "view_history": {
       "type": "array",
@@ -61,30 +59,36 @@
           "device_info": {
             "type": "string"
           },
-          "location": {
+          "session_id": {
             "type": "string"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "open",
+              "heartbeat",
+              "download"
+            ]
           }
         }
       },
-      "description": "Hist\u00f3rico completo de visualiza\u00e7\u00f5es"
+      "description": "Hist\u00f3rico de sess\u00f5es sem GPS ou localiza\u00e7\u00e3o precisa"
     },
     "engagement_score": {
       "type": "number",
-      "description": "Score de engajamento (0-100)"
+      "description": "Sinal interno limitado de engajamento (0-100)"
     },
     "time_spent_seconds": {
       "type": "number",
-      "description": "Tempo total gasto visualizando (segundos)"
+      "description": "Tempo ativo total limitado em segundos"
     },
     "shared_count": {
       "type": "number",
-      "default": 0,
-      "description": "Quantas vezes foi compartilhado"
+      "default": 0
     },
     "downloaded": {
       "type": "boolean",
-      "default": false,
-      "description": "Se foi baixado"
+      "default": false
     },
     "sent_via": {
       "type": "string",
@@ -93,22 +97,18 @@
         "email",
         "sms",
         "link_direto"
-      ],
-      "description": "Como foi enviado"
+      ]
     },
     "sent_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Quando foi enviado"
+      "format": "date-time"
     },
     "response_received": {
       "type": "boolean",
-      "default": false,
-      "description": "Se cliente respondeu ap\u00f3s visualizar"
+      "default": false
     },
     "response_text": {
-      "type": "string",
-      "description": "Texto da resposta do cliente"
+      "type": "string"
     },
     "interest_level": {
       "type": "string",
@@ -118,13 +118,57 @@
         "medio",
         "baixo",
         "nenhum"
-      ],
-      "description": "N\u00edvel de interesse inferido"
+      ]
     }
   },
   "required": [
     "client_id",
     "document_type",
     "tracking_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

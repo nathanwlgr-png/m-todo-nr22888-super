@@ -1,170 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Download, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+const SESSION_ID = crypto.randomUUID();
+
 export default function DocumentTracking() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const trackingId = urlParams.get('id');
-  const navigate = useNavigate();
-  
+  const trackingId = new URLSearchParams(window.location.search).get('id');
   const [loading, setLoading] = useState(true);
-  const [engagement, setEngagement] = useState(null);
-  const [startTime] = useState(Date.now());
+  const [trackedDocument, setTrackedDocument] = useState(null);
   const [timeSpent, setTimeSpent] = useState(0);
 
   useEffect(() => {
-    if (!trackingId) {
-      toast.error('Link inválido');
-      setLoading(false);
-      return;
-    }
-
-    loadEngagement();
+    if (!trackingId) { setLoading(false); return; }
+    base44.functions.invoke('trackDocumentView', { tracking_id: trackingId, event_type: 'load' })
+      .then(async ({ data }) => {
+        setTrackedDocument(data.document);
+        await base44.functions.invoke('trackDocumentView', { tracking_id: trackingId, event_type: 'open', session_id: SESSION_ID });
+      })
+      .catch(() => toast.error('Documento não encontrado'))
+      .finally(() => setLoading(false));
   }, [trackingId]);
 
-  // Rastrear tempo gasto
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeSpent(Math.floor((Date.now() - startTime) / 1000));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [startTime]);
-
-  // Enviar atualização de tempo quando usuário sai
-  useEffect(() => {
-    const handleUnload = () => {
-      if (engagement) {
-        trackView(timeSpent);
+    if (!trackedDocument) return undefined;
+    const interval = window.setInterval(() => {
+      if (window.document.visibilityState === 'visible' && window.document.hasFocus()) {
+        setTimeSpent((current) => current + 15);
+        base44.functions.invoke('trackDocumentView', { tracking_id: trackingId, event_type: 'heartbeat', session_id: SESSION_ID, active_seconds: 15 }).catch(() => {});
       }
-    };
-
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
-  }, [engagement, timeSpent]);
-
-  const loadEngagement = async () => {
-    try {
-      const engagements = await base44.entities.DocumentEngagement.filter({ tracking_id: trackingId });
-      
-      if (engagements.length === 0) {
-        toast.error('Documento não encontrado');
-        return;
-      }
-
-      setEngagement(engagements[0]);
-      
-      // Registrar visualização inicial
-      await trackView(0);
-      
-    } catch (error) {
-      toast.error('Erro ao carregar documento');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const trackView = async (seconds) => {
-    if (!engagement) return;
-
-    try {
-      // Detectar dispositivo e localização
-      const deviceInfo = /mobile|android|iphone/i.test(navigator.userAgent) ? 'Mobile' :
-                         /tablet|ipad/i.test(navigator.userAgent) ? 'Tablet' : 'Desktop';
-      
-      let location = 'Desconhecido';
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            location = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
-          },
-          () => {}
-        );
-      }
-
-      await base44.functions.invoke('trackDocumentView', {
-        tracking_id: trackingId,
-        device_info: deviceInfo,
-        location: location,
-        time_spent_seconds: seconds
-      });
-    } catch (error) {
-      console.error('Erro ao rastrear:', error);
-    }
-  };
+    }, 15000);
+    return () => window.clearInterval(interval);
+  }, [trackedDocument, trackingId]);
 
   const handleDownload = async () => {
-    await trackView(timeSpent);
-    
-    // Marcar como baixado
-    await base44.functions.invoke('trackDocumentView', {
-      tracking_id: trackingId,
-      downloaded: true
-    });
-
-    if (engagement.document_url) {
-      window.open(engagement.document_url, '_blank');
-    }
+    await base44.functions.invoke('trackDocumentView', { tracking_id: trackingId, event_type: 'download', session_id: SESSION_ID });
+    if (trackedDocument.document_url) window.open(trackedDocument.document_url, '_blank', 'noopener,noreferrer');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-      </div>
-    );
-  }
+  if (loading) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple-600" /></div>;
+  if (!trackedDocument) return <div className="flex min-h-screen items-center justify-center p-6"><Card className="p-6 text-center"><h1 className="font-bold">Rastreamento não encontrado</h1><p className="mt-2 text-sm text-slate-600">Abra um link válido para consultar o documento.</p></Card></div>;
 
-  if (!engagement) {
-    return <div className="min-h-screen flex items-center justify-center p-6"><Card className="p-6 text-center"><h1 className="font-bold">Rastreamento não encontrado</h1><p className="text-sm text-slate-600 mt-2">Abra um link válido de proposta para consultar o sinal de interesse.</p></Card></div>;
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Card className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-slate-900">
-                {engagement?.document_title || 'Documento'}
-              </h1>
-              <p className="text-sm text-slate-600">
-                Enviado por {engagement?.created_by || 'Vendedor'}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-purple-50 rounded-lg p-4 mb-4 border-2 border-purple-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Eye className="w-5 h-5 text-purple-600" />
-                <p className="font-semibold text-purple-900">Sinal de interesse registrado</p>
-              </div>
-              <p className="text-sm text-purple-700">Tempo: {Math.floor(timeSpent / 60)}:{String(timeSpent % 60).padStart(2, '0')}</p>
-            </div>
-            <p className="text-xs text-purple-700">
-              A abertura e o clique indicam interesse, mas não comprovam leitura completa do documento.
-            </p>
-          </div>
-
-          {engagement?.document_url && (
-            <Button
-              onClick={handleDownload}
-              className="w-full bg-purple-600 hover:bg-purple-700"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Baixar Documento
-            </Button>
-          )}
-        </Card>
-      </div>
-    </div>
-  );
+  return <main className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6">
+    <Card className="mx-auto max-w-2xl p-5 sm:p-6">
+      <div className="mb-6 flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-xl bg-purple-600"><FileText className="h-7 w-7 text-white" /></div><h1 className="min-w-0 flex-1 text-xl font-bold text-slate-900">{trackedDocument.document_title}</h1></div>
+      <div className="mb-4 rounded-lg border-2 border-purple-200 bg-purple-50 p-4"><div className="mb-2 flex items-center justify-between gap-3"><p className="flex items-center gap-2 font-semibold text-purple-900"><Eye className="h-5 w-5" />Sinal de interesse registrado</p><p className="text-sm text-purple-700">{Math.floor(timeSpent / 60)}:{String(timeSpent % 60).padStart(2, '0')}</p></div><p className="text-xs text-purple-700">A abertura e o clique indicam interesse, mas não comprovam leitura completa. Não coletamos GPS nem localização precisa.</p></div>
+      {trackedDocument.document_url && <Button onClick={handleDownload} className="min-h-11 w-full bg-purple-600 hover:bg-purple-700"><Download className="mr-2 h-5 w-5" />Baixar documento</Button>}
+    </Card>
+  </main>;
 }

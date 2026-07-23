@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Edit2, Trash2, Save, X, Plus } from 'lucide-react';
+import { Edit2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import CatalogManagerPanel from '@/components/catalog/CatalogManagerPanel';
 
@@ -23,7 +23,7 @@ export default function ProductManager() {
 
   // Mutation para atualizar
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Product.update(id, data),
+    mutationFn: ({ id, data, source }) => base44.functions.invoke('adminProductChange', { entity: 'Product', id, data, source, confirmed: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setEditingId(null);
@@ -32,36 +32,16 @@ export default function ProductManager() {
     onError: (err) => toast.error('Erro ao atualizar: ' + err.message)
   });
 
-  // Mutation para deletar
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Product.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Produto deletado!');
-    },
-    onError: (err) => toast.error('Erro ao deletar')
-  });
-
-  // Importar de Fabia
-  const importMutation = useMutation({
-    mutationFn: async () => {
-      const result = await base44.functions.invoke('importFromFabia', {});
-      return result.data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success(`${data.imported} produtos importados!`);
-    },
-    onError: () => toast.error('Erro ao importar de Fabia')
-  });
-
   const handleEdit = (product) => {
     setEditingId(product.id);
     setEditData(product);
   };
 
   const handleSave = () => {
-    updateMutation.mutate({ id: editingId, data: editData });
+    const source = window.prompt('Informe a fonte oficial desta alteração:');
+    if (!source?.trim()) return;
+    if (!window.confirm('Confirma a alteração? O estado anterior será registrado para auditoria.')) return;
+    updateMutation.mutate({ id: editingId, data: editData, source: source.trim() });
   };
 
   const handleCancel = () => {
@@ -84,7 +64,7 @@ export default function ProductManager() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Gerenciador de Produtos</h1>
-        <p className="text-slate-600">Gerencie o catálogo Seamaty e os produtos importados</p>
+        <p className="text-slate-600">Gerencie o catálogo SEAMATY e os produtos importados com auditoria administrativa</p>
       </div>
 
       <CatalogManagerPanel />
@@ -93,23 +73,13 @@ export default function ProductManager() {
         <h2 className="text-xl font-bold text-slate-800">Produtos importados</h2>
       </div>
 
-      {/* Ações */}
-      <div className="flex gap-2 flex-wrap">
-        <Input
-          placeholder="🔍 Buscar por nome, SKU ou categoria..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-xs"
-        />
-        <Button
-          onClick={() => importMutation.mutate()}
-          disabled={importMutation.isPending}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          {importMutation.isPending ? 'Importando...' : 'Importar Fabia'}
-        </Button>
-      </div>
+      {/* Busca segura — importações exigem revisão administrativa separada */}
+      <Input
+        placeholder="🔍 Buscar por nome, SKU ou categoria..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="max-w-xs"
+      />
 
       {/* Info */}
       {products.length > 0 && (
@@ -126,14 +96,7 @@ export default function ProductManager() {
           <p className="text-center text-slate-500">Carregando...</p>
         ) : filteredProducts.length === 0 ? (
           <Card className="p-6 text-center">
-            <p className="text-slate-500">Nenhum produto encontrado</p>
-            <Button
-              onClick={() => importMutation.mutate()}
-              variant="outline"
-              className="mt-4"
-            >
-              Importar de Fabia
-            </Button>
+            <p className="text-slate-500">Nenhum produto encontrado. Importações devem passar por revisão administrativa.</p>
           </Card>
         ) : (
           filteredProducts.map(product => (
@@ -141,7 +104,7 @@ export default function ProductManager() {
               {editingId === product.id ? (
                 // Modo Edição
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <label className="text-xs font-semibold text-slate-700">Nome</label>
                       <Input
@@ -253,23 +216,11 @@ export default function ProductManager() {
                       onClick={() => handleEdit(product)}
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 hover:bg-blue-50"
+                      className="min-h-11 min-w-11 border-blue-300 hover:bg-blue-50"
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button
-                      onClick={() => {
-                        if (confirm('Tem certeza que deseja deletar este produto?')) {
-                          deleteMutation.mutate(product.id);
-                        }
-                      }}
-                      size="sm"
-                      variant="outline"
-                      className="border-red-300 hover:bg-red-50"
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
+
                   </div>
                 </div>
               )}

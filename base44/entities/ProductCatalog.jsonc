@@ -1,7 +1,7 @@
 {
   "name": "ProductCatalog",
   "type": "object",
-  "description": "Cat\u00e1logo oficial de equipamentos e insumos Seamaty, com pre\u00e7os internos nunca expostos no link do cliente.",
+  "description": "Cat\u00e1logo oficial de equipamentos e insumos SEAMATY, com pre\u00e7os internos nunca expostos no link do cliente.",
   "properties": {
     "codigo_produto": {
       "type": "string",
@@ -176,5 +176,27 @@
   "required": [
     "nome_produto",
     "categoria"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

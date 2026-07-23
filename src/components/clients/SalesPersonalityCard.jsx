@@ -10,8 +10,9 @@ export default function SalesPersonalityCard({ client }) {
       <Brain className="h-4 w-4 text-purple-400" />
       <h2 className="text-xs font-black uppercase tracking-widest text-purple-400">Perfil Comportamental</h2>
     </div>
-    <p className="text-sm font-black text-white">{profile.title}</p>
-    <p className="mt-1 text-xs leading-relaxed text-slate-300">{profile.description}</p>
+    <p className="text-sm font-black text-white">Hipótese interna: {profile.title}</p>
+    <p className="mt-1 text-xs leading-relaxed text-slate-300">Hipótese interna de abordagem comercial baseada exclusivamente no primeiro nome. Não representa avaliação psicológica, científica ou confirmação sobre o decisor.</p>
+    <p className="mt-2 text-xs leading-relaxed text-slate-400">{profile.description}</p>
     <div className="mt-3 rounded-xl bg-slate-900 p-3">
       <p className="flex items-center gap-1 text-[10px] font-black uppercase text-orange-300"><Target className="h-3 w-3" /> Gatilhos comerciais</p>
       <div className="mt-2 flex flex-wrap gap-1">{profile.triggers.map(trigger => <span key={trigger} className="rounded-full bg-orange-950 px-2 py-1 text-[10px] font-bold text-orange-200">{trigger}</span>)}</div>
