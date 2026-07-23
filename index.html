@@ -11,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SEAMATY" />
     <meta name="display-mode" content="standalone" />
-    <meta name="screen-orientation" content="landscape" />
     <meta name="application-name" content="Seamaty NR22888" />
     <meta name="msapplication-TileColor" content="#ff6b00" />
     <meta name="msapplication-TileImage" content="/icon-192x192.png" />
@@ -89,26 +88,6 @@
     <script src="/tablet-config.js"></script>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          const isEditor = window.location.hostname.includes('base44.com') ||
-            window.location.hostname.includes('localhost') ||
-            window.self !== window.top;
-
-          if (isEditor) {
-            navigator.serviceWorker.getRegistrations()
-              .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
-              .catch(() => {});
-            if ('caches' in window) {
-              caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))).catch(() => {});
-            }
-            return;
-          }
-
-          navigator.serviceWorker.register('/sw-offline.js?v=nr22888-v2').catch(err => console.log('SW registration failed:', err));
-        });
-      }
-      
       let deferredPrompt;
       window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
