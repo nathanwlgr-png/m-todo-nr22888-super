@@ -1,0 +1,41 @@
+{
+  "name": "Auto-Fix Di\u00e1rio (todos os dias 3h da manh\u00e3)",
+  "description": "Corrige automaticamente problemas comuns do sistema todos os dias \u00e0s 3h",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_fix_di_rio_todos_os_dias_3h_da_manh",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoFixSystem",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
