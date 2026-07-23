@@ -49,7 +49,7 @@ const CONECTORES_STATUS = [
 // ── Componente Principal ────────────────────────────────────────────────────
 export default function ClienteDetalhe360() {
   const [searchParams] = useSearchParams();
-  const clientId = searchParams.get('id');
+  const clientId = searchParams.get('id')?.trim() || '';
   const qc = useQueryClient();
 
   // Estados locais
@@ -65,7 +65,10 @@ export default function ClienteDetalhe360() {
   // ── Queries ────────────────────────────────────────────────────────────────
   const { data: client, isLoading, isError, refetch } = useQuery({
     queryKey: ['c360-client', clientId],
-    queryFn: () => base44.entities.Client.get(clientId),
+    queryFn: async () => {
+      const matches = await base44.entities.Client.filter({ id: clientId }, '-updated_date', 1);
+      return matches[0] || null;
+    },
     enabled: !!clientId,
     staleTime: 2 * 60 * 1000,
   });

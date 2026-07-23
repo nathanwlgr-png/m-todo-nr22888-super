@@ -10,7 +10,7 @@ const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 horas
  * Permite acesso aos dados mesmo sem internet
  */
 export function useOfflineClients() {
-  const [offlineMode, setOfflineMode] = useState(false);
+  const [offlineMode, setOfflineMode] = useState(!navigator.onLine);
   const [cachedClients, setCachedClients] = useState([]);
 
   // Monitorar conexão
@@ -83,14 +83,9 @@ export function useOfflineClients() {
     retry: 1
   });
 
-  // Se tem dados online, usa eles. Se erro, usa cache. Se carregando e tem cache, usa cache.
-  const clients = onlineClients.length > 0 
-    ? onlineClients 
-    : isError 
-    ? cachedClients 
-    : isLoading && cachedClients.length > 0 
-    ? cachedClients 
-    : onlineClients;
+  // Enquanto online, aguarda a lista atual para não abrir IDs antigos de outro ambiente.
+  // O cache local só assume quando o aparelho está realmente offline ou a consulta falha.
+  const clients = offlineMode || isError ? cachedClients : onlineClients;
 
   return {
     clients,

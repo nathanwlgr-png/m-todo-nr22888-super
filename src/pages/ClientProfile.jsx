@@ -27,7 +27,7 @@ const STAGE_COLORS = {
 export default function ClientProfile() {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const clientId = searchParams.get('id');
+  const clientId = searchParams.get('id')?.trim() || '';
   const [editingNote, setEditingNote] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [showWaModal, setShowWaModal] = useState(false);
@@ -39,7 +39,10 @@ export default function ClientProfile() {
 
   const { data: client, isLoading, isError, refetch } = useQuery({
     queryKey: ['client-profile', clientId],
-    queryFn: () => base44.entities.Client.get(clientId),
+    queryFn: async () => {
+      const matches = await base44.entities.Client.filter({ id: clientId }, '-updated_date', 1);
+      return matches[0] || null;
+    },
     enabled: !!clientId,
     staleTime: 2 * 60 * 1000,
   });
