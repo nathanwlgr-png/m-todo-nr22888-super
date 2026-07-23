@@ -11,6 +11,7 @@ import Score4x4Display from '@/components/Score4x4Display';
 import BattlecardAtaque from '@/components/elite/BattlecardAtaque';
 import DropboxEvidenceCard from '@/components/investigation/DropboxEvidenceCard';
 import SalesPersonalityCard from '@/components/clients/SalesPersonalityCard';
+import CollapsibleInsightSection from '@/components/investigation/CollapsibleInsightSection';
 
 const SCORE_COLORS = {
   alto: '#00ff88',
@@ -344,37 +345,33 @@ export default function ModoInvestigativoSupremo() {
           )}
 
           {/* Perfil do Decisor */}
-          <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(0,191,255,0.2)' }}>
-            <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-2">👤 Perfil do Decisor</p>
-            <p className="text-xs text-slate-300 mb-2">{result.decision_maker_profile}</p>
+          <CollapsibleInsightSection title="Perfil do Decisor" icon="👤" tone="blue">
+            <p className="mb-2 text-xs text-slate-300">{result.decision_maker_profile}</p>
             {result.decision_style && (
               <p className="text-[11px] text-blue-300">Estilo: <strong>{result.decision_style}</strong></p>
             )}
             {result.main_motivations?.length > 0 && (
               <div className="mt-2">
-                <p className="text-[10px] text-slate-500 mb-1">Motivações principais:</p>
+                <p className="mb-1 text-[10px] text-slate-500">Motivações principais:</p>
                 <div className="flex flex-wrap gap-1">
-                  {result.main_motivations.map((m, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full"
-                      style={{ background: 'rgba(0,191,255,0.1)', color: '#00bfff' }}>{m}</span>
+                  {result.main_motivations.map((motivation, index) => (
+                    <span key={index} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] text-blue-400">{motivation}</span>
                   ))}
                 </div>
               </div>
             )}
-          </div>
+          </CollapsibleInsightSection>
 
           {/* Potencial de Compra */}
-          <div className="rounded-2xl p-4" style={{ background: '#111', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <p className="text-xs font-black text-orange-400 uppercase tracking-widest mb-2">💰 Potencial de Compra</p>
-            <p className="text-xs text-slate-300 mb-2">{result.equipment_purchase_potential}</p>
+          <CollapsibleInsightSection title="Potencial de Compra" icon="💰" tone="orange">
+            <p className="mb-2 text-xs text-slate-300">{result.equipment_purchase_potential}</p>
             {result.recommended_product && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
-                style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)' }}>
-                <Star className="w-3.5 h-3.5 text-orange-400" />
+              <div className="inline-flex items-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/15 px-3 py-1.5">
+                <Star className="h-3.5 w-3.5 text-orange-400" />
                 <span className="text-xs font-black text-orange-400">Produto Ideal: {result.recommended_product}</span>
               </div>
             )}
-          </div>
+          </CollapsibleInsightSection>
 
           {/* Potencial de Comodato */}
           {result.comodato_potential && (

@@ -9,6 +9,13 @@ import { toast } from 'sonner';
 import { useAIGlobal } from '@/lib/AIGlobalContext.jsx';
 import HunterClinicCard from '@/components/hunter/HunterClinicCard';
 
+const CITY_OPTIONS = {
+  SP: ['Marília', 'Botucatu', 'Bauru', 'Araçatuba', 'Ribeirão Preto', 'São Paulo'],
+  MG: ['Belo Horizonte', 'Uberlândia', 'Contagem'],
+  RJ: ['Rio de Janeiro', 'Niterói'],
+  PR: ['Curitiba', 'Londrina'],
+};
+
 export default function SeamatyHunter() {
   const { aiEnabled, powerMode } = useAIGlobal();
   const [selectedCity, setSelectedCity] = useState('');
@@ -18,12 +25,7 @@ export default function SeamatyHunter() {
   const [hasSearched, setHasSearched] = useState(false);
   const [importingName, setImportingName] = useState('');
 
-  const cities = {
-    'SP': ['Marília', 'Botucatu', 'Bauru', 'Araçatuba', 'Ribeirão Preto', 'São Paulo'],
-    'MG': ['Belo Horizonte', 'Uberlândia', 'Contagem'],
-    'RJ': ['Rio de Janeiro', 'Niterói'],
-    'PR': ['Curitiba', 'Londrina']
-  };
+  const availableCities = CITY_OPTIONS[selectedState] || [];
 
   const segments = [
     'clinica',
@@ -130,35 +132,40 @@ export default function SeamatyHunter() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Estado */}
               <div>
-                <label className="text-sm font-semibold text-slate-300 mb-2 block">Estado</label>
+                <label htmlFor="hunter-state" className="text-sm font-semibold text-slate-300 mb-2 block">Estado</label>
                 <select
+                  id="hunter-state"
+                  name="state"
+                  aria-label="Estado"
                   value={selectedState}
                   onChange={(e) => {
-                    setSelectedState(e.target.value);
+                    setSelectedState(e.target.value.trim().toUpperCase());
                     setSelectedCity('');
                   }}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white"
+                  className="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white"
                 >
-                  <option value="">Selecione...</option>
-                  {Object.keys(cities).map(state => (
-                    <option key={state} value={state}>{state}</option>
+                  <option className="bg-slate-900 text-white" value="">Selecione...</option>
+                  {Object.keys(CITY_OPTIONS).map(state => (
+                    <option className="bg-slate-900 text-white" key={state} value={state}>{state}</option>
                   ))}
                 </select>
               </div>
 
               {/* Cidade */}
               <div>
-                <label className="text-sm font-semibold text-slate-300 mb-2 block">Cidade</label>
+                <label htmlFor="hunter-city" className="text-sm font-semibold text-slate-300 mb-2 block">Cidade</label>
                 <select
-                  key={selectedState || 'sem-estado'}
+                  id="hunter-city"
+                  name="city"
+                  aria-label="Cidade"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
                   disabled={!selectedState}
-                  className="w-full px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white disabled:opacity-50"
+                  className="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
                 >
-                  <option value="">Selecione...</option>
-                  {(cities[selectedState] || []).map(city => (
-                    <option key={`${selectedState}-${city}`} value={city}>{city}</option>
+                  <option className="bg-slate-900 text-white" value="">Selecione...</option>
+                  {availableCities.map(city => (
+                    <option className="bg-slate-900 text-white" key={`${selectedState}-${city}`} value={city}>{city}</option>
                   ))}
                 </select>
               </div>
