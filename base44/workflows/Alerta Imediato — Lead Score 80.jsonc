@@ -1,0 +1,41 @@
+{
+  "name": "Alerta Imediato \u2014 Lead Score 80",
+  "description": "Avisa no CRM e Telegram quando um lead atinge score preditivo de compra igual ou superior a 80.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Lead",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.predictive_score >= 80 and (.trigger.event_type == \"create\" or (.trigger.old_data.predictive_score // 0) < 80) }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "alerta_imediato_lead_score_80",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "notificar_prioridade": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "notifyHighScoreLead",
+            "args": {
+              "lead_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Avisar lead priorit\u00e1rio",
+            "description": "CRM e Telegram"
+          }
+        }
+      }
+    ]
+  }
+}
