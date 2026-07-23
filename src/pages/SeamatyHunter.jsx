@@ -150,14 +150,15 @@ export default function SeamatyHunter() {
               <div>
                 <label className="text-sm font-semibold text-slate-300 mb-2 block">Cidade</label>
                 <select
+                  key={selectedState || 'sem-estado'}
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
                   disabled={!selectedState}
                   className="w-full px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white disabled:opacity-50"
                 >
                   <option value="">Selecione...</option>
-                  {selectedState && cities[selectedState]?.map(city => (
-                    <option key={city} value={city}>{city}</option>
+                  {(cities[selectedState] || []).map(city => (
+                    <option key={`${selectedState}-${city}`} value={city}>{city}</option>
                   ))}
                 </select>
               </div>
