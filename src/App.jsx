@@ -40,6 +40,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import PWAInstallButtonFloating from '@/components/PWAInstallButtonFloating';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import OfflineBanner from '@/components/OfflineBanner';
+import OfflineAutoSync from '@/components/OfflineAutoSync';
 import AppLoadingScreen from '@/components/AppLoadingScreen';
 import { Toaster as ToasterComponent } from '@/components/ui/toaster';
 import Layout from '@/components/AppLayout';
@@ -179,7 +180,9 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Suspense fallback={<PageLoader />}>
+    <>
+      <OfflineAutoSync />
+      <Suspense fallback={<PageLoader />}>
        <Routes>
          {/* ── HOME — Dashboard Sniper ── */}
          <Route path="/" element={<LayoutWrapper currentPageName="HojeModoRuaNR22888"><HojeModoRuaNR22888 /></LayoutWrapper>} />
@@ -312,7 +315,8 @@ const AuthenticatedApp = () => {
 
         <Route path="*" element={<Navigate to="/SalesCommandCenter" replace />} />
       </Routes>
-    </Suspense>
+      </Suspense>
+    </>
   );
 };
 

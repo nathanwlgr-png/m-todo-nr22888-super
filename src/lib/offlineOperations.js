@@ -49,30 +49,46 @@ export async function updateWithOfflineQueue(entity, id, data) {
   return { record, queued: true };
 }
 
-export async function syncPendingOperations() {
+const resolveReferences = (value, idMap) => {
+  if (typeof value === 'string') return idMap.get(value) || value;
+  if (Array.isArray(value)) return value.map((item) => resolveReferences(item, idMap));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, resolveReferences(item, idMap)]));
+  }
+  return value;
+};
+
+let syncInFlight = null;
+
+async function performPendingSync() {
   if (!navigator.onLine) return { synced: 0, failed: 0, pending: (await OfflineManager.getPendingOperations()).length };
 
   const operations = await OfflineManager.getPendingOperations();
-  const createdIds = new Map();
+  const savedMap = await OfflineManager.getMeta('offline_id_map') || {};
+  const createdIds = new Map(Object.entries(savedMap));
   let synced = 0;
   let failed = 0;
 
   for (const operation of operations) {
     try {
       if (operation.action === 'create') {
-        const created = await base44.entities[operation.entity].create(operation.data);
+        const data = resolveReferences(operation.data, createdIds);
+        const created = await base44.entities[operation.entity].create(data);
         await OfflineManager.saveEntity(operation.entity, created);
         if (operation.local_id) {
           createdIds.set(operation.local_id, created.id);
+          await OfflineManager.setMeta('offline_id_map', Object.fromEntries(createdIds));
           await OfflineManager.deleteEntity(operation.entity, operation.local_id);
         }
       } else if (operation.action === 'update') {
         const recordId = createdIds.get(operation.record_id) || operation.record_id;
         if (String(recordId).startsWith('offline-')) throw new Error('Registro local ainda não criado');
-        const updated = await base44.entities[operation.entity].update(recordId, operation.data);
+        const data = resolveReferences(operation.data, createdIds);
+        const updated = await base44.entities[operation.entity].update(recordId, data);
         await OfflineManager.saveEntity(operation.entity, updated);
       } else if (operation.action === 'delete') {
-        await base44.entities[operation.entity].delete(operation.record_id);
+        const recordId = createdIds.get(operation.record_id) || operation.record_id;
+        await base44.entities[operation.entity].delete(recordId);
         await OfflineManager.deleteEntity(operation.entity, operation.record_id);
       }
       await OfflineManager.markOperationSynced(operation.id);
@@ -85,4 +101,9 @@ export async function syncPendingOperations() {
   await OfflineManager.clearSyncedOperations();
   await OfflineManager.setMeta('last_queue_sync', new Date().toISOString());
   return { synced, failed, pending: failed };
+}
+
+export function syncPendingOperations() {
+  if (!syncInFlight) syncInFlight = performPendingSync().finally(() => { syncInFlight = null; });
+  return syncInFlight;
 }

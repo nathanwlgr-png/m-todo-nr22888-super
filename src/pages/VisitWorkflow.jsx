@@ -151,14 +151,31 @@ Formato curto e prático.`
 
     try {
       // Criar registro de visita
-      await createVisitMutation.mutateAsync({
+      const visitResult = await createVisitMutation.mutateAsync({
         client_id: selectedClient.id,
         client_name: selectedClient.first_name,
         scheduled_date: new Date().toISOString(),
         visit_type: 'followup',
         notes: `PRÉ: ${JSON.stringify(preVisitData)}\n\nDURANTE: ${JSON.stringify(duringVisitData)}\n\nPÓS: ${JSON.stringify(postVisitData)}`,
+        result_notes: postVisitData.notes || duringVisitData.observations,
         status: 'realizada'
       });
+
+      if (postVisitData.follow_up_date) {
+        await createWithOfflineQueue('Task', {
+          client_id: selectedClient.id,
+          client_name: selectedClient.first_name,
+          title: `Follow-up da visita — ${selectedClient.first_name}`,
+          description: duringVisitData.next_steps || postVisitData.notes || 'Retomar contato após a visita',
+          due_date: postVisitData.follow_up_date,
+          source_visit_id: visitResult.record.id,
+          priority: duringVisitData.interest_level === 'muito_alto' ? 'alta' : 'media',
+          status: 'pendente',
+          type: 'follow_up',
+          auto_created: true
+        });
+        queryClient.invalidateQueries({ queryKey: ['tasks-rua'] });
+      }
 
       // Atualizar cliente
       await updateClientMutation.mutateAsync({
@@ -170,7 +187,7 @@ Formato curto e prático.`
         }
       });
 
-      toast.success('Visita salva com sucesso!');
+      toast.success(navigator.onLine ? 'Visita e follow-up salvos com sucesso!' : 'Visita e follow-up salvos offline para sincronização!');
       
       // Reset
       setPreVisitData({ objective: '', questions: '', triggers: '', materials: '' });

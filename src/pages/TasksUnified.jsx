@@ -52,14 +52,14 @@ export default function TasksUnified() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients-task-search', clientSearch],
-    queryFn: () => base44.entities.Client.list('-updated_date', 80),
+    queryFn: () => listWithOfflineCache('Client', '-updated_date', 80),
     enabled: clientSearch.length >= 2 || showForm || aiPriority,
     staleTime: 300000,
   });
 
   const { data: leads = [] } = useQuery({
     queryKey: ['leads-task-priority'],
-    queryFn: () => base44.entities.Lead.list('-created_date', 80),
+    queryFn: () => listWithOfflineCache('Lead', '-created_date', 80),
     enabled: aiPriority,
     staleTime: 300000,
   });
