@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 
 export default function WhatsAppHub() {
   const [search, setSearch] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [message, setMessage] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -249,7 +248,6 @@ export default function WhatsAppHub() {
                   onChange={e => {
                     const value = e.target.value;
                     setSearch(value);
-                    setIsSearching(Boolean(value.trim()));
                     if (selectedClient) setSelectedClient(null);
                   }}
                   placeholder="Buscar cliente com WhatsApp..."
@@ -258,16 +256,22 @@ export default function WhatsAppHub() {
                 />
               </div>
 
-              {search && !selectedClient && (isLoadingClients || isSearching) && (
-                <div role="status" aria-live="polite" className="mt-2 flex items-center gap-2 px-3 py-2 text-xs text-slate-500">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Buscando clientes...
+              {search.trim() && !selectedClient && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  data-testid="client-search-status"
+                  className="mt-2 flex min-h-10 items-center gap-2 rounded-xl border border-green-500/40 bg-green-500/10 px-3 py-2 text-xs font-bold text-green-300"
+                >
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                  <span>Buscando clientes...</span>
                 </div>
               )}
 
               {search && !selectedClient && !isLoadingClients && filteredClients.length > 0 && (
                 <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)' }}>
                   {filteredClients.slice(0, 5).map(c => (
-                    <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); setIsSearching(false); }}
+                    <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); }}
                       className="w-full flex items-center justify-between px-3 py-2 hover:opacity-80 border-b last:border-0"
                       style={{ background: '#141414', borderColor: 'rgba(0,255,136,0.1)' }}>
                       <div className="text-left">
