@@ -215,23 +215,18 @@ Retorne JSON com:
       suggested_time: times[pos] || '',
     }));
 
-    // Enviar notificação WhatsApp se solicitado
-    let whatsappSent = false;
+    // Notificação solicitada vira rascunho pendente; nenhum envio é realizado.
+    let pendingMessageId = null;
     if (notify_phone && aiResult.whatsapp_message) {
-      try {
-        await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `placeholder — não usado`
-        });
-        // Enviar via função existente
-        const waRes = await fetch(`${req.url.split('/functions/')[0]}/functions/sendWhatsAppMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': req.headers.get('Authorization') || '' },
-          body: JSON.stringify({ phone: notify_phone, message: aiResult.whatsapp_message })
-        });
-        whatsappSent = waRes.ok;
-      } catch (e) {
-        console.error('Erro ao enviar WhatsApp:', e.message);
-      }
+      const draft = await base44.entities.PendingMessage.create({
+        canal: 'whatsapp', channel: 'whatsapp', destinatario_nome: 'Rota do dia',
+        destinatario_contato: String(notify_phone).replace(/\D/g, ''),
+        contexto: `rota_${targetDate}`, mensagem: aiResult.whatsapp_message,
+        message_content: aiResult.whatsapp_message, status: 'aguardando_aprovacao',
+        criado_por_agente: 'optimizeDayRoute', aprovado_por_nathan: false,
+        data_criacao: new Date().toISOString(), priority: 'media'
+      });
+      pendingMessageId = draft.id;
     }
 
     return Response.json({
@@ -247,7 +242,8 @@ Retorne JSON com:
         route_summary: aiResult.route_summary || '',
       },
       whatsapp_message: aiResult.whatsapp_message || '',
-      whatsapp_sent: whatsappSent,
+      whatsapp_sent: false,
+      pending_message_id: pendingMessageId,
     });
 
   } catch (error) {

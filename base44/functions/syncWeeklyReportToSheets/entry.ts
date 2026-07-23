@@ -144,17 +144,20 @@ Deno.serve(async (req) => {
   <div class="footer">Relatório automático · CRM NR22 · SEAMATY Brasil</div>
 </body></html>`;
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: user.email,
-      subject: `📊 Relatório Semanal de Vendas – ${periodStr}`,
-      body: htmlReport,
-      from_name: 'CRM NR22 – SEAMATY Brasil'
+    const draft = await base44.entities.PendingMessage.create({
+      canal: 'email', channel: 'email', destinatario_nome: user.full_name || user.email,
+      destinatario_contato: user.email, contexto: 'relatorio_semanal_sheets',
+      mensagem: htmlReport, message_content: htmlReport,
+      email_subject: `Relatório Semanal de Vendas – ${periodStr}`,
+      status: 'aguardando_aprovacao', criado_por_agente: 'syncWeeklyReportToSheets',
+      aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'baixa'
     });
 
     return Response.json({
       success: true,
       period: periodStr,
-      email_sent_to: user.email,
+      email_sent_to: null,
+      pending_message_id: draft.id,
       sheets_url: sheetsUrl,
       summary: {
         new_leads: newLeads.length,

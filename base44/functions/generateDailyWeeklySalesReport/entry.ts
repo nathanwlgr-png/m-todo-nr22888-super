@@ -156,16 +156,15 @@ Deno.serve(async (req) => {
 </html>
     `;
 
-    // Enviar email
-    if (recipients && recipients.length > 0) {
-      for (const email of recipients) {
-        await base44.integrations.Core.SendEmail({
-          to: email,
-          subject: `Relatório ${report_type === 'daily' ? 'Diário' : 'Semanal'} de Vendas - ${new Date().toLocaleDateString('pt-BR')}`,
-          body: htmlReport,
-          from_name: 'CRM NR22888'
-        });
-      }
+    const validRecipients = Array.isArray(recipients) ? recipients.filter(Boolean) : [];
+    if (validRecipients.length) {
+      await base44.entities.PendingMessage.bulkCreate(validRecipients.map((email) => ({
+        canal: 'email', channel: 'email', destinatario_nome: email, destinatario_contato: email,
+        contexto: `relatorio_${report_type || 'weekly'}`, mensagem: htmlReport, message_content: htmlReport,
+        email_subject: `Relatório ${report_type === 'daily' ? 'Diário' : 'Semanal'} de Vendas - ${new Date().toLocaleDateString('pt-BR')}`,
+        status: 'aguardando_aprovacao', criado_por_agente: 'generateDailyWeeklySalesReport',
+        aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'baixa'
+      })));
     }
 
     return Response.json({
@@ -175,7 +174,8 @@ Deno.serve(async (req) => {
       sales_count: salesCount,
       total_value: totalValue,
       average_value: avgValue,
-      recipients_sent: recipients?.length || 0
+      recipients_sent: 0,
+      drafts_prepared: validRecipients.length
     });
   } catch (error) {
     console.error('Error in generateDailyWeeklySalesReport:', error);

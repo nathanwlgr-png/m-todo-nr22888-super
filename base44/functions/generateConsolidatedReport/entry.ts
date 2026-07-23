@@ -3,6 +3,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
     const body = await req.json().catch(() => ({}));
     const { report_id } = body;
 
@@ -49,7 +52,7 @@ Deno.serve(async (req) => {
           acc[l.source] = (acc[l.source] || 0) + 1;
           return acc;
         }, {}),
-        taxa_conversao: leads.filter(l => l.status === 'convertido').length / leads.length * 100
+        taxa_conversao: leads.length > 0 ? leads.filter(l => l.status === 'convertido').length / leads.length * 100 : 0
       };
     }
 
@@ -61,7 +64,7 @@ Deno.serve(async (req) => {
         total: clients.length,
         quentes: clients.filter(c => c.status === 'quente').length,
         mornos: clients.filter(c => c.status === 'morno').length,
-        health_score_medio: clients.reduce((sum, c) => sum + (c.health_score || 0), 0) / clients.length
+        health_score_medio: clients.length > 0 ? clients.reduce((sum, c) => sum + Number(c.health_score || 0), 0) / clients.length : 0
       };
     }
 
@@ -144,7 +147,7 @@ Deno.serve(async (req) => {
       
       metricsData.sentimento_clientes = {
         ...sentimentCounts,
-        score_medio: interactions.reduce((sum, i) => sum + (i.sentiment_score || 0), 0) / interactions.length
+        score_medio: interactions.length > 0 ? interactions.reduce((sum, i) => sum + Number(i.sentiment_score || 0), 0) / interactions.length : 0
       };
     }
 
@@ -161,29 +164,24 @@ Deno.serve(async (req) => {
     // Gerar HTML do relatório
     const htmlContent = generateReportHTML(report, metricsData, startDate, endDate);
 
-    // Enviar email para cada destinatário (apenas se tiver recipients)
-    if (report.recipients && report.recipients.length > 0) {
-      const sendPromises = report.recipients.map(email => 
-        base44.asServiceRole.integrations.Core.SendEmail({
-          to: email,
-          subject: `${report.report_name} - ${new Date().toLocaleDateString('pt-BR')}`,
-          body: htmlContent
-        }).catch(() => null)
-      );
-      await Promise.all(sendPromises);
-    }
-
-    // Atualizar status do relatório (apenas se tiver ID)
-    if (report_id) {
-      await base44.asServiceRole.entities.ScheduledReport.update(report_id, {
-        last_sent_date: new Date().toISOString(),
-        last_sent_status: 'success'
-      }).catch(() => null);
+    // Destinatários recebem apenas rascunhos pendentes de aprovação.
+    const recipients = Array.isArray(report.recipients) ? report.recipients.filter(Boolean) : [];
+    if (recipients.length) {
+      await base44.asServiceRole.entities.PendingMessage.bulkCreate(recipients.map((email) => ({
+        canal: 'email', channel: 'email', destinatario_nome: email,
+        destinatario_contato: email, contexto: `relatorio_${report_id || 'consolidado'}`,
+        mensagem: htmlContent, message_content: htmlContent,
+        email_subject: `${report.report_name} - ${new Date().toLocaleDateString('pt-BR')}`,
+        status: 'aguardando_aprovacao', criado_por_agente: 'generateConsolidatedReport',
+        aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'baixa'
+      })));
     }
 
     return Response.json({
       success: true,
-      recipients_count: (report.recipients || []).length,
+      recipients_count: 0,
+      drafts_prepared: recipients.length,
+      messages_sent: 0,
       metrics: metricsData,
       html_preview: htmlContent.substring(0, 500) + '...'
     });

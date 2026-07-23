@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
       status: 'approved'
     });
 
-    let sentCount = 0;
+    let preparedCount = 0;
     const whatsappLinks = [];
 
     for (const msg of approvedMessages) {
@@ -45,21 +45,22 @@ Deno.serve(async (req) => {
           });
         }
 
-        sentCount++;
+        preparedCount++;
       } catch (error) {
-        console.error(`Erro ao enviar mensagem ${msg.id}:`, error);
+        console.error(`Erro ao preparar mensagem ${msg.id}:`, error);
       }
     }
 
     return Response.json({ 
       success: true, 
-      sent: sentCount,
+      prepared: preparedCount,
+      sent: 0,
       whatsapp_links: whatsappLinks,
-      message: `${sentCount} mensagem(ns) preparada(s). Nenhuma é enviada automaticamente: WhatsApp e e-mail ficam prontos e exigem confirmação humana.`
+      message: `${preparedCount} mensagem(ns) preparada(s). Nenhum envio foi realizado.`
     });
 
   } catch (error) {
-    console.error('Erro no envio de mensagens:', error);
+    console.error('Erro na preparação de mensagens:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

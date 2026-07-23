@@ -20,10 +20,9 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Manual (logado) ou automação (service role)
-    try {
-      await base44.auth.me();
-    } catch (_e) { /* automação */ }
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
     const dryRun = body?.dry_run === true;
@@ -38,9 +37,9 @@ Deno.serve(async (req) => {
     const ia = await base44.asServiceRole.integrations.Core.InvokeLLM({
       add_context_from_internet: true,
       model: 'gemini_3_flash',
-      prompt: `Você é o analista de inteligência competitiva da Compet Distribuidora, que vende equipamentos laboratoriais veterinários da marca Seamaty no Brasil (hematologia, bioquímica, morfologia celular por IA, hemogasometria, imunofluorescência, PCR, urinálise).
+      prompt: `Você é o analista de inteligência competitiva da Compet Distribuidora, que vende equipamentos laboratoriais veterinários da marca SEAMATY no Brasil (hematologia, bioquímica, morfologia celular por IA, hemogasometria, imunofluorescência, PCR, urinálise).
 
-TAREFA: Pesquise na internet (priorize fabricantes da CHINA e lançamentos globais recentes ou anunciados para 2025/2026) e liste EQUIPAMENTOS veterinários NOVOS ou em pré-lançamento que possam competir com a Seamaty no Brasil. Inclua qualquer tipo: hematologia, bioquímica, morfologia/análise celular por IA, PCR, imunofluorescência, hemogasometria, urinálise.
+TAREFA: Pesquise na internet (priorize fabricantes da CHINA e lançamentos globais recentes ou anunciados para 2025/2026) e liste EQUIPAMENTOS veterinários NOVOS ou em pré-lançamento que possam competir com a SEAMATY no Brasil. Inclua qualquer tipo: hematologia, bioquímica, morfologia/análise celular por IA, PCR, imunofluorescência, hemogasometria, urinálise.
 
 Para CADA equipamento novo encontrado, informe: nome do equipamento/produto, fabricante/marca, país, tecnologia/linha, um resumo do que ele faz, e o link da fonte. Foque em concorrentes FUTUROS (lançamentos novos) — não liste produtos antigos e consolidados há muitos anos.
 
@@ -63,7 +62,7 @@ Retorne no máximo 12 itens, os mais relevantes e recentes.`,
                 resumo: { type: 'string' },
                 ano_lancamento: { type: 'string' },
                 nivel_ameaca: { type: 'string', description: 'baixo, medio, alto ou critico' },
-                argumento_contra: { type: 'string', description: 'Como a Seamaty pode se posicionar contra esse concorrente' },
+                argumento_contra: { type: 'string', description: 'Como a SEAMATY pode se posicionar contra esse concorrente' },
                 url: { type: 'string' }
               }
             }
@@ -126,25 +125,18 @@ Retorne no máximo 12 itens, os mais relevantes e recentes.`,
       await base44.asServiceRole.entities.CompetitorTracker.bulkCreate(novos);
     }
 
-    // 4. Alerta no Telegram
-    let telegramEnviado = false;
-    const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
-    const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
-    if (!dryRun && novos.length > 0 && token && chatId) {
-      const linhasAmeaca = ameacasAltas.length > 0
-        ? `\n\n⚠️ Ameaças altas/críticas:\n${ameacasAltas.join('\n')}`
-        : '';
-      const texto = `🎯 NR22888 — Caça de Concorrentes Futuros\n\nForam encontrados ${novos.length} novo(s) equipamento(s) concorrente(s) no mercado e registrados no Painel Concorrência.${linhasAmeaca}\n\nAbra o Painel Concorrência para ver os detalhes.`;
-      try {
-        const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: texto }),
-          signal: AbortSignal.timeout(8000),
-        });
-        const d = await r.json();
-        telegramEnviado = !!d.ok;
-      } catch (_e) { telegramEnviado = false; }
+    // Alertas externos são convertidos em rascunho pendente.
+    let pendingMessageId = null;
+    if (!dryRun && novos.length > 0) {
+      const linhasAmeaca = ameacasAltas.length > 0 ? `\n\nAmeaças para revisão:\n${ameacasAltas.join('\n')}` : '';
+      const texto = `NR22888 — Concorrentes futuros\n\n${novos.length} item(ns) novo(s) preparado(s) para revisão.${linhasAmeaca}`;
+      const draft = await base44.entities.PendingMessage.create({
+        canal: 'telegram', channel: 'telegram', destinatario_nome: 'Canal Telegram configurado',
+        contexto: 'concorrentes_futuros', mensagem: texto, message_content: texto,
+        status: 'aguardando_aprovacao', criado_por_agente: 'cacaConcorrentesFuturos',
+        aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'media'
+      });
+      pendingMessageId = draft.id;
     }
 
     return Response.json({
@@ -154,7 +146,8 @@ Retorne no máximo 12 itens, os mais relevantes e recentes.`,
       novos_registrados: dryRun ? 0 : novos.length,
       novos_detectados: novos.length,
       ameacas_altas: ameacasAltas.length,
-      telegram_enviado: telegramEnviado,
+      telegram_enviado: false,
+      pending_message_id: pendingMessageId,
       preview: novos.map(n => ({ nome: n.nome, tecnologia: n.tecnologias[0], ameaca: n.nivel_ameaca }))
     });
   } catch (error) {

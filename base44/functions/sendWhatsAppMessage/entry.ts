@@ -1,82 +1,40 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!user) {
-      return Response.json({ error: 'Não autorizado' }, { status: 401 });
+    const body = await req.json().catch(() => ({}));
+    const clientId = body.client_id;
+    const rawPhone = body.client_phone || body.phone;
+    const message = body.message || body.message_content;
+    if (!rawPhone || !message) return Response.json({ error: 'message e phone são obrigatórios' }, { status: 400 });
+
+    let phone = String(rawPhone).replace(/\.0+$/, '').replace(/\D/g, '');
+    if (!phone.startsWith('55') && [10, 11].includes(phone.length)) phone = `55${phone}`;
+    if (phone.length < 12 || phone.length > 13) return Response.json({ error: 'Número de telefone inválido' }, { status: 422 });
+
+    let clientName = body.client_name || 'Contato WhatsApp';
+    if (clientId) {
+      const clients = await base44.entities.Client.filter({ id: clientId });
+      const client = clients[0];
+      clientName = client?.full_name || client?.first_name || client?.clinic_name || clientName;
     }
 
-    const body = await req.json();
-
-    // Aceita tanto "phone"/"client_phone" para compatibilidade
-    const client_id    = body.client_id;
-    const client_phone = body.client_phone || body.phone;
-    const message      = body.message;
-    const auto_log     = body.auto_log !== false; // default true
-
-    if (!message || !client_phone) {
-      return Response.json({ error: 'Parâmetros obrigatórios: message e phone (ou client_phone)' }, { status: 400 });
-    }
-
-    // Normalizar telefone (remove não-dígitos, remove .0 do Excel, adiciona 55 se necessário)
-    let phone = String(client_phone).replace(/\.0+$/, '').replace(/\D/g, '');
-    if (!phone.startsWith('55') && (phone.length === 10 || phone.length === 11)) {
-      phone = '55' + phone;
-    }
-
-    if (phone.length < 12) {
-      return Response.json({ error: 'Número de telefone inválido (mínimo 12 dígitos com código país)' }, { status: 422 });
-    }
-
-    // Gerar link wa.me (padrão principal seguro)
-    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-    // Registra como mensagem preparada; não marca como enviada sem confirmação humana.
-    if (auto_log && client_id) {
-      try {
-        const clients = await base44.asServiceRole.entities.Client.filter({ id: client_id });
-        const client = clients?.[0];
-        const clientName = client?.full_name || client?.first_name || client?.clinic_name || '';
-
-        await base44.asServiceRole.entities.PendingMessage.create({
-          canal: 'whatsapp',
-          channel: 'whatsapp',
-          cliente_id: client_id,
-          recipient_id: client_id,
-          destinatario_nome: clientName,
-          recipient_name: clientName,
-          destinatario_contato: phone,
-          recipient_phone: phone,
-          mensagem: message,
-          message_content: message,
-          status: 'ready_to_send',
-          aprovado_por_nathan: true,
-          approved_by: user.email,
-          approved_at: new Date().toISOString(),
-          wa_url: waUrl,
-          prepared_at: new Date().toISOString(),
-          contexto: 'Mensagem personalizada preparada no perfil do cliente'
-        });
-      } catch (logErr) {
-        console.warn('[sendWhatsAppMessage] Log falhou:', logErr.message);
-      }
-    }
-
-    return Response.json({
-      success: true,
-      wa_url: waUrl,
-      phone_formatted: phone,
-      timestamp: new Date().toISOString(),
-      message_id: Math.random().toString(36).substring(7),
-      status: 'prepared',
-      note: 'Link preparado. NÃO marca como enviado. Confirmar envio manualmente após abrir o WhatsApp.'
+    const draft = await base44.entities.PendingMessage.create({
+      canal: 'whatsapp', channel: 'whatsapp', cliente_id: clientId, recipient_id: clientId,
+      destinatario_nome: clientName, recipient_name: clientName,
+      destinatario_contato: phone, recipient_phone: phone,
+      mensagem: String(message), message_content: String(message),
+      status: 'aguardando_aprovacao', aprovado_por_nathan: false,
+      criado_por_agente: 'sendWhatsAppMessage', data_criacao: new Date().toISOString(),
+      contexto: 'mensagem_whatsapp_pendente', context: 'mensagem_whatsapp_pendente', priority: 'media'
     });
 
+    return Response.json({ success: true, pending_message_id: draft.id, status: 'aguardando_aprovacao', sent: false, message: 'Rascunho preparado. Nenhum envio realizado.' });
   } catch (error) {
-    console.error('[sendWhatsAppMessage] Erro:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

@@ -149,31 +149,22 @@ Deno.serve(async (req) => {
 </html>`;
 
     const recipients = [...new Set(users.filter((user) => user.email && user.role === 'admin').map((user) => user.email))];
-    const finalRecipients = recipients.length > 0 ? recipients : ['nathan.wlgr@gmail.com'];
+    const finalRecipients = recipients;
 
-    for (const email of finalRecipients) {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: email,
-        subject: `Resumo semanal de rotas e oportunidades — ${startDate} a ${endDate}`,
-        body: html,
-        from_name: 'CRM NR22888'
-      });
-      await base44.asServiceRole.entities.Alert.create({
-        user_email: email,
-        title: 'Resumo semanal de rotas e oportunidades',
-        message: `Resumo enviado por e-mail. Período ${startDate} a ${endDate}: ${weekVisits.length} visitas realizadas, ${weekRouteTasks.length} tarefas de rota, ${rows.length} oportunidades acompanhadas.`,
-        type: 'high_score_lead',
-        priority: 'alta',
-        link_to: '/ScheduledAgenda',
-        read: false,
-        dismissed: false
-      });
+    if (finalRecipients.length) {
+      await base44.asServiceRole.entities.PendingMessage.bulkCreate(finalRecipients.map((email) => ({
+        canal: 'email', channel: 'email', destinatario_nome: email, destinatario_contato: email,
+        contexto: 'resumo_semanal_rotas', mensagem: html, message_content: html,
+        email_subject: `Resumo semanal de rotas e oportunidades — ${startDate} a ${endDate}`,
+        status: 'aguardando_aprovacao', criado_por_agente: 'weeklyRouteOpportunitySummary',
+        aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'baixa'
+      })));
     }
 
     await base44.asServiceRole.entities.AIInteractionLog.create({
       action_type: 'route',
       user_message: 'Resumo semanal automático de clínicas visitadas e oportunidades por rota',
-      ai_response: `Resumo semanal enviado para ${finalRecipients.length} destinatário(s). Visitas: ${weekVisits.length}. Tarefas de rota: ${weekRouteTasks.length}. Oportunidades: ${rows.length}.`,
+      ai_response: `Resumo semanal preparado para ${finalRecipients.length} destinatário(s). Nenhum envio realizado. Visitas: ${weekVisits.length}. Tarefas de rota: ${weekRouteTasks.length}. Oportunidades: ${rows.length}.`,
       source: 'automation',
       success: true,
       model_used: 'CRM_NR22888_operacional'
@@ -181,7 +172,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      recipients: finalRecipients.length,
+      recipients: 0,
+      drafts_prepared: finalRecipients.length,
       period: { start: startDate, end: endDate },
       visits_done: weekVisits.length,
       route_tasks: weekRouteTasks.length,

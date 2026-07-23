@@ -70,20 +70,14 @@ Deno.serve(async (req) => {
       'Origem: telegram_operacional_nr22888'
     ].filter(Boolean).join('\n').slice(0, 4000);
 
-    const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
-    const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
-    if (!token || !chatId) return Response.json({ error: 'Telegram não configurado', dashboard_config_id: saved.id }, { status: 500 });
-
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: summary }),
-      signal: AbortSignal.timeout(10000)
+    const draft = await base44.entities.PendingMessage.create({
+      canal: 'telegram', channel: 'telegram', destinatario_nome: 'Canal Telegram configurado',
+      contexto: 'resumo_executivo_semanal', mensagem: summary, message_content: summary,
+      status: 'aguardando_aprovacao', criado_por_agente: 'publishWeeklySalesExecutiveSummary',
+      aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'media'
     });
-    const telegramData = await telegramResponse.json();
-    if (!telegramData.ok) return Response.json({ error: telegramData.description || 'Falha no Telegram', dashboard_config_id: saved.id }, { status: 502 });
 
-    return Response.json({ success: true, dashboard_config_id: saved.id, telegram_sent: true });
+    return Response.json({ success: true, dashboard_config_id: saved.id, telegram_sent: false, pending_message_id: draft.id });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

@@ -2,8 +2,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // ── RADAR DE PROSPECÇÃO QUENTE — NR22888 ──
 // Varre clínicas/hospitais/laboratórios de uma região e PRIORIZA quem ainda usa
-// concorrente ou análise terceirizada (maior chance de conversão Seamaty).
-// Gera battlecard (argumento de ataque) pronto e injeta como LeadHunterSeamaty quente.
+// concorrente ou análise terceirizada (maior chance de conversão SEAMATY).
+// Gera battlecard (argumento de ataque) pronto e injeta como LeadHunterSEAMATY quente.
 // SAFE: usa apenas dados públicos. Nada é enviado. Tudo aguarda aprovação do Nathan.
 
 Deno.serve(async (req) => {
@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
 
     // Evitar duplicatas: nomes já capturados + clientes existentes
     const [leadsExistentes, clientesExistentes] = await Promise.all([
-      base44.asServiceRole.entities.LeadHunterSeamaty.list('-created_date', 2000).catch(() => []),
+      base44.asServiceRole.entities.LeadHunterSEAMATY.list('-created_date', 2000).catch(() => []),
       base44.asServiceRole.entities.Client.list('-created_date', 2000).catch(() => []),
     ]);
     const nomesConhecidos = new Set([
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
     // Busca pública + análise de fit, priorizando uso de concorrente/terceirizado
     const pesquisa = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Você é um caçador de oportunidades comerciais do mercado veterinário brasileiro para a Seamaty (analisadores hematológicos e bioquímicos in-house).
+      prompt: `Você é um caçador de oportunidades comerciais do mercado veterinário brasileiro para a SEAMATY (analisadores hematológicos e bioquímicos in-house).
 
 Analise ${city}/${state} e arredores (raio ~${radius_km}km) em 2026 e identifique clínicas, hospitais e laboratórios veterinários.
 
@@ -37,7 +37,7 @@ PRIORIZE QUEM TEM MAIOR CHANCE DE COMPRAR AGORA:
 2. Clínicas que usam EQUIPAMENTO CONCORRENTE antigo (Idexx, Heska, Zoetis, Mindray, Wiener, Labtest) — chance de upgrade.
 3. Hospitais/clínicas de médio-grande porte com 40-230+ exames de sangue/mês.
 
-Para CADA clínica, classifique a "temperatura" de oportunidade e gere um ARGUMENTO DE ATAQUE Seamaty específico (battlecard curto e direto que o vendedor pode usar na abordagem).
+Para CADA clínica, classifique a "temperatura" de oportunidade e gere um ARGUMENTO DE ATAQUE SEAMATY específico (battlecard curto e direto que o vendedor pode usar na abordagem).
 
 Use somente dados públicos (Google Maps, Instagram, sites, notícias).`,
       add_context_from_internet: true,
@@ -116,10 +116,10 @@ Use somente dados públicos (Google Maps, Instagram, sites, notícias).`,
     for (const c of topQuentes.slice(0, 25)) {
       const abordagem = c.battlecard
         || (c.usa_terceirizado
-          ? `${c.nome_clinica} ainda terceiriza exames — atacar custo recorrente e demora. Seamaty entrega resultado in-house em minutos.`
-          : `Oportunidade de upgrade de ${c.concorrente_detectado || 'equipamento atual'} para Seamaty.`);
+          ? `${c.nome_clinica} ainda terceiriza exames — atacar custo recorrente e demora. SEAMATY entrega resultado in-house em minutos.`
+          : `Oportunidade de upgrade de ${c.concorrente_detectado || 'equipamento atual'} para SEAMATY.`);
 
-      const criado = await base44.asServiceRole.entities.LeadHunterSeamaty.create({
+      const criado = await base44.asServiceRole.entities.LeadHunterSEAMATY.create({
         nome_clinica: c.nome_clinica,
         tipo: TIPO_MAP[(c.tipo || '').toLowerCase()] || 'clinica_veterinaria',
         cidade: c.cidade || city,
@@ -152,19 +152,6 @@ Use somente dados públicos (Google Maps, Instagram, sites, notícias).`,
         created_date: new Date().toISOString(),
       }).catch(() => null);
 
-      const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
-      const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
-      if (token && chatId) {
-        const topo = topQuentes.slice(0, 5)
-          .map(c => `• ${c.nome_clinica} (${c.temperatura}, ${c.score_potencial || 0})`).join('\n');
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: `🎯 RADAR DE PROSPECÇÃO — ${city}/${state}\n${criados} oportunidade(s) quente(s) capturada(s):\n\n${topo}\n\nAbra o CRM para validar e atacar.`,
-          }),
-        }).catch(() => {});
-      }
     }
 
     return Response.json({

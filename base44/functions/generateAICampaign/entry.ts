@@ -120,10 +120,10 @@ Para cada perfil comportamental comum (analítico, emocional, direto):
 
 REGRAS:
 - Use dados do mercado veterinário brasileiro
-- Mencione diferenciais Seamaty (garantia 25 meses, bonificação insumos)
+- Mencione somente diferenciais SEAMATY previamente validados no CRM; não invente garantia, bonificação, preço ou condição
 - Seja persuasivo mas profissional
 - Adapte ao perfil B2B veterinário
-- Todas as mensagens devem estar PRONTAS para envio
+- Todas as mensagens são RASCUNHOS e exigem aprovação humana
 
 Retorne JSON estruturado.`,
       add_context_from_internet: true,
@@ -190,7 +190,7 @@ Retorne JSON estruturado.`,
       goal: campaign_goal,
       target_criteria: target_criteria,
       target_count: targetStats.total,
-      status: execute_campaign ? 'active' : 'draft',
+      status: 'draft',
       channels: [campaign.primary_channel, campaign.secondary_channel].filter(Boolean),
       message_template: campaign.main_message.body,
       subject_line: campaign.main_message.subject,
@@ -198,26 +198,22 @@ Retorne JSON estruturado.`,
       expected_conversion_rate: campaign.success_metrics?.expected_conversion_rate || 10
     });
 
-    // Se executar campanha, enviar mensagens
-    let sent_count = 0;
-    if (execute_campaign && targetClients.length > 0) {
-      for (const client of targetClients.slice(0, 50)) { // Limitar a 50 por vez
-        try {
-          if (campaign.primary_channel === 'email' && client.email) {
-            await base44.integrations.Core.SendEmail({
-              to: client.email,
-              subject: campaign.main_message.subject.replace('{nome}', client.first_name),
-              body: campaign.main_message.body.replace('{nome}', client.first_name)
-            });
-            sent_count++;
-          }
-          
-          await new Promise(resolve => setTimeout(resolve, 100)); // Rate limiting
-        } catch (error) {
-          console.error(`Erro ao enviar para ${client.first_name}:`, error);
-        }
-      }
-    }
+    // A solicitação de execução prepara rascunhos; nunca envia.
+    const drafts = execute_campaign ? targetClients.slice(0, 50).map((client) => {
+      const name = client.first_name || client.full_name || 'Cliente';
+      const channel = campaign.primary_channel === 'email' ? 'email' : 'whatsapp';
+      const contact = channel === 'email' ? client.email : client.phone;
+      return contact ? {
+        canal: channel, channel, destinatario_nome: name, destinatario_contato: contact,
+        cliente_id: client.id, contexto: `campanha_${savedCampaign.id}`,
+        mensagem: campaign.main_message.body.replace('{nome}', name),
+        message_content: campaign.main_message.body.replace('{nome}', name),
+        email_subject: campaign.main_message.subject.replace('{nome}', name),
+        status: 'aguardando_aprovacao', criado_por_agente: 'generateAICampaign',
+        aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'media'
+      } : null;
+    }).filter(Boolean) : [];
+    if (drafts.length) await base44.entities.PendingMessage.bulkCreate(drafts);
 
     return Response.json({
       success: true,
@@ -226,8 +222,9 @@ Retorne JSON estruturado.`,
         id: savedCampaign.id,
         target_stats: targetStats
       },
-      messages_sent: sent_count,
-      executed: execute_campaign
+      messages_sent: 0,
+      drafts_prepared: drafts.length,
+      executed: false
     });
 
   } catch (error) {

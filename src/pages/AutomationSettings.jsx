@@ -89,9 +89,6 @@ export default function AutomationSettings() {
   // Execute now
   const executeMutation = useMutation({
     mutationFn: async () => {
-      if (!window.confirm('Preparar os rascunhos agora? Eles ficarão pendentes para aprovação manual.')) {
-        throw new Error('cancelled');
-      }
       const response = await base44.functions.invoke('automaticMessageScheduler', {
         action: 'execute_now',
         confirmed_by_user: true
@@ -105,8 +102,8 @@ export default function AutomationSettings() {
       toast.success(data.message);
     },
     onError: (error) => {
-      if (error.message !== 'cancelled') setExecutionResult({ success: false, message: error.message });
-      toast.error(error.message === 'cancelled' ? 'Preparação cancelada' : error.message);
+      setExecutionResult({ success: false, message: error.message });
+      toast.error(error.message);
     }
   });
 
@@ -208,7 +205,7 @@ export default function AutomationSettings() {
                 min="1"
                 max="100"
                 value={maxMessages}
-                onChange={(e) => setMaxMessages(parseInt(e.target.value))}
+                onChange={(e) => setMaxMessages(Math.max(1, Math.min(Number(e.target.value) || 1, 100)))}
                 className="w-full max-w-xs"
               />
               <p className="text-xs text-slate-500 mt-1">Quantidade máxima de rascunhos preparados por dia</p>

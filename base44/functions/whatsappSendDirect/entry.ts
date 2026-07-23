@@ -1,44 +1,27 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
-// Envia mensagem via WhatsApp direto
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { phone, message, client_id, client_name } = await req.json().catch(() => ({}));
+    if (!phone || !message) return Response.json({ error: 'Telefone e mensagem obrigatórios' }, { status: 400 });
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    if (cleanPhone.length < 10 || cleanPhone.length > 13) return Response.json({ error: 'Formato de telefone inválido' }, { status: 400 });
 
-    const { phone, message } = await req.json();
-
-    if (!phone || !message) {
-      return Response.json({ error: 'Telefone e mensagem obrigatórios' }, { status: 400 });
-    }
-
-    // Formata número para WhatsApp (aceita com ou sem DDI 55)
-    const cleanPhone = phone.replace(/\D/g, '');
-    let formattedPhone = cleanPhone;
-    // Se não começa com 55, adiciona DDI Brasil
-    if (!formattedPhone.startsWith('55')) {
-      formattedPhone = '55' + formattedPhone;
-    }
-    // Aceita 12 ou 13 dígitos (55 + DDD + número)
-    if (formattedPhone.length < 12 || formattedPhone.length > 13) {
-      return Response.json({ error: 'Formato de telefone inválido. Use: 11999999999 ou 5511999999999' }, { status: 400 });
-    }
-
-    // Abre WhatsApp Web com mensagem
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-
-    return Response.json({
-      success: true,
-      whatsappUrl,
-      phone: formattedPhone,
-      messagePreview: message.substring(0, 100)
+    const draft = await base44.entities.PendingMessage.create({
+      canal: 'whatsapp', channel: 'whatsapp', cliente_id: client_id,
+      destinatario_nome: client_name || 'Contato WhatsApp', destinatario_contato: cleanPhone,
+      recipient_id: client_id, recipient_name: client_name || 'Contato WhatsApp', recipient_phone: cleanPhone,
+      contexto: 'whatsapp_direct_convertido_em_rascunho', context: 'whatsapp_direct_convertido_em_rascunho',
+      mensagem: String(message), message_content: String(message),
+      status: 'aguardando_aprovacao', criado_por_agente: 'whatsappSendDirect',
+      aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'media'
     });
 
+    return Response.json({ success: true, pending_message_id: draft.id, status: 'aguardando_aprovacao', sent: false, message: 'Rascunho preparado. Nenhum envio realizado.' });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

@@ -3,6 +3,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const now = new Date();
     const weekAgo = new Date(now);
@@ -126,20 +129,20 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-    // Send to admin emails
-    const adminEmails = ['nathan.wlgr@gmail.com'];
-    for (const email of adminEmails) {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: email,
-        subject: `📊 Relatório Semanal de Vendas – ${periodStr}`,
-        body: htmlReport,
-        from_name: 'CRM NR22 – SEAMATY Brasil'
-      });
-    }
+    const draft = await base44.entities.PendingMessage.create({
+      canal: 'email', channel: 'email', destinatario_nome: user.full_name || user.email,
+      destinatario_contato: user.email, contexto: 'relatorio_semanal_vendas',
+      mensagem: htmlReport, message_content: htmlReport,
+      email_subject: `Relatório Semanal de Vendas – ${periodStr}`,
+      status: 'aguardando_aprovacao', criado_por_agente: 'weeklySalesReport',
+      aprovado_por_nathan: false, data_criacao: new Date().toISOString(), priority: 'baixa'
+    });
 
     return Response.json({
       success: true,
       period: periodStr,
+      messages_sent: 0,
+      pending_message_id: draft.id,
       summary: {
         new_leads: newLeads.length,
         new_clients: newClients.length,

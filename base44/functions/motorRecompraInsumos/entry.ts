@@ -128,21 +128,6 @@ Deno.serve(async (req) => {
         dismissed: false
       }).catch(() => null);
 
-      // Notificação interna via Telegram (se configurado)
-      const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
-      const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
-      if (token && chatId) {
-        const topo = preparados.slice(0, 5)
-          .map(p => `• ${p.cliente_nome} — ${p.produto || 'reagente'} (${p.dias_ciclo}d)`).join('\n');
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: `🧪 MÁQUINA DE INSUMOS\n${criados} recompra(s) prontas para aprovar:\n\n${topo}\n\nAbra o WhatsApp Hub para aprovar e enviar.`,
-          }),
-        }).catch(() => {});
-      }
     }
 
     return Response.json({

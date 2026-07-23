@@ -45,7 +45,7 @@ IDENTIDADE DO REMETENTE:
 - Nome: Nathan Rosa
 - Empresa: SEAMATY Brasil
 - Produto: Equipamentos de diagnóstico in-house para clínicas e hospitais veterinários
-- Diferenciais: Garantia 25 meses, bonificação em insumos, ROI rápido, suporte técnico
+- Diferenciais: use somente informações previamente validadas no CRM; não invente garantia, bonificação, ROI, preço ou condição
 
 CLIENTE A CONTATAR: ${client.first_name}
 Clínica: ${client.clinic_name || 'N/A'}
@@ -84,7 +84,7 @@ REGRAS:
 - Adapte tom ao perfil numerológico ${client.numerology_number}
 - Seja progressivo: comece suave, aumente urgência gradualmente
 - Use dores/interesses identificados (equipamento: ${client.equipment_interest || 'diagnóstico veterinário'})
-- Mencione valor específico (garantia 25 meses, bonificação em reagentes, ROI, etc)
+- Mencione somente valor, garantia, insumos ou ROI confirmados no CRM; caso contrário escreva "Informação não confirmada — requer validação técnica."
 - Seja HUMANO e consultivo, não robotizado
 - Cada mensagem deve ter 2-4 parágrafos curtos
 - Inclua perguntas abertas sobre o dia a dia clínico
@@ -120,7 +120,7 @@ Retorne JSON estruturado.`,
       name: sequence.sequence_name,
       trigger_type: 'manual',
       target_status: [client.status],
-      active: true,
+      active: false,
       steps: sequence.messages.map(msg => ({
         day_offset: msg.day_offset,
         channel: msg.channel,
@@ -130,31 +130,23 @@ Retorne JSON estruturado.`,
       }))
     });
 
-    // Se envio imediato, enviar primeira mensagem
+    // Pedido de envio imediato é convertido em rascunho pendente.
+    let pendingMessageId = null;
     if (send_immediately && sequence.messages.length > 0) {
       const firstMsg = sequence.messages[0];
-      
-      try {
-        if (firstMsg.channel === 'email' && client.email) {
-          await base44.asServiceRole.integrations.Core.SendEmail({
-            to: client.email,
-            subject: firstMsg.subject,
-            body: firstMsg.body
-          });
-        }
-
-        await base44.asServiceRole.entities.FollowUpLog.create({
-          client_id: client.id,
-          client_name: client.first_name,
-          sequence_id: followUpSequence.id,
-          sequence_name: sequence.sequence_name,
-          step_number: 1,
-          channel: firstMsg.channel,
-          status: 'sent',
-          message_content: firstMsg.body
+      const channel = firstMsg.channel === 'email' ? 'email' : 'whatsapp';
+      const contact = channel === 'email' ? client.email : client.phone;
+      if (contact) {
+        const draft = await base44.entities.PendingMessage.create({
+          canal: channel, channel, destinatario_nome: client.first_name || client.full_name,
+          destinatario_contato: contact, cliente_id: client.id,
+          contexto: `follow_up_sequence_${followUpSequence.id}`,
+          mensagem: firstMsg.body, message_content: firstMsg.body,
+          email_subject: firstMsg.subject, status: 'aguardando_aprovacao',
+          criado_por_agente: 'generateAIFollowUpSequence', aprovado_por_nathan: false,
+          data_criacao: new Date().toISOString(), priority: 'media'
         });
-      } catch (error) {
-        console.error('Erro ao enviar mensagem:', error);
+        pendingMessageId = draft.id;
       }
     }
 
@@ -164,7 +156,8 @@ Retorne JSON estruturado.`,
         ...sequence,
         id: followUpSequence.id
       },
-      first_message_sent: send_immediately
+      first_message_sent: false,
+      pending_message_id: pendingMessageId
     });
 
   } catch (error) {
