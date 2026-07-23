@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -31,16 +31,6 @@ export default function WhatsAppHub() {
     queryFn: () => base44.entities.Client.list('-updated_date', 300),
     staleTime: 5 * 60 * 1000,
   });
-
-  useEffect(() => {
-    if (!search || isLoadingClients) {
-      if (!search) setIsSearching(false);
-      return undefined;
-    }
-    setIsSearching(true);
-    const timer = window.setTimeout(() => setIsSearching(false), 2500);
-    return () => window.clearTimeout(timer);
-  }, [search, isLoadingClients]);
 
   const { data: messages = [] } = useQuery({
     queryKey: ['wa-messages'],
@@ -256,7 +246,12 @@ export default function WhatsAppHub() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-600" />
                 <input
                   value={search}
-                  onChange={e => { setSearch(e.target.value); if (selectedClient) setSelectedClient(null); }}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setSearch(value);
+                    setIsSearching(Boolean(value.trim()));
+                    if (selectedClient) setSelectedClient(null);
+                  }}
                   placeholder="Buscar cliente com WhatsApp..."
                   className="w-full pl-8 pr-3 h-9 rounded-xl text-xs focus:outline-none"
                   style={{ background: '#1a1a1a', border: '1px solid rgba(0,255,136,0.2)', color: '#e2e8f0' }}
@@ -272,7 +267,7 @@ export default function WhatsAppHub() {
               {search && !selectedClient && !isLoadingClients && filteredClients.length > 0 && (
                 <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)' }}>
                   {filteredClients.slice(0, 5).map(c => (
-                    <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); }}
+                    <button key={c.id} onClick={() => { setSelectedClient(c); setSearch(''); setIsSearching(false); }}
                       className="w-full flex items-center justify-between px-3 py-2 hover:opacity-80 border-b last:border-0"
                       style={{ background: '#141414', borderColor: 'rgba(0,255,136,0.1)' }}>
                       <div className="text-left">
