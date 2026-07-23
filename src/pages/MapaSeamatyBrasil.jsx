@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import BotaoGeocodificarRestantes from '@/components/elite/BotaoGeocodificarRestantes';
+import SeamatyInstalledMap from '@/components/maps/SeamatyInstalledMap';
 import {
   CORES, calcularScoreCidade, classificarCidade, corCidade,
   calcularScoreCliente, classificarCliente, corPin,
@@ -646,93 +647,8 @@ const MapaSeamatyBrasil = () => {
 
       {/* BODY */}
       <div className="flex flex-col lg:flex-row gap-4 p-4 md:p-6 max-w-7xl mx-auto">
-        {/* MAPA PRINCIPAL (simulado) */}
-        <div className="flex-1 rounded-2xl overflow-hidden" style={{ background: usarFallbackCidade ? '#fff7ed' : '#e8f4f8', minHeight: '600px', position: 'relative' }}>
-          {usarFallbackCidade ? (
-            <div className="p-4 md:p-6 h-full">
-              <div className="bg-white border rounded-2xl p-4 mb-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#ff6f0020' }}>
-                    <MapPin className="w-5 h-5" style={{ color: '#ff6f00' }} />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-black text-slate-900">Mapa pendente de coordenadas</h2>
-                    <p className="text-sm text-slate-600 mt-1">
-                      Ainda não há latitude/longitude estruturada nos pontos. A visão abaixo usa Client.city, Client.address e visitas com coordenada em Visit.location.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-white border rounded-2xl p-4 shadow-sm">
-                  <h3 className="text-sm font-black text-slate-900 mb-3">Clientes agrupados por cidade</h3>
-                  <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1">
-                    {clientesPorCidadeFallback.length === 0 ? (
-                      <p className="text-xs text-slate-500">Nenhum cliente com cidade ou endereço encontrado nos filtros atuais.</p>
-                    ) : clientesPorCidadeFallback.slice(0, 30).map((grupo) => (
-                      <div key={grupo.cidade} className="border rounded-xl p-3 bg-slate-50">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-black text-slate-900">{grupo.cidade}{grupo.uf ? '/' + grupo.uf : ''}</p>
-                          <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6f0020', color: '#c2410c' }}>
-                            {grupo.total_clientes} clientes
-                          </span>
-                        </div>
-                        <div className="mt-2 space-y-1">
-                          {grupo.clientes.slice(0, 4).map((cliente) => (
-                            <div key={cliente.id} className="text-xs text-slate-600 flex items-start gap-1">
-                              <span>•</span>
-                              <span>{getClientName(cliente)}{cliente.address ? ' — ' + cliente.address : ''}</span>
-                            </div>
-                          ))}
-                          {grupo.clientes.length > 4 && (
-                            <p className="text-[11px] text-slate-400">+{grupo.clientes.length - 4} clientes nesta cidade</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white border rounded-2xl p-4 shadow-sm">
-                  <h3 className="text-sm font-black text-slate-900 mb-3">Visitas com coordenada em Visit.location</h3>
-                  <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1">
-                    {visitasComCoordenada.length === 0 ? (
-                      <p className="text-xs text-slate-500">Nenhuma visita com localização no formato latitude,longitude.</p>
-                    ) : visitasComCoordenada.slice(0, 40).map((visita) => (
-                      <div key={visita.id} className="border rounded-xl p-3 bg-slate-50">
-                        <p className="text-sm font-bold text-slate-900">{visita.client_name || 'Visita sem cliente'}</p>
-                        <p className="text-xs text-slate-500 mt-1">{visita.location}</p>
-                        {visita.scheduled_date && <p className="text-[11px] text-slate-400 mt-1">{new Date(visita.scheduled_date).toLocaleDateString('pt-BR')}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="w-full h-full flex items-center justify-center p-4">
-                <div className="text-center max-w-md">
-                  <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <p className="text-sm text-slate-600 mb-4">Mapa Interativo (Leaflet)</p>
-                  <p className="text-xs text-slate-500">
-                    {cidadesFiltradas.length} cidades — {pontosFiltrados.length} pontos — {visitasComCoordenada.length} visitas com coordenada
-                  </p>
-                </div>
-              </div>
-
-              <div className="absolute bottom-4 left-4 bg-white rounded-lg p-3 shadow-md max-w-[200px]" style={{ fontSize: '11px' }}>
-                <p className="font-bold text-slate-800 mb-2">Legenda</p>
-                <div className="space-y-1 text-slate-700">
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ background: CORES.PRIORIDADE_MAXIMA }} /><span>Prioridade Máx</span></div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ background: CORES.CLIENTE_ATIVO_COM_EQ }} /><span>Cliente Ativo</span></div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ background: CORES.VENDA_ALTA }} /><span>Oportunidade</span></div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ background: CORES.COMODATO }} /><span>Comodato</span></div>
-                </div>
-              </div>
-            </>
-          )}
+        <div className="min-w-0 flex-1">
+          <SeamatyInstalledMap />
         </div>
 
         {/* PAINEL LATERAL */}

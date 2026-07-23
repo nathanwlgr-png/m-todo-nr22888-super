@@ -113,13 +113,14 @@ export default function DashboardSniper() {
         <div className="rounded-2xl p-4 bg-[#0f0f11] border border-emerald-500/25 shadow-xl space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-black text-emerald-300 uppercase tracking-widest">⚡ Modo Uma Mão</h2>
-            <span className="text-[10px] text-slate-400">4 ações principais</span>
+            <span className="text-[10px] text-slate-400">5 ações principais</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Link to="/RankingOportunidades" className="rounded-2xl p-4 min-h-20 bg-orange-500/10 border border-orange-500/30 flex flex-col justify-center"><p className="text-sm font-black text-orange-300">💰 Cliente quente</p><p className="text-[10px] text-slate-400">{hotClients.length} prioridades</p></Link>
             <Link to="/DayFieldView" className="rounded-2xl p-4 min-h-20 bg-cyan-500/10 border border-cyan-500/30 flex flex-col justify-center"><p className="text-sm font-black text-cyan-300">📅 Rota hoje</p><p className="text-[10px] text-slate-400">Agenda + mapa</p></Link>
             <Link to="/WhatsAppHub" className="rounded-2xl p-4 min-h-20 bg-green-500/10 border border-green-500/30 flex flex-col justify-center"><p className="text-sm font-black text-green-300">💬 WhatsApp</p><p className="text-[10px] text-slate-400">Aprovação manual</p></Link>
             <Link to="/ProposalGenerator" className="rounded-2xl p-4 min-h-20 bg-amber-500/10 border border-amber-500/30 flex flex-col justify-center"><p className="text-sm font-black text-amber-300">📄 Proposta</p><p className="text-[10px] text-slate-400">Fechar venda</p></Link>
+            <Link to="/MapaSeamatyBrasil" className="col-span-2 rounded-2xl p-4 min-h-16 bg-blue-500/10 border border-blue-500/30 flex items-center justify-between"><div><p className="text-sm font-black text-blue-300">🗺️ Mapa Seamaty completo</p><p className="text-[10px] text-slate-400">Clientes instalados por equipamento</p></div><MapPin className="w-5 h-5 text-blue-300" /></Link>
           </div>
         </div>
 

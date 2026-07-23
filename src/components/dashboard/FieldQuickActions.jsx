@@ -8,6 +8,7 @@ const actions = [
   { label: 'Visita', to: '/VisitManager', icon: ClipboardCheck, color: 'text-blue-300 border-blue-500/25' },
   { label: 'Tarefa', to: '/TasksUnified', icon: ListTodo, color: 'text-amber-300 border-amber-500/25' },
   { label: 'Rota', to: '/SmartRouteOptimizer', icon: MapPinned, color: 'text-orange-300 border-orange-500/25' },
+  { label: 'Mapa Seamaty', to: '/MapaSeamatyBrasil', icon: MapPinned, color: 'text-blue-300 border-blue-500/25' },
   { label: 'WhatsApp', to: '/WhatsAppHub', icon: MessageCircle, color: 'text-green-300 border-green-500/25' },
   { label: 'Investigar', to: '/ModoInvestigativoSupremo', icon: Search, color: 'text-purple-300 border-purple-500/25' },
   { label: 'Proposta', to: '/ProposalGenerator', icon: FileText, color: 'text-rose-300 border-rose-500/25' },
