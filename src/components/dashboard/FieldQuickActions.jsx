@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardCheck, FileText, MapPinned, MessageCircle, Search, UserPlus, WifiOff, ListTodo } from 'lucide-react';
+import { ClipboardCheck, FileText, MapPinned, MessageCircle, Radar, Search, UserPlus, WifiOff, ListTodo } from 'lucide-react';
 
 const actions = [
   { label: 'Novo cliente', to: '/NewClient', icon: UserPlus, color: 'text-cyan-300 border-cyan-500/25' },
+  { label: 'Buscar clínicas', to: '/SeamatyHunter', icon: Radar, color: 'text-fuchsia-300 border-fuchsia-500/25' },
   { label: 'Visita', to: '/VisitManager', icon: ClipboardCheck, color: 'text-blue-300 border-blue-500/25' },
   { label: 'Tarefa', to: '/TasksUnified', icon: ListTodo, color: 'text-amber-300 border-amber-500/25' },
   { label: 'Rota', to: '/SmartRouteOptimizer', icon: MapPinned, color: 'text-orange-300 border-orange-500/25' },

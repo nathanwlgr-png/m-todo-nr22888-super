@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Radar, Target, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAIGlobal } from '@/lib/AIGlobalContext.jsx';
+import HunterClinicCard from '@/components/hunter/HunterClinicCard';
 
 export default function SeamatyHunter() {
   const { aiEnabled, powerMode } = useAIGlobal();
@@ -14,6 +15,8 @@ export default function SeamatyHunter() {
   const [selectedState, setSelectedState] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [importingName, setImportingName] = useState('');
 
   const cities = {
     'SP': ['Marília', 'Botucatu', 'Bauru', 'Araçatuba', 'Ribeirão Preto', 'São Paulo'],
@@ -23,8 +26,8 @@ export default function SeamatyHunter() {
   };
 
   const segments = [
-    'veterinario',
-    'hospital_veterinario',
+    'clinica',
+    'hospital',
     'laboratorio',
     'centro_diagnostico',
     'universidade'
@@ -45,6 +48,8 @@ export default function SeamatyHunter() {
     }
 
     setLoading(true);
+    setHasSearched(true);
+    setResults([]);
     toast.info('🔍 Investigando clínicas...');
 
     try {
@@ -53,22 +58,52 @@ export default function SeamatyHunter() {
         state: selectedState,
         radius_km: 20,
         depth: powerMode === 'economico' ? 'rapida' : powerMode === 'absoluto' ? 'suprema' : 'completa',
-        segment: segments
+        segments
       });
 
-      const analyzed = response.data?.search_results?.map(clinic => ({
+      const rawResults = response.data?.leads || response.data?.search_results || [];
+      const analyzed = rawResults.map(clinic => ({
         ...clinic,
-        opportunity_score: Math.floor(Math.random() * 100), // Placeholder
-        seamaty_fit: Math.floor(Math.random() * 100),
-        next_action: 'INVESTIGAR CLÍNICA'
-      })) || [];
+        city: clinic.city || selectedCity,
+        state: clinic.state || selectedState,
+        opportunity_score: Number(clinic.seamaty_score ?? clinic.opportunity_score ?? 0),
+        seamaty_fit: Number(clinic.seamaty_score ?? clinic.seamaty_fit ?? 0),
+        next_action: clinic.next_action || 'Investigar clínica'
+      }));
 
       setResults(analyzed.sort((a, b) => b.opportunity_score - a.opportunity_score));
-      toast.success(`✅ ${analyzed.length} clínicas encontradas`);
+      if (analyzed.length === 0) toast.info('Nenhuma clínica encontrada nesta busca.');
+      else toast.success(`✅ ${analyzed.length} clínicas encontradas`);
     } catch (err) {
+      setHasSearched(false);
       toast.error(`Erro: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const importProspect = async (clinic) => {
+    setImportingName(clinic.name);
+    try {
+      const existing = await base44.entities.Client.filter({ clinic_name: clinic.name }, '-updated_date', 1);
+      const client = existing[0] || await base44.entities.Client.create({
+        first_name: clinic.name,
+        clinic_name: clinic.name,
+        phone: clinic.phone || undefined,
+        city: clinic.city || selectedCity,
+        status: 'morno',
+        pipeline_stage: 'lead',
+        equipment_interest: clinic.potential_product || undefined,
+        notes: `Prospect importado pelo Seamaty Hunter. ${clinic.notes || ''}`.trim(),
+      });
+      setResults(current => current.map(item => item.name === clinic.name
+        ? { ...item, imported_client_id: client.id }
+        : item));
+      toast.success(existing[0] ? 'Prospect já estava no pipeline.' : 'Prospect importado para o pipeline.');
+    } catch (err) {
+      toast.error(`Erro ao importar: ${err.message}`);
+    } finally {
+      setImportingName('');
     }
   };
 
@@ -161,38 +196,13 @@ export default function SeamatyHunter() {
             {/* RANKING */}
             <TabsContent value="ranking" className="space-y-4">
               {results.slice(0, 10).map((clinic, idx) => (
-                <Card key={clinic.name} className="bg-slate-800 border-slate-700 hover:border-purple-500/50 transition-all">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl font-bold text-purple-400">#{idx + 1}</span>
-                          <p className="text-lg font-semibold text-white">{clinic.name}</p>
-                          <Badge className={clinic.opportunity_score > 70 ? 'bg-red-600' : clinic.opportunity_score > 40 ? 'bg-yellow-600' : 'bg-green-600'}>
-                            Score {clinic.opportunity_score}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-slate-400 mb-3">{clinic.city}, {clinic.state}</p>
-                        
-                        {/* Métricas */}
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div className="p-2 bg-slate-900 rounded">
-                            <p className="text-xs text-slate-400">Potencial Seamaty</p>
-                            <p className="text-sm font-bold text-white">{clinic.seamaty_fit}%</p>
-                          </div>
-                          <div className="p-2 bg-slate-900 rounded">
-                            <p className="text-xs text-slate-400">Exames/mês</p>
-                            <p className="text-sm font-bold text-white">~{Math.floor(Math.random() * 500) + 100}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Button className="bg-purple-600 hover:bg-purple-700">
-                        Investigar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <HunterClinicCard
+                  key={`${clinic.name}-${idx}`}
+                  clinic={clinic}
+                  position={idx + 1}
+                  importing={importingName === clinic.name}
+                  onImport={importProspect}
+                />
               ))}
             </TabsContent>
 
@@ -218,6 +228,16 @@ export default function SeamatyHunter() {
               </Card>
             </TabsContent>
           </Tabs>
+        )}
+
+        {hasSearched && !loading && results.length === 0 && (
+          <Card className="bg-slate-800 border-slate-700">
+            <CardContent className="py-10 text-center">
+              <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto mb-3" />
+              <p className="font-bold text-white">Nenhuma clínica encontrada</p>
+              <p className="text-sm text-slate-400 mt-1">Tente outra cidade ou execute novamente mais tarde.</p>
+            </CardContent>
+          </Card>
         )}
 
       </div>

@@ -15,6 +15,7 @@ export const setModo = (modo) => {
 export const VENDEDOR_PAGES = [
   { page: '', label: '🏠 Hoje', category: 'Operação de Rua' },
   { page: 'Clients', label: '👥 Clientes', category: 'Operação de Rua' },
+  { page: 'SeamatyHunter', label: '📡 Buscar clínicas por cidade', category: 'Operação de Rua' },
   { page: 'AracatubaClinics', label: '📍 Araçatuba', category: 'Operação de Rua' },
   { page: 'MessageApproval', label: '✅ Aprovar mensagens', category: 'Operação de Rua' },
   { page: 'WhatsAppHub', label: '💬 Mensagens', category: 'Operação de Rua' },

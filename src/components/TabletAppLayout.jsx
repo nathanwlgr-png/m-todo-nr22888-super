@@ -34,6 +34,7 @@ const PAGE_TITLES = {
   OfflineMode: 'Modo Offline',
   ModoInvestigativoSupremo: 'Análise de Cliente',
   ModoCacaComercial: 'Prospecção',
+  SeamatyHunter: 'Buscar Clínicas por Cidade',
   ArquivoMasterConsulta: 'Arquivo Master / Consulta',
   PipelineView: 'Pipeline',
   SalesFunnel: 'Vendas',
