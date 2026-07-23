@@ -4,20 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Search, X } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 
-export default function ClientSelector({ clients = [], selectedClientId, onClientChange }) {
+export default function ClientSelector({ clients = [], visits = [], selectedClientId, onClientChange, onVisitChange }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showResults, setShowResults] = useState(false);
 
-  const filteredClients = clients.filter(client => {
-    if (!searchTerm) return false;
-    const term = searchTerm.toLowerCase();
-    return (
-      client.first_name?.toLowerCase().includes(term) ||
-      client.full_name?.toLowerCase().includes(term) ||
-      client.clinic_name?.toLowerCase().includes(term) ||
-      client.city?.toLowerCase().includes(term)
-    );
-  });
+  const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const term = normalize(searchTerm);
+  const filteredClients = clients.filter(client => term && [client.first_name, client.full_name, client.clinic_name, client.city, client.razao_social].some(value => normalize(value).includes(term)));
+  const filteredVisits = visits.filter(visit => term && [visit.client_name, visit.location, visit.notes].some(value => normalize(value).includes(term)));
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
@@ -71,32 +65,24 @@ export default function ClientSelector({ clients = [], selectedClientId, onClien
           
           {showResults && (
             <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto border-2 shadow-lg">
-              {filteredClients.length > 0 ? (
+              {filteredClients.length > 0 || filteredVisits.length > 0 ? (
                 <div className="py-1">
                   {filteredClients.slice(0, 10).map((client) => (
-                    <button
-                      key={client.id}
-                      onClick={() => handleSelectClient(client)}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b last:border-b-0"
-                    >
-                      <p className="font-semibold text-slate-800">{client.first_name}</p>
-                      <p className="text-xs text-slate-500">
-                        {client.razao_social && `${client.razao_social} • `}
-                        {client.clinic_name && `${client.clinic_name} • `}
-                        {client.cnpj && `CNPJ: ${client.cnpj} • `}
-                        {client.city}
-                      </p>
+                    <button key={client.id} onClick={() => handleSelectClient(client)} className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b">
+                      <p className="font-semibold text-slate-800">{client.first_name || client.full_name}</p>
+                      <p className="text-xs text-slate-500">{client.clinic_name || client.razao_social} {client.city && `• ${client.city}`}</p>
                     </button>
                   ))}
-                  {filteredClients.length > 10 && (
-                    <p className="px-4 py-2 text-xs text-slate-400 text-center">
-                      +{filteredClients.length - 10} mais resultados
-                    </p>
-                  )}
+                  {filteredVisits.slice(0, 10).map((visit) => (
+                    <button key={`visit-${visit.id}`} onClick={() => onVisitChange?.(visit)} className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 transition-colors border-b">
+                      <p className="font-semibold text-slate-800">{visit.client_name || 'Visita planejada'}</p>
+                      <p className="text-xs text-blue-600">Parada planejada {visit.location && `• ${visit.location}`}</p>
+                    </button>
+                  ))}
                 </div>
               ) : (
                 <div className="px-4 py-6 text-center">
-                  <p className="text-sm text-slate-500">Nenhum cliente encontrado</p>
+                  <p className="text-sm text-slate-500">Nenhum cliente ou parada planejada encontrada</p>
                 </div>
               )}
             </Card>

@@ -84,15 +84,19 @@ export default function PreVisitChecklist() {
 
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-updated_date')
+    queryFn: () => base44.entities.Client.list('-updated_date', 500)
+  });
+
+  const { data: plannedVisits = [] } = useQuery({
+    queryKey: ['pre-visit-planned-stops'],
+    queryFn: () => base44.entities.Visit.list('-scheduled_date', 500),
   });
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', selectedClientId],
     queryFn: async () => {
       if (!selectedClientId) return null;
-      const clients = await base44.entities.Client.list();
-      return clients.find(c => c.id === selectedClientId);
+      return base44.entities.Client.get(selectedClientId);
     },
     enabled: !!selectedClientId
   });
@@ -305,8 +309,14 @@ Forneça análise profunda e estratégica para vendas.`,
         
         <ClientSelector
           clients={allClients}
+          visits={plannedVisits.filter(visit => visit.status !== 'cancelada')}
           selectedClientId={selectedClientId}
           onClientChange={setSelectedClientId}
+          onVisitChange={(visit) => {
+            const linkedClient = allClients.find(item => item.id === visit.client_id);
+            if (linkedClient) setSelectedClientId(linkedClient.id);
+            else navigate(`/DayFieldView?visit_id=${visit.id}`);
+          }}
         />
       </div>
 
