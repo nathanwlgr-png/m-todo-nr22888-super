@@ -196,11 +196,14 @@ export default function ModoInvestigativoSupremo() {
   };
 
   const scoreColor = result?.score_level ? SCORE_COLORS[result.score_level] : '#ff9500';
-  const decisionProfile = result?.decision_maker_profile || result?.decision_profile || selectedClient?.behavioral_profile;
-  const decisionStyle = result?.decision_style || selectedClient?.decision_style;
-  const decisionMotivations = result?.main_motivations?.length
-    ? result.main_motivations
-    : (selectedClient?.purchase_motivators || []);
+  const firstNonBlank = (...values) => values.find((value) => typeof value === 'string' && value.trim())?.trim();
+  const decisionProfile = firstNonBlank(result?.decision_maker_profile, result?.decision_profile, selectedClient?.behavioral_profile);
+  const decisionStyle = firstNonBlank(result?.decision_style, selectedClient?.decision_style);
+  const resultMotivations = Array.isArray(result?.main_motivations) ? result.main_motivations : [];
+  const clientMotivations = Array.isArray(selectedClient?.purchase_motivators) ? selectedClient.purchase_motivators : [];
+  const decisionMotivations = (resultMotivations.length ? resultMotivations : clientMotivations)
+    .filter((motivation) => typeof motivation === 'string' && motivation.trim())
+    .map((motivation) => motivation.trim());
 
   return (
     <div className="min-h-screen pb-24" style={{ background: '#0a0a0a' }}>

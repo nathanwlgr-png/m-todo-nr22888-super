@@ -19,7 +19,7 @@ const CITY_OPTIONS = {
 export default function SeamatyHunter() {
   const { aiEnabled, powerMode } = useAIGlobal();
   const [selectedCity, setSelectedCity] = useState('');
-  const [selectedState, setSelectedState] = useState('');
+  const [selectedState, setSelectedState] = useState('SP');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
