@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Envia diariamente \u00e0s 07:00 um resumo das tarefas pendentes e follow-ups no CRM e no Telegram.",
+  "name": "Lembrete Di\u00e1rio de Tarefas \u2014 07h",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "lembrete_diario_tarefas_07h",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "enviar_lembrete": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dailyPendingTaskReminder",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Enviar lembrete di\u00e1rio",
+            "description": "CRM e Telegram"
+          }
+        }
+      }
+    ]
+  }
+}
