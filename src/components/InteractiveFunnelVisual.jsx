@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GripVertical, Plus, Settings, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
+import { Plus, Settings, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DEFAULT_STAGES = [
@@ -19,12 +19,16 @@ function StageCard({ stage, clients, onClientDrop }) {
   const [dragOverStage, setDragOverStage] = useState(false);
 
   const stageClients = clients.filter(c => c.pipeline_stage === stage.name);
-  const totalRevenue = stageClients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
-  const avgDaysInStage = stageClients.length > 0 
-    ? Math.round(stageClients.reduce((sum, c) => {
-        const daysSince = new Date(c.stage_entered_date || c.created_date);
-        return sum + ((Date.now() - daysSince) / (1000 * 60 * 60 * 24));
-      }, 0) / stageClients.length)
+  const totalRevenue = stageClients.reduce((sum, c) => {
+    const value = Number(c.projected_revenue);
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+  const stageAges = stageClients
+    .map(c => new Date(c.stage_entered_date || c.created_date).getTime())
+    .filter(timestamp => Number.isFinite(timestamp))
+    .map(timestamp => Math.max(0, (Date.now() - timestamp) / (1000 * 60 * 60 * 24)));
+  const avgDaysInStage = stageAges.length > 0
+    ? Math.round(stageAges.reduce((sum, days) => sum + days, 0) / stageAges.length)
     : 0;
 
   const handleDragOver = (e) => {
@@ -97,7 +101,12 @@ function StageCard({ stage, clients, onClientDrop }) {
         ) : (
           <div className="space-y-1">
             {stageClients.slice(0, 3).map(client => (
-              <div key={client.id} className="bg-slate-50 rounded p-1.5 text-xs truncate cursor-move hover:bg-slate-100" draggable>
+              <div
+                key={client.id}
+                className="bg-slate-50 rounded p-1.5 text-xs truncate cursor-move hover:bg-slate-100"
+                draggable
+                onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ clientId: client.id }))}
+              >
                 <span className="font-semibold">{client.clinic_name || client.full_name}</span>
               </div>
             ))}
@@ -118,7 +127,6 @@ function StageCard({ stage, clients, onClientDrop }) {
 }
 
 export default function InteractiveFunnelVisual() {
-  const queryClient = useQueryClient();
   const [addingStage, setAddingStage] = useState(false);
 
   // Buscar clientes
@@ -144,47 +152,27 @@ export default function InteractiveFunnelVisual() {
     return [...baseStages, ...custom].sort((a, b) => a.order - b.order);
   }, [customStages]);
 
-  // Mutation para atualizar cliente
+  // Registra apenas uma solicitação; nenhuma entidade comercial é alterada aqui.
   const updateClientMutation = useMutation({
     mutationFn: async ({ clientId, stageName }) => {
       const client = clients.find(c => c.id === clientId);
-      
-      // Atualizar cliente
-      await base44.entities.Client.update(clientId, {
-        pipeline_stage: stageName,
-        stage_entered_date: new Date().toISOString()
+      return base44.entities.CRMUpdateQueue.create({
+        origem: 'manual',
+        texto_original: `Mover ${client?.clinic_name || client?.full_name || clientId} para ${stageName}`,
+        comando_interpretado: 'Solicitação de alteração de etapa do funil',
+        cliente_id: clientId,
+        tipo_atualizacao: 'alterar_etapa_funil',
+        campo_alvo: 'pipeline_stage',
+        valor_novo: stageName,
+        status: 'pendente',
+        risco: 'medio',
+        exige_aprovacao: true,
+        agente_origem: 'InteractiveFunnelVisual',
+        data_criacao: new Date().toISOString(),
+        observacao: 'Solicitação criada por arrastar e soltar; requer aprovação antes de aplicar.'
       });
-
-      // Criar interação
-      await base44.entities.Interaction.create({
-        client_id: clientId,
-        client_name: client?.clinic_name,
-        type: 'other',
-        direction: 'outbound',
-        subject: `Movido para: ${stageName}`,
-        notes: `Cliente avançou para a etapa "${stageName}" do funil`,
-        outcome: 'positive',
-        created_by_name: 'Sistema'
-      }).catch(() => {});
-
-      // Disparar automação se configurada
-      const stage = allStages.find(s => s.name === stageName);
-      if (stage?.automation_trigger) {
-        await base44.functions.invoke('processAutomationRules', {
-          trigger_type: 'pipeline_stage_change',
-          event_data: {
-            client_id: clientId,
-            stage_name: stageName
-          }
-        }).catch(() => {});
-      }
-
-      return true;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Cliente movido com sucesso!');
-    },
+    onSuccess: () => toast.success('Solicitação registrada para aprovação.'),
     onError: (error) => toast.error('Erro: ' + error.message)
   });
 
@@ -195,8 +183,15 @@ export default function InteractiveFunnelVisual() {
   // Estatísticas gerais
   const stats = useMemo(() => {
     const totalClients = clients.length;
-    const totalRevenue = clients.reduce((sum, c) => sum + (c.projected_revenue || 0), 0);
-    const avgConversionRate = allStages.reduce((sum, s) => sum + (s.probability || 0), 0) / allStages.length;
+    const totalRevenue = clients.reduce((sum, c) => {
+      const value = Number(c.projected_revenue);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const probabilityTotal = allStages.reduce((sum, stage) => {
+      const value = Number(stage.probability);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const avgConversionRate = allStages.length > 0 ? probabilityTotal / allStages.length : 0;
     const clientsByStage = allStages.map(stage => ({
       ...stage,
       count: clients.filter(c => c.pipeline_stage === stage.name).length
@@ -261,7 +256,7 @@ export default function InteractiveFunnelVisual() {
             </Button>
           </div>
 
-          <p className="text-xs text-slate-600 mb-4">Arraste clientes entre as etapas para atualizar automaticamente</p>
+          <p className="text-xs text-slate-600 mb-4">Arraste clientes entre as etapas para solicitar a atualização</p>
 
           {allStages.map(stage => (
             <StageCard
@@ -279,8 +274,10 @@ export default function InteractiveFunnelVisual() {
           <div className="space-y-2">
             {stats.clientsByStage.map((stage, i) => {
               const nextStage = stats.clientsByStage[i + 1];
-              const conversionRate = nextStage ? ((nextStage.count / stage.count) * 100).toFixed(0) : 'N/A';
-              const isBottleneck = stage.count > 5 && conversionRate < 50;
+              const conversionRate = nextStage && stage.count > 0
+                ? Math.round((nextStage.count / stage.count) * 100)
+                : null;
+              const isBottleneck = stage.count > 5 && conversionRate !== null && conversionRate < 50;
 
               return (
                 <div key={stage.id} className="text-sm bg-white/60 rounded p-2">
@@ -288,7 +285,7 @@ export default function InteractiveFunnelVisual() {
                     <span className="font-semibold">{stage.name}</span>
                     <div className="flex gap-2">
                       <Badge>{stage.count} clientes</Badge>
-                      {nextStage && <Badge variant="outline">{conversionRate}% conversão</Badge>}
+                      {nextStage && <Badge variant="outline">{conversionRate ?? 0}% conversão</Badge>}
                     </div>
                   </div>
                   {isBottleneck && (

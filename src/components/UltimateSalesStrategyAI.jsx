@@ -100,15 +100,10 @@ export default function UltimateSalesStrategyAI({ client }) {
 - Prazo Decisão: ${client.decision_deadline || 'Não definido'}
 - Volume Exames: ${client.current_volume || 'N/A'}
 
-**CATÁLOGO SEAMATY/CIAMAT BRASIL (USE APENAS ESTES):**
-- SMT-120VP (R$ 23.500) - Bioquímico veterinário
-- QT3 (R$ 31.000) - Bioquímico multifuncional
-- VG1 (R$ 28.000) - Gases e eletrólitos
-- VG2 (R$ 33.000) - Gases + Imunofluorescência
-- 3DX (R$ 55.000) - Minilab multifuncional
-- VBC50A (R$ 70.000) - Hematológico 5 partes
-- Vi1 (R$ 8.500) - Imunofluorescência
-- VQ1 (R$ 45.000) - PCR veterinário
+**CATÁLOGO SEAMATY:**
+- Considere somente equipamentos e condições já registrados e validados neste cliente.
+- Não invente preços, descontos, condições, ROI, disponibilidade ou especificações técnicas.
+- Quando um dado não estiver no perfil acima, escreva "informação não confirmada".
 
 **DORES E MOTIVADORES:**
 - Dores Identificadas: ${client.main_pains?.join(', ') || 'Não identificadas'}
@@ -277,8 +272,9 @@ INSTRUÇÕES CRÍTICAS:
 - Baseie-se em dados REAIS do cliente
 - Combine ciência + psicologia + numerologia
 - Forneça estratégia ACIONÁVEL e PRÁTICA
-- Quantifique sempre que possível
-- Use estudos científicos para validar abordagens`;
+- Quantifique somente com valores já presentes no perfil do cliente; caso contrário, escreva "informação não confirmada"
+- Não invente estudos, resultados, percentuais, preços, condições comerciais ou fontes
+- A resposta é apenas uma recomendação e não pode assumir que alterou o CRM ou enviou mensagens`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -476,34 +472,58 @@ INSTRUÇÕES CRÍTICAS:
       });
 
       setStrategy(result);
-      
-      // Criar tarefa automática com melhor dia/horário
+
+      const pendingRequests = [];
       if (result.timing_strategy?.best_day_week && result.timing_strategy?.best_time_day) {
-        try {
-          const nextDate = new Date();
-          // Encontrar próximo dia da semana recomendado
-          const dayMap = { 'segunda': 1, 'terça': 2, 'quarta': 3, 'quinta': 4, 'sexta': 5, 'sábado': 6, 'domingo': 0 };
-          const targetDay = dayMap[result.timing_strategy.best_day_week.toLowerCase()];
-          const currentDay = nextDate.getDay();
-          const daysUntilTarget = (targetDay - currentDay + 7) % 7 || 7;
-          nextDate.setDate(nextDate.getDate() + daysUntilTarget);
-          
-          await base44.entities.Task.create({
-            client_id: client.id,
-            client_name: client.first_name,
-            title: `🎯 Contato Estratégico - ${client.first_name}`,
-            description: `Melhor momento para contato baseado em análise científica:\n\n⏰ ${result.timing_strategy.best_time_day}\n📅 ${result.timing_strategy.best_day_week}\n🔮 ${result.timing_strategy.numerology_lucky_dates}\n\n💡 ${result.personalized_recommendations.secret_weapon}`,
-            due_date: nextDate.toISOString().split('T')[0],
-            priority: 'alta',
-            type: 'ligacao',
-            auto_created: true
-          });
-        } catch (error) {
-          console.error('Erro ao criar tarefa:', error);
-        }
+        pendingRequests.push(base44.entities.CRMUpdateQueue.create({
+          origem: 'agente',
+          texto_original: `Sugestão de contato estratégico para ${client.first_name}`,
+          comando_interpretado: 'Criar tarefa de contato estratégico após aprovação',
+          cliente_id: client.id,
+          tipo_atualizacao: 'criar_tarefa',
+          campo_alvo: 'Task',
+          valor_novo: JSON.stringify({
+            title: `Contato Estratégico - ${client.first_name}`,
+            suggested_day: result.timing_strategy.best_day_week,
+            suggested_time: result.timing_strategy.best_time_day
+          }),
+          status: 'pendente',
+          risco: 'medio',
+          exige_aprovacao: true,
+          agente_origem: 'UltimateSalesStrategyAI',
+          modelo_ia_usado: 'InvokeLLM',
+          data_criacao: new Date().toISOString(),
+          observacao: 'A recomendação não altera cliente, tarefa, funil, score ou próxima ação.'
+        }));
       }
-      
-      toast.success('Estratégia gerada + tarefa criada!');
+
+      const draftMessage = [
+        result.conversation_script?.opening,
+        result.conversation_script?.discovery,
+        result.conversation_script?.presentation
+      ].filter(Boolean).join('\n\n');
+
+      if (draftMessage) {
+        pendingRequests.push(base44.entities.PendingMessage.create({
+          canal: 'whatsapp',
+          channel: 'whatsapp',
+          destinatario_nome: client.first_name,
+          destinatario_contato: client.phone,
+          cliente_id: client.id,
+          contexto: 'Rascunho comercial gerado pela estratégia de vendas; requer revisão humana',
+          mensagem: draftMessage,
+          message_content: draftMessage,
+          status: 'aguardando_aprovacao',
+          criado_por_agente: 'UltimateSalesStrategyAI',
+          modelo_ia_usado: 'InvokeLLM',
+          aprovado_por_nathan: false,
+          data_criacao: new Date().toISOString(),
+          priority: 'media'
+        }));
+      }
+
+      await Promise.all(pendingRequests);
+      toast.success('Estratégia gerada; sugestões e rascunhos aguardam aprovação.');
     } catch (error) {
       console.error('Erro ao gerar estratégia:', error);
       toast.error('Erro ao gerar estratégia');

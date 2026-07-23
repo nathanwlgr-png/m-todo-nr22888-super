@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,7 +22,6 @@ import {
 import { toast } from 'sonner';
 
 export default function RegionalClinicAnalyzer() {
-  const navigate = useNavigate();
   const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
   const [clinics, setClinics] = useState([]);
@@ -45,129 +42,19 @@ export default function RegionalClinicAnalyzer() {
         return;
       }
 
-      const prompt = `Você é um especialista em pesquisa de mercado veterinário e inteligência comercial.
+      const prompt = `Você é um pesquisador de mercado veterinário em modo estritamente consultivo e somente leitura.
 
-🎯 MISSÃO: Pesquise e analise TODAS as clínicas veterinárias na cidade de ${city}.
+Localize clínicas veterinárias em ${city} usando apenas informações públicas verificáveis.
 
-📊 DADOS A COLETAR (pesquise Google Maps, Google, redes sociais, CNPJ):
+REGRAS OBRIGATÓRIAS:
+- Não invente nem estime CNPJ, endereço, telefone, equipe, especialidade, equipamento, volume de exames, receita, capital, potencial comercial, prioridade, probabilidade ou fonte.
+- Para qualquer dado sem fonte verificável, omita o campo ou escreva "informação não confirmada".
+- Não crie registros e não afirme que dados foram salvos no CRM.
+- Produtos, valores e condições comerciais só podem ser mencionados quando estiverem expressamente presentes em fonte oficial verificável; caso contrário, use "informação não confirmada".
+- Diferencie fatos públicos de sugestões comerciais.
+- Retorne as clínicas encontradas como sugestões para validação humana.
 
-Para CADA clínica encontrada, retorne JSON estruturado:
-
-{
-  "total_clinics_found": 15,
-  "market_overview": {
-    "city_name": "${city}",
-    "total_market_potential": 2500000,
-    "competition_level": "média/alta/baixa",
-    "growth_trend": "crescendo/estável/declinando",
-    "key_insights": "Insights do mercado local"
-  },
-  "clinics": [
-    {
-      "clinic_name": "Nome oficial completo",
-      "cnpj": "00.000.000/0001-00",
-      "razao_social": "Razão Social LTDA",
-      "address": "Endereço completo com número",
-      "cep": "00000-000",
-      "neighborhood": "Bairro",
-      "phone": "5511999999999",
-      "whatsapp": "5511999999999",
-      "email": "contato@clinica.com",
-      "website": "www.clinica.com.br",
-      "instagram": "@clinica",
-      "facebook": "facebook.com/clinica",
-      "google_rating": 4.5,
-      "total_reviews": 234,
-      "google_maps_url": "URL do Google Maps",
-      
-      "business_intelligence": {
-        "estimated_employees": 12,
-        "estimated_monthly_exams": 180,
-        "clinic_size": "pequena/média/grande",
-        "clinic_type": "geral/especializada/hospital",
-        "specialties": ["Cirurgia", "Ortopedia"],
-        "operation_years": 8,
-        "growth_indicators": "Em expansão/Estável/Declinando"
-      },
-      
-      "equipment_analysis": {
-        "detected_equipment": ["Equipamento 1", "Equipamento 2"],
-        "equipment_photos_found": true,
-        "technology_level": "avançado/intermediário/básico",
-        "lab_setup": "completo/parcial/terceirizado",
-        "modernization_need": "alta/média/baixa"
-      },
-      
-      "financial_indicators": {
-        "estimated_revenue_annual": 1200000,
-        "cnpj_capital_social": 500000,
-        "purchase_power_score": 75,
-        "credit_capacity": "alta/média/baixa",
-        "investment_pattern": "agressivo/moderado/conservador"
-      },
-      
-      "decision_maker": {
-        "name": "Dr. Nome do Proprietário",
-        "role": "Proprietário/Sócio/Veterinário",
-        "linkedin": "linkedin.com/in/pessoa",
-        "background": "Formação e experiência"
-      },
-      
-      "sales_opportunity": {
-        "priority_score": 85,
-        "recommended_product": "VG2 - Hemogasometria + Imunofluorescência",
-        "product_fit_reason": "Por que este produto é ideal",
-        "alternative_products": ["SMT-120VP", "QT3"],
-        "estimated_deal_size": 95000,
-        "probability_closing": 70,
-        "urgency_level": "alta/média/baixa",
-        "key_pain_points": ["Dor 1", "Dor 2", "Dor 3"],
-        "competitive_threat": "alta/média/baixa"
-      },
-      
-      "visit_strategy": {
-        "best_approach": "Consultiva/Técnica/ROI",
-        "best_day_week": "terça-feira",
-        "best_time": "14h-16h",
-        "key_talking_points": ["Ponto 1", "Ponto 2"],
-        "expected_objections": ["Objeção 1", "Objeção 2"]
-      }
-    }
-  ],
-  
-  "visit_route_optimization": {
-    "optimal_sequence": [1, 3, 5, 2, 4],
-    "route_description": "Rota otimizada por região",
-    "estimated_total_time": "6 horas",
-    "geographic_clusters": ["Centro", "Zona Sul", "Zona Norte"]
-  }
-}
-
-🎯 CATÁLOGO SEAMATY/CIAMAT BRASIL - USE APENAS ESTES PRODUTOS:
-
-**EQUIPAMENTOS DISPONÍVEIS:**
-- **SMT-120VP** (R$ 23.500) - Analisador químico multifuncional automático veterinário
-- **QT3** (R$ 31.000) - Analisador químico multifuncional automático veterinário QT3
-- **VG1** (R$ 28.000) - Analisador de gases e eletrólitos veterinário
-- **VG2** (R$ 33.000) - Analisador de imunoensaio fluorescente e gases sanguíneos veterinário
-- **3DX** (R$ 55.000) - Analisador multifuncional veterinário minilab 3DX
-- **VBC50A** (R$ 70.000) - Analisador hematológico 5 partes veterinária 50A
-- **Vi1** (R$ 8.500) - Analisador de imunoensaio fluorescente
-- **VQ1** (R$ 45.000) - Analisador PCR
-
-IMPORTANTE: Sugira SOMENTE equipamentos desta lista. Considere:
-- Clínicas pequenas → SMT-120VP, Vi1, VG1
-- Clínicas médias → QT3, VG2, 3DX
-- Hospitais/grandes → VBC50A, VQ1, 3DX
-
-INSTRUÇÕES CRÍTICAS:
-- Pesquise PROFUNDAMENTE em Google Maps, Google Search, Instagram, Facebook
-- CNPJ obrigatório quando possível (Receita Federal)
-- Número de funcionários: estime por fotos, reviews, estrutura
-- Equipamentos: procure fotos no Instagram/Facebook da clínica
-- Capital social: consulte CNPJ na Receita
-- Ordene por PRIORIDADE de visita (maior potencial primeiro)
-- Seja específico e baseado em DADOS REAIS encontrados`;
+Use o formato JSON solicitado pelo schema. Mantenha os objetos esperados, mas deixe campos não confirmados vazios ou com zero apenas quando o schema exigir número.`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -301,62 +188,27 @@ INSTRUÇÕES CRÍTICAS:
     }
   };
 
-  const createClientFromClinic = async (clinic) => {
+  const requestClientValidation = async (clinic) => {
     try {
-      const clientData = {
-        first_name: clinic.decision_maker?.name?.split(' ')[0] || clinic.clinic_name.split(' ')[0],
-        full_name: clinic.decision_maker?.name,
-        cnpj: clinic.cnpj,
-        razao_social: clinic.razao_social,
-        email: clinic.email,
-        phone: clinic.whatsapp || clinic.phone,
-        address: clinic.address,
-        cep: clinic.cep,
-        city: city,
-        clinic_name: clinic.clinic_name,
-        instagram_handle: clinic.instagram?.replace('@', ''),
-        facebook_url: clinic.facebook,
-        website: clinic.website,
-        client_type: clinic.business_intelligence.clinic_size === 'grande' ? 'hospital_veterinario' : 
-                     clinic.business_intelligence.clinic_size === 'média' ? 'clinica_media' : 'clinica_pequena',
-        decision_role: clinic.decision_maker?.role === 'Proprietário' ? 'proprietario' : 'veterinario_responsavel',
-        current_equipment: clinic.equipment_analysis.detected_equipment?.join(', '),
-        equipment_suggestion: clinic.sales_opportunity.recommended_product,
-        equipment_suggestion_reason: clinic.sales_opportunity.product_fit_reason,
-        equipment_suggestion_alternative: clinic.sales_opportunity.alternative_products?.join(', '),
-        available_budget: clinic.sales_opportunity.estimated_deal_size,
-        valor_real_poder_compra: clinic.financial_indicators.cnpj_capital_social,
-        main_pains: JSON.stringify(clinic.sales_opportunity.key_pain_points || []),
-        purchase_score: clinic.sales_opportunity.priority_score,
-        status: clinic.sales_opportunity.urgency_level === 'alta' ? 'quente' : 'morno',
-        projected_revenue: clinic.sales_opportunity.estimated_deal_size,
-        priority_level: clinic.sales_opportunity.priority_score > 80 ? 1 : clinic.sales_opportunity.priority_score > 60 ? 2 : 3,
-        notes: `[ANÁLISE REGIONAL IA - ${new Date().toLocaleDateString('pt-BR')}]
-        
-📊 INTELIGÊNCIA DE MERCADO:
-- Funcionários: ${clinic.business_intelligence.estimated_employees}
-- Exames/mês: ${clinic.business_intelligence.estimated_monthly_exams}
-- Avaliação Google: ${clinic.google_rating}⭐ (${clinic.total_reviews} reviews)
-- Nível Tecnológico: ${clinic.equipment_analysis.technology_level}
-
-💰 INDICADORES FINANCEIROS:
-- Receita Anual: R$ ${clinic.financial_indicators.estimated_revenue_annual?.toLocaleString('pt-BR')}
-- Capital Social: R$ ${clinic.financial_indicators.cnpj_capital_social?.toLocaleString('pt-BR')}
-- Poder de Compra: ${clinic.financial_indicators.purchase_power_score}/100
-
-🎯 OPORTUNIDADE:
-- Probabilidade Fechamento: ${clinic.sales_opportunity.probability_closing}%
-- Ameaça Competitiva: ${clinic.sales_opportunity.competitive_threat}
-- Abordagem: ${clinic.visit_strategy.best_approach}
-- Melhor Dia: ${clinic.visit_strategy.best_day_week} às ${clinic.visit_strategy.best_time}`
-      };
-
-      const newClient = await base44.entities.Client.create(clientData);
-      toast.success('Cliente criado!');
-      navigate(createPageUrl(`ClientProfile?id=${newClient.id}`));
+      await base44.entities.CRMUpdateQueue.create({
+        origem: 'manual',
+        texto_original: `Validar possível clínica encontrada em ${city}: ${clinic.clinic_name || 'nome não confirmado'}`,
+        comando_interpretado: 'Validar dados públicos antes de qualquer criação no CRM',
+        tipo_atualizacao: 'validar_novo_cliente',
+        campo_alvo: 'Client',
+        valor_novo: JSON.stringify(clinic),
+        status: 'pendente',
+        risco: 'alto',
+        exige_aprovacao: true,
+        agente_origem: 'RegionalClinicAnalyzer',
+        modelo_ia_usado: 'InvokeLLM com pesquisa pública',
+        data_criacao: new Date().toISOString(),
+        observacao: 'Sugestão não validada. Nenhum cliente ou dado comercial foi criado ou alterado.'
+      });
+      toast.success('Sugestão enviada para validação. Nenhum cliente foi criado.');
     } catch (error) {
-      console.error('Erro ao criar cliente:', error);
-      toast.error('Erro ao criar cliente');
+      console.error('Erro ao registrar sugestão:', error);
+      toast.error('Erro ao registrar sugestão para validação');
     }
   };
 
@@ -376,7 +228,7 @@ INSTRUÇÕES CRÍTICAS:
 
           <div className="bg-white/10 backdrop-blur rounded-lg p-3 mb-3">
             <p className="text-xs text-white/90 leading-relaxed">
-              Sistema analisa <strong>TODAS clínicas da cidade</strong>: CNPJ, funcionários, equipamentos (fotos), capital social, fluxo estimado, redes sociais. Gera rota otimizada e prioridade de visita.
+              Pesquisa dados públicos de clínicas e apresenta sugestões para validação humana, sem criar ou alterar registros comerciais.
             </p>
           </div>
 
@@ -435,7 +287,11 @@ INSTRUÇÕES CRÍTICAS:
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="bg-white/10 backdrop-blur rounded p-2">
             <p className="text-xs text-white/70">Potencial Mercado</p>
-            <p className="font-bold">R$ {(clinics.market_overview.total_market_potential / 1000).toFixed(0)}k</p>
+            <p className="font-bold">
+              {Number.isFinite(Number(clinics.market_overview.total_market_potential)) && Number(clinics.market_overview.total_market_potential) > 0
+                ? `R$ ${(Number(clinics.market_overview.total_market_potential) / 1000).toFixed(0)}k`
+                : 'Informação não confirmada'}
+            </p>
           </div>
           <div className="bg-white/10 backdrop-blur rounded p-2">
             <p className="text-xs text-white/70">Competição</p>
@@ -462,8 +318,8 @@ INSTRUÇÕES CRÍTICAS:
 
       {/* Clinics List */}
       <div className="space-y-3">
-        {clinics.clinics
-          .sort((a, b) => b.sales_opportunity.priority_score - a.sales_opportunity.priority_score)
+        {[...clinics.clinics]
+          .sort((a, b) => Number(b.sales_opportunity?.priority_score || 0) - Number(a.sales_opportunity?.priority_score || 0))
           .map((clinic, index) => (
             <Card key={index} className="p-4 hover:shadow-lg transition-all border-2">
               {/* Header */}
@@ -502,7 +358,11 @@ INSTRUÇÕES CRÍTICAS:
                 </div>
                 <div className="bg-amber-50 rounded p-2">
                   <p className="text-amber-600">Capital</p>
-                  <p className="font-bold text-slate-800">R$ {(clinic.financial_indicators.cnpj_capital_social / 1000).toFixed(0)}k</p>
+                  <p className="font-bold text-slate-800">
+                    {Number.isFinite(Number(clinic.financial_indicators?.cnpj_capital_social)) && Number(clinic.financial_indicators?.cnpj_capital_social) > 0
+                      ? `R$ ${(Number(clinic.financial_indicators.cnpj_capital_social) / 1000).toFixed(0)}k`
+                      : 'Não confirmado'}
+                  </p>
                 </div>
               </div>
 
@@ -571,11 +431,11 @@ INSTRUÇÕES CRÍTICAS:
 
               {/* Actions */}
               <Button
-                onClick={() => createClientFromClinic(clinic)}
+                onClick={() => requestClientValidation(clinic)}
                 className="w-full h-10 bg-indigo-600 hover:bg-indigo-700"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                Criar Cliente + Perfil Completo
+                Solicitar validação da clínica
               </Button>
             </Card>
           ))}

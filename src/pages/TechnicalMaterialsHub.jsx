@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, BookOpen, Microscope, Activity, TrendingUp, Send } from 'lucide-react';
+import { FileText, Download, BookOpen, Microscope, Activity, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { base44 } from '@/api/base44Client';
@@ -1180,16 +1180,16 @@ export default function TechnicalMaterialsHub() {
     }
   };
 
-  const sendToNatan = async () => {
+  const prepareForReview = async () => {
     try {
-      setGenerating('sending');
-      toast.info('Enviando análise científica para Natan...');
-      
+      setGenerating('sendNatan');
+      toast.info('Preparando rascunho técnico para revisão...');
+
       await base44.functions.invoke('sendSeamtyAnalysisToPlanetaBichos', {});
-      
-      toast.success('✅ PDF enviado para Natan (14 991 676 428) via WhatsApp!');
+
+      toast.success('Rascunho preparado e aguardando aprovação. Nenhum envio foi realizado.');
     } catch (error) {
-      toast.error('Erro ao enviar: ' + error.message);
+      toast.error('Erro ao preparar rascunho: ' + error.message);
     } finally {
       setGenerating(null);
     }
@@ -1227,11 +1227,11 @@ export default function TechnicalMaterialsHub() {
     },
     {
       id: 'sendNatan',
-      title: '🔬 Enviar Análise Científica Seamaty',
-      description: 'Envia PDF completo com análise dos rotores Seamaty, enzimas e casos clínicos para Natan (Planeta Bichos) via WhatsApp',
+      title: '🔬 Preparar análise SEAMATY para revisão',
+      description: 'Cria somente um rascunho pendente de aprovação; nenhum arquivo ou mensagem é enviado',
       icon: FileText,
       color: 'from-green-500 to-emerald-500',
-      action: sendToNatan,
+      action: prepareForReview,
       isSpecial: true
     },
     {
@@ -1321,11 +1321,11 @@ export default function TechnicalMaterialsHub() {
               <div className="flex items-start gap-4 justify-between">
                 <div className="flex items-start gap-4 flex-1">
                   <div className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500">
-                    <Send className="w-8 h-8 text-white" />
+                    <FileText className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-2xl mb-2">{materials[0].title}</CardTitle>
-                    <p className="text-sm text-slate-700">{materials[0].description}</p>
+                    <CardTitle className="text-2xl mb-2">{materials[1].title}</CardTitle>
+                    <p className="text-sm text-slate-700">{materials[1].description}</p>
                   </div>
                 </div>
               </div>
@@ -1339,12 +1339,12 @@ export default function TechnicalMaterialsHub() {
                 {generating === materials[1].id ? (
                   <>
                     <TrendingUp className="w-5 h-5 mr-2 animate-spin" />
-                    Gerando e enviando...
+                    Preparando rascunho...
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5 mr-2" />
-                    Enviar PDF para Natan no WhatsApp
+                    <FileText className="w-5 h-5 mr-2" />
+                    Preparar para revisão
                   </>
                 )}
               </Button>
