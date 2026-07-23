@@ -142,9 +142,12 @@ function buildGoogleRouteUrl(points, myLocation) {
 
 // ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────
 export default function ClientLocationMap() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialType = ['client', 'lead'].includes(urlParams.get('type')) ? urlParams.get('type') : 'todos';
+  const autoGps = urlParams.get('gps') === '1';
   const [filterStatus, setFilterStatus] = useState('todos');
-  const [filterType, setFilterType] = useState('todos');
-  const [myLocation, setMyLocation] = useState(MARILIA_ORIGIN);
+  const [filterType, setFilterType] = useState(initialType);
+  const [myLocation, setMyLocation] = useState(null);
   const [locating, setLocating] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -154,12 +157,14 @@ export default function ClientLocationMap() {
   const { data: clients = [], isLoading: loadingClients, refetch: refetchClients } = useQuery({
     queryKey: ['client-map'],
     queryFn: () => base44.entities.Client.list('-updated_date', 1000),
+    enabled: filterType !== 'lead',
     staleTime: 60000,
   });
 
   const { data: leads = [], isLoading: loadingLeads, refetch: refetchLeads } = useQuery({
     queryKey: ['lead-map'],
     queryFn: () => base44.entities.Lead.list('-updated_date', 1000),
+    enabled: filterType !== 'client',
     staleTime: 60000,
   });
 
@@ -189,7 +194,11 @@ export default function ClientLocationMap() {
     );
   }, []);
 
-  // Marília é a origem inicial; o GPS atual só substitui quando solicitado.
+  useEffect(() => {
+    if (autoGps) locateMe();
+  }, [autoGps, locateMe]);
+
+  // Marília permanece apenas como centro visual até o GPS atual ser autorizado.
 
   // ── CLÍNICAS COM LOCALIZAÇÃO + DISTÂNCIA ─────────────────────────────────
   const recordsWithCoords = useMemo(() =>
@@ -279,7 +288,7 @@ export default function ClientLocationMap() {
             className="h-8 text-xs border rounded-md px-2 bg-white"
           >
             <option value="todos">Clientes e leads</option>
-            <option value="client">Clientes atuais</option>
+            <option value="client">Clientes próximos</option>
             <option value="lead">Novos leads</option>
           </select>
           <select
