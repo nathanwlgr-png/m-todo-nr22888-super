@@ -5,7 +5,7 @@ import SentimentTranscriptList from '@/components/sentiment/SentimentTranscriptL
 import SentimentActions from '@/components/sentiment/SentimentActions';
 
 export default function ConversationSentimentPanel({ client }) {
-  const { transcripts, isLoading } = useConversationTranscripts(client.id);
+  const { transcripts, isLoading } = useConversationTranscripts(client.id, client.phone);
   const { analyze, addNote, updateSegment } = useSentimentActions(client);
   const [selected, setSelected] = useState(null);
   const [busy, setBusy] = useState('');

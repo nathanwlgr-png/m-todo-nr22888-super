@@ -20,12 +20,18 @@ export default function useSentimentActions(client) {
     const label = { positive: 'positivo', neutral: 'neutro', negative: 'negativo' }[sentiment] || 'não analisado';
     const entry = `[Sentimento ${label} — ${new Date().toLocaleDateString('pt-BR')}] ${text.trim()}`;
     await base44.entities.Client.update(client.id, { notes: [client.notes, entry].filter(Boolean).join('\n\n') });
-    await queryClient.invalidateQueries({ queryKey: ['c360-client', client.id] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['c360-client', client.id] }),
+      queryClient.invalidateQueries({ queryKey: ['client-profile', client.id] }),
+    ]);
   };
 
   const updateSegment = async (ai_segment) => {
     await base44.entities.Client.update(client.id, { ai_segment });
-    await queryClient.invalidateQueries({ queryKey: ['c360-client', client.id] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['c360-client', client.id] }),
+      queryClient.invalidateQueries({ queryKey: ['client-profile', client.id] }),
+    ]);
   };
 
   return { analyze, addNote, updateSegment };

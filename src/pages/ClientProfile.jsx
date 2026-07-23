@@ -16,6 +16,7 @@ import ComoVenderAgoraCard from '@/components/elite/ComoVenderAgoraCard';
 import ClientCatalogRequestPanel from '@/components/catalog/ClientCatalogRequestPanel';
 import ClientProductDemo from '@/components/catalog/ClientProductDemo';
 import AIRecommendationLog from '@/components/AIRecommendationLog';
+import ConversationSentimentPanel from '@/components/sentiment/ConversationSentimentPanel';
 
 const STATUS_COLORS = { quente: '#ff4444', morno: '#ff9500', frio: '#64748b' };
 const STAGE_COLORS = {
@@ -281,6 +282,8 @@ export default function ClientProfile() {
         <Score4x4Display score={score4x4} isLoading={loadingScore} />
 
         <AIRecommendationLog clientId={client.id} />
+
+        <ConversationSentimentPanel client={client} />
 
         <ComoVenderAgoraCard target={client} type="cliente" />
 
