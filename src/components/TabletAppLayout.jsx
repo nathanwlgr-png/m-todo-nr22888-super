@@ -39,6 +39,7 @@ const PAGE_TITLES = {
   PipelineView: 'Pipeline',
   SalesFunnel: 'Vendas',
   AutoFollowUpDashboard: 'Pós-venda',
+  AutomationSettings: 'Preparação Automática',
   DuplicateManager: 'Duplicados',
 };
 

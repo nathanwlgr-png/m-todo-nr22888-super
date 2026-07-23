@@ -62,9 +62,10 @@ export default function AutomationSettings() {
       });
       return response.data;
     },
-    onSuccess: (data) => {
-      toast.success(data.message);
+    onSuccess: async (data) => {
+      toast.success(data.message || 'Preparação automática ativada.');
       setAutomationEnabled(true);
+      await statusQuery.refetch();
     },
     onError: (error) => toast.error(error.message === 'cancelled' ? 'Ativação cancelada' : 'Erro ao ativar')
   });
@@ -135,10 +136,15 @@ export default function AutomationSettings() {
                     {automationEnabled ? 'Preparação Ativa' : 'Preparação Desativada'}
                   </p>
                   <p className="text-xs text-slate-600">
-                    {automationEnabled 
-                      ? `Próxima preparação: ${sendTime}` 
+                    {automationEnabled
+                      ? `Ativa às ${sendTime} • máximo ${maxMessages}/dia`
                       : 'Configure e ative para começar'}
                   </p>
+                  {automationEnabled && (
+                    <p className="mt-1 text-xs font-semibold text-green-700">
+                      Tipos ativos: {Object.entries(enabledTypes).filter(([, enabled]) => enabled).map(([type]) => type === 'turbo_venda' ? 'Turbo Venda' : type === 'follow_up' ? 'Follow-up' : type.replace(/_/g, ' ')).join(', ') || 'nenhum'}
+                    </p>
+                  )}
                 </div>
               </div>
               <Button

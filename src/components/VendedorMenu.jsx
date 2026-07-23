@@ -58,6 +58,7 @@ const ADMIN_CATEGORIES = [
       { page: 'GlobalSearch', label: '🔍 Busca Global' },
       { page: 'OfflineMode', label: '📴 Modo Offline' },
       { page: 'NotificationSettings', label: '🔔 Notificações' },
+      { page: 'AutomationSettings', label: '⚡ Preparação automática' },
       { page: 'Integrations', label: '🔗 Integrações' },
       { page: 'ArquivoMasterConsulta', label: '🗄️ Arquivo Master / Consulta (legado)' },
     ],

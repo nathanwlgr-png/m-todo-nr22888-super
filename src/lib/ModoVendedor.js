@@ -25,6 +25,7 @@ export const VENDEDOR_PAGES = [
   { page: 'MapaSeamatyBrasil', label: '🗺️ Mapa', category: 'Mais' },
   { page: 'DuplicateManager', label: '🧹 Duplicados', category: 'Mais' },
   { page: 'NotificationSettings', label: '⚙️ Configurações', category: 'Mais' },
+  { page: 'AutomationSettings', label: '⚡ Preparação automática', category: 'Mais' },
   { page: 'Reports', label: '📊 Central de Relatórios', category: 'Mais' },
   { page: 'CentralIAMaster', label: '🧠 Ferramentas avançadas', category: 'Mais' },
   { page: 'DashboardSniper', label: '🎯 Dashboard Sniper clássico', category: 'Mais' },

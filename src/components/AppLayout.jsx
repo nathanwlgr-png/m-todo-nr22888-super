@@ -48,6 +48,7 @@ const PAGE_TITLES = {
   Reports: 'Central de Relatórios',
   AracatubaClinics: 'Clínicas de Araçatuba',
   MessageApproval: 'Aprovação de Mensagens',
+  AutomationSettings: 'Preparação Automática',
   EquipmentConsumables: 'Estoque de Insumos',
   PreVisitChecklist: 'Preparação de Visita',
   PostVisitAnalysis: 'Resumo Pós-Visita',
