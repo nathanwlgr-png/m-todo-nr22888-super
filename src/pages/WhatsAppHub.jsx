@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 
 export default function WhatsAppHub() {
   const [search, setSearch] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [message, setMessage] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -30,6 +31,16 @@ export default function WhatsAppHub() {
     queryFn: () => base44.entities.Client.list('-updated_date', 300),
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!search || isLoadingClients) {
+      if (!search) setIsSearching(false);
+      return undefined;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [search, isLoadingClients]);
 
   const { data: messages = [] } = useQuery({
     queryKey: ['wa-messages'],
@@ -252,8 +263,8 @@ export default function WhatsAppHub() {
                 />
               </div>
 
-              {search && !selectedClient && isLoadingClients && (
-                <div className="mt-2 flex items-center gap-2 px-3 py-2 text-xs text-slate-500">
+              {search && !selectedClient && (isLoadingClients || isSearching) && (
+                <div role="status" aria-live="polite" className="mt-2 flex items-center gap-2 px-3 py-2 text-xs text-slate-500">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" /> Buscando clientes...
                 </div>
               )}
