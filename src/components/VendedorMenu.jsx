@@ -59,6 +59,7 @@ const ADMIN_CATEGORIES = [
       { page: 'OfflineMode', label: '📴 Modo Offline' },
       { page: 'NotificationSettings', label: '🔔 Notificações' },
       { page: 'AutomationSettings', label: '⚡ Preparação automática' },
+      { page: 'AutomationRules', label: '🧪 Simular lembrete diário' },
       { page: 'Integrations', label: '🔗 Integrações' },
       { page: 'ArquivoMasterConsulta', label: '🗄️ Arquivo Master / Consulta (legado)' },
     ],

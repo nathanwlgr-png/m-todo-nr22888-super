@@ -246,6 +246,7 @@ const AuthenticatedApp = () => {
         <Route path="/WhatsAppHub" element={<LayoutWrapper currentPageName="WhatsAppHub"><WhatsAppHub /></LayoutWrapper>} />
         <Route path="/WhatsAppInbox" element={<LayoutWrapper currentPageName="WhatsAppInbox"><WhatsAppInbox /></LayoutWrapper>} />
         <Route path="/AutomationSettings" element={<LayoutWrapper currentPageName="AutomationSettings"><AutomationSettings /></LayoutWrapper>} />
+        <Route path="/AutomationRules" element={<LayoutWrapper currentPageName="NRControlCenter"><NRControlCenter /></LayoutWrapper>} />
         <Route path="/ContactSettings" element={<LayoutWrapper currentPageName="ContactSettings"><ContactSettings /></LayoutWrapper>} />
         <Route path="/NotificationSettings" element={<LayoutWrapper currentPageName="NotificationSettings"><NotificationSettings /></LayoutWrapper>} />
         <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><Integrations /></LayoutWrapper>} />
